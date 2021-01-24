@@ -167,7 +167,7 @@ public class UserPreset {
                         throw new UncheckedIOException(ex);
                     }
                 }
-                owner.loadStateFrom(UserPreset.this);
+                owner.loadUserPreset(UserPreset.this);
             }
         };
     }

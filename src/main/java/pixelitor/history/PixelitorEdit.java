@@ -52,15 +52,15 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        activateComp();
+        // any action triggered from this method
+        // must not add something to the history
+        try {
+            History.setForbidEdits(true);
 
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
-
-        if (!wasDirty && !embedded) {
-            comp.setDirty(false);
-            cleanedByUndo = true;
+            afterActions();
+            cleanIfThisEditMadeItDirty();
+        } finally {
+            History.setForbidEdits(false);
         }
     }
 
@@ -68,12 +68,32 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
+        try {
+            History.setForbidEdits(true);
+
+            afterActions();
+            makeDirtyAgain();
+        } finally {
+            History.setForbidEdits(false);
+        }
+    }
+
+    private void afterActions() {
         activateComp();
 
         if (!embedded) {
             History.notifyMenus(this);
         }
+    }
 
+    private void cleanIfThisEditMadeItDirty() {
+        if (!wasDirty && !embedded) {
+            comp.setDirty(false);
+            cleanedByUndo = true;
+        }
+    }
+
+    private void makeDirtyAgain() {
         if (cleanedByUndo && makesDirty()) {
             comp.setDirty(true);
         }

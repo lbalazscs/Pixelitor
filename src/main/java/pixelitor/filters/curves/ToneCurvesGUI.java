@@ -19,9 +19,9 @@ package pixelitor.filters.curves;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.levels.Channel;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
-import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -35,11 +35,13 @@ import static javax.swing.BoxLayout.PAGE_AXIS;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesGUI extends FilterGUI {
+    private final ToneCurvesPanel curvesPanel;
+
     public ToneCurvesGUI(Filter filter, Drawable dr) {
         super(filter, dr);
 
         // listen for any change in curves to run filter preview
-        var curvesPanel = new ToneCurvesPanel();
+        curvesPanel = new ToneCurvesPanel();
         curvesPanel.addActionListener(e -> {
             ((ToneCurvesFilter) filter).setCurves(curvesPanel.toneCurves);
             runFilterPreview();
@@ -63,24 +65,19 @@ public class ToneCurvesGUI extends FilterGUI {
         JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
 
         channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(createTypeCombo(curvesPanel));
-        channelPanel.add(createResetChannelButton(curvesPanel));
+        channelPanel.add(createChannelsCombo(curvesPanel));
+        channelPanel.add(GUIUtils.createResetChannelButton(e ->
+            curvesPanel.resetActiveCurve()));
 
         return channelPanel;
     }
 
-    private static JComboBox<ToneCurveType> createTypeCombo(ToneCurvesPanel panel) {
-        var curveTypeCB = GUIUtils.createComboBox(ToneCurveType.values());
-        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
-        curveTypeCB.addActionListener(e -> panel.setActiveCurve(
-            (ToneCurveType) curveTypeCB.getSelectedItem()));
-        return curveTypeCB;
-    }
-
-    private static JButton createResetChannelButton(ToneCurvesPanel panel) {
-        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
-        resetChannel.addActionListener(e -> panel.resetActiveCurve());
-        return resetChannel;
+    private static JComboBox<Channel> createChannelsCombo(ToneCurvesPanel panel) {
+        var channelTypeCB = GUIUtils.createComboBox(Channel.values());
+        channelTypeCB.setSelectedItem(Channel.RGB);
+        channelTypeCB.addActionListener(e -> panel.setActiveCurve(
+            (Channel) channelTypeCB.getSelectedItem()));
+        return channelTypeCB;
     }
 
     private static JPanel createButtonsPanel(Drawable dr, ToneCurvesPanel curvesPanel) {
@@ -95,5 +92,13 @@ public class ToneCurvesGUI extends FilterGUI {
         showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
         return showOriginalCB;
+    }
+
+    public void stateChanged() {
+        curvesPanel.stateChanged();
+    }
+
+    public ToneCurves getCurves() {
+        return curvesPanel.toneCurves;
     }
 }

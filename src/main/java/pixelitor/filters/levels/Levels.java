@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.layers.Drawable;
@@ -37,13 +38,15 @@ import static pixelitor.utils.Texts.i18n;
 public class Levels extends FilterWithGUI {
     public static final String NAME = i18n("levels");
     private RGBLookup rgbLookup;
+    private final LevelsModel levelsModel;
 
     public Levels() {
+        levelsModel = new LevelsModel(this);
     }
 
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new LevelsGUI(this, dr, new LevelsModel(this));
+        return new LevelsGUI(this, dr, levelsModel);
     }
 
     public void setRGBLookup(RGBLookup rgbLookup) {
@@ -52,29 +55,46 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-
         if (rgbLookup == null) {
             throw new IllegalStateException("rgbLookup not initialized");
         }
 
-        BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
-        filterOp.filter(src, dest);
+        ShortLookupTable lut = (ShortLookupTable) rgbLookup.getLookupOp();
+        BufferedImageOp filterOp = new FastLookupOp(lut);
+        dest = filterOp.filter(src, dest);
 
         return dest;
     }
 
     @Override
     public void randomizeSettings() {
-        int inputBlackValue = Rnd.nextInt(255);
-        int inputWhiteValue = Rnd.nextInt(255);
-        int outputBlackValue = Rnd.nextInt(255);
-        int outputWhiteValue = Rnd.nextInt(255);
-        var g = new GrayScaleLookup(inputBlackValue, inputWhiteValue, outputBlackValue, outputWhiteValue);
-        rgbLookup = new RGBLookup(g, g, g, g, g, g, g);
+        int inputDark = Rnd.nextInt(255);
+        int inputLight = Rnd.nextInt(255);
+        int outputDark = Rnd.nextInt(255);
+        int outputLight = Rnd.nextInt(255);
+        var g = new GrayScaleLookup(inputDark, inputLight, outputDark, outputLight);
+        rgbLookup = new RGBLookup(g, g, g, g);
     }
 
     @Override
     public boolean supportsGray() {
         return false;
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, getName());
+        levelsModel.saveToUserPreset(preset);
+        return preset;
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        levelsModel.loadUserPreset(preset);
     }
 }

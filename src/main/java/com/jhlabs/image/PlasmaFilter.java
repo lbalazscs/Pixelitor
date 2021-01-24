@@ -17,25 +17,23 @@ limitations under the License.
 package com.jhlabs.image;
 
 import java.awt.Rectangle;
-import java.util.Date;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PlasmaFilter extends WholeImageFilter {
-    public static final int DO_PLASMA_CALL_PER_UNIT = 200_000;
+    private static final int DO_PLASMA_CALL_PER_UNIT = 200_000;
     private int doPlasmaCalls = 0;
 
     public float turbulence = 1.0f;
     private float scaling = 0.0f;
     private Colormap colormap = new LinearColormap();
-    private final Random random;
-    private long seed = 567;
+    private ThreadLocalRandom random;
     private boolean useColormap = false;
 
     private boolean lessColors = false;
 
     public PlasmaFilter(String filterName) {
         super(filterName);
-        random = new Random();
+        random = ThreadLocalRandom.current();
     }
 
     public void setLessColors(boolean lessColors) {
@@ -100,16 +98,8 @@ public class PlasmaFilter extends WholeImageFilter {
         return useColormap;
     }
 
-    public void setSeed(int seed) {
-        this.seed = seed;
-    }
-
-    public int getSeed() {
-        return (int) seed;
-    }
-
     public void randomize() {
-        seed = new Date().getTime();
+        random = ThreadLocalRandom.current();
     }
 
     private int randomRGB() {
@@ -128,7 +118,6 @@ public class PlasmaFilter extends WholeImageFilter {
         int g = (rgb >> 8) & 0xff;
         int b = rgb & 0xff;
 
-
         if (lessColors) {
             int d = (int) (amount * (random.nextFloat() - 0.5));
 
@@ -136,12 +125,10 @@ public class PlasmaFilter extends WholeImageFilter {
             int g1 = g + d;
             int b1 = b + d;
 
-            // this method is very frequently called, the filter runs 7% faster if PixelUtils.clamp is inlined
-            r = r1 > 255 ? 255 : (r1 < 0 ? 0 : r1);
-            g = g1 > 255 ? 255 : (g1 < 0 ? 0 : g1);
-            b = b1 > 255 ? 255 : (b1 < 0 ? 0 : b1);
+            r = PixelUtils.clamp(r1);
+            g = PixelUtils.clamp(g1);
+            b = PixelUtils.clamp(b1);
         } else {
-            // strangely this branch seems to run faster if PixelUtils.clamp is NOT inlined....
             int r1 = r + (int) (amount * (random.nextFloat() - 0.5));
             int g1 = g + (int) (amount * (random.nextFloat() - 0.5));
             int b1 = b + (int) (amount * (random.nextFloat() - 0.5));
@@ -149,12 +136,7 @@ public class PlasmaFilter extends WholeImageFilter {
             r = PixelUtils.clamp(r1);
             g = PixelUtils.clamp(g1);
             b = PixelUtils.clamp(b1);
-
-//            r = r1 < 0 ? 0 : (r1 > 255 ? 255 : r1);
-//            g = g1 < 0 ? 0 : (g1 > 255 ? 255 : g1);
-//            b = b1 < 0 ? 0 : (b1 > 255 ? 255 : b1);
         }
-
 
         return 0xff000000 | (r << 16) | (g << 8) | b;
     }
@@ -262,7 +244,13 @@ public class PlasmaFilter extends WholeImageFilter {
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
         int[] outPixels = new int[width * height];
 
-        random.setSeed(seed);
+        if (width == 1 && height == 1) {
+            // the algorithm doesn't work in this case, so just return the input
+            outPixels[0] = inPixels[0];
+            return outPixels;
+        }
+
+//        random.setSeed(seed);
 
         int w1 = width - 1;
         int h1 = height - 1;

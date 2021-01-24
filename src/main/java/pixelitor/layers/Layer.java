@@ -338,9 +338,12 @@ public abstract class Layer implements Serializable {
             }
         }
 
+        if (isActive()) {
+            MaskViewMode.EDIT_MASK.activate(comp, this);
+        }
+
         if (addEdit) {
             History.add(edit);
-            MaskViewMode.EDIT_MASK.activate(comp, this);
             return null;
         } else {
             return edit;
@@ -385,8 +388,9 @@ public abstract class Layer implements Serializable {
         if (addToHistory) {
             History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
-
-        MaskViewMode.NORMAL.activate(view, this);
+        if (isActive()) {
+            MaskViewMode.NORMAL.activate(view, this);
+        }
         comp.imageChanged();
     }
 
@@ -551,7 +555,7 @@ public abstract class Layer implements Serializable {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }
-        BufferedImage transformed = actOnImageFromLayerBellow(imgSoFar);
+        BufferedImage transformed = applyOnImage(imgSoFar);
         if (useMask()) {
             mask.applyToImage(transformed);
         }
@@ -568,8 +572,9 @@ public abstract class Layer implements Serializable {
 
     /**
      * Used by adjustment layers and watermarked text layers
+     * to apply this layer's effect on the given image.
      */
-    protected abstract BufferedImage actOnImageFromLayerBellow(BufferedImage src);
+    protected abstract BufferedImage applyOnImage(BufferedImage src);
 
     public abstract CompletableFuture<Void> resize(Dimension newSize);
 

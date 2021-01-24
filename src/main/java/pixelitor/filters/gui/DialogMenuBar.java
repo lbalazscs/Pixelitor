@@ -38,6 +38,7 @@ import static pixelitor.filters.gui.UserPreset.*;
  */
 public class DialogMenuBar extends JMenuBar {
     public static final String PRESETS = Texts.i18n("presets");
+    public static final String BUILT_IN_PRESETS = Texts.i18n("builtin_presets");
 
     private final DialogMenuOwner owner;
     private JMenu presetsMenu;
@@ -63,7 +64,7 @@ public class DialogMenuBar extends JMenuBar {
         presetsMenu = new JMenu(PRESETS);
 
         if (owner.hasBuiltinPresets()) {
-            JMenu builtinPresets = new JMenu("Built-in Presets");
+            JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
             FilterState[] presets = owner.getBuiltinPresets();
 
             ParametrizedFilter pf = (ParametrizedFilter) owner;

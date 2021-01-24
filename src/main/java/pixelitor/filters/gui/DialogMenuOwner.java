@@ -26,7 +26,7 @@ public interface DialogMenuOwner {
 
     UserPreset createUserPreset(String presetName);
 
-    void loadStateFrom(UserPreset preset);
+    void loadUserPreset(UserPreset preset);
 
     String getPresetDirName();
 

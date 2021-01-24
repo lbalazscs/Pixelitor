@@ -246,7 +246,7 @@ public class ShapesTool extends DragTool {
             typeModel.setSelectedItem(styledShape.getShapeType());
             fillPaintModel.setSelectedItem(styledShape.getFillPaintType());
             strokePaintModel.setSelectedItem(styledShape.getStrokePaintType());
-            strokeParam.setState(styledShape.getStrokeSettings(), false);
+            strokeParam.loadStateFrom(styledShape.getStrokeSettings(), false);
             effectsParam.setEffects(styledShape.getEffects());
         } finally {
             regenerateShape = true;

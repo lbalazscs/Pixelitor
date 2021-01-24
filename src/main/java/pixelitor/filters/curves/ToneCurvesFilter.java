@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ package pixelitor.filters.curves;
 import com.jhlabs.image.CurvesFilter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.UserPreset;
+import pixelitor.filters.levels.Channel;
 import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
@@ -38,9 +40,17 @@ public class ToneCurvesFilter extends FilterWithGUI {
     private CurvesFilter filter;
     private ToneCurves curves;
 
+    private ToneCurvesGUI lastGUI;
+
+    public ToneCurvesFilter() {
+        helpURL = "https://en.wikipedia.org/wiki/Curve_(tonality)";
+    }
+
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new ToneCurvesGUI(this, dr);
+        lastGUI = new ToneCurvesGUI(this, dr);
+        curves = lastGUI.getCurves();
+        return lastGUI;
     }
 
     public void setCurves(ToneCurves curves) {
@@ -57,10 +67,10 @@ public class ToneCurvesFilter extends FilterWithGUI {
         }
 
         filter.setCurves(
-                curves.getCurve(ToneCurveType.RGB).curve,
-                curves.getCurve(ToneCurveType.RED).curve,
-                curves.getCurve(ToneCurveType.GREEN).curve,
-                curves.getCurve(ToneCurveType.BLUE).curve
+            curves.getCurve(Channel.RGB).curve,
+            curves.getCurve(Channel.RED).curve,
+            curves.getCurve(Channel.GREEN).curve,
+            curves.getCurve(Channel.BLUE).curve
         );
 
         dest = filter.filter(src, dest);
@@ -70,5 +80,34 @@ public class ToneCurvesFilter extends FilterWithGUI {
     @Override
     public void randomizeSettings() {
         // not supported yet
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, NAME);
+
+        Channel[] channels = Channel.values();
+        for (Channel channel : channels) {
+            String saveString = curves.getCurve(channel).toSaveString();
+            preset.put(channel.getPresetKey(), saveString);
+        }
+
+        return preset;
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        Channel[] channels = Channel.values();
+        for (Channel channel : channels) {
+            String saveString = preset.get(channel.getPresetKey());
+            curves.getCurve(channel).setStateFrom(saveString);
+        }
+
+        lastGUI.stateChanged();
     }
 }

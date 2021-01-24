@@ -45,7 +45,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     public abstract void randomizeSettings();
 
     private JMenuBar getMenuBar() {
-        boolean addPresets = hasBuiltinPresets() || canHaveUserPresets();
+        boolean addPresets = canHaveUserPresets() || hasBuiltinPresets();
         if (!hasHelp() && !addPresets) {
             return null;
         }
@@ -76,7 +76,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public void loadStateFrom(UserPreset preset) {
+    public void loadUserPreset(UserPreset preset) {
         // the subclasses implement this if they can have user presets
         throw new UnsupportedOperationException();
     }

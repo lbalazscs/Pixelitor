@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,22 +25,22 @@ import com.jhlabs.image.PixelUtils;
  */
 public class GrayScaleLookup {
     private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(
-            0, 255, 0, 255);
+        0, 255, 0, 255);
     private final short[] lut = new short[256];
 
-    public GrayScaleLookup(int inputDarkValue, int inputLightValue,
-                           int outputDarkValue, int outputLightValue) {
+    public GrayScaleLookup(int inputDark, int inputLight,
+                           int outputDark, int outputLight) {
         double multiplier;
         double constant;
 
-        int inputDiff = inputLightValue - inputDarkValue;
+        int inputDiff = inputLight - inputDark;
         if (inputDiff == 0) { // in Levels this should happen only if both are 0 or both are 255
             multiplier = 0;
-            constant = 255 - inputDarkValue;
+            constant = 255 - inputDark;
         } else {
-            multiplier = (outputLightValue - outputDarkValue)
-                    / (double) inputDiff;
-            constant = outputDarkValue - multiplier * inputDarkValue;
+            multiplier = (outputLight - outputDark)
+                / (double) inputDiff;
+            constant = outputDark - multiplier * inputDark;
         }
         for (int i = 0; i < lut.length; i++) {
             lut[i] = (short) PixelUtils.clamp((int) (multiplier * i + constant));

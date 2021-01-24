@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,18 +21,14 @@ import java.awt.Color;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Determines which channels are currently edited
- * (currently used only for the Levels filter)
+ * (used by Levels and Curves filters)
  */
-public enum EditedChannelsType {
-    RGB {
-        @Override
-        public String getName() {
-            return "Red, Green, Blue";
-        }
-
+public enum Channel {
+    RGB("RGB", "rgb", BLACK) {
         @Override
         public Color getDarkColor() {
             return BLACK;
@@ -42,12 +38,7 @@ public enum EditedChannelsType {
         public Color getLightColor() {
             return WHITE;
         }
-    }, R {
-        @Override
-        public String getName() {
-            return "Red";
-        }
-
+    }, RED(i18n("red"), "red", Color.RED) {
         @Override
         public Color getDarkColor() {
             return DARK_CYAN;
@@ -57,12 +48,7 @@ public enum EditedChannelsType {
         public Color getLightColor() {
             return LIGHT_PINK;
         }
-    }, G {
-        @Override
-        public String getName() {
-            return "Green";
-        }
-
+    }, GREEN(i18n("green"), "green", Color.GREEN) {
         @Override
         public Color getDarkColor() {
             return DARK_PURPLE;
@@ -72,12 +58,7 @@ public enum EditedChannelsType {
         public Color getLightColor() {
             return LIGHT_GREEN;
         }
-    }, B {
-        @Override
-        public String getName() {
-            return "Blue";
-        }
-
+    }, BLUE(i18n("blue"), "blue", Color.BLUE) {
         @Override
         public Color getDarkColor() {
             return DARK_YELLOW_GREEN;
@@ -87,56 +68,7 @@ public enum EditedChannelsType {
         public Color getLightColor() {
             return LIGHT_BLUE;
         }
-    }, RG {
-        @Override
-        public String getName() {
-            return "Red, Green";
-        }
-
-        @Override
-        public Color getDarkColor() {
-            return DARK_BLUE;
-        }
-
-        @Override
-        public Color getLightColor() {
-            return LIGHT_YELLOW;
-        }
-    }, RB {
-        @Override
-        public String getName() {
-            return "Red, Blue";
-        }
-
-        @Override
-        public Color getDarkColor() {
-            return DARK_GREEN;
-        }
-
-        @Override
-        public Color getLightColor() {
-            return LIGHT_PURPLE;
-        }
-    }, GB {
-        @Override
-        public String getName() {
-            return "Green, Blue";
-        }
-
-        @Override
-        public Color getDarkColor() {
-            return DARK_RED;
-        }
-
-        @Override
-        public Color getLightColor() {
-            return LIGHT_CYAN;
-        }
     };
-
-    private static final Color DARK_RED = new Color(128, 0, 0);
-    private static final Color DARK_GREEN = new Color(0, 128, 0);
-    private static final Color DARK_BLUE = new Color(0, 0, 128);
 
     private static final Color LIGHT_PINK = new Color(255, 128, 128);
     private static final Color LIGHT_GREEN = new Color(128, 255, 128);
@@ -146,13 +78,36 @@ public enum EditedChannelsType {
     private static final Color DARK_CYAN = new Color(0, 128, 128);
     private static final Color DARK_PURPLE = new Color(128, 0, 128);
 
-    private static final Color LIGHT_YELLOW = new Color(255, 255, 128);
-    private static final Color LIGHT_CYAN = new Color(128, 255, 255);
-    private static final Color LIGHT_PURPLE = new Color(255, 128, 255);
+    private final String name;
+    private final String presetKey;
+    private final Color color;
+    private final Color inactiveColor;
 
-    abstract String getName();
+    Channel(String name, String presetKey, Color color) {
+        this.name = name;
+        this.presetKey = presetKey;
+        this.color = color;
+        inactiveColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
+    }
 
     public abstract Color getDarkColor();
 
     public abstract Color getLightColor();
+
+    public Color getDrawColor(boolean active) {
+        return active ? color : inactiveColor;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPresetKey() {
+        return presetKey;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

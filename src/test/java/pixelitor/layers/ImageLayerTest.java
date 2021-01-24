@@ -102,11 +102,15 @@ public class ImageLayerTest {
         withSelection.setupFor(comp);
 
         int layerIconUpdatesAtStart = 0;
+        int maskIconUpdatesAtStart = 0;
         if (withTranslation.isTrue()) {
             layerIconUpdatesAtStart = 1;
+            if (withMask.isTrue()) {
+                maskIconUpdatesAtStart = 1;
+            }
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, 0);
+        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, maskIconUpdatesAtStart);
     }
 
     @Test
@@ -118,6 +122,9 @@ public class ImageLayerTest {
             expectedImageChangedCalls++;
         }
         if (withTranslation.isTrue()) {
+            expectedImageChangedCalls++;
+        }
+        if (withMask.isTrue() && withTranslation.isTrue()) {
             expectedImageChangedCalls++;
         }
         verify(comp, times(expectedImageChangedCalls)).imageChanged(INVALIDATE_CACHE);

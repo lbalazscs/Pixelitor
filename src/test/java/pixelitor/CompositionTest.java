@@ -22,7 +22,6 @@ import pixelitor.Composition.LayerAdder;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
-import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
@@ -827,8 +826,6 @@ class CompositionTest {
         assertThat(comp)
             .hasSelection()
             .selectionBoundsIs(new Rectangle(4, 4, 2, 2));
-
-        Tools.setCurrentTool(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
 
         var tx = Crop.createCanvasTransform(cropRect);
         comp.imCoordsChanged(tx, false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -447,7 +447,9 @@ public class ChannelMixer extends ParametrizedFilter {
     private static RangeParam from(String first, String second, int defaultValue) {
         String name = "<html><b><font color=" + first + ">" + first
             + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%)";
-        return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
+        RangeParam param = new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
+        param.setPresetKey(first + "From" + second);
+        return param;
     }
 
     @Override

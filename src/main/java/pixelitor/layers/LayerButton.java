@@ -215,6 +215,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void layerIconClicked(MouseEvent e) {
+        activateLayerNow();
+
         int clickCount = e.getClickCount();
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activate(layer);
@@ -225,6 +227,13 @@ public class LayerButton extends JToggleButton implements LayerUI {
                 ((AdjustmentLayer) layer).configure();
             }
         }
+    }
+
+    // called when one of the icons is clicked
+    private void activateLayerNow() {
+        // the layer would be activated anyway, but only in an invokeLayer,
+        // and the mask activation expects events to be coming from the active layer
+        layer.activate(true);
     }
 
     private void layerIconPressed(MouseEvent e) {
@@ -441,6 +450,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void maskIconClicked(MouseEvent e) {
+        activateLayerNow();
+
         boolean altClick = e.isAltDown();
         boolean shiftClick = e.isShiftDown();
 

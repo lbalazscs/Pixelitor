@@ -28,7 +28,7 @@ import static pixelitor.FilterContext.PREVIEWING;
  * The superclass of all filter configuration panels.
  * Instances must not be cached (since they store a Drawable reference).
  */
-public abstract class FilterGUI extends JPanel implements PreviewExecutor {
+public abstract class FilterGUI extends JPanel {
     protected Filter filter;
     private final Drawable dr;
 
@@ -37,7 +37,6 @@ public abstract class FilterGUI extends JPanel implements PreviewExecutor {
         this.dr = dr;
     }
 
-    @Override
     public void runFilterPreview() {
         filter.startOn(dr, PREVIEWING, this);
     }

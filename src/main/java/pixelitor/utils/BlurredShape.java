@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,10 @@ import java.awt.geom.Point2D;
  * rather than a boolean describes whether a point is inside or outside it.
  */
 public interface BlurredShape {
+    static BlurredShape createEmptyShape() {
+        return (x, y) -> 1.0; // everything is outside
+    }
+
     /**
      * Returns 1.0 if the given coordinate is completely outside
      * the shape, 0.0 if it is completely inside, and
@@ -54,6 +58,10 @@ public interface BlurredShape {
     static BlurredShape create(int type, Point2D center,
                                double innerRadiusX, double innerRadiusY,
                                double outerRadiusX, double outerRadiusY) {
+        if (outerRadiusX < 1 || outerRadiusY < 1) {
+            return createEmptyShape();
+        }
+
         return switch (type) {
             case TYPE_ELLIPSE -> new BlurredEllipse(center,
                 innerRadiusX, innerRadiusY,

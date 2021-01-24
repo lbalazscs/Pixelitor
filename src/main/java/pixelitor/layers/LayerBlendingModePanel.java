@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -90,7 +90,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void activeLayerChanged(Layer newActiveLayer) {
+    public void layerActivated(Layer newActiveLayer) {
         float floatOpacity = newActiveLayer.getOpacity();
         int intOpacity = (int) (floatOpacity * 100);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,6 +54,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private final EventListenerList listenerList = new EventListenerList();
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
+
+    private String presetKey;
 
     public RangeParam(String name, int min, double def, int max) {
         this(name, min, def, max, true, BORDER);
@@ -390,7 +392,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         double newValue = ((RangeParamState) state).getValue();
         if (updateGUI) {
             setValueNoTrigger(newValue);
@@ -400,7 +402,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         double v = Double.parseDouble(savedValue);
         setValueNoTrigger(v);
     }
@@ -431,6 +433,18 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         // sure that the default value is copied
         copy.setValueNoTrigger(value);
         return copy;
+    }
+
+    @Override
+    public String getPresetKey() {
+        if (presetKey != null) {
+            return presetKey;
+        }
+        return getName();
+    }
+
+    public void setPresetKey(String presetKey) {
+        this.presetKey = presetKey;
     }
 
     @Override

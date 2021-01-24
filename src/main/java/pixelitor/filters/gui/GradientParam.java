@@ -109,7 +109,8 @@ public class GradientParam extends AbstractFilterParam {
     private boolean shouldStartFilter(PropertyChangeEvent evt) {
         if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             return switch (evt.getPropertyName()) {
-                case "ancestor", "selected thumb", "enabled", USE_BEVEL -> false;
+                case "ancestor", "selected thumb", "enabled",
+                    "graphicsConfiguration", USE_BEVEL -> false;
                 default -> true;
             };
         }
@@ -218,14 +219,14 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         GradientParamState gr = (GradientParamState) state;
 
         setValuesNoTrigger(gr.thumbPositions, gr.colors);
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         // the expected argument format is like: 0.00,0.50,1.00|91707B,1E165B,BF7512
         int pipeIndex = savedValue.indexOf('|');
         if (pipeIndex == -1) {

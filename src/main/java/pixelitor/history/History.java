@@ -50,6 +50,7 @@ public class History {
     private static final PixelitorUndoManager undoManager = new PixelitorUndoManager();
     private static int numUndoneEdits = 0;
     private static boolean ignoreEdits = false;
+    private static boolean forbidEdits = false;
 
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
@@ -82,6 +83,9 @@ public class History {
 //        Debug.call(edit.getDebugName());
 
         assert edit != null;
+        if (forbidEdits) {
+            throw new IllegalStateException();
+        }
         if (ignoreEdits) {
             return;
         }
@@ -342,6 +346,10 @@ public class History {
 
     public static void setIgnoreEdits(boolean ignoreEdits) {
         History.ignoreEdits = ignoreEdits;
+    }
+
+    public static void setForbidEdits(boolean forbidEdits) {
+        History.forbidEdits = forbidEdits;
     }
 
     public static DebugNode getDebugNode() {

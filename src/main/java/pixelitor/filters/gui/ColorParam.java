@@ -130,7 +130,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         Color newColor = ((ColorParamState) state).color;
         if (updateGUI) {
             setColor(newColor, false);
@@ -140,7 +140,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         Color newColor = Colors.fromHTMLHex(savedValue);
         setColor(newColor, false);
     }

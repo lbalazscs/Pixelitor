@@ -122,10 +122,11 @@ public abstract class Filter implements Serializable {
                     "composition = '%s'%n" +
                     "layer = '%s' (%s)%n" +
                     "hasMask = '%s'%n" +
-                    "mask editing = '%b'",
+                    "mask editing = '%b'%n" +
+                    "params = %s",
                 getName(), layer.getComp().getName(),
                 layer.getName(), layer.getClass().getSimpleName(),
-                layer.hasMask(), layer.isMaskEditing());
+                layer.hasMask(), layer.isMaskEditing(), paramsAsString());
 
             var ise = new IllegalStateException(errorDetails, e);
             if (RandomGUITest.isRunning()) {
@@ -186,5 +187,9 @@ public abstract class Filter implements Serializable {
      */
     public boolean supportsGray() {
         return true;
+    }
+
+    public String paramsAsString() {
+        return "";
     }
 }

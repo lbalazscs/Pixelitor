@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public interface ActiveCompositionListener {
 
     void numLayersChanged(Composition comp, int newLayerCount);
 
-    void activeLayerChanged(Layer newActiveLayer);
+    void layerActivated(Layer newActiveLayer);
 
     void layerOrderChanged(Composition comp);
 }

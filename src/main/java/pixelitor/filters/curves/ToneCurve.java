@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.curves;
 
 import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.levels.Channel;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -41,18 +42,18 @@ public class ToneCurve {
     private static final float KNOT_RADIUS = 0.04F;
     private static final float NEARBY_RADIUS = 0.08F;
     public final Curve curve = new Curve();
-    private final ToneCurveType curveType;
+    private final Channel channel;
     private int width = 255;
     private int height = 255;
     private int[] curvePlotData;
-    private boolean isDirty = true;
+    private boolean dirty = true;
     private boolean active = false;
     private Graphics2D gr;
     private final BasicStroke curveStroke = new BasicStroke(1);
     private final BasicStroke pointStroke = new BasicStroke(2);
 
-    public ToneCurve(ToneCurveType curveType) {
-        this.curveType = curveType;
+    public ToneCurve(Channel channel) {
+        this.channel = channel;
     }
 
     public void setSize(int width, int height) {
@@ -63,12 +64,12 @@ public class ToneCurve {
     public void reset() {
         curve.x = new float[]{0, 1};
         curve.y = new float[]{0, 1};
-        isDirty = true;
+        dirty = true;
     }
 
     private void initCurvePlotData() {
-        if (isDirty) {
-            isDirty = false;
+        if (dirty) {
+            dirty = false;
             curvePlotData = curve.makeTable();
         }
     }
@@ -117,7 +118,7 @@ public class ToneCurve {
             return -1;
         }
 
-        isDirty = true;
+        dirty = true;
         return curve.addKnot(p.x, p.y);
     }
 
@@ -130,7 +131,7 @@ public class ToneCurve {
             return;
         }
 
-        isDirty = true;
+        dirty = true;
         curve.removeKnot(index);
     }
 
@@ -156,7 +157,7 @@ public class ToneCurve {
 
         curve.x[index] = ImageMath.clamp01(p.x);
         curve.y[index] = ImageMath.clamp01(p.y);
-        isDirty = true;
+        dirty = true;
     }
 
     /**
@@ -256,7 +257,7 @@ public class ToneCurve {
             path.lineTo(x, y);
         }
 
-        gr.setColor(active ? curveType.getColor() : curveType.getInactiveColor());
+        gr.setColor(channel.getDrawColor(active));
         gr.setStroke(curveStroke);
         gr.draw(path);
     }
@@ -273,5 +274,35 @@ public class ToneCurve {
                 knotSize
             );
         }
+    }
+
+    public String toSaveString() {
+        int numPoints = curve.x.length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < numPoints; i++) {
+            sb.append(curve.x[i]);
+            sb.append(",");
+            sb.append(curve.y[i]);
+            if (i != numPoints - 1) {
+                sb.append("#");
+            }
+        }
+        return sb.toString();
+    }
+
+    public void setStateFrom(String savedValue) {
+        String[] xyPairs = savedValue.split("#");
+        int numPoints = xyPairs.length;
+        curve.x = new float[numPoints];
+        curve.y = new float[numPoints];
+        for (int i = 0; i < numPoints; i++) {
+            String pair = xyPairs[i];
+            int commaIndex = pair.indexOf(',');
+            String pairX = pair.substring(0, commaIndex);
+            String pairY = pair.substring(commaIndex + 1);
+            curve.x[i] = Float.parseFloat(pairX);
+            curve.y[i] = Float.parseFloat(pairY);
+        }
+        dirty = true;
     }
 }

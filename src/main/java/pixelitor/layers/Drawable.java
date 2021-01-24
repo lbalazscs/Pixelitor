@@ -31,26 +31,36 @@ import java.awt.image.BufferedImage;
 public interface Drawable {
     BufferedImage getImage();
 
+    /**
+     * Sets the image ignoring the selection
+     */
     void setImage(BufferedImage newImage);
 
+    /**
+     * Initializes a filter previewing session.
+     */
     void startPreviewing();
+
+    void stopPreviewing();
+
+    void changePreviewImage(BufferedImage img, String filterName, FilterContext context);
 
     void onFilterDialogAccepted(String filterName);
 
     void onFilterDialogCanceled();
 
-    void stopPreviewing();
-
     void tweenCalculatingStarted();
 
     void tweenCalculatingEnded();
-
-    void changePreviewImage(BufferedImage img, String filterName, FilterContext context);
 
     void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName);
 
     void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection);
 
+    /**
+     * Returns the image from which the "image position" thumbnail is calculated.
+     * The canvas size is not considered, only the selection.
+     */
     BufferedImage getImageForFilterDialogs();
 
     TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean softSelection);
@@ -61,6 +71,10 @@ public interface Drawable {
 
     BufferedImage getFilterSourceImage();
 
+    /**
+     * Returns the subimage determined by the selection bounds,
+     * or the image if there is no selection.
+     */
     BufferedImage getSelectedSubImage(boolean copyIfNoSelection);
 
     void setShowOriginal(boolean b);

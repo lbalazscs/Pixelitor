@@ -99,8 +99,8 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public void loadStateFrom(UserPreset preset) {
-        settings.loadStateFrom(preset);
+    public void loadUserPreset(UserPreset preset) {
+        settings.loadUserPreset(preset);
     }
 
     @Override

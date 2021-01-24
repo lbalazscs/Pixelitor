@@ -49,24 +49,36 @@ public interface FilterParam extends FilterSetting, Resettable {
      */
     ParamState<?> copyState();
 
+    default String getPresetKey() {
+        return getName();
+    }
+
     /**
      * Sets the internal state according to the given {@link ParamState}
      * without triggering the filter.
      */
-    void setState(ParamState<?> state, boolean updateGUI);
+    void loadStateFrom(ParamState<?> state, boolean updateGUI);
 
     /**
      * Sets the internal state according to the given saved
      * preset string, without triggering the filter. The GUI is updated.
      */
-    void setState(String savedValue);
+    void loadStateFrom(String savedValue);
 
     /**
      * Load the state from the given user preset.
      */
     default void loadStateFrom(UserPreset preset) {
         // overridden in the composite params
-        setState(preset.get(getName()));
+        String key = getPresetKey();
+        String savedValue = preset.get(key);
+
+        // In the tests there should be a value for every key
+        assert savedValue != null : "no value found for " + key;
+
+        if (savedValue != null) {
+            loadStateFrom(savedValue);
+        }
     }
 
     /**
@@ -74,7 +86,7 @@ public interface FilterParam extends FilterSetting, Resettable {
      */
     default void saveStateTo(UserPreset preset) {
         // overridden in the composite params
-        preset.put(getName(), copyState().toSaveString());
+        preset.put(getPresetKey(), copyState().toSaveString());
     }
 
     /**

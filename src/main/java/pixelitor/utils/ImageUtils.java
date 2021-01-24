@@ -53,7 +53,7 @@ import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
-import static pixelitor.colors.Colors.packedARGBToString;
+import static pixelitor.colors.Colors.packedIntToString;
 import static pixelitor.colors.Colors.toPackedARGB;
 import static pixelitor.utils.Threads.onPool;
 
@@ -117,10 +117,10 @@ public class ImageUtils {
     }
 
     public static BufferedImage createImageWithSameCM(BufferedImage src) {
-        ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(
+        ColorModel cm = src.getColorModel();
+        return new BufferedImage(cm, cm.createCompatibleWritableRaster(
             src.getWidth(), src.getHeight()),
-            dstCM.isAlphaPremultiplied(), null);
+            cm.isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
@@ -933,23 +933,23 @@ public class ImageUtils {
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
-                                        BufferedImage bumpMapSource,
+                                        BufferedImage bumpImage,
                                         String filterName) {
-        return bumpMap(src, bumpMapSource,
+        return bumpMap(src, bumpImage,
             (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
-                                        BufferedImage bumpMapSource,
+                                        BufferedImage bumpImage,
                                         float azimuth, float elevation, float bumpHeight,
                                         String filterName) {
-        return bumpMap(src, bumpMapSource, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
+        return bumpMap(src, bumpImage, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, Composite composite,
+    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpImage, Composite composite,
                                         float azimuth, float elevation, float bumpHeight,
                                         String filterName) {
-        // TODO optimize it so that the bumpMapSource can be smaller, and an offset is given - useful for text effects
+        // TODO optimize it so that the bumpImage can be smaller, and an offset is given - useful for text effects
         // tiling could be also an option
 
         var embossFilter = new EmbossFilter(filterName);
@@ -957,7 +957,7 @@ public class ImageUtils {
         embossFilter.setElevation(elevation);
         embossFilter.setBumpHeight(bumpHeight);
 
-        BufferedImage bumpMap = embossFilter.filter(bumpMapSource, null);
+        BufferedImage bumpMap = embossFilter.filter(bumpImage, null);
 
         BufferedImage dest = copyImage(src);
 
@@ -1062,7 +1062,7 @@ public class ImageUtils {
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
                     String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                        x, y, packedARGBToString(rgb1), packedARGBToString(rgb2));
+                        x, y, packedIntToString(rgb1), packedIntToString(rgb2));
                     System.out.println("ImageUtils::compareSmallImages: " + msg);
                     return false;
                 }
@@ -1079,7 +1079,7 @@ public class ImageUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);
-                String asString = packedARGBToString(rgb);
+                String asString = packedIntToString(rgb);
                 s.append(asString);
                 if (x == width - 1) {
                     s.append("\n");

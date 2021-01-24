@@ -256,7 +256,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
+    public BufferedImage applyOnImage(BufferedImage src) {
         assert settings.hasWatermark(); // should be called only in this case
         return settings.watermarkImage(src, painter);
     }
@@ -433,8 +433,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void loadStateFrom(UserPreset preset) {
-        settings.loadStateFrom(preset);
+    public void loadUserPreset(UserPreset preset) {
+        settings.loadUserPreset(preset);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.filters.Filter;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -213,7 +213,7 @@ public class ParamSet {
             ParamState<?> newState = newStateSet.get(name);
 
             if (newState != null) { // a preset doesn't have to contain all key-value pairs
-                param.setState(newState, !forAnimation);
+                param.loadStateFrom(newState, !forAnimation);
             }
         }
     }

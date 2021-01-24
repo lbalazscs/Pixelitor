@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -40,14 +42,23 @@ public class LaplaceFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-
-        pt = createProgressTracker(2 * height);
-
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
+        int width = src.getWidth();
+        int height = src.getHeight();
+        if (height == 1) {
+            // lbalazscs: the algorithm will throw NullPointerException
+            // for images with height == 1, because then row3 is null, so
+            // simply return a black image
+            Graphics2D g = dst.createGraphics();
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, width, 1);
+            g.dispose();
+            return dst;
+        }
+
+        pt = createProgressTracker(2 * height);
 
         int[] row1 = null;
         int[] row2 = null;

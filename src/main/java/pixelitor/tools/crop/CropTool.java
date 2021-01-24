@@ -233,8 +233,9 @@ public class CropTool extends DragTool {
             return;
         }
 
-        e.consume();
-        executeCropCommand();
+        if (executeCropCommand()) {
+            e.consume();
+        }
     }
 
     @Override
@@ -458,16 +459,22 @@ public class CropTool extends DragTool {
         executeCancelCommand();
     }
 
-    private void executeCropCommand() {
+    // return true if a crop was executed
+    private boolean executeCropCommand() {
         if (state != TRANSFORM) {
-            return;
+            return false;
         }
 
         Rectangle2D cropRect = getCropRect().getIm();
+        if (cropRect.isEmpty()) {
+            return false;
+        }
+
         Crop.toolCropActiveImage(cropRect,
             allowGrowingCB.isSelected(),
             deleteCroppedPixelsCB.isSelected());
         resetInitialState();
+        return true;
     }
 
     private void executeCancelCommand() {
@@ -482,8 +489,11 @@ public class CropTool extends DragTool {
     @Override
     public void otherKeyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            executeCropCommand();
-            e.consume();
+            if (executeCropCommand()) {
+                e.consume();
+            }
+            // otherwise the Enter might be used elsewhere,
+            // for example by the layer name editor
         } else if (e.getKeyCode() == KeyEvent.VK_O) {
             if (e.isControlDown()) {
                 // ignore Ctrl-O see issue #81

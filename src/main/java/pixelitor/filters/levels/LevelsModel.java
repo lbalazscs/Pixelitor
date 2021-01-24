@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,88 +17,83 @@
 
 package pixelitor.filters.levels;
 
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.PreviewExecutor;
+import pixelitor.filters.gui.UserPreset;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static pixelitor.filters.levels.EditedChannelsType.B;
-import static pixelitor.filters.levels.EditedChannelsType.G;
-import static pixelitor.filters.levels.EditedChannelsType.GB;
-import static pixelitor.filters.levels.EditedChannelsType.R;
-import static pixelitor.filters.levels.EditedChannelsType.RB;
-import static pixelitor.filters.levels.EditedChannelsType.RG;
-import static pixelitor.filters.levels.EditedChannelsType.RGB;
+import static pixelitor.filters.levels.Channel.*;
 
 public class LevelsModel {
-    private final OneChannelLevelsModel rgbModel;
-    private final OneChannelLevelsModel rModel;
-    private final OneChannelLevelsModel gModel;
-    private final OneChannelLevelsModel bModel;
-    private final OneChannelLevelsModel rgModel;
-    private final OneChannelLevelsModel gbModel;
-    private final OneChannelLevelsModel rbModel;
+    private final ChannelLevelsModel rgbModel;
+    private final ChannelLevelsModel rModel;
+    private final ChannelLevelsModel gModel;
+    private final ChannelLevelsModel bModel;
     private final Levels filter;
-    private PreviewExecutor executor;
+    private FilterGUI lastGUI;
 
     /**
      * Contains the sub-models in the order they should appear in
      * the GUI
      */
-    private final OneChannelLevelsModel[] subModels;
+    private final ChannelLevelsModel[] subModels;
 
     public LevelsModel(Levels filter) {
         this.filter = filter;
-        rgbModel = new OneChannelLevelsModel(RGB, this);
-        rModel = new OneChannelLevelsModel(R, this);
-        gModel = new OneChannelLevelsModel(G, this);
-        bModel = new OneChannelLevelsModel(B, this);
-        rgModel = new OneChannelLevelsModel(RG, this);
-        rbModel = new OneChannelLevelsModel(RB, this);
-        gbModel = new OneChannelLevelsModel(GB, this);
+        rgbModel = new ChannelLevelsModel(RGB, this);
+        rModel = new ChannelLevelsModel(RED, this);
+        gModel = new ChannelLevelsModel(GREEN, this);
+        bModel = new ChannelLevelsModel(BLUE, this);
 
-        subModels = new OneChannelLevelsModel[]{
-                rgbModel, rModel, gModel, bModel, rgModel, rbModel, gbModel
-        };
+        subModels = new ChannelLevelsModel[]{
+            rgbModel, rModel, gModel, bModel};
     }
 
-    public void setExecutor(PreviewExecutor previewExecutor) {
-        executor = previewExecutor;
+    public void setLastGUI(FilterGUI lastGUI) {
+        this.lastGUI = lastGUI;
     }
 
-    public void adjustmentChanged() {
+    public void settingsChanged() {
         GrayScaleLookup rgb = rgbModel.getLookup();
 
         GrayScaleLookup r = rModel.getLookup();
         GrayScaleLookup g = gModel.getLookup();
         GrayScaleLookup b = bModel.getLookup();
 
-        GrayScaleLookup rg = rgModel.getLookup();
-        GrayScaleLookup gb = gbModel.getLookup();
-        GrayScaleLookup rb = rbModel.getLookup();
-
-        RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b, rg, rb, gb);
+        RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b);
         filter.setRGBLookup(unifiedLookup);
-        executor.runFilterPreview();
+        lastGUI.runFilterPreview();
     }
 
-    public void resetToDefaultSettings() {
-        for (OneChannelLevelsModel model : subModels) {
+    public void resetAllToDefault() {
+        for (ChannelLevelsModel model : subModels) {
             model.resetToDefaults();
         }
 
-        adjustmentChanged();
+        settingsChanged();
     }
 
-    public OneChannelLevelsModel[] getSubModels() {
+    public void resetChannelToDefault(Channel channel) {
+        for (ChannelLevelsModel model : subModels) {
+            if (model.getChannel() == channel) {
+                model.resetToDefaults();
+                break;
+            }
+        }
+
+        settingsChanged();
+    }
+
+    public ChannelLevelsModel[] getSubModels() {
         return subModels;
     }
 
     public ParamSet getParamSet() {
         List<FilterParam> params = new ArrayList<>();
-        for (OneChannelLevelsModel subModel : subModels) {
+        for (ChannelLevelsModel subModel : subModels) {
             params.add(subModel.getInputDark());
             params.add(subModel.getInputLight());
             params.add(subModel.getOutputDark());
@@ -106,5 +101,18 @@ public class LevelsModel {
         }
 
         return new ParamSet(params);
+    }
+
+    public void saveToUserPreset(UserPreset preset) {
+        for (ChannelLevelsModel model : subModels) {
+            model.saveToUserPreset(preset);
+        }
+    }
+
+    public void loadUserPreset(UserPreset preset) {
+        for (ChannelLevelsModel model : subModels) {
+            model.loadUserPreset(preset);
+        }
+        settingsChanged();
     }
 }

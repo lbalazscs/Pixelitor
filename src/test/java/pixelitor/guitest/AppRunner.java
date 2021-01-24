@@ -474,21 +474,19 @@ public class AppRunner {
         }
 
         if (randomize == Randomize.YES) {
-            boolean presetAdded = false;
-            if (testPresets) {
-                presetAdded = savePreset(dialog);
-            }
-
             dialog.button("randomize").click();
             dialog.button("resetAll").click();
             dialog.button("randomize").click();
 
-            if (presetAdded) {
-                dialog.menuItem("test preset").click();
-                // the filter should now be set to default again
-
+            // load first the saved preset, to force it loading it from the disk
+            String testPresetName = "test preset";
+            boolean alreadyExists = hasPreset(dialog, testPresetName);
+            if (alreadyExists) {
+                findMenuItemByText(testPresetName).click();
                 dialog.button("randomize").click();
             }
+
+            savePreset(dialog, testPresetName);
         }
 
         if (checkShowOriginal.isYes()) {
@@ -504,20 +502,40 @@ public class AppRunner {
         dialog.requireNotVisible();
     }
 
-    private boolean savePreset(DialogFixture filterDialog) {
-        boolean presetAdded = false;
-        JDialog realDialog = (JDialog) filterDialog.target();
-        JMenuBar menuBar = realDialog.getJMenuBar();
-        if (menuBar != null) {
-            if (DialogMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
-                filterDialog.menuItem("savePreset").click();
-                var pane = findJOptionPane();
-                pane.textBox().enterText("test preset");
-                pane.okButton().click();
-                presetAdded = true;
+    private boolean hasPreset(DialogFixture dialog, String presetName) {
+        JMenu presetsMenu = getPresetsMenu(dialog);
+        if (presetsMenu != null) {
+            int numItems = presetsMenu.getItemCount();
+            for (int i = 0; i < numItems; i++) {
+                JMenuItem item = presetsMenu.getItem(i);
+                if (item != null && presetName.equals(item.getText())) {
+                    return true;
+                }
             }
         }
-        return presetAdded;
+        return false;
+    }
+
+    private void savePreset(DialogFixture dialog, String presetName) {
+        JMenu presetsMenu = getPresetsMenu(dialog);
+        if (presetsMenu != null) {
+            dialog.menuItem("savePreset").click();
+            var pane = findJOptionPane();
+            pane.textBox().enterText(presetName);
+            pane.okButton().click();
+        }
+    }
+
+    private JMenu getPresetsMenu(DialogFixture dialog) {
+        JDialog realDialog = (JDialog) dialog.target();
+        JMenuBar menuBar = realDialog.getJMenuBar();
+        if (menuBar != null) {
+            JMenu firstMenu = menuBar.getMenu(0);
+            if (DialogMenuBar.PRESETS.equals(firstMenu.getText())) {
+                return firstMenu;
+            }
+        }
+        return null;
     }
 
     void checkNumLayersIs(int expected) {

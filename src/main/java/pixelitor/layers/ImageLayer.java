@@ -302,10 +302,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return filterSourceImage;
     }
 
-    /**
-     * Returns the subimage determined by the selection bounds,
-     * or the image if there is no selection.
-     */
     @Override
     public BufferedImage getSelectedSubImage(boolean copyIfNoSelection) {
         var selection = comp.getSelection();
@@ -321,10 +317,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             selection, getTx(), getTy());
     }
 
-    /**
-     * Returns the image shown in the image selector in filter dialogs.
-     * The canvas size is not considered, only the selection.
-     */
     @Override
     public BufferedImage getImageForFilterDialogs() {
         var selection = comp.getSelection();
@@ -489,9 +481,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    /**
-     * Sets the image ignoring the selection
-     */
     @Override
     public void setImage(BufferedImage newImage) {
         BufferedImage oldRef = image;
@@ -519,10 +508,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         updateIconImage();
     }
 
-    /**
-     * Initializes a preview session. Called when
-     * a new dialog appears, right before creating the adjustment panel.
-     */
     @Override
     public void startPreviewing() {
         assert state == NORMAL : "state was " + state;
@@ -1229,7 +1214,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
+    public BufferedImage applyOnImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 

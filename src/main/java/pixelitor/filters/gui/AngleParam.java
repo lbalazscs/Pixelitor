@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -170,12 +170,12 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         setValueInDegrees(((AngleParamState) state).angle, false);
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         double d = Double.parseDouble(savedValue);
         setValueInDegrees(d, false);
     }

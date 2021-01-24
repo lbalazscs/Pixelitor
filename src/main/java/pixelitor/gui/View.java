@@ -137,20 +137,21 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // recreate the layer buttons
         layersPanel = new LayersPanel();
         newComp.addAllLayersToGUI();
-        LayersContainer.showLayersFor(this);
-        Layers.activeCompChanged(newComp, false);
-
         oldComp.setView(null);
 
-        newMaskViewMode.activate(this, newComp.getActiveLayer());
-        repaintNavigator(true);
+        if (isActive()) {
+            LayersContainer.showLayersFor(this);
+            Layers.activeCompChanged(newComp, false);
+            newMaskViewMode.activate(this, newComp.getActiveLayer());
+            repaintNavigator(true);
+            HistogramsPanel.updateFrom(newComp);
+        }
 
         Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
 
         revalidate(); // make sure the scrollbars are OK if the new comp has a different size
         canvasCoSizeChanged();
         repaint();
-        HistogramsPanel.updateFrom(newComp);
     }
 
     private void addListeners() {

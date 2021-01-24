@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.levels;
 
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.UserPreset;
 
 import java.awt.Color;
 
@@ -26,7 +27,7 @@ import java.awt.Color;
  * The model (the GUI-independent part) of the settings
  * for one channel in the Levels filter
  */
-public class OneChannelLevelsModel implements ParamAdjustmentListener {
+public class ChannelLevelsModel implements ParamAdjustmentListener {
     public static final int MAX_VALUE = 255;
     public static final int MIN_VALUE = 0;
     private static final int DARK_DEFAULT = MIN_VALUE;
@@ -38,24 +39,25 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
     private final RangeParam inputLight;
     private final RangeParam outputDark;
     private final RangeParam outputLight;
-    private final EditedChannelsType type;
-    private final LevelsModel bigModel;
+    private final Channel channel;
+    private final LevelsModel mainModel;
+    private final RangeParam[] params;
 
-    public OneChannelLevelsModel(EditedChannelsType type, LevelsModel bigModel) {
-        this.type = type;
-        this.bigModel = bigModel;
+    public ChannelLevelsModel(Channel channel, LevelsModel mainModel) {
+        this.channel = channel;
+        this.mainModel = mainModel;
 
         inputDark = new RangeParam("Input Dark", MIN_VALUE, DARK_DEFAULT, MAX_VALUE);
         inputLight = new RangeParam("Input Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
         outputDark = new RangeParam("Output Dark", MIN_VALUE, DARK_DEFAULT, MAX_VALUE);
         outputLight = new RangeParam("Output Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
+        params = new RangeParam[]{inputDark, inputLight, outputDark, outputLight};
 
         ensureInputValueOrdering();
 
-        inputDark.setAdjustmentListener(this);
-        inputLight.setAdjustmentListener(this);
-        outputDark.setAdjustmentListener(this);
-        outputLight.setAdjustmentListener(this);
+        for (RangeParam param : params) {
+            param.setAdjustmentListener(this);
+        }
     }
 
     private void ensureInputValueOrdering() {
@@ -84,11 +86,11 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
     }
 
     public Color getDarkColor() {
-        return type.getDarkColor();
+        return channel.getDarkColor();
     }
 
     public Color getLightColor() {
-        return type.getLightColor();
+        return channel.getLightColor();
     }
 
     public RangeParam getInputDark() {
@@ -107,8 +109,8 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         return outputLight;
     }
 
-    public String getName() {
-        return type.getName();
+    public String getChannelName() {
+        return channel.getName();
     }
 
     public GrayScaleLookup getLookup() {
@@ -117,25 +119,47 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
 
     @Override
     public void paramAdjusted() {
-        updateAdjustment();
+        updateLookup();
 
-        bigModel.adjustmentChanged();
+        mainModel.settingsChanged();
     }
 
-    private void updateAdjustment() {
+    private void updateLookup() {
         lookup = new GrayScaleLookup(
-                inputDark.getValue(),
-                inputLight.getValue(),
-                outputDark.getValue(),
-                outputLight.getValue());
+            inputDark.getValue(),
+            inputLight.getValue(),
+            outputDark.getValue(),
+            outputLight.getValue());
     }
 
     public void resetToDefaults() {
-        inputDark.reset(false);
-        inputLight.reset(false);
-        outputDark.reset(false);
-        outputLight.reset(false);
+        for (RangeParam param : params) {
+            param.reset(false);
+        }
 
-        updateAdjustment();
+        updateLookup();
+    }
+
+    public void saveToUserPreset(UserPreset preset) {
+        for (RangeParam param : params) {
+            String key = uniqueKey(param);
+            preset.put(key, param.copyState().toSaveString());
+        }
+    }
+
+    public void loadUserPreset(UserPreset preset) {
+        for (RangeParam param : params) {
+            String key = uniqueKey(param);
+            param.loadStateFrom(preset.get(key));
+        }
+        updateLookup();
+    }
+
+    private String uniqueKey(RangeParam param) {
+        return channel.getPresetKey() + " " + param.getName();
+    }
+
+    public Channel getChannel() {
+        return channel;
     }
 }

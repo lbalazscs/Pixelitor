@@ -65,13 +65,13 @@ public class Layers {
     }
 
     public static void activeCompChanged(Composition newComp, boolean viewChanged) {
-        activeLayerChanged(newComp.getActiveLayer(), viewChanged);
+        layerActivated(newComp.getActiveLayer(), viewChanged);
     }
 
-    public static void activeLayerChanged(Layer newActiveLayer, boolean viewChanged) {
+    public static void layerActivated(Layer newActiveLayer, boolean viewChanged) {
         assert newActiveLayer != null;
         for (var listener : compListeners) {
-            listener.activeLayerChanged(newActiveLayer);
+            listener.layerActivated(newActiveLayer);
         }
 
         View view = newActiveLayer.getComp().getView();

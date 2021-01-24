@@ -134,6 +134,10 @@ public class AssertJSwingTest {
     private boolean colorsTested = false;
     private boolean viewMenuTested = false;
 
+    // Whether filters should be tested with images with a width or height of 1 pixel.
+    private static final boolean FILTER_TESTS_WITH_HEIGHT_1 = false;
+    private static final boolean FILTER_TESTS_WITH_WIDTH_1 = false;
+
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
@@ -1634,7 +1638,18 @@ public class AssertJSwingTest {
         EDT.assertNumOpenImagesIs(1);
         app.checkNumLayersIs(1);
 
-        testFiltersColor();
+        boolean squashImage = FILTER_TESTS_WITH_WIDTH_1 || FILTER_TESTS_WITH_HEIGHT_1;
+        if (squashImage) {
+            if (FILTER_TESTS_WITH_WIDTH_1 && FILTER_TESTS_WITH_HEIGHT_1) {
+                app.resize(1, 1);
+            } else if (FILTER_TESTS_WITH_WIDTH_1) {
+                app.resize(1, 100);
+            } else if (FILTER_TESTS_WITH_HEIGHT_1) {
+                app.resize(100, 1);
+            }
+        }
+
+        testFiltersColor(squashImage);
         testFiltersBlurSharpen();
         testFiltersDistort();
         testFiltersDislocate();
@@ -1649,15 +1664,15 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-    private void testFiltersColor() {
-        testColorBalance();
+    private void testFiltersColor(boolean squashedImage) {
+        testColorBalance(squashedImage);
         testFilterWithDialog("Hue/Saturation", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Colorize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Levels", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Brightness/Contrast", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Solarize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Sepia", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testInvert();
+        testInvert(squashedImage);
         testFilterWithDialog("Channel Invert", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Channel Mixer", Randomize.YES,
             Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
@@ -1814,14 +1829,15 @@ public class AssertJSwingTest {
         testNoDialogFilter("Invert Transparency");
     }
 
-    private void testColorBalance() {
-        runWithSelectionAndTranslation(
-            () -> testFilterWithDialog("Color Balance",
+    private void testColorBalance(boolean squashedImage) {
+        runWithSelectionAndTranslation(squashedImage, () ->
+            testFilterWithDialog("Color Balance",
                 Randomize.YES, Reseed.NO, ShowOriginal.YES));
     }
 
-    private void testInvert() {
-        runWithSelectionAndTranslation(() -> testNoDialogFilter("Invert"));
+    private void testInvert(boolean squashedImage) {
+        runWithSelectionAndTranslation(squashedImage, () ->
+            testNoDialogFilter("Invert"));
     }
 
     private void testText() {
@@ -2954,10 +2970,17 @@ public class AssertJSwingTest {
         mouse.dragToCanvas(200, 300);
     }
 
+    private void runWithSelectionAndTranslation(boolean squashedImage, Runnable task) {
+        if (squashedImage) {
+            task.run();
+        } else {
+            runWithSelectionAndTranslation(task);
+        }
+    }
+
     private void runWithSelectionAndTranslation(Runnable task) {
-        log(1, "simple run");
-        // simple run
-        EDT.postAssertJEvent("simple run");
+        log(1, "simple test");
+        EDT.postAssertJEvent("simple test");
         keyboard.deselect();
         task.run();
 
@@ -2965,9 +2988,8 @@ public class AssertJSwingTest {
             return;
         }
 
-        log(1, "selection run");
-        // run with selection
-        EDT.postAssertJEvent("selection run");
+        log(1, "test with selection");
+        EDT.postAssertJEvent("test with selection");
         addSelection();
         task.run();
         keyboard.deselect();
@@ -2976,9 +2998,8 @@ public class AssertJSwingTest {
             return;
         }
 
-        // run with translation
-        log(1, "translation run");
-        EDT.postAssertJEvent("translation run");
+        log(1, "test with translation");
+        EDT.postAssertJEvent("test with translation");
         addTranslation();
         task.run();
 
@@ -2986,9 +3007,8 @@ public class AssertJSwingTest {
             return;
         }
 
-        // run with both translation and selection
-        log(1, "selection+translation run");
-        EDT.postAssertJEvent("selection+translation run");
+        log(1, "test with selection+translation");
+        EDT.postAssertJEvent("test with selection+translation");
         addSelection();
         task.run();
         keyboard.undo("Create Selection");

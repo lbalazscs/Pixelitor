@@ -209,7 +209,11 @@ public class TextSettings implements Serializable {
         Composition comp = OpenImages.getActiveComp();
         if (comp != null) {
             int canvasHeight = comp.getCanvasHeight();
-            return (int) (canvasHeight * 0.2);
+            int size = (int) (canvasHeight * 0.2);
+            if (size == 0) {
+                size = 1;
+            }
+            return size;
         } else {
             return 100;
         }
@@ -237,7 +241,7 @@ public class TextSettings implements Serializable {
         return preset;
     }
 
-    public void loadStateFrom(UserPreset preset) {
+    public void loadUserPreset(UserPreset preset) {
         text = preset.get("text");
         color = preset.getColor("color");
         rotation = preset.getFloat("rotation");

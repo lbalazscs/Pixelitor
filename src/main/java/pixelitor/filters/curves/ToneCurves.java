@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.curves;
 
 import pixelitor.colors.Colors;
+import pixelitor.filters.levels.Channel;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -30,8 +31,9 @@ import java.util.EnumMap;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurves {
-    private final EnumMap<ToneCurveType, ToneCurve> curve = new EnumMap<>(ToneCurveType.class);
-    private ToneCurveType activeCurveType = ToneCurveType.RGB;
+    private final EnumMap<Channel, ToneCurve> curvesByChannel
+        = new EnumMap<>(Channel.class);
+    private Channel activeChannel = Channel.RGB;
     private Graphics2D gr;
     private final BasicStroke gridStroke = new BasicStroke(1);
     private int width = 295;
@@ -44,25 +46,25 @@ public class ToneCurves {
     private static final int GRID_DENSITY = 4;
 
     public ToneCurves() {
-        curve.put(ToneCurveType.RGB, new ToneCurve(ToneCurveType.RGB));
-        curve.put(ToneCurveType.RED, new ToneCurve(ToneCurveType.RED));
-        curve.put(ToneCurveType.GREEN, new ToneCurve(ToneCurveType.GREEN));
-        curve.put(ToneCurveType.BLUE, new ToneCurve(ToneCurveType.BLUE));
-        setActiveCurve(ToneCurveType.RGB);
+        curvesByChannel.put(Channel.RGB, new ToneCurve(Channel.RGB));
+        curvesByChannel.put(Channel.RED, new ToneCurve(Channel.RED));
+        curvesByChannel.put(Channel.GREEN, new ToneCurve(Channel.GREEN));
+        curvesByChannel.put(Channel.BLUE, new ToneCurve(Channel.BLUE));
+        setActiveCurve(Channel.RGB);
     }
 
-    public ToneCurve getCurve(ToneCurveType curveType) {
-        return curve.get(curveType);
+    public ToneCurve getCurve(Channel channel) {
+        return curvesByChannel.get(channel);
     }
 
     public ToneCurve getActiveCurve() {
-        return curve.get(activeCurveType);
+        return curvesByChannel.get(activeChannel);
     }
 
-    public void setActiveCurve(ToneCurveType curveType) {
-        curve.get(activeCurveType).setActive(false);
-        curve.get(curveType).setActive(true);
-        activeCurveType = curveType;
+    public void setActiveCurve(Channel channel) {
+        curvesByChannel.get(activeChannel).setActive(false);
+        curvesByChannel.get(channel).setActive(true);
+        activeChannel = channel;
     }
 
     public void setSize(int width, int height) {
@@ -70,13 +72,13 @@ public class ToneCurves {
         this.height = height;
         curveWidth = width - 2 * CURVE_PADDING - AXIS_PADDING;
         curveHeight = height - 2 * CURVE_PADDING - AXIS_PADDING;
-        for (var entry : curve.entrySet()) {
+        for (var entry : curvesByChannel.entrySet()) {
             entry.getValue().setSize(curveWidth, curveHeight);
         }
     }
 
     public void reset() {
-        for (var entry : curve.entrySet()) {
+        for (var entry : curvesByChannel.entrySet()) {
             entry.getValue().reset();
         }
     }
@@ -92,7 +94,7 @@ public class ToneCurves {
 
     public void setG2D(Graphics2D gr) {
         this.gr = gr;
-        for (var entry : curve.entrySet()) {
+        for (var entry : curvesByChannel.entrySet()) {
             entry.getValue().setG2D(gr);
         }
     }
@@ -146,17 +148,24 @@ public class ToneCurves {
     }
 
     private void drawScales() {
-        // draw horizontal
+        Color gradientEndColor;
+        if (activeChannel == Channel.RGB) {
+            gradientEndColor = Color.WHITE;
+        } else {
+            gradientEndColor = activeChannel.getDrawColor(true);
+        }
+
+        // draw horizontal gradient
         var rectH = new Rectangle.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
-        var gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, Color.WHITE);
+        var gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, gradientEndColor);
         gr.setPaint(gradientH);
         gr.fill(rectH);
         gr.setColor(Color.LIGHT_GRAY);
         gr.draw(rectH);
 
-        // draw vertical
+        // draw vertical gradient
         var rectV = new Rectangle.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
-        gradientH = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, Color.WHITE);
+        gradientH = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, gradientEndColor);
         gr.setPaint(gradientH);
         gr.fill(rectV);
         gr.setColor(Color.LIGHT_GRAY);
@@ -171,13 +180,13 @@ public class ToneCurves {
 
     private void drawCurves() {
         // on back draw inactive curves
-        for (var entry : curve.entrySet()) {
-            if (entry.getKey() != activeCurveType) {
+        for (var entry : curvesByChannel.entrySet()) {
+            if (entry.getKey() != activeChannel) {
                 entry.getValue().draw();
             }
         }
 
         // on top draw active curve
-        curve.get(activeCurveType).draw();
+        curvesByChannel.get(activeChannel).draw();
     }
 }

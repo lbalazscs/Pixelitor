@@ -271,8 +271,8 @@ public class ImageMagick {
 
     private static void showNotInstalledDialog() {
         Dialogs.showInfoDialog("ImageMagick 7 not found",
-            "<html>ImageMagick 7 was not found in PATH." +
-                "<br>It can be downloaded from https://imagemagick.org");
+            "<html>ImageMagick 7 was not found in the PATH" +
+                "<br>or in the folder configured in the Preferences." +
+                "<br><br>It can be downloaded from https://imagemagick.org");
     }
-
 }

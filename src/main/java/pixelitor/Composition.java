@@ -524,7 +524,7 @@ public class Composition implements Serializable {
 
         if (activeLayer.hasUI()) {
             activeLayer.activateUI();
-            Layers.activeLayerChanged(newActiveLayer, false);
+            Layers.layerActivated(newActiveLayer, false);
         }
 
         if (addToHistory) {
@@ -802,7 +802,7 @@ public class Composition implements Serializable {
             Layer firstLayer = layerList.get(0);
             if (firstLayer instanceof ImageLayer) {
                 ImageLayer layer = (ImageLayer) firstLayer;
-                if (Tools.currentTool.isDirectDrawing()) {
+                if (!layer.hasMask() && Tools.currentTool.isDirectDrawing()) {
                     if (layer.getState() != ImageLayer.State.PREVIEW) {
                         return layer.getCanvasSizedSubImage();
                     } else if (!layer.isBigLayer()) {

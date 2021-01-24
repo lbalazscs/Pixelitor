@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.levels;
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import pixelitor.TestHelper;
-import pixelitor.filters.gui.PreviewExecutor;
+import pixelitor.filters.gui.FilterGUI;
 
 import static org.mockito.Mockito.*;
 
@@ -30,9 +30,9 @@ class LevelsTest {
     private Levels levels;
     private ArgumentCaptor<RGBLookup> captor;
     private LevelsModel model;
-    private PreviewExecutor executor;
-    private OneChannelLevelsModel rgbPage;
-    private OneChannelLevelsModel rPage;
+    private FilterGUI filterGUI;
+    private ChannelLevelsModel rgbPage;
+    private ChannelLevelsModel rPage;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -44,15 +44,15 @@ class LevelsTest {
         levels = mock(Levels.class);
         captor = ArgumentCaptor.forClass(RGBLookup.class);
         model = new LevelsModel(levels);
-        executor = mock(PreviewExecutor.class);
-        model.setExecutor(executor);
+        filterGUI = mock(FilterGUI.class);
+        model.setLastGUI(filterGUI);
         rgbPage = model.getSubModels()[0];
         rPage = model.getSubModels()[1];
     }
 
     @Test
     void defaultSettingsProduceIdentity() {
-        model.resetToDefaultSettings();
+        model.resetAllToDefault();
 
         var lookup = getCalculatedLookup();
 
@@ -152,7 +152,7 @@ class LevelsTest {
     }
 
     private RGBLookup getCalculatedLookup() {
-        verify(executor, times(1)).runFilterPreview();
+        verify(filterGUI, times(1)).runFilterPreview();
         verify(levels, times(1)).setRGBLookup(captor.capture());
         return captor.getValue();
     }

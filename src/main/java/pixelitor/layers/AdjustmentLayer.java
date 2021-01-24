@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,8 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
+    public BufferedImage applyOnImage(BufferedImage src) {
         return filter.transformImage(src);
     }
 
@@ -94,8 +95,8 @@ public class AdjustmentLayer extends Layer {
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
-                + ", super=" + super.toString() + '}';
+            + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
+            + ", super=" + super.toString() + '}';
     }
 
     public void configure() {

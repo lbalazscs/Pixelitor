@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -289,11 +289,13 @@ public class ChaosGame extends ParametrizedFilter {
         // to the actual image space
         double xRange = Vertex.maxX - Vertex.minX;
         double yRange = Vertex.maxY - Vertex.minY;
-        double hScale = (width - 2 * MARGIN) / xRange;
-        double vScale = (height - 2 * MARGIN) / yRange;
+        double actualHMargin = Math.min(MARGIN, width / 3.0);
+        double actualVMargin = Math.min(MARGIN, height / 3.0);
+        double hScale = (width - 2 * actualHMargin) / xRange;
+        double vScale = (height - 2 * actualVMargin) / yRange;
         for (Vertex p : vertices) {
-            p.x = MARGIN + hScale * (p.x - Vertex.minX);
-            p.y = MARGIN + vScale * (p.y - Vertex.minY);
+            p.x = actualHMargin + hScale * (p.x - Vertex.minX);
+            p.y = actualVMargin + vScale * (p.y - Vertex.minY);
         }
     }
 
@@ -362,6 +364,11 @@ public class ChaosGame extends ParametrizedFilter {
             if (y < minY) {
                 minY = y;
             }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Vertex (x = %.2f, y = %.2f)", x, y);
         }
 
         static void resetMaxMin() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -125,7 +125,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         ImagePositionParamState s = (ImagePositionParamState) state;
         float newRelX = (float) s.relativeX;
         float newRelY = (float) s.relativeY;
@@ -139,7 +139,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         int commaIndex = savedValue.indexOf(',');
         float newRelX = Float.parseFloat(savedValue.substring(0, commaIndex));
         float newRelY = Float.parseFloat(savedValue.substring(commaIndex + 1));

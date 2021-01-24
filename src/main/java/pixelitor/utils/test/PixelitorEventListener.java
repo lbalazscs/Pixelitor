@@ -50,40 +50,40 @@ public class PixelitorEventListener implements ActiveCompositionListener,
 
     @Override
     public void numLayersChanged(Composition comp, int newLayerCount) {
-        String type = "activeCompLayerCountChanged, newCount = " + newLayerCount;
+        String type = "#layers changed, newCount = " + newLayerCount;
         Events.postListenerEvent(type, comp, null);
     }
 
     @Override
-    public void activeLayerChanged(Layer newActiveLayer) {
-        String type = "activeLayerChanged to " + newActiveLayer.getName();
+    public void layerActivated(Layer newActiveLayer) {
+        String type = "layer activated: " + newActiveLayer.getName();
         Events.postListenerEvent(type, newActiveLayer.getComp(), newActiveLayer);
     }
 
     @Override
     public void layerOrderChanged(Composition comp) {
-        Events.postListenerEvent("layerOrderChanged", comp, null);
+        Events.postListenerEvent("layer order changed", comp, null);
     }
 
     @Override
     public void maskAddedTo(Layer layer) {
-        Events.postListenerEvent("maskAdded", layer.getComp(), layer);
+        Events.postListenerEvent("mask added", layer.getComp(), layer);
     }
 
     @Override
     public void maskDeletedFrom(Layer layer) {
-        Events.postListenerEvent("maskDeleted", layer.getComp(), layer);
+        Events.postListenerEvent("mask deleted", layer.getComp(), layer);
     }
 
     @Override
     public void allViewsClosed() {
-        Events.postListenerEvent("allViewsClosed", null, null);
+        Events.postListenerEvent("all views closed", null, null);
     }
 
     @Override
     public void viewActivated(View oldView, View newView) {
         String oldCVName = oldView == null ? "null" : oldView.getName();
-        String type = format("viewActivated %s => %s", oldCVName, newView.getName());
+        String type = format("view activated %s => %s", oldCVName, newView.getName());
         Events.postListenerEvent(type, newView.getComp(), null);
     }
 }

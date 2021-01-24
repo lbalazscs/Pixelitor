@@ -145,7 +145,12 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public void loadStateFrom(UserPreset preset) {
+    public void loadUserPreset(UserPreset preset) {
         paramSet.loadPreset(preset);
+    }
+
+    @Override
+    public String paramsAsString() {
+        return paramSet.toUserPreset(getName(), "Debug").toString();
     }
 }

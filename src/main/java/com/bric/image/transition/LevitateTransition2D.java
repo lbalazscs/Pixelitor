@@ -42,7 +42,7 @@ public class LevitateTransition2D extends Transition2D {
         float stripHeight = size.height / 6.0f;
 
         List<Rectangle2D> v = new ArrayList<>();
-        for (int y = 0; y < size.height; y = (int) (y + stripHeight)) {
+        for (float y = 0; y < size.height; y += stripHeight) {
             v.add(new Rectangle2D.Float(0, y, size.width, stripHeight));
         }
         Transition2DInstruction[] instr = new Transition2DInstruction[v.size() + 1];

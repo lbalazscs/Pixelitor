@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.filters.levels.gui;
 
-import pixelitor.filters.levels.OneChannelLevelsModel;
-import pixelitor.gui.utils.CardPanelWithCombo;
+import pixelitor.filters.levels.ChannelLevelsModel;
 import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -28,9 +27,11 @@ import static java.awt.Color.GRAY;
 /**
  * The panel corresponding to one channel in the Levels GUI
  */
-public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
-    public OneChannelLevelsPanel(OneChannelLevelsModel model) {
-        super(model.getName());
+public class ChannelLevelsPanel extends JPanel {
+    private String cardName;
+
+    public ChannelLevelsPanel(ChannelLevelsModel model) {
+        cardName = model.getChannelName();
         Box box = Box.createVerticalBox();
         add(box);
 
@@ -43,5 +44,9 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
         box.add(inputLightSlider);
         box.add(outputDarkSlider);
         box.add(outputLightSlider);
+    }
+
+    public String getCardName() {
+        return cardName;
     }
 }

@@ -360,6 +360,12 @@ public final class GUIUtils {
         return button;
     }
 
+    public static JButton createResetChannelButton(ActionListener action) {
+        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
+        resetChannel.addActionListener(action);
+        return resetChannel;
+    }
+
     public static <E> JComboBox<E> createComboBox(ComboBoxModel<E> model,
                                                   ActionListener al) {
         JComboBox<E> cb = new JComboBox<>(model);

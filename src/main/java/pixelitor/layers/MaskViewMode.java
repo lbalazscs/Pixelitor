@@ -107,6 +107,8 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer) {
         assert view != null;
+        assert layer.isActive();
+
         if (AppContext.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
         }
@@ -153,7 +155,13 @@ public enum MaskViewMode {
     // used in asserts
     public boolean canBeAssignedTo(Layer layer) {
         if (editMask || showMask) {
-            return layer.hasMask();
+            boolean hasMask = layer.hasMask();
+            if (!hasMask) {
+                throw new AssertionError("layer " + layer.getName()
+                    + " has no mask, view mode = " + this
+                    + ", mask icon = " + layer.getUI().hasMaskIcon());
+            }
+            return hasMask;
         }
         return true;
     }

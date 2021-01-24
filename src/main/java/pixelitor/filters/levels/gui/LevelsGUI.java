@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,12 @@
 
 package pixelitor.filters.levels.gui;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.levels.Channel;
+import pixelitor.filters.levels.ChannelLevelsModel;
 import pixelitor.filters.levels.LevelsModel;
-import pixelitor.filters.levels.OneChannelLevelsModel;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 
@@ -37,56 +39,67 @@ import static java.awt.BorderLayout.*;
  * The GUI for the levels filter
  */
 public class LevelsGUI extends FilterGUI implements ItemListener {
-    private final DefaultComboBoxModel<String> selectorModel;
+    private final EnumComboBoxModel<Channel> channelsModel
+        = new EnumComboBoxModel<>(Channel.class);
 
     private final JPanel cardPanel;
     private final JCheckBox showOriginalCB;
 
+    @SuppressWarnings("unchecked")
     public LevelsGUI(Filter filter, Drawable dr, LevelsModel model) {
         super(filter, dr);
 
-        model.setExecutor(this);
+        model.setLastGUI(this);
 
         setLayout(new BorderLayout());
 
-        selectorModel = new DefaultComboBoxModel<>();
-        JComboBox<String> selector = new JComboBox<>(selectorModel);
+        JComboBox<Channel> selector = new JComboBox<>(channelsModel);
         selector.addItemListener(this);
 
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new FlowLayout());
+        northPanel.add(new JLabel("Channel:"));
         northPanel.add(selector);
-        JButton resetAllButton = GUIUtils.createResetAllButton(
-            e -> model.resetToDefaultSettings());
-        northPanel.add(resetAllButton);
+
+        JButton resetChannelButton = GUIUtils.createResetChannelButton(
+            e -> model.resetChannelToDefault(channelsModel.getSelectedItem()));
+        northPanel.add(resetChannelButton);
+
         add(northPanel, NORTH);
 
         cardPanel = new JPanel();
         cardPanel.setLayout(new CardLayout());
 
-        OneChannelLevelsModel[] models = model.getSubModels();
-        for (OneChannelLevelsModel m : models) {
-            OneChannelLevelsPanel p = new OneChannelLevelsPanel(m);
+        ChannelLevelsModel[] models = model.getSubModels();
+        for (ChannelLevelsModel m : models) {
+            ChannelLevelsPanel p = new ChannelLevelsPanel(m);
             addNewCard(p);
         }
 
         add(cardPanel, CENTER);
 
+        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
-        add(showOriginalCB, SOUTH);
+        southPanel.add(showOriginalCB);
+
+        JButton resetAllButton = GUIUtils.createResetAllButton(
+            e -> model.resetAllToDefault());
+        southPanel.add(resetAllButton);
+
+        add(southPanel, SOUTH);
     }
 
-    private void addNewCard(OneChannelLevelsPanel chPanel) {
+    private void addNewCard(ChannelLevelsPanel chPanel) {
         String channelName = chPanel.getCardName();
         cardPanel.add(chPanel, channelName);
-        selectorModel.addElement(channelName);
     }
 
     @Override
     public void itemStateChanged(ItemEvent e) {
         CardLayout cl = (CardLayout) cardPanel.getLayout();
-        cl.show(cardPanel, (String) e.getItem());
+        cl.show(cardPanel, ((Channel) e.getItem()).getName());
     }
 }

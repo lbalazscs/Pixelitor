@@ -37,10 +37,10 @@ public class CollapseTransition2D extends Transition2D {
     public Transition2DInstruction[] getInstructions(float progress,
                                                      Dimension size) {
         progress = (float) Math.pow(progress, 2);
-        float stripHeight = size.height / 6;
+        float stripHeight = size.height / 6.0f;
 
         List<Rectangle2D> v = new ArrayList<>();
-        for (int y = 0; y < size.height; y = (int) (y + stripHeight)) {
+        for (float y = 0; y < size.height; y += stripHeight) {
             v.add(new Rectangle2D.Float(0, y, size.width, stripHeight));
         }
         ImageInstruction[] instr = new ImageInstruction[v.size() + 1];

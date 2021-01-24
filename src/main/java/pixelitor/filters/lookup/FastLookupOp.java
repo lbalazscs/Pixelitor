@@ -41,7 +41,9 @@ public class FastLookupOp implements BufferedImageOp {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
         if (packedInt) {
-            dst = ImageUtils.createImageWithSameCM(src);
+            if (dst == null) {
+                dst = ImageUtils.createImageWithSameCM(src);
+            }
             boolean notPremultiplied = !src.isAlphaPremultiplied();
 
             int[] srcData = ((DataBufferInt) src.getRaster()
@@ -50,12 +52,12 @@ public class FastLookupOp implements BufferedImageOp {
             int[] destData = ((DataBufferInt) dst.getRaster()
                 .getDataBuffer()).getData();
 
-            int length = srcData.length;
-            assert length == destData.length;
+            int numPixels = srcData.length;
+            assert numPixels == destData.length;
 
             short[][] table = lut.getTable();
 
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < numPixels; i++) {
                 int rgb = srcData[i];
                 int a = (rgb >>> 24) & 0xFF;
                 int r = (rgb >>> 16) & 0xFF;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
-import pixelitor.filters.lookup.LookupFactory;
 import pixelitor.filters.util.FilterUtils;
 
 import java.awt.image.BufferedImage;
@@ -110,12 +109,12 @@ public class ExtractChannel extends ParametrizedFilter {
 
     private static BufferedImage colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
         LookupTable lookupTable = switch (channel) {
-            case RED_CHANNEL -> LookupFactory.createLookupForOnlyRed();
-            case REMOVE_RED_CHANNEL -> LookupFactory.createLookupForRemoveRed();
-            case GREEN_CHANNEL -> LookupFactory.createLookupForOnlyGreen();
-            case REMOVE_GREEN_CHANNEL -> LookupFactory.createLookupForRemoveGreen();
-            case BLUE_CHANNEL -> LookupFactory.createLookupForOnlyBlue();
-            case REMOVE_BLUE_CHANNEL -> LookupFactory.createLookupForRemoveBlue();
+            case RED_CHANNEL -> createOnlyRedLUT();
+            case REMOVE_RED_CHANNEL -> createRemoveRedLUT();
+            case GREEN_CHANNEL -> createOnlyGreenLUT();
+            case REMOVE_GREEN_CHANNEL -> createRemoveGreenLUT();
+            case BLUE_CHANNEL -> createOnlyBlueLUT();
+            case REMOVE_BLUE_CHANNEL -> createRemoveBlueLUT();
             default -> throw new IllegalStateException("should not het here");
         };
 
@@ -127,5 +126,69 @@ public class ExtractChannel extends ParametrizedFilter {
     @Override
     public boolean supportsGray() {
         return false;
+    }
+
+    private static LookupTable createRemoveRedLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createZeroMap();
+        maps[1] = createIdentityMap();
+        maps[2] = createIdentityMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static LookupTable createOnlyRedLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createIdentityMap();
+        maps[1] = createZeroMap();
+        maps[2] = createZeroMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static LookupTable createRemoveGreenLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createIdentityMap();
+        maps[1] = createZeroMap();
+        maps[2] = createIdentityMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static LookupTable createOnlyGreenLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createZeroMap();
+        maps[1] = createIdentityMap();
+        maps[2] = createZeroMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static LookupTable createRemoveBlueLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createIdentityMap();
+        maps[1] = createIdentityMap();
+        maps[2] = createZeroMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static LookupTable createOnlyBlueLUT() {
+        short[][] maps = new short[3][256];
+        maps[0] = createZeroMap();
+        maps[1] = createZeroMap();
+        maps[2] = createIdentityMap();
+        return new ShortLookupTable(0, maps);
+    }
+
+    private static short[] createIdentityMap() {
+        short[] map = new short[256];
+        for (int i = 0; i < 256; i++) {
+            map[i] = (short) i;
+        }
+        return map;
+    }
+
+    private static short[] createZeroMap() {
+        short[] map = new short[256];
+        for (int i = 0; i < 256; i++) {
+            map[i] = 0;
+        }
+        return map;
     }
 }

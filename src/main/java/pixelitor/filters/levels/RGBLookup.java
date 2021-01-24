@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,10 @@
 
 package pixelitor.filters.levels;
 
-import pixelitor.filters.lookup.LookupFactory;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.image.LookupTable;
+import java.awt.image.ShortLookupTable;
 
 /**
  * Manages 3 lookup tables, corresponding to the
@@ -57,10 +57,7 @@ public class RGBLookup {
     public RGBLookup(GrayScaleLookup rgb,
                      GrayScaleLookup r,
                      GrayScaleLookup g,
-                     GrayScaleLookup b,
-                     GrayScaleLookup rg,
-                     GrayScaleLookup rb,
-                     GrayScaleLookup gb
+                     GrayScaleLookup b
     ) {
         allocateArrays();
 
@@ -69,18 +66,12 @@ public class RGBLookup {
 
             redLUT[i] = rgbMapped;
             redLUT[i] = r.map(redLUT[i]);
-            redLUT[i] = rg.map(redLUT[i]);
-            redLUT[i] = rb.map(redLUT[i]);
 
             greenLUT[i] = rgbMapped;
             greenLUT[i] = g.map(greenLUT[i]);
-            greenLUT[i] = rg.map(greenLUT[i]);
-            greenLUT[i] = gb.map(greenLUT[i]);
 
             blueLUT[i] = rgbMapped;
             blueLUT[i] = b.map(blueLUT[i]);
-            blueLUT[i] = rb.map(blueLUT[i]);
-            blueLUT[i] = gb.map(blueLUT[i]);
         }
     }
 
@@ -91,7 +82,17 @@ public class RGBLookup {
     }
 
     public LookupTable getLookupOp() {
-        return LookupFactory.createLookupFrom3Arrays(redLUT, greenLUT, blueLUT);
+        return createLUT(redLUT, greenLUT, blueLUT);
+    }
+
+    private static LookupTable createLUT(
+        short[] redMap, short[] greenMap, short[] blueMap) {
+
+        short[][] maps = new short[3][256];
+        maps[0] = redMap;
+        maps[1] = greenMap;
+        maps[2] = blueMap;
+        return new ShortLookupTable(0, maps);
     }
 
     public void initFromPosterize(int numRedLevels, int numGreenLevels, int numBlueLevels) {

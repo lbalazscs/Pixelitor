@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -261,7 +261,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state, boolean updateGUI) {
+    public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         GroupedRangeParamState grState = (GroupedRangeParamState) state;
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
@@ -275,7 +275,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(String savedValue) {
+    public void loadStateFrom(String savedValue) {
         StringTokenizer st = new StringTokenizer(savedValue, ",");
         for (RangeParam param : rangeParams) {
             String s = st.nextToken();

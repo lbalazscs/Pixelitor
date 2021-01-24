@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,11 @@
 
 package pixelitor.filters.curves;
 
+import pixelitor.filters.levels.Channel;
+
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.EventListener;
@@ -49,7 +48,8 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
         img = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 
-        toneCurves.setG2D(img.createGraphics());
+        Graphics2D g = img.createGraphics();
+        toneCurves.setG2D(g);
         toneCurves.setSize(img.getWidth(), img.getHeight());
         toneCurves.draw();
     }
@@ -75,7 +75,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         g.drawImage(img, 0, 0, null);
     }
 
-    private void stateChanged() {
+    public void stateChanged() {
         toneCurves.draw();
         repaint();
 
@@ -88,8 +88,8 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         return mousePos;
     }
 
-    public void setActiveCurve(ToneCurveType type) {
-        toneCurves.setActiveCurve(type);
+    public void setActiveCurve(Channel channel) {
+        toneCurves.setActiveCurve(channel);
         stateChanged();
     }
 
@@ -177,7 +177,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() ==2 && !e.isConsumed() && mouseKnotIndex >= 0) {
+        if (e.getClickCount() == 2 && !e.isConsumed() && mouseKnotIndex >= 0) {
             e.consume();
             toneCurves.getActiveCurve().deleteKnot(mouseKnotIndex);
             stateChanged();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.PointFilter;
+import pixelitor.AppContext;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
 import pixelitor.utils.Metric.DistanceFunction;
@@ -80,9 +81,21 @@ public class VoronoiFilter extends PointFilter {
 
         Random rand = ReseedSupport.reInitialize();
 
+        // Determining the number of cells is tricky because more
+        // cells mean better performance, but if a cell and all
+        // of its neighbors are empty, then the algorithm fails.
+        // Also the cells should be more or less square-shaped.
+        double est = Math.sqrt(numPoints / 10.0);
         double aspectRatio = width / (double) height;
-        int numVerGridCells = (int) (1 + Math.sqrt(numPoints / 10.0));
-        int numHorGridCells = (int) (1 + (numVerGridCells * aspectRatio));
+        int numVerGridCells;
+        int numHorGridCells;
+        if (aspectRatio > 1.0) {
+            numHorGridCells = calcNumGridCells(width, est);
+            numVerGridCells = calcNumGridCells(height, est / aspectRatio);
+        } else {
+            numHorGridCells = calcNumGridCells(width, est * aspectRatio);
+            numVerGridCells = calcNumGridCells(height, est);
+        }
 
         gridPixelWidth = width / (double) numHorGridCells;
         gridPixelHeight = height / (double) numVerGridCells;
@@ -156,6 +169,17 @@ public class VoronoiFilter extends PointFilter {
         return super.filter(src, dst);
     }
 
+    private int calcNumGridCells(int size, double estimated) {
+        int numGridCells;
+        if (estimated > size / 3.0) { // can happen for very small images
+            // the cell size should be at least 3 pixels
+            numGridCells = 1 + size / 3;
+        } else {
+            numGridCells = 1 + (int) estimated;
+        }
+        return numGridCells;
+    }
+
     public void debugGrid(BufferedImage img) {
         int width = img.getWidth();
         int height = img.getHeight();
@@ -202,6 +226,15 @@ public class VoronoiFilter extends PointFilter {
         int gridIndexY = (int) (y / gridPixelHeight);
         VorPoint closest = cells[gridIndexX][gridIndexY].findClosestPointTo(x, y,
             metric.asIntPrecisionDistance());
+        if (closest == null) {
+            // there wasn't a point in the cell or in its neighbours
+            if (AppContext.isDevelopment()) {
+                throw new IllegalStateException(String.format(
+                    "gridIndexX = %d, gridIndexY = %d", gridIndexX, gridIndexY));
+            }
+            return 0xFF_FF_FF_FF;
+        }
+
         return closest.color;
     }
 

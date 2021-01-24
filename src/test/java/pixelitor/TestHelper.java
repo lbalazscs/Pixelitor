@@ -396,6 +396,9 @@ public class TestHelper {
         AppContext.setUnitTestingMode();
         Messages.setMsgHandler(new TestMessageHandler());
 
+        // make sure that the current tool is not null
+        Tools.setCurrentTool(Tools.BRUSH);
+
         History.setUndoLevels(15);
         Utils.makeSureAssertionsAreEnabled();
 
