@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
@@ -42,11 +41,11 @@ public class JHPerspective extends ParametrizedFilter {
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
     public JHPerspective() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                northWest, northEast, southWest, southEast,
-                edgeAction, interpolation
+            northWest, northEast, southWest, southEast,
+            edgeAction, interpolation
         );
     }
 
@@ -62,17 +61,16 @@ public class JHPerspective extends ParametrizedFilter {
         float southEastY = southEast.getRelativeY();
 
         var filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
-                southEastX, southEastY, southWestX, southWestY, NAME);
+            southEastX, southEastY, southWestX, southWestY, NAME);
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new GridAdjustmentPanel(this, dr, false, ShowOriginal.YES);
+        return new GridAdjustmentPanel(this, dr, false, true);
     }
 }

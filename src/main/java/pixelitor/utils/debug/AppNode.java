@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,19 +30,19 @@ public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.get());
 
-        addString("Pixelitor Version", Pixelitor.VERSION_NUMBER);
+        addString("version", Pixelitor.VERSION_NUMBER);
         add(DebugNodes.createSystemNode());
-        add(Tools.getCurrent().getDebugNode());
-        add(History.getDebugNode());
+        add(Tools.getCurrent().createDebugNode());
+        add(History.createDebugNode());
 
         addImageNodes();
     }
 
     private void addImageNodes() {
-        addInt("Number of Open Images", OpenImages.getNumOpenImages());
+        addInt("# open images", OpenImages.getNumOpenImages());
 
         OpenImages.forEachView(view -> {
-            String prefix = view.isActive() ? "ACTIVE Image - " : "Image - ";
+            String prefix = view.isActive() ? "active image - " : "image - ";
             add(DebugNodes.createViewNode(prefix + view.getName(), view));
         });
     }

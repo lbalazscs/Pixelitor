@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,16 +25,7 @@ import pixelitor.utils.SubtaskProgressTracker;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,38 +46,41 @@ public class PXCFormat {
     private PXCFormat() {
     }
 
-    public static Composition read(File file) throws NotPxcFormatException {
+    public static Composition read(File file) throws BadPxcFormatException {
         long fileSize = file.length();
         mainPT = new StatusBarProgressTracker(
-                "Reading " + file.getName(), (int) fileSize);
+            "Reading " + file.getName(), (int) fileSize);
         Composition comp = null;
         try (InputStream is = new ProgressTrackingInputStream(
-                new FileInputStream(file), mainPT)) {
+            new FileInputStream(file), mainPT)) {
+
             int firstByte = is.read();
             int secondByte = is.read();
             if (firstByte == 0xAB && secondByte == 0xC4) {
                 // identification bytes OK
             } else {
-                throw new NotPxcFormatException(file.getName() + " is not in the pxc format.");
+                throw new BadPxcFormatException(file.getName()
+                    + " is not in the pxc format.");
             }
             int versionByte = is.read();
             if (versionByte == 0) {
-                throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, " +
-                        "it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
+                throw new BadPxcFormatException(file.getName()
+                    + " is in an obsolete pxc format, "
+                    + "it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
             }
             if (versionByte == 1) {
-                throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, " +
-                        "it can only be opened in the old beta Pixelitor version 0.9.8");
+                throw new BadPxcFormatException(file.getName()
+                    + " is in an obsolete pxc format, "
+                    + "it can only be opened in the old beta Pixelitor version 0.9.8");
             }
             if (versionByte == 2) {
-                throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, " +
-                        "it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
+                throw new BadPxcFormatException(file.getName()
+                    + " is in an obsolete pxc format, "
+                    + "it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
             }
-            if (versionByte > 3) {
-                throw new NotPxcFormatException(file.getName() + " has unknown version byte " + versionByte);
+            if (versionByte > CURRENT_PXC_VERSION_NUMBER) {
+                throw new BadPxcFormatException(file.getName()
+                    + " has unknown version byte " + versionByte);
             }
 
             try (GZIPInputStream gs = new GZIPInputStream(is)) {
@@ -94,7 +88,7 @@ public class PXCFormat {
                     comp = (Composition) ois.readObject();
                     mainPT.finished();
                     mainPT = null;
-                    
+
                     // file is transient in Composition because the pxc file can be renamed
                     comp.setFile(file);
                 }
@@ -106,16 +100,16 @@ public class PXCFormat {
         return comp;
     }
 
-    public static void write(Composition comp, File f) {
+    public static void write(Composition comp, File file) {
         mainPT = new StatusBarProgressTracker(
-                "Writing " + f.getName(), 100);
+            "Writing " + file.getName(), 100);
         int numImages = comp.calcNumImages();
         if (numImages > 0) {
             workRatioForOneImage = 1.0 / numImages;
         } else {
             workRatioForOneImage = -1;
         }
-        try (FileOutputStream fos = new FileOutputStream(f)) {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(new byte[]{(byte) 0xAB, (byte) 0xC4, CURRENT_PXC_VERSION_NUMBER});
 
             try (GZIPOutputStream gz = new GZIPOutputStream(fos)) {

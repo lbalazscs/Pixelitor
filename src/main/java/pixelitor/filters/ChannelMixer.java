@@ -66,8 +66,7 @@ public class ChannelMixer extends ParametrizedFilter {
         // DO require explicit triggering because they are simple JButtons
     };
 
-    private final Action swapRedGreen
-            = new AbstractAction("Swap Red-Green") {
+    private final Action swapRedGreen = new AbstractAction("Swap Red-Green") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(0);
@@ -277,27 +276,27 @@ public class ChannelMixer extends ParametrizedFilter {
     };
 
     private final Action[] presets = {swapRedGreen, swapRedBlue, swapGreenBlue,
-            shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
-            averageBW, luminosityBW, sepia};
+        shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
+        averageBW, luminosityBW, sepia};
     private boolean monochrome = false;
 
     public ChannelMixer() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var normalize = new FilterButtonModel("Normalize", normalizeAction,
-                "Makes sure that the sum of the channel contributions is 100%");
+            "Makes sure that the sum of the channel contributions is 100%");
         FilterParam[] params = {
-                redFromRed,
-                redFromGreen,
-                redFromBlue,
+            redFromRed,
+            redFromGreen,
+            redFromBlue,
 
-                greenFromRed,
-                greenFromGreen,
-                greenFromBlue,
+            greenFromRed,
+            greenFromGreen,
+            greenFromBlue,
 
-                blueFromRed,
-                blueFromGreen,
-                blueFromBlue,
+            blueFromRed,
+            blueFromGreen,
+            blueFromBlue,
         };
         BooleanSupplier ifMonochrome = () -> monochrome;
         redFromRed.linkWith(greenFromRed, ifMonochrome);
@@ -309,15 +308,14 @@ public class ChannelMixer extends ParametrizedFilter {
         redFromGreen.linkWith(greenFromGreen, ifMonochrome);
         redFromGreen.linkWith(blueFromGreen, ifMonochrome);
 
-        setParams(params)
-                .withAction(normalize);
+        setParams(params).withAction(normalize);
 
         // add this extra action, but after the standard "Randomize Settings"
         var randomizeAndNormalize = new FilterButtonModel("Randomize and Normalize",
-                () -> {
-                    paramSet.randomize();
-                    normalizeAction.run();
-                }, "Randomizes settings and normalizes the brightness");
+            () -> {
+                paramSet.randomize();
+                normalizeAction.run();
+            }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
     }
@@ -427,9 +425,9 @@ public class ChannelMixer extends ParametrizedFilter {
             }
         } else { // not packed int
             var bandCombineOp = new BandCombineOp(new float[][]{
-                    {rfr, rfg, rfb},
-                    {gfr, gfg, gfb},
-                    {bfr, bfg, bfb}
+                {rfr, rfg, rfb},
+                {gfr, gfg, gfb},
+                {bfr, bfg, bfb}
             }, null);
             var srcRaster = src.getRaster();
             var destRaster = dest.getRaster();

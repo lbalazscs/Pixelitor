@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
@@ -49,15 +48,15 @@ public class JHCrystallize extends ParametrizedFilter {
     private CrystallizeFilter filter;
 
     public JHCrystallize() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                size.withAdjustedRange(0.2),
-                edgeThickness,
-                gridType,
-                randomness,
-                edgeColor,
-                fadeEdges
+            size.withAdjustedRange(0.2),
+            edgeThickness,
+            gridType,
+            randomness,
+            edgeColor,
+            fadeEdges
         ).withAction(reseedByCalling(() -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
@@ -77,7 +76,6 @@ public class JHCrystallize extends ParametrizedFilter {
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.isChecked());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.SliceFilter;
 
 import java.awt.image.BufferedImage;
@@ -35,27 +34,27 @@ public class Slice extends ParametrizedFilter {
     private final RangeParam size = new RangeParam("Size", 1, 75, 300);
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
     private final GroupedRangeParam shift = new GroupedRangeParam(
-            "Shift Effect (Size %)", 0, 0, 100, false);
+        "Shift Effect (Size %)", 0, 0, 100, false);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
     private SliceFilter filter;
 
     public Slice() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                size.withAdjustedRange(0.25),
-                offset.withAdjustedRange(0.25),
-                shift,
-                angle,
-                edgeAction
+            size.withAdjustedRange(0.25),
+            offset.withAdjustedRange(0.25),
+            shift,
+            angle,
+            edgeAction
         );
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(filter == null) {
+        if (filter == null) {
             filter = new SliceFilter(NAME);
         }
 
@@ -67,7 +66,6 @@ public class Slice extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR); // no difference
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

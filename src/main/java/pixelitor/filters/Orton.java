@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import com.jhlabs.composite.MultiplyComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -37,11 +36,11 @@ public class Orton extends ParametrizedFilter {
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 100);
 
     public Orton() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                blurRadius.withAdjustedRange(0.01),
-                amount
+            blurRadius.withAdjustedRange(0.01),
+            amount
         );
     }
 

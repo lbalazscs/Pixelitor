@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.GlowFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -36,11 +35,11 @@ public class JHGlow extends ParametrizedFilter {
     private GlowFilter filter;
 
     public JHGlow() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                amount,
-                softness
+            amount,
+            softness
         );
     }
 
@@ -63,8 +62,6 @@ public class JHGlow extends ParametrizedFilter {
         filter.setAmount(amountValue);
         filter.setRadius(softness.getValueAsFloat());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,10 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterButtonModel;
+import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.layers.Drawable;
 
 import java.awt.Color;
@@ -41,7 +44,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
     private FourColorFilter filter;
 
     public JHFourColorGradient() {
-        super(ShowOriginal.NO);
+        super(false);
 
         var darkenAll = new FilterButtonModel("Darker",
             this::darkenColors, "Darken all colors");
@@ -81,12 +84,11 @@ public class JHFourColorGradient extends ParametrizedFilter {
         filter.setColorSW(southWestParam.getColor().getRGB());
         filter.setColorSE(southEastParam.getColor().getRGB());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new GridAdjustmentPanel(this, dr, true, ShowOriginal.NO);
+        return new GridAdjustmentPanel(this, dr, true, false);
     }
 }

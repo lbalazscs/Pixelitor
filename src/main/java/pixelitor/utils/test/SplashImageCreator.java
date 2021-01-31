@@ -217,7 +217,7 @@ public class SplashImageCreator {
     }
 
     private static ImageLayer addNewLayer(Composition comp, String name) {
-        ImageLayer imageLayer = comp.addNewEmptyLayer(name, false);
+        ImageLayer imageLayer = comp.addNewEmptyImageLayer(name, false);
         imageLayer.setName(name, true);
         return imageLayer;
     }

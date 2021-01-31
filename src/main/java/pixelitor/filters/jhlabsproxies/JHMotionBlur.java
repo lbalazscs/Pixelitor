@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,25 +95,25 @@ public class JHMotionBlur extends ParametrizedFilter {
     }
 
     public JHMotionBlur(Mode mode) {
-        super(ShowOriginal.YES);
+        super(true);
 
         this.mode = mode;
 
-        if(mode == MOTION_BLUR) {
+        if (mode == MOTION_BLUR) {
             setParams(
-                    distance,
-                    angle,
-                    method,
-                    hpSharpening
+                distance,
+                angle,
+                method,
+                hpSharpening
             );
 
-        } else if(mode == SPIN_ZOOM_BLUR) {
+        } else if (mode == SPIN_ZOOM_BLUR) {
             setParams(
-                    rotation,
-                    zoom,
-                    center,
-                    method,
-                    hpSharpening
+                rotation,
+                zoom,
+                center,
+                method,
+                hpSharpening
             );
         } else {
             throw new IllegalStateException("should not get here");
@@ -125,11 +125,11 @@ public class JHMotionBlur extends ParametrizedFilter {
         int distanceValue = distance.getValue();
         float zoomValue = zoom.getPercentageValF();
         float rotationValue = rotation.getValueInRadians();
-        if(mode == MOTION_BLUR) {
+        if (mode == MOTION_BLUR) {
             if (distanceValue == 0) {
                 return src;
             }
-        } else if(mode == SPIN_ZOOM_BLUR) {
+        } else if (mode == SPIN_ZOOM_BLUR) {
             if (zoomValue == 0.0f && rotationValue == 0.0f) {
                 return src;
             }

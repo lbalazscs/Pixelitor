@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -284,12 +284,12 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         userChangedSelection = true;
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("edits", this);
 
         for (int i = 0; i < getSize(); i++) {
             PixelitorEdit edit = getElementAt(i);
-            node.add(edit.getDebugNode());
+            node.add(edit.createDebugNode());
         }
 
         return node;

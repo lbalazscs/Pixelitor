@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.GlintFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -43,21 +42,21 @@ public class JHGlint extends ParametrizedFilter {
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
     private final GradientParam colors = new GradientParam("Colors",
-            new float[]{0.0f, 0.5f, 1.0f},
-            new Color[]{WHITE, WHITE, WHITE});
+        new float[]{0.0f, 0.5f, 1.0f},
+        new Color[]{WHITE, WHITE, WHITE});
 
     private GlintFilter filter;
 
     public JHGlint() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                threshold,
-                coverage,
-                intensity,
-                lengthParam, // if we adjust to the max of image, render times become unbearable for large images
-                blur,
-                colors
+            threshold,
+            coverage,
+            intensity,
+            lengthParam, // slow for large images if it's adjusted to the image size
+            blur,
+            colors
 //                glintOnly
         );
     }
@@ -81,7 +80,6 @@ public class JHGlint extends ParametrizedFilter {
         filter.setBlur(blur.getValueAsFloat());
         filter.setColormap(colors.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

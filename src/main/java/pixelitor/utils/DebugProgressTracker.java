@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,12 +91,12 @@ public class DebugProgressTracker implements ProgressTracker {
         long totalDuration = System.currentTimeMillis() - startTimeMillis;
 
         callInfos.stream()
-                .map(callInfo -> callInfo.asString(totalDuration))
-                .map(s -> s.replace("pixelitor.", ""))
-                .map(s -> s.replace("filters.", ""))
-                .map(s -> s.replace("jhlabsproxies.", ""))
-                .map(s -> s.replace("utils.", ""))
-                .forEach(System.out::println);
+            .map(callInfo -> callInfo.asString(totalDuration))
+            .map(s -> s.replace("pixelitor.", ""))
+            .map(s -> s.replace("filters.", ""))
+            .map(s -> s.replace("jhlabsproxies.", ""))
+            .map(s -> s.replace("utils.", ""))
+            .forEach(System.out::println);
     }
 
     private void log(String method) {
@@ -134,14 +134,14 @@ public class DebugProgressTracker implements ProgressTracker {
             double durationPercentage = (duration * 100.0) / totalDuration;
 
             String whatWithPercent = String
-                    .format("%s (%.1f%%=>%.2fu)", method, durationPercentage,
-                            (durationPercentage / 100.0) * totalUnits);
+                .format("%s (%.1f%%=>%.2fu)", method, durationPercentage,
+                    (durationPercentage / 100.0) * totalUnits);
 
             return String
-                    .format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
-                            timeSeconds, durationSeconds, whatWithPercent,
-                            ste.getClassName(), ste.getMethodName(),
-                            ste.getFileName(), ste.getLineNumber());
+                .format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
+                    timeSeconds, durationSeconds, whatWithPercent,
+                    ste.getClassName(), ste.getMethodName(),
+                    ste.getFileName(), ste.getLineNumber());
         }
     }
 }

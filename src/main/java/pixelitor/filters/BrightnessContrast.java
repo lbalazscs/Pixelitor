@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -38,7 +37,7 @@ public class BrightnessContrast extends ParametrizedFilter {
     private final RangeParam contrastParam = new RangeParam(CONTRAST, -100, 0, 100);
 
     public BrightnessContrast() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             brightnessParam,
@@ -55,7 +54,7 @@ public class BrightnessContrast extends ParametrizedFilter {
         // prepare brightness
         double brightnessValue = brightnessParam.getValue() / 10.0;
         double pow = -brightnessValue + 1;
-        if(brightnessValue > 0) {
+        if (brightnessValue > 0) {
             pow = 1.0 / (brightnessValue + 1);
         }
         double normalize = Math.pow(255, pow - 1);

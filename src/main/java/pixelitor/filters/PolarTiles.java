@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.DialogParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
@@ -51,20 +46,20 @@ public class PolarTiles extends ParametrizedFilter {
     private PolarTilesFilter filter;
 
     public PolarTiles() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var reseedRandomness = reseedNoise("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
         setParams(
-                center,
-                numAngDivisions,
-                numRadDivisions,
-                curvature.withAdjustedRange(0.02),
-                rotateEffect,
-                randomness.withAction(reseedRandomness),
-                new DialogParam("Background", zoom, rotateImage),
-                edgeAction,
-                interpolation
+            center,
+            numAngDivisions,
+            numRadDivisions,
+            curvature.withAdjustedRange(0.02),
+            rotateEffect,
+            randomness.withAction(reseedRandomness),
+            new DialogParam("Background", zoom, rotateImage),
+            edgeAction,
+            interpolation
         );
     }
 
@@ -85,7 +80,6 @@ public class PolarTiles extends ParametrizedFilter {
         filter.setCurvature(curvature.getValueAsDouble());
         filter.setRandomness(randomness.getPercentageValF());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

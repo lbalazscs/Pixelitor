@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pd.CannyEdgeDetector;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 
@@ -28,26 +27,28 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Utils.BYTES_IN_1_MEGABYTE;
+
 /**
  * Canny edge detector - see http://en.wikipedia.org/wiki/Canny_edge_detector
  * based on CannyEdgeDetector by Tom Gibara - http://www.tomgibara.com/computer-vision/canny-edge-detector
  */
 public class Canny extends ParametrizedFilter {
     private final RangeParam lowThreshold = new RangeParam(
-            "Low Threshold", 1, 250, 961);
+        "Low Threshold", 1, 250, 961);
     private final RangeParam highThreshold = new RangeParam(
-            "High Threshold", 1, 750, 961);
+        "High Threshold", 1, 750, 961);
     private final RangeParam gaussianKernelWidth = new RangeParam(
-            "Gaussian Kernel Width", 2, 16, 50);
+        "Gaussian Kernel Width", 2, 16, 50);
     private final RangeParam gaussianKernelRadius = new RangeParam(
-            "Gaussian Kernel Radius", 0, 2, 10);
+        "Gaussian Kernel Radius", 0, 2, 10);
     private final BooleanParam contrastNormalized = new BooleanParam(
-            "Contrast Normalized", false);
+        "Contrast Normalized", false);
     private final BooleanParam invert = new BooleanParam(
-            "Invert", false);
+        "Invert", false);
 
     public Canny() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             lowThreshold,
@@ -64,7 +65,7 @@ public class Canny extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(gaussianKernelRadius.getValueAsFloat() <= 0.1f) {
+        if (gaussianKernelRadius.getValueAsFloat() <= 0.1f) {
             // return a black image to avoid exceptions
             Graphics2D g = dest.createGraphics();
             g.setColor(invert.isChecked() ? Color.WHITE : Color.BLACK);
@@ -108,10 +109,10 @@ public class Canny extends ParametrizedFilter {
     private static void showNotEnoughMemoryDialog(long estimatedMemoryMB,
                                                   long availableMemoryMB) {
         String msg = "This image is too large for the Canny edge detection algorithm.\n" +
-                "Press Cancel in the following dialog and try with smaller images.\n" +
-                "Available memory is " + availableMemoryMB +
-                " megabytes, memory needed for this image is " + estimatedMemoryMB
-                + " megabytes.";
+            "Press Cancel in the following dialog and try with smaller images.\n" +
+            "Available memory is " + availableMemoryMB +
+            " megabytes, memory needed for this image is " + estimatedMemoryMB
+            + " megabytes.";
         Messages.showInfo("Not enough memory", msg);
     }
 
@@ -120,7 +121,7 @@ public class Canny extends ParametrizedFilter {
         int height = src.getHeight();
         long numPixels = (long) width * height;
         // 6 arrays with 4-byte data type
-        long estimatedMemoryMB = 6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE;
+        long estimatedMemoryMB = 6 * numPixels * 4 / BYTES_IN_1_MEGABYTE;
         // 1.8 was found experimentally, this is still needed to prevent OutOfMemory errors
         estimatedMemoryMB = (long) (estimatedMemoryMB * 1.8);
         return estimatedMemoryMB;

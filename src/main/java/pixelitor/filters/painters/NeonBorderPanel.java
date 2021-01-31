@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,7 +72,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
     @Override
     public boolean isSetToDefault() {
         return super.isSetToDefault()
-                && innerColor.equals(defaultInnerColor);
+            && innerColor.equals(defaultInnerColor);
     }
 
     @Override

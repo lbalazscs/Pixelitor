@@ -72,7 +72,7 @@ public class ChaosGame extends ParametrizedFilter {
     private final BooleanParam showPoly = new BooleanParam("Show Polygon", false, IGNORE_RANDOMIZE);
 
     public ChaosGame() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
             numVerticesParam,

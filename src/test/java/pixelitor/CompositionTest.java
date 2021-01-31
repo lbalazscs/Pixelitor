@@ -69,7 +69,7 @@ class CompositionTest {
             .secondLayerIsActive();
 
         // add new layer bellow the active layer
-        comp.addNewEmptyLayer("newLayer 1", true);
+        comp.addNewEmptyImageLayer("newLayer 1", true);
 
         comp.getActiveLayer().createUI();
         assertThat(comp)
@@ -79,7 +79,7 @@ class CompositionTest {
             .secondLayerIsActive();
 
         // add new layer above the active layer
-        comp.addNewEmptyLayer("newLayer 2", false);
+        comp.addNewEmptyImageLayer("newLayer 2", false);
 
         comp.getActiveLayer().createUI();
         assertThat(comp)

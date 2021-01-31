@@ -86,7 +86,7 @@ public class AffectedArea {
             (int) saveWidth, (int) saveHeight);
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("affected area", this);
 
         node.addDouble("min x", minX);

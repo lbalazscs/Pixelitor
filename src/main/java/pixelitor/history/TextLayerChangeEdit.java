@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,16 +28,17 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the editing of a text layer
  */
 public class TextLayerChangeEdit extends PixelitorEdit {
-    private TextSettings backupTextSettings;
+    private TextSettings backupSettings;
     private TextLayer layer;
 
-    public TextLayerChangeEdit(Composition comp, TextLayer layer, TextSettings oldTextSettings) {
+    public TextLayerChangeEdit(Composition comp, TextLayer layer,
+                               TextSettings backupSettings) {
         super("Edit Text Layer", comp);
 
-        backupTextSettings = oldTextSettings;
+        this.backupSettings = backupSettings;
         this.layer = layer;
 
-        if(oldTextSettings == layer.getSettings()) {
+        if (backupSettings == layer.getSettings()) {
             throw new IllegalArgumentException("same settings");
         }
     }
@@ -58,8 +59,8 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
     private void swapTextSettings() {
         TextSettings tmp = layer.getSettings();
-        layer.setSettings(backupTextSettings);
-        backupTextSettings = tmp;
+        layer.setSettings(backupSettings);
+        backupSettings = tmp;
 
         layer.updateLayerName();
 

@@ -35,12 +35,12 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ZoomMenu extends PMenu {
     public static final String ACTUAL_PIXELS_TOOLTIP = format(
-            "Set the zoom level to 100%% (%s)",
-            Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
+        "Set the zoom level to 100%% (%s)",
+        Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
 
     public static final String FIT_SPACE_TOOLTIP = format(
-            "Display the image at the largest zoom that can fit in the available space (%s)",
-            Utils.keystrokeAsText(FIT_SPACE_KEY));
+        "Display the image at the largest zoom that can fit in the available space (%s)",
+        Utils.keystrokeAsText(FIT_SPACE_KEY));
 
     private static final ButtonGroup radioGroup = new ButtonGroup();
 
@@ -92,7 +92,6 @@ public class ZoomMenu extends PMenu {
     }
 
     public static void setupZoomKeys(JComponent c) {
-        // add other key bindings - see http://stackoverflow.com/questions/15605109/java-keybinding-plus-key
         InputMap inputMap = c.getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = c.getActionMap();
         inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards

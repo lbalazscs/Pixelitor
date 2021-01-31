@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,19 +41,19 @@ public class Magnify extends ParametrizedFilter {
     private MagnifyFilter filter;
 
     public Magnify() {
-        super(ShowOriginal.YES);
+        super(true);
 
         showAffectedArea();
 
         setParams(
-                magnification,
-                outerRadius.withAdjustedRange(1.0),
-                outerInnerRadiusRatio,
-                center,
-                shape,
-                invert,
-                edgeAction,
-                interpolation
+            magnification,
+            outerRadius.withAdjustedRange(1.0),
+            outerInnerRadiusRatio,
+            center,
+            shape,
+            invert,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -88,10 +88,9 @@ public class Magnify extends ParametrizedFilter {
         filter.calcAbsoluteCenter(src);
 
         filter.setShape(shape.getValue());
+
         dest = filter.filter(src, dest);
-
         setAffectedAreaShapes(filter.getAffectedAreaShapes());
-
         return dest;
     }
 }

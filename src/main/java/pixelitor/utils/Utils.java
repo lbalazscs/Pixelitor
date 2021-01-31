@@ -47,7 +47,7 @@ import static java.lang.String.format;
  */
 public final class Utils {
     private static final int BYTES_IN_1_KILOBYTE = 1_024;
-    private static final int BYTES_IN_1_MEGABYTE = 1_048_576;
+    public static final int BYTES_IN_1_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
 
     private Utils() {

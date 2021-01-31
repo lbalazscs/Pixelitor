@@ -332,6 +332,7 @@ public class PenTool extends Tool {
         if (newComp.isActive()) {
             // reloading is asynchronous, the view might not be active anymore
             setPathFromComp(newComp);
+            mode.compReplaced(newComp);
         }
     }
 
@@ -480,8 +481,8 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.add(mode.createDebugNode());
 

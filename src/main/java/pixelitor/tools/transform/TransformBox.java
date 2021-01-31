@@ -606,14 +606,14 @@ public class TransformBox implements ToolWidget {
         return rot;
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("transform box", this);
 
-        node.add(nw.getDebugNode());
-        node.add(ne.getDebugNode());
-        node.add(se.getDebugNode());
-        node.add(sw.getDebugNode());
-        node.add(rot.getDebugNode());
+        node.add(nw.createDebugNode());
+        node.add(ne.createDebugNode());
+        node.add(se.createDebugNode());
+        node.add(sw.createDebugNode());
+        node.add(rot.createDebugNode());
 
         node.addDouble("rotated width", rotatedImSize.getWidth());
         node.addDouble("rotated height", rotatedImSize.getHeight());

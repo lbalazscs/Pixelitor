@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.SmartBlurFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
@@ -40,12 +39,12 @@ public class JHSmartBlur extends ParametrizedFilter {
     private SmartBlurFilter filter;
 
     public JHSmartBlur() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                radiusParam,
-                threshold,
-                hpSharpening
+            radiusParam,
+            threshold,
+            hpSharpening
         );
     }
 
@@ -63,7 +62,7 @@ public class JHSmartBlur extends ParametrizedFilter {
         // The SmartBlurFilter API allows setting the horizontal and vertical
         // radii separately, but the implementation seems to be buggy
         filter.setRadius(radius);
-        
+
         filter.setThreshold(threshold.getValue());
 
         dest = filter.filter(src, dest);

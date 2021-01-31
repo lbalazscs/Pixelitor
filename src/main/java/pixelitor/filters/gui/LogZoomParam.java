@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,14 +20,14 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * A range with a logarithmic scale, specialized for fractal zooming
+ * A range with a logarithmic scale
  */
 public class LogZoomParam extends RangeParam {
     /**
-     *  The values are on the logarithmic scale (base 10),
-     *  and multiplied by 100 for continuous zooming.
-     *  Example: the 100-10000 zoom range corresponds to 2-4 on
-     *  the logarithmic scale, and must be given as 200-400
+     * The values are on the logarithmic scale (base 10),
+     * and multiplied by 100 for continuous zooming.
+     * Example: the 100-10000 zoom range corresponds to 2-4 on
+     * the logarithmic scale, and must be given as 200-400
      */
     public LogZoomParam(String name, int min, int def, int max) {
         super(name, min, def, max);
@@ -42,7 +42,7 @@ public class LogZoomParam extends RangeParam {
     }
 
     public double getZoomValue() {
-        return Math.pow(10.0, getValueAsDouble()/100.0);
+        return Math.pow(10.0, getValueAsDouble() / 100.0);
     }
 
     public double getZoomRatio() {

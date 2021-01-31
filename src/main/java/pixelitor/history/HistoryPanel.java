@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 
 /**
- * The UI panel of history: the history list in a scroll pane
- * and the undo/redo buttons bellow it
+ * The history panel.
  */
 public class HistoryPanel extends JPanel {
     private final JButton undoButton;
@@ -42,13 +41,10 @@ public class HistoryPanel extends JPanel {
         add(new JScrollPane(historyList), CENTER);
         JPanel buttonsPanel = new JPanel(new FlowLayout());
 
-        Icon undoIcon = Icons.getUndoIcon();
-        Icon redoIcon = Icons.getRedoIcon();
-
-        undoButton = createButton(undoIcon, "undo",
-                "AbstractUndoableEdit.undoText", History.UNDO_ACTION);
-        redoButton = createButton(redoIcon, "redo",
-                "AbstractUndoableEdit.redoText", History.REDO_ACTION);
+        undoButton = createButton(Icons.getUndoIcon(), "undo",
+            "AbstractUndoableEdit.undoText", History.UNDO_ACTION);
+        redoButton = createButton(Icons.getRedoIcon(), "redo",
+            "AbstractUndoableEdit.redoText", History.REDO_ACTION);
 
         History.addUndoableEditListener(e -> updateButtonsEnabledState());
         updateButtonsEnabledState();
@@ -58,7 +54,9 @@ public class HistoryPanel extends JPanel {
         add(buttonsPanel, SOUTH);
     }
 
-    private static JButton createButton(Icon icon, String name, String tooltipResource, ActionListener actionListener) {
+    private static JButton createButton(Icon icon, String name,
+                                        String tooltipResource,
+                                        ActionListener actionListener) {
         JButton b = new JButton(icon);
         b.setName(name);
         b.setToolTipText(UIManager.getString(tooltipResource));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,9 @@ import com.jhlabs.image.PointFilter;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * A common superclass for the Mandelbrot and Julia fractal implementations.
+ */
 public abstract class ComplexFractalImpl extends PointFilter {
     // the bounds in the complex space
     private final double cxMin;
@@ -48,7 +51,9 @@ public abstract class ComplexFractalImpl extends PointFilter {
 
     protected int[] colors;
 
-    protected ComplexFractalImpl(String filterName, double cxMin, double cxMax, double cyMin, double cyMax) {
+    protected ComplexFractalImpl(String filterName,
+                                 double cxMin, double cxMax,
+                                 double cyMin, double cyMax) {
         super(filterName);
 
         this.cxMin = cxMin;
@@ -79,20 +84,20 @@ public abstract class ComplexFractalImpl extends PointFilter {
 
         // if the zoomed range would go outside of
         // the default c range, then adjust it back
-        if(cxZoomedMax > cxMax) {
+        if (cxZoomedMax > cxMax) {
             cxStart = cxZoomedMin - (cxZoomedMax - cxMax);
-        } else if(cxZoomedMin < cxMin) {
+        } else if (cxZoomedMin < cxMin) {
             cxStart = cxMin;
         } else {
-            cxStart =  cxZoomedMin;
+            cxStart = cxZoomedMin;
         }
 
-        if(cyZoomedMax > cyMax) {
+        if (cyZoomedMax > cyMax) {
             cyStart = cyZoomedMin - (cyZoomedMax - cyMax);
-        } else if(cyZoomedMin < cyMin) {
+        } else if (cyZoomedMin < cyMin) {
             cyStart = cyMin;
         } else {
-            cyStart =  cyZoomedMin;
+            cyStart = cyZoomedMin;
         }
 
         return super.filter(src, dst);
@@ -119,6 +124,7 @@ public abstract class ComplexFractalImpl extends PointFilter {
         return it;
     }
 
+    // the unoptimized version of the iterate, where the algorithm is more clear
     private static int iterateUnOpt(double x, double y, double cx, double cy, int maxIt) {
         int it = maxIt;
         while (x * x + y * y < 4 && it > 0) {

@@ -50,6 +50,12 @@ public interface PenToolMode {
 
     void imCoordsChanged(AffineTransform at, Composition comp);
 
+    default void compReplaced(Composition newComp) {
+        // do nothing by default
+    }
+
+    ;
+
     String getToolMessage();
 
     void start();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,11 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.GRAY;
@@ -67,12 +66,12 @@ public class JHPixelate extends ParametrizedFilter {
     private BrickBlockFilter brickBlockFilter;
 
     public JHPixelate() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                cellSizeParam.withAdjustedRange(0.2),
-                styleParam,
-                typeParam
+            cellSizeParam.withAdjustedRange(0.2),
+            styleParam,
+            typeParam
         );
     }
 
@@ -140,7 +139,7 @@ public class JHPixelate extends ParametrizedFilter {
 
         if (type == TYPE_SQUARE) {
             ImageUtils.drawGrid(GRAY, g, width, height,
-                    gapWidth, cellSize, gapWidth, cellSize, false);
+                gapWidth, cellSize, gapWidth, cellSize, false);
         } else if (type == TYPE_BRICK) {
             ImageUtils.drawBrickGrid(GRAY, g, cellSize, width, height);
         }

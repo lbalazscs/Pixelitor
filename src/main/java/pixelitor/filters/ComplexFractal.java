@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,11 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.LogZoomParam;
+import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -53,21 +56,21 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     }, IGNORE_RANDOMIZE);
 
     protected ComplexFractal(int defaultIterations, float zoomX) {
-        super(ShowOriginal.NO);
+        super(false);
 
         iterationsParam = new RangeParam.Builder("Iterations")
             .min(2)
             .def(defaultIterations)
             .max(998)
             .randomizePolicy(IGNORE_RANDOMIZE)
-                .build();
+            .build();
 
         zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
         setParams(zoomParam,
-                zoomCenter.withDecimalPlaces(2),
-                iterationsParam,
-                colorsParam,
-                aaParam);
+            zoomCenter.withDecimalPlaces(2),
+            iterationsParam,
+            colorsParam,
+            aaParam);
     }
 
     @Override
@@ -78,7 +81,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         } else if (aa == AA_2x2) {
             // transform an image with double size, then scale it down
             BufferedImage bigSrc = new BufferedImage(
-                    src.getWidth() * 2, src.getHeight() * 2, src.getType());
+                src.getWidth() * 2, src.getHeight() * 2, src.getType());
             BufferedImage bigDest = doTransformAA(bigSrc, null);
             bigSrc.flush();
             Graphics2D g2 = dest.createGraphics();
@@ -102,27 +105,27 @@ public abstract class ComplexFractal extends ParametrizedFilter {
             for (int it = 0; it <= maxIterations; it++) {
                 float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
-                        maxIterations / (float) it,
-                        0.9f,
-                        it > 0 ? bri : 0);
+                    maxIterations / (float) it,
+                    0.9f,
+                    it > 0 ? bri : 0);
             }
         } else if (colorsParam.getValue() == COLORS_CONTINUOUS) {
             double normalizer = Math.log(maxIterations + 1);
             for (int it = 0; it <= maxIterations; it++) {
                 float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
-                        (float) it / maxIterations,
-                        0.9f,
-                        it > 0 ? bri : 0);
+                    (float) it / maxIterations,
+                    0.9f,
+                    it > 0 ? bri : 0);
             }
         } else if (colorsParam.getValue() == COLORS_BLUES) {
             double normalizer = Math.log(maxIterations + 1);
             for (int it = 0; it <= maxIterations; it++) {
                 float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
-                        0.5f + (float) it / (maxIterations * 10),
-                        (float) it / maxIterations,
-                        it > 0 ? bri : 0);
+                    0.5f + (float) it / (maxIterations * 10),
+                    (float) it / maxIterations,
+                    it > 0 ? bri : 0);
             }
         } else {
             throw new IllegalStateException("value = " + colorsParam.getValue());

@@ -326,7 +326,7 @@ public class Composition implements Serializable {
         new LayerAdder(this).compInitMode().add(newLayer);
     }
 
-    public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
+    public ImageLayer addNewEmptyImageLayer(String name, boolean bellowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         new LayerAdder(this)
             .withHistory("New Empty Layer")
@@ -337,10 +337,10 @@ public class Composition implements Serializable {
         return newLayer;
     }
 
-    public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String historyName) {
+    public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String editName) {
         var newLayer = ImageLayer.fromExternalImage(image, this, layerName);
         new LayerAdder(this)
-            .withHistory(historyName)
+            .withHistory(editName)
             .add(newLayer);
     }
 

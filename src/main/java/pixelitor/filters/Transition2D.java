@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BricTransitionFilter;
 import pixelitor.gui.GUIText;
 
@@ -77,7 +76,7 @@ public class Transition2D extends ParametrizedFilter {
     private BricTransitionFilter filter;
 
     public Transition2D() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(type, progress);
     }
@@ -91,9 +90,7 @@ public class Transition2D extends ParametrizedFilter {
         filter.setType(type.getValue());
         filter.setProgress(progress.getPercentageValF());
 
-        dest = filter.filter(src, dest);
-
-        return dest;
+        return filter.filter(src, dest);
     }
 
     @Override

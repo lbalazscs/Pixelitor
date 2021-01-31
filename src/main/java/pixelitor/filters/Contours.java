@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.EdgeFilter;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
 import pixelitor.filters.lookup.Luminosity;
 
@@ -34,7 +33,7 @@ public class Contours extends ParametrizedFilter {
     private final RangeParam lineThickness = new RangeParam("Extra Line Thickness", 0, 0, 20);
 
     public Contours() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(lineThickness);
     }

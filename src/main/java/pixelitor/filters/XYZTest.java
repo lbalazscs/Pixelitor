@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.PixelUtils;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
@@ -42,13 +41,13 @@ public class XYZTest extends ParametrizedFilter {
 //    private static final ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
 
     public XYZTest() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                x,
-                y,
-                z,
-                linRGB
+            x,
+            y,
+            z,
+            linRGB
         );
     }
 
@@ -123,9 +122,9 @@ public class XYZTest extends ParametrizedFilter {
      * http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html#Specifications
      **/
     private static final double[] MATRIX_SRGB2XYZ_D50 = {
-            0.436052025, 0.385081593, 0.143087414,
-            0.222491598, 0.716886060, 0.060621486,
-            0.013929122, 0.097097002, 0.714185470
+        0.436052025, 0.385081593, 0.143087414,
+        0.222491598, 0.716886060, 0.060621486,
+        0.013929122, 0.097097002, 0.714185470
     };
 
     /**
@@ -133,9 +132,9 @@ public class XYZTest extends ParametrizedFilter {
      * http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html#Specifications
      **/
     private static final double[] MATRIX_XYZ2SRGB_D50 = {
-            3.1338561, -1.6168667, -0.4906146,
-            -0.9787684, 1.9161415, 0.0334540,
-            0.0719453, -0.2289914, 1.4052427
+        3.1338561, -1.6168667, -0.4906146,
+        -0.9787684, 1.9161415, 0.0334540,
+        0.0719453, -0.2289914, 1.4052427
     };
 
     public static double[] rgb2xyz(double[] rgb, double[] xyz, boolean linearize) {
@@ -155,8 +154,8 @@ public class XYZTest extends ParametrizedFilter {
         // Convert linear sRGB with D50 white point to CIE XYZ
         for (int i = 0; i < 3; i++) {
             xyz[i] = MATRIX_SRGB2XYZ_D50[i * 3 + 0] * rgbLin[0] +
-                    MATRIX_SRGB2XYZ_D50[i * 3 + 1] * rgbLin[1] +
-                    MATRIX_SRGB2XYZ_D50[i * 3 + 2] * rgbLin[2];
+                MATRIX_SRGB2XYZ_D50[i * 3 + 1] * rgbLin[1] +
+                MATRIX_SRGB2XYZ_D50[i * 3 + 2] * rgbLin[2];
         }
 
         return xyz;
@@ -166,8 +165,8 @@ public class XYZTest extends ParametrizedFilter {
         // XYZ to linear sRGB with D50 white point
         for (int i = 0; i < 3; i++) {
             rgb[i] = MATRIX_XYZ2SRGB_D50[i * 3 + 0] * xyz[0] +
-                    MATRIX_XYZ2SRGB_D50[i * 3 + 1] * xyz[1] +
-                    MATRIX_XYZ2SRGB_D50[i * 3 + 2] * xyz[2];
+                MATRIX_XYZ2SRGB_D50[i * 3 + 1] * xyz[1] +
+                MATRIX_XYZ2SRGB_D50[i * 3 + 2] * xyz[2];
         }
 
         if (linearize) {

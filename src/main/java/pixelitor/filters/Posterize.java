@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
 import pixelitor.filters.lookup.FastLookupOp;
 
@@ -39,7 +38,7 @@ public class Posterize extends ParametrizedFilter {
     private final RangeParam blueLevels = new RangeParam(i18n("blue"), 2, 2, 50);
 
     public Posterize() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var levels = new GroupedRangeParam("Levels",
             new RangeParam[]{
@@ -61,7 +60,6 @@ public class Posterize extends ParametrizedFilter {
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());
         filterOp.filter(src, dest);
-
         return dest;
     }
 

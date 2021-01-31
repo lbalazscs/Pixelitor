@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,13 +44,13 @@ public class ReseedActions {
     public static FilterButtonModel reseedByCalling(Runnable beforeTriggeringTask,
                                                     String text) {
         return reseedByCalling(beforeTriggeringTask, text,
-                "Reinitialize the randomness");
+            "Reinitialize the randomness");
     }
 
     public static FilterButtonModel reseedByCalling(Runnable beforeTriggeringTask,
                                                     String text, String toolTip) {
         var filterAction = new FilterButtonModel(text, beforeTriggeringTask,
-                Icons.getTwoDicesIcon(), toolTip, "reseed");
+            Icons.getTwoDicesIcon(), toolTip, "reseed");
         filterAction.setIgnoreFinalAnimationSettingMode(false);
         return filterAction;
     }

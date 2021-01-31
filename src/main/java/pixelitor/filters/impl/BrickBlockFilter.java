@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,30 +44,29 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
 
         int[] pixels = new int[horBlockSize * verBlockSize];
-        int[] smallPixels = new int[horBlockSize * verBlockSize / 2];
-        int verticalCount = 0;
+        int[] halfPixels = new int[horBlockSize * verBlockSize / 2];
 
-        for (int y = 0; y < height; y += verBlockSize) {
-            verticalCount++;
+        int imgWidth = src.getWidth();
+        int imgHeight = src.getHeight();
+        int verticalBlockNo = 0;
+        for (int y = 0; y < imgHeight; y += verBlockSize) {
+            verticalBlockNo++;
 
             int hShift = 0;
-            if (verticalCount % 2 == 0) {
+            if (verticalBlockNo % 2 == 0) {
                 hShift = horBlockSize / 2;
-                replaceWithAverage(src, dst, width, height,
-                        smallPixels, 0, y, horBlockSize / 2, verBlockSize);
+                replaceWithAverage(src, dst, imgWidth, imgHeight,
+                    halfPixels, 0, y, horBlockSize / 2, verBlockSize);
             }
 
-            for (int x = hShift; x < width; x += horBlockSize) {
-                replaceWithAverage(src, dst, width, height,
-                        pixels, x, y, horBlockSize, verBlockSize);
+            for (int x = hShift; x < imgWidth; x += horBlockSize) {
+                replaceWithAverage(src, dst, imgWidth, imgHeight,
+                    pixels, x, y, horBlockSize, verBlockSize);
             }
         }
 
@@ -83,23 +82,23 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
 
         getRGB(src, x, y, w, h, pixels);
         int r = 0, g = 0, b = 0;
-        int argb;
+        int rgb;
         int i = 0;
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
-                argb = pixels[i];
-                r += (argb >> 16) & 0xff;
-                g += (argb >> 8) & 0xff;
-                b += argb & 0xff;
+                rgb = pixels[i];
+                r += (rgb >> 16) & 0xff;
+                g += (rgb >> 8) & 0xff;
+                b += rgb & 0xff;
                 i++;
             }
         }
         int t = w * h;
-        argb = ((r / t) << 16) | ((g / t) << 8) | (b / t);
+        rgb = ((r / t) << 16) | ((g / t) << 8) | (b / t);
         i = 0;
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
-                pixels[i] = (pixels[i] & 0xff000000) | argb;
+                pixels[i] = (pixels[i] & 0xff000000) | rgb;
                 i++;
             }
         }

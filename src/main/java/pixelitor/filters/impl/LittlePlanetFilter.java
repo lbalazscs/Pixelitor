@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
 
         double radius = srcHeight * zoom / 2;
-        double angle = Utils.atan2AngleToIntuitive(FastMath.atan2(dy, dx))
-                + rotateResult;
+        double angle = Utils.atan2AngleToIntuitive(FastMath.atan2(dy, dx)) + rotateResult;
 
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;
@@ -52,7 +51,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         float ratio = (float) (r / radius);
         float correctedRatio = ImageMath.bias(ratio, innerZoom);
         float ny = correctedRatio * srcHeight;
-        if(!inverted) {
+        if (!inverted) {
             ny = srcHeight - ny;
         }
 

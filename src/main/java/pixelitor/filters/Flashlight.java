@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class Flashlight extends ParametrizedFilter {
     private Impl filter;
 
     public Flashlight() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             center,
@@ -68,8 +68,8 @@ public class Flashlight extends ParametrizedFilter {
         }
 
         filter.setCenter(
-                src.getWidth() * center.getRelativeX(),
-                src.getHeight() * center.getRelativeY()
+            src.getWidth() * center.getRelativeX(),
+            src.getHeight() * center.getRelativeY()
         );
 
         double radiusX = radius.getValueAsDouble(0);
@@ -81,9 +81,7 @@ public class Flashlight extends ParametrizedFilter {
         filter.setBG(bg.getValue());
         filter.setInvert(invert.isChecked());
 
-        dest = filter.filter(src, dest);
-
-        return dest;
+        return filter.filter(src, dest);
     }
 
     /**
@@ -147,8 +145,8 @@ public class Flashlight extends ParametrizedFilter {
         // must be called after the shape arguments!
         public void setShape(int type) {
             shape = BlurredShape.create(type, center,
-                    innerRadiusX, innerRadiusY,
-                    outerRadiusX, outerRadiusY);
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
         }
 
         public void setInvert(boolean invert) {

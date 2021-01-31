@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,11 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.GradientParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.CachedFloatRandom;
 
@@ -62,18 +65,18 @@ public class JHCells extends ParametrizedFilter {
     private CellularFilter filter;
 
     public JHCells() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
-                type,
-                refineType,
-                gridType,
-                gridRandomness,
-                gradient,
-                darkLightBalance,
-                scale.withAdjustedRange(0.5),
-                stretch,
-                angle
+            type,
+            refineType,
+            gridType,
+            gridRandomness,
+            gradient,
+            darkLightBalance,
+            scale.withAdjustedRange(0.5),
+            stretch,
+            angle
         ).withAction(reseedByCalling(() -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
@@ -123,7 +126,6 @@ public class JHCells extends ParametrizedFilter {
         filter.setRandomness(gridRandomness.getPercentageValF());
         filter.setColormap(gradient.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

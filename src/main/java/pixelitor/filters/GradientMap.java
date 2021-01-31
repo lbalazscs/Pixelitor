@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.Colormap;
 import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -31,10 +30,10 @@ public class GradientMap extends ParametrizedFilter {
     public static final String NAME = "Gradient Map";
 
     private final GradientParam gradient =
-            GradientParam.createBlackToWhite("Colors");
+        GradientParam.createBlackToWhite("Colors");
 
     public GradientMap() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(gradient);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,20 +54,20 @@ public class GenericBlurredShape implements BlurredShape {
                                          double outerRadiusX, double outerRadiusY) {
         if (lastRef == null) {
             GenericBlurredShape last = new GenericBlurredShape(shapeType,
-                    center,
-                    innerRadiusX, innerRadiusY,
-                    outerRadiusX, outerRadiusY);
+                center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
             lastRef = new WeakReference<>(last);
             return last;
         }
 
         GenericBlurredShape last = lastRef.get();
         if (last != null
-                && shapeType == last.shapeType
-                && innerRadiusX == last.innerRadiusX
-                && innerRadiusY == last.innerRadiusY
-                && outerRadiusX == last.outerRadiusX
-                && outerRadiusY == last.outerRadiusY) {
+            && shapeType == last.shapeType
+            && innerRadiusX == last.innerRadiusX
+            && innerRadiusY == last.innerRadiusY
+            && outerRadiusX == last.outerRadiusX
+            && outerRadiusY == last.outerRadiusY) {
             // if only the center changed,
             // there is no need to recreate the image
             last.recenter(center);
@@ -75,10 +75,9 @@ public class GenericBlurredShape implements BlurredShape {
         }
 
         // there was a radius or softness change
-        last = new GenericBlurredShape(shapeType,
-                center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
+        last = new GenericBlurredShape(shapeType, center,
+            innerRadiusX, innerRadiusY,
+            outerRadiusX, outerRadiusY);
         lastRef = new WeakReference<>(last);
         return last;
     }
@@ -108,7 +107,7 @@ public class GenericBlurredShape implements BlurredShape {
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
         Shape shape = shapeType.createShape(
-                new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY), null);
+            new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY), null);
         g2.setClip(shape);
         Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
         g2.dispose();
@@ -118,7 +117,7 @@ public class GenericBlurredShape implements BlurredShape {
         float hRadius = (int) (shapeStartX / numIterations);
         float vRadius = (int) (shapeStartY / numIterations);
         var blurFilter = new BoxBlurFilter(
-                hRadius, vRadius, numIterations, "");
+            hRadius, vRadius, numIterations, "");
         blurFilter.setPremultiplyAlpha(false);
 
         // it would be complicated to set up a better progress tracking

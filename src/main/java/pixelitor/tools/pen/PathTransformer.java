@@ -86,6 +86,20 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
+    public void compReplaced(Composition newComp) {
+        // the transform boxes store references to
+        // the old subpaths, they need to be updated
+        assert path.getNumSubpaths() == boxes.size();
+        for (int i = 0; i < boxes.size(); i++) {
+            SubPath subPath = path.getSubPath(i);
+            TransformBox box = boxes.get(i);
+            box.replaceOwner(subPath);
+
+            subPath.storeTransformRefPoints();
+        }
+    }
+
+    @Override
     public void mousePressed(PMouseEvent e) {
         double x = e.getCoX();
         double y = e.getCoY();
@@ -209,7 +223,7 @@ public class PathTransformer implements PenToolMode {
     public DebugNode createDebugNode() {
         var node = PenToolMode.super.createDebugNode();
         for (TransformBox box : boxes) {
-            node.add(box.getDebugNode());
+            node.add(box.createDebugNode());
         }
         return node;
     }

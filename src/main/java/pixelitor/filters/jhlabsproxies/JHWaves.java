@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.RippleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -41,15 +40,15 @@ public class JHWaves extends ParametrizedFilter {
     private RippleFilter filter;
 
     public JHWaves() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                waveType,
-                wavelengthParam.withAdjustedRange(0.2).withDecimalPlaces(1),
-                amplitudeParam.withAdjustedRange(0.2),
-                phaseParam,
-                edgeAction,
-                interpolation
+            waveType,
+            wavelengthParam.withAdjustedRange(0.2).withDecimalPlaces(1),
+            amplitudeParam.withAdjustedRange(0.2),
+            phaseParam,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -80,7 +79,6 @@ public class JHWaves extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

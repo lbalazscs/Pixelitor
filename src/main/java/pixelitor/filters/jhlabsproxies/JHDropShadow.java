@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,10 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.ShadowFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -50,15 +53,15 @@ public class JHDropShadow extends ParametrizedFilter {
     private ShadowFilter filter;
 
     public JHDropShadow() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                angle,
-                distance.withAdjustedRange(0.1),
-                opacity,
-                softness.withAdjustedRange(0.025),
-                color,
-                shadowOnly
+            angle,
+            distance.withAdjustedRange(0.1),
+            opacity,
+            softness.withAdjustedRange(0.025),
+            color,
+            shadowOnly
         );
     }
 

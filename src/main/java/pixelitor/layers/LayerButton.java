@@ -320,23 +320,23 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     public void addDragReorderHandler(DragReorderHandler handler) {
         dragReorderHandler = handler;
-        handler.attachToComponent(this);
-        handler.attachToComponent(nameEditor);
-        handler.attachToComponent(layerIconLabel);
+        handler.attachTo(this);
+        handler.attachTo(nameEditor);
+        handler.attachTo(layerIconLabel);
 
         if (maskAddedBeforeDragHandler) {
             assert hasMaskIcon() : "no mask in " + layer.getName();
-            handler.attachToComponent(maskIconLabel);
+            handler.attachTo(maskIconLabel);
         }
     }
 
     public void removeDragReorderHandler(DragReorderHandler handler) {
-        handler.detachFromComponent(this);
-        handler.detachFromComponent(nameEditor);
-        handler.detachFromComponent(layerIconLabel);
+        handler.detachFrom(this);
+        handler.detachFrom(nameEditor);
+        handler.detachFrom(layerIconLabel);
 
         if (hasMaskIcon()) {
-            handler.detachFromComponent(maskIconLabel);
+            handler.detachFrom(maskIconLabel);
         }
     }
 
@@ -439,7 +439,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         });
 
         if (dragReorderHandler != null) {
-            dragReorderHandler.attachToComponent(maskIconLabel);
+            dragReorderHandler.attachTo(maskIconLabel);
             maskAddedBeforeDragHandler = false;
         } else {
             maskAddedBeforeDragHandler = true;
@@ -492,7 +492,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         // the mask icon label is not going to be used again, remove all listeners
         if (dragReorderHandler != null) { // null in unit tests
-            dragReorderHandler.detachFromComponent(maskIconLabel);
+            dragReorderHandler.detachFrom(maskIconLabel);
         }
 
         // remove the left-click and right-click mouse listeners

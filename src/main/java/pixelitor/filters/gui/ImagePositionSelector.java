@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,15 +37,12 @@ import static java.awt.Color.WHITE;
 /**
  * The image selector part of an {@link ImagePositionParamGUI}
  */
-public class ImagePositionSelector extends JComponent
-        implements MouseMotionListener, MouseListener {
-
+public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
     private static final int CENTRAL_SQUARE_SIZE = 5;
 
     private final ImagePositionParamGUI parentGUI;
     private final ImagePositionParam model;
     private BufferedImage thumb;
-    private boolean enabled = true;
 
     public ImagePositionSelector(ImagePositionParamGUI parentGUI,
                                  ImagePositionParam model, int size) {
@@ -83,14 +80,14 @@ public class ImagePositionSelector extends JComponent
         g2.drawLine(x + 1, 0, x + 1, height); // vertical west
         g2.drawLine(x - 1, 0, x - 1, height); // vertical east
 
-        if(y < height) {
+        if (y < height) {
             g2.drawLine(0, y - 1, width, y - 1); // horizontal north
             g2.drawLine(0, y + 1, width, y + 1); // horizontal south
         }
 
         g2.setColor(WHITE);
         g2.drawLine(x, 0, x, height); // vertical
-        if(y < height) {
+        if (y < height) {
             g2.drawLine(0, y, width, y); // horizontal
         }
     }
@@ -98,12 +95,12 @@ public class ImagePositionSelector extends JComponent
     private static void drawCentralSquare(Graphics2D g2, int x, int y) {
         g2.setColor(BLACK);
         g2.draw(new Rectangle2D.Float(
-                x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE,
-                CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
+            x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE,
+            CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
         g2.setColor(WHITE);
         g2.fill(new Rectangle2D.Float(
-                x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1,
-                CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
+            x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1,
+            CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
     }
 
     @Override
@@ -112,16 +109,15 @@ public class ImagePositionSelector extends JComponent
     }
 
     private void moveControl(MouseEvent e, boolean isAdjusting) {
-        if (!enabled) {
+        if (!isEnabled()) {
             return;
         }
         int mouseX = e.getX();
         int mouseY = e.getY();
 
-        float relativeX = ((float) mouseX) / thumb.getWidth();
-        float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeValues(relativeX, relativeY,
-                false, isAdjusting, true);
+        float relX = ((float) mouseX) / thumb.getWidth();
+        float relY = ((float) mouseY) / thumb.getHeight();
+        model.setRelativeValues(relX, relY, false, isAdjusting, true);
 
         parentGUI.updateSlidersFromModel();
 
@@ -151,16 +147,5 @@ public class ImagePositionSelector extends JComponent
 
     @Override
     public void mouseExited(MouseEvent e) {
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        super.setEnabled(enabled);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 }

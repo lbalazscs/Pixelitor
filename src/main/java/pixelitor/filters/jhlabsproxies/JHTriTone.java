@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,13 +20,10 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.TritoneFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.RED;
-import static java.awt.Color.YELLOW;
+import static java.awt.Color.*;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
@@ -42,11 +39,9 @@ public class JHTriTone extends ParametrizedFilter {
     private TritoneFilter filter;
 
     public JHTriTone() {
-        super(ShowOriginal.YES);
+        super(true);
 
-        setParams(
-                shadowColor, midtonesColor, highlightsColor
-        );
+        setParams(shadowColor, midtonesColor, highlightsColor);
     }
 
     @Override
@@ -59,7 +54,6 @@ public class JHTriTone extends ParametrizedFilter {
         filter.setHighColor(highlightsColor.getColor().getRGB());
         filter.setMidColor(midtonesColor.getColor().getRGB());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

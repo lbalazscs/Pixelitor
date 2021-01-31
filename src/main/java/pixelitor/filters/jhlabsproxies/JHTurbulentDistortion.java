@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ import com.jhlabs.image.MarbleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -44,21 +43,21 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     private MarbleFilter filter;
 
     public JHTurbulentDistortion() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                scale.withAdjustedRange(0.1),
-                amount.withAdjustedRange(0.07),
-                turbulence,
-                time,
-                edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
-                interpolation
+            scale.withAdjustedRange(0.1),
+            amount.withAdjustedRange(0.07),
+            turbulence,
+            time,
+            edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
+            interpolation
         ).withAction(reseedNoise());
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(amount.isZero() || turbulence.isZero()) {
+        if (amount.isZero() || turbulence.isZero()) {
             return src;
         }
 
@@ -73,7 +72,6 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,8 @@ import pixelitor.tools.pen.Paths;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
+
 /**
  * A debugging node for a Composition
  */
@@ -37,9 +39,7 @@ public class CompositionNode extends DebugNode {
         comp.forEachLayer(this::addLayerNode);
 
         BufferedImage compositeImage = comp.getCompositeImage();
-        DebugNode imageNode = DebugNodes.createBufferedImageNode(
-                "composite image", compositeImage);
-        add(imageNode);
+        add(createBufferedImageNode("composite image", compositeImage));
 
         Paths paths = comp.getPaths();
         if (paths == null) {
@@ -63,7 +63,6 @@ public class CompositionNode extends DebugNode {
         if (file != null) {
             filePath = file.getAbsolutePath();
         }
-
         addQuotedString("file", filePath);
 
         addBoolean("dirty", comp.isDirty());
@@ -92,28 +91,27 @@ public class CompositionNode extends DebugNode {
         } else if (layer instanceof TextLayer) {
             addTextLayerNode((TextLayer) layer);
         } else {
-            addQuotedString("layer class",
-                    layer.getClass().getName());
+            addQuotedString("layer class", layer.getClass().getName());
         }
     }
 
     private void addImageLayerNode(ImageLayer layer) {
-        String name = "layer - " + layer.getName();
-
-        if (layer.isActive()) {
-            name = "active " + name;
-        }
+        String name = createNameForLayer(layer);
 
         add(new ImageLayerNode(name, layer));
     }
 
     private void addTextLayerNode(TextLayer layer) {
-        String name = "text layer - " + layer.getName();
+        String name = createNameForLayer(layer);
 
+        add(new TextLayerNode(name, layer));
+    }
+
+    private static String createNameForLayer(Layer layer) {
+        String name = layer.getClass().getSimpleName() + " - " + layer.getName();
         if (layer.isActive()) {
             name = "active " + name;
         }
-
-        add(new TextLayerNode(name, layer));
+        return name;
     }
 }

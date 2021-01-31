@@ -193,16 +193,16 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("symmetry brush", this);
 
         for (int i = 0; i < numBrushes; i++) {
-            node.add(brushes[i].getDebugNode());
+            node.add(brushes[i].createDebugNode());
         }
 
         node.addString("type", brushType.toString());
         node.addString("symmetry", symmetry.toString());
-        node.add(affectedArea.getDebugNode());
+        node.add(affectedArea.createDebugNode());
 
         return node;
     }

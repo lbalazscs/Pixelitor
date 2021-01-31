@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.FeedbackFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -41,15 +40,15 @@ public class JHVideoFeedback extends ParametrizedFilter {
     private FeedbackFilter filter;
 
     public JHVideoFeedback() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                iterations,
-                center,
-                zoom,
-                rotation,
-                startOpacity,
-                endOpacity
+            iterations,
+            center,
+            zoom,
+            rotation,
+            startOpacity,
+            endOpacity
         );
     }
 
@@ -71,7 +70,6 @@ public class JHVideoFeedback extends ParametrizedFilter {
         filter.setStartAlpha(startOpacity.getPercentageValF());
         filter.setEndAlpha(endOpacity.getPercentageValF());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

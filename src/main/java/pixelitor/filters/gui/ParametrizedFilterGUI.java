@@ -46,13 +46,13 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
     public ParametrizedFilterGUI(ParametrizedFilter filter,
                                  Drawable dr,
-                                 ShowOriginal addShowOriginal) {
+                                 boolean addShowOriginal) {
         this(filter, dr, addShowOriginal, null);
     }
 
     public ParametrizedFilterGUI(ParametrizedFilter filter,
                                  Drawable dr,
-                                 ShowOriginal addShowOriginal,
+                                 boolean addShowOriginal,
                                  Object otherInfo) {
         super(filter, dr);
 
@@ -70,11 +70,11 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     }
 
     protected void setupGUI(ParamSet paramSet,
-                            ShowOriginal addShowOriginal,
+                            boolean addShowOriginal,
                             Object otherInfo) {
         JPanel filterParamsPanel = createFilterParamsPanel(paramSet);
         JPanel filterActionsPanel = createFilterActionsPanel(
-                paramSet.getActions(), addShowOriginal, 3);
+            paramSet.getActions(), addShowOriginal, 3);
 
         setLayout(new BorderLayout());
         add(filterParamsPanel, CENTER);
@@ -89,10 +89,10 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     }
 
     protected JPanel createFilterActionsPanel(List<FilterButtonModel> actionList,
-                                              ShowOriginal addShowOriginal,
+                                              boolean addShowOriginal,
                                               int maxControlsInRow) {
         int numControls = actionList.size();
-        if (addShowOriginal.isYes()) {
+        if (addShowOriginal) {
             numControls++;
             showOriginalCB = new ShowOriginalCB("Show Original");
         }
@@ -104,7 +104,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             int cols = (numControls + 1) / 2;
             actionsPanel = new JPanel(new GridLayout(2, cols));
         }
-        if (addShowOriginal.isYes()) {
+        if (addShowOriginal) {
             actionsPanel.add(showOriginalCB);
         }
         for (FilterButtonModel action : actionList) {
@@ -141,8 +141,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             super(text);
             addActionListener(e -> {
                 if (trigger) {
-                    OpenImages.getActiveDrawableOrThrow()
-                            .setShowOriginal(isSelected());
+                    OpenImages.getActiveDrawableOrThrow().setShowOriginal(isSelected());
                 }
             });
             setName("show original");

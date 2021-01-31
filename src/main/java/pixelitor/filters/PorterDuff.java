@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -64,7 +63,7 @@ public class PorterDuff extends ParametrizedFilter {
     private final RangeParam alpha = new RangeParam("Constant Alpha (%)", 0, 100, 100);
 
     public PorterDuff() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(rule, mode, alpha);
     }
@@ -79,11 +78,11 @@ public class PorterDuff extends ParametrizedFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        if(mode.getValue() == MODE_SHAPE) {
+        if (mode.getValue() == MODE_SHAPE) {
             // if it is filled directly with a shape, then it will
             // have any effect only within the shape
             fillWithRedEllipse(g, width, height);
-        } else if(mode.getValue() == MODE_IMAGE) {
+        } else if (mode.getValue() == MODE_IMAGE) {
             BufferedImage img = new BufferedImage(width, height, TYPE_INT_ARGB);
             Graphics2D imgG = img.createGraphics();
             fillWithRedEllipse(imgG, width, height);

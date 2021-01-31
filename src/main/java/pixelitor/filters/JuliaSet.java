@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,10 @@ public class JuliaSet extends ComplexFractal {
     private JuliaSetImpl filter;
 
     private final GroupedRangeParam cParam = new GroupedRangeParam("Complex Constant (*100)",
-            new RangeParam[]{
-                    new RangeParam("Re", -150, -70, 50),
-                    new RangeParam("Im", -150, 27, 50)
-            }, false);
+        new RangeParam[]{
+            new RangeParam("Re", -150, -70, 50),
+            new RangeParam("Im", -150, 27, 50)
+        }, false);
 
     public JuliaSet() {
         super(300, 0.22f);
@@ -46,7 +46,7 @@ public class JuliaSet extends ComplexFractal {
 
     @Override
     public BufferedImage doTransformAA(BufferedImage src, BufferedImage dest) {
-        if(filter == null) {
+        if (filter == null) {
             filter = new JuliaSetImpl();
         }
 
@@ -69,7 +69,7 @@ class JuliaSetImpl extends ComplexFractalImpl {
     private double cy;
 
     protected JuliaSetImpl() {
-        super(JuliaSet.NAME, -2.0f,  2.0f, -1.2f, 1.2f);
+        super(JuliaSet.NAME, -2.0f, 2.0f, -1.2f, 1.2f);
     }
 
     @Override

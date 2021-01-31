@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,23 +59,23 @@ public class PhotoCollage extends ParametrizedFilter {
     private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 3, 10);
 
     public PhotoCollage() {
-        super(ShowOriginal.YES);
+        super(true);
 
         DialogParam shadowDialog = new DialogParam("Shadow Settings",
-                shadowOpacityParam,
-                shadowAngleParam,
-                shadowDistance.withAdjustedRange(0.02),
-                shadowSoftnessParam.withAdjustedRange(0.01));
-        
+            shadowOpacityParam,
+            shadowAngleParam,
+            shadowDistance.withAdjustedRange(0.02),
+            shadowSoftnessParam.withAdjustedRange(0.01));
+
         setParams(
-                numImagesParam,
-                allowOutside,
-                size.withAdjustedRange(1.0),
-                randomRotation,
-                marginSize.withAdjustedRange(0.02),
-                bgColor,
-                marginColor,
-                shadowDialog
+            numImagesParam,
+            allowOutside,
+            size.withAdjustedRange(1.0),
+            randomRotation,
+            marginSize.withAdjustedRange(0.02),
+            bgColor,
+            marginColor,
+            shadowDialog
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -109,17 +109,17 @@ public class PhotoCollage extends ParametrizedFilter {
         BufferedImage shadowImage = createShadowImage(xSize, ySize, shadowSoftness, softShadowRoom);
 
         Point2D offset = Utils.offsetFromPolar(
-                shadowDistance.getValue(),
-                shadowAngleParam.getValueInRadians());
+            shadowDistance.getValue(),
+            shadowAngleParam.getValueInRadians());
         double shadowOffsetX = offset.getX();
         double shadowOffsetY = offset.getY();
 
         // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
-                shadowOpacityParam.getPercentageValF());
+            shadowOpacityParam.getPercentageValF());
 
         Paint imagePaint = new TexturePaint(src, new Rectangle2D.Float(
-                0, 0, src.getWidth(), src.getHeight()));
+            0, 0, src.getWidth(), src.getHeight()));
 
         for (int i = 0; i < numImages; i++) {
             // Calculate the transform of the image
@@ -190,7 +190,7 @@ public class PhotoCollage extends ParametrizedFilter {
         int shadowImgWidth = xSize + 2 * softShadowRoom;
         int shadowImgHeight = ySize + 2 * softShadowRoom;
         BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
-                shadowImgWidth, shadowImgHeight);
+            shadowImgWidth, shadowImgHeight);
 
         Graphics2D gShadow = shadowImage.createGraphics();
         gShadow.setColor(BLACK);
@@ -198,7 +198,7 @@ public class PhotoCollage extends ParametrizedFilter {
         gShadow.dispose();
         if (shadowSoftness > 0) {
             shadowImage = new BoxBlurFilter(shadowSoftness, shadowSoftness, 1, NAME)
-                    .filter(shadowImage, shadowImage);
+                .filter(shadowImage, shadowImage);
         }
         return shadowImage;
     }

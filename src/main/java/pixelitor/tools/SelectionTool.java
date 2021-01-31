@@ -359,8 +359,8 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addString("type", getSelectionType().toString());
         node.addString("interaction", getCurrentInteraction().toString());

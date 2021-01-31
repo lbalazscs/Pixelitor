@@ -677,7 +677,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public boolean isDirectDrawing() {
-        return false;
+        return state == NO_INTERACTION;
     }
 
     @Override
@@ -694,18 +694,18 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         if (transformBox == null) {
             node.addString("transform box", "null");
         } else {
-            node.add(transformBox.getDebugNode());
+            node.add(transformBox.createDebugNode());
         }
         if (styledShape == null) {
             node.addString("styledShape", "null");
         } else {
-            node.add(styledShape.getDebugNode());
+            node.add(styledShape.createDebugNode());
         }
 
         node.addString("type", getSelectedType().toString());

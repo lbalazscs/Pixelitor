@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,8 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.io.Serial;
 import java.io.Serializable;
@@ -50,10 +51,11 @@ public class Guides implements Serializable {
     private static final long serialVersionUID = -1168950961227421664L;
 
     // all guide positions are stored as ratios relative to the canvas
-    // so that resizing does not affect their perceived position
+    // so that resizing does not affect their image-space position
     private final List<Double> horizontals = new ArrayList<>();
     private final List<Double> verticals = new ArrayList<>();
 
+    // the rendered lines in component space
     private List<Line2D> lines;
 
     // used only for debugging
@@ -188,21 +190,21 @@ public class Guides implements Serializable {
 
         // a crop is a negative enlargement
         return copyForEnlargedCanvas(
-                -northMargin, -eastMargin,
-                -southMargin, -westMargin,
-                view, oldCanvas);
+            -northMargin, -eastMargin,
+            -southMargin, -westMargin,
+            view, oldCanvas);
     }
 
     public static void showAddGridDialog(View view) {
         Builder builder = new Builder(view, true);
         AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
         new DialogBuilder()
-                .title("Add Grid Guides")
-                .content(panel)
-                .withScrollbars()
-                .okAction(() -> panel.createGuides(false))
-                .cancelAction(builder::resetOldGuides)
-                .show();
+            .title("Add Grid Guides")
+            .content(panel)
+            .withScrollbars()
+            .okAction(() -> panel.createGuides(false))
+            .cancelAction(builder::resetOldGuides)
+            .show();
     }
 
     public static void showAddSingleGuideDialog(View view,
@@ -211,12 +213,12 @@ public class Guides implements Serializable {
         AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
         String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
         new DialogBuilder()
-                .title(dialogTitle)
-                .content(panel)
-                .withScrollbars()
-                .okAction(() -> panel.createGuides(false))
-                .cancelAction(builder::resetOldGuides)
-                .show();
+            .title(dialogTitle)
+            .content(panel)
+            .withScrollbars()
+            .okAction(() -> panel.createGuides(false))
+            .cancelAction(builder::resetOldGuides)
+            .show();
     }
 
     public void addHorRelative(double percent) {

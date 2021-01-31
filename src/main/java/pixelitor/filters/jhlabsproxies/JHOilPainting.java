@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -53,12 +52,12 @@ public class JHOilPainting extends ParametrizedFilter {
         }, IGNORE_RANDOMIZE);
 
     public JHOilPainting() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                brushSize.withAdjustedRange(0.04),
-                coarseness,
-                detailQuality
+            brushSize.withAdjustedRange(0.04),
+            coarseness,
+            detailQuality
         );
     }
 

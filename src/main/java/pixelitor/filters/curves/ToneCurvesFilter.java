@@ -73,8 +73,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.getCurve(Channel.BLUE).curve
         );
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 
     @Override

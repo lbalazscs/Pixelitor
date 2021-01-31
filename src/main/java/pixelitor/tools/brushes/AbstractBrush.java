@@ -138,7 +138,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("brush", this);
         node.addClass();
         node.addDouble("radius", radius);

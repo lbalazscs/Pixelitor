@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,10 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SparkleFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
@@ -45,7 +48,7 @@ public class JHSparkle extends ParametrizedFilter {
     private SparkleFilter filter;
 
     public JHSparkle() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var reseed = ReseedSupport.createAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseed);

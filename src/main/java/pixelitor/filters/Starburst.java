@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,18 +62,18 @@ public class Starburst extends ParametrizedFilter {
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
-        super(ShowOriginal.NO);
+        super(false);
 
         var reseedColorsAction = ReseedSupport.createAction(
-                "Reseed", "Changes the random colors");
+            "Reseed", "Changes the random colors");
 
         setParams(
-                numberOfRaysParam,
-                background,
-                raysColor,
-                randomColors.withAction(reseedColorsAction),
-                center,
-                rotate
+            numberOfRaysParam,
+            background,
+            raysColor,
+            randomColors.withAction(reseedColorsAction),
+            center,
+            rotate
         );
 
         // enable the "Reseed Colors" button only if

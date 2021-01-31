@@ -319,6 +319,11 @@ public abstract class Tool implements KeyListener {
         return Tools.currentIs(this);
     }
 
+    /**
+     * Returns true if this tool is currently not affecting the
+     * composite image in ways other than directly drawing
+     * into the pixels of the actual image layer.
+     */
     public boolean isDirectDrawing() {
         return true;
     }
@@ -328,7 +333,7 @@ public abstract class Tool implements KeyListener {
         return null;
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         DebugNode toolNode = new DebugNode("active tool", this);
         toolNode.addString("name", getName());
         return toolNode;

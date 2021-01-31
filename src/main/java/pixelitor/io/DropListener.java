@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.io;
 
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
@@ -51,16 +52,7 @@ public class DropListener extends DropTargetAdapter {
             @Override
             public void handleDrop(List<File> list) {
                 for (File file : list) {
-                    if (file.isDirectory()) {
-                        String question = format("<html>You have dropped the folder <b>\"%s\"</b>." +
-                                "<br>Do you want to open all image files inside it?", file.getName());
-
-                        if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                            IO.openAllImagesInDir(file);
-                        }
-                    } else if (file.isFile()) {
-                        IO.openFileAsync(file);
-                    }
+                    addDroppedFileAsNewImage(file);
                 }
             }
         },
@@ -79,17 +71,7 @@ public class DropListener extends DropTargetAdapter {
                 }
 
                 for (File file : list) {
-                    if (file.isDirectory()) {
-                        String question = format("You have dropped the folder \"%s\".\n" +
-                                "Do you want all image files inside it to be added as layers to "
-                                + comp.getName() + "?", file.getName());
-
-                        if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                            IO.addAllImagesInDirAsLayers(file, comp);
-                        }
-                    } else if (file.isFile()) {
-                        IO.loadToNewImageLayerAsync(file, comp);
-                    }
+                    addDroppedFileAsNewLayer(file, comp);
                 }
             }
         };
@@ -148,5 +130,32 @@ public class DropListener extends DropTargetAdapter {
 
         // DataFlavor not recognized
         e.rejectDrop();
+    }
+
+    private static void addDroppedFileAsNewImage(File file) {
+        if (file.isDirectory()) {
+            String question = format("<html>You have dropped the folder <b>\"%s\"</b>."
+                + "<br>Do you want to open all image files inside it?", file.getName());
+
+            if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+                IO.openAllImagesInDir(file);
+            }
+        } else if (file.isFile()) {
+            IO.openFileAsync(file);
+        }
+    }
+
+    private static void addDroppedFileAsNewLayer(File file, Composition comp) {
+        if (file.isDirectory()) {
+            String question = format("You have dropped the folder \"%s\".\n" +
+                "Do you want all image files inside it to be added as layers to "
+                + comp.getName() + "?", file.getName());
+
+            if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+                IO.addAllImagesInDirAsLayers(file, comp);
+            }
+        } else if (file.isFile()) {
+            IO.loadToNewImageLayerAsync(file, comp);
+        }
     }
 }

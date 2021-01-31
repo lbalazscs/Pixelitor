@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,9 @@ package pixelitor.filters.jhlabsproxies;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.LinearGradientPaint;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -33,12 +35,12 @@ public class JHStripedHalftone extends JHMaskedHalftone {
 
     public JHStripedHalftone() {
         setParams(
-                angle,
-                stripesDistance,
-                repetitionType,
-                shiftStripes,
-                softness,
-                monochrome
+            angle,
+            stripesDistance,
+            repetitionType,
+            shiftStripes,
+            softness,
+            monochrome
         );
     }
 
@@ -65,7 +67,7 @@ public class JHStripedHalftone extends JHMaskedHalftone {
         float[] fractions = {0.0f, 1.0f};
         Color[] colors = {BLACK, WHITE};
         var paint = new LinearGradientPaint(x1, y1, x2, y2,
-                fractions, colors, cycleMethod);
+            fractions, colors, cycle);
 
         g.setPaint(paint);
         g.fillRect(0, 0, src.getWidth(), src.getHeight());

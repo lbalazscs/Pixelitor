@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -54,15 +53,15 @@ public class JHStamp extends ParametrizedFilter {
     private StampFilter filter;
 
     public JHStamp() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                lightDarkBalance,
-                smoothness.withAdjustedRange(0.05),
-                soften,
-                brightColor,
-                darkColor,
-                blurMethod
+            lightDarkBalance,
+            smoothness.withAdjustedRange(0.05),
+            soften,
+            brightColor,
+            darkColor,
+            blurMethod
         );
     }
 
@@ -79,7 +78,6 @@ public class JHStamp extends ParametrizedFilter {
         filter.setThreshold(lightDarkBalance.getPercentageValF());
         filter.setBlurMethod(blurMethod.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

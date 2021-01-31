@@ -22,7 +22,6 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
@@ -41,7 +40,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
     private DoGFilter filter;
 
     public JHDifferenceOfGaussians() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             radius1.withAdjustedRange(0.01),

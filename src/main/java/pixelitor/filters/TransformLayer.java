@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,10 @@ package pixelitor.filters;
 
 import pixelitor.OpenImages;
 import pixelitor.colors.Colors;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.Drawable;
 
@@ -43,14 +46,14 @@ public class TransformLayer extends ParametrizedFilter {
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 
     public TransformLayer() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                centerParam,
-                angleParam,
-                scaleParam,
-                shearParam,
-                bgColorParam
+            centerParam,
+            angleParam,
+            scaleParam,
+            shearParam,
+            bgColorParam
         );
         shearParam.setLinked(false);
     }
@@ -98,7 +101,7 @@ public class TransformLayer extends ParametrizedFilter {
     private AffineTransform calcRotateTransform(Point2D centerShift) {
         double theta = angleParam.getValueInRadians();
         return AffineTransform.getRotateInstance(
-                theta, centerShift.getX(), centerShift.getY());
+            theta, centerShift.getX(), centerShift.getY());
     }
 
     private void applyScale(AffineTransform transform, Point2D centerShift) {

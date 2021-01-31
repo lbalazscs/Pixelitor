@@ -105,7 +105,7 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        return delegate.getDebugNode();
+    public DebugNode createDebugNode() {
+        return delegate.createDebugNode();
     }
 }

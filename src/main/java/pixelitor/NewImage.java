@@ -34,8 +34,8 @@ import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.colors.FillType.TRANSPARENT;
-import static pixelitor.utils.MemoryInfo.ONE_MEGABYTE;
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Utils.BYTES_IN_1_MEGABYTE;
 
 /**
  * Static methods for creating new images
@@ -165,8 +165,8 @@ public final class NewImage {
                                 "<br>An image of %dx%d pixels needs at least %d megabytes." +
                                 "<br>Available memory is at most %d megabytes.",
                             width, height,
-                            numPixels * 4 / ONE_MEGABYTE,
-                            availableMemory / ONE_MEGABYTE));
+                            numPixels * 4 / BYTES_IN_1_MEGABYTE,
+                            availableMemory / BYTES_IN_1_MEGABYTE));
                     }
                 }
             }

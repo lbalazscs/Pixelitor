@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * An Action that adds a new layer to the active composition
+ * An action that adds a new image layer to the active composition
  */
 public class AddNewLayerAction extends NamedAction implements ViewActivationListener {
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
@@ -46,7 +46,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
     public void actionPerformed(ActionEvent e) {
         var comp = OpenImages.getActiveComp();
         boolean addBellowActive = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
-        comp.addNewEmptyLayer(comp.generateNewLayerName(), addBellowActive);
+        comp.addNewEmptyImageLayer(comp.generateNewLayerName(), addBellowActive);
     }
 
     @Override

@@ -72,8 +72,8 @@ public abstract class CopyBrush extends DabsBrush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addString("type", type.toString());
 

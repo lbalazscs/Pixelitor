@@ -33,14 +33,14 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     protected ParamSet paramSet;
 
     private BooleanParam showAffectedAreaParam = null;
-    private final ShowOriginal addShowOriginal;
+    private final boolean addShowOriginal;
     private boolean hasAffectedAreaShapeParam;
 
     // not fully implemented - the idea is to show interactively
     // the area affected by a filter
     private Shape[] affectedAreaShapes;
 
-    protected ParametrizedFilter(ShowOriginal addShowOriginal) {
+    protected ParametrizedFilter(boolean addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
     }
 

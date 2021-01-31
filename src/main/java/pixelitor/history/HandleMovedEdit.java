@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.geom.Point2D;
 
+/**
+ * Represents the moving of a {@link DraggablePoint}.
+ */
 public class HandleMovedEdit extends PixelitorEdit {
     private final DraggablePoint handle;
     private final Point2D before;
@@ -35,8 +38,7 @@ public class HandleMovedEdit extends PixelitorEdit {
         this.before = before;
         after = handle.getLocationCopy();
 
-        assert before.getX() != after.getX()
-                || before.getY() != after.getY();
+        assert before.getX() != after.getX() || before.getY() != after.getY();
     }
 
     @Override

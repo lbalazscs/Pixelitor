@@ -545,7 +545,7 @@ public class StyledShape implements Cloneable, Transformable {
         }
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("styled shape", this);
         node.addString("type", shapeType.toString());
         return node;

@@ -34,12 +34,12 @@ import static javax.swing.BoxLayout.Y_AXIS;
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
     public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr, Action[] actions) {
-        super(filter, dr, ShowOriginal.YES, actions);
+        super(filter, dr, true, actions);
     }
 
     @Override
     protected void setupGUI(ParamSet paramSet,
-                            ShowOriginal addShowOriginal,
+                            boolean addShowOriginal,
                             Object otherInfo) {
         var upperPanel = new JPanel(new BorderLayout());
         var leftPanel = GUIUtils.arrangeVertically(paramSet);

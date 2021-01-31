@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
 
     protected ShapeFilter() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
             background,
@@ -129,7 +129,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
                 // http://stackoverflow.com/questions/17113234/affine-transform-scale-around-a-point
                 var at = AffineTransform.getTranslateInstance
-                        (cx - scaleX * cx, cy - scaleY * cy);
+                    (cx - scaleX * cx, cy - scaleY * cy);
                 at.scale(scaleX, scaleY);
 
                 shape = at.createTransformedShape(shape);

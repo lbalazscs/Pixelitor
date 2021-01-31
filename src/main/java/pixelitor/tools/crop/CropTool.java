@@ -531,8 +531,8 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addFloat("mask opacity", maskOpacity.getPercentageValF());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * The GUI for an {@link AngleParam}, which can be
+ * The GUI for an {@link AngleParam}, which can also be
  * an {@link ElevationAngleParam}
  */
 public class AngleParamGUI extends JPanel implements ParamGUI {
@@ -55,22 +55,20 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     private void setupPreferredSize() {
         var origPS = getPreferredSize();
         var sliderPS = sliderSpinner.getPreferredSize();
-        setPreferredSize(new Dimension(
-                sliderPS.width,
-                origPS.height));
+        setPreferredSize(new Dimension(sliderPS.width, origPS.height));
     }
 
     private SliderSpinner createSliderSpinner(AngleParam angleParam,
                                               AbstractAngleUI angleUI) {
         var sliderModel = angleParam.createRangeParam();
         sliderModel.addChangeListener(e ->
-                sliderModelChanged(angleParam, sliderModel));
+            sliderModelChanged(angleParam, sliderModel));
 
         var retVal = new SliderSpinner(sliderModel, NONE, true);
         setupSliderTicks(retVal, angleParam.getMaxAngleInDegrees());
 
         angleParam.addChangeListener(e ->
-                angleParamChanged(angleParam, angleUI, sliderModel));
+            angleParamChanged(angleParam, angleUI, sliderModel));
         return retVal;
     }
 

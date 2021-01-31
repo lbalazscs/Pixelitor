@@ -120,5 +120,5 @@ public interface Brush {
      */
     double getPreferredSpacing();
 
-    DebugNode getDebugNode();
+    DebugNode createDebugNode();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
@@ -51,16 +50,16 @@ public class JHPointillize extends ParametrizedFilter {
     private PointillizeFilter filter;
 
     public JHPointillize() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                gridSize.withAdjustedRange(0.2),
-                gridType,
-                randomness,
-                fadeEdges,
-                edgeColor,
-                dotSize,
-                fuzziness
+            gridSize.withAdjustedRange(0.2),
+            gridType,
+            randomness,
+            fadeEdges,
+            edgeColor,
+            dotSize,
+            fuzziness
         ).withAction(reseedByCalling(() -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
@@ -87,7 +86,6 @@ public class JHPointillize extends ParametrizedFilter {
         filter.setEdgeColor(edgeColor.getColor().getRGB());
 //        filter.setRndGenerator(rndGen.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

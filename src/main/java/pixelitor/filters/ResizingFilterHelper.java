@@ -68,6 +68,7 @@ public class ResizingFilterHelper {
                 return ImageUtils.calcNumStepsForEnlargeSmooth(resizeFactor, 1.2);
             }
         }, BILINEAR11 { // highest quality with 1.1 steps
+
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {

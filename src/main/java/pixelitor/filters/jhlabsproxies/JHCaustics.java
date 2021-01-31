@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -46,12 +45,12 @@ public class JHCaustics extends ParametrizedFilter {
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time", 0, 0, 800);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
-            true, BORDER, IGNORE_RANDOMIZE);
+        true, BORDER, IGNORE_RANDOMIZE);
 
     private CausticsFilter filter;
 
     public JHCaustics() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
             bgColor,
@@ -80,7 +79,6 @@ public class JHCaustics extends ParametrizedFilter {
         filter.setTime(time.getPercentageValF());
         filter.setTurbulence(turbulence.getValueAsFloat() / 25.0f);
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

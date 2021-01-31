@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
@@ -40,7 +39,7 @@ public class Fade extends ParametrizedFilter {
 //    private BlendingModeParam blendingModeParam = new BlendingModeParam(BlendingMode.values());
 
     public Fade() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(opacityParam);
     }
@@ -51,10 +50,10 @@ public class Fade extends ParametrizedFilter {
         assert History.canFade();
 
         BufferedImage previous = OpenImages.getActiveCompOpt()
-                .flatMap(Composition::getActiveDrawableOpt)
-                .flatMap(History::getPreviousEditForFade)
-                .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
-                .getBackupImage();
+            .flatMap(Composition::getActiveDrawableOpt)
+            .flatMap(History::getPreviousEditForFade)
+            .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
+            .getBackupImage();
 
         if (previous == null) {
             // soft reference expired

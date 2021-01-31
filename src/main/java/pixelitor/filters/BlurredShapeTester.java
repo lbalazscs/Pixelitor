@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,10 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
@@ -40,13 +43,13 @@ public class BlurredShapeTester extends ParametrizedFilter {
     private Impl filter;
 
     public BlurredShapeTester() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                center,
-                radius.withAdjustedRange(1.0),
-                softness,
-                shape
+            center,
+            radius.withAdjustedRange(1.0),
+            softness,
+            shape
         );
     }
 
@@ -57,8 +60,8 @@ public class BlurredShapeTester extends ParametrizedFilter {
         }
 
         filter.setCenter(
-                src.getWidth() * center.getRelativeX(),
-                src.getHeight() * center.getRelativeY()
+            src.getWidth() * center.getRelativeX(),
+            src.getHeight() * center.getRelativeY()
         );
 
         double radiusX = radius.getValueAsDouble(0);
@@ -68,9 +71,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
 
         filter.setShape(shape.getValue());
 
-        dest = filter.filter(src, dest);
-
-        return dest;
+        return filter.filter(src, dest);
     }
 
     private static class Impl extends PointFilter {
@@ -116,8 +117,8 @@ public class BlurredShapeTester extends ParametrizedFilter {
         // must be called after the shape arguments!
         public void setShape(int type) {
             shape = BlurredShape.create(type, center,
-                    innerRadiusX, innerRadiusY,
-                    outerRadiusX, outerRadiusY);
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
         }
     }
 }

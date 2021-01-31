@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,12 +31,11 @@ public class JpegSettings extends SaveSettings {
     }
 
     public static JpegSettings from(SaveSettings settings) {
-        if(settings instanceof JpegSettings) {
+        assert settings.getFormat() == FileFormat.JPG;
+        if (settings instanceof JpegSettings) {
             return (JpegSettings) settings;
         }
-        assert settings.getFormat() == FileFormat.JPG;
-        return new JpegSettings(JpegInfo.DEFAULTS,
-                settings.getFile());
+        return new JpegSettings(JpegInfo.DEFAULTS, settings.getFile());
     }
 
     public JpegInfo getJpegInfo() {

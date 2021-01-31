@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -51,15 +50,15 @@ public class JHWeave extends ParametrizedFilter {
     private WeaveFilter filter;
 
     public JHWeave() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                pattern,
-                size.withAdjustedRange(0.4),
-                gap.withAdjustedRange(0.4),
-                roundThreads,
-                shadeCrossings,
-                useImageColors
+            pattern,
+            size.withAdjustedRange(0.4),
+            gap.withAdjustedRange(0.4),
+            roundThreads,
+            shadeCrossings,
+            useImageColors
         );
     }
 
@@ -78,7 +77,6 @@ public class JHWeave extends ParametrizedFilter {
         filter.setRoundThreads(roundThreads.isChecked());
         filter.setShadeCrossings(shadeCrossings.isChecked());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

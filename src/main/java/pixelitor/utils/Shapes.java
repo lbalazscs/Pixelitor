@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -96,12 +96,6 @@ public class Shapes {
         g.draw(shape);
     }
 
-    public static void fillVisible(Graphics2D g, Shape shape) {
-        assert shape != null;
-
-        fillVisible(g, shape, WHITE);
-    }
-
     public static void fillVisible(Graphics2D g, Shape shape, Color c) {
         assert shape != null;
 
@@ -137,7 +131,9 @@ public class Shapes {
         arrowHead.lineTo(arrowEnd1X, arrowEnd1Y);
         arrowHead.lineTo(arrowEnd2X, arrowEnd2Y);
         arrowHead.closePath();
-        fillVisible(g, arrowHead);
+        assert arrowHead != null;
+
+        fillVisible(g, arrowHead, WHITE);
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
@@ -239,8 +235,8 @@ public class Shapes {
 
     public static Point2D calcCenter(Point2D p1, Point2D p2) {
         return new Point2D.Double(
-                (p1.getX() + p2.getX()) / 2.0,
-                (p1.getY() + p2.getY()) / 2.0
+            (p1.getX() + p2.getX()) / 2.0,
+            (p1.getY() + p2.getY()) / 2.0
         );
     }
 
@@ -1117,24 +1113,24 @@ public class Shapes {
         path.moveTo(centerX, bottomY);
         // right side
         path.curveTo(cp1XRight, cp1Y, // control point 1
-                maxX, cp2Y,    // control point 2
-                maxX, sideY); // side point
+            maxX, cp2Y,    // control point 2
+            maxX, sideY); // side point
         path.curveTo(maxX, cp3Y, // control point 3
-                cp4XRight, y, // control point 4
-                topXRight, y); // top point
+            cp4XRight, y, // control point 4
+            topXRight, y); // top point
         path.curveTo(cp5XRight, y, // control point 5
-                centerX, topCenterY,  // this control point is the same as the following endpoint
-                centerX, topCenterY); // top center point
+            centerX, topCenterY,  // this control point is the same as the following endpoint
+            centerX, topCenterY); // top center point
         // left side
         path.curveTo(centerX, topCenterY,   // this control point is the same as the start point
-                cp5XLeft, y, // left mirror of control point 5
-                topXLeft, y);
+            cp5XLeft, y, // left mirror of control point 5
+            topXLeft, y);
         path.curveTo(cp4XLeft, y,
-                x, cp3Y,
-                x, sideY);
+            x, cp3Y,
+            x, sideY);
         path.curveTo(x, cp2Y,
-                cp1XLeft, cp1Y,
-                centerX, bottomY);
+            cp1XLeft, cp1Y,
+            centerX, bottomY);
 
         return path;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -45,17 +44,17 @@ public class JHUnderWater extends ParametrizedFilter {
     private SwimFilter filter;
 
     public JHUnderWater() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var reseed = reseedNoise();
         setParams(
-                amount.withAdjustedRange(0.1),
-                scale.withAdjustedRange(0.3),
-                stretch,
-                angle,
-                time,
-                edgeAction,
-                interpolation
+            amount.withAdjustedRange(0.1),
+            scale.withAdjustedRange(0.3),
+            stretch,
+            angle,
+            time,
+            edgeAction,
+            interpolation
         ).withAction(reseed);
 
         amount.setupEnableOtherIfNotZero(reseed);
@@ -67,8 +66,8 @@ public class JHUnderWater extends ParametrizedFilter {
         if (amount.isZero()) {
             return src;
         }
-        
-        if(filter == null) {
+
+        if (filter == null) {
             filter = new SwimFilter(NAME);
         }
 
@@ -80,7 +79,6 @@ public class JHUnderWater extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

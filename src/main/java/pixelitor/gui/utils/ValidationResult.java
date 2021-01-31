@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,14 +31,14 @@ public class ValidationResult {
 
     // The OK result has no error message, therefore it can be shared
     private static final ValidationResult okInstance
-            = new ValidationResult(true, null);
+        = new ValidationResult(true, null);
 
     private ValidationResult(boolean valid, String errorMsg) {
         this.valid = valid;
         this.errorMsg = errorMsg;
 
         if (!valid && errorMsg == null) {
-            throw new IllegalStateException("missing error message");
+            throw new IllegalArgumentException("missing error message");
         }
     }
 
@@ -58,7 +58,7 @@ public class ValidationResult {
 
     /**
      * Returns a composed result that represents a
-     * logical AND of this result and another.
+     * logical AND of this result and the given one.
      */
     public ValidationResult and(ValidationResult other) {
         if (valid) {
@@ -72,7 +72,7 @@ public class ValidationResult {
             if (other.isOK()) {
                 return this; // with our error message
             } else {
-                return error(errorMsg + "<br>" + other.errorMsg);
+                return error(composeMessages(errorMsg, other.errorMsg));
             }
         }
     }
@@ -82,7 +82,7 @@ public class ValidationResult {
             assert this == okInstance;
             return new ValidationResult(false, msg);
         } else {
-            return new ValidationResult(false, errorMsg + "<br>" + msg);
+            return new ValidationResult(false, composeMessages(errorMsg, msg));
         }
     }
 
@@ -100,7 +100,7 @@ public class ValidationResult {
             }
         } else {
             if (condition) {
-                return error(errorMsg + "<br>" + msg);
+                return error(composeMessages(errorMsg, msg));
             } else {
                 return this;
             }
@@ -130,5 +130,9 @@ public class ValidationResult {
         } else {
             return this;
         }
+    }
+
+    private static String composeMessages(String first, String second) {
+        return first + "<br>" + second;
     }
 }

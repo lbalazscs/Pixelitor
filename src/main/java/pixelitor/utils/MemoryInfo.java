@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,9 @@
 package pixelitor.utils;
 
 import static java.lang.String.format;
+import static pixelitor.utils.Utils.BYTES_IN_1_MEGABYTE;
 
 public class MemoryInfo {
-    public static final int ONE_MEGABYTE = 1024*1024;
-
     private final long freeMemoryMB;
     private final long totalMemoryMB;
     private final long usedMemoryMB;
@@ -35,10 +34,10 @@ public class MemoryInfo {
         long usedMemory = totalMemory - freeMemory;
         long maxMemory = runtime.maxMemory();
 
-        freeMemoryMB = freeMemory / ONE_MEGABYTE;
-        totalMemoryMB = totalMemory / ONE_MEGABYTE;
-        usedMemoryMB = usedMemory / ONE_MEGABYTE;
-        maxMemoryMB = maxMemory / ONE_MEGABYTE;
+        freeMemoryMB = freeMemory / BYTES_IN_1_MEGABYTE;
+        totalMemoryMB = totalMemory / BYTES_IN_1_MEGABYTE;
+        usedMemoryMB = usedMemory / BYTES_IN_1_MEGABYTE;
+        maxMemoryMB = maxMemory / BYTES_IN_1_MEGABYTE;
     }
 
     public String getFreeMemory() {
@@ -64,6 +63,6 @@ public class MemoryInfo {
     @Override
     public String toString() {
         return format("allocated = %d, used = %d, free = %d, max = %d",
-                totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);
+            totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);
     }
 }

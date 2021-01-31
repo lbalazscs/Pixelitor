@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.QuantizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -38,15 +37,15 @@ public class JHQuantize extends ParametrizedFilter {
     private QuantizeFilter filter;
 
     public JHQuantize() {
-        super(ShowOriginal.YES);
+        super(true);
 
         // enable serpentine only if dither is checked
         dither.setupEnableOtherIfChecked(serpentine);
 
         setParams(
-                numberOfColors,
-                dither,
-                serpentine
+            numberOfColors,
+            dither,
+            serpentine
         );
     }
 
@@ -60,8 +59,7 @@ public class JHQuantize extends ParametrizedFilter {
         filter.setDither(dither.isChecked());
         filter.setSerpentine(serpentine.isChecked());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 
     @Override

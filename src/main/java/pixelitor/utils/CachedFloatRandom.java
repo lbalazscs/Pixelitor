@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.utils;
 import java.util.Random;
 
 /**
- * Generating random numbers can be a relatively expensive operation,
+ * Generating many random numbers can be expensive,
  * and some filters work just fine with a small number of reused
  * random floats.
  *
@@ -48,7 +48,7 @@ public class CachedFloatRandom {
 
     public float nextFloat() {
         index++;
-        if(index >= CACHE_SIZE) {
+        if (index >= CACHE_SIZE) {
             index = 0;
         }
         return randomCache[index];

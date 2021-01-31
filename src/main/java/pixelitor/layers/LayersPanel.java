@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,15 +40,15 @@ public class LayersPanel extends JLayeredPane {
     private final List<LayerButton> layerButtons = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final DragReorderHandler dragReorderHandler;
-    private LayerButton draggedButton = null;
+    private LayerButton draggedButton;
 
     public LayersPanel() {
         dragReorderHandler = new DragReorderHandler(this);
     }
 
-    public void addLayerButton(LayerButton button, int atIndex) {
+    public void addLayerButton(LayerButton button, int index) {
         buttonGroup.add(Objects.requireNonNull(button));
-        layerButtons.add(atIndex, button);
+        layerButtons.add(index, button);
 
         add(button, JLayeredPane.DEFAULT_LAYER);
 
@@ -81,14 +81,13 @@ public class LayersPanel extends JLayeredPane {
     }
 
     /**
-     * @param firstDragUpdate true if called for the first time during this drag
+     * @param firstUpdate true if called for the first time during this drag
      */
-    public void updateDrag(LayerButton newDraggedButton, int dragY, boolean firstDragUpdate) {
+    public void updateDrag(LayerButton newDraggedButton, int dragY, boolean firstUpdate) {
         assert newDraggedButton != null;
 
-        if (firstDragUpdate) {
+        if (firstUpdate) {
             // put it into the drag layer so that it is always visible
-            // (removing and adding works on Java 7, but not on Java 8, setLayer is fine on both)
             setLayer(newDraggedButton, JLayeredPane.DRAG_LAYER);
             draggedButton = newDraggedButton;
         }
@@ -184,7 +183,7 @@ public class LayersPanel extends JLayeredPane {
     @VisibleForTesting
     public List<String> getLayerNames() {
         return layerButtons.stream()
-                .map(LayerButton::getLayerName)
-                .collect(toList());
+            .map(LayerButton::getLayerName)
+            .collect(toList());
     }
 }

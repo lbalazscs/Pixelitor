@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,11 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -56,13 +55,13 @@ public class Clouds extends ParametrizedFilter {
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
 
     public Clouds() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
-                scaleParam.withAdjustedRange(0.3),
-                roughnessParam,
-                color1,
-                color2
+            scaleParam.withAdjustedRange(0.3),
+            roughnessParam,
+            color1,
+            color2
         ).withAction(reseedByCalling(Clouds::reseed));
     }
 
@@ -71,11 +70,11 @@ public class Clouds extends ParametrizedFilter {
         var pt = new StatusBarProgressTracker(NAME, src.getHeight());
 
         renderClouds(dest,
-                scaleParam.getValueAsFloat(),
-                roughnessParam.getPercentageValF(),
-                color1.getColor(),
-                color2.getColor(),
-                pt);
+            scaleParam.getValueAsFloat(),
+            roughnessParam.getPercentageValF(),
+            color1.getColor(),
+            color2.getColor(),
+            pt);
 
         pt.finished();
         return dest;
@@ -124,7 +123,7 @@ public class Clouds extends ParametrizedFilter {
             }
 
             destData[x + y * width] = ImageUtils.lerpAndPremultiply(
-                    noiseValue, color1, color2);
+                noiseValue, color1, color2);
         }
     }
 

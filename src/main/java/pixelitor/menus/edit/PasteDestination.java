@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum PasteDestination {
     NEW_LAYER {
         @Override
-        public String toResourceKey() {
+        public String getResourceKey() {
             return "paste_as_new_layer";
         }
 
@@ -43,27 +43,25 @@ public enum PasteDestination {
         void paste(BufferedImage pastedImage) {
             var comp = OpenImages.getActiveComp();
             comp.addExternalImageAsNewLayer(pastedImage,
-                    "Pasted Layer", "New Pasted Layer");
+                "Pasted Layer", "New Pasted Layer");
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;
 
         @Override
-        public String toResourceKey() {
+        public String getResourceKey() {
             return "paste_as_new_img";
         }
 
         @Override
         void paste(BufferedImage pastedImage) {
             String title = "Pasted Image " + pastedCount;
-
             OpenImages.addAsNewComp(pastedImage, null, title);
-
             pastedCount++;
         }
     }, MASK {
         @Override
-        public String toResourceKey() {
+        public String getResourceKey() {
             return "paste_as_layer_mask";
         }
 
@@ -77,10 +75,12 @@ public enum PasteDestination {
             int imgWidth = pastedImage.getWidth();
             int imgHeight = pastedImage.getHeight();
 
-            BufferedImage bwImage = new BufferedImage(canvasWidth, canvasHeight,
-                    TYPE_BYTE_GRAY);
-            Graphics2D g = bwImage.createGraphics();
+            // the mask image will be canvas-sized, even
+            // if the pasted image is bigger then the canvas
+            BufferedImage bwImage = new BufferedImage(
+                canvasWidth, canvasHeight, TYPE_BYTE_GRAY);
 
+            Graphics2D g = bwImage.createGraphics();
             // if the pasted image is too small, pad it with white
             if (!canvas.isFullyCoveredBy(pastedImage)) {
                 Colors.fillWith(Color.WHITE, g, canvasWidth, canvasHeight);
@@ -98,12 +98,13 @@ public enum PasteDestination {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");
             } else {
-                layer.addImageAsMask(bwImage, false, true, true, "Add Pasted Mask", false);
+                layer.addImageAsMask(bwImage, false, true,
+                    true, "Add Pasted Mask", false);
             }
         }
     };
 
     abstract void paste(BufferedImage pastedImage);
 
-    abstract String toResourceKey();
+    abstract String getResourceKey();
 }

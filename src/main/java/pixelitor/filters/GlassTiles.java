@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.TilesFilter;
 
 import java.awt.image.BufferedImage;
@@ -40,15 +39,15 @@ public class GlassTiles extends ParametrizedFilter {
     private TilesFilter filter;
 
     public GlassTiles() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                size.withAdjustedRange(0.5),
-                curvature,
-                phase.notLinkable(),
-                angle,
-                edgeAction,
-                interpolation
+            size.withAdjustedRange(0.5),
+            curvature,
+            phase.notLinkable(),
+            angle,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -68,8 +67,7 @@ public class GlassTiles extends ParametrizedFilter {
         filter.setShiftX(phase.getValueAsPercentage(0));
         filter.setShiftY(phase.getValueAsPercentage(1));
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }
 

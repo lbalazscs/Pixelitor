@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.VariableBlurFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.BlurredShape;
 import pixelitor.utils.ImageUtils;
 
@@ -50,17 +45,17 @@ public class JHFocus extends ParametrizedFilter {
     private FocusImpl filter;
 
     public JHFocus() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                center.withDecimalPlaces(0),
-                radius,
-                softness,
-                shape,
-                blurRadius,
-                numberOfIterations,
-                invert,
-                hpSharpening
+            center.withDecimalPlaces(0),
+            radius,
+            softness,
+            shape,
+            blurRadius,
+            numberOfIterations,
+            invert,
+            hpSharpening
         );
     }
 
@@ -71,8 +66,8 @@ public class JHFocus extends ParametrizedFilter {
         if (hRadius == 0 && vRadius == 0) {
             return src;
         }
-        if(radius.getValue(0) == 0 || radius.getValue(1) == 0) {
-            if(invert.isChecked()) {
+        if (radius.getValue(0) == 0 || radius.getValue(1) == 0) {
+            if (invert.isChecked()) {
                 return src;
             }
             return new BoxBlurFilter(hRadius, vRadius, numberOfIterations.getValue(), getName()).filter(src, dest);
@@ -89,8 +84,8 @@ public class JHFocus extends ParametrizedFilter {
         }
 
         filter.setCenter(
-                src.getWidth() * center.getRelativeX(),
-                src.getHeight() * center.getRelativeY()
+            src.getWidth() * center.getRelativeX(),
+            src.getHeight() * center.getRelativeY()
         );
 
         double radiusX = radius.getValueAsDouble(0);
@@ -158,8 +153,8 @@ public class JHFocus extends ParametrizedFilter {
         // must be called after the shape arguments!
         public void setShape(int type) {
             shape = BlurredShape.create(type, center,
-                    innerRadiusX, innerRadiusY,
-                    outerRadiusX, outerRadiusY);
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
         }
     }
 }

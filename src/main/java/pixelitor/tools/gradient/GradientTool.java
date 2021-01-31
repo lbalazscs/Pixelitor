@@ -490,8 +490,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addString("type", getType().toString());
         node.addString("cycling", getCycleType().toString());

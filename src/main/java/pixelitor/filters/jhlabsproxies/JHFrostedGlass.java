@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedActions;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
@@ -40,17 +39,17 @@ public class JHFrostedGlass extends ParametrizedFilter {
     private DiffuseFilter filter;
 
     public JHFrostedGlass() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(amount.withAdjustedRange(0.1),
-                interpolation,
-                edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS)
+            interpolation,
+            edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS)
         ).withAction(ReseedActions.noOpReseed());
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(amount.isZero()) {
+        if (amount.isZero()) {
             return src;
         }
 
@@ -62,7 +61,6 @@ public class JHFrostedGlass extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

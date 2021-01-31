@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.image.BufferedImage;
@@ -44,11 +43,11 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     });
     protected final RangeParam shiftStripes = new RangeParam("Shift Stripes (%)", 0, 0, 100);
     protected final RangeParam softness = new RangeParam("Softness", 0, 10, 100);
-    protected CycleMethod cycleMethod;
+    protected CycleMethod cycle;
     protected float distanceCorrection;
 
     protected JHMaskedHalftone() {
-        super(ShowOriginal.YES);
+        super(true);
     }
 
     @Override
@@ -69,10 +68,10 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     private void setupHelperVariables() {
         int repetition = repetitionType.getValue();
         if (repetition == REPETITION_REFLECT) {
-            cycleMethod = CycleMethod.REFLECT;
+            cycle = CycleMethod.REFLECT;
             distanceCorrection = 2.0f;
         } else if (repetition == REPETITION_REPEAT) {
-            cycleMethod = CycleMethod.REPEAT;
+            cycle = CycleMethod.REPEAT;
             distanceCorrection = 1.0f;
         } else {
             throw new IllegalStateException("repetition = " + repetition);

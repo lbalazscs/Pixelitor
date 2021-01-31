@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.ThreadPool;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -42,7 +41,7 @@ public class ColorWheel extends ParametrizedFilter {
     private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
 
     public ColorWheel() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(center, hueShiftParam, brightnessParam, satParam);
     }
@@ -67,7 +66,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(
-                    destData, width, finalY, cx, cy, hueShift, saturation, brightness);
+                destData, width, finalY, cx, cy, hueShift, saturation, brightness);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);

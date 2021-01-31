@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,6 @@ public enum ZoomLevel {
             return Z12;
         }
     }, Z18("17.7%") { // 12.5 * sqrt(2)
-
         @Override
         public double asPercent() {
             return 17.67766952966369;
@@ -326,7 +325,7 @@ public enum ZoomLevel {
     // The menuItem must be initialized only after the enum constructor
     // in order to make sure that it has a name
     private final Lazy<ZoomMenuItem> menuItem = Lazy.of(
-            () -> new ZoomMenuItem(this));
+        () -> new ZoomMenuItem(this));
 
     @Override
     public String toString() {
@@ -359,7 +358,8 @@ public enum ZoomLevel {
      * Calculate the optimal zoom level for a given canvas,
      * and possibly for a given auto zoom.
      */
-    public static ZoomLevel calcZoom(Canvas canvas, AutoZoom autoZoom, boolean zoomInToFitSpace) {
+    public static ZoomLevel calcZoom(Canvas canvas, AutoZoom autoZoom,
+                                     boolean zoomInToFitSpace) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
             return Z100;
         }

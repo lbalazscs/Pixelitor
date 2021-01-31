@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,11 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.GradientParam;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -76,8 +79,8 @@ public class FractalTree extends ParametrizedFilter {
     private boolean hasRandomness;
 
     private final GradientParam colors = new GradientParam("Colors",
-            new float[]{0.25f, 0.75f},
-            new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
+        new float[]{0.25f, 0.75f},
+        new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
     private double defaultLength;
     private double lengthDeviation;
     private double angleDeviation;
@@ -85,18 +88,18 @@ public class FractalTree extends ParametrizedFilter {
     private ProgressTracker pt;
 
     public FractalTree() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
-                iterations,
-                zoom,
-                randomnessParam,
-                curvedness,
-                angle,
-                physics.notLinkable(),
-                width.notLinkable().withAdjustedRange(0.5),
-                colors,
-                quality
+            iterations,
+            zoom,
+            randomnessParam,
+            curvedness,
+            angle,
+            physics.notLinkable(),
+            width.notLinkable().withAdjustedRange(0.5),
+            colors,
+            quality
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -136,7 +139,7 @@ public class FractalTree extends ParametrizedFilter {
             double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);
-            float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float)zoom.getDefaultValue();
+            float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float) zoom.getDefaultValue();
             widthLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
             // colors
             float where = ((float) depth) / iterations.getValue();
@@ -161,7 +164,7 @@ public class FractalTree extends ParametrizedFilter {
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(),
-                270 + genAngleRandomness(rand), maxDepth, rand, c);
+            270 + genAngleRandomness(rand), maxDepth, rand, c);
 
         g.dispose();
         pt.finished();
@@ -192,7 +195,7 @@ public class FractalTree extends ParametrizedFilter {
                 g.setColor(colorLookup[depth]);
             } else {
                 g.setPaint(new GradientPaint(
-                        (float) x1, (float) y1, colorLookup[depth],
+                    (float) x1, (float) y1, colorLookup[depth],
                     (float) x2, (float) y2, colorLookup[nextDepth]));
             }
         } else {

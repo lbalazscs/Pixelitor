@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static java.lang.String.format;
 
 class AddGridGuidesPanel extends JPanel {
     private final GroupedRangeParam guidesParam = new GroupedRangeParam(
-            "Guides", 0, 3, 50, false);
+        "Guides", 0, 3, 50, false);
     private final Guides.Builder builder;
 
     public AddGridGuidesPanel(Guides.Builder builder) {
@@ -60,7 +60,8 @@ class AddGridGuidesPanel extends JPanel {
         int horDivisions = getNumHorDivisions();
         int verDivisions = getNumVerDivisions();
         guides.addRelativeGrid(horDivisions, verDivisions);
-        guides.setName(format("horDivisions = %d, verDivisions = %d%n", horDivisions, verDivisions));
+        guides.setName(format("horDivisions = %d, verDivisions = %d%n",
+            horDivisions, verDivisions));
     }
 
     private int getNumHorDivisions() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,11 +50,11 @@ public class AffectedAreaTracker extends BrushDecorator {
     }
 
     @Override
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode("affected area tracker", this);
 
-        node.add(delegate.getDebugNode());
-        node.add(affectedArea.getDebugNode());
+        node.add(delegate.createDebugNode());
+        node.add(affectedArea.createDebugNode());
 
         return node;
     }

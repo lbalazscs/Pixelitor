@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -52,16 +51,16 @@ public class JHRays extends ParametrizedFilter {
     private RaysFilter filter;
 
     public JHRays() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                center,
-                length,
-                threshold,
-                strength,
-                opacity,
-                rotation,
-                raysOnly
+            center,
+            length,
+            threshold,
+            strength,
+            opacity,
+            rotation,
+            raysOnly
         );
     }
 

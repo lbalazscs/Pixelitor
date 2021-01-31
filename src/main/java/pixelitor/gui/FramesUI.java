@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,6 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
 
         ImageFrame frame = new ImageFrame(view, locX, locY);
         view.setViewContainer(frame);
-
         add(frame);
         activateFrame(frame);
 
@@ -77,7 +76,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     public void cascadeWindows() {
         if (OpenImages.getNumOpenImages() == 0) {
             Dialogs.showInfoDialog("No open windows",
-                    "There are no open internal windows to cascade.");
+                "There are no open internal windows to cascade.");
             return;
         }
         List<View> views = OpenImages.getViews();
@@ -87,12 +86,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
             frame.setLocation(locX, locY);
             frame.setToCanvasSize();
-            try {
-                frame.setIcon(false);
-                frame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
+            ensureNormalDisplay(frame);
 
             locX += CASCADE_HORIZONTAL_SHIFT;
             locY += CASCADE_VERTICAL_SHIFT;
@@ -114,7 +108,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int numWindows = OpenImages.getNumOpenImages();
         if (numWindows == 0) {
             Dialogs.showInfoDialog("No open windows",
-                    "There are no open internal windows to tile.");
+                "There are no open internal windows to tile.");
             return;
         }
 
@@ -130,12 +124,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         List<View> views = OpenImages.getViews();
         for (View view : views) {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
-            try {
-                frame.setIcon(false);
-                frame.setMaximum(false);
-            } catch (PropertyVetoException e) {
-                e.printStackTrace();
-            }
+            ensureNormalDisplay(frame);
             int frameX = currCol * frameWidth;
             int frameY = currRow * frameHeight;
             frame.reshape(frameX, frameY, frameWidth, frameHeight);
@@ -148,6 +137,16 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
                     frameHeight = getHeight() / numRows;
                 }
             }
+        }
+    }
+
+    // ensure that the given frame is neither iconified nor maximized
+    private static void ensureNormalDisplay(ImageFrame frame) {
+        try {
+            frame.setIcon(false);
+            frame.setMaximum(false);
+        } catch (PropertyVetoException e) {
+            Messages.showException(e);
         }
     }
 

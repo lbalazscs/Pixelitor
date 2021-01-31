@@ -164,8 +164,8 @@ public class PartialImageEdit extends FadeableEdit {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         int width = -1;
         int height = -1;

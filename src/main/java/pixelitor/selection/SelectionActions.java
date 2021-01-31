@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -148,10 +148,10 @@ public final class SelectionActions {
                     modifySelection(type, amount);
 
                     // always return false so that
-                        // the Change button does not close it
-                        return false;
-                    })
-                    .show();
+                    // the Change button does not close it
+                    return false;
+                })
+                .show();
         }
     };
 
@@ -162,7 +162,7 @@ public final class SelectionActions {
         if (selection != null) {
             selection.modify(selectionModifyType, amount.getValue());
         } else {
-            // TODO - we modified it so much that it disappeared
+            // TODO - the selections was modified so much that it disappeared
             // at least the change button should be disabled
         }
     }
@@ -180,8 +180,8 @@ public final class SelectionActions {
      */
     public static void setEnabled(boolean b, Composition comp) {
         assert comp == null || getActiveComp() == comp
-                : "comp = " + (comp == null ? "null" : comp.getName())
-                + ", active comp = " + (getActiveComp() == null ? "null" : getActiveComp().getName());
+            : "comp = " + (comp == null ? "null" : comp.getName())
+            + ", active comp = " + (getActiveComp() == null ? "null" : getActiveComp().getName());
 
         crop.setEnabled(b);
         deselect.setEnabled(b);

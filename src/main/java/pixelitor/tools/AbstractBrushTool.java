@@ -685,19 +685,19 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         if (typeCB != null) { // can be null, for example in Clone
             node.addString("brush type", getBrushType().toString());
         }
         node.addInt("radius", getRadius());
-        node.add(brush.getDebugNode());
+        node.add(brush.createDebugNode());
 
         if (symmetryBrush != null) { // can be null, for example in Clone
             node.addString("symmetry", getSymmetry().toString());
             if (symmetryBrush != brush) {
-                node.add(symmetryBrush.getDebugNode());
+                node.add(symmetryBrush.createDebugNode());
             }
         }
 

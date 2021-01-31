@@ -699,7 +699,6 @@ public class SubPath implements Serializable, Transformable {
         comp.repaint();
     }
 
-    @VisibleForTesting
     public void storeTransformRefPoints() {
         for (AnchorPoint point : anchorPoints) {
             point.storeTransformRefPoint();

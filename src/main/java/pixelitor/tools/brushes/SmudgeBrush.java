@@ -112,8 +112,8 @@ public class SmudgeBrush extends CopyBrush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         if (last != null) {
             node.addDouble("last x", last.getImX());

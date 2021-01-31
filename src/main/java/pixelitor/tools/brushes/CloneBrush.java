@@ -152,8 +152,8 @@ public class CloneBrush extends CopyBrush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addDouble("orig src x", origSrcX);
         node.addDouble("orig src y", origSrcY);

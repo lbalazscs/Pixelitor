@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,6 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
  */
 public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Item> {
     private final List<Item> choicesList = new ArrayList<>();
-
     private Item defaultChoice;
     private Item currentChoice;
 
@@ -99,7 +98,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
             currentChoice = item;
             fireContentsChanged(this, -1, -1);
             if (trigger) {
-                if (adjustmentListener != null) {  // when called from randomize, this is null
+                if (adjustmentListener != null) {  // it's null when called from randomize
                     adjustmentListener.paramAdjusted();
                 }
             }
@@ -170,8 +169,10 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
         }
     }
 
-    public static final Item EDGE_REPEAT_PIXELS = new Item("Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
-    public static final Item EDGE_REFLECT = new Item("Reflect Image", TransformFilter.REFLECT);
+    public static final Item EDGE_REPEAT_PIXELS = new Item(
+        "Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
+    public static final Item EDGE_REFLECT = new Item(
+        "Reflect Image", TransformFilter.REFLECT);
 
     private static final Item[] edgeActions = {
         new Item("Repeat Image", TransformFilter.WRAP_AROUND),
@@ -195,12 +196,11 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
     private static final Item[] interpolationChoices = {
         new Item("Bilinear (Better)", TransformFilter.BILINEAR),
         new Item("Nearest Neighbour (Faster)", TransformFilter.NEAREST_NEIGHBOUR),
-//            new Value("Nearest Neighbour (OLD)", TransformFilter.NEAREST_NEIGHBOUR_OLD),
-//            new Value("Bilinear (OLD)", TransformFilter.BILINEAR_OLD),
     };
 
     public static IntChoiceParam forInterpolation() {
-        return new IntChoiceParam("Interpolation", interpolationChoices, IGNORE_RANDOMIZE);
+        return new IntChoiceParam("Interpolation",
+            interpolationChoices, IGNORE_RANDOMIZE);
     }
 
     private static final Item[] gridTypeChoices = {
@@ -226,7 +226,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
 
         // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
         icp.setupEnableOtherIf(reseedNoise,
-                selected -> selected.getValue() == WaveType.NOISE);
+            selected -> selected.getValue() == WaveType.NOISE);
 
         return icp;
     }
@@ -248,7 +248,8 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
             @Override
             public void contentsChanged(ListDataEvent e) {
                 int selectedValue = param.getValue();
-                randomnessParam.setEnabled(selectedValue != CellularFilter.GR_RANDOM, APP_LOGIC);
+                boolean newEnabled = selectedValue != CellularFilter.GR_RANDOM;
+                randomnessParam.setEnabled(newEnabled, APP_LOGIC);
             }
         });
         return param;
@@ -261,7 +262,8 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == ListDataListener.class) {
                 if (e == null) {
-                    e = new ListDataEvent(source, ListDataEvent.CONTENTS_CHANGED, index0, index1);
+                    e = new ListDataEvent(source,
+                        ListDataEvent.CONTENTS_CHANGED, index0, index1);
                 }
                 ((ListDataListener) listeners[i + 1]).contentsChanged(e);
             }
@@ -281,6 +283,6 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
     @Override
     public String toString() {
         return format("%s[name = '%s', selected = '%s']",
-                getClass().getSimpleName(), getName(), currentChoice);
+            getClass().getSimpleName(), getName(), currentChoice);
     }
 }

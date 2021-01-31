@@ -104,8 +104,8 @@ public abstract class DabsBrush extends AbstractBrush {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addBoolean("angle aware", settings.isAngleAware());
         node.addBoolean("jitter aware",

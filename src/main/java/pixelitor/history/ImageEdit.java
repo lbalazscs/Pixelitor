@@ -145,8 +145,8 @@ public class ImageEdit extends FadeableEdit {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         BufferedImage img = imgRef.get();
         if (img != null) {

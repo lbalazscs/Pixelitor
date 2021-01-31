@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,13 +50,13 @@ public class JHConcentricHalftone extends JHMaskedHalftone {
 
     public JHConcentricHalftone() {
         setParams(
-                center,
-                gradientType,
-                repetitionType,
-                stripesDistance,
-                softness,
-                invert,
-                monochrome
+            center,
+            gradientType,
+            repetitionType,
+            stripesDistance,
+            softness,
+            invert,
+            monochrome
         );
     }
 
@@ -72,18 +72,15 @@ public class JHConcentricHalftone extends JHMaskedHalftone {
         if (type == TYPE_CONCENTRIC) {
             float[] fractions = {0.0f, 1.0f};
             Color[] colors = {BLACK, WHITE};
-            paint = new RadialGradientPaint(cx, cy,
-                    radius, fractions, colors, cycleMethod);
+            paint = new RadialGradientPaint(cx, cy, radius, fractions, colors, cycle);
         } else {
             ImDrag imDrag = new ImDrag(cx, cy, cx + 2 * radius, cy);
             Color startColor = BLACK;
             Color endColor = WHITE;
             if (type == TYPE_SPIRAL_CW) {
-                paint = new SpiralGradientPaint(true,
-                        imDrag, startColor, endColor, cycleMethod);
+                paint = new SpiralGradientPaint(true, imDrag, startColor, endColor, cycle);
             } else if (type == TYPE_SPIRAL_CCW) {
-                paint = new SpiralGradientPaint(false,
-                        imDrag, startColor, endColor, cycleMethod);
+                paint = new SpiralGradientPaint(false, imDrag, startColor, endColor, cycle);
             } else {
                 throw new IllegalStateException("type = " + type);
             }

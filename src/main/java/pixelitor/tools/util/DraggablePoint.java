@@ -407,7 +407,7 @@ public class DraggablePoint extends Point2D.Double {
             name, x, y, imX, imY);
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         var node = new DebugNode(name, this);
         node.addDouble("x", getX());
         node.addDouble("y", getY());

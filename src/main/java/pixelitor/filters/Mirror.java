@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MirrorFilter;
 import pixelitor.gui.GUIText;
 
@@ -46,7 +45,7 @@ public class Mirror extends ParametrizedFilter {
     private MirrorFilter filter;
 
     public Mirror() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             type,
@@ -65,12 +64,9 @@ public class Mirror extends ParametrizedFilter {
         filter.setType(type.getValue());
         filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setEdgeAction(edgeAction.getValue());
-//        filter.setInterpolation(interpolation.getValue());
-
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR);
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }
 

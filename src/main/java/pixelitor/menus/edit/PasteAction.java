@@ -38,7 +38,7 @@ public class PasteAction extends AbstractAction {
     private final PasteDestination destination;
 
     public PasteAction(PasteDestination destination) {
-        super(i18n(destination.toResourceKey()));
+        super(i18n(destination.getResourceKey()));
 
         this.destination = destination;
     }

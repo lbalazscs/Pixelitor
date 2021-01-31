@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,9 +40,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
 
     @Override
     protected void doRandomize() {
-        setSelectedItem(
-                Rnd.chooseFrom(enumConstants),
-                false);
+        setSelectedItem(Rnd.chooseFrom(enumConstants), false);
     }
 
     @Override
@@ -87,16 +85,6 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     }
 
     @Override
-    public void addListDataListener(ListDataListener l) {
-        delegateModel.addListDataListener(l);
-    }
-
-    @Override
-    public void removeListDataListener(ListDataListener l) {
-        delegateModel.removeListDataListener(l);
-    }
-
-    @Override
     public Object getSelectedItem() {
         return delegateModel.getSelectedItem();
     }
@@ -104,6 +92,16 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     // no need for casting with this one
     public E getSelected() {
         return delegateModel.getSelectedItem();
+    }
+
+    @Override
+    public void addListDataListener(ListDataListener l) {
+        delegateModel.addListDataListener(l);
+    }
+
+    @Override
+    public void removeListDataListener(ListDataListener l) {
+        delegateModel.removeListDataListener(l);
     }
 
     @Override

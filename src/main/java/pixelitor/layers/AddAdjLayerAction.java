@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,7 @@ public class AddAdjLayerAction extends NamedAction
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
-        super("Add Adjustment Layer",
-            Icons.load("add_adj_layer.png"));
+        super("Add Adjustment Layer", Icons.load("add_adj_layer.png"));
         setToolTip("Adds a new adjustment layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
@@ -49,8 +48,8 @@ public class AddAdjLayerAction extends NamedAction
         var adjustmentLayer = new AdjustmentLayer(comp, Invert.NAME, new Invert());
 
         new LayerAdder(comp)
-                .withHistory("New Adjustment Layer")
-                .add(adjustmentLayer);
+            .withHistory("New Adjustment Layer")
+            .add(adjustmentLayer);
     }
 
     @Override

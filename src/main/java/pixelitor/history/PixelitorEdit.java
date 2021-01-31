@@ -147,7 +147,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return this;
     }
 
-    public DebugNode getDebugNode() {
+    public DebugNode createDebugNode() {
         String nodeName = name;
 
         boolean noNodeName = nodeName == null || nodeName.trim().isEmpty();

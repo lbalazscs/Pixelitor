@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.AngularWavesFilter;
 
 import java.awt.image.BufferedImage;
@@ -46,17 +45,17 @@ public class AngularWaves extends ParametrizedFilter {
     private AngularWavesFilter filter;
 
     public AngularWaves() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                waveType,
-                center,
-                radialWL.withAdjustedRange(0.05).withDecimalPlaces(1),
-                amount,
-                phase,
-                zoom,
-                edgeAction,
-                interpolation
+            waveType,
+            center,
+            radialWL.withAdjustedRange(0.05).withDecimalPlaces(1),
+            amount,
+            phase,
+            zoom,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -77,7 +76,6 @@ public class AngularWaves extends ParametrizedFilter {
         filter.setAmount(amount.getPercentageValF());
         filter.setWaveType(waveType.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

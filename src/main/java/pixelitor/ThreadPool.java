@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,7 @@ import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * A thread pool for parallel execution on multiple CPU cores
@@ -34,8 +29,8 @@ import java.util.concurrent.Future;
 public class ThreadPool {
     private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
 
-    private static final ExecutorService executorService =
-            Executors.newFixedThreadPool(NUM_CORES);
+    private static final ExecutorService pool =
+        Executors.newFixedThreadPool(NUM_CORES);
 
     private ThreadPool() {
     }
@@ -44,7 +39,7 @@ public class ThreadPool {
      * Submits a task that doesn't return anything
      */
     public static Future<?> submit(Runnable task) {
-        return executorService.submit(task);
+        return pool.submit(task);
     }
 
     /**
@@ -52,7 +47,7 @@ public class ThreadPool {
      * the calculated pixels in a line
      */
     public static <T> Future<T> submit2(Callable<T> task) {
-        return executorService.submit(task);
+        return pool.submit(task);
     }
 
     /**
@@ -115,6 +110,6 @@ public class ThreadPool {
     }
 
     public static Executor getExecutor() {
-        return executorService;
+        return pool;
     }
 }

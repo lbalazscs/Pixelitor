@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -45,26 +44,26 @@ public class JHWood extends ParametrizedFilter {
     private final RangeParam gain = new RangeParam("Gain", 0, 80, 100);
 
     private final GradientParam gradient = new GradientParam("Colors",
-            new float[]{0.0f, 0.5f, 1.0f},
-            new Color[]{
-                    new Color(229, 196, 148),
-                    new Color(190, 160, 115),
-                    new Color(152, 123, 81)});
+        new float[]{0.0f, 0.5f, 1.0f},
+        new Color[]{
+            new Color(229, 196, 148),
+            new Color(190, 160, 115),
+            new Color(152, 123, 81)});
 
     private WoodFilter filter;
 
     public JHWood() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
-                angle,
-                scale.withAdjustedRange(0.5),
-                stretch,
-                gradient,
-                rings,
-                turbulence,
-                fibres,
-                gain
+            angle,
+            scale.withAdjustedRange(0.5),
+            stretch,
+            gradient,
+            rings,
+            turbulence,
+            fibres,
+            gain
         ).withAction(reseedNoise());
 
         stretch.setupEnableOtherIfNotZero(angle);
@@ -85,7 +84,6 @@ public class JHWood extends ParametrizedFilter {
         filter.setGain(gain.getPercentageValF());
         filter.setColormap(gradient.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

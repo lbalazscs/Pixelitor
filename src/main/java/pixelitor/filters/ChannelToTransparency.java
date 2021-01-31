@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.gui.GUIText;
 
@@ -50,7 +49,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
     private final BooleanParam keepParam = new BooleanParam("Keep Existing Transparency", true);
 
     public ChannelToTransparency() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             channel,

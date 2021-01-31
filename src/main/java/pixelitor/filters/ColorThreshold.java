@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -37,7 +36,7 @@ public class ColorThreshold extends ParametrizedFilter {
     private final RangeParam blueThreshold = new RangeParam(i18n("blue"), 0, 128, 256);
 
     public ColorThreshold() {
-        super(ShowOriginal.YES);
+        super(true);
 
         var threshold = new GroupedRangeParam(i18n("threshold"),
             new RangeParam[]{

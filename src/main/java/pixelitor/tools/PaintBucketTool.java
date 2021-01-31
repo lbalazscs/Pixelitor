@@ -329,8 +329,8 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
         node.addInt("tolerance", toleranceParam.getValue());
         node.addQuotedString("fill with", (String) fillCB.getSelectedItem());

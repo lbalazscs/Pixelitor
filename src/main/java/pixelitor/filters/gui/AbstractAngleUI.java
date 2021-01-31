@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,7 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -35,20 +31,17 @@ import static java.awt.RenderingHints.VALUE_STROKE_PURE;
  * An abstract superclass for angle selectors ({@link AngleUI})
  * and elevation angle selectors ({@link ElevationAngleUI})
  */
-public abstract class AbstractAngleUI extends JComponent
-        implements MouseListener, MouseMotionListener {
-    static final int SIZE = 50;
+public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
+    protected static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     protected static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
     protected static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
 
-    final AngleParam model;
+    protected final AngleParam model;
     protected boolean enabled = true;
 
-    // the subclasses need to set
-    // the center point
-    int cx;
-    int cy;
+    protected int cx;
+    protected int cy;
 
     AbstractAngleUI(AngleParam angleParam) {
         model = angleParam;
@@ -80,10 +73,10 @@ public abstract class AbstractAngleUI extends JComponent
 
         float arrowEnd1X = (float) (endX + arrowRadius * Math.cos(backAngle1));
         float arrowEnd1Y = (float) (endY + arrowRadius * Math.sin(backAngle1));
+        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
+
         float arrowEnd2X = (float) (endX + arrowRadius * Math.cos(backAngle2));
         float arrowEnd2Y = (float) (endY + arrowRadius * Math.sin(backAngle2));
-
-        g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
     }
 

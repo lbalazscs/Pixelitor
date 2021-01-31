@@ -22,7 +22,6 @@ import com.jhlabs.image.GaussianFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
@@ -41,7 +40,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
     private GaussianFilter filter;
 
     public JHGaussianBlur() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             radius.withDecimalPlaces(1),

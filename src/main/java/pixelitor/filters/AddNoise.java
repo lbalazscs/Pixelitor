@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -53,7 +52,7 @@ public class AddNoise extends ParametrizedFilter {
     private final float[] tmpHSV = new float[3];
 
     public AddNoise() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             coverageParam,

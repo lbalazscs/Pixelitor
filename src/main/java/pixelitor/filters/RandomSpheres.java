@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class RandomSpheres extends ParametrizedFilter {
     private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
 
     public RandomSpheres() {
-        super(ShowOriginal.YES);
+        super(true);
 
         // enable "Light Direction" and "Highlight Elevation"
         // only if "Add Highlights" is checked
@@ -72,13 +72,13 @@ public class RandomSpheres extends ParametrizedFilter {
         addHighLightsCB.setupEnableOtherIfChecked(highlightElevationSelector);
 
         setParams(
-                radius.withAdjustedRange(0.1),
-                density,
-                opacity,
-                colorSource,
-                addHighLightsCB,
-                highlightAngleSelector,
-                highlightElevationSelector
+            radius.withAdjustedRange(0.1),
+            density,
+            opacity,
+            colorSource,
+            addHighLightsCB,
+            highlightAngleSelector,
+            highlightElevationSelector
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -139,8 +139,8 @@ public class RandomSpheres extends ParametrizedFilter {
             if (addHighlights) {
                 float[] fractions = {0.0f, 1.0f};
                 Paint gradientPaint = new RadialGradientPaint(
-                        x + centerShiftX, y + centerShiftY, r,
-                        fractions, colors, NO_CYCLE);
+                    x + centerShiftX, y + centerShiftY, r,
+                    fractions, colors, NO_CYCLE);
 
                 g.setPaint(gradientPaint);
             } else {

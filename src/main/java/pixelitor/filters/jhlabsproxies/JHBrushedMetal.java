@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.BrushedMetalFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
@@ -42,13 +41,13 @@ public class JHBrushedMetal extends ParametrizedFilter {
     private final RangeParam shine = new RangeParam("Shine (%)", 0, 10, 100);
 
     public JHBrushedMetal() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
-                color,
-                radius.withAdjustedRange(0.5),
-                amount,
-                shine
+            color,
+            radius.withAdjustedRange(0.5),
+            amount,
+            shine
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -57,15 +56,14 @@ public class JHBrushedMetal extends ParametrizedFilter {
         Random rand = ReseedSupport.reInitialize();
 
         var filter = new BrushedMetalFilter(color.getColor().getRGB(),
-                radius.getValue(),
-                amount.getPercentageValF(),
-                true,
-                shine.getPercentageValF(),
-                NAME);
+            radius.getValue(),
+            amount.getPercentageValF(),
+            true,
+            shine.getPercentageValF(),
+            NAME);
 
         filter.setRandom(rand);
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

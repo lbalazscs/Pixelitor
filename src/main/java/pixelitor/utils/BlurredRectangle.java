@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,9 +45,9 @@ public class BlurredRectangle implements BlurredShape {
         this.innerRadiusY = innerRadiusY;
 
         outerRect = new Rectangle2D.Double(cx - outerRadiusX, cy - outerRadiusY,
-                2 * outerRadiusX, 2 * outerRadiusY);
+            2 * outerRadiusX, 2 * outerRadiusY);
         innerRect = new Rectangle2D.Double(cx - innerRadiusX, cy - innerRadiusY,
-                2 * innerRadiusX, 2 * innerRadiusY);
+            2 * innerRadiusX, 2 * innerRadiusY);
 
         maxXDist = outerRadiusX - innerRadiusX;
         maxYDist = outerRadiusY - innerRadiusY;

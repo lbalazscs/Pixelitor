@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.util.NoiseInterpolation;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -64,7 +63,7 @@ public class ValueNoise extends ParametrizedFilter {
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
 
     public ValueNoise() {
-        super(ShowOriginal.NO);
+        super(false);
 
         setParams(
             scale.withAdjustedRange(0.3),
@@ -88,7 +87,7 @@ public class ValueNoise extends ParametrizedFilter {
 
         for (int i = 0, lookupTableLength = lookupTable.length; i < lookupTableLength; i++) {
             lookupTable[i] = ImageUtils.lerpAndPremultiply(
-                    i / 255.0f, colorArray1, colorArray2);
+                i / 255.0f, colorArray1, colorArray2);
         }
 
         int[] destData = ImageUtils.getPixelsAsArray(dest);

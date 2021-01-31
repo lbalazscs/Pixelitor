@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,10 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.CircleToSquareFilter;
 import pixelitor.gui.GUIText;
 
@@ -39,15 +42,15 @@ public class CircleToSquare extends ParametrizedFilter {
     private CircleToSquareFilter filter;
 
     public CircleToSquare() {
-        super(ShowOriginal.YES);
+        super(true);
         showAffectedArea();
 
         setParams(
-                center,
-                radius.withAdjustedRange(1.0),
-                amount,
-                edgeAction,
-                interpolation
+            center,
+            radius.withAdjustedRange(1.0),
+            amount,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -58,19 +61,14 @@ public class CircleToSquare extends ParametrizedFilter {
         }
 
         filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
-
         filter.setRadiusX(radius.getValueAsFloat(0));
         filter.setRadiusY(radius.getValueAsFloat(1));
-
         filter.setAmount(amount.getPercentageValF());
-
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
-
         setAffectedAreaShapes(filter.getAffectedAreaShapes());
-
         return dest;
     }
 }

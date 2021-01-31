@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -45,11 +44,11 @@ public class DrunkVision extends ParametrizedFilter {
     private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 5, 42);
 
     public DrunkVision() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                drunkenness,
-                numEyes
+            drunkenness,
+            numEyes
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -73,8 +72,8 @@ public class DrunkVision extends ParametrizedFilter {
         Point2D[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
         for (int i = 0; i < numShiftedImages; i++) {
             var transform = AffineTransform.getTranslateInstance(
-                    transformPoints[i].getX(),
-                    transformPoints[i].getY());
+                transformPoints[i].getX(),
+                transformPoints[i].getY());
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, 1.0f / (i + 2)));
             g.drawImage(src, transform, null);
             pt.unitDone();

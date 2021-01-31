@@ -91,10 +91,10 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode getDebugNode() {
-        var node = super.getDebugNode();
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
 
-        node.add(translationEdit.getDebugNode());
+        node.add(translationEdit.createDebugNode());
 
         return node;
     }

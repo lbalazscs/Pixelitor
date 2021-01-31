@@ -23,7 +23,6 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
 
 import java.awt.image.BufferedImage;
@@ -58,7 +57,7 @@ public class ColorBalance extends ParametrizedFilter {
         i18n("yellow") + "-" + i18n("blue"), -100, 0, 100);
 
     public ColorBalance() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             affect,

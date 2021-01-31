@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
@@ -41,12 +40,12 @@ public class JHBoxBlur extends ParametrizedFilter {
     private BoxBlurFilter filter;
 
     public JHBoxBlur() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                radius,
-                numberOfIterations,
-                hpSharpening
+            radius,
+            numberOfIterations,
+            hpSharpening
         );
     }
 

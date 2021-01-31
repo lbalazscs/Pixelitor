@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -49,7 +48,7 @@ public class HueSat extends ParametrizedFilter {
     private final RangeParam brightness = new RangeParam(BRIGHTNESS, MIN_BRI, DEFAULT_BRI, MAX_BRI);
 
     public HueSat() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
             hue,

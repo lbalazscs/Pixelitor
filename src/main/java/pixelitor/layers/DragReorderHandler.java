@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,13 +52,13 @@ public class DragReorderHandler extends MouseInputAdapter {
             lastNameEditorPressesMillis = when;
         }
 
-        getLayerButtonFromEvent(e); // the call is necessary for translating the mouse event
+        layerButtonForEvent(e); // the call is necessary for translating the mouse event
         dragStartYInButton = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        LayerButton layerButton = getLayerButtonFromEvent(e);
+        LayerButton layerButton = layerButtonForEvent(e);
         if (!dragging && Math.abs(dragStartYInButton - e.getY()) < 5) {
             // it seems that on Mac we get mouseDragged events even when the mouse is not moved
             return;
@@ -81,7 +81,7 @@ public class DragReorderHandler extends MouseInputAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        LayerButton layerButton = getLayerButtonFromEvent(e);
+        LayerButton layerButton = layerButtonForEvent(e);
         if (dragging) {
             layerButton.setCursor(Cursors.DEFAULT);
             layersPanel.dragFinished();
@@ -95,9 +95,9 @@ public class DragReorderHandler extends MouseInputAdapter {
 
     /**
      * Returns the layer button for the mouse event and also translate
-     * the coordinates of the argument into the layer button space
+     * the coordinates of the argument into the layer button's space
      */
-    private static LayerButton getLayerButtonFromEvent(MouseEvent e) {
+    private static LayerButton layerButtonForEvent(MouseEvent e) {
         LayerButton layerButton;
         Component c = e.getComponent();
         // the source of the event must be either the layer button
@@ -116,12 +116,12 @@ public class DragReorderHandler extends MouseInputAdapter {
         return layerButton;
     }
 
-    public void attachToComponent(Component c) {
+    public void attachTo(JComponent c) {
         c.addMouseListener(this);
         c.addMouseMotionListener(this);
     }
 
-    public void detachFromComponent(Component c) {
+    public void detachFrom(JComponent c) {
         c.removeMouseListener(this);
         c.removeMouseMotionListener(this);
     }

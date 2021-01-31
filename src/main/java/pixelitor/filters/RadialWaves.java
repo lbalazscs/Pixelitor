@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.RadialWavesFilter;
 
 import java.awt.image.BufferedImage;
@@ -45,17 +44,17 @@ public class RadialWaves extends ParametrizedFilter {
     private RadialWavesFilter filter;
 
     public RadialWaves() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                waveType,
-                center,
-                angularDivision,
-                radialAmplitude.withAdjustedRange(1.0),
-                phase,
-                zoom,
-                edgeAction,
-                interpolation
+            waveType,
+            center,
+            angularDivision,
+            radialAmplitude.withAdjustedRange(1.0),
+            phase,
+            zoom,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -74,7 +73,6 @@ public class RadialWaves extends ParametrizedFilter {
         filter.setZoom(zoom.getPercentageValF());
         filter.setWaveType(waveType.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

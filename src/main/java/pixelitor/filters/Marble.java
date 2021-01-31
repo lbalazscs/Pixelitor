@@ -69,7 +69,7 @@ public class Marble extends ParametrizedFilter {
     private Impl filter;
 
     public Marble() {
-        super(ShowOriginal.NO);
+        super(false);
 
         var details = new GroupedRangeParam("Details",
             new RangeParam[]{detailsLevel, detailsStrength}, false);

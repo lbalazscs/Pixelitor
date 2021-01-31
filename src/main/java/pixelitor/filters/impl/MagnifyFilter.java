@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,19 +78,19 @@ public class MagnifyFilter extends CenteredTransformFilter {
         if (invert) {
             outside = 1.0 - outside;
         }
-        
-        if (outside == 1.0) { // outside
+
+        if (outside == 1.0) { // 100% outside
             out[0] = x;
             out[1] = y;
-        } else if (outside == 0.0) { // innermost region
+        } else if (outside == 0.0) { // 100% inside
             out[0] = radiusRatio * x + (1 - radiusRatio) * cx;
             out[1] = radiusRatio * y + (1 - radiusRatio) * cy;
-        } else { // between the inner and outer radius
-            double simpleX = radiusRatio * x + (1 - radiusRatio) * cx;
-            double simpleY = radiusRatio * y + (1 - radiusRatio) * cy;
+        } else { // the blurred region between the inner and outer radius
+            double movedX = radiusRatio * x + (1 - radiusRatio) * cx;
+            double movedY = radiusRatio * y + (1 - radiusRatio) * cy;
 
-            out[0] = (float) ImageMath.lerp(outside, simpleX, x);
-            out[1] = (float) ImageMath.lerp(outside, simpleY, y);
+            out[0] = (float) ImageMath.lerp(outside, movedX, x);
+            out[1] = (float) ImageMath.lerp(outside, movedY, y);
         }
     }
 
@@ -103,8 +103,7 @@ public class MagnifyFilter extends CenteredTransformFilter {
     // must be called after the shape arguments!
     public void setShape(int type) {
         shape = BlurredShape.create(type, new Point2D.Double(cx, cy),
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
+            innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
     }
 
     public void setInvert(boolean invert) {

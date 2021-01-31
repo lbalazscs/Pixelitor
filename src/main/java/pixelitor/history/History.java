@@ -352,12 +352,12 @@ public class History {
         History.forbidEdits = forbidEdits;
     }
 
-    public static DebugNode getDebugNode() {
+    public static DebugNode createDebugNode() {
         var node = new DebugNode("history", undoManager);
 
         node.addInt("num edits", undoManager.getSize());
         if (undoManager.hasEdits()) {
-            node.add(undoManager.getDebugNode());
+            node.add(undoManager.createDebugNode());
         }
 
         node.addInt("num undone edits", numUndoneEdits);

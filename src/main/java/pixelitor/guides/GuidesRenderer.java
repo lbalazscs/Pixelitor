@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,15 +25,15 @@ import java.awt.Shape;
 import java.util.List;
 
 /**
- * Renderer for guide lines (crop, guides).
+ * Renderer for both the crop composition guides and the normal guides.
  */
 public class GuidesRenderer {
     private final GuideStyle guideStyle;
 
     public static final Lazy<GuidesRenderer> CROP_GUIDES_INSTANCE = Lazy.of(
-            () -> new GuidesRenderer(AppPreferences.getCropGuideStyle()));
+        () -> new GuidesRenderer(AppPreferences.getCropGuideStyle()));
     public static final Lazy<GuidesRenderer> GUIDES_INSTANCE = Lazy.of(
-            () -> new GuidesRenderer(AppPreferences.getGuideStyle()));
+        () -> new GuidesRenderer(AppPreferences.getGuideStyle()));
 
     public GuidesRenderer(GuideStyle guideStyle) {
         this.guideStyle = guideStyle;

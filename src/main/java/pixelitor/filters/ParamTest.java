@@ -35,7 +35,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARE
  */
 public class ParamTest extends ParametrizedFilter {
     public ParamTest() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(getTestParams());
     }
@@ -46,8 +46,7 @@ public class ParamTest extends ParametrizedFilter {
             System.out.println("ParamTest.doTransform CALLED");
         }
 
-        dest = ImageUtils.copyImage(src);
-        return dest;
+        return ImageUtils.copyImage(src);
     }
 
     public static FilterParam[] getTestParams() {

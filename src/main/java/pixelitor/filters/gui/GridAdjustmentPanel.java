@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private boolean addGridLabels;
 
     public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr,
-                               boolean addGridLabels, ShowOriginal showOriginal) {
+                               boolean addGridLabels, boolean showOriginal) {
         super(filter, dr, showOriginal);
         this.addGridLabels = addGridLabels;
     }
@@ -49,32 +49,26 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     public JPanel createFilterParamsPanel(ParamSet paramSet) {
         // hack, otherwise the setting of the flag in the constructor is too late,
         // because this is called by the superclass constructor
-        if(filter instanceof JHFourColorGradient) {
+        if (filter instanceof JHFourColorGradient) {
             addGridLabels = true;
         }
 
-        // the central panel, with max 4 controls
+        // the central panel, with maximum MAX_GRID_PARAMS controls
         JPanel gridPanel = new JPanel();
-        GridLayout layout;
-        if (addGridLabels) {
-            layout = new GridLayout(2, 4, 5, 5);
-        } else {
-            layout = new GridLayout(2, 2, 5, 5);
-        }
-        gridPanel.setLayout(layout);
+        int numCols = addGridLabels ? 4 : 2;
+        gridPanel.setLayout(new GridLayout(2, numCols, 5, 5));
 
         List<FilterParam> paramList = paramSet.getParams();
         int numParams = paramList.size();
 
         JPanel extraParamsPanel = null;
-        if(numParams > MAX_GRID_PARAMS) {
+        if (numParams > MAX_GRID_PARAMS) {
             extraParamsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         }
 
         for (int i = 0; i < numParams; i++) {
             FilterParam param = paramList.get(i);
             JComponent control = param.createGUI();
-
             String labelText = param.getName() + ':';
 
             // the first 4 are added into the 4 grid positions...

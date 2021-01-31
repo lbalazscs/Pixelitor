@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,10 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.KaleidoscopeFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.ImagePositionParam;
+import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
@@ -44,17 +47,17 @@ public class JHKaleidoscope extends ParametrizedFilter {
     private KaleidoscopeFilter filter;
 
     public JHKaleidoscope() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                center,
-                angle,
-                sides,
+            center,
+            angle,
+            sides,
 //                radius,
-                zoom,
-                rotateResult,
-                edgeAction,
-                interpolation
+            zoom,
+            rotateResult,
+            edgeAction,
+            interpolation
         );
     }
 
@@ -73,7 +76,6 @@ public class JHKaleidoscope extends ParametrizedFilter {
         filter.setInterpolation(interpolation.getValue());
         filter.setZoom(zoom.getPercentageValF());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

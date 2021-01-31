@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ import com.jhlabs.image.LensBlurFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -41,14 +40,14 @@ public class JHLensBlur extends ParametrizedFilter {
     private LensBlurFilter filter;
 
     public JHLensBlur() {
-        super(ShowOriginal.YES);
+        super(true);
 
         setParams(
-                amount.withDecimalPlaces(1),
-                numberOfSides,
-                bloomFactor,
-                bloomThreshold,
-                hpSharpening
+            amount.withDecimalPlaces(1),
+            numberOfSides,
+            bloomFactor,
+            bloomThreshold,
+            hpSharpening
         );
     }
 
