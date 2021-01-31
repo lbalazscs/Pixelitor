@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,16 +19,13 @@ package pixelitor.tools.util;
 
 import pixelitor.utils.ImageUtils;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * Support for drawing drag information (pixels, angles) in the tools.
+ */
 public class DragDisplay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
     private static final BasicStroke BG_STROKE = new BasicStroke(1.0f);
@@ -106,7 +103,7 @@ public class DragDisplay {
         g.setComposite(BG_COMPOSITE);
         g.setColor(Color.BLACK);
         RoundRectangle2D rect = new RoundRectangle2D.Float(
-                x, y - height, bgWidth, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+            x, y - height, bgWidth, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
         g.fill(rect);
         g.setColor(Color.WHITE);
         g.draw(rect);

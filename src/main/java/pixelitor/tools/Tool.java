@@ -65,7 +65,6 @@ public abstract class Tool implements KeyListener {
 
     protected Tool(String name, char activationKey, String iconFileName,
                    String toolMessage, Cursor cursor,
-                   boolean allowOnlyDrawables, boolean handToolForwarding,
                    ClipStrategy clipStrategy) {
         this.activationKey = activationKey;
         assert Character.isUpperCase(activationKey);
@@ -76,8 +75,17 @@ public abstract class Tool implements KeyListener {
         this.cursor = cursor;
         this.clipStrategy = clipStrategy;
 
-        handlerChain = new ToolHandlerChain(this, cursor,
-            allowOnlyDrawables, handToolForwarding);
+        handlerChain = new ToolHandlerChain(this, cursor);
+    }
+
+    public boolean hasHandToolForwarding() {
+        // all tools behave like the hand tool if space is pressed,
+        // but the hand tool itself doesn't need the forwarding
+        return true;
+    }
+
+    public boolean allowOnlyDrawables() {
+        return false;
     }
 
     public boolean hasColorPickerForwarding() {

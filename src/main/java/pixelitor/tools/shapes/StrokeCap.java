@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,12 +18,14 @@ package pixelitor.tools.shapes;
 
 import pixelitor.filters.gui.EnumParam;
 
+import java.awt.BasicStroke;
+
 import static java.awt.BasicStroke.*;
 
 /**
- * An enum wrapper around the cap argument of a BasicStroke constructor
+ * An enum wrapper around the cap argument of a {@link BasicStroke} constructor
  */
-public enum BasicStrokeCap {
+public enum StrokeCap {
     ROUND("Round", CAP_ROUND),
     BUTT("Butt", CAP_BUTT),
     SQUARE("Square", CAP_SQUARE);
@@ -32,7 +34,7 @@ public enum BasicStrokeCap {
     private final int value;
     private final String guiName;
 
-    BasicStrokeCap(String guiName, int value) {
+    StrokeCap(String guiName, int value) {
         this.guiName = guiName;
         this.value = value;
     }
@@ -41,16 +43,18 @@ public enum BasicStrokeCap {
         return value;
     }
 
+    public static EnumParam<StrokeCap> asParam() {
+        var param = new EnumParam<>(NAME, StrokeCap.class);
+        param.setToolTip("The shape of the line endpoints");
+        return param;
+    }
+
+    public static EnumParam<StrokeCap> asParam(StrokeCap defaultCap) {
+        return asParam().withDefault(defaultCap);
+    }
+
     @Override
     public String toString() {
         return guiName;
-    }
-
-    public static EnumParam<BasicStrokeCap> asParam() {
-        return new EnumParam<>(NAME, BasicStrokeCap.class);
-    }
-
-    public static EnumParam<BasicStrokeCap> asParam(BasicStrokeCap defaultCap) {
-        return asParam().withDefault(defaultCap);
     }
 }

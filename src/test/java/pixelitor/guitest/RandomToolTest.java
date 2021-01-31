@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,8 @@ import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.PenToolMode;
-import pixelitor.tools.shapes.BasicStrokeCap;
 import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StrokeCap;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
@@ -184,6 +184,7 @@ public class RandomToolTest {
 
     private void testLoop() {
         // exit this infinite loop only by throwing an exception
+        //noinspection InfiniteLoopStatement
         while (true) {
             Tool tool = selectNextToolForTesting();
 
@@ -695,7 +696,7 @@ public class RandomToolTest {
             case RECTANGLE -> slideRandomly(dialog.slider("radius"));
             case LINE -> {
                 slideRandomly(dialog.slider("Width (px)"));
-                chooseRandomly(dialog.comboBox(BasicStrokeCap.NAME));
+                chooseRandomly(dialog.comboBox(StrokeCap.NAME));
             }
             case STAR -> {
                 slideRandomly(dialog.slider("Number of Branches"));

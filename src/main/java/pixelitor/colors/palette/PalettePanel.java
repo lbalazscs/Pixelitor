@@ -85,7 +85,7 @@ public class PalettePanel extends JPanel {
     }
 
     public void configChanged() {
-        palette.onConfigChange();
+        palette.configChanged();
         regenerate(numRows, numCols);
         repaint();
     }

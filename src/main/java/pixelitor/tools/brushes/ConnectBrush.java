@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * "History Connect" brushes based on ideas from "project harmony", see
- * https://github.com/mrdoob/harmony
- * https://github.com/lbalazscs/Pixelitor/issues/11
+ * https://github.com/mrdoob/harmony.
+ * Also see issue #11
  */
 public class ConnectBrush extends AbstractBrush {
     private final ConnectBrushSettings settings;

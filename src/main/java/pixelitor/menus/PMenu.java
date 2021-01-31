@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class PMenu extends JMenu {
     }
 
     // Simple add without a builder
-    public void addActionWithKey(Action action, KeyStroke keyStroke) {
+    public void addAction(Action action, KeyStroke keyStroke) {
         JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(action);
         menuItem.setAccelerator(keyStroke);
         add(menuItem);
@@ -60,7 +60,7 @@ public class PMenu extends JMenu {
     /**
      * Returns an action builder for non-filter actions
      */
-    public MenuItemBuilder buildAction(Action action) {
+    public MenuItemBuilder builder(Action action) {
         return new MenuItemBuilder(this, action);
     }
 
@@ -69,6 +69,10 @@ public class PMenu extends JMenu {
      */
     public void addFilter(String name, Supplier<Filter> supplier) {
         addFilter(new FilterAction(name, supplier));
+    }
+
+    public void addFilter(String name, Supplier<Filter> supplier, KeyStroke keyStroke) {
+        addFilter(new FilterAction(name, supplier), keyStroke);
     }
 
     /**
@@ -83,7 +87,13 @@ public class PMenu extends JMenu {
         add(menuItem);
     }
 
-    public FilterMenuItemBuilder buildFilter(String name, Supplier<Filter> supplier) {
+    public void addFilter(FilterAction fa, KeyStroke keyStroke) {
+        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(fa);
+        menuItem.setAccelerator(keyStroke);
+        add(menuItem);
+    }
+
+    public FilterMenuItemBuilder builder(String name, Supplier<Filter> supplier) {
         FilterAction fa = new FilterAction(name, supplier);
         return buildFilter(fa);
     }
@@ -111,10 +121,10 @@ public class PMenu extends JMenu {
                 whenToEnable = EnabledIf.THERE_IS_OPEN_IMAGE;
             }
             JMenuItem menuItem = whenToEnable.createMenuItem(action);
-            menu.add(menuItem);
             if (keyStroke != null) {
                 menuItem.setAccelerator(keyStroke);
             }
+            menu.add(menuItem);
         }
 
         public MenuItemBuilder withKey(KeyStroke keyStroke) {
@@ -143,7 +153,7 @@ public class PMenu extends JMenu {
         }
 
         public FilterMenuItemBuilder noGUI() {
-            ((FilterAction) action).withoutGUI();
+            ((FilterAction) action).noGUI();
             return this;
         }
 
@@ -152,7 +162,7 @@ public class PMenu extends JMenu {
             return this;
         }
 
-        public FilterMenuItemBuilder extract() {
+        public FilterMenuItemBuilder withExtractChannelListName() {
             ((FilterAction) action).withExtractChannelListName();
             return this;
         }

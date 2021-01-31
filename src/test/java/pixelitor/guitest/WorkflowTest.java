@@ -46,9 +46,10 @@ import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
 import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
 
 /**
- * Assertj-Swing test focused on a longer workflow
- * rather than individual functionality.
- * Not a unit test.
+ * A workflow test is an Assertj-Swing regression test, where an
+ * image is created from scratch using a longer workflow, and then
+ * it is visually compared to a reference image saved earlier.
+ * It's not a unit test.
  */
 public class WorkflowTest {
     private final AppRunner app;

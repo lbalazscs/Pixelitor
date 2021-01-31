@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,7 @@
 
 package pixelitor.automate;
 
-import pixelitor.gui.utils.BrowseFilesSupport;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
+import pixelitor.gui.utils.*;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
 
@@ -30,9 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.WEST;
+import static java.awt.BorderLayout.*;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
@@ -85,14 +79,14 @@ public class SingleDirChooser extends ValidatedPanel {
         } else {
             if (exists) {
                 return ValidationResult.error(
-                        "The selected path "
-                                + selectedDir.getAbsolutePath()
-                                + " is not a folder.");
+                    "The selected path "
+                        + selectedDir.getAbsolutePath()
+                        + " is not a folder.");
             } else {
                 return ValidationResult.error(
-                        "The selected folder "
-                                + selectedDir.getAbsolutePath()
-                                + " does not exist.");
+                    "The selected folder "
+                        + selectedDir.getAbsolutePath()
+                        + " does not exist.");
             }
         }
     }
@@ -107,19 +101,19 @@ public class SingleDirChooser extends ValidatedPanel {
      */
     public static boolean selectOutputDir(FileFormat defaultFormat) {
         var chooserPanel = new SingleDirChooser("Output Folder:",
-                Dirs.getLastSave().getAbsolutePath(),
-                "Select Output Folder", defaultFormat);
+            Dirs.getLastSave().getAbsolutePath(),
+            "Select Output Folder", defaultFormat);
 
         boolean[] selectionWasMade = {false};
         new DialogBuilder()
-                .validatedContent(chooserPanel)
-                .title("Select Output Folder")
-                .okAction(() -> {
-                    File dir = chooserPanel.getSelectedDir();
-                    Dirs.setLastSaveIfValid(dir);
-                    selectionWasMade[0] = true;
-                })
-                .show();
+            .validatedContent(chooserPanel)
+            .title("Select Output Folder")
+            .okAction(() -> {
+                File dir = chooserPanel.getSelectedDir();
+                Dirs.setLastSave(dir);
+                selectionWasMade[0] = true;
+            })
+            .show();
 
         if (defaultFormat != null) {
             FileFormat.setLastOutput(chooserPanel.getSelectedFormat());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,18 +56,18 @@ public class HueSatPaletteConfig implements PaletteConfig {
         var p = new JPanel(new GridBagLayout());
 
         satSlider = createSlider(saturation, "Saturation of the colors");
-        satSlider.addChangeListener(e -> onNewSat(palettePanel));
+        satSlider.addChangeListener(e -> satChanged(palettePanel));
 
         hueSlider = createSlider(hueShift, "Rotate the hue of the colors");
-        hueSlider.addChangeListener(e -> onNewHue(palettePanel));
+        hueSlider.addChangeListener(e -> hueChanged(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         var labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
-                GridBagConstraints.CENTER,
-                GridBagConstraints.NONE, insets, 0, 0);
+            GridBagConstraints.CENTER,
+            GridBagConstraints.NONE, insets, 0, 0);
         var sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
-                GridBagConstraints.EAST,
-                GridBagConstraints.HORIZONTAL, insets, 0, 0);
+            GridBagConstraints.EAST,
+            GridBagConstraints.HORIZONTAL, insets, 0, 0);
         p.add(new JLabel("Sat:"), labelCtr);
         p.add(satSlider, sliderCtr);
         labelCtr.gridy = 1;
@@ -78,7 +78,7 @@ public class HueSatPaletteConfig implements PaletteConfig {
         return p;
     }
 
-    private void onNewSat(PalettePanel palettePanel) {
+    private void satChanged(PalettePanel palettePanel) {
         float oldSat = saturation;
         saturation = satSlider.getValue() / 100.0f;
         if (oldSat != saturation) {
@@ -86,7 +86,7 @@ public class HueSatPaletteConfig implements PaletteConfig {
         }
     }
 
-    private void onNewHue(PalettePanel palettePanel) {
+    private void hueChanged(PalettePanel palettePanel) {
         float oldHueShift = hueShift;
         hueShift = hueSlider.getValue() / 100.0f;
         if (oldHueShift != hueShift) {

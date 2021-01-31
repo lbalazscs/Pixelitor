@@ -78,7 +78,7 @@ public enum MaskViewMode {
                 OpenImages.onActiveLayer(layer -> activate(layer));
             }
         };
-        sub.addActionWithKey(action, keyStroke);
+        sub.addAction(action, keyStroke);
     }
 
     /**

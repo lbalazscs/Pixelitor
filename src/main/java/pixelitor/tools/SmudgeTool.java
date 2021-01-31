@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,7 @@ package pixelitor.tools;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.AffectedArea;
-import pixelitor.tools.brushes.AffectedAreaTracker;
-import pixelitor.tools.brushes.CopyBrushType;
-import pixelitor.tools.brushes.LazyMouseBrush;
-import pixelitor.tools.brushes.SmudgeBrush;
+import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
@@ -35,13 +31,13 @@ import java.awt.image.BufferedImage;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * The Smudge Tool
+ * The smudge tool.
  */
 public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
         super("Smudge", 'K', "smudge_tool_icon.png",
-                "<b>click and drag</b> to smudge. " +
-                        "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
+            "<b>click and drag</b> to smudge. " +
+                "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
             Cursors.HAND, false);
 
         drawDestination = DrawDestination.DIRECT;
@@ -63,8 +59,8 @@ public class SmudgeTool extends AbstractBrushTool {
         if (lazyMouseCB.isSelected()) {
             lazyMouseBrush = new LazyMouseBrush(smudgeBrush);
             brush = new AffectedAreaTracker(
-                    lazyMouseBrush,
-                    affectedArea);
+                lazyMouseBrush,
+                affectedArea);
             lazyMouse = true;
         } else {
             brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
@@ -76,8 +72,8 @@ public class SmudgeTool extends AbstractBrushTool {
     @Override
     public void initSettingsPanel() {
         settingsPanel.addCopyBrushTypeSelector(
-                CopyBrushType.HARD,
-                smudgeBrush::typeChanged);
+            CopyBrushType.HARD,
+            smudgeBrush::typeChanged);
 
         addSizeSelector();
         addStrengthSelector();
@@ -90,7 +86,7 @@ public class SmudgeTool extends AbstractBrushTool {
 
     private void addStrengthSelector() {
         SliderSpinner strengthSelector = new SliderSpinner(
-                strengthParam, WEST, false);
+            strengthParam, WEST, false);
         settingsPanel.add(strengthSelector);
     }
 
@@ -99,7 +95,7 @@ public class SmudgeTool extends AbstractBrushTool {
         settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB, "fingerPaintingCB");
         fingerPaintingCB.setName("fingerPaintingCB");
         fingerPaintingCB.addActionListener(
-                e -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));
+            e -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));
     }
 
     @Override

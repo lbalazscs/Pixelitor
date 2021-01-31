@@ -40,8 +40,8 @@ import static pixelitor.tools.shapes.StrokeType.*;
  */
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
-    private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam();
-    private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam();
+    private final EnumParam<StrokeCap> strokeCapParam = StrokeCap.asParam();
+    private final EnumParam<StrokeJoin> strokeJoinParam = StrokeJoin.asParam();
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
     private final BooleanParam dashedParam = new BooleanParam("Dashed", false);
@@ -251,11 +251,11 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeWidthParam;
     }
 
-    public EnumParam<BasicStrokeCap> getStrokeCapParam() {
+    public EnumParam<StrokeCap> getStrokeCapParam() {
         return strokeCapParam;
     }
 
-    public EnumParam<BasicStrokeJoin> getStrokeJoinParam() {
+    public EnumParam<StrokeJoin> getStrokeJoinParam() {
         return strokeJoinParam;
     }
 

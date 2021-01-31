@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class CloneBrush extends CopyBrush {
 
     // if a new source point was just set, the distances
     // have to be recalculated when the painting begins
-    private boolean newSourcePointWasJustSet = true;
+    private boolean newSourcePoint = true;
 
     private double scaleX;
     private double scaleY;
@@ -61,7 +61,7 @@ public class CloneBrush extends CopyBrush {
         sourceImage = image;
         origSrcX = x;
         origSrcY = y;
-        newSourcePointWasJustSet = true;
+        newSourcePoint = true;
     }
 
     /**
@@ -75,10 +75,10 @@ public class CloneBrush extends CopyBrush {
         // aligned = forces the source point to follow the mouse,
         // even after a stroke is completed
         // unaligned = the cloning distance is reinitialized for each stroke
-        if (!aligned || newSourcePointWasJustSet) {
+        if (!aligned || newSourcePoint) {
             reinitializeDistance = true;
         }
-        newSourcePointWasJustSet = false;
+        newSourcePoint = false;
 
         if (reinitializeDistance) {
             dx = destX - origSrcX;
@@ -104,7 +104,7 @@ public class CloneBrush extends CopyBrush {
         // order, so start with the last transformation
         // that works when there is no scaling/rotating
         var transform = AffineTransform.getTranslateInstance(
-                currSrcX + radius, currSrcY + radius);
+            currSrcX + radius, currSrcY + radius);
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
@@ -127,8 +127,8 @@ public class CloneBrush extends CopyBrush {
     @Override
     public void putDab(PPoint p, double theta) {
         var transform = AffineTransform.getTranslateInstance(
-                p.getImX() - radius,
-                p.getImY() - radius
+            p.getImX() - radius,
+            p.getImY() - radius
         );
         targetG.drawImage(brushImage, transform, null);
         repaintComp(p);
@@ -163,7 +163,7 @@ public class CloneBrush extends CopyBrush {
         node.addDouble("scale y", scaleY);
         node.addDouble("rotate", rotate);
         node.addBoolean("aligned", aligned);
-        node.addBoolean("new source point was just set", newSourcePointWasJustSet);
+        node.addBoolean("new source point", newSourcePoint);
 
         return node;
     }

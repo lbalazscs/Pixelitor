@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,8 @@ import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 import static java.lang.String.format;
@@ -56,7 +57,7 @@ public class UserDrag {
 
     private View view;
 
-    private boolean constrainPoints = false;
+    private boolean constrained = false;
     private boolean startFromCenter = false;
     private boolean equallySized = false;
 
@@ -84,7 +85,7 @@ public class UserDrag {
         coEndX = e.getCoX();
         coEndY = e.getCoY();
 
-        if (constrainPoints) {
+        if (constrained) {
             Point2D constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
             coEndX = constrainedEnd.getX();
             coEndY = constrainedEnd.getY();
@@ -150,8 +151,8 @@ public class UserDrag {
         return d;
     }
 
-    public void setConstrainPoints(boolean constrainPoints) {
-        this.constrainPoints = constrainPoints;
+    public void setConstrained(boolean constrained) {
+        this.constrained = constrained;
     }
 
     public void drawGradientArrow(Graphics2D g) {
@@ -349,8 +350,8 @@ public class UserDrag {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
             x = coEndX - displayBgWidth / 2.0
-                    + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                    * coDx / displayBgWidth);
+                + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                * coDx / displayBgWidth);
         }
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
         if (xDistIsSmall) {
@@ -369,8 +370,8 @@ public class UserDrag {
         } else {
             // display it so that it has no sudden jumps
             y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
-                    + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                    * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
+                + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
         }
 
         String angleInfo = "\u2221 = " + dragAngle + " \u00b0";

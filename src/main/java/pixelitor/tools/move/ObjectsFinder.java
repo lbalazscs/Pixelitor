@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
-import java.awt.*;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.ListIterator;
@@ -34,7 +34,6 @@ import java.util.ListIterator;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ObjectsFinder {
-
     private static final float layerOpacityThreshold = 0.05f;
     private static final int pixelAlphaThreshold = 30;
 
@@ -58,7 +57,6 @@ public class ObjectsFinder {
     }
 
     public static ObjectsSelection findGuideAtPoint(Point2D p, Composition stage) {
-
         ObjectsSelection result = new ObjectsSelection();
         // here guides selection, but it would be convenient to operate on objects
         // instead of doubles in pixel coordinates space
@@ -96,7 +94,7 @@ public class ObjectsFinder {
             }
 
             ContentLayer contentLayer = (ContentLayer) layer;
-            int pixel = contentLayer.getMouseHitPixelAtPoint(pPixel);
+            int pixel = contentLayer.getPixelAtPoint(pPixel);
 
             if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
                 result.setObject(layer);

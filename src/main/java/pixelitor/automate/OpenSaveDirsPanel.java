@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,11 +36,11 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  */
 class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport inputChooser
-            = new BrowseFilesSupport(Dirs.getLastOpenPath(),
-            "Select Input Folder", DIRECTORY);
+        = new BrowseFilesSupport(Dirs.getLastOpenPath(),
+        "Select Input Folder", DIRECTORY);
     private final BrowseFilesSupport outputChooser
-            = new BrowseFilesSupport(Dirs.getLastSavePath(),
-            "Select Output Folder", DIRECTORY);
+        = new BrowseFilesSupport(Dirs.getLastSavePath(),
+        "Select Output Folder", DIRECTORY);
 
     private final FileFormatSelector outputFormatSelector;
 
@@ -59,8 +59,8 @@ class OpenSaveDirsPanel extends ValidatedPanel {
                                       BrowseFilesSupport chooser,
                                       GridBagHelper gbh) {
         gbh.addLabelAndTwoControls(label,
-                chooser.getNameTF(),
-                chooser.getBrowseButton());
+            chooser.getNameTF(),
+            chooser.getBrowseButton());
     }
 
     private FileFormat getSelectedFormat() {
@@ -91,7 +91,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
                                                          File dir, String type) {
         if (!dir.exists()) {
             String msg = format("The selected %s folder %s does not exist.",
-                    type, dir.getAbsolutePath());
+                type, dir.getAbsolutePath());
             v = v.and(ValidationResult.error(msg));
         }
         return v;
@@ -99,10 +99,10 @@ class OpenSaveDirsPanel extends ValidatedPanel {
 
     public void rememberValues() {
         File in = inputChooser.getSelectedFile();
-        Dirs.setLastOpenIfValid(in);
+        Dirs.setLastOpen(in);
 
         File out = outputChooser.getSelectedFile();
-        Dirs.setLastSaveIfValid(out);
+        Dirs.setLastSave(out);
 
         FileFormat.setLastOutput(getSelectedFormat());
     }

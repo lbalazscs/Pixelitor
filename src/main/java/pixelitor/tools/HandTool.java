@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,11 @@ import pixelitor.utils.Cursors;
  */
 public class HandTool extends Tool {
     private final HandToolSupport handToolSupport = new HandToolSupport();
-    
+
     HandTool() {
         super("Hand", 'H', "hand_tool_icon.png",
             "<b>drag</b> to move the view (if there are scrollbars).",
-                Cursors.HAND, false,
-                false, ClipStrategy.CANVAS);
+            Cursors.HAND, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -50,5 +49,10 @@ public class HandTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+    }
+
+    @Override
+    public boolean hasHandToolForwarding() {
+        return false;
     }
 }

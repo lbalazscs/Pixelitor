@@ -69,8 +69,7 @@ public class SelectionTool extends DragTool {
 
     SelectionTool() {
         super("Selection", 'M', "selection_tool_icon.png",
-            HELP_TEXT, Cursors.DEFAULT, false,
-            true, false, ClipStrategy.FULL);
+            HELP_TEXT, Cursors.DEFAULT, false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 
@@ -271,7 +270,7 @@ public class SelectionTool extends DragTool {
             var comp = view.getComp();
             var selection = comp.getSelection();
             if (selection != null) {
-                selection.nudge(key.getTransform());
+                selection.nudge(key.asTransform());
                 return true;
             }
         }

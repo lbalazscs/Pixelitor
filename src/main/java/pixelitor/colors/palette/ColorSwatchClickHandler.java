@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,10 @@
 
 package pixelitor.colors.palette;
 
-import javax.swing.*;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 
+import static javax.swing.SwingUtilities.isRightMouseButton;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 
@@ -28,13 +28,12 @@ import static pixelitor.colors.FgBgColors.setFGColor;
  * Defines what happens when a color swatch button is clicked
  */
 public interface ColorSwatchClickHandler {
-    void onClick(Color newColor, MouseEvent e);
+    void handle(Color newColor, MouseEvent e);
 
     // The standard click handler sets the foreground color
     // for left clicks and the background color for right clicks
     ColorSwatchClickHandler STANDARD = (newColor, e) -> {
-        boolean rightClick = SwingUtilities.isRightMouseButton(e);
-        if (rightClick) {
+        if (isRightMouseButton(e)) {
             setBGColor(newColor);
         } else {
             setFGColor(newColor);
@@ -42,9 +41,9 @@ public interface ColorSwatchClickHandler {
     };
 
     String STANDARD_HTML_HELP = "<b>click</b> to set the foreground color, "
-            + "<b>right-click</b> to set the background color, "
-            + "<b>Ctrl-click</b> to clear the marking";
+        + "<b>right-click</b> to set the background color, "
+        + "<b>Ctrl-click</b> to clear the marking";
 
     String FILTER_HTML_HELP = "<b>click</b> to set the filter color, "
-            + "<b>Ctrl-click</b> to clear the marking";
+        + "<b>Ctrl-click</b> to clear the marking";
 }

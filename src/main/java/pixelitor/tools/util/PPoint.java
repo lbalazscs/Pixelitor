@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,7 @@ public abstract class PPoint {
     // coordinates in image space
     protected double imX;
     protected double imY;
+
     // coordinates in component (MouseEvent) space
     protected double coX;
     protected double coY;
@@ -101,20 +102,20 @@ public abstract class PPoint {
     }
 
     public PPoint mirrorVertically(int compWidth) {
-        return new EagerImage(view, compWidth - getImX(), getImY());
+        return new EagerIm(view, compWidth - getImX(), getImY());
     }
 
     public PPoint mirrorHorizontally(int compHeight) {
-        return new EagerImage(view, getImX(), compHeight - getImY());
+        return new EagerIm(view, getImX(), compHeight - getImY());
     }
 
     public PPoint mirrorBoth(int compWidth, int compHeight) {
-        return new EagerImage(view, compWidth - getImX(), compHeight - getImY());
+        return new EagerIm(view, compWidth - getImX(), compHeight - getImY());
     }
 
     public void drawLineTo(PPoint end, Graphics2D g) {
         g.draw(new Line2D.Double(
-                getImX(), getImY(), end.getImX(), end.getImY()));
+            getImX(), getImY(), end.getImX(), end.getImY()));
     }
 
     /**
@@ -150,23 +151,23 @@ public abstract class PPoint {
     }
 
     public static PPoint lazyFromCo(double x, double y, View view) {
-        return new Lazy(view, x, y);
+        return new LazyCo(view, x, y);
     }
 
     public static PPoint eagerFromCo(double x, double y, View view) {
-        return new Eager(view, x, y);
+        return new EagerCo(view, x, y);
     }
 
     public static PPoint eagerFromIm(double imX, double imY, View view) {
-        return new EagerImage(view, imX, imY);
+        return new EagerIm(view, imX, imY);
     }
 
     public static PPoint eagerFromIm(Point2D im, View view) {
-        return new EagerImage(view, im.getX(), im.getY());
+        return new EagerIm(view, im.getX(), im.getY());
     }
 
     public static PPoint lazyFromIm(double imX, double imY, View view) {
-        return new LazyImage(view, imX, imY);
+        return new LazyIm(view, imX, imY);
     }
 
     public Composition getComp() {
@@ -183,11 +184,11 @@ public abstract class PPoint {
      * space coordinates to image space coordinates only
      * on demand
      */
-    public static class Lazy extends PPoint {
+    public static class LazyCo extends PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public Lazy(View view, double x, double y) {
+        public LazyCo(View view, double x, double y) {
             super(view);
             coX = x;
             coY = y;
@@ -217,8 +218,8 @@ public abstract class PPoint {
      * An eager {@link PPoint}, which converts component
      * space coordinates to image space coordinates immediately
      */
-    public static class Eager extends PPoint {
-        public Eager(View view, double x, double y) {
+    public static class EagerCo extends PPoint {
+        public EagerCo(View view, double x, double y) {
             super(view);
             coX = x;
             coY = y;
@@ -230,8 +231,8 @@ public abstract class PPoint {
     /**
      * A {@link PPoint} eagerly initialized with image-space coordinates
      */
-    private static class EagerImage extends PPoint {
-        public EagerImage(View view, double imX, double imY) {
+    private static class EagerIm extends PPoint {
+        public EagerIm(View view, double imX, double imY) {
             super(view);
             this.imX = imX;
             this.imY = imY;
@@ -243,11 +244,11 @@ public abstract class PPoint {
     /**
      * A {@link PPoint} lazily initialized with image-space coordinates
      */
-    private static class LazyImage extends PPoint {
+    private static class LazyIm extends PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public LazyImage(View view, double imX, double imY) {
+        public LazyIm(View view, double imX, double imY) {
             super(view);
             this.imX = imX;
             this.imY = imY;

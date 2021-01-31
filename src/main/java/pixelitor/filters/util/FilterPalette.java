@@ -59,9 +59,8 @@ public abstract class FilterPalette {
 
         var dstCM = new IndexColorModel(8, arrayLength, reds, greens, blues,
             srcCM.getTransparentPixel());
-        BufferedImage dest = new BufferedImage(dstCM, src.getRaster(),
+        return new BufferedImage(dstCM, src.getRaster(),
             srcCM.isAlphaPremultiplied(), null);
-        return dest;
     }
 
     protected abstract int changeRed(int r);

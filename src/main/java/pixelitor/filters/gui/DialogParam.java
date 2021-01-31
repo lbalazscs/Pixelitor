@@ -21,7 +21,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +60,7 @@ public class DialogParam extends AbstractFilterParam {
 
     private JDialog createDialog(JDialog owner) {
         JPanel p = GUIUtils.arrangeVertically(List.of(children));
-        JDialog d = new DialogBuilder()
+        return new DialogBuilder()
             .owner(owner)
             .content(p)
             .title(getName())
@@ -68,7 +68,6 @@ public class DialogParam extends AbstractFilterParam {
             .okText(CLOSE_DIALOG)
             .noCancelButton()
             .build();
-        return d;
     }
 
     @Override
@@ -80,9 +79,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
+    public void adaptToImageSize(Dimension size) {
         for (FilterParam child : children) {
-            child.considerImageSize(bounds);
+            child.adaptToImageSize(size);
         }
     }
 

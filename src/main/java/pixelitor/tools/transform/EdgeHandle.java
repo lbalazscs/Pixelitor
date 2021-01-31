@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,10 +43,10 @@ public class EdgeHandle extends PositionHandle {
                       Color color, boolean horizontal,
                       int cursorIndex, int cursorIndexIO) {
         super(name, box,
-                (ch1.getX() + ch2.getX()) / 2.0,
-                (ch1.getY() + ch2.getY()) / 2.0,
-                ch1.getView(), color, Color.RED,
-                cursorIndex, cursorIndexIO);
+            (ch1.getX() + ch2.getX()) / 2.0,
+            (ch1.getY() + ch2.getY()) / 2.0,
+            ch1.getView(), color, Color.RED,
+            cursorIndex, cursorIndexIO);
         this.ch1 = ch1;
         this.ch2 = ch2;
         this.horizontal = horizontal;
@@ -54,8 +54,8 @@ public class EdgeHandle extends PositionHandle {
 
     public void updatePosition() {
         setLocation(
-                (ch1.getX() + ch2.getX()) / 2.0,
-                (ch1.getY() + ch2.getY()) / 2.0);
+            (ch1.getX() + ch2.getX()) / 2.0,
+            (ch1.getY() + ch2.getY()) / 2.0);
     }
 
     @Override
@@ -78,12 +78,6 @@ public class EdgeHandle extends PositionHandle {
 
         double dx = x - dragStartX;
         double dy = y - dragStartY;
-
-        // there is no need to set the location of the current handle:
-        // all edge handles will be placed at midpoints later
-//        double newX = origX + dx;
-//        double newY = origY + dy;
-//        setLocation(newX, newY);
 
         // calculate the deltas in the original coordinate system
         double odx = dx * cos + dy * sin;

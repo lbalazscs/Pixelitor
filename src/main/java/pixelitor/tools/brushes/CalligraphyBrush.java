@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,8 @@ import com.bric.awt.CalligraphyStroke;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 
 /**
@@ -45,8 +46,7 @@ public class CalligraphyBrush extends StrokeBrush {
 
     @Override
     protected Stroke createStroke(float thickness) {
-        double angle = settings.getAngle();
-        return new CalligraphyStroke(thickness, (float) angle);
+        return new CalligraphyStroke(thickness, (float) settings.getAngle());
     }
 
     @Override

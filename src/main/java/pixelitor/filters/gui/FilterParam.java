@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.Rectangle;
+import java.awt.Dimension;
 
 /**
  * The model for a filter parameter, which (unlike a button) holds
@@ -37,11 +37,12 @@ public interface FilterParam extends FilterSetting, Resettable {
     void randomize();
 
     /**
-     * A filter param can implement this to
-     * adjust the maximum and default values
+     * Can be used to adjust the maximum and default values
      * according to the size of the current image
      */
-    void considerImageSize(Rectangle bounds);
+    default void adaptToImageSize(Dimension size) {
+        // by default does nothing, as most controls are unaffected
+    }
 
     /**
      * Captures the state of this parameter into the returned

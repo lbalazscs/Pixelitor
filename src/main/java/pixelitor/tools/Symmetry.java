@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -278,11 +278,9 @@ public enum Symmetry {
 
             View view = p.getView();
             if (brushNo == 1) {
-                PPoint p1 = getRotatedPoint1(view, relX, relY);
-                return p1;
+                return getRotatedPoint1(view, relX, relY);
             } else if (brushNo == 2) {
-                PPoint p2 = getRotatedPoint2(view, relX, relY);
-                return p2;
+                return getRotatedPoint2(view, relX, relY);
             } else {
                 throw new IllegalArgumentException("brushNo = " + brushNo);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,25 +33,25 @@ public class RGBColorMixPalette extends Palette {
     private static int lastRows = 7;
     private static int lastCols = 10;
 
-    private final int rgb;
-    private final int otherRGB;
+    private final int rgbA;
+    private final int rgbB;
     private final boolean startWithFg;
 
     public RGBColorMixPalette(boolean startWithFg) {
         super(lastRows, lastCols);
         this.startWithFg = startWithFg;
 
-        Color color, otherColor;
+        Color colorA, colorB;
         if (startWithFg) {
-            color = getFGColor();
-            otherColor = getBGColor();
+            colorA = getFGColor();
+            colorB = getBGColor();
         } else {
-            color = getBGColor();
-            otherColor = getFGColor();
+            colorA = getBGColor();
+            colorB = getFGColor();
         }
 
-        rgb = color.getRGB();
-        otherRGB = otherColor.getRGB();
+        rgbA = colorA.getRGB();
+        rgbB = colorB.getRGB();
 
         config = new RGBPaletteConfig();
     }
@@ -84,7 +84,7 @@ public class RGBColorMixPalette extends Palette {
 
     private int getMixed(int x) {
         float mixFactor = calcMixFactor(x);
-        int mixed = mixColors(mixFactor, rgb, otherRGB);
+        int mixed = mixColors(mixFactor, rgbA, rgbB);
 
         var rgbConfig = (RGBPaletteConfig) config;
         float cyanRed = rgbConfig.getCyanRed();

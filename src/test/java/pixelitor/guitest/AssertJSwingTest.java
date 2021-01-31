@@ -2713,7 +2713,7 @@ public class AssertJSwingTest {
 
             mouse.dragToCanvas(200, 300);
 
-            if (mode.movesTheLayer()) {
+            if (mode.movesLayer()) {
                 // The translations will have these values only if we are at 100% zoom!
                 assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
                 assert dr.getTx() == -200 : "tx = " + dr.getTx();

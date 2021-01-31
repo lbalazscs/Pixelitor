@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,21 +56,21 @@ public class RGBPaletteConfig implements PaletteConfig {
         var p = new JPanel(new GridBagLayout());
 
         crSlider = createSlider(cyanRed, "Cyan-red shift");
-        crSlider.addChangeListener(e -> onNewRed(palettePanel));
+        crSlider.addChangeListener(e -> redChanged(palettePanel));
 
         mgSlider = createSlider(magentaGreen, "Magenta-green shift");
-        mgSlider.addChangeListener(e -> onNewGreen(palettePanel));
+        mgSlider.addChangeListener(e -> greenChanged(palettePanel));
 
         ybSlider = createSlider(yellowBlue, "Yellow-Blue shift");
-        ybSlider.addChangeListener(e -> onNewBlue(palettePanel));
+        ybSlider.addChangeListener(e -> blueChanged(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
         var labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
-                GridBagConstraints.CENTER,
-                GridBagConstraints.NONE, insets, 0, 0);
+            GridBagConstraints.CENTER,
+            GridBagConstraints.NONE, insets, 0, 0);
         var sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
-                GridBagConstraints.EAST,
-                GridBagConstraints.HORIZONTAL, insets, 0, 0);
+            GridBagConstraints.EAST,
+            GridBagConstraints.HORIZONTAL, insets, 0, 0);
 
         p.add(new JLabel("C-R:"), labelCtr);
         p.add(crSlider, sliderCtr);
@@ -88,27 +88,27 @@ public class RGBPaletteConfig implements PaletteConfig {
         return p;
     }
 
-    private void onNewRed(PalettePanel palettePanel) {
+    private void redChanged(PalettePanel panel) {
         float oldValue = cyanRed;
         cyanRed = crSlider.getValue() / 100.0f;
         if (oldValue != cyanRed) {
-            palettePanel.configChanged();
+            panel.configChanged();
         }
     }
 
-    private void onNewGreen(PalettePanel palettePanel) {
+    private void greenChanged(PalettePanel panel) {
         float oldValue = magentaGreen;
         magentaGreen = mgSlider.getValue() / 100.0f;
         if (oldValue != magentaGreen) {
-            palettePanel.configChanged();
+            panel.configChanged();
         }
     }
 
-    private void onNewBlue(PalettePanel palettePanel) {
+    private void blueChanged(PalettePanel panel) {
         float oldValue = yellowBlue;
         yellowBlue = ybSlider.getValue() / 100.0f;
         if (oldValue != yellowBlue) {
-            palettePanel.configChanged();
+            panel.configChanged();
         }
     }
 }

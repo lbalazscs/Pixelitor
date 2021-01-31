@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,13 +30,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * The history of {@link ConnectBrush}. Not just for undo/redo,
+ * the drawing is also based on connecting with older points.
+ */
 public class ConnectBrushHistory {
+    // a brush stroke is a list of points, and the history is a list of strokes
     private static final List<List<HistoryPoint>> history = new ArrayList<>();
     private static List<HistoryPoint> lastStroke;
     private static int numPoints;
     private static int indexOfNextAdd = 0;
 
     private ConnectBrushHistory() {
+    }
+
+    public static void startNewBrushStroke(PPoint p) {
+        lastStroke = new ArrayList<>();
+
+        // the entries after indexOfNextAdd will never be
+        // redone, they can be discarded
+        if (history.size() > indexOfNextAdd) {
+            history.subList(indexOfNextAdd, history.size()).clear();
+        }
+
+        assert history.size() == indexOfNextAdd;
+        history.add(lastStroke);
+        indexOfNextAdd++;
+
+        lastStroke.add(new HistoryPoint(p.getImX(), p.getImY()));
+        numPoints++;
     }
 
     public static void drawConnectingLines(Graphics2D targetG,
@@ -55,6 +77,7 @@ public class ConnectBrushHistory {
 
             var line = new Line2D.Double();
 
+            // randomly connect with nearby old points
             ThreadLocalRandom rnd = ThreadLocalRandom.current();
             for (int i = 0; i < indexOfNextAdd; i++) {
                 List<HistoryPoint> stroke = history.get(i);
@@ -71,30 +94,13 @@ public class ConnectBrushHistory {
                         double xOffset = dx * offSet;
                         double yOffset = dy * offSet;
                         line.setLine(last.x - xOffset, last.y - yOffset,
-                                old.x + xOffset, old.y + yOffset);
+                            old.x + xOffset, old.y + yOffset);
 
                         targetG.draw(line);
                     }
                 }
             }
         }
-    }
-
-    public static void startNewBrushStroke(PPoint p) {
-        lastStroke = new ArrayList<>();
-
-        // the entries after indexOfNextAdd will never be
-        // redone, they can be discarded
-        if (history.size() > indexOfNextAdd) {
-            history.subList(indexOfNextAdd, history.size()).clear();
-        }
-        
-        assert history.size() == indexOfNextAdd;
-        history.add(lastStroke);
-        indexOfNextAdd++;
-
-        lastStroke.add(new HistoryPoint(p.getImX(), p.getImY()));
-        numPoints++;
     }
 
     public static void clear() {

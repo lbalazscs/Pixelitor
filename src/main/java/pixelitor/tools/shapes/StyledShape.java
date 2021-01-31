@@ -47,6 +47,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.String.format;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -237,9 +238,14 @@ public class StyledShape implements Cloneable, Transformable {
     }
 
     @Override
-    public void transformWith(AffineTransform at) {
+    public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
-        transformedImDrag = origImDrag.transform(at);
+        transformedImDrag = origImDrag.transformedCopy(at);
+    }
+
+    @Override
+    public void updateUI(View view) {
+        view.getComp().imageChanged(REPAINT);
     }
 
     private void setFillPaintType(TwoPointPaintType fillPaintType) {

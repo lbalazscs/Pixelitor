@@ -722,12 +722,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public int getMouseHitPixelAtPoint(Point p) {
+    public int getPixelAtPoint(Point p) {
         int x = p.x - getTx();
         int y = p.y - getTy();
         if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
             if (hasMask() && isMaskEnabled()) {
-                int maskPixel = getMask().getMouseHitPixelAtPoint(p);
+                int maskPixel = getMask().getPixelAtPoint(p);
                 if (maskPixel != 0) {
                     int imagePixel = image.getRGB(x, y);
                     float maskAlpha = (maskPixel & 0xff) / 255.0f;

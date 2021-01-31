@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,14 +18,14 @@ package pixelitor.tools.shapes;
 
 import pixelitor.filters.gui.EnumParam;
 
-import static java.awt.BasicStroke.JOIN_BEVEL;
-import static java.awt.BasicStroke.JOIN_MITER;
-import static java.awt.BasicStroke.JOIN_ROUND;
+import java.awt.BasicStroke;
+
+import static java.awt.BasicStroke.*;
 
 /**
- * An enum wrapper around the join argument of a BasicStroke constructor
+ * An enum wrapper around the join argument of a {@link BasicStroke} constructor
  */
-public enum BasicStrokeJoin {
+public enum StrokeJoin {
     ROUND("Round", JOIN_ROUND),
     BEVEL("Bevel", JOIN_BEVEL),
     MITER("Miter", JOIN_MITER);
@@ -34,7 +34,7 @@ public enum BasicStrokeJoin {
     private final int value;
     private final String guiName;
 
-    BasicStrokeJoin(String guiName, int value) {
+    StrokeJoin(String guiName, int value) {
         this.guiName = guiName;
         this.value = value;
     }
@@ -43,12 +43,14 @@ public enum BasicStrokeJoin {
         return value;
     }
 
+    public static EnumParam<StrokeJoin> asParam() {
+        var param = new EnumParam<>(NAME, StrokeJoin.class);
+        param.setToolTip("The way lines connect at the corners");
+        return param;
+    }
+
     @Override
     public String toString() {
         return guiName;
-    }
-
-    public static EnumParam<BasicStrokeJoin> asParam() {
-        return new EnumParam<>(NAME, BasicStrokeJoin.class);
     }
 }

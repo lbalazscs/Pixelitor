@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,26 +32,26 @@ import java.awt.geom.Point2D;
 import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
 
 /**
- * The type of the gradient in the gradient tool
+ * The type of a gradient.
  */
 public enum GradientType {
     LINEAR("Linear") {
         @Override
         public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            Point2D.Double start = imDrag.getStartPoint();
-            Point2D.Double end = imDrag.getEndPoint();
+            Point2D start = imDrag.getStartPoint();
+            Point2D end = imDrag.getEndPoint();
 
             return new LinearGradientPaint(start, end, FRACTIONS,
-                    colors, cycle, SRGB, gradientTransform);
+                colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
     }, RADIAL("Radial") {
         @Override
         public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
             float radius = (float) imDrag.getDistance();
-            Point2D.Double center = imDrag.getStartPoint();
+            Point2D center = imDrag.getStartPoint();
 
             return new RadialGradientPaint(center, radius, center, FRACTIONS,
-                    colors, cycle, SRGB, gradientTransform);
+                colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
     }, ANGLE("Angle") {
         @Override
@@ -76,7 +76,7 @@ public enum GradientType {
     };
 
     private static final float[] FRACTIONS = {0.0f, 1.0f};
-    private static final AffineTransform gradientTransform = new AffineTransform();
+    private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();
 
     private final String guiName;
 

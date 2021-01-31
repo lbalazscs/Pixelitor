@@ -39,16 +39,14 @@ import static java.lang.String.format;
  */
 public class PartialImageEdit extends FadeableEdit {
     private final Rectangle saveRect;
-    private final boolean canRepeat;
     private SoftReference<Raster> backupRasterRef;
 
     private final Drawable dr;
 
     public PartialImageEdit(String name, Composition comp, Drawable dr,
-                            BufferedImage image, Rectangle saveRect, boolean canRepeat) {
+                            BufferedImage image, Rectangle saveRect) {
         super(name, comp, dr);
 
-        this.canRepeat = canRepeat;
         this.dr = dr;
         this.saveRect = saveRect;
 

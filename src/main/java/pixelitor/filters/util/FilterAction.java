@@ -102,7 +102,7 @@ public class FilterAction extends DrawableAction {
 
     // overrides the constructor parameter
     // a bit ugly, but it simplifies the builders
-    public FilterAction withoutGUI() {
+    public FilterAction noGUI() {
         hasDialog = false;
         menuName = name; // without the "..."
         setText(menuName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,14 +32,14 @@ import java.util.List;
  */
 class LineSettings extends ShapeTypeSettings {
     private final RangeParam width;
-    private final EnumParam<BasicStrokeCap> cap;
+    private final EnumParam<StrokeCap> cap;
 
     public LineSettings() {
         width = new RangeParam("Width (px)", 1, 10, 100);
-        cap = BasicStrokeCap.asParam();
+        cap = StrokeCap.asParam();
     }
 
-    private LineSettings(RangeParam width, EnumParam<BasicStrokeCap> cap) {
+    private LineSettings(RangeParam width, EnumParam<StrokeCap> cap) {
         this.width = width;
         this.cap = cap;
     }
@@ -63,7 +63,7 @@ class LineSettings extends ShapeTypeSettings {
 
     @Override
     public LineSettings copy() {
-        EnumParam<BasicStrokeCap> capCopy = BasicStrokeCap.asParam(); // same default
+        EnumParam<StrokeCap> capCopy = StrokeCap.asParam(); // same default
         capCopy.setSelectedItem(cap.getSelected(), false); // different value
 
         return new LineSettings(width.copy(), capCopy);

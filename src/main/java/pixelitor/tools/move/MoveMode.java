@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,13 +19,16 @@ package pixelitor.tools.move;
 
 import pixelitor.history.ContentLayerMoveEdit;
 
+/**
+ * The type of moves available in the Move Tool.
+ */
 public enum MoveMode {
     MOVE_BOTH("Layer and Selection", "Move",
-            true, true) {
+        true, true) {
     }, MOVE_SELECTION_ONLY("Selection Only", "Move Selection",
-            true, false) {
+        true, false) {
     }, MOVE_LAYER_ONLY("Layer Only", ContentLayerMoveEdit.NAME,
-            false, true) {
+        false, true) {
     };
 
     private final String guiName;
@@ -40,11 +43,11 @@ public enum MoveMode {
         this.moveLayer = moveLayer;
     }
 
-    public boolean movesTheSelection() {
+    public boolean movesSelection() {
         return moveSelection;
     }
 
-    public boolean movesTheLayer() {
+    public boolean movesLayer() {
         return moveLayer;
     }
 

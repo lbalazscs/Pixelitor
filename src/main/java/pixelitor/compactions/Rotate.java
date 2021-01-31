@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class Rotate extends SimpleCompAction {
     private final SpecialAngle angle;
 
     public Rotate(SpecialAngle angle) {
-        super(angle.getName(), true);
+        super(angle.getGUIName(), true);
         this.angle = angle;
     }
 
@@ -44,7 +44,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return angle.getName();
+        return angle.getGUIName();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected String getStatusBarMessage() {
-        return "The image was rotated by " + angle.getAngleAsString();
+        return "The image was rotated by " + angle.asString();
     }
 
     public enum SpecialAngle {
@@ -81,7 +81,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        canvas.getHeight(), 0);
+                    canvas.getHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -90,7 +90,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        image.getHeight(), 0);
+                    image.getHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -113,7 +113,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        canvas.getWidth(), canvas.getHeight());
+                    canvas.getWidth(), canvas.getHeight());
                 at.quadrantRotate(2);
                 return at;
             }
@@ -122,7 +122,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        image.getWidth(), image.getHeight());
+                    image.getWidth(), image.getHeight());
                 at.quadrantRotate(2);
                 return at;
             }
@@ -146,7 +146,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        0, canvas.getWidth());
+                    0, canvas.getWidth());
                 at.quadrantRotate(3);
                 return at;
             }
@@ -155,7 +155,7 @@ public class Rotate extends SimpleCompAction {
             public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        0, image.getWidth());
+                    0, image.getWidth());
                 at.quadrantRotate(3);
                 return at;
             }
@@ -171,17 +171,17 @@ public class Rotate extends SimpleCompAction {
         };
 
         protected final int angleDegree;
-        private final String name;
-        private final String angleAsString;
+        private final String guiName;
+        private final String asString;
 
-        SpecialAngle(int angleDegree, String angleAsString) {
+        SpecialAngle(int angleDegree, String asString) {
             this.angleDegree = angleDegree;
-            this.name = "Rotate " + angleAsString;
-            this.angleAsString = angleAsString;
+            this.guiName = "Rotate " + asString;
+            this.asString = asString;
         }
 
-        public String getName() {
-            return name;
+        public String getGUIName() {
+            return guiName;
         }
 
         public abstract void changeCanvasSize(Canvas canvas, View view);
@@ -202,8 +202,8 @@ public class Rotate extends SimpleCompAction {
             return angleDegree;
         }
 
-        public String getAngleAsString() {
-            return angleAsString;
+        public String asString() {
+            return asString;
         }
 
         /**

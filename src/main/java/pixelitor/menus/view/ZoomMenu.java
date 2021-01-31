@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,11 +70,11 @@ public class ZoomMenu extends PMenu {
 
         setupZoomKeys(this);
 
-        addActionWithKey(ZOOM_IN_ACTION, CTRL_PLUS);
-        addActionWithKey(ZOOM_OUT_ACTION, CTRL_MINUS);
+        addAction(ZOOM_IN_ACTION, CTRL_PLUS);
+        addAction(ZOOM_OUT_ACTION, CTRL_MINUS);
 
-        addActionWithKey(ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
-        addActionWithKey(FIT_SPACE_ACTION, FIT_SPACE_KEY);
+        addAction(ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
+        addAction(FIT_SPACE_ACTION, FIT_SPACE_KEY);
         addAction(FIT_WIDTH_ACTION);
         addAction(FIT_HEIGHT_ACTION);
 

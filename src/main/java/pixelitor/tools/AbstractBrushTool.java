@@ -83,7 +83,7 @@ public abstract class AbstractBrushTool extends Tool {
     private Action brushSettingsAction;
     private JDialog settingsDialog;
 
-    DrawDestination drawDestination;
+    protected DrawDestination drawDestination;
 
     private RangeParam lazyMouseDist;
     private RangeParam lazyMouseSpacing;
@@ -99,7 +99,7 @@ public abstract class AbstractBrushTool extends Tool {
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
         super(name, activationKey, iconFileName, toolMessage,
-            cursor, true, true, ClipStrategy.CANVAS);
+            cursor, ClipStrategy.CANVAS);
         this.canHaveSymmetry = canHaveSymmetry;
         if (canHaveSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
@@ -205,20 +205,19 @@ public abstract class AbstractBrushTool extends Tool {
         p.setBorder(createEmptyBorder(5, 5, 5, 5));
         var gbh = new GridBagHelper(p);
 
-        boolean lazyMouseEnabledByDefault = false;
-        lazyMouseCB = new JCheckBox("", lazyMouseEnabledByDefault);
+        lazyMouseCB = new JCheckBox("", false);
         lazyMouseCB.addActionListener(e -> setLazyBrush());
         gbh.addLabelAndControlNoStretch("Enabled:", lazyMouseCB);
 
         lazyMouseDist = LazyMouseBrush.createDistParam();
         var distSlider = SliderSpinner.from(lazyMouseDist);
         distSlider.setName("distSlider");
-        distSlider.setEnabled(lazyMouseEnabledByDefault);
+        distSlider.setEnabled(false);
         gbh.addLabelAndControl(lazyMouseDist.getName() + ":", distSlider);
 
         lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
         var spacingSlider = SliderSpinner.from(lazyMouseSpacing);
-        spacingSlider.setEnabled(lazyMouseEnabledByDefault);
+        spacingSlider.setEnabled(false);
         spacingSlider.setName("spacingSlider");
         gbh.addLabelAndControl(lazyMouseSpacing.getName() + ":", spacingSlider);
 
@@ -678,6 +677,11 @@ public abstract class AbstractBrushTool extends Tool {
 
     private void closeBrushSettingsDialog() {
         GUIUtils.closeDialog(settingsDialog, true);
+    }
+
+    @Override
+    public boolean allowOnlyDrawables() {
+        return true;
     }
 
     @Override

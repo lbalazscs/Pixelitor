@@ -92,7 +92,7 @@ public abstract class ContentLayer extends Layer {
      * Returns the pixel value at the given point or zero if
      * the point is outside the contents or it is transparent.
      */
-    public abstract int getMouseHitPixelAtPoint(Point p);
+    public abstract int getPixelAtPoint(Point p);
 
     @Override
     public void startMovement() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,7 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Cursor;
 
-import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
-import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
-import static pixelitor.tools.util.DragDisplay.ONE_LINER_BG_HEIGHT;
+import static pixelitor.tools.util.DragDisplay.*;
 import static pixelitor.tools.util.DraggablePoint.HANDLE_RADIUS;
 
 /**
@@ -31,29 +29,29 @@ import static pixelitor.tools.util.DraggablePoint.HANDLE_RADIUS;
  */
 public enum Direction {
     NORTH(Cursors.N,
-            -BG_WIDTH_PIXEL / 2.0f,
-            -MOUSE_DISPLAY_DISTANCE - HANDLE_RADIUS),
+        -BG_WIDTH_PIXEL / 2.0f,
+        -MOUSE_DISPLAY_DISTANCE - HANDLE_RADIUS),
     NORTH_WEST(Cursors.NW,
-            -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
-            -MOUSE_DISPLAY_DISTANCE),
+        -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
+        -MOUSE_DISPLAY_DISTANCE),
     WEST(Cursors.W,
-            -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
-            ONE_LINER_BG_HEIGHT / 2.0f),
+        -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
+        ONE_LINER_BG_HEIGHT / 2.0f),
     SOUTH_WEST(Cursors.SW,
-            -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
-            MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
+        -BG_WIDTH_PIXEL - MOUSE_DISPLAY_DISTANCE,
+        MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
     SOUTH(Cursors.S,
-            -BG_WIDTH_PIXEL / 2.0f,
-            MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
+        -BG_WIDTH_PIXEL / 2.0f,
+        MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
     SOUTH_EAST(Cursors.SE,
-            MOUSE_DISPLAY_DISTANCE,
-            MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
+        MOUSE_DISPLAY_DISTANCE,
+        MOUSE_DISPLAY_DISTANCE + ONE_LINER_BG_HEIGHT),
     EAST(Cursors.E,
-            MOUSE_DISPLAY_DISTANCE,
-            ONE_LINER_BG_HEIGHT / 2.0f),
+        MOUSE_DISPLAY_DISTANCE,
+        ONE_LINER_BG_HEIGHT / 2.0f),
     NORTH_EAST(Cursors.NE,
-            MOUSE_DISPLAY_DISTANCE,
-            -MOUSE_DISPLAY_DISTANCE);
+        MOUSE_DISPLAY_DISTANCE,
+        -MOUSE_DISPLAY_DISTANCE);
 
     // the corner offsets at 0 angle with a default transform box
     public static final int N_OFFSET = 0;
@@ -76,15 +74,14 @@ public enum Direction {
     public static final int NE_OFFSET_IO = 1;
     public static final int N_OFFSET_IO = 0;
 
-    // the cursor that should be shown for a corner facing the current direction
+    // the cursor shown for a corner facing the current direction
     private final Cursor cursor;
 
     // the relative distances needed for displaying the drag display
     final float dx;
     final float dy;
 
-    // values() creates a new array for each call, so cache it for efficiency
-    private static final Direction[] dirs = values();
+    private static final Direction[] directions = values();
 
     Direction(Cursor cursor, float dx, float dy) {
         this.cursor = cursor;
@@ -92,9 +89,6 @@ public enum Direction {
         this.dy = dy;
     }
 
-    /**
-     * Return the cursor associated with the current direction
-     */
     public Cursor getCursor() {
         return cursor;
     }
@@ -107,6 +101,6 @@ public enum Direction {
         if (index > 7) {
             index = index % 8;
         }
-        return dirs[index];
+        return directions[index];
     }
 }

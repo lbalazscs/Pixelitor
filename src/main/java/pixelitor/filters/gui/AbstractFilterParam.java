@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import java.awt.Rectangle;
 import java.util.Objects;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -60,11 +59,6 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
-        // by default does nothing, as most controls are unaffected
     }
 
     @Override

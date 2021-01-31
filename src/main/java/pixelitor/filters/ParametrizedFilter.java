@@ -132,7 +132,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     @Override
     public boolean canHaveUserPresets() {
-        return paramSet.isNonTrivialFilter();
+        return paramSet.canHaveUserPresets();
     }
 
     public void saveAsPreset(DialogMenuBar menu) {

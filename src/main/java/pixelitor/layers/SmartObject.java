@@ -107,7 +107,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public int getMouseHitPixelAtPoint(Point p) {
+    public int getPixelAtPoint(Point p) {
         // unknown
         return 0x00000000;
     }

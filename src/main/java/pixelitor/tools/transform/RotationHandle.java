@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -107,11 +107,11 @@ public class RotationHandle extends DraggablePoint {
             double cos = box.getCos();
 
             float drawX = (float) (x
-                    - displayBgWidth / 2.0f
-                    + displayBgWidth * 0.7 * sin);
+                - displayBgWidth / 2.0f
+                + displayBgWidth * 0.7 * sin);
             float drawY = (float) (y
-                    - MOUSE_DISPLAY_CENTER_DISTANCE * cos
-                    + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
+                - MOUSE_DISPLAY_CENTER_DISTANCE * cos
+                + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
             dd.drawOneLine(angleInfo, drawX, drawY);
             dd.finish();
         }

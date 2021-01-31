@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,6 @@ import static pixelitor.tools.shapes.ShapeType.KIWI;
  * shape filters
  */
 public class StrokeSettingsPanel extends JPanel {
-
     public StrokeSettingsPanel(StrokeParam sp) {
         RangeParam strokeWidthParam = sp.getStrokeWidthParam();
 
@@ -70,8 +69,8 @@ public class StrokeSettingsPanel extends JPanel {
     }
 
     private static JPanel createCapJoinPanel(StrokeParam sp) {
-        EnumParam<BasicStrokeCap> capParam = sp.getStrokeCapParam();
-        EnumParam<BasicStrokeJoin> joinParam = sp.getStrokeJoinParam();
+        EnumParam<StrokeCap> capParam = sp.getStrokeCapParam();
+        EnumParam<StrokeJoin> joinParam = sp.getStrokeJoinParam();
 
         var p = new JPanel();
         p.setBorder(createTitledBorder("Line Endpoints"));
@@ -90,11 +89,8 @@ public class StrokeSettingsPanel extends JPanel {
 
         JComponent joinSelector = joinParam.createGUI("join");
 
-        capParam.setToolTip("The shape of the line endpoints");
-        joinParam.setToolTip("The way lines connect at the corners");
-
-        gbh.addLabelAndControl(BasicStrokeCap.NAME + ":", capSelector);
-        gbh.addLabelAndControl(BasicStrokeJoin.NAME + ":", joinSelector);
+        gbh.addLabelAndControl(StrokeCap.NAME + ":", capSelector);
+        gbh.addLabelAndControl(StrokeJoin.NAME + ":", joinSelector);
 
         return p;
     }
@@ -136,9 +132,9 @@ public class StrokeSettingsPanel extends JPanel {
                 int height = getHeight();
                 g2.fillRect(0, 0, width, height);
                 QuadCurve2D.Double shape = new QuadCurve2D.Double(
-                        width * 0.1, height * 0.4,
-                        width * 0.5, height * 0.8,
-                        width * 0.9, height * 0.4
+                    width * 0.1, height * 0.4,
+                    width * 0.5, height * 0.8,
+                    width * 0.9, height * 0.4
                 );
                 g2.setColor(Color.BLACK);
                 g2.setStroke(sp.createStroke());

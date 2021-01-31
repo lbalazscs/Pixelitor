@@ -42,11 +42,9 @@ public abstract class DragTool extends Tool {
 
     protected DragTool(String name, char activationKeyChar, String iconFileName,
                        String toolMessage, Cursor cursor,
-                       boolean allowOnlyDrawables, boolean handToolForwarding,
                        boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
 
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor,
-            allowOnlyDrawables, handToolForwarding, clipStrategy);
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor, clipStrategy);
 
         this.constrainIfShiftDown = constrainIfShiftDown;
     }
@@ -70,7 +68,7 @@ public abstract class DragTool extends Tool {
             userDrag.saveEndValues();
         }
         if (constrainIfShiftDown) {
-            userDrag.setConstrainPoints(e.isShiftDown());
+            userDrag.setConstrained(e.isShiftDown());
         }
 
         userDrag.setEnd(e);

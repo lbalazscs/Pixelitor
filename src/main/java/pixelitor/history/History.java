@@ -145,7 +145,7 @@ public class History {
         // but typically the extra savings would be minimal
 
         return new PartialImageEdit(editName, comp,
-            dr, origImage, rect, false);
+            dr, origImage, rect);
     }
 
     public static String getUndoPresentationName() {

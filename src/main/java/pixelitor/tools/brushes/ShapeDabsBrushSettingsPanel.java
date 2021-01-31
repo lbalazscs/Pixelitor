@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,27 +53,26 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
     }
 
     private void addSpacingSelector(DabsBrushSettings settings) {
-        RangeParam spacingSelector = new RangeParam("Spacing (radius %)", 1,
-                (int) Math.round(DEFAULT_SPACING_RATIO * 100),
-                1000, true, NONE);
-        addSlider(spacingSelector, "spacing");
-        spacingSelector.setAdjustmentListener(
-            () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getPercentageValF())));
+        RangeParam spacing = new RangeParam("Spacing (radius %)", 1,
+            (int) Math.round(DEFAULT_SPACING_RATIO * 100),
+            1000, true, NONE);
+        addSlider(spacing, "spacing");
+        spacing.setAdjustmentListener(
+            () -> settings.changeSpacing(new RadiusRatioSpacing(spacing.getPercentageValF())));
     }
 
     private void addShapeTypeSelector(ShapeDabsBrushSettings settings) {
         EnumParam<ShapeType> typeModel = ShapeType.asParam(DEFAULT_SHAPE);
-        JComponent typeSelector = typeModel.createGUI("shape");
+        JComponent typeCombo = typeModel.createGUI("shape");
         typeModel.setAdjustmentListener(() ->
-                settings.setShapeType(typeModel.getSelected()));
+            settings.setShapeType(typeModel.getSelected()));
 
-        addLabelWithControlNoStretch("Shape:", typeSelector);
+        addLabelWithControlNoStretch("Shape:", typeCombo);
     }
 
     private void changeAngleSettings() {
-        boolean angleAwareChecked = angleAware.isChecked();
-        float angleJitterRadians = angleJitter.getValueInRadians();
-        AngleSettings angleSettings = new AngleSettings(angleAwareChecked, angleJitterRadians);
+        AngleSettings angleSettings = new AngleSettings(
+            angleAware.isChecked(), angleJitter.getValueInRadians());
         settings.changeAngleSettings(angleSettings);
     }
 }

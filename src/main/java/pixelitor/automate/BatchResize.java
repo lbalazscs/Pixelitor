@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,13 +34,13 @@ public class BatchResize {
     private BatchResize() { // do not instantiate
     }
 
-    public static void start() {
+    public static void showDialog() {
         var batchResizePanel = new BatchResizePanel();
         new DialogBuilder()
-                .validatedContent(batchResizePanel)
-                .title("Batch Resize")
-                .okAction(() -> dialogAccepted(batchResizePanel))
-                .show();
+            .validatedContent(batchResizePanel)
+            .title("Batch Resize")
+            .okAction(() -> dialogAccepted(batchResizePanel))
+            .show();
     }
 
     private static void dialogAccepted(BatchResizePanel p) {
@@ -83,14 +83,10 @@ public class BatchResize {
         @Override
         public ValidationResult checkValidity() {
             return openSaveDirsPanel.checkValidity()
-                    .addErrorIf(widthTF.getText()
-                                    .trim()
-                                    .isEmpty(),
-                            "The 'width' field is empty")
-                    .addErrorIf(heightTF.getText()
-                                    .trim()
-                                    .isEmpty(),
-                            "The 'height' field is empty");
+                .addErrorIf(widthTF.getText().trim().isEmpty(),
+                    "The 'width' field is empty")
+                .addErrorIf(heightTF.getText().trim().isEmpty(),
+                    "The 'height' field is empty");
         }
 
         private void saveValues() {

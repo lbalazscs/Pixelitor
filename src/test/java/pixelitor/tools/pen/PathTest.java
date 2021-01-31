@@ -91,11 +91,11 @@ class PathTest {
         sp.storeTransformRefPoints(); // the ref point for the first anchor is 10, 10
 
         var at = AffineTransform.getTranslateInstance(20, 10);
-        sp.transformWith(at);
+        sp.transform(at);
         assertThat(sp).firstAnchorIsAt(30, 20);
 
         at = AffineTransform.getTranslateInstance(10, 20);
-        sp.transformWith(at);
+        sp.transform(at);
         assertThat(sp).firstAnchorIsAt(20, 30);
     }
 

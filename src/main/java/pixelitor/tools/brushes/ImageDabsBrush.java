@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  */
 public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages
-            = new EnumMap<>(ImageBrushType.class);
+        = new EnumMap<>(ImageBrushType.class);
     private final BufferedImage templateImg;
     private BufferedImage coloredBrushImg;
     private BufferedImage finalScaledImg;
@@ -44,22 +44,23 @@ public class ImageDabsBrush extends DabsBrush {
     public ImageDabsBrush(double radius, ImageBrushType imageBrushType,
                           double spacingRatio, AngleSettings angleSettings) {
         super(radius, new RadiusRatioSpacing(spacingRatio),
-                angleSettings, false);
+            angleSettings, false);
 
         // for each brush type multiple brush instances are created because
         // of the symmetry, but the template image can be shared between them
         templateImg = templateImages.computeIfAbsent(imageBrushType,
-                ImageBrushType::createBWBrushImage);
+            ImageBrushType::createBWBrushImage);
     }
 
     @Override
     public void setRadius(double radius) {
         super.setRadius(radius);
 
-        // if the radius changes during the brush stroke via hotkeys,
-        // the brush image has to be recreated
+        // if the radius changes during the brush stroke
+        // via hotkeys, the brush image has to be recreated
         if (targetG != null) {
-            setupBrushStamp(null); // the point argument is not used by this class
+            // the point argument is not used by this class
+            setupBrushStamp(null);
         }
     }
 
@@ -101,7 +102,7 @@ public class ImageDabsBrush extends DabsBrush {
 
     /**
      * Creates a colorized brush image from the template image
-     * according to the foreground color
+     * according to the given color.
      */
     private void colorizeBrushImage(Color color) {
         coloredBrushImg = new BufferedImage(
@@ -115,12 +116,13 @@ public class ImageDabsBrush extends DabsBrush {
         for (int i = 0; i < destPixels.length; i++) {
             int srcRGB = srcPixels[i];
 
-            //int a = (srcRGB >>> 24) & 0xFF;
             int srcR = (srcRGB >>> 16) & 0xFF;
             int srcG = (srcRGB >>> 8) & 0xFF;
             int srcB = srcRGB & 0xFF;
             int srcAverage = (srcR + srcG + srcB) / 3;
 
+            // the color comes from the given color,
+            // the alpha depends on the source
             destPixels[i] = (0xFF - srcAverage) << 24 | destR << 16 | destG << 8 | destB;
         }
     }

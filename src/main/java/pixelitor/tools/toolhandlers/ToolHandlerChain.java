@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,17 +34,14 @@ public class ToolHandlerChain {
 
     private HandToolHandler handToolHandler;
 
-    public ToolHandlerChain(Tool tool, Cursor cursor,
-                            boolean allowOnlyDrawables,
-                            boolean handToolForwarding) {
+    public ToolHandlerChain(Tool tool, Cursor cursor) {
         lastHandler = null;
-        if (handToolForwarding) {
-            // most tools behave like the hand tool if the space is pressed
+        if (tool.hasHandToolForwarding()) {
             handToolHandler = new HandToolHandler(cursor, tool);
             lastHandler = appendNext(handToolHandler);
         }
 
-        if (allowOnlyDrawables) {
+        if (tool.allowOnlyDrawables()) {
             lastHandler = appendNext(new DrawableCheckHandler(tool));
         }
 

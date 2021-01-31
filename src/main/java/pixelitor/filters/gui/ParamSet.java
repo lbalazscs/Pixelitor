@@ -21,7 +21,7 @@ import pixelitor.filters.Filter;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -188,54 +188,10 @@ public class ParamSet {
         }
     }
 
-    public void considerImageSize(Rectangle bounds) {
+    public void adaptToImageSize(Dimension size) {
         for (FilterParam param : paramList) {
-            param.considerImageSize(bounds);
+            param.adaptToImageSize(size);
         }
-    }
-
-    public FilterState copyState(boolean animOnly) {
-        return new FilterState(this, animOnly);
-    }
-
-    public FilterState createPreset(String name) {
-        FilterState preset = copyState(false);
-        preset.setName(name);
-        return preset;
-    }
-
-    public void setState(FilterState newStateSet, boolean forAnimation) {
-        for (FilterParam param : paramList) {
-            if (forAnimation && !param.canBeAnimated()) {
-                continue;
-            }
-            String name = param.getName();
-            ParamState<?> newState = newStateSet.get(name);
-
-            if (newState != null) { // a preset doesn't have to contain all key-value pairs
-                param.loadStateFrom(newState, !forAnimation);
-            }
-        }
-    }
-
-    public void applyPreset(FilterState preset) {
-        setState(preset, false);
-        runFilter();
-    }
-
-    public void loadPreset(UserPreset preset) {
-        long runCountBefore = Filter.runCount;
-        System.out.println("ParamSet::loadPreset: loading from preset " + preset.toString());
-        for (FilterParam param : paramList) {
-            param.loadStateFrom(preset);
-        }
-        assert runCountBefore == Filter.runCount :
-            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
-
-        runFilter();
-
-        assert runCountBefore + 1 == Filter.runCount :
-            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
     }
 
     /**
@@ -267,6 +223,29 @@ public class ParamSet {
         return paramList;
     }
 
+    public FilterState copyState(boolean animOnly) {
+        return new FilterState(this, animOnly);
+    }
+
+    public void setState(FilterState newStateSet, boolean forAnimation) {
+        for (FilterParam param : paramList) {
+            if (forAnimation && !param.canBeAnimated()) {
+                continue;
+            }
+            String name = param.getName();
+            ParamState<?> newState = newStateSet.get(name);
+
+            if (newState != null) { // a preset doesn't have to contain all key-value pairs
+                param.loadStateFrom(newState, !forAnimation);
+            }
+        }
+    }
+
+    public void applyState(FilterState preset) {
+        setState(preset, false);
+        runFilter();
+    }
+
     public void setBuiltinPresets(FilterState... filterStates) {
         this.builtinPresets = filterStates;
     }
@@ -277,6 +256,23 @@ public class ParamSet {
 
     public boolean hasBuiltinPresets() {
         return builtinPresets != null;
+    }
+
+    public boolean canHaveUserPresets() {
+        return nonTrivialFilter;
+    }
+
+    public void loadPreset(UserPreset preset) {
+        long runCountBefore = Filter.runCount;
+        for (FilterParam param : paramList) {
+            param.loadStateFrom(preset);
+        }
+
+        // check that the loading didn't trigger the filter
+        assert Filter.runCount == runCountBefore :
+            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
+
+        runFilter();
     }
 
     public UserPreset toUserPreset(String filterName, String presetName) {
@@ -293,10 +289,6 @@ public class ParamSet {
         }
 
         return p;
-    }
-
-    public boolean isNonTrivialFilter() {
-        return nonTrivialFilter;
     }
 
     @Override

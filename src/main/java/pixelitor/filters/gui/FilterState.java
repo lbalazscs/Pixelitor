@@ -101,7 +101,7 @@ public class FilterState {
         return new AbstractAction(name) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                paramSet.applyPreset(FilterState.this);
+                paramSet.applyState(FilterState.this);
             }
         };
     }

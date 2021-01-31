@@ -412,9 +412,7 @@ public class Composition implements Serializable {
         int index = layerList.indexOf(layer);
         if (index > 0 && layer.isVisible()) {
             Layer bellow = layerList.get(index - 1);
-            if (bellow instanceof ImageLayer && bellow.isVisible()) {
-                return true;
-            }
+            return bellow instanceof ImageLayer && bellow.isVisible();
         }
         return false;
     }
@@ -659,7 +657,7 @@ public class Composition implements Serializable {
     }
 
     public void startMovement(MoveMode mode, boolean duplicateLayer) {
-        if (mode.movesTheLayer()) {
+        if (mode.movesLayer()) {
             if (duplicateLayer) {
                 duplicateActiveLayer();
             }
@@ -667,7 +665,7 @@ public class Composition implements Serializable {
             Layer layer = getActiveMaskOrLayer();
             layer.startMovement();
         }
-        if (mode.movesTheSelection()) {
+        if (mode.movesSelection()) {
             if (selection != null) {
                 selection.startMovement();
             }
@@ -676,11 +674,11 @@ public class Composition implements Serializable {
 
     public void moveActiveContentRelative(MoveMode mode,
                                           double relImX, double relImY) {
-        if (mode.movesTheLayer()) {
+        if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
             layer.moveWhileDragging(relImX, relImY);
         }
-        if (mode.movesTheSelection()) {
+        if (mode.movesSelection()) {
             if (selection != null) {
                 selection.moveWhileDragging(relImX, relImY);
             }
@@ -690,7 +688,7 @@ public class Composition implements Serializable {
 
     public void endMovement(MoveMode mode) {
         PixelitorEdit layerEdit = null;
-        if (mode.movesTheLayer()) {
+        if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
             // the layer edit will be null if an adjustment
             // layer without a mask was moved.
@@ -698,7 +696,7 @@ public class Composition implements Serializable {
         }
 
         PixelitorEdit selectionEdit = null;
-        if (mode.movesTheSelection()) {
+        if (mode.movesSelection()) {
             if (selection != null) {
                 selectionEdit = selection.endMovement();
             }
@@ -1238,8 +1236,7 @@ public class Composition implements Serializable {
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer) {
                 ContentLayer contentLayer = (ContentLayer) layer;
-                Rectangle contentBounds = contentLayer.getContentBounds();
-                enlargeCanvas.ensureCovering(contentBounds, canvas);
+                enlargeCanvas.setupToFitContentOf(contentLayer);
             }
         }
 

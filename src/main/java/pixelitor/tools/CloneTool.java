@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,9 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -40,7 +42,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.tools.CloneTool.State.*;
 
 /**
- * The Clone Stamp tool
+ * The clone stamp tool.
  */
 public class CloneTool extends BlendingModeBrushTool {
     enum State {
@@ -61,19 +63,16 @@ public class CloneTool extends BlendingModeBrushTool {
 
     protected CloneTool() {
         super("Clone Stamp", 'S', "clone_tool_icon.png",
-                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
-                    "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
+            "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
+                "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
             Cursors.CROSSHAIR, false);
     }
 
     @Override
     public void initSettingsPanel() {
         settingsPanel.addCopyBrushTypeSelector(
-                CopyBrushType.SOFT,
-                cloneBrush::typeChanged);
-
+            CopyBrushType.SOFT, cloneBrush::typeChanged);
         addSizeSelector();
-
         addBlendingModePanel();
 
         settingsPanel.addSeparator();
@@ -87,7 +86,6 @@ public class CloneTool extends BlendingModeBrushTool {
         settingsPanel.addSeparator();
         settingsPanel.addButton("Transform...", e -> transformButtonPressed(),
             "transformButton", "Transform while cloning");
-
         addLazyMouseDialogButton();
     }
 
@@ -153,8 +151,8 @@ public class CloneTool extends BlendingModeBrushTool {
         float scaleAbs = scaleParam.getPercentageValF();
         Mirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
-                mirror.getScaleX(scaleAbs),
-                mirror.getScaleY(scaleAbs));
+            mirror.getScaleX(scaleAbs),
+            mirror.getScaleY(scaleAbs));
         cloneBrush.setRotate(rotationParam.getValueInRadians());
 
         // when drawing with line, a mouse press should not change the destination
@@ -178,10 +176,10 @@ public class CloneTool extends BlendingModeBrushTool {
             setCloningSource(e);
         } else {
             String msg = "<html>Define a source point first with " +
-                    "<b>Alt-Click</b> or with <b>right-click</b>.";
+                "<b>Alt-Click</b> or with <b>right-click</b>.";
             if (JVM.isLinux) {
                 msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
-                        "<br><b>Alt-Click</b> for window dragging in the window manager)";
+                    "<br><b>Alt-Click</b> for window dragging in the window manager)";
             }
             Messages.showError("No source point", msg);
         }

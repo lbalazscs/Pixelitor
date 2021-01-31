@@ -25,7 +25,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.util.function.BooleanSupplier;
 
 import static java.lang.String.format;
@@ -353,11 +353,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
+    public void adaptToImageSize(Dimension size) {
         if (adjustMaxAccordingToImage) {
             double defaultToMaxRatio = defaultValue / maxValue;
-            maxValue = (int) (maxToImageSizeRatio * Math.max(bounds.width, bounds.height));
-            if (maxValue <= minValue) { // can happen with very small (for example 1x1) images
+            maxValue = (int) (maxToImageSizeRatio * Math.max(size.width, size.height));
+            if (maxValue <= minValue) { // can happen with very small images
                 maxValue = minValue + 1;
             }
 

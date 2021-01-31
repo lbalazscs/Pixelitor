@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,8 +37,8 @@ public class HSBColorMixPalette extends Palette {
 
     private final boolean startWithFg;
 
-    private float hue, otherHue;
-    private final float sat, bri, otherSat, otherBri;
+    private float hueA, hueB;
+    private final float satA, briA, satB, briB;
     private final float averageSat;
     private float extraSat;
 
@@ -48,40 +48,40 @@ public class HSBColorMixPalette extends Palette {
         super(lastRows, lastCols);
         this.startWithFg = startWithFg;
 
-        Color color, otherColor;
+        Color colorA, colorB;
         if (startWithFg) {
-            color = getFGColor();
-            otherColor = getBGColor();
+            colorA = getFGColor();
+            colorB = getBGColor();
         } else {
-            color = getBGColor();
-            otherColor = getFGColor();
+            colorA = getBGColor();
+            colorB = getFGColor();
         }
 
-        float[] hsb = Colors.toHSB(color);
-        float[] hsb2 = Colors.toHSB(otherColor);
+        float[] hsbA = Colors.toHSB(colorA);
+        float[] hsbB = Colors.toHSB(colorB);
 
-        hue = hsb[0];
-        sat = hsb[1];
-        bri = hsb[2];
-        otherHue = hsb2[0];
-        otherSat = hsb2[1];
-        otherBri = hsb2[2];
+        hueA = hsbA[0];
+        satA = hsbA[1];
+        briA = hsbA[2];
+        hueB = hsbB[0];
+        satB = hsbB[1];
+        briB = hsbB[2];
 
         // if the saturation is 0, then the hue does not mean anything,
         // but can lead to unexpected hue variations in the mix
-        if (sat == 0) {
-            hue = otherHue;
-        } else if (otherSat == 0) {
-            otherHue = hue;
+        if (satA == 0) {
+            hueA = hueB;
+        } else if (satB == 0) {
+            hueB = hueA;
         }
 
         // set the average saturation as the slider default
-        averageSat = (sat + otherSat) / 2;
+        averageSat = (satA + satB) / 2;
         config = new HueSatPaletteConfig(0.0f, averageSat);
     }
 
     @Override
-    public void onConfigChange() {
+    public void configChanged() {
         float configSat = ((HueSatPaletteConfig) config).getSaturation();
         extraSat = configSat - averageSat;
     }
@@ -96,13 +96,13 @@ public class HSBColorMixPalette extends Palette {
                     float mixFactor = calcMixFactor(x);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
-                    float b = lerp(mixFactor, bri, otherBri);
+                    float b = lerp(mixFactor, briA, briB);
                     c = new Color(Color.HSBtoRGB(h, s, b));
                 } else {
                     float mixFactor = calcMixFactor(x);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
-                    float b = lerp(mixFactor, bri, otherBri);
+                    float b = lerp(mixFactor, briA, briB);
 
                     float startBri = b - MAX_BRI_DEVIATION;
                     b = startBri + y * briStep;
@@ -130,7 +130,7 @@ public class HSBColorMixPalette extends Palette {
     }
 
     private float calcSat(float mixFactor) {
-        float s = lerp(mixFactor, sat, otherSat) + extraSat;
+        float s = lerp(mixFactor, satA, satB) + extraSat;
 
         if (s > 1.0f) {
             s = 1.0f;
@@ -142,7 +142,7 @@ public class HSBColorMixPalette extends Palette {
 
     private float calcHue(float mixFactor) {
         float hueShift = ((HueSatPaletteConfig) config).getHueShift();
-        float h = hueShift + Colors.lerpHue(mixFactor, hue, otherHue);
+        float h = hueShift + Colors.lerpHue(mixFactor, hueA, hueB);
         if (h > 1.0f) {
             h = h - 1.0f;
         }
@@ -159,7 +159,7 @@ public class HSBColorMixPalette extends Palette {
     @Override
     public String getDialogTitle() {
         return startWithFg ?
-                "HSB Mix with Background" :
-                "HSB Mix with Foreground";
+            "HSB Mix with Background" :
+            "HSB Mix with Foreground";
     }
 }

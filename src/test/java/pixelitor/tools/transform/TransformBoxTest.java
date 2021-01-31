@@ -35,6 +35,17 @@ import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
     private View view;
+    private static final Transformable DUMMY_TRANSFORMABLE = new Transformable() {
+        @Override
+        public void transform(AffineTransform transform) {
+            // do nothing
+        }
+
+        @Override
+        public void updateUI(View view) {
+            // do nothing
+        }
+    };
 
     @BeforeAll
     static void beforeAllTests() {
@@ -49,7 +60,7 @@ class TransformBoxTest {
 
     @Test
     void moveNWFromInitialState() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -92,7 +103,7 @@ class TransformBoxTest {
 
     @Test
     void moveSEFromInitialState() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -135,7 +146,7 @@ class TransformBoxTest {
 
     @Test
     void pureTranslation() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -167,7 +178,7 @@ class TransformBoxTest {
 
     @Test
     void pureScaling() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -199,7 +210,7 @@ class TransformBoxTest {
 
     @Test
     void pureRotation() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -253,7 +264,7 @@ class TransformBoxTest {
 
     @Test
     void cursorAfterTurnedInsideOut() {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -323,7 +334,7 @@ class TransformBoxTest {
 
     @Test
     void imageSpaceRotation() throws NoninvertibleTransformException {
-        var box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, DUMMY_TRANSFORMABLE);
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();

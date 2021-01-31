@@ -321,10 +321,9 @@ public class RandomGUITest {
             throw new IllegalStateException("small window");
         }
 
-        Point randomPoint = new Point(
+        return new Point(
             Rnd.intInRange(minX, maxX),
             Rnd.intInRange(minY, maxY));
-        return randomPoint;
     }
 
     private static void finishRunning() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
-import java.awt.Rectangle;
+import java.awt.Dimension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -49,7 +49,7 @@ class ParamSetTest {
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParamAtIndex(extraParam, 3);
-        params.considerImageSize(new Rectangle(0, 0, 400, 800));
+        params.adaptToImageSize(new Dimension(400, 800));
     }
 
     @Test

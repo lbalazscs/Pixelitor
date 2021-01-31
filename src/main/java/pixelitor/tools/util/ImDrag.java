@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,10 +68,10 @@ public class ImDrag {
         ImDrag drag;
 
         while (true) {
-            int x1 = Rnd.intInRange(-width, 2*width);
-            int x2 = Rnd.intInRange(-width, 2*width);
-            int y1 = Rnd.intInRange(-height, 2*height);
-            int y2 = Rnd.intInRange(-height, 2*height);
+            int x1 = Rnd.intInRange(-width, 2 * width);
+            int x2 = Rnd.intInRange(-width, 2 * width);
+            int y1 = Rnd.intInRange(-height, 2 * height);
+            int y2 = Rnd.intInRange(-height, 2 * height);
 
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -83,7 +83,7 @@ public class ImDrag {
         return drag;
     }
 
-    public ImDrag transform(AffineTransform at) {
+    public ImDrag transformedCopy(AffineTransform at) {
         Point2D start = new Point2D.Double(startX, startY);
         Point2D end = new Point2D.Double(endX, endY);
         at.transform(start, start);
@@ -91,10 +91,10 @@ public class ImDrag {
         return new ImDrag(start.getX(), start.getY(), end.getX(), end.getY());
     }
 
-    public ImDrag translate(double dx, double dy) {
+    public ImDrag translatedCopy(double dx, double dy) {
         return new ImDrag(
-                startX + dx, startY + dy,
-                endX + dx, endY + dy);
+            startX + dx, startY + dy,
+            endX + dx, endY + dy);
     }
 
     public double getStartX() {
@@ -286,10 +286,10 @@ public class ImDrag {
     public ImDrag getCenterHorizontalDrag() {
         double centerY = startY + getDY() / 2.0;
         return new ImDrag(
-                startX,
-                centerY,
-                endX,
-                centerY);
+            startX,
+            centerY,
+            endX,
+            centerY);
     }
 
 

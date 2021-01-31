@@ -57,9 +57,7 @@ public class GradientTool extends DragTool {
     private static final String CYCLE_REFLECT = "Reflect";
     private static final String CYCLE_REPEAT = "Repeat";
     public static final String[] CYCLE_METHODS = {
-        CYCLE_NONE,
-        CYCLE_REFLECT,
-        CYCLE_REPEAT};
+        CYCLE_NONE, CYCLE_REFLECT, CYCLE_REPEAT};
 
     private JComboBox<GradientColorType> colorTypeCB;
     private JComboBox<GradientType> typeCB;
@@ -75,8 +73,7 @@ public class GradientTool extends DragTool {
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
                 "<b>Shift-drag</b> to constrain the direction. " +
                 "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
-            Cursors.DEFAULT, true, true,
-            true, ClipStrategy.FULL);
+            Cursors.DEFAULT, true, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 
@@ -86,12 +83,10 @@ public class GradientTool extends DragTool {
         addCycleMethodSelector();
 
         settingsPanel.addSeparator();
-
         addColorTypeSelector();
         addRevertCheckBox();
 
         settingsPanel.addSeparator();
-
         addBlendingModePanel();
     }
 
@@ -109,16 +104,14 @@ public class GradientTool extends DragTool {
         cycleMethodCB = new JComboBox<>(CYCLE_METHODS);
         cycleMethodCB.addActionListener(e ->
             regenerateGradient("Change Gradient Cycling"));
-        settingsPanel.addComboBox("Cycling: ",
-            cycleMethodCB, "cycleMethodCB");
+        settingsPanel.addComboBox("Cycling: ", cycleMethodCB, "cycleMethodCB");
     }
 
     private void addColorTypeSelector() {
         colorTypeCB = new JComboBox<>(GradientColorType.values());
         colorTypeCB.addActionListener(e ->
             regenerateGradient("Change Gradient Colors"));
-        settingsPanel.addComboBox("Color: ",
-            colorTypeCB, "colorTypeCB");
+        settingsPanel.addComboBox("Color: ", colorTypeCB, "colorTypeCB");
     }
 
     private void addRevertCheckBox() {
@@ -153,10 +146,11 @@ public class GradientTool extends DragTool {
         }
 
         DrawableAction.run(editName,
-            dr -> regenerateOnDrawable(true, dr, editName));
+            dr -> regenerateOnDrawable(dr, true, editName));
     }
 
-    private void regenerateOnDrawable(boolean addToHistory, Drawable dr, String editName) {
+    private void regenerateOnDrawable(Drawable dr,
+                                      boolean addToHistory, String editName) {
         // regenerate the gradient if a tool setting
         // was changed while handles are present
         if (handles != null) {
@@ -247,6 +241,7 @@ public class GradientTool extends DragTool {
             // handle under the mouse
             return;
         }
+
         DraggablePoint handle = handles.handleWasHit(e.getX(), e.getY());
         if (handle != null) {
             handle.setActive(true);
@@ -374,7 +369,8 @@ public class GradientTool extends DragTool {
         return (GradientType) typeCB.getSelectedItem();
     }
 
-    private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory, String editName) {
+    private void drawGradient(Drawable dr, ImDrag imDrag,
+                              boolean addToHistory, String editName) {
         Gradient gradient = new Gradient(imDrag,
             getType(), getCycleType(), getGradientColorType(),
             revertCB.isSelected(),
@@ -481,11 +477,16 @@ public class GradientTool extends DragTool {
 
         ignoreRegenerate = false;
         if (regenerate) {
-            regenerateOnDrawable(false, dr, null);
+            regenerateOnDrawable(dr, false, null);
         }
 
         lastGradient = gradient;
         view.repaint();
+    }
+
+    @Override
+    public boolean allowOnlyDrawables() {
+        return true;
     }
 
     @Override

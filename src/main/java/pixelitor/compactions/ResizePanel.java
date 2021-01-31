@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,8 +44,12 @@ import static java.lang.Integer.parseInt;
 public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 
+    private static final String CHOICE_PIXELS = "pixels";
+    private static final String CHOICE_PERCENT = "percent";
+    private static final String[] COMBO_CHOICES = {CHOICE_PIXELS, CHOICE_PERCENT};
+    private final DefaultComboBoxModel<String> sharedComboBoxModel;
+
     private final JCheckBox constrainProportionsCB;
-    private final JComboBox<String> pixelPercentChooser1;
     private final JTextField heightTF;
     private final JTextField widthTF;
     private final double origProportion;
@@ -72,8 +76,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         newWidthInPercent = 100.0;
         newHeightInPercent = 100.0;
 
-        String[] items = {"pixels", "percent"};
-        var sharedComboBoxModel = new DefaultComboBoxModel<>(items);
+        sharedComboBoxModel = new DefaultComboBoxModel<>(COMBO_CHOICES);
         var p = new JPanel();
         p.setLayout(new GridBagLayout());
 
@@ -83,7 +86,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         widthTF.setName("widthTF");
         widthTF.addKeyListener(this);
         updateWidthTextPixels();
-        pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
+        var pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
         var widthLayer = new JLayer<>(widthTF,
             TFValidationLayerUI.fromValidator(widthValidator));
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
@@ -129,7 +132,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private boolean unitsArePixels() {
-        return pixelPercentChooser1.getSelectedIndex() == 0;
+        return sharedComboBoxModel.getSelectedItem().equals(CHOICE_PIXELS);
     }
 
     private boolean constrainProportions() {
@@ -324,7 +327,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     @Override
     public ValidationResult checkValidity() {
         return widthValidator.check(widthTF)
-                .and(heightValidator.check(heightTF));
+            .and(heightValidator.check(heightTF));
     }
 
     private String getWidthText() {
@@ -354,16 +357,16 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     public static void showInDialog(Composition comp) {
         ResizePanel p = new ResizePanel(comp.getCanvas());
         new DialogBuilder()
-                .validatedContent(p)
-                .title("Resize")
-                .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
-                        .process(comp))
-                .show();
+            .validatedContent(p)
+            .title("Resize")
+            .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
+                .process(comp))
+            .show();
     }
 
     public static void resizeActiveImage() {
         var comp = OpenImages.getActiveCompOpt()
-                .orElseThrow(() -> new IllegalStateException("no active image"));
+            .orElseThrow(() -> new IllegalStateException("no active image"));
         showInDialog(comp);
     }
 

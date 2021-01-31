@@ -394,7 +394,6 @@ public final class GUIUtils {
         if (italic) {
             style |= Font.ITALIC;
         }
-        Font font = new Font(family, style, size);
-        return font;
+        return new Font(family, style, size);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * The brush tool
+ * The brush tool.
  */
 public class BrushTool extends BlendingModeBrushTool {
     public static final String NAME = GUIText.BRUSH;
@@ -39,9 +39,9 @@ public class BrushTool extends BlendingModeBrushTool {
 
     public BrushTool() {
         super(NAME, 'B', "brush_tool_icon.png",
-                "<b>click</b> or <b>drag</b> to draw with the current brush, " +
-                        "<b>Shift-click</b> to draw lines, " +
-                        "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
+            "<b>click</b> or <b>drag</b> to draw with the current brush, " +
+                "<b>Shift-click</b> to draw lines, " +
+                "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
             Cursors.CROSSHAIR, true
         );
     }
@@ -50,12 +50,12 @@ public class BrushTool extends BlendingModeBrushTool {
     public void initSettingsPanel() {
         addTypeSelector();
         addBrushSettingsButton();
+
         settingsPanel.addSeparator();
         addSizeSelector();
         addSymmetryCombo();
 
         settingsPanel.addSeparator();
-
         addBlendingModePanel();
         addLazyMouseDialogButton();
     }

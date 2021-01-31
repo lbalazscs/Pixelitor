@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,6 @@ import pixelitor.tools.transform.TransformBox;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
-
 /**
  * Represents a change to a {@link TransformBox}
  */
@@ -33,17 +31,14 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
     private final TransformBox box;
     private final TransformBox.Memento before;
     private final TransformBox.Memento after;
-    private final boolean simpleRepaint;
 
     public TransformBoxChangedEdit(String editName, Composition comp, TransformBox box,
                                    TransformBox.Memento before,
-                                   TransformBox.Memento after,
-                                   boolean simpleRepaint) {
+                                   TransformBox.Memento after) {
         super(editName, comp);
         this.box = box;
         this.before = before;
         this.after = after;
-        this.simpleRepaint = simpleRepaint;
     }
 
     @Override
@@ -51,8 +46,6 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
         super.undo();
 
         box.restoreFrom(before);
-
-        updateGUI();
     }
 
     @Override
@@ -60,15 +53,5 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
         super.redo();
 
         box.restoreFrom(after);
-
-        updateGUI();
-    }
-
-    private void updateGUI() {
-        if(simpleRepaint) {
-            comp.repaint();
-        } else {
-            comp.imageChanged(REPAINT);
-        }
     }
 }

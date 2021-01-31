@@ -21,7 +21,7 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -34,31 +34,31 @@ import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * Two or more {@link RangeParam} objects that are grouped visually in the GUI
- * and can be linked to move together.
+ * Two or more {@link RangeParam} objects that are grouped
+ * visually in the GUI and can be linked to move together.
  */
 public class GroupedRangeParam extends AbstractFilterParam {
-    private final RangeParam[] rangeParams;
+    private final RangeParam[] children;
     private final ButtonModel checkBoxModel;
     private final boolean linkedByDefault;
     private boolean linkable = true; // whether a "Linked" checkbox appears
 
     /**
-     * Two linked params: "Horizontal" and "Vertical", with shared min/max/default values
+     * Two linked children: "Horizontal" and "Vertical", with shared min/max/default values
      */
     public GroupedRangeParam(String name, int min, int def, int max) {
         this(name, min, def, max, true);
     }
 
     /**
-     * Two params: "Horizontal" and "Vertical", with shared min/max/default values
+     * Two children: "Horizontal" and "Vertical", with shared min/max/default values
      */
     public GroupedRangeParam(String name, int min, int def, int max, boolean linked) {
         this(name, "Horizontal", "Vertical", min, def, max, linked);
     }
 
     /**
-     * Two params with custom names and shared min/max/default values
+     * Two children with custom names and shared min/max/default values
      */
     public GroupedRangeParam(String name, String firstChildName, String secondChildName,
                              int min, int def, int max, boolean linked) {
@@ -66,28 +66,28 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     /**
-     * Any number of params with shared min/max/default values
+     * Any number of children with shared min/max/default values
      */
     public GroupedRangeParam(String name, String[] childNames,
                              int min, int def, int max, boolean linked) {
-        this(name, createParams(childNames, min, def, max), linked);
+        this(name, createChildren(childNames, min, def, max), linked);
     }
 
     /**
-     * The most generic constructor: any number of params that can differ
-     * in their min/max/default values (but linking makes sense only if they
-     * have the same ranges).
+     * The most generic constructor: any number of children that can differ
+     * in their min/max/default values. Linking makes sense only if they
+     * have the same ranges.
      */
-    public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
+    public GroupedRangeParam(String name, RangeParam[] children, boolean linked) {
         super(name, ALLOW_RANDOMIZE);
-        rangeParams = params;
+        this.children = children;
 
         checkBoxModel = new JToggleButton.ToggleButtonModel();
 
         linkedByDefault = linked;
         setLinked(linkedByDefault);
 
-        linkParams();
+        linkChildren();
     }
 
     @Override
@@ -98,26 +98,25 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return gui;
     }
 
-    private static RangeParam[] createParams(String[] names,
-                                             int min, int def, int max) {
-        RangeParam[] rangeParams = new RangeParam[names.length];
+    private static RangeParam[] createChildren(String[] names,
+                                               int min, int def, int max) {
+        RangeParam[] children = new RangeParam[names.length];
         for (int i = 0; i < names.length; i++) {
-            String name = names[i];
-            rangeParams[i] = new RangeParam(name, min, def, max);
+            children[i] = new RangeParam(names[i], min, def, max);
         }
-        return rangeParams;
+        return children;
     }
 
-    private void linkParams() {
-        for (RangeParam param : rangeParams) {
-            param.addChangeListener(e -> onParamChange(param));
+    private void linkChildren() {
+        for (RangeParam child : children) {
+            child.addChangeListener(e -> propagateChange(child));
         }
     }
 
-    private void onParamChange(RangeParam param) {
+    private void propagateChange(RangeParam param) {
         if (isLinked()) {
-            // set the value of every other param to the value of the changed param
-            for (RangeParam other : rangeParams) {
+            // set the value of every other child to the value of the changed child
+            for (RangeParam other : children) {
                 if (other != param) {
                     double newValue = param.getValueAsDouble();
                     other.setValueNoTrigger(newValue);
@@ -132,26 +131,26 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        for (RangeParam param : rangeParams) {
-            param.setAdjustmentListener(listener);
+        for (RangeParam child : children) {
+            child.setAdjustmentListener(listener);
         }
         adjustmentListener = listener;
     }
 
     public int getValue(int index) {
-        return rangeParams[index].getValue();
+        return children[index].getValue();
     }
 
     public float getValueAsFloat(int index) {
-        return rangeParams[index].getValueAsFloat();
+        return children[index].getValueAsFloat();
     }
 
     public double getValueAsDouble(int index) {
-        return rangeParams[index].getValueAsDouble();
+        return children[index].getValueAsDouble();
     }
 
     public void setValue(int index, int newValue) {
-        rangeParams[index].setValue(newValue);
+        children[index].setValue(newValue);
         // if linked, the others will be set automatically
     }
 
@@ -166,10 +165,10 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         if (isLinked()) {
-            rangeParams[0].randomize();
+            children[0].randomize();
         } else {
-            for (RangeParam param : rangeParams) {
-                param.randomize();
+            for (RangeParam child : children) {
+                child.randomize();
             }
         }
     }
@@ -179,15 +178,14 @@ public class GroupedRangeParam extends AbstractFilterParam {
         if (isLinked() != linkedByDefault) {
             return false;
         }
-        return Utils.allMatch(rangeParams,
-            RangeParam::isSetToDefault);
+        return Utils.allMatch(children, RangeParam::isSetToDefault);
     }
 
     @Override
     public void reset(boolean trigger) {
-        for (RangeParam param : rangeParams) {
+        for (RangeParam child : children) {
             // call the individual params without trigger...
-            param.reset(false);
+            child.reset(false);
         }
 
         // ... and then trigger only once
@@ -199,33 +197,33 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     public RangeParam getRangeParam(int index) {
-        return rangeParams[index];
+        return children[index];
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-        for (RangeParam param : rangeParams) {
-            param.considerImageSize(bounds);
+    public void adaptToImageSize(Dimension size) {
+        for (RangeParam child : children) {
+            child.adaptToImageSize(size);
         }
     }
 
     public GroupedRangeParam withAdjustedRange(double ratio) {
-        for (RangeParam param : rangeParams) {
-            param.withAdjustedRange(ratio);
+        for (RangeParam child : children) {
+            child.withAdjustedRange(ratio);
         }
         return this;
     }
 
     public float getValueAsPercentage(int index) {
-        return rangeParams[index].getPercentageValF();
+        return children[index].getPercentageValF();
     }
 
     public double getValueAsDPercentage(int index) {
-        return rangeParams[index].getPercentageValD();
+        return children[index].getPercentageValD();
     }
 
     public int getNumParams() {
-        return rangeParams.length;
+        return children.length;
     }
 
     public GroupedRangeParam notLinkable() {
@@ -244,16 +242,16 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        String rangeStrings = Arrays.stream(rangeParams)
+        String childStrings = Arrays.stream(children)
             .map(RangeParam::toString)
             .collect(joining(",", "[", "]"));
 
-        return getClass().getSimpleName() + rangeStrings;
+        return getClass().getSimpleName() + childStrings;
     }
 
     @Override
     public GroupedRangeParamState copyState() {
-        double[] values = Arrays.stream(rangeParams)
+        double[] values = Arrays.stream(children)
             .mapToDouble(RangeParam::getValue)
             .toArray();
 
@@ -267,9 +265,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
             if (updateGUI) {
-                rangeParams[i].setValueNoTrigger(value);
+                children[i].setValueNoTrigger(value);
             } else {
-                rangeParams[i].setValueNoGUI(value);
+                children[i].setValueNoGUI(value);
             }
         }
     }
@@ -277,15 +275,15 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(String savedValue) {
         StringTokenizer st = new StringTokenizer(savedValue, ",");
-        for (RangeParam param : rangeParams) {
+        for (RangeParam child : children) {
             String s = st.nextToken();
-            param.setValueNoTrigger(Double.parseDouble(s));
+            child.setValueNoTrigger(Double.parseDouble(s));
         }
     }
 
     public void setDecimalPlaces(int dp) {
-        for (RangeParam param : rangeParams) {
-            param.setDecimalPlaces(dp);
+        for (RangeParam child : children) {
+            child.setDecimalPlaces(dp);
         }
     }
 
@@ -296,7 +294,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public Object getParamValue() {
-        List<Object> childValues = Stream.of(rangeParams)
+        List<Object> childValues = Stream.of(children)
             .map(FilterParam::getParamValue)
             .collect(toList());
         return childValues;

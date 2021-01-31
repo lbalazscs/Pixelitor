@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,8 @@ package pixelitor.tools.crop;
 
 import pixelitor.guides.GuidesRenderer;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -27,18 +28,18 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 /**
- * Crop composition guides renderer
+ * Crop composition guide
  */
 public class CompositionGuide {
     private Graphics2D g2;
     private CompositionGuideType type = CompositionGuideType.NONE;
     private int orientation = 0;
-    private final GuidesRenderer glRenderer;
+    private final GuidesRenderer renderer;
     private static final double GOLDEN_RATIO = 1.618;
     private static final int NUM_SPIRAL_SEGMENTS = 11;
 
-    public CompositionGuide(GuidesRenderer glRenderer) {
-        this.glRenderer = glRenderer;
+    public CompositionGuide(GuidesRenderer renderer) {
+        this.renderer = renderer;
     }
 
     public CompositionGuideType getType() {
@@ -84,7 +85,7 @@ public class CompositionGuide {
     }
 
     private void drawShapes(Shape[] shapes) {
-        glRenderer.draw(g2, Arrays.asList(shapes));
+        renderer.draw(g2, Arrays.asList(shapes));
     }
 
     private void drawSections(Rectangle2D rect, double phi) {
@@ -166,40 +167,40 @@ public class CompositionGuide {
         double gridOffsetV = (rect.getWidth() - (gridCountV + 1) * gridSize) / 2;
         Line2D[] lines = new Line2D.Double[gridCountH + gridCountV];
 
-        // horizontal lines (change only y position)
-        double x1 = rect.getX();
-        double x2 = rect.getX() + rect.getWidth();
+        // horizontal lines
+        double startX = rect.getX();
+        double endX = rect.getX() + rect.getWidth();
         for (int i = 0; i < gridCountH; i++) {
-            double yh = rect.getY() + (i + 1) * gridSize + gridOffsetH;
-            lines[i] = new Line2D.Double(x1, yh, x2, yh);
+            double y = rect.getY() + (i + 1) * gridSize + gridOffsetH;
+            lines[i] = new Line2D.Double(startX, y, endX, y);
         }
 
-        // vertical lines (change only x position)
-        double y1 = rect.getY();
-        double y2 = rect.getY() + rect.getHeight();
+        // vertical lines
+        double startY = rect.getY();
+        double endY = rect.getY() + rect.getHeight();
         for (int i = 0; i < gridCountV; i++) {
-            double xv = rect.getX() + (i + 1) * gridSize + gridOffsetV;
-            lines[gridCountH + i] = new Line2D.Double(xv, y1, xv, y2);
+            double x = rect.getX() + (i + 1) * gridSize + gridOffsetV;
+            lines[gridCountH + i] = new Line2D.Double(x, startY, x, endY);
         }
 
         drawShapes(lines);
     }
 
     /**
-     * Get projected point P' of P on given line
+     * Calculate the projected point of the given point on the given line
      *
      * @return projected point p.
      */
-    private static Point2D.Double getProjectedPointOnLine(Line2D line, Point2D.Double p) {
+    private static Point2D.Double projectPointOnLine(Line2D line, Point2D.Double p) {
         Point2D.Double l1 = (Point2D.Double) line.getP1();
         Point2D.Double l2 = (Point2D.Double) line.getP2();
 
-        // get dot product of vectors v1, v2
+        // dot product of vectors v1, v2
         Point2D.Double v1 = new Point2D.Double(l2.x - l1.x, l2.y - l1.y);
         Point2D.Double v2 = new Point2D.Double(p.x - l1.x, p.y - l1.y);
         double d = v1.x * v2.x + v1.y * v2.y;
 
-        // get squared length of vector v1
+        // squared length of vector v1
         double v1Length = v1.x * v1.x + v1.y * v1.y;
         if (v1Length == 0) {
             return l1;
@@ -211,12 +212,12 @@ public class CompositionGuide {
     }
 
     /**
-     * Get orthogonal line to given line that pass through point P
+     * Calculate the line orthogonal to the given line that passes through the point P
      *
      * @return orthogonal line
      */
-    private static Line2D getOrthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
-        return new Line2D.Double(p, getProjectedPointOnLine(line, p));
+    private static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
+        return new Line2D.Double(p, projectPointOnLine(line, p));
     }
 
     private void drawTriangles(Rectangle2D rect) {
@@ -238,8 +239,8 @@ public class CompositionGuide {
 
         Line2D[] lines = new Line2D.Double[3];
         lines[0] = new Line2D.Double(x1, y1, x2, y2);
-        lines[1] = getOrthogonalLineThroughPoint(lines[0], new Point2D.Double(x1, y2));
-        lines[2] = getOrthogonalLineThroughPoint(lines[0], new Point2D.Double(x2, y1));
+        lines[1] = orthogonalLineThroughPoint(lines[0], new Point2D.Double(x1, y2));
+        lines[2] = orthogonalLineThroughPoint(lines[0], new Point2D.Double(x2, y1));
 
         drawShapes(lines);
     }
@@ -265,13 +266,13 @@ public class CompositionGuide {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                    center.getX() - arcWidth,
-                    center.getY() - arcHeight,
-                    arcWidth * 2,
-                    arcHeight * 2,
-                    angle,
-                    -90,
-                    Arc2D.OPEN);
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                -90,
+                Arc2D.OPEN);
 
             angle -= 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -289,13 +290,13 @@ public class CompositionGuide {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                    center.getX() - arcWidth,
-                    center.getY() - arcHeight,
-                    arcWidth * 2,
-                    arcHeight * 2,
-                    angle,
-                    90,
-                    Arc2D.OPEN);
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                90,
+                Arc2D.OPEN);
 
             angle += 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -313,13 +314,13 @@ public class CompositionGuide {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                    center.getX() - arcWidth,
-                    center.getY() - arcHeight,
-                    arcWidth * 2,
-                    arcHeight * 2,
-                    angle,
-                    90,
-                    Arc2D.OPEN);
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                90,
+                Arc2D.OPEN);
 
             angle += 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -337,13 +338,13 @@ public class CompositionGuide {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                    center.getX() - arcWidth,
-                    center.getY() - arcHeight,
-                    arcWidth * 2,
-                    arcHeight * 2,
-                    angle,
-                    -90,
-                    Arc2D.OPEN);
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                -90,
+                Arc2D.OPEN);
 
             angle -= 90;
             arcWidth = arcWidth / GOLDEN_RATIO;

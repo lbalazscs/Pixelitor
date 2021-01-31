@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,14 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -59,8 +63,8 @@ public class Path implements Serializable {
     private static long nextId = 0;
     private final String id; // for debugging
 
-    private BuildState buildState;
-    private BuildState prevBuildState;
+    private transient BuildState buildState;
+    private transient BuildState prevBuildState;
     private transient PenToolMode preferredPenToolMode;
 
     public Path(Composition comp, boolean setAsActive) {
@@ -70,6 +74,15 @@ public class Path implements Serializable {
         }
         id = "P" + nextId++;
         buildState = NO_INTERACTION;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        buildState = NO_INTERACTION;
+        prevBuildState = NO_INTERACTION;
+        preferredPenToolMode = PenToolMode.BUILD;
     }
 
     public Path deepCopy(Composition newComp) {
@@ -358,7 +371,7 @@ public class Path implements Serializable {
     void finishByCtrlClick(Composition comp) {
         BuildState state = getBuildState();
         assert state == MOVING_TO_NEXT_ANCHOR
-                || state == MOVE_EDITING_PREVIOUS : "state = " + state;
+            || state == MOVE_EDITING_PREVIOUS : "state = " + state;
 
         activeSubPath.finishByCtrlClick(comp);
     }
@@ -400,20 +413,18 @@ public class Path implements Serializable {
     @Override
     public String toString() {
         String s = getId() + " ";
-        s += subPaths
-                .stream()
-                .map(SubPath::getId)
-                .collect(joining(",", "[", "]"));
+        s += subPaths.stream()
+            .map(SubPath::getId)
+            .collect(joining(",", "[", "]"));
         return s;
     }
 
     // also includes the anchor point positions
     public String toDetailedString() {
         String s = getId() + " ";
-        s += subPaths
-                .stream()
-                .map(SubPath::toDetailedString)
-                .collect(joining(",", "[", "]"));
+        s += subPaths.stream()
+            .map(SubPath::toDetailedString)
+            .collect(joining(",", "[", "]"));
         return s;
     }
 }

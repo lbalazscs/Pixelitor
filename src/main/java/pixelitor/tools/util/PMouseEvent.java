@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.awt.event.MouseEvent;
  * the standard {@link MouseEvent} with some
  * practical added functionality
  */
-public class PMouseEvent extends PPoint.Lazy {
+public class PMouseEvent extends PPoint.LazyCo {
     private final MouseEvent e;
 
     public PMouseEvent(MouseEvent e, View view) {

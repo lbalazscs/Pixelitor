@@ -38,7 +38,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.tools.transform.Direction.*;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 import static pixelitor.utils.Cursors.DEFAULT;
@@ -65,7 +64,7 @@ public class TransformBox implements ToolWidget {
     private final PositionHandle[] positions;
     private final EdgeHandle[] edges;
 
-    private Transformable transformable;
+    private Transformable owner;
 
     private final View view;
 
@@ -95,14 +94,14 @@ public class TransformBox implements ToolWidget {
     private Memento beforeMovement;
 
     public TransformBox(Rectangle2D origCoRect, View view,
-                        Transformable transformable) {
+                        Transformable owner) {
         // it must be transformed to positive rectangle before calling this
         assert !origCoRect.isEmpty();
 
         origImRect = view.componentToImageSpace(origCoRect);
         rotatedImSize = new DDimension(origImRect);
         this.view = view;
-        this.transformable = transformable;
+        this.owner = owner;
 
         double westX = origCoRect.getX();
         double eastX = westX + origCoRect.getWidth();
@@ -156,8 +155,8 @@ public class TransformBox implements ToolWidget {
         updateDirections(false);
     }
 
-    public void replaceTransformable(Transformable transformable) {
-        this.transformable = transformable;
+    public void replaceOwner(Transformable owner) {
+        this.owner = owner;
     }
 
     /**
@@ -258,7 +257,7 @@ public class TransformBox implements ToolWidget {
     }
 
     public void applyTransform() {
-        transformable.transformWith(calcImTransform());
+        owner.transform(calcImTransform());
     }
 
     private void updateRotLocation() {
@@ -350,7 +349,7 @@ public class TransformBox implements ToolWidget {
     public boolean processMouseDragged(PMouseEvent e) {
         if (activePoint != null) {
             activePoint.mouseDragged(e.getCoX(), e.getCoY());
-            e.imageChanged(REPAINT);
+            owner.updateUI(view);
             return true;
         } else if (wholeBoxDrag) {
             dragBox(e);
@@ -372,7 +371,7 @@ public class TransformBox implements ToolWidget {
                 // constrained position
                 activePoint = null;
             }
-            e.imageChanged(REPAINT);
+            owner.updateUI(view);
             updateDirections(); // necessary only if dragged through the opposite corner
             addMovementToHistory(e.getComp(), "Change Transform Box");
             return true;
@@ -437,7 +436,7 @@ public class TransformBox implements ToolWidget {
         assert editName != null;
         Memento afterMovement = copyState();
         History.add(new TransformBoxChangedEdit(editName, comp,
-            this, beforeMovement, afterMovement, false));
+            this, beforeMovement, afterMovement));
     }
 
     void updateDirections() {
@@ -481,7 +480,7 @@ public class TransformBox implements ToolWidget {
 
         cornerHandlesMoved();
 
-        comp.imageChanged(REPAINT);
+        owner.updateUI(view);
     }
 
     public Point2D getCenter() {
@@ -666,6 +665,8 @@ public class TransformBox implements ToolWidget {
 
         // just to be sure
         updateDirections();
+
+        owner.updateUI(view);
     }
 
     /**

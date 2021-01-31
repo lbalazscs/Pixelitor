@@ -47,7 +47,7 @@ public class MoveTool extends DragTool {
             "<b>drag</b> to move the active layer, " +
                 "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
                 "<b>Shift-drag</b> to constrain the movement.",
-            Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
+            Cursors.DEFAULT, true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -56,7 +56,6 @@ public class MoveTool extends DragTool {
         modeSelector.addActionListener(e -> currentMode = (MoveMode) modeSelector.getSelectedItem());
 
         settingsPanel.addSeparator();
-
         settingsPanel.addWithLabel("Auto Select Layer:",
             autoSelectCheckBox, "autoSelectCheckBox");
     }
@@ -65,7 +64,7 @@ public class MoveTool extends DragTool {
     public void mouseMoved(MouseEvent e, View view) {
         super.mouseMoved(e, view);
 
-        if (currentMode.movesTheLayer()) {
+        if (currentMode.movesLayer()) {
             setMoveCursor(view, e);
         }
     }
@@ -85,7 +84,7 @@ public class MoveTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        if (currentMode.movesTheLayer() && useAutoSelect()) {
+        if (currentMode.movesLayer() && useAutoSelect()) {
             Point2D p = e.asImPoint2D();
             ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
 

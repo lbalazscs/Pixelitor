@@ -189,7 +189,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public int getMouseHitPixelAtPoint(Point p) {
+    public int getPixelAtPoint(Point p) {
         // we treat surrounding rect as area for mouse hit detection
         // for small font sizes or thin font styles it can be helpful
         // for larger font sizes it could be more appropriate to use pixel perfect test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,10 +63,9 @@ public class PaintBucketTool extends Tool {
 
     public PaintBucketTool() {
         super("Paint Bucket", 'N',
-                "paint_bucket_tool_icon.png",
-                "<b>click</b> to fill with the selected color.",
-                Cursors.DEFAULT, true,
-                true, ClipStrategy.CANVAS);
+            "paint_bucket_tool_icon.png",
+            "<b>click</b> to fill with the selected color.",
+            Cursors.DEFAULT, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -206,7 +205,7 @@ public class PaintBucketTool extends Tool {
             int scanlineMinX = x - 1;
             int offset = y * imgWidth;
             while (scanlineMinX >= 0
-                    && isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
+                && isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
                 scanlineMinX--;
             }
             scanlineMinX++;
@@ -214,7 +213,7 @@ public class PaintBucketTool extends Tool {
             // find the last replaceable point to the right
             int scanlineMaxX = x + 1;
             while (scanlineMaxX < img.getWidth()
-                    && isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
+                && isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
                 scanlineMaxX++;
             }
             scanlineMaxX--;
@@ -252,7 +251,7 @@ public class PaintBucketTool extends Tool {
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int upIndex = i + upOffset;
                     boolean shouldBeReplaced = !checkedPixels[upIndex]
-                            && isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
+                        && isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y - 1);
@@ -272,7 +271,7 @@ public class PaintBucketTool extends Tool {
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int downIndex = i + downOffset;
                     boolean shouldBeReplaced = !checkedPixels[downIndex]
-                            && isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
+                        && isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y + 1);
@@ -319,9 +318,14 @@ public class PaintBucketTool extends Tool {
         int b2 = color2 & 0xFF;
 
         return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
-                (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
+            (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
             (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
             (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
+    }
+
+    @Override
+    public boolean allowOnlyDrawables() {
+        return true;
     }
 
     @Override

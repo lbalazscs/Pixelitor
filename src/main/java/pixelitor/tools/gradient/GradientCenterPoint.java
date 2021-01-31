@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import pixelitor.tools.util.DraggablePoint;
 import java.awt.Color;
 
 /**
- * The point at the half distance between the gradient
- * start point and the gradient end point.
+ * The draggable point at the half distance between the
+ * start and end points, which moves the whole gradient.
  */
 public class GradientCenterPoint extends DraggablePoint {
     private final GradientDefiningPoint start;
@@ -34,9 +34,9 @@ public class GradientCenterPoint extends DraggablePoint {
                                GradientDefiningPoint end,
                                View view, Color color, Color activeColor) {
         super("center",
-                (start.x + end.x) / 2.0,
-                (start.y + end.y) / 2.0,
-                view, color, activeColor);
+            (start.x + end.x) / 2.0,
+            (start.y + end.y) / 2.0,
+            view, color, activeColor);
         this.start = start;
         this.end = end;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public abstract class Wizard {
     /**
      * Show the wizard in a dialog
      */
-    public void start(JFrame dialogParent) {
+    public void showDialog(JFrame dialogParent) {
         try {
             showDialog(dialogParent, dialogTitle);
         } finally {
@@ -90,7 +90,7 @@ public abstract class Wizard {
         currentPage.finish(this, dr);
 
         Optional<WizardPage> nextPage = currentPage.getNext();
-        if(nextPage.isPresent()) {
+        if (nextPage.isPresent()) {
             showNextPage(dialog, nextPage.get());
         } else {
             // dialog finished

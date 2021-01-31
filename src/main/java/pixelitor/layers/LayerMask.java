@@ -52,10 +52,10 @@ public class LayerMask extends ImageLayer {
             lookup[i] = (byte) i;
         }
         TRANSPARENCY_COLOR_MODEL = new IndexColorModel(8, 256,
-                lookup,  // red
-                lookup,  // green
-                lookup,  // blue
-                lookup); // alpha
+            lookup,  // red
+            lookup,  // green
+            lookup,  // blue
+            lookup); // alpha
 
         byte[] invertedLookup = new byte[256];
         for (int i = 0; i < 256; i++) {
@@ -64,10 +64,10 @@ public class LayerMask extends ImageLayer {
         byte[] allZeroLookup = new byte[256];
 
         RUBYLITH_COLOR_MODEL = new IndexColorModel(8, 256,
-                invertedLookup,  // red
-                allZeroLookup,   // green
-                allZeroLookup,   // blue
-                invertedLookup); // alpha
+            invertedLookup,  // red
+            allZeroLookup,   // green
+            allZeroLookup,   // blue
+            invertedLookup); // alpha
     }
 
     public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
@@ -99,7 +99,7 @@ public class LayerMask extends ImageLayer {
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
         transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL,
-                raster, false, null);
+            raster, false, null);
     }
 
     public void paintAsRubylith(Graphics2D g) {
@@ -190,10 +190,8 @@ public class LayerMask extends ImageLayer {
             tmpG.dispose();
 
             // ... and return a transparency image based on it
-            WritableRaster raster = tmpImg.getRaster();
-            var tmpTransparency = new BufferedImage(
-                TRANSPARENCY_COLOR_MODEL, raster, false, null);
-            return tmpTransparency;
+            return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
+                tmpImg.getRaster(), false, null);
         }
     }
 

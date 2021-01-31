@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,29 +47,15 @@ public class Dirs {
         return lastSaveDir.getAbsolutePath();
     }
 
-    public static void setLastOpenIfValid(File dir) {
-        if (dir.exists() && dir.isDirectory()) {
-            setLastOpen(dir);
-        }
-    }
-
     public static void setLastOpen(File dir) {
-        assert dir.exists();
-        assert dir.isDirectory();
-
-        lastOpenDir = dir;
-    }
-
-    public static void setLastSaveIfValid(File dir) {
         if (dir.exists() && dir.isDirectory()) {
-            setLastSave(dir);
+            lastOpenDir = dir;
         }
     }
 
     public static void setLastSave(File dir) {
-        assert dir.exists();
-        assert dir.isDirectory();
-
-        lastSaveDir = dir;
+        if (dir.exists() && dir.isDirectory()) {
+            lastSaveDir = dir;
+        }
     }
 }

@@ -128,8 +128,7 @@ public class ShapesTool extends DragTool {
             "<b>drag</b> to draw a shape. " +
                 "Hold <b>Alt</b> down to drag from the center. " +
                 "Hold <b>SPACE</b> down while drawing to move the shape. ",
-            Cursors.DEFAULT, true, true,
-            false, ClipStrategy.FULL);
+            Cursors.DEFAULT, false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
         defaultShapeTypeSettings = new EnumMap<>(ShapeType.class);
@@ -623,7 +622,7 @@ public class ShapesTool extends DragTool {
         assert state == TRANSFORM : "state = " + state;
 
         this.styledShape = styledShape;
-        transformBox.replaceTransformable(styledShape);
+        transformBox.replaceOwner(styledShape);
 
         setFGColor(styledShape.getFgColor(), false);
         setBGColor(styledShape.getBgColor(), false);
@@ -678,6 +677,11 @@ public class ShapesTool extends DragTool {
     @Override
     public boolean isDirectDrawing() {
         return false;
+    }
+
+    @Override
+    public boolean allowOnlyDrawables() {
+        return true;
     }
 
     @Override

@@ -140,10 +140,7 @@ public final class ConsistencyChecks {
             return true;
         }
         var selShapeBounds = selection.getShapeBounds2D();
-        if (selShapeBounds.isEmpty()) {
-            return false;
-        }
-        return true;
+        return !selShapeBounds.isEmpty();
     }
 
     public static boolean selectionIsInsideCanvas(Composition comp) {

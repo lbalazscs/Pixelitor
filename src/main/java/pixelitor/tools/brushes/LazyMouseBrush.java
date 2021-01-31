@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ public class LazyMouseBrush extends BrushDecorator {
     private static int defaultSpacing = DEFAULT_SPACING;
 
     // the lazy mouse distance is shared between the tools
-    private static int minDist = DEFAULT_DIST;
-    private static double minDist2 = DEFAULT_DIST * DEFAULT_DIST;
+    private static int dist = DEFAULT_DIST;
+    private static double dist2 = DEFAULT_DIST * DEFAULT_DIST;
 
     public LazyMouseBrush(Brush delegate) {
         super(delegate);
@@ -65,8 +65,8 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     private static void setDist(int value) {
-        minDist = value;
-        minDist2 = value * value;
+        dist = value;
+        dist2 = value * value;
     }
 
     private static void setDefaultSpacing(int value) {
@@ -112,7 +112,7 @@ public class LazyMouseBrush extends BrushDecorator {
         double dx = mouseX - drawX;
         double dy = mouseY - drawY;
 
-        double dist2 = dx * dx + dy * dy;
+        double d2 = dx * dx + dy * dy;
 
         double angle = Math.atan2(dy, dx);
         double advanceDX = spacing * Math.cos(angle);
@@ -121,22 +121,18 @@ public class LazyMouseBrush extends BrushDecorator {
         // It is important to consider here the spacing in order to avoid
         // infinite loops for large spacings (shape brush + large radius).
         // The math might not be 100% correct, but it looks OK.
-        double minValue = minDist2 + spacing * spacing;
+        double minValue = dist2 + spacing * spacing;
 
-        while (dist2 > minValue) {
+        while (d2 > minValue) {
             drawX += advanceDX;
             drawY += advanceDY;
 
             PPoint drawPoint = PPoint.eagerFromIm(drawX, drawY, view);
-//            if (lineConnect) {
-//                delegate.lineConnectTo(drawPoint);
-//            } else {
-                delegate.continueTo(drawPoint);
-//            }
+            delegate.continueTo(drawPoint);
 
             dx = mouseX - drawX;
             dy = mouseY - drawY;
-            dist2 = dx * dx + dy * dy;
+            d2 = dx * dx + dy * dy;
         }
     }
 
@@ -151,17 +147,15 @@ public class LazyMouseBrush extends BrushDecorator {
 
     public static RangeParam createDistParam() {
         RangeParam param = new RangeParam(
-            "Distance (px)", MIN_DIST, minDist, MAX_DIST);
-        param.setAdjustmentListener(() ->
-                setDist(param.getValue()));
+            "Distance (px)", MIN_DIST, dist, MAX_DIST);
+        param.setAdjustmentListener(() -> setDist(param.getValue()));
         return param;
     }
 
     public static RangeParam createSpacingParam() {
         RangeParam param = new RangeParam(
             "Spacing (px)", MIN_SPACING, defaultSpacing, MAX_SPACING);
-        param.setAdjustmentListener(() ->
-                setDefaultSpacing(param.getValue()));
+        param.setAdjustmentListener(() -> setDefaultSpacing(param.getValue()));
         return param;
     }
 

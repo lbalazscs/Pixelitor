@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -107,7 +107,7 @@ public class TmpDrawingLayer {
         if (smallImage) {
             // the drag was relative to the canvas, but if small images are used,
             // then it must be transformed to be relative to the selection
-            return drag.translate(-selStartX, -selStartY);
+            return drag.translatedCopy(-selStartX, -selStartY);
         } else {
             return drag;
         }

@@ -59,17 +59,18 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     // the property change events form the JFileChooser
     @Override
     public void propertyChange(PropertyChangeEvent e) {
-        File file = getFileFromFileChooserEvent(e);
-        if (file == null) {
-            thumbInfo = null;
-        } else {
-            if (FileUtils.hasSupportedInputExt(file)) {
+        if (JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(e.getPropertyName())) {
+            File file = (File) e.getNewValue();
+            if (file != null && FileUtils.hasSupportedInputExt(file)) {
                 String filePath = file.getAbsolutePath();
                 thumbInfo = getOrCreateThumb(file, filePath);
             } else {
                 thumbInfo = null;
             }
+        } else {
+            thumbInfo = null;
         }
+
         repaint();
     }
 
@@ -103,13 +104,6 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             ex.printStackTrace();
             return fakeThumbInfo;
         }
-    }
-
-    private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
-        return switch (e.getPropertyName()) {
-            case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY -> (File) e.getNewValue();
-            default -> null;
-        };
     }
 
     @Override

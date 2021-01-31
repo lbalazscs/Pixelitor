@@ -80,15 +80,13 @@ public enum StrokeType {
                 return wobbleStroke;
             }
 
-            if (width == lastWidth) {
-                // avoids creating new WobbleStroke objects, the main benefit is that
-                // the seed is not changed when the mouse is released
-                return wobbleStroke;
-            } else {
+            if (width != lastWidth) {
+                // create new stroke objects only when necessary, the main benefit
+                // is that the seed is not changed when the mouse is released
                 createStroke(width);
                 lastWidth = width;
-                return wobbleStroke;
             }
+            return wobbleStroke;
         }
 
         private void createStroke(float width) {

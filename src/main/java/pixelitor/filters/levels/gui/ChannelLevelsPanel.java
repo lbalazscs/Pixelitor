@@ -28,7 +28,7 @@ import static java.awt.Color.GRAY;
  * The panel corresponding to one channel in the Levels GUI
  */
 public class ChannelLevelsPanel extends JPanel {
-    private String cardName;
+    private final String cardName;
 
     public ChannelLevelsPanel(ChannelLevelsModel model) {
         cardName = model.getChannelName();

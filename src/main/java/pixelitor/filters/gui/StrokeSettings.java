@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
-import pixelitor.tools.shapes.BasicStrokeCap;
-import pixelitor.tools.shapes.BasicStrokeJoin;
 import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StrokeCap;
+import pixelitor.tools.shapes.StrokeJoin;
 import pixelitor.tools.shapes.StrokeType;
 
 /**
@@ -29,13 +29,13 @@ import pixelitor.tools.shapes.StrokeType;
  */
 public class StrokeSettings implements ParamState<StrokeSettings> {
     private final double width;
-    private final BasicStrokeCap cap;
-    private final BasicStrokeJoin join;
+    private final StrokeCap cap;
+    private final StrokeJoin join;
     private final StrokeType type;
     private final ShapeType shapeType;
     private final boolean dashed;
 
-    public StrokeSettings(double width, BasicStrokeCap cap, BasicStrokeJoin join,
+    public StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
                           StrokeType type, ShapeType shapeType, boolean dashed) {
         this.width = width;
         this.cap = cap;
@@ -57,11 +57,11 @@ public class StrokeSettings implements ParamState<StrokeSettings> {
         return width;
     }
 
-    public BasicStrokeCap getCap() {
+    public StrokeCap getCap() {
         return cap;
     }
 
-    public BasicStrokeJoin getJoin() {
+    public StrokeJoin getJoin() {
         return join;
     }
 

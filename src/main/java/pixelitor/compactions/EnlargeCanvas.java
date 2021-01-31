@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,20 +54,26 @@ public class EnlargeCanvas extends SimpleCompAction {
         this.west = west;
     }
 
-    public void ensureCovering(Rectangle imageBounds, Canvas canvas) {
-        if (imageBounds.x < -west) {
-            west = -imageBounds.x;
+    public void setupToFitContentOf(ContentLayer contentLayer) {
+        Rectangle contentBounds = contentLayer.getContentBounds();
+        Canvas canvas = contentLayer.getComp().getCanvas();
+
+        if (contentBounds.x < -west) {
+            west = -contentBounds.x;
         }
-        if (imageBounds.y < -north) {
-            north = -imageBounds.y;
+
+        if (contentBounds.y < -north) {
+            north = -contentBounds.y;
         }
-        int imageMaxX = imageBounds.x + imageBounds.width;
-        if (imageMaxX > canvas.getWidth() + east) {
-            east = imageMaxX - canvas.getWidth();
+
+        int contentMaxX = contentBounds.x + contentBounds.width;
+        if (contentMaxX > canvas.getWidth() + east) {
+            east = contentMaxX - canvas.getWidth();
         }
-        int imageMaxY = imageBounds.y + imageBounds.height;
-        if (imageMaxY > canvas.getHeight() + south) {
-            south = imageMaxY - canvas.getHeight();
+
+        int contentMaxY = contentBounds.y + contentBounds.height;
+        if (contentMaxY > canvas.getHeight() + south) {
+            south = contentMaxY - canvas.getHeight();
         }
     }
 
@@ -105,7 +111,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     @Override
     protected String getStatusBarMessage() {
         return "The canvas was enlarged to "
-                + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
+            + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
     }
 
     public static Action getAction() {
@@ -121,13 +127,13 @@ public class EnlargeCanvas extends SimpleCompAction {
         var p = new EnlargeCanvasPanel();
         new DialogBuilder()
             .title(NAME)
-                .content(p)
-                .okAction(() -> {
-                    var comp = OpenImages.getActiveComp();
-                    new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
-                            .process(comp);
-                })
-                .show();
+            .content(p)
+            .okAction(() -> {
+                var comp = OpenImages.getActiveComp();
+                new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
+                    .process(comp);
+            })
+            .show();
     }
 
     static class EnlargeCanvasPanel extends JPanel {

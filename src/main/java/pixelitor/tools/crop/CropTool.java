@@ -83,8 +83,7 @@ public class CropTool extends DragTool {
                 "After the handles appear: " +
                 "<b>Shift-drag</b> keeps the aspect ratio, " +
                 "<b>Double-click</b> crops, <b>Esc</b> cancels.",
-            Cursors.DEFAULT, false,
-            true, false, ClipStrategy.CUSTOM);
+            Cursors.DEFAULT, false, ClipStrategy.CUSTOM);
         spaceDragStartPoint = true;
 
         GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
@@ -97,23 +96,21 @@ public class CropTool extends DragTool {
     @Override
     public void initSettingsPanel() {
         addMaskOpacitySelector();
-        settingsPanel.addSeparator();
 
+        settingsPanel.addSeparator();
         addGuidesSelector();
-        settingsPanel.addSeparator();
 
+        settingsPanel.addSeparator();
         addCropSizeControls();
-        settingsPanel.addSeparator();
 
+        settingsPanel.addSeparator();
         addCropButton();
         addCancelButton();
 
         settingsPanel.addSeparator();
-
         addCropControlCheckboxes();
 
         enableCropActions(false);
-
         if (AppContext.isDevelopment()) {
             JButton b = new JButton("Dump State");
             b.addActionListener(e -> {
