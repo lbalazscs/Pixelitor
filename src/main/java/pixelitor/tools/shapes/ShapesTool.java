@@ -35,6 +35,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
@@ -60,7 +61,7 @@ import java.util.Map;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
-import static pixelitor.tools.shapes.ShapesToolState.*;
+import static pixelitor.tools.DragToolState.*;
 import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
@@ -114,7 +115,7 @@ public class ShapesTool extends DragTool {
     private StyledShape styledShape;
     private TransformBox transformBox;
 
-    private ShapesToolState state = NO_INTERACTION;
+    private DragToolState state = NO_INTERACTION;
 
     private final Action convertToSelectionAction = new AbstractAction("Convert to Selection") {
         @Override
@@ -427,7 +428,7 @@ public class ShapesTool extends DragTool {
         return false;
     }
 
-    private void setState(ShapesToolState newState) {
+    private void setState(DragToolState newState) {
         state = newState;
 
         assert state.isOK(this);
@@ -670,7 +671,7 @@ public class ShapesTool extends DragTool {
     }
 
     @VisibleForTesting
-    public ShapesToolState getState() {
+    public DragToolState getState() {
         return state;
     }
 

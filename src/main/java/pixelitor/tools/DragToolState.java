@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,14 +15,17 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.shapes;
+package pixelitor.tools;
+
+import pixelitor.tools.shapes.ShapesTool;
 
 /**
- * The possible states of the shapes tool
+ * The possible states of a {@link DragTool}.
+ * Currently used only for the shapes and crop tools.
  */
-public enum ShapesToolState {
+public enum DragToolState {
     /**
-     * The initial state and the state after rasterizing a shape
+     * The initial state and the state after finishing a tool action
      */
     NO_INTERACTION {
         @Override
@@ -31,7 +34,7 @@ public enum ShapesToolState {
         }
     },
     /**
-     * The state during the initial drag (no transform box yet)
+     * The state during the initial drag (no handles yet).
      */
     INITIAL_DRAG {
         @Override
@@ -40,7 +43,7 @@ public enum ShapesToolState {
         }
     },
     /**
-     * The state when the transform box is visible
+     * The state when the handles are shown.
      */
     TRANSFORM {
         @Override

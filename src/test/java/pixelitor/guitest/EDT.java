@@ -30,12 +30,12 @@ import pixelitor.layers.Layer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.selection.ShapeCombination;
+import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PathTransformer;
 import pixelitor.tools.pen.PenTool;
-import pixelitor.tools.shapes.ShapesToolState;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.test.Events;
@@ -192,8 +192,8 @@ public class EDT {
         run(() -> OpenImages.assertNumLayersIs(expected));
     }
 
-    public static void assertShapesToolStateIs(ShapesToolState expected) {
-        ShapesToolState actual = call(Tools.SHAPES::getState);
+    public static void assertShapesToolStateIs(DragToolState expected) {
+        DragToolState actual = call(Tools.SHAPES::getState);
         if (actual != expected) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }

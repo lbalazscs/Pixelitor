@@ -42,8 +42,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
-import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
 
 /**
  * A workflow test is an Assertj-Swing regression test, where an

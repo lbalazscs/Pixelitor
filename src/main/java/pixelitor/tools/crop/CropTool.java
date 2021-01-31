@@ -29,6 +29,7 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.DragToolState;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -48,13 +49,13 @@ import java.awt.geom.Rectangle2D;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
-import static pixelitor.tools.crop.CropToolState.*;
+import static pixelitor.tools.DragToolState.*;
 
 /**
  * The crop tool
  */
 public class CropTool extends DragTool {
-    private CropToolState state = INITIAL;
+    private DragToolState state = NO_INTERACTION;
 
     private CropBox cropBox;
 
@@ -237,13 +238,16 @@ public class CropTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        setState(state.getNextAfterMousePressed());
+        if (state == NO_INTERACTION) {
+            setState(INITIAL_DRAG);
+            enableCropActions(true);
+        } else if (state == INITIAL_DRAG) {
+            throw new IllegalStateException();
+        }
 
         if (state == TRANSFORM) {
             assert cropBox != null;
             cropBox.mousePressed(e);
-            enableCropActions(true);
-        } else if (state == USER_DRAG) {
             enableCropActions(true);
         }
     }
@@ -254,6 +258,7 @@ public class CropTool extends DragTool {
             cropBox.mouseDragged(e);
         } else if (userDrag != null) {
             userDrag.setStartFromCenter(e.isAltDown());
+            userDrag.setEquallySized(e.isShiftDown());
         }
 
         PRectangle cropRect = getCropRect();
@@ -280,9 +285,9 @@ public class CropTool extends DragTool {
         comp.imageChanged();
 
         switch (state) {
-            case INITIAL:
+            case NO_INTERACTION:
                 break;
-            case USER_DRAG:
+            case INITIAL_DRAG:
                 if (cropBox != null) {
                     throw new IllegalStateException();
                 }
@@ -305,7 +310,7 @@ public class CropTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (state == INITIAL) {
+        if (state == NO_INTERACTION) {
             return;
         }
         PRectangle cropRect = getCropRect();
@@ -385,7 +390,7 @@ public class CropTool extends DragTool {
      * Returns the crop rectangle
      */
     public PRectangle getCropRect() {
-        if (state == USER_DRAG) {
+        if (state == INITIAL_DRAG) {
             return userDrag.toPosPRect();
         } else if (state == TRANSFORM) {
             return cropBox.getRect();
@@ -403,7 +408,7 @@ public class CropTool extends DragTool {
     @Override
     public void resetInitialState() {
         cropBox = null;
-        setState(INITIAL);
+        setState(NO_INTERACTION);
 
         enableCropActions(false);
 
@@ -414,7 +419,7 @@ public class CropTool extends DragTool {
         OpenImages.setCursorForAll(Cursors.DEFAULT);
     }
 
-    private void setState(CropToolState newState) {
+    private void setState(DragToolState newState) {
         state = newState;
     }
 

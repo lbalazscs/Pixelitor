@@ -94,8 +94,8 @@ import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.selection.ShapeCombination.ADD;
 import static pixelitor.selection.ShapeCombination.REPLACE;
-import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
-import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.TRANSFORM;
 
 /**
  * An automated GUI test which uses AssertJ-Swing.
