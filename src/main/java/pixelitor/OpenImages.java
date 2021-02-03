@@ -19,11 +19,11 @@ package pixelitor;
 
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
-import pixelitor.menus.MenuAction;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
@@ -37,6 +37,7 @@ import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.RandomGUITest;
 
+import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -64,21 +65,21 @@ public class OpenImages {
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(i18n("close_all")) {
+    public static final Action CLOSE_ALL_ACTION = new OpenImageEnabledAction(i18n("close_all")) {
         @Override
         public void onClick() {
             warnAndCloseAll();
         }
     };
 
-    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(i18n("close")) {
+    public static final Action CLOSE_ACTIVE_ACTION = new OpenImageEnabledAction(i18n("close")) {
         @Override
         public void onClick() {
             warnAndCloseActive();
         }
     };
 
-    public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
+    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenImageEnabledAction("Close Unmodified") {
         @Override
         public void onClick() {
             warnAndCloseUnmodified();

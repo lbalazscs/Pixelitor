@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.OpenImages;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
@@ -86,13 +85,12 @@ public class RandomFilterGUI extends FilterGUI {
         }
 
         filter = newFilter;
-        String filterName = newFilter.getListName();
+        String filterName = newFilter.getName();
         realSettingsPanel.setBorder(createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                Drawable dr = OpenImages.getActiveDrawableOrThrow();
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }

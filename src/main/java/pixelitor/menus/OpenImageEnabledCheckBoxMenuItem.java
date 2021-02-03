@@ -15,33 +15,32 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.jhlabsproxies;
+package pixelitor.menus;
 
-import com.jhlabs.image.LaplaceFilter;
-import pixelitor.filters.Filter;
+import pixelitor.OpenImages;
+import pixelitor.gui.View;
+import pixelitor.utils.ViewActivationListener;
 
-import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 /**
- * Laplacian edge detection filter based on
- * the JHLabs {@link LaplaceFilter}
+ * A JCheckBoxMenuItem that becomes enabled only if there is an open image
  */
-public class JHLaplacian extends Filter {
-    public static final String NAME = "Laplacian";
-
-    private final LaplaceFilter filter;
-
-    public JHLaplacian() {
-        filter = new LaplaceFilter(NAME);
+public class OpenImageEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implements ViewActivationListener {
+    public OpenImageEnabledCheckBoxMenuItem(String name) {
+        super(name);
+        setName(name);
+        setEnabled(false);
+        OpenImages.addActivationListener(this);
     }
 
     @Override
-    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return filter.filter(src, dest);
+    public void viewActivated(View oldView, View newView) {
+        setEnabled(true);
     }
 
     @Override
-    public boolean supportsGray() {
-        return false;
+    public void allViewsClosed() {
+        setEnabled(false);
     }
 }

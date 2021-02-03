@@ -21,18 +21,14 @@ import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
 import pixelitor.filters.Invert;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
-
-import java.awt.event.ActionEvent;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
-public class AddAdjLayerAction extends NamedAction
-    implements ViewActivationListener {
-
+public class AddAdjLayerAction extends PAction implements ViewActivationListener {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
@@ -43,7 +39,7 @@ public class AddAdjLayerAction extends NamedAction
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void onClick() {
         var comp = OpenImages.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, Invert.NAME, new Invert());
 

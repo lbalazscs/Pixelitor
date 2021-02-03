@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,6 +91,15 @@ public class GridBagHelper {
         autoIncrementedGridY++;
     }
 
+    public void addLabelAndControl(FilterSetting setting) {
+        addLabelAndControl(setting.getName() + ":", setting.createGUI());
+    }
+
+    public void addLabelAndControl(FilterSetting setting, String controlName) {
+        addLabelAndControl(setting.getName() + ":",
+            setting.createGUI(controlName));
+    }
+
     public void addLabelAndControl(String labelText, Component c) {
         addLabelAndControl(labelText, c, autoIncrementedGridY);
         autoIncrementedGridY++;
@@ -131,6 +140,10 @@ public class GridBagHelper {
     public void addNextControl(Component c) {
         nextControlConstraint.gridx++;
         container.add(c, nextControlConstraint);
+    }
+
+    public void addLabelAndLastControl(FilterSetting setting) {
+        addLabelAndLastControl(setting.getName() + ":", setting.createGUI());
     }
 
     public void addLabelAndLastControl(String name, Component c) {

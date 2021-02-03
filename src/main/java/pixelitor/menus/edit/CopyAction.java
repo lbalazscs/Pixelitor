@@ -20,15 +20,13 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
 import pixelitor.utils.Result;
 
-import javax.swing.*;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.utils.Texts.i18n;
@@ -37,7 +35,7 @@ import static pixelitor.utils.Texts.i18n;
  * Copies the image given by the {@link CopySource}
  * to the system clipboard
  */
-public class CopyAction extends AbstractAction {
+public class CopyAction extends OpenImageEnabledAction {
     private final CopySource source;
 
     public CopyAction(CopySource source) {
@@ -46,12 +44,8 @@ public class CopyAction extends AbstractAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            OpenImages.onActiveComp(this::copyToClipboard);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick() {
+        OpenImages.onActiveComp(this::copyToClipboard);
     }
 
     private void copyToClipboard(Composition comp) {

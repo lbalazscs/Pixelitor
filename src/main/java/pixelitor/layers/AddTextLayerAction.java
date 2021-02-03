@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,18 +19,16 @@ package pixelitor.layers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 /**
  * An {@link Action} that adds a new text layer to the active composition.
  */
-public class AddTextLayerAction extends NamedAction implements ViewActivationListener {
-
+public class AddTextLayerAction extends PAction implements ViewActivationListener {
     public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
 
     private AddTextLayerAction() {
@@ -41,7 +39,7 @@ public class AddTextLayerAction extends NamedAction implements ViewActivationLis
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void onClick() {
         TextLayer.createNew();
     }
 

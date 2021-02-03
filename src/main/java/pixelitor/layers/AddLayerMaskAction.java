@@ -24,6 +24,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
+import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
@@ -53,14 +54,22 @@ public class AddLayerMaskAction extends NamedAction
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        var comp = OpenImages.getActiveComp();
-        var layer = comp.getActiveLayer();
-        assert !layer.hasMask();
-
         boolean ctrlPressed = false;
         if (e != null) { // could be null in tests
             ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
         }
+
+        try {
+            onClick(ctrlPressed);
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    private void onClick(boolean ctrlPressed) {
+        var comp = OpenImages.getActiveComp();
+        var layer = comp.getActiveLayer();
+        assert !layer.hasMask();
 
         if (comp.hasSelection()) {
             if (ctrlPressed) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,35 +15,31 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.menus;
+package pixelitor.gui.utils;
 
 import pixelitor.OpenImages;
-import pixelitor.gui.utils.NamedAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-
 import static java.lang.String.format;
 
 /**
- * An action which is typically added to menus
+ * An action that can run only when the active layer has a specific type
  */
-public abstract class MenuAction extends NamedAction {
+public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
     /**
-     * On which layer types is a {@link MenuAction} allowed to run
+     * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
-    public enum AllowedOnLayerType {
-        ANY(null) {
+    public enum Condition {
+        ALWAYS(null) {
             @Override
             boolean isAllowed(Layer layer) {
                 return true;
             }
 
             @Override
-            public String getErrorMessage(Layer layer) {
+            String getErrorMessage(Layer layer) {
                 return null;
             }
         }, HAS_LAYER_MASK("No layer mask") {
@@ -53,7 +49,7 @@ public abstract class MenuAction extends NamedAction {
             }
 
             @Override
-            public String getErrorMessage(Layer layer) {
+            String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" has no layer mask.", layer.getName());
             }
         }, NO_LAYER_MASK("Has layer mask") {
@@ -63,7 +59,7 @@ public abstract class MenuAction extends NamedAction {
             }
 
             @Override
-            public String getErrorMessage(Layer layer) {
+            String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" already has a layer mask.", layer.getName());
             }
         }, IS_TEXT_LAYER("Not a text layer") {
@@ -73,67 +69,42 @@ public abstract class MenuAction extends NamedAction {
             }
 
             @Override
-            public String getErrorMessage(Layer layer) {
+            String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" is not a text layer.", layer.getName());
             }
         };
 
         private final String errorDialogTitle;
 
-        AllowedOnLayerType(String errorDialogTitle) {
+        Condition(String errorDialogTitle) {
             this.errorDialogTitle = errorDialogTitle;
         }
 
         abstract boolean isAllowed(Layer layer);
 
-        public abstract String getErrorMessage(Layer layer);
+        abstract String getErrorMessage(Layer layer);
 
-        public String getErrorDialogTitle() {
-            return errorDialogTitle;
+        public void showErrorMessage(Layer layer) {
+            Messages.showInfo(errorDialogTitle, getErrorMessage(layer));
         }
     }
 
-    private final AllowedOnLayerType layerType;
+    private final Condition layerType;
 
-    protected MenuAction(String name) {
+    protected RestrictedLayerAction(String name, Condition layerType) {
         super(name);
-        layerType = AllowedOnLayerType.ANY;
-    }
-
-    protected MenuAction(String name, Icon icon) {
-        super(name, icon);
-        layerType = AllowedOnLayerType.ANY;
-    }
-
-    protected MenuAction(String name, AllowedOnLayerType layerType) {
-        super(name);
-        this.layerType = layerType;
-    }
-
-    protected MenuAction(String name, Icon icon, AllowedOnLayerType layerType) {
-        super(name, icon);
         this.layerType = layerType;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            if (layerType == AllowedOnLayerType.ANY) {
-                onClick();
-            } else {
-                Layer activeLayer = OpenImages.getActiveLayer();
-                if (layerType.isAllowed(activeLayer)) {
-                    onClick();
-                } else {
-                    String errorTitle = layerType.getErrorDialogTitle();
-                    String errorMessage = layerType.getErrorMessage(activeLayer);
-                    Messages.showInfo(errorTitle, errorMessage);
-                }
-            }
-        } catch (Exception ex) {
-            Messages.showException(ex);
+    public void onClick() {
+        Layer activeLayer = OpenImages.getActiveLayer();
+        if (layerType.isAllowed(activeLayer)) {
+            onActiveLayer(activeLayer);
+        } else {
+            layerType.showErrorMessage(activeLayer);
         }
     }
 
-    public abstract void onClick();
+    public abstract void onActiveLayer(Layer layer);
 }

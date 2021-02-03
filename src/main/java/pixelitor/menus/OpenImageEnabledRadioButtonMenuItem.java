@@ -15,27 +15,32 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.jhlabsproxies;
+package pixelitor.menus;
 
-import com.jhlabs.image.MedianFilter;
-import pixelitor.filters.Filter;
+import pixelitor.OpenImages;
+import pixelitor.gui.View;
+import pixelitor.utils.ViewActivationListener;
 
-import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 /**
- * "3x3 Median Filter" based on the JHLabs {@link MedianFilter}
+ * A JRadioButtonMenuItem that becomes enabled only if there is an open image
  */
-public class JHMedian extends Filter {
-    public static final String NAME = "3x3 Median Filter";
-
-    private final MedianFilter filter;
-
-    public JHMedian() {
-        filter = new MedianFilter(NAME);
+public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements ViewActivationListener {
+    public OpenImageEnabledRadioButtonMenuItem(String name) {
+        super(name);
+        setName(name);
+        setEnabled(false);
+        OpenImages.addActivationListener(this);
     }
 
     @Override
-    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return filter.filter(src, dest);
+    public void viewActivated(View oldView, View newView) {
+        setEnabled(true);
+    }
+
+    @Override
+    public void allViewsClosed() {
+        setEnabled(false);
     }
 }

@@ -22,13 +22,13 @@ import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import static javax.swing.BoxLayout.Y_AXIS;
@@ -115,9 +115,9 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     public static Action getAction() {
-        return new AbstractAction("Enlarge Canvas...") {
+        return new OpenImageEnabledAction("Enlarge Canvas...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 showInDialog();
             }
         };

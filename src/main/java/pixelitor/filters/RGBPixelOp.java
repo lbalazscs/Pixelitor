@@ -31,9 +31,6 @@ public interface RGBPixelOp {
     int changeRGB(int a, int r, int g, int b);
 
     default FilterAction toFilterAction(String name) {
-        return new FilterAction(name,
-            () -> new ExtractChannelFilter(this))
-            .noGUI()
-            .withExtractChannelListName();
+        return new FilterAction(name, () -> new ExtractChannelFilter(this)).noGUI();
     }
 }

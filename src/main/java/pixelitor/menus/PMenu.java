@@ -37,134 +37,37 @@ public class PMenu extends JMenu {
         setMnemonic(c);
     }
 
-    // Simple add without a builder
-    public void addAction(Action action) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(action);
-        add(menuItem);
-    }
-
-    // Simple add without a builder
-    public void addAction(Action action, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(action);
+    public void add(Action action, KeyStroke keyStroke) {
+        JMenuItem menuItem = new JMenuItem(action);
         menuItem.setAccelerator(keyStroke);
         add(menuItem);
     }
 
-    // Simple add without a builder
-    public void addAlwaysEnabledAction(Action action, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.createMenuItem(action);
-        menuItem.setAccelerator(keyStroke);
-        add(menuItem);
-    }
-
-    /**
-     * Returns an action builder for non-filter actions
-     */
-    public MenuItemBuilder builder(Action action) {
-        return new MenuItemBuilder(this, action);
-    }
-
-    /**
-     * Simple add for filter actions, no builder is needed in the simplest case
-     */
     public void addFilter(String name, Supplier<Filter> supplier) {
-        addFilter(new FilterAction(name, supplier));
+        add(new FilterAction(name, supplier));
+    }
+
+    public void addFilterWithoutGUI(String name, Supplier<Filter> supplier) {
+        add(new FilterAction(name, supplier).noGUI());
+    }
+
+    public void addFilterWithoutGUI(String name, Supplier<Filter> supplier,
+                                    KeyStroke keyStroke) {
+        add(new FilterAction(name, supplier).noGUI(), keyStroke);
     }
 
     public void addFilter(String name, Supplier<Filter> supplier, KeyStroke keyStroke) {
-        addFilter(new FilterAction(name, supplier), keyStroke);
+        add(new FilterAction(name, supplier), keyStroke);
     }
 
     /**
-     * Simple add for simple filters
+     * Simple add for forwarding filters
      */
-    public void addFilter(String name, AbstractBufferedImageOp op) {
-        addFilter(new FilterAction(name, op));
+    public void addForwardingFilter(String name, Supplier<AbstractBufferedImageOp> op) {
+        add(FilterAction.forwarding(name, op, true));
     }
 
-    public void addFilter(FilterAction fa) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(fa);
-        add(menuItem);
-    }
-
-    public void addFilter(FilterAction fa, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(fa);
-        menuItem.setAccelerator(keyStroke);
-        add(menuItem);
-    }
-
-    public FilterMenuItemBuilder builder(String name, Supplier<Filter> supplier) {
-        FilterAction fa = new FilterAction(name, supplier);
-        return buildFilter(fa);
-    }
-
-    public FilterMenuItemBuilder buildFilter(FilterAction fa) {
-        return new FilterMenuItemBuilder(this, fa);
-    }
-
-    /**
-     * Action builder for non-filter actions
-     */
-    public static class MenuItemBuilder {
-        private final PMenu menu;
-        protected final Action action;
-        private KeyStroke keyStroke;
-        private EnabledIf whenToEnable;
-
-        public MenuItemBuilder(PMenu menu, Action action) {
-            this.action = action;
-            this.menu = menu;
-        }
-
-        public void add() {
-            if (whenToEnable == null) {
-                whenToEnable = EnabledIf.THERE_IS_OPEN_IMAGE;
-            }
-            JMenuItem menuItem = whenToEnable.createMenuItem(action);
-            if (keyStroke != null) {
-                menuItem.setAccelerator(keyStroke);
-            }
-            menu.add(menuItem);
-        }
-
-        public MenuItemBuilder withKey(KeyStroke keyStroke) {
-            this.keyStroke = keyStroke;
-            return this;
-        }
-
-        public MenuItemBuilder enableIf(EnabledIf whenToEnable) {
-            this.whenToEnable = whenToEnable;
-            return this;
-        }
-
-        public MenuItemBuilder alwaysEnabled() {
-            // used in cases when the action will be never disabled
-            whenToEnable = EnabledIf.ACTION_ENABLED;
-            return this;
-        }
-    }
-
-    /**
-     * Filter action builder
-     */
-    public static class FilterMenuItemBuilder extends MenuItemBuilder {
-        public FilterMenuItemBuilder(PMenu menu, FilterAction action) {
-            super(menu, action);
-        }
-
-        public FilterMenuItemBuilder noGUI() {
-            ((FilterAction) action).noGUI();
-            return this;
-        }
-
-        public FilterMenuItemBuilder withFillListName() {
-            ((FilterAction) action).withFillListName();
-            return this;
-        }
-
-        public FilterMenuItemBuilder withExtractChannelListName() {
-            ((FilterAction) action).withExtractChannelListName();
-            return this;
-        }
+    public void addNoGrayForwardingFilter(String name, Supplier<AbstractBufferedImageOp> op) {
+        add(FilterAction.forwarding(name, op, false));
     }
 }

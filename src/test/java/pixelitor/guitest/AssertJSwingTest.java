@@ -34,7 +34,6 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.AutoPaint;
 import pixelitor.colors.FgBgColorSelector;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
@@ -42,6 +41,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
+import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
@@ -1900,7 +1900,7 @@ public class AssertJSwingTest {
     private void testFilterWithDialog(String name,
                                       Randomize randomize,
                                       Reseed reseed,
-                                      ShowOriginal checkShowOriginal,
+                                      ShowOriginal showOriginal,
                                       String... extraButtonsToClick) {
         if (skipThis()) {
             return;
@@ -1908,7 +1908,7 @@ public class AssertJSwingTest {
         log(1, "filter " + name);
 
         boolean testPresets = !quick;
-        app.runFilterWithDialog(name, randomize, reseed, checkShowOriginal, testPresets, extraButtonsToClick);
+        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonsToClick);
 
         afterFilterRunActions(name);
     }

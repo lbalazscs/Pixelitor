@@ -23,8 +23,8 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ColorIcon;
+import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.Themes;
-import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Rnd;
@@ -130,7 +130,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String selectorName = fg ? "Foreground" : "Background";
         String otherName = fg ? "Background" : "Foreground";
 
-        popup.add(new MenuAction(selectorName + " Color Variations...") {
+        popup.add(new PAction(selectorName + " Color Variations...") {
             @Override
             public void onClick() {
                 if (fg) {
@@ -141,14 +141,14 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        popup.add(new MenuAction("HSB Mix with " + otherName + "...") {
+        popup.add(new PAction("HSB Mix with " + otherName + "...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, fg);
             }
         });
 
-        popup.add(new MenuAction("RGB Mix with " + otherName + "...") {
+        popup.add(new PAction("RGB Mix with " + otherName + "...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, fg);
@@ -156,7 +156,7 @@ public class FgBgColorSelector extends JLayeredPane {
         });
 
         ColorHistory history = fg ? ColorHistory.FOREGROUND : ColorHistory.BACKGROUND;
-        popup.add(new MenuAction(selectorName + " Color History...") {
+        popup.add(new PAction(selectorName + " Color History...") {
             @Override
             public void onClick() {
                 history.showDialog(pw, ColorSwatchClickHandler.STANDARD);

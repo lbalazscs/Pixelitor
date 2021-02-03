@@ -27,7 +27,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 import static java.lang.Integer.parseInt;
@@ -79,9 +78,9 @@ public final class NewImage {
     }
 
     public static Action getAction() {
-        return new AbstractAction(NEW_IMAGE_STRING + "...") {
+        return new PAction(NEW_IMAGE_STRING + "...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 showInDialog();
             }
         };

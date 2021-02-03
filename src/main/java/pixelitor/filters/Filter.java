@@ -177,10 +177,6 @@ public abstract class Filter implements Serializable {
         return getClass().getSimpleName();
     }
 
-    public String getListName() {
-        return filterAction.getListName();
-    }
-
     /**
      * Whether this filter supports editing TYPE_BYTE_GRAY
      * images used in layer masks

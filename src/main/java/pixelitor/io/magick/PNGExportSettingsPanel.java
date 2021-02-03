@@ -63,7 +63,7 @@ class PNGExportSettingsPanel extends JPanel implements ExportSettings {
 
         compression = new RangeParam("Compression Level",
             0, 7, 9, true, SliderSpinner.TextPosition.NONE);
-        gbh.addLabelAndControl(compression.getName() + ":", compression.createGUI());
+        gbh.addLabelAndControl(compression);
     }
 
     @Override

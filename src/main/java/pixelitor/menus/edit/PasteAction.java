@@ -17,14 +17,16 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.OpenImages;
+import pixelitor.gui.View;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ViewActivationListener;
 
-import javax.swing.*;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
@@ -34,22 +36,22 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * Pastes an image from the system clipboard
  */
-public class PasteAction extends AbstractAction {
+public class PasteAction extends PAction implements ViewActivationListener {
     private final PasteDestination destination;
 
     public PasteAction(PasteDestination destination) {
         super(i18n(destination.getResourceKey()));
 
         this.destination = destination;
+        if (destination.requiresOpenImage()) {
+            OpenImages.addActivationListener(this);
+            setEnabled(false);
+        }
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            getImageFromClipboard().ifPresent(this::pasteImage);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick() {
+        getImageFromClipboard().ifPresent(this::pasteImage);
     }
 
     private void pasteImage(BufferedImage pastedImage) {
@@ -78,5 +80,17 @@ public class PasteAction extends AbstractAction {
             return Optional.empty();
         }
         return Optional.of(pastedImage);
+    }
+
+    @Override
+    public void viewActivated(View oldView, View newView) {
+        assert destination.requiresOpenImage();
+        setEnabled(true);
+    }
+
+    @Override
+    public void allViewsClosed() {
+        assert destination.requiresOpenImage();
+        setEnabled(false);
     }
 }

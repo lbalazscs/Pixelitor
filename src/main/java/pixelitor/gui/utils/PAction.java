@@ -15,16 +15,36 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.gui.utils;
+
+import pixelitor.utils.Messages;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 
 /**
- * Whether a filter GUI should have
- * a "Show Original" checkbox.
+ * The "Pixelitor action" is the common superclass of most actions.
  */
-public enum ShowOriginal {
-    YES, NO;
-
-    public boolean isYes() {
-        return this == YES;
+public abstract class PAction extends NamedAction {
+    public PAction() {
     }
+
+    public PAction(String name) {
+        super(name);
+    }
+
+    public PAction(String name, Icon icon) {
+        super(name, icon);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            onClick();
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    public abstract void onClick();
 }

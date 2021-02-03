@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.menus;
+
+package pixelitor.gui.utils;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
@@ -23,22 +24,35 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 
 /**
- * A menu item that is enabled only if there is an open image
+ * An Action that is enabled only if at least one image is opened.
  */
-public class OpenImageAwareMenuItem extends JMenuItem implements ViewActivationListener {
-    public OpenImageAwareMenuItem(Action a) {
-        super(a);
+public abstract class OpenImageEnabledAction extends PAction implements ViewActivationListener {
+    public OpenImageEnabledAction() {
+        init();
+    }
+
+    public OpenImageEnabledAction(String name) {
+        super(name);
+        init();
+    }
+
+    public OpenImageEnabledAction(String name, Icon icon) {
+        super(name, icon);
+        init();
+    }
+
+    private void init() {
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }
 
     @Override
-    public void allViewsClosed() {
-        setEnabled(false);
+    public void viewActivated(View oldView, View newView) {
+        setEnabled(true);
     }
 
     @Override
-    public void viewActivated(View oldView, View newView) {
-        setEnabled(true);
+    public void allViewsClosed() {
+        setEnabled(false);
     }
 }

@@ -29,7 +29,6 @@ import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.DialogMenuBar;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
@@ -462,7 +461,7 @@ public class AppRunner {
     }
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
-                                    ShowOriginal checkShowOriginal, boolean testPresets,
+                                    ShowOriginal showOriginal, boolean testPresets,
                                     String... extraButtonsToClick) {
         runMenuCommand(name + "...");
         var dialog = findFilterDialog();
@@ -489,7 +488,7 @@ public class AppRunner {
             savePreset(dialog, testPresetName);
         }
 
-        if (checkShowOriginal.isYes()) {
+        if (showOriginal == ShowOriginal.YES) {
             dialog.checkBox("show original").click();
             dialog.checkBox("show original").click();
         }
@@ -561,4 +560,6 @@ public class AppRunner {
     public enum Randomize {YES, NO}
 
     public enum Reseed {YES, NO}
+
+    public enum ShowOriginal {YES, NO}
 }

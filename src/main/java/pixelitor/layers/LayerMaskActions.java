@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -121,7 +121,7 @@ public class LayerMaskActions {
         }
     }
 
-    static class EnableDisableMaskAction extends NamedAction implements LayerListener {
+    static class EnableDisableMaskAction extends PAction implements LayerListener {
         private final Layer layer;
 
         public EnableDisableMaskAction(Layer layer) {
@@ -131,7 +131,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
             refreshText();
         }
@@ -151,7 +151,7 @@ public class LayerMaskActions {
         }
     }
 
-    static class LinkUnlinkMaskAction extends NamedAction implements LayerListener {
+    static class LinkUnlinkMaskAction extends PAction implements LayerListener {
         private final Layer layer;
 
         public LinkUnlinkMaskAction(Layer layer) {
@@ -161,7 +161,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             LayerMask mask = layer.getMask();
             mask.setLinked(!mask.isLinked(), true);
             refreshText();

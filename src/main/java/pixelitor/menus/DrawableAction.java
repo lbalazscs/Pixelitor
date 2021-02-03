@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,14 +19,12 @@ package pixelitor.menus;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.layers.*;
-import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
@@ -35,7 +33,7 @@ import static java.lang.String.format;
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
  */
-public abstract class DrawableAction extends NamedAction {
+public abstract class DrawableAction extends OpenImageEnabledAction {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
@@ -86,12 +84,8 @@ public abstract class DrawableAction extends NamedAction {
     protected abstract void process(Drawable dr);
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            OpenImages.onActiveLayer(this::startOnLayer);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+    public void onClick() {
+        OpenImages.onActiveLayer(this::startOnLayer);
     }
 
     private void startOnLayer(Layer layer) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,20 +20,33 @@ package pixelitor.filters;
 import com.jhlabs.image.AbstractBufferedImageOp;
 
 import java.awt.image.BufferedImage;
+import java.util.function.Supplier;
 
 /**
- * A filter without parameters that delegates the
+ * A filter without GUI that delegates the
  * filtering to an AbstractBufferedImageOp
  */
 public class SimpleForwardingFilter extends Filter {
-    private final AbstractBufferedImageOp delegate;
+    private final Supplier<AbstractBufferedImageOp> factory;
+    private final boolean supportsGray;
+    private AbstractBufferedImageOp filter;
 
-    public SimpleForwardingFilter(AbstractBufferedImageOp delegate) {
-        this.delegate = delegate;
+    public SimpleForwardingFilter(Supplier<AbstractBufferedImageOp> factory,
+                                  boolean supportsGray) {
+        this.factory = factory;
+        this.supportsGray = supportsGray;
     }
 
     @Override
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return delegate.filter(src, dest);
+        if (filter == null) {
+            filter = factory.get();
+        }
+        return filter.filter(src, dest);
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return supportsGray;
     }
 }

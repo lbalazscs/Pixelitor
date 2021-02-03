@@ -72,8 +72,6 @@ public enum FillType {
     }
 
     public FilterAction asFillFilterAction() {
-        return new FilterAction(guiName, () -> new Fill(this))
-            .noGUI()
-            .withFillListName();
+        return new FilterAction(guiName, () -> new Fill(this)).noGUI();
     }
 }

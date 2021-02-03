@@ -42,9 +42,9 @@ public class HistoryPanel extends JPanel {
         JPanel buttonsPanel = new JPanel(new FlowLayout());
 
         undoButton = createButton(Icons.getUndoIcon(), "undo",
-            "AbstractUndoableEdit.undoText", History.UNDO_ACTION);
+            "AbstractUndoableEdit.undoText", UndoAction.INSTANCE);
         redoButton = createButton(Icons.getRedoIcon(), "redo",
-            "AbstractUndoableEdit.redoText", History.REDO_ACTION);
+            "AbstractUndoableEdit.redoText", RedoAction.INSTANCE);
 
         History.addUndoableEditListener(e -> updateButtonsEnabledState());
         updateButtonsEnabledState();

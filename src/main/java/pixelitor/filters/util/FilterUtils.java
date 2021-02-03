@@ -60,7 +60,7 @@ public class FilterUtils {
     public static FilterAction[] getAnimationFiltersSorted() {
         return allFilters.stream()
             .filter(FilterAction::isAnimationFilter)
-            .sorted(comparing(FilterAction::getListName))
+            .sorted(comparing(FilterAction::getName))
             .toArray(FilterAction[]::new);
     }
 

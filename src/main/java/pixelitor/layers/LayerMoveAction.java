@@ -21,12 +21,10 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.utils.Icons;
-import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -34,8 +32,8 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends NamedAction
-    implements ViewActivationListener, ActiveCompositionListener {
+public class LayerMoveAction extends OpenImageEnabledAction
+    implements ActiveCompositionListener {
 
     // menu and history names (also for selection movements)
     public static final String RAISE_LAYER = i18n("raise_layer");
@@ -55,23 +53,17 @@ public class LayerMoveAction extends NamedAction
         this.up = up;
         setToolTip(up ? i18n("raise_layer_tt") : i18n("lower_layer_tt"));
         setEnabled(false);
-        OpenImages.addActivationListener(this);
         Layers.addCompositionListener(this);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void onClick() {
         var comp = OpenImages.getActiveComp();
         if (up) {
             comp.moveActiveLayerUp();
         } else {
             comp.moveActiveLayerDown();
         }
-    }
-
-    @Override
-    public void allViewsClosed() {
-        setEnabled(false);
     }
 
     @Override

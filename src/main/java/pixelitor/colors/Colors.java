@@ -24,7 +24,7 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.menus.MenuAction;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -326,7 +326,7 @@ public class Colors {
 
         ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
 
-        popup.add(new MenuAction("Color Variations...") {
+        popup.add(new PAction("Color Variations...") {
             @Override
             public void onClick() {
                 Window window = SwingUtilities.windowForComponent(parent);
@@ -334,7 +334,7 @@ public class Colors {
             }
         });
 
-        popup.add(new MenuAction("Filter Color History...") {
+        popup.add(new PAction("Filter Color History...") {
             @Override
             public void onClick() {
                 Window window = SwingUtilities.windowForComponent(parent);
@@ -374,7 +374,7 @@ public class Colors {
     }
 
     public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {
-        popup.add(new MenuAction("Copy Color") {
+        popup.add(new PAction("Copy Color") {
             @Override
             public void onClick() {
                 copyColorToClipboard(colorSupplier.get());
@@ -383,7 +383,7 @@ public class Colors {
     }
 
     public static void setupPasteColorPopupMenu(JPopupMenu popup, Window window, Consumer<Color> colorSetter) {
-        popup.add(new MenuAction("Paste Color") {
+        popup.add(new PAction("Paste Color") {
             @Override
             public void onClick() {
                 Color color = getColorFromClipboard();

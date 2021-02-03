@@ -33,7 +33,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
  * Represents the destination of a pasted image
  */
 public enum PasteDestination {
-    NEW_LAYER {
+    NEW_LAYER(true) {
         @Override
         public String getResourceKey() {
             return "paste_as_new_layer";
@@ -45,7 +45,7 @@ public enum PasteDestination {
             comp.addExternalImageAsNewLayer(pastedImage,
                 "Pasted Layer", "New Pasted Layer");
         }
-    }, NEW_IMAGE {
+    }, NEW_IMAGE(false) {
         private int pastedCount = 1;
 
         @Override
@@ -59,7 +59,7 @@ public enum PasteDestination {
             OpenImages.addAsNewComp(pastedImage, null, title);
             pastedCount++;
         }
-    }, MASK {
+    }, MASK(true) {
         @Override
         public String getResourceKey() {
             return "paste_as_layer_mask";
@@ -104,7 +104,17 @@ public enum PasteDestination {
         }
     };
 
+    private final boolean requiresOpenImage;
+
+    PasteDestination(boolean requiresOpenImage) {
+        this.requiresOpenImage = requiresOpenImage;
+    }
+
     abstract void paste(BufferedImage pastedImage);
+
+    public boolean requiresOpenImage() {
+        return requiresOpenImage;
+    }
 
     abstract String getResourceKey();
 }

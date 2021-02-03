@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,30 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.menus.edit;
 
-import pixelitor.history.History;
+package pixelitor.history;
+
+import pixelitor.gui.utils.PAction;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
-/**
- * The "Edit/Redo" menu item
- */
-public class RedoMenuItem extends JMenuItem implements UndoableEditListener {
-    public RedoMenuItem(Action a) {
-        super(a);
+public class RedoAction extends PAction implements UndoableEditListener {
+    private static final String REDO_TEXT = UIManager.getString(
+        "AbstractUndoableEdit.redoText");
 
-        assert a == History.REDO_ACTION;
+    public static final Action INSTANCE = new RedoAction();
+
+    private RedoAction() {
+        super(REDO_TEXT);
 
         History.addUndoableEditListener(this);
         setEnabled(false);
     }
 
     @Override
+    public void onClick() {
+        History.redo();
+    }
+
+    @Override
     public void undoableEditHappened(UndoableEditEvent e) {
         setEnabled(History.canRedo());
-        getAction().putValue(Action.NAME, History.getRedoPresentationName());
+        setText(History.getRedoPresentationName());
     }
 }

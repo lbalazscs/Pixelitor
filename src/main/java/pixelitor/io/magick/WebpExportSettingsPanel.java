@@ -55,7 +55,7 @@ class WebpExportSettingsPanel extends JPanel implements ExportSettings {
 
         var controls = List.of(quality, lossless, imageHint);
         for (FilterParam control : controls) {
-            gbh.addLabelAndControl(control.getName() + ":", control.createGUI());
+            gbh.addLabelAndControl(control);
         }
     }
 

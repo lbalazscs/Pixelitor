@@ -21,9 +21,7 @@ import pixelitor.AppContext;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
 import pixelitor.layers.Drawable;
-import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
@@ -55,22 +53,6 @@ public class History {
     static {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
-
-    private static final String UNDO_TEXT = UIManager.getString("AbstractUndoableEdit.undoText");
-    public static final Action UNDO_ACTION = new MenuAction(UNDO_TEXT, Icons.getUndoIcon()) {
-        @Override
-        public void onClick() {
-            undo();
-        }
-    };
-
-    private static final String REDO_TEXT = UIManager.getString("AbstractUndoableEdit.redoText");
-    public static final Action REDO_ACTION = new MenuAction(REDO_TEXT, Icons.getRedoIcon()) {
-        @Override
-        public void onClick() {
-            redo();
-        }
-    };
 
     private History() {
     }

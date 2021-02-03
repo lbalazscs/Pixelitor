@@ -20,12 +20,11 @@ package pixelitor.layers;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.RestrictedLayerAction;
+import pixelitor.gui.utils.RestrictedLayerAction.Condition;
 import pixelitor.history.History;
-import pixelitor.menus.MenuAction;
-import pixelitor.menus.MenuAction.AllowedOnLayerType;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.tools.Tools;
@@ -42,29 +41,29 @@ import static pixelitor.utils.Keys.*;
  */
 public enum MaskViewMode {
     NORMAL("Show and Edit Layer", false, false, false,
-        AllowedOnLayerType.ANY, CTRL_1) {
+        Condition.ALWAYS, CTRL_1) {
     }, SHOW_MASK("Show and Edit Mask", true, true, false,
-        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_2) {
+        Condition.HAS_LAYER_MASK, CTRL_2) {
     }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
-        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_3) {
+        Condition.HAS_LAYER_MASK, CTRL_3) {
     }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
-        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_4) {
+        Condition.HAS_LAYER_MASK, CTRL_4) {
     };
 
     private final String guiName;
     private final boolean showRuby;
-    private final AllowedOnLayerType allowedOnLayerType;
+    private final Condition condition;
     private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
     MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby,
-                 AllowedOnLayerType allowedOnLayerType, KeyStroke keyStroke) {
+                 Condition condition, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;
         this.showRuby = showRuby;
-        this.allowedOnLayerType = allowedOnLayerType;
+        this.condition = condition;
         this.keyStroke = keyStroke;
     }
 
@@ -72,13 +71,13 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the active layer of the active image
      */
     public void addToMenuBar(PMenu sub) {
-        var action = new MenuAction(guiName, allowedOnLayerType) {
+        var action = new RestrictedLayerAction(guiName, condition) {
             @Override
-            public void onClick() {
-                OpenImages.onActiveLayer(layer -> activate(layer));
+            public void onActiveLayer(Layer layer) {
+                activate(layer);
             }
         };
-        sub.addAction(action, keyStroke);
+        sub.add(action, keyStroke);
     }
 
     /**

@@ -26,8 +26,8 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
-import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
@@ -59,14 +59,14 @@ public final class SelectionActions {
         }
     };
 
-    private static final Action deselect = new MenuAction("Deselect") {
+    private static final Action deselect = new PAction("Deselect") {
         @Override
         public void onClick() {
             getActiveComp().deselect(true);
         }
     };
 
-    private static final Action invert = new MenuAction("Invert Selection") {
+    private static final Action invert = new PAction("Invert Selection") {
         @Override
         public void onClick() {
             getActiveComp().invertSelection();
@@ -83,7 +83,7 @@ public final class SelectionActions {
         }
     };
 
-    private static final Action copySel = new MenuAction("Copy Selection") {
+    private static final Action copySel = new PAction("Copy Selection") {
         @Override
         public void onClick() {
             copiedSelShape = getActiveComp().getSelectionShape();
@@ -91,7 +91,7 @@ public final class SelectionActions {
         }
     };
 
-    private static final Action pasteSel = new MenuAction("Paste Selection") {
+    private static final Action pasteSel = new PAction("Paste Selection") {
         @Override
         public void onClick() {
             getActiveComp().changeSelection(copiedSelShape);
@@ -128,7 +128,7 @@ public final class SelectionActions {
         }
     }
 
-    private static final Action modify = new MenuAction("Modify Selection...") {
+    private static final Action modify = new PAction("Modify Selection...") {
         @Override
         public void onClick() {
             JPanel panel = new JPanel(new GridBagLayout());

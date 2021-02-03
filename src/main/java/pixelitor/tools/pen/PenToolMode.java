@@ -54,8 +54,6 @@ public interface PenToolMode {
         // do nothing by default
     }
 
-    ;
-
     String getToolMessage();
 
     void start();

@@ -107,14 +107,9 @@ public class StrokeSettingsPanel extends JPanel {
         p.setLayout(new GridBagLayout());
 
         var gbh = new GridBagHelper(p);
-        gbh.addLabelAndControl(strokeTypeParam.getName() + ":",
-            strokeTypeParam.createGUI("strokeType"));
-
-        gbh.addLabelAndControl(shapeTypeParam.getName() + ":",
-            shapeTypeParam.createGUI("shapeType"));
-
-        gbh.addLabelAndControl(dashedParam.getName() + ":",
-            dashedParam.createGUI("dashed"));
+        gbh.addLabelAndControl(strokeTypeParam, "strokeType");
+        gbh.addLabelAndControl(shapeTypeParam, "shapeType");
+        gbh.addLabelAndControl(dashedParam, "dashed");
 
         return p;
     }

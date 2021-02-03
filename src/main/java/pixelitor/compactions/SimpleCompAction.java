@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
@@ -31,7 +31,6 @@ import pixelitor.layers.LayerMask;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,7 +40,7 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
  * A {@link CompAction} where the processing can be simplified
  * by using the template method pattern.
  */
-public abstract class SimpleCompAction extends NamedAction implements CompAction {
+public abstract class SimpleCompAction extends OpenImageEnabledAction implements CompAction {
     private final boolean affectsCanvasSize;
 
     SimpleCompAction(String name, boolean affectsCanvasSize) {
@@ -51,7 +50,7 @@ public abstract class SimpleCompAction extends NamedAction implements CompAction
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void onClick() {
         OpenImages.onActiveComp(this::process);
     }
 

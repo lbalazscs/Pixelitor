@@ -57,9 +57,12 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private CloneBrush cloneBrush;
 
-    private final RangeParam scaleParam = new RangeParam("", 10, 100, 400, true, NONE);
-    private final RangeParam rotationParam = new RangeParam("", -180, 0, 180, true, NONE);
-    private final EnumParam<Mirror> mirrorParam = new EnumParam<>("", Mirror.class);
+    private final RangeParam scaleParam = new RangeParam(
+        "Scale (%)", 10, 100, 400, true, NONE);
+    private final RangeParam rotationParam = new RangeParam(
+        "Rotate (Degrees)", -180, 0, 180, true, NONE);
+    private final EnumParam<Mirror> mirrorParam = new EnumParam<>(
+        "Mirror", Mirror.class);
 
     protected CloneTool() {
         super("Clone Stamp", 'S', "clone_tool_icon.png",
@@ -103,9 +106,9 @@ public class CloneTool extends BlendingModeBrushTool {
     private JPanel createTransformPanel() {
         var transformPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(transformPanel);
-        gbh.addLabelAndControl("Scale (%):", scaleParam.createGUI("scale"));
-        gbh.addLabelAndControl("Rotate (Degrees):", rotationParam.createGUI("rotate"));
-        gbh.addLabelAndControl("Mirror:", mirrorParam.createGUI("mirror"));
+        gbh.addLabelAndControl(scaleParam, "scale");
+        gbh.addLabelAndControl(rotationParam, "rotate");
+        gbh.addLabelAndControl(mirrorParam, "mirror");
         return transformPanel;
     }
 

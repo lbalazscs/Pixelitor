@@ -20,14 +20,13 @@ package pixelitor;
 import com.twelvemonkeys.image.ImageUtil;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.IndexedModePanel;
-import pixelitor.menus.OpenImageAwareRadioButtonMenuItem;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
@@ -76,14 +75,14 @@ public enum ImageMode {
     private final Lazy<JMenuItem> menuItem = Lazy.of(this::createMenuItem);
 
     private JMenuItem createMenuItem() {
-        AbstractAction action = new AbstractAction(toString()) {
+        Action action = new OpenImageEnabledAction(toString()) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 getActiveComp().changeMode(ImageMode.this);
             }
         };
 
-        return new OpenImageAwareRadioButtonMenuItem(action);
+        return new JRadioButtonMenuItem(action);
     }
 
     public JMenuItem getMenuItem() {

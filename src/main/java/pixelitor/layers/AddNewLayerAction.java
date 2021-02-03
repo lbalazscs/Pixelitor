@@ -21,6 +21,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
+import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import java.awt.event.ActionEvent;
@@ -44,8 +45,20 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        boolean ctrlPressed = false;
+        if (e != null) { // could be null in tests
+            ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
+        }
+
+        try {
+            onClick(ctrlPressed);
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    private void onClick(boolean addBellowActive) {
         var comp = OpenImages.getActiveComp();
-        boolean addBellowActive = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
         comp.addNewEmptyImageLayer(comp.generateNewLayerName(), addBellowActive);
     }
 

@@ -22,7 +22,6 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
-import pixelitor.gui.GUIText;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
@@ -35,7 +34,6 @@ import java.util.function.Supplier;
 public class FilterAction extends DrawableAction {
     private final Supplier<Filter> filterSupplier;
     private Filter filter;
-    private String listNamePrefix = null;
 
     public FilterAction(String name, Supplier<Filter> filterSupplier) {
         this(name, true, filterSupplier);
@@ -52,20 +50,11 @@ public class FilterAction extends DrawableAction {
         }
     }
 
-    public FilterAction(String name, AbstractBufferedImageOp op) {
-        this(name, () -> new SimpleForwardingFilter(op));
-    }
-
-    /**
-     * This name appears when all filters are listed in a combo box.
-     * For example "Fill with Transparent" is better than "Transparent" in this case.
-     */
-    public String getListName() {
-        if (listNamePrefix == null) {
-            return name;
-        } else {
-            return listNamePrefix + name;
-        }
+    public static FilterAction forwarding(String name,
+                                          Supplier<AbstractBufferedImageOp> op,
+                                          boolean supportsGray) {
+        return new FilterAction(name,
+            () -> new SimpleForwardingFilter(op, supportsGray)).noGUI();
     }
 
     @Override
@@ -85,19 +74,6 @@ public class FilterAction extends DrawableAction {
     public Filter getFilter() {
         createFilter();
         return filter;
-    }
-
-    public FilterAction withFillListName() {
-        return withListNamePrefix(GUIText.FILL_WITH + " ");
-    }
-
-    public FilterAction withExtractChannelListName() {
-        return withListNamePrefix("Extract Channel: ");
-    }
-
-    private FilterAction withListNamePrefix(String listNamePrefix) {
-        this.listNamePrefix = listNamePrefix;
-        return this;
     }
 
     // overrides the constructor parameter
@@ -156,6 +132,6 @@ public class FilterAction extends DrawableAction {
 
     @Override
     public String toString() {
-        return getListName();
+        return getName();
     }
 }

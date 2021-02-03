@@ -23,7 +23,8 @@ import pixelitor.Layers;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -31,7 +32,6 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -270,8 +270,7 @@ public abstract class Layer implements Serializable {
 
     public void addMask(LayerMaskAddType addType) {
         if (hasMask()) {
-            String msg = format("The layer \"%s\" already has a layer mask.", getName());
-            Messages.showInfo("Has layer mask", msg);
+            RestrictedLayerAction.Condition.NO_LAYER_MASK.showErrorMessage(this);
             return;
         }
         if (addType.needsSelection() && !comp.hasSelection()) {
@@ -704,9 +703,9 @@ public abstract class Layer implements Serializable {
     public JPopupMenu createLayerIconPopupMenu() {
         if (comp.canMergeDown(this)) {
             JPopupMenu popup = new JPopupMenu();
-            var mergeDownAction = new NamedAction(GUIText.MERGE_DOWN) {
+            var mergeDownAction = new PAction(GUIText.MERGE_DOWN) {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     comp.mergeDown(Layer.this);
                 }
             };

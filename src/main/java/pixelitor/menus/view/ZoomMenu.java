@@ -19,11 +19,11 @@ package pixelitor.menus.view;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 import static java.lang.String.format;
 import static pixelitor.gui.AutoZoom.*;
@@ -49,15 +49,16 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
-    private static final Action ZOOM_IN_ACTION = new AbstractAction(i18n("zoom_in")) {
+    private static final Action ZOOM_IN_ACTION = new OpenImageEnabledAction(i18n("zoom_in")) {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             OpenImages.onActiveView(View::increaseZoom);
         }
     };
-    private static final Action ZOOM_OUT_ACTION = new AbstractAction(i18n("zoom_out")) {
+
+    private static final Action ZOOM_OUT_ACTION = new OpenImageEnabledAction(i18n("zoom_out")) {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             OpenImages.onActiveView(View::decreaseZoom);
         }
     };
@@ -70,13 +71,13 @@ public class ZoomMenu extends PMenu {
 
         setupZoomKeys(this);
 
-        addAction(ZOOM_IN_ACTION, CTRL_PLUS);
-        addAction(ZOOM_OUT_ACTION, CTRL_MINUS);
+        add(ZOOM_IN_ACTION, CTRL_PLUS);
+        add(ZOOM_OUT_ACTION, CTRL_MINUS);
 
-        addAction(ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
-        addAction(FIT_SPACE_ACTION, FIT_SPACE_KEY);
-        addAction(FIT_WIDTH_ACTION);
-        addAction(FIT_HEIGHT_ACTION);
+        add(ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
+        add(FIT_SPACE_ACTION, FIT_SPACE_KEY);
+        add(FIT_WIDTH_ACTION);
+        add(FIT_HEIGHT_ACTION);
 
         addSeparator();
 
