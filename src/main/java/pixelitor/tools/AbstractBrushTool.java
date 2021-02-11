@@ -98,8 +98,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
-        super(name, activationKey, iconFileName, toolMessage,
-            cursor, ClipStrategy.CANVAS);
+        super(name, activationKey, iconFileName, toolMessage, cursor);
         this.canHaveSymmetry = canHaveSymmetry;
         if (canHaveSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);

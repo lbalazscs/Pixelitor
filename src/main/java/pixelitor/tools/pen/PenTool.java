@@ -24,7 +24,6 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
@@ -49,7 +48,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.PenToolMode.*;
 
 /**
- * The Pen Tool
+ * The pen tool.
  */
 public class PenTool extends Tool {
     private final ComboBoxModel<PenToolMode> modeModel =
@@ -79,7 +78,7 @@ public class PenTool extends Tool {
     public PenTool() {
         super("Pen", 'P', "pen_tool_icon.png",
             "", // getStatusBarMessage() is overridden
-            Cursors.DEFAULT, ClipStrategy.FULL);
+            Cursors.DEFAULT);
 
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override

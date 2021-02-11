@@ -36,7 +36,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -52,7 +51,6 @@ public abstract class Tool implements KeyListener {
     private final String iconFileName;
     private final String toolMessage;
     private final char activationKey;
-    private final ClipStrategy clipStrategy;
     final ToolHandlerChain handlerChain;
     protected Cursor cursor;
 
@@ -64,8 +62,7 @@ public abstract class Tool implements KeyListener {
     protected boolean altDown = false;
 
     protected Tool(String name, char activationKey, String iconFileName,
-                   String toolMessage, Cursor cursor,
-                   ClipStrategy clipStrategy) {
+                   String toolMessage, Cursor cursor) {
         this.activationKey = activationKey;
         assert Character.isUpperCase(activationKey);
 
@@ -73,7 +70,6 @@ public abstract class Tool implements KeyListener {
         this.iconFileName = iconFileName;
         this.toolMessage = toolMessage;
         this.cursor = cursor;
-        this.clipStrategy = clipStrategy;
 
         handlerChain = new ToolHandlerChain(this, cursor);
     }
@@ -185,10 +181,6 @@ public abstract class Tool implements KeyListener {
 
     public void randomize() {
         GUIUtils.randomizeWidgetsOn(settingsPanel);
-    }
-
-    public void setClip(Graphics2D g, View view, Shape originalClip) {
-        clipStrategy.setClip(g, view, originalClip);
     }
 
     @Override

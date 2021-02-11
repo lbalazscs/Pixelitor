@@ -27,7 +27,6 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
-import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
 import pixelitor.tools.util.ArrowKey;
@@ -84,7 +83,7 @@ public class CropTool extends DragTool {
                 "After the handles appear: " +
                 "<b>Shift-drag</b> keeps the aspect ratio, " +
                 "<b>Double-click</b> crops, <b>Esc</b> cancels.",
-            Cursors.DEFAULT, false, ClipStrategy.CUSTOM);
+            Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
 
         GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();

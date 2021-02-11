@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
-import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
@@ -47,7 +46,7 @@ public class MoveTool extends DragTool {
             "<b>drag</b> to move the active layer, " +
                 "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
                 "<b>Shift-drag</b> to constrain the movement.",
-            Cursors.DEFAULT, true, ClipStrategy.CANVAS);
+            Cursors.DEFAULT, true);
     }
 
     @Override

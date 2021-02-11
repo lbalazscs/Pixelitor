@@ -130,10 +130,8 @@ public class Selection {
             return;
         }
 
-        paintAnts(g2, shape, dashPhase);
-    }
+        Stroke oldStroke = g2.getStroke();
 
-    private void paintAnts(Graphics2D g2, Shape shape, float phase) {
         // As the selection coordinates are in image space, this is
         // called with a Graphics2D transformed into image space.
         // The line width has to be scaled to compensate.
@@ -150,16 +148,18 @@ public class Selection {
 
         g2.setPaint(WHITE);
         Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
-            JOIN_ROUND, 0.0f, dash, phase);
+            JOIN_ROUND, 0.0f, dash, dashPhase);
         g2.setStroke(stroke);
         g2.draw(shape);
 
         g2.setPaint(BLACK);
         Stroke stroke2 = new BasicStroke(lineWidth, CAP_BUTT,
             JOIN_ROUND, 0.0f, dash,
-            (float) (phase + DASH_LENGTH / viewScale));
+            (float) (dashPhase + DASH_LENGTH / viewScale));
         g2.setStroke(stroke2);
         g2.draw(shape);
+
+        g2.setStroke(oldStroke);
     }
 
     public void die() {

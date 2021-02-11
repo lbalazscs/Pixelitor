@@ -47,7 +47,7 @@ public class ColorPickerTool extends Tool {
 
     public ColorPickerTool() {
         super("Color Picker", 'I', "color_picker_tool_icon.png",
-            HELP_TEXT, Cursors.CROSSHAIR, ClipStrategy.CANVAS);
+            HELP_TEXT, Cursors.CROSSHAIR);
     }
 
     @Override

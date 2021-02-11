@@ -26,7 +26,6 @@ import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
-import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
@@ -73,7 +72,7 @@ public class GradientTool extends DragTool {
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
                 "<b>Shift-drag</b> to constrain the direction. " +
                 "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
-            Cursors.DEFAULT, true, ClipStrategy.FULL);
+            Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
     }
 

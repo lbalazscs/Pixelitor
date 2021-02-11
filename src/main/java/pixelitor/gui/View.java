@@ -27,7 +27,6 @@ import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
@@ -43,11 +42,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 import static java.lang.String.format;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -299,16 +299,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     @Override
     public void paintComponent(Graphics g) {
-        Shape originalClip = g.getClip();
-
         Graphics2D g2 = (Graphics2D) g;
 
         int canvasCoWidth = canvas.getCoWidth();
         int canvasCoHeight = canvas.getCoHeight();
-
-        Rectangle canvasClip = setVisibleCanvasClip(g,
-            canvasStartX, canvasStartY,
-            canvasCoWidth, canvasCoHeight);
 
         // make a copy of the transform object
         var componentTransform = g2.getTransform();
@@ -331,8 +325,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             assert mask != null : "no mask in " + maskViewMode;
             mask.paintLayerOnGraphics(g2, true);
         } else {
-            BufferedImage compositeImage = comp.getCompositeImage();
-            g2.drawImage(compositeImage, 0, 0, null);
+            g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 
             if (maskViewMode.showRuby()) {
                 LayerMask mask = comp.getActiveLayer().getMask();
@@ -341,30 +334,21 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             }
         }
 
-        Tool currentTool = Tools.getCurrent();
-        // possibly allow a larger clip for the selections and tools
-        currentTool.setClip(g2, this, originalClip);
-
         comp.paintSelection(g2);
 
         // restore the original transform
         g2.setTransform(componentTransform);
-        g2.setClip(originalClip);
         // now we are back in "component space"
-
-        comp.drawGuides(g2);
-
-        if (isActive()) {
-            currentTool.paintOverImage(g2, comp);
-        }
-
-        g2.setClip(canvasClip);
 
         if (showPixelGrid && allowPixelGrid()) {
             drawPixelGrid(g2);
         }
 
-        g2.setClip(originalClip);
+        comp.drawGuides(g2);
+
+        if (isActive()) {
+            Tools.getCurrent().paintOverImage(g2, comp);
+        }
     }
 
     public void paintImmediately() {
@@ -372,35 +356,41 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public boolean allowPixelGrid() {
-        // for some reason the pixel grid is very slow if there is
-        // a selection visible, so don't show it
-        return zoomLevel.allowPixelGrid() && !comp.showsSelection();
+        return zoomLevel.allowPixelGrid();
     }
 
     private void drawPixelGrid(Graphics2D g2) {
+        g2.setColor(WHITE);
         g2.setXORMode(BLACK);
         double pixelSize = zoomLevel.getViewScale();
 
-        Rectangle r = getVisiblePart();
+        Rectangle scrolledRect = getVisiblePart();
 
-        int startX = r.x;
-        int endX = r.x + r.width;
-        int startY = r.y;
-        int endY = r.y + r.height;
+        double startX = canvasStartX;
+        if (scrolledRect.x > 0) {
+            startX += Math.floor(scrolledRect.x / pixelSize) * pixelSize;
+        }
+        double endX = startX + Math.min(
+            scrolledRect.width + pixelSize, canvas.getCoWidth()) - 1;
+        double startY = canvasStartY;
+        if (scrolledRect.y > 0) {
+            startY += Math.floor(scrolledRect.y / pixelSize) * pixelSize;
+        }
+        double endY = startY + Math.min(
+            scrolledRect.height + pixelSize, canvas.getCoHeight()) - 1;
 
         // vertical lines
-        double skipVer = Math.ceil(startX / pixelSize);
-        for (double i = pixelSize * skipVer; i < endX; i += pixelSize) {
-            int x = (int) (canvasStartX + i);
-            g2.drawLine(x, startY, x, endY);
+        for (double x = startX + pixelSize; x < endX; x += pixelSize) {
+            g2.draw(new Line2D.Double(x, startY, x, endY));
         }
 
         // horizontal lines
-        double skipHor = Math.ceil(startY / pixelSize);
-        for (double i = skipHor * pixelSize; i < endY; i += pixelSize) {
-            int y = (int) (canvasStartY + i);
-            g2.drawLine(startX, y, endX, y);
+        for (double y = startY + pixelSize; y < endY; y += pixelSize) {
+            g2.draw(new Line2D.Double(startX, y, endX, y));
         }
+
+        // stop the XOR mode
+        g2.setPaintMode();
     }
 
     public static void setShowPixelGrid(boolean newValue) {
@@ -413,28 +403,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         } else {
             OpenImages.repaintVisible();
         }
-    }
-
-    /**
-     * Makes sure that not the whole area is repainted, only the canvas,
-     * and only inside the visible area of scrollbars
-     */
-    private static Rectangle setVisibleCanvasClip(Graphics g,
-                                                  double canvasStartX, double canvasStartY,
-                                                  int maxWidth, int maxHeight) {
-        // if there are scollbars, this is the visible area
-        Rectangle clipBounds = g.getClipBounds();
-
-        Rectangle imageRect = new Rectangle(
-            (int) canvasStartX, (int) canvasStartY,
-            maxWidth, maxHeight);
-
-        // now we are definitely not drawing neither outside
-        // the canvas nor outside the scrollbars visible area
-        clipBounds = clipBounds.intersection(imageRect);
-
-        g.setClip(clipBounds);
-        return clipBounds;
     }
 
     /**

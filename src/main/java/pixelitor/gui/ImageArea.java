@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -209,8 +209,6 @@ public class ImageArea {
         Messages.showInfo("Pixel Grid",
             """
                 The pixel grid consists of lines between the pixels,
-                and is shown only if the zoom is at least 1600%
-                and there is no selection.""");
+                and is shown only if the zoom is at least 1600%.""");
     }
-
 }

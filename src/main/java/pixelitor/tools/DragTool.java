@@ -42,9 +42,9 @@ public abstract class DragTool extends Tool {
 
     protected DragTool(String name, char activationKeyChar, String iconFileName,
                        String toolMessage, Cursor cursor,
-                       boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
+                       boolean constrainIfShiftDown) {
 
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor, clipStrategy);
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor);
 
         this.constrainIfShiftDown = constrainIfShiftDown;
     }

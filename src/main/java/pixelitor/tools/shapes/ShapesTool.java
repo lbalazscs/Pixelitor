@@ -33,7 +33,6 @@ import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
-import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tools;
@@ -66,7 +65,7 @@ import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
 /**
- * The Shapes Tool
+ * The shapes tool.
  */
 public class ShapesTool extends DragTool {
     // history edit names for the shape editing
@@ -129,7 +128,7 @@ public class ShapesTool extends DragTool {
             "<b>drag</b> to draw a shape. " +
                 "Hold <b>Alt</b> down to drag from the center. " +
                 "Hold <b>SPACE</b> down while drawing to move the shape. ",
-            Cursors.DEFAULT, false, ClipStrategy.FULL);
+            Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
         defaultShapeTypeSettings = new EnumMap<>(ShapeType.class);

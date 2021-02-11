@@ -1037,12 +1037,12 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        if (!JVM.isLinux) { // see https://github.com/lbalazscs/Pixelitor/issues/140
-            var showPixelGridMI = new OpenImageEnabledCheckBoxMenuItem("Show Pixel Grid");
-            showPixelGridMI.addActionListener(e ->
-                View.setShowPixelGrid(showPixelGridMI.getState()));
-            viewMenu.add(showPixelGridMI);
-        }
+//        if (!JVM.isLinux) { // see https://github.com/lbalazscs/Pixelitor/issues/140
+        var showPixelGridMI = new OpenImageEnabledCheckBoxMenuItem("Show Pixel Grid");
+        showPixelGridMI.addActionListener(e ->
+            View.setShowPixelGrid(showPixelGridMI.getState()));
+        viewMenu.add(showPixelGridMI);
+//        }
 
         viewMenu.addSeparator();
 

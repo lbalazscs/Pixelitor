@@ -65,7 +65,7 @@ public class PaintBucketTool extends Tool {
         super("Paint Bucket", 'N',
             "paint_bucket_tool_icon.png",
             "<b>click</b> to fill with the selected color.",
-            Cursors.DEFAULT, ClipStrategy.CANVAS);
+            Cursors.DEFAULT);
     }
 
     @Override

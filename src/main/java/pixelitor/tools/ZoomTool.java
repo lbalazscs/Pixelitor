@@ -33,7 +33,7 @@ public class ZoomTool extends Tool {
         super(ZOOM, 'Z', "zoom_tool_icon.png",
             "<b>click</b> to zoom in, " +
                 "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
-            Cursors.HAND, ClipStrategy.CANVAS);
+            Cursors.HAND);
     }
 
     @Override

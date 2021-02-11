@@ -21,7 +21,7 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 /**
- * The Hand Tool
+ * The hand tool.
  */
 public class HandTool extends Tool {
     private final HandToolSupport handToolSupport = new HandToolSupport();
@@ -29,7 +29,7 @@ public class HandTool extends Tool {
     HandTool() {
         super("Hand", 'H', "hand_tool_icon.png",
             "<b>drag</b> to move the view (if there are scrollbars).",
-            Cursors.HAND, ClipStrategy.CANVAS);
+            Cursors.HAND);
     }
 
     @Override
