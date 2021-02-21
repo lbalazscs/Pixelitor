@@ -47,9 +47,9 @@ public class DraggablePoint extends Point2D.Double {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static final int HANDLE_RADIUS = 5;
-    protected static final int HANDLE_SIZE = 2 * HANDLE_RADIUS;
-    private static final int SHADOW_OFFSET = 1;
+    public static final double HANDLE_RADIUS = 5.0;
+    protected static final double HANDLE_SIZE = 2.0 * HANDLE_RADIUS;
+    private static final double SHADOW_OFFSET = 1.0;
 
     private final String name; // used only for debugging
 
@@ -78,7 +78,7 @@ public class DraggablePoint extends Point2D.Double {
     protected transient View view;
 
     private Shape shape;
-    private Shape shadow;
+    private Shape shadowShape;
     private static final Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
     protected Cursor cursor;
@@ -87,7 +87,8 @@ public class DraggablePoint extends Point2D.Double {
     // a transform box is created to serve as reference points
     private Point2D imTransformRefPoint;
 
-    public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
+    public DraggablePoint(String name, double x, double y,
+                          View view, Color color, Color activeColor) {
         assert view != null;
         this.view = view;
 
@@ -118,7 +119,7 @@ public class DraggablePoint extends Point2D.Double {
         assert !isNaN(imX);
         assert !isNaN(imY);
 
-        setShapes();
+        updateShapes();
     }
 
     /**
@@ -167,14 +168,14 @@ public class DraggablePoint extends Point2D.Double {
         restoreCoordsFromImSpace(view);
     }
 
-    private void setShapes() {
+    private void updateShapes() {
         double shapeStartX = x - HANDLE_RADIUS;
         double shapeStartY = y - HANDLE_RADIUS;
         shape = createShape(shapeStartX, shapeStartY);
 
         double shadowStartX = shapeStartX + SHADOW_OFFSET;
         double shadowStartY = shapeStartY + SHADOW_OFFSET;
-        shadow = createShape(shadowStartX, shadowStartY);
+        shadowShape = createShape(shadowStartX, shadowStartY);
     }
 
     protected Shape createShape(double startX, double startY) {
@@ -206,15 +207,16 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public void paintHandle(Graphics2D g) {
-        Composite c = g.getComposite();
+        Composite origComposite = g.getComposite();
         g.setComposite(shadowComposite);
-        Shapes.fillVisible(g, shadow, Color.BLACK);
-        g.setComposite(c);
+        g.setColor(Color.BLACK);
+        g.fill(shadowShape);
+        g.setComposite(origComposite);
 
         if (isActive()) {
-            Shapes.fillVisible(g, shape, activeColor);
+            Shapes.fillVisibly(g, shape, activeColor);
         } else {
-            Shapes.fillVisible(g, shape, color);
+            Shapes.fillVisibly(g, shape, color);
         }
     }
 

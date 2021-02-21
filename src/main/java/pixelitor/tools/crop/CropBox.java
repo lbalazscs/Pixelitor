@@ -89,7 +89,7 @@ public class CropBox implements ToolWidget {
     }
 
     private void drawRect(Graphics2D g) {
-        Shapes.drawVisible(g, getSelectedCoRect());
+        Shapes.drawVisibly(g, getSelectedCoRect());
     }
 
     private void drawHandles(Graphics2D g) {

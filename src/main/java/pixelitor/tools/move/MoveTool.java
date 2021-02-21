@@ -103,7 +103,7 @@ public class MoveTool extends DragTool {
         double relX = imDrag.getDX();
         double relY = imDrag.getDY();
 
-        e.getComp().moveActiveContentRelative(currentMode, relX, relY);
+        e.getComp().moveActiveContent(currentMode, relX, relY);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class MoveTool extends DragTool {
      */
     public static void move(Composition comp, MoveMode mode, int relX, int relY) {
         comp.startMovement(mode, false);
-        comp.moveActiveContentRelative(mode, relX, relY);
+        comp.moveActiveContent(mode, relX, relY);
         comp.endMovement(mode);
     }
 

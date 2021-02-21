@@ -114,7 +114,7 @@ public class Path implements Serializable {
     }
 
     public void paintForBuilding(Graphics2D g) {
-        Shapes.drawVisible(g, toComponentSpaceShape());
+        Shapes.drawVisibly(g, toComponentSpaceShape());
 
         for (SubPath sp : subPaths) {
             sp.paintHandlesForBuilding(g, buildState);
@@ -122,7 +122,7 @@ public class Path implements Serializable {
     }
 
     public void paintForEditing(Graphics2D g) {
-        Shapes.drawVisible(g, toComponentSpaceShape());
+        Shapes.drawVisibly(g, toComponentSpaceShape());
 
         for (SubPath sp : subPaths) {
             sp.paintHandlesForEditing(g);
@@ -130,7 +130,7 @@ public class Path implements Serializable {
     }
 
     public void paintForTransforming(Graphics2D g) {
-        Shapes.drawVisible(g, toComponentSpaceShape());
+        Shapes.drawVisibly(g, toComponentSpaceShape());
     }
 
     public DraggablePoint handleWasHit(double x, double y, boolean altDown) {

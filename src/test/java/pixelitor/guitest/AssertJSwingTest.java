@@ -1157,13 +1157,6 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-    private void checkNumLayersAfterReOpening(String fileName, int expected) {
-        runMenuCommand("Close");
-        EDT.assertNumOpenImagesIs(0);
-        openFileWithDialog(baseTestingDir, fileName);
-        app.checkNumLayersIs(expected);
-    }
-
     private void testExportLayerAnimation() {
         log(1, "testing exporting layer animation");
 
@@ -1810,7 +1803,7 @@ public class AssertJSwingTest {
     private void testFiltersOther() {
         testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-//        testRandomFilter();
+        testRandomFilter();
         testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
@@ -1859,6 +1852,8 @@ public class AssertJSwingTest {
     }
 
     private void testRandomFilter() {
+        log(1, "random filter");
+
         runMenuCommand("Random Filter...");
         var dialog = app.findFilterDialog();
         var nextRandomButton = findButtonByText(dialog, "Next Random Filter");

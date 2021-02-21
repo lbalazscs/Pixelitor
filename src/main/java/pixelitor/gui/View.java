@@ -301,10 +301,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        int canvasCoWidth = canvas.getCoWidth();
-        int canvasCoHeight = canvas.getCoHeight();
-
-        // make a copy of the transform object
+        // make a copy of the transform object which represents "component space"
         var componentTransform = g2.getTransform();
 
         // TODO casting to int seems necessary, otherwise the
@@ -314,7 +311,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         boolean showMask = maskViewMode.showMask();
         if (!showMask) {
-            checkerBoardPainter.paint(g2, this, canvasCoWidth, canvasCoHeight);
+            checkerBoardPainter.paint(g2, this,
+                canvas.getCoWidth(), canvas.getCoHeight());
         }
 
         g2.scale(scaling, scaling);
@@ -336,7 +334,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         comp.paintSelection(g2);
 
-        // restore the original transform
         g2.setTransform(componentTransform);
         // now we are back in "component space"
 

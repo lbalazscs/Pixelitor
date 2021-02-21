@@ -302,23 +302,21 @@ public class Guides implements Serializable {
             double y = h * height;
 
             // the generated lines have to be in component space
+            double coY = view.imageYToComponentSpace(y);
             double coStartX = view.imageXToComponentSpace(0) - margins.left();
-            double coStartY = view.imageYToComponentSpace(y);
             double coEndX = view.imageXToComponentSpace(width) + margins.right();
-            double coEndY = coStartY;
 
-            lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
+            lines.add(new Line2D.Double(coStartX, coY, coEndX, coY));
         }
 
         for (Double v : verticals) {
             double x = v * width;
 
-            double coStartX = view.imageXToComponentSpace(x);
+            double coX = view.imageXToComponentSpace(x);
             double coStartY = view.imageYToComponentSpace(0) - margins.top();
-            double coEndX = coStartX;
             double coEndY = view.imageYToComponentSpace(height) + margins.bottom();
 
-            lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
+            lines.add(new Line2D.Double(coX, coStartY, coX, coEndY));
         }
     }
 

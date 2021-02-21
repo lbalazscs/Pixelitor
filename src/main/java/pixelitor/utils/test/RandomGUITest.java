@@ -419,7 +419,7 @@ public class RandomGUITest {
             r.delay(50);
         }
 
-        return Debug.modifierString(ctrlDown, altDown, shiftDown, rightMouse, false);
+        return Debug.modifiersAsString(ctrlDown, altDown, shiftDown, rightMouse, false);
     }
 
     private static void randomColors() {

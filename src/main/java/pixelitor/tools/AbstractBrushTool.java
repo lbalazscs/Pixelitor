@@ -243,7 +243,7 @@ public abstract class AbstractBrushTool extends Tool {
         Drawable dr = e.getComp().getActiveDrawableOrThrow();
         newMousePoint(dr, e, lineConnect);
 
-        // it it can have symmetry, then the symmetry brush does
+        // if it can have symmetry, then the symmetry brush does
         // the tracking of the affected area
         if (!canHaveSymmetry) {
             if (lineConnect) {
@@ -564,7 +564,6 @@ public abstract class AbstractBrushTool extends Tool {
      */
     public void trace(Drawable dr, Shape shape) {
         try {
-            affectedArea = new AffectedArea();
             doTrace(dr, shape);
             finishBrushStroke(dr);
         } finally {
@@ -574,31 +573,31 @@ public abstract class AbstractBrushTool extends Tool {
 
     private void doTrace(Drawable dr, Shape shape) {
         View view = dr.getComp().getView();
-        PPoint startingPoint = null;
-
-        var fpi = new FlatteningPathIterator(
-            shape.getPathIterator(null), 1.0);
-
-//        MeasuredShape[] subpaths = MeasuredShape.getSubpaths(shape, 3.0f);
-//        GeneralPath gp = new GeneralPath();
-//        subpaths[0].writeShape(new GeneralPathWriter(gp));
-//        PathIterator fpi = gp.getPathIterator(null);
-
+        PPoint subPathStartingPoint = null;
+        boolean firstPoint = true;
         boolean brushStrokePrepared = false;
         float[] coords = new float[2];
         int subPathIndex = -1;
+
+        var fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
             double x = coords[0];
             double y = coords[1];
             PPoint p = PPoint.lazyFromIm(x, y, view);
-            affectedArea.updateWith(p);
+
+            if (firstPoint) {
+                affectedArea.initAt(p);
+                firstPoint = false;
+            } else {
+                affectedArea.updateWith(p);
+            }
 
             // we can get here more than once if there are multiple subpaths!
             switch (type) {
                 case SEG_MOVETO -> {
                     subPathIndex++;
-                    startingPoint = p;
+                    subPathStartingPoint = p;
                     if (!brushStrokePrepared) {
                         // TODO this should not be here, and it should not need
                         // a point argument, but it is here because some hacks
@@ -612,7 +611,7 @@ public abstract class AbstractBrushTool extends Tool {
                     brush.startAt(p);
                 }
                 case SEG_LINETO -> brush.continueTo(p);
-                case SEG_CLOSE -> brush.continueTo(startingPoint);
+                case SEG_CLOSE -> brush.continueTo(subPathStartingPoint);
                 default -> throw new IllegalArgumentException("type = " + type);
             }
 

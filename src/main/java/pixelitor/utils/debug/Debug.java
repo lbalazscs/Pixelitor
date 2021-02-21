@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.NewImage;
 import pixelitor.OpenImages;
+import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
 import pixelitor.gui.PixelitorWindow;
@@ -29,7 +30,10 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.*;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Threads;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.OpenImages.addAsNewComp;
 import static pixelitor.OpenImages.findCompByName;
@@ -160,13 +166,13 @@ public class Debug {
         return false;
     }
 
-    public static String mouseModifiers(MouseEvent e) {
-        return modifierString(e.isControlDown(), e.isAltDown(), e.isShiftDown(),
+    public static String modifiersAsString(MouseEvent e) {
+        return modifiersAsString(e.isControlDown(), e.isAltDown(), e.isShiftDown(),
             SwingUtilities.isRightMouseButton(e), e.isPopupTrigger());
     }
 
-    public static String modifierString(boolean control, boolean alt, boolean shift,
-                                        boolean right, boolean popup) {
+    public static String modifiersAsString(boolean control, boolean alt, boolean shift,
+                                           boolean right, boolean popup) {
         StringBuilder msg = new StringBuilder(25);
         if (control) {
             msg.append(Ansi.red("ctrl-"));
@@ -186,15 +192,11 @@ public class Debug {
         return msg.toString();
     }
 
-    public static void call(String... args) {
-        call(false, args);
+    public static void debugCall(String... args) {
+        debugCall(false, args);
     }
 
-    public static void callAndCaller(String... args) {
-        call(true, args);
-    }
-
-    private static void call(boolean printCaller, String... args) {
+    public static void debugCall(boolean printCaller, String... args) {
         StackTraceElement[] fullTrace = new Throwable().getStackTrace();
         StackTraceElement me = fullTrace[2];
 
@@ -232,27 +234,14 @@ public class Debug {
         }
     }
 
-    public static String keyEvent(KeyEvent e) {
-        String keyText = KeyEvent.getKeyText(e.getKeyCode());
-        int modifiers = e.getModifiersEx();
-        if (modifiers != 0) {
-            String modifiersText = InputEvent.getModifiersExText(modifiers);
-            if (keyText.equals(modifiersText)) { // the key itself is the modifier
-                return modifiersText;
-            }
-            return modifiersText + "+" + keyText;
-        }
-        return keyText;
+    public static void debugImage(Image img) {
+        debugImage(img, "Debug");
     }
 
-    public static void image(Image img) {
-        image(img, "Debug");
-    }
-
-    public static void image(Image img, String name) {
+    public static void debugImage(Image img, String name) {
         // make sure the this is called on the EDT
         if (calledOutsideEDT()) {
-            EventQueue.invokeLater(() -> image(img, name));
+            EventQueue.invokeLater(() -> debugImage(img, name));
             return;
         }
 
@@ -280,7 +269,7 @@ public class Debug {
         comp.repaint();
     }
 
-    public static void shape(Shape shape, String name) {
+    public static void debugShape(Shape shape, String name) {
         // create a copy
         Path2D shapeCopy = new Path2D.Double(shape);
 
@@ -289,19 +278,19 @@ public class Debug {
         int imgHeight = shapeBounds.y + shapeBounds.height + 50;
 
         BufferedImage debugImg = ImageUtils.createSysCompatibleImage(imgWidth, imgHeight);
-        Drawer.on(debugImg)
-            .fillWith(Color.WHITE)
-            .useAA()
-            .draw(g -> {
-                g.setColor(Color.BLACK);
-                g.setStroke(new BasicStroke(3));
-                g.draw(shapeCopy);
-            });
 
-        image(debugImg, name);
+        Graphics2D g = debugImg.createGraphics();
+        Colors.fillWith(Color.WHITE, g, imgWidth, imgHeight);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setColor(Color.BLACK);
+        g.setStroke(new BasicStroke(3));
+        g.draw(shapeCopy);
+        g.dispose();
+
+        debugImage(debugImg, name);
     }
 
-    public static void raster(Raster raster, String name) {
+    public static void debugRaster(Raster raster, String name) {
         ColorModel colorModel;
         int numBands = raster.getNumBands();
 
@@ -327,17 +316,17 @@ public class Debug {
         BufferedImage debugImage = new BufferedImage(colorModel,
             (WritableRaster) correctlyTranslated, true, null);
 
-        image(debugImage, name);
+        debugImage(debugImage, name);
     }
 
-    public static void rasterWithEmptySpace(Raster raster) {
+    public static void debugRasterWithEmptySpace(Raster raster) {
         BufferedImage debugImage = new BufferedImage(
             raster.getMinX() + raster.getWidth(),
             raster.getMinY() + raster.getHeight(),
             BufferedImage.TYPE_4BYTE_ABGR_PRE);
         debugImage.setData(raster);
 
-        image(debugImage);
+        debugImage(debugImage);
     }
 
     public static void keepSwitchingToolsRandomly() {

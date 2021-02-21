@@ -96,8 +96,8 @@ public final class ConsistencyChecks {
     private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg, Composition comp) {
         Events.postProgramError("fade would not work", comp, null);
 
-        Debug.image(currentImg, "current");
-        Debug.image(previousImg, "previous");
+        Debug.debugImage(currentImg, "current");
+        Debug.debugImage(previousImg, "previous");
 
         String lastFadeableOp = History.getLastEditName();
         throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now");

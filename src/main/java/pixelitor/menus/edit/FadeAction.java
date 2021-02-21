@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,30 +17,24 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.OpenImages;
 import pixelitor.filters.Fade;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.utils.ViewActivationListener;
+import pixelitor.utils.Texts;
 
-import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import java.text.MessageFormat;
-
-import static pixelitor.utils.Texts.i18n;
 
 /**
- * The Fade menu item. It is enabled only if fading is possible.
+ * The Fade action for the fade menu item. It is enabled only if fading is possible.
  */
-public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ViewActivationListener {
-    public static final FadeMenuItem INSTANCE = new FadeMenuItem();
+public class FadeAction extends FilterAction implements UndoableEditListener {
+    public static final FadeAction INSTANCE = new FadeAction();
 
-    private FadeMenuItem() {
-        super(new FilterAction(Fade.NAME, Fade::new));
+    private FadeAction() {
+        super(Fade.NAME, Fade::new);
         History.addUndoableEditListener(this);
-        OpenImages.addActivationListener(this);
         setEnabled(false);
     }
 
@@ -52,20 +46,14 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Vie
 
     public void refresh(boolean canFade) {
         setEnabled(canFade);
-        Action action = getAction();
+        String menuName;
         if (canFade) {
-            MessageFormat formatter = new MessageFormat(i18n("fade_filter"));
             Object[] msgArguments = {History.getLastEditName()};
-            String menuName = formatter.format(msgArguments) + "...";
-            action.putValue(Action.NAME, menuName);
+            menuName = Texts.formatI18N("fade_filter", msgArguments);
         } else {
-            action.putValue(Action.NAME, Fade.NAME + "...");
+            menuName = Fade.NAME;
         }
-    }
-
-    @Override
-    public void allViewsClosed() {
-        setEnabled(false);
+        setText(menuName + "...");
     }
 
     @Override

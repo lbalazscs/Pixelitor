@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,6 +75,8 @@ public class Screens {
                 locY = screenBounds.y + (screenBounds.height - windowBounds.height) / 2;
             }
 
+            // if there is place between the canvas and the window,
+            // then place the window at half distance
             View view = OpenImages.getActiveView();
             if (view != null) {
                 Rectangle canvasBounds = view.getVisibleCanvasBoundsOnScreen();

@@ -127,9 +127,7 @@ public class LayersPanel extends JLayeredPane {
         int buttonHeight = draggedButton.getPreferredSize().height; // all buttons have the same height
         int halfHeight = buttonHeight / 2;
         if (deltaY > 0) {  // dragging downwards
-            if (deltaY < halfHeight) {
-                return;
-            } else {
+            if (deltaY >= halfHeight) {
                 int draggedIndex = layerButtons.indexOf(draggedButton);
                 if (draggedIndex > 0) {
                     int indexBellow = draggedIndex - 1;
@@ -137,9 +135,7 @@ public class LayersPanel extends JLayeredPane {
                 }
             }
         } else { // dragging upwards
-            if (deltaY > -halfHeight) {
-                return;
-            } else {
+            if (deltaY <= -halfHeight) {
                 int draggedIndex = layerButtons.indexOf(draggedButton);
                 if (draggedIndex < layerButtons.size() - 1) {
                     int indexAbove = draggedIndex + 1;

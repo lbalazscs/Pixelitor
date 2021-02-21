@@ -112,29 +112,6 @@ public class TrackedIO {
         }
     }
 
-    public static void writeDetailedToStream(BufferedImage image, ImageOutputStream ios,
-                                             ProgressTracker tracker, String formatName,
-                                             boolean progressive, float quality) throws IOException {
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(formatName);
-        if (!writers.hasNext()) {
-            throw new IllegalStateException("No " + formatName + " writers found");
-        }
-        ImageWriter writer = writers.next();
-
-        ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
-
-        IIOImage iioImage = new IIOImage(image, null, null);
-
-        writer.setOutput(ios);
-        if (tracker != null) {
-            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
-        }
-        writer.write(null, iioImage, imageWriteParam);
-
-        ios.flush();
-        ios.close();
-    }
-
     /**
      * Reads an image from a file, and throws only runtime exceptions
      */

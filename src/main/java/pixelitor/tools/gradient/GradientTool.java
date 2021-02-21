@@ -301,18 +301,19 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void firstModalDialogShown() {
-        if (handles != null) {
-            var comp = OpenImages.getActiveComp();
-            hideHandles(comp, false);
-        }
+    public void forceFinish() {
+        hideHandles(false);
     }
 
     @Override
     public void escPressed() {
+        hideHandles(true);
+    }
+
+    private void hideHandles(boolean addHistory) {
         if (handles != null) {
             var comp = OpenImages.getActiveComp();
-            hideHandles(comp, true);
+            hideHandles(comp, addHistory);
         }
     }
 

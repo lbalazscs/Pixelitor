@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -183,12 +183,12 @@ public class Crop implements CompAction {
 
         if (RandomGUITest.isRunning()) {
             // ask no questions, just do the simplest crop
-            rectangularCrop(comp, sel, false);
+            rectangularSelectionCrop(comp, sel, false);
             return;
         }
 
         if (sel.isRectangular()) {
-            rectangularCrop(comp, sel, false);
+            rectangularSelectionCrop(comp, sel, false);
         } else {
             selectionCropWithQuestion(comp, sel);
         }
@@ -206,10 +206,10 @@ public class Crop implements CompAction {
             // canceled, do nothing
         } else if (answer == 0) {
             // crop and hide
-            rectangularCrop(comp, sel, true);
+            rectangularSelectionCrop(comp, sel, true);
         } else if (answer == 1) {
             // only crop
-            rectangularCrop(comp, sel, false);
+            rectangularSelectionCrop(comp, sel, false);
         } else if (answer == 2) {
             // only hide
             addHidingMask(comp, sel.getShape(), true);
@@ -219,9 +219,9 @@ public class Crop implements CompAction {
         }
     }
 
-    private static void rectangularCrop(Composition comp,
-                                        Selection sel,
-                                        boolean addHidingMask) {
+    private static void rectangularSelectionCrop(Composition comp,
+                                                 Selection sel,
+                                                 boolean addHidingMask) {
         new Crop(sel.getShapeBounds2D(), true,
             true, true, addHidingMask).process(comp);
     }

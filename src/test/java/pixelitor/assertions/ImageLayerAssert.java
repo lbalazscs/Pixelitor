@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ public class ImageLayerAssert extends ContentLayerAssert<ImageLayerAssert, Image
         return this;
     }
 
-    public ImageLayerAssert imageSizeIsEqualTo(int width, int height) {
+    public ImageLayerAssert imageSizeIs(int width, int height) {
         isNotNull();
 
         BufferedImage img = actual.getImage();

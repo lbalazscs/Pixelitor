@@ -272,7 +272,7 @@ public class TestHelper {
 //        if(makeDuplicateLayer) {
 //            comp.getActiveLayer().setUI(new TestLayerUI());
 //        }
-        comp.moveActiveContentRelative(MOVE_LAYER_ONLY, relX, relY);
+        comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
         comp.endMovement(MOVE_LAYER_ONLY);
     }
 

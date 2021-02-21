@@ -51,6 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
+import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.utils.Keys.CTRL_T;
 
 /**
@@ -94,10 +95,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             return;
         }
 
-        // Call this explicitly before adding the text layer,
-        // because otherwise the shapes tool won't rasterize the shape
-        // because it sees a text layer as the active layer.
-        Tools.firstModalDialogShown();
+        Tools.forceFinish();
 
         var textLayer = new TextLayer(comp);
         var activeLayerBefore = comp.getActiveLayer();
@@ -111,6 +109,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .menuBar(textLayer.getMenuBar())
             .content(settingsPanel)
             .withScrollbars()
+            .align(FRAME_RIGHT)
             .okAction(() ->
                 textLayer.finalizeCreation(comp, activeLayerBefore, oldViewMode))
             .cancelAction(() -> comp.deleteLayer(textLayer, false))
@@ -121,10 +120,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         updateLayerName();
 
         // now it is safe to add it to the history
-        var newLayerEdit = new NewLayerEdit(
-            "Add Text Layer", comp, this,
-            activeLayerBefore, oldViewMode);
-        History.add(newLayerEdit);
+        History.add(new NewLayerEdit("Add Text Layer",
+            comp, this, activeLayerBefore, oldViewMode));
     }
 
     public void edit(PixelitorWindow pw) {
@@ -137,6 +134,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .content(settingsPanel)
             .owner(pw)
             .withScrollbars()
+            .align(FRAME_RIGHT)
             .okAction(() -> commitSettings(oldSettings))
             .cancelAction(() -> resetOldSettings(oldSettings))
             .show();

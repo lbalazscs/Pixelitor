@@ -293,8 +293,7 @@ public class MenuBar extends JMenuBar {
         editMenu.add(RedoAction.INSTANCE, CTRL_SHIFT_Z);
 
         // fade
-        FadeMenuItem.INSTANCE.setAccelerator(CTRL_SHIFT_F);
-        editMenu.add(FadeMenuItem.INSTANCE);
+        editMenu.add(FadeAction.INSTANCE, CTRL_SHIFT_F);
 
         editMenu.addSeparator();
 
@@ -1191,15 +1190,15 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onActiveLayer(Layer layer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                Debug.image(imageLayer.getImage(), "layer image");
+                Debug.debugImage(imageLayer.getImage(), "layer image");
 
                 if (imageLayer.hasMask()) {
                     LayerMask layerMask = imageLayer.getMask();
                     BufferedImage maskImage = layerMask.getImage();
-                    Debug.image(maskImage, "mask image");
+                    Debug.debugImage(maskImage, "mask image");
 
                     BufferedImage transparencyImage = layerMask.getTransparencyImage();
-                    Debug.image(transparencyImage, "transparency image");
+                    Debug.debugImage(transparencyImage, "transparency image");
                 }
             }
         });
@@ -1215,7 +1214,7 @@ public class MenuBar extends JMenuBar {
         developMenu.add(new DrawableAction("Debug getCanvasSizedSubImage") {
             @Override
             protected void process(Drawable dr) {
-                Debug.image(dr.getCanvasSizedSubImage());
+                Debug.debugImage(dr.getCanvasSizedSubImage());
             }
         });
 

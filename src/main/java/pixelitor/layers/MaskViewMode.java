@@ -26,7 +26,7 @@ import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.RestrictedLayerAction.Condition;
 import pixelitor.history.History;
 import pixelitor.menus.PMenu;
-import pixelitor.menus.edit.FadeMenuItem;
+import pixelitor.menus.edit.FadeAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.test.Events;
 
@@ -131,7 +131,7 @@ public enum MaskViewMode {
                     canFade = false;
                 }
             }
-            FadeMenuItem.INSTANCE.refresh(canFade);
+            FadeAction.INSTANCE.refresh(canFade);
 
             if (AppContext.isDevelopment()) {
                 assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());

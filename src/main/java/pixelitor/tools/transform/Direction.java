@@ -78,12 +78,12 @@ public enum Direction {
     private final Cursor cursor;
 
     // the relative distances needed for displaying the drag display
-    final float dx;
-    final float dy;
+    final double dx;
+    final double dy;
 
     private static final Direction[] directions = values();
 
-    Direction(Cursor cursor, float dx, float dy) {
+    Direction(Cursor cursor, double dx, double dy) {
         this.cursor = cursor;
         this.dx = dx;
         this.dy = dy;

@@ -497,7 +497,7 @@ public class RandomToolTest {
             boolean ctrlPressed = Rnd.withProbability(0.25, keyboard::pressCtrl);
             boolean altPressed = Rnd.withProbability(0.25, keyboard::pressAlt);
             boolean shiftPressed = Rnd.withProbability(0.25, keyboard::pressShift);
-            String msg = "random " + Debug.modifierString(ctrlPressed, altPressed,
+            String msg = "random " + Debug.modifiersAsString(ctrlPressed, altPressed,
                 shiftPressed, false, false) + "drag";
             log(msg);
 
@@ -535,7 +535,7 @@ public class RandomToolTest {
     }
 
     private String click(boolean ctrl, boolean alt, boolean shift) {
-        String modifierDescr = Debug.modifierString(ctrl, alt, shift, false, false);
+        String modifierDescr = Debug.modifiersAsString(ctrl, alt, shift, false, false);
         String name = "random " + modifierDescr + "click";
         log(name);
 

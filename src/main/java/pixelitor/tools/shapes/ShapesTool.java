@@ -634,34 +634,33 @@ public class ShapesTool extends DragTool {
     protected void toolEnded() {
         super.toolEnded();
 
-        finalizeBoxIfExists();
+        finalizeBox();
 
         resetInitialState();
     }
 
     @Override
-    public void viewActivated(View oldCV, View newCV) {
-        if (oldCV != null) {
-            finalizeBoxIfExists(oldCV.getComp());
+    public void viewActivated(View oldView, View newView) {
+        if (oldView != null) {
+            finalizeBox(oldView.getComp());
         }
 
-        super.viewActivated(oldCV, newCV);
+        super.viewActivated(oldView, newView);
     }
 
     @Override
-    public void firstModalDialogShown() {
-        // safe because the shape tool's own dialogs are not modal
-        finalizeBoxIfExists();
+    public void forceFinish() {
+        finalizeBox();
     }
 
-    private void finalizeBoxIfExists() {
+    private void finalizeBox() {
         if (transformBox != null) {
             Composition comp = OpenImages.getActiveComp();
-            finalizeBoxIfExists(comp);
+            finalizeBox(comp);
         }
     }
 
-    private void finalizeBoxIfExists(Composition comp) {
+    private void finalizeBox(Composition comp) {
         if (transformBox != null) {
             assert styledShape != null;
             assert state == TRANSFORM : "state = " + state;

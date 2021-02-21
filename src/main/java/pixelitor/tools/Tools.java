@@ -189,6 +189,10 @@ public class Tools {
         currentTool.firstModalDialogHidden();
     }
 
+    public static void forceFinish() {
+        currentTool.forceFinish();
+    }
+
     public static void setupMaskEditing(boolean maskEditing) {
         currentTool.setupMaskEditing(maskEditing);
     }

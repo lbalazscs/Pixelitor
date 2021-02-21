@@ -82,7 +82,11 @@ public class Shapes {
         return path;
     }
 
-    public static void drawVisible(Graphics2D g, Shape shape) {
+    /**
+     * Draws the given Shape on the given Graphics so that
+     * it is clearly visible over any background.
+     */
+    public static void drawVisibly(Graphics2D g, Shape shape) {
         assert shape != null;
 
         // black at the edges
@@ -96,16 +100,19 @@ public class Shapes {
         g.draw(shape);
     }
 
-    public static void fillVisible(Graphics2D g, Shape shape, Color c) {
+    /**
+     * Fills the given Shape with the given color and also adds a black outline
+     */
+    public static void fillVisibly(Graphics2D g, Shape shape, Color c) {
         assert shape != null;
+        assert c != BLACK;
 
         // black at the edges
         g.setStroke(BIG_STROKE);
         g.setColor(BLACK);
         g.draw(shape);
 
-        // the given color in the middle
-        g.setStroke(SMALL_STROKE);
+        // fill with the given color in the middle
         g.setColor(c);
         g.fill(shape);
     }
@@ -113,7 +120,7 @@ public class Shapes {
     public static void drawGradientArrow(Graphics2D g,
                                          double startX, double startY,
                                          double endX, double endY) {
-        drawVisible(g, new Line2D.Double(startX, startY, endX, endY));
+        drawVisibly(g, new Line2D.Double(startX, startY, endX, endY));
 
         double angle = Math.atan2(endY - startY, endX - startX);
 
@@ -133,7 +140,7 @@ public class Shapes {
         arrowHead.closePath();
         assert arrowHead != null;
 
-        fillVisible(g, arrowHead, WHITE);
+        fillVisibly(g, arrowHead, WHITE);
     }
 
     @SuppressWarnings("SuspiciousNameCombination")

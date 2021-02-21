@@ -448,32 +448,42 @@ public class CompActionTest {
 
     private void checkStateAfterCrop(boolean selectionCrop, boolean allowGrowing,
                                      boolean deleteCroppedPixels, boolean addHidingMask) {
-        Composition cropped = view.getComp();
-        assert cropped != origComp;
+        Composition croppedComp = view.getComp();
+        assert croppedComp != origComp;
 
         int expectedCanvasWidth = 10;
         if (allowGrowing) {
             expectedCanvasWidth = 15;
         }
-        assertThat(cropped).canvasSizeIs(expectedCanvasWidth, 3);
-        ImageLayer layer = (ImageLayer) cropped.getLayer(0);
+        assertThat(croppedComp).canvasSizeIs(expectedCanvasWidth, 3);
+        ImageLayer croppedLayer = (ImageLayer) croppedComp.getLayer(0);
 
         if (deleteCroppedPixels) {
             if (allowGrowing) {
-                assertThat(layer).imageSizeIsEqualTo(15, 3);
+                assertThat(croppedLayer).imageSizeIs(15, 3);
             } else {
-                assertThat(layer).imageSizeIsEqualTo(10, 3);
+                assertThat(croppedLayer).imageSizeIs(10, 3);
             }
         } else {
             if (allowGrowing) {
-                assertThat(layer).imageSizeIsEqualTo(origImageWidth + 5, origImageHeight);
+                assertThat(croppedLayer).imageSizeIs(origImageWidth + 5, origImageHeight);
             } else {
-                assertThat(layer).imageSizeIsEqualTo(origImageWidth, origImageHeight);
+                assertThat(croppedLayer).imageSizeIs(origImageWidth, origImageHeight);
             }
         }
 
         if (selectionCrop) {
-            assertThat(cropped).doesNotHaveSelection();
+            assertThat(croppedComp).doesNotHaveSelection();
+        }
+
+        if (addHidingMask) {
+            assertThat(croppedLayer).hasMask();
+        } else {
+            if (withMask.isTrue()) {
+                assertThat(croppedLayer).hasMask();
+            } else {
+                assertThat(croppedLayer).hasNoMask();
+            }
         }
     }
 

@@ -51,13 +51,13 @@ public class CustomConvolveGUI extends FilterGUI {
 
         size = filter.getSize();
 
-        initLeftVerticalBox(filter);
+        initLeftVerticalBox();
         initPresetBox();
 
         reset(size);
     }
 
-    private void initLeftVerticalBox(Convolve filter) {
+    private void initLeftVerticalBox() {
         Box box = Box.createVerticalBox();
 
         addTextFieldsPanel(box);

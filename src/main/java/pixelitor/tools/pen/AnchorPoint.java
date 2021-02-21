@@ -110,8 +110,7 @@ public class AnchorPoint extends DraggablePoint {
     private void paintControlHandle(ControlPoint controlPoint,
                                     boolean ctrlActive,
                                     Graphics2D g) {
-        var line = new Line2D.Double(x, y, controlPoint.x, controlPoint.y);
-        Shapes.drawVisible(g, line);
+        Shapes.drawVisibly(g, new Line2D.Double(x, y, controlPoint.x, controlPoint.y));
         if (!ctrlActive) {
             controlPoint.paintHandle(g);
         }

@@ -260,6 +260,13 @@ public abstract class Tool implements KeyListener {
         // empty by default
     }
 
+    /**
+     * Signals that the tool should finish what it started
+     */
+    public void forceFinish() {
+        // empty by default
+    }
+
     public void resetInitialState() {
         // empty by default
     }

@@ -63,7 +63,7 @@ public abstract class CopyBrush extends DabsBrush {
 
     public void debugImage() {
         if (debugBrushImage) {
-            Debug.image(brushImage, "Copy Brush");
+            Debug.debugImage(brushImage, "Copy Brush");
         }
     }
 

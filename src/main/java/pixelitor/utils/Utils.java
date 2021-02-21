@@ -230,6 +230,19 @@ public final class Utils {
         return s;
     }
 
+    public static String keyEventAsText(KeyEvent e) {
+        String keyText = KeyEvent.getKeyText(e.getKeyCode());
+        int modifiers = e.getModifiersEx();
+        if (modifiers != 0) {
+            String modifiersText = InputEvent.getModifiersExText(modifiers);
+            if (keyText.equals(modifiersText)) { // the key itself is the modifier
+                return modifiersText;
+            }
+            return modifiersText + "+" + keyText;
+        }
+        return keyText;
+    }
+
     public static String formatMillis(long millis) {
         long seconds = millis / 1000;
         long s = seconds % 60;

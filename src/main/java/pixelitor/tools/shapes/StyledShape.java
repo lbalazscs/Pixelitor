@@ -165,17 +165,17 @@ public class StyledShape implements Cloneable, Transformable {
 
     private void paintEffects(Graphics2D g) {
         if (hasStroke()) {
-            if (shapeType.isClosed()) {
-                paintEffectsForClosedShapeWithStroke(g);
+            if (hasFill() && shapeType.isClosed()) {
+                paintEffectsForFilledStrokedShape(g);
             } else {
-                paintEffectsForOpenShapeWithStroke(g);
+                paintStrokeOutlineEffects(g);
             }
         } else {
             paintEffectsNoStroke(g);
         }
     }
 
-    private void paintEffectsForClosedShapeWithStroke(Graphics2D g) {
+    private void paintEffectsForFilledStrokedShape(Graphics2D g) {
         // add the outline area of the stroke to the shape area
         // to get the shape for the effects, but these Area operations
         // could be too slow for the WobbleStroke
@@ -192,12 +192,12 @@ public class StyledShape implements Cloneable, Transformable {
         }
     }
 
-    private void paintEffectsForOpenShapeWithStroke(Graphics2D g) {
+    private void paintStrokeOutlineEffects(Graphics2D g) {
         if (stroke instanceof WobbleStroke) {
             // be careful and consistent with the behavior above
             effects.drawOn(g, shape);
         } else {
-            // Open shape with stroke: apply the effects on the stroke outline
+            // apply the effects on the stroke outline
             Shape outline = stroke.createStrokedShape(shape);
             effects.drawOn(g, outline);
         }

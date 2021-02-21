@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -37,6 +38,10 @@ public class Texts {
 
     public static String i18n(String key) {
         return resources.getString(key);
+    }
+
+    public static String formatI18N(String key, Object[] args) {
+        return new MessageFormat(i18n(key)).format(args);
     }
 
     public static void setLocale(Locale newLocale) {

@@ -20,7 +20,7 @@ package pixelitor.gui;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.colors.ColorPickerDialog;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.utils.*;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
@@ -36,6 +36,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagLayout;
+import java.io.File;
 
 import static java.lang.Integer.parseInt;
 import static javax.swing.SwingConstants.LEFT;
@@ -48,8 +49,10 @@ import static pixelitor.utils.Texts.i18n;
 public class PreferencesPanel extends JPanel {
     private static final Border EMPTY_BORDER =
         BorderFactory.createEmptyBorder(0, 10, 5, 0);
+    private static final String UNDO_LEVELS_LABEL = "Undo/Redo Levels";
+    private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
     private JTextField undoLevelsTF;
-    private JComboBox<IntChoiceParam.Item> thumbSizeCB;
+    private JComboBox<Item> thumbSizeCB;
     private JComboBox<MouseZoomMethod> zoomMethodCB;
     private JComboBox<PanMethod> panMethodCB;
     private JTextField magickDirTF;
@@ -148,19 +151,18 @@ public class PreferencesPanel extends JPanel {
         undoLevelsTF = new JTextField(3);
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-        gbh.addLabelAndControl("Undo/Redo Levels: ",
-            TextFieldValidator.createPositiveIntLayer("Undo/Redo Levels",
+        gbh.addLabelAndControl(UNDO_LEVELS_LABEL + ": ",
+            TextFieldValidator.createPositiveIntLayer(UNDO_LEVELS_LABEL,
                 undoLevelsTF, true));
     }
 
     private void addThumbSizeChooser(GridBagHelper gbh) {
-        IntChoiceParam.Item[] thumbSizes = {
-            new IntChoiceParam.Item("24x24 pixels", 24),
-            new IntChoiceParam.Item("48x48 pixels", 48),
-            new IntChoiceParam.Item("72x72 pixels", 72),
-            new IntChoiceParam.Item("96x96 pixels", 96),
-        };
-        thumbSizeCB = new JComboBox<>(thumbSizes);
+        thumbSizeCB = new JComboBox<>(new Item[]{
+            new Item("24x24 pixels", 24),
+            new Item("48x48 pixels", 48),
+            new Item("72x72 pixels", 72),
+            new Item("96x96 pixels", 96),
+        });
         thumbSizeCB.setName("thumbSizeCB");
 
         int currentSize = LayerButtonLayout.getThumbSize();
@@ -174,7 +176,7 @@ public class PreferencesPanel extends JPanel {
         magickDirTF = new JTextField(AppPreferences.magickDirName);
         // don't let the textfield grow too large
         magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
-        gbh.addLabelAndControl("ImageMagick 7 Folder: ", magickDirTF);
+        gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
     }
 
     private static JPanel createGuidesPanel() {
@@ -272,14 +274,32 @@ public class PreferencesPanel extends JPanel {
             History.setUndoLevels(undoLevels);
         } else {
             Dialogs.showErrorDialog(d, "Error",
-                "<html>The <b>Undo/Redo Levels</b> must be a positive integer.");
+                "<html><b>" + UNDO_LEVELS_LABEL + "</b> must be a positive integer.");
             return false;
+        }
+
+        // validate the given ImageMagick directory
+        String magickDirName = magickDirTF.getText().trim();
+        if (!magickDirName.isEmpty()) {
+            File dir = new File(magickDirName);
+            if (!dir.exists()) {
+                Dialogs.showErrorDialog(d, "Error",
+                    String.format("<html>The %s <b>\"%s\"</b> doesn't exist.",
+                        IMAGEMAGICK_FOLDER_LABEL, magickDirName));
+                return false;
+            }
+            if (!dir.isDirectory()) {
+                Dialogs.showErrorDialog(d, "Error",
+                    String.format("<html>The %s <b>\"%s\"</b> isn't a directory.",
+                        IMAGEMAGICK_FOLDER_LABEL, magickDirName));
+                return false;
+            }
         }
 
         // these can't be set interactively => set it here
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
-        AppPreferences.magickDirName = magickDirTF.getText().trim();
+        AppPreferences.magickDirName = magickDirName;
 
         return true;
     }
@@ -289,7 +309,7 @@ public class PreferencesPanel extends JPanel {
     }
 
     private void updateThumbSize() {
-        int newSize = ((IntChoiceParam.Item) thumbSizeCB.getSelectedItem()).getValue();
+        int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
         LayerButtonLayout.setThumbSize(newSize);
     }
 

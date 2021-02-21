@@ -31,7 +31,6 @@ import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
-import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.io.Dirs;
@@ -206,14 +205,6 @@ public class SplashImageCreator {
         font = font.deriveFont(attr);
 
         return font;
-    }
-
-    private static void addDropShadow(ImageLayer layer) {
-        var dropShadow = new JHDropShadow();
-        dropShadow.setDistance(5);
-        dropShadow.setSoftness(5);
-        dropShadow.setOpacity(0.7f);
-        dropShadow.startOn(layer, FILTER_WITHOUT_DIALOG);
     }
 
     private static ImageLayer addNewLayer(Composition comp, String name) {

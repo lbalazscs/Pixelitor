@@ -38,6 +38,8 @@ public class SymmetryBrush implements Brush {
     private final Tool tool;
     private BrushType brushType;
     private Symmetry symmetry;
+
+    // the affected area is shared between all the brushes
     private final AffectedArea affectedArea;
 
     public SymmetryBrush(Tool tool, BrushType brushType,
@@ -162,7 +164,7 @@ public class SymmetryBrush implements Brush {
     }
 
     public void startAt(int brushNo, PPoint p) {
-        // the tracking of the affected area is done at this level
+        // the tracking of the shared affected area is done at this level
         if (brushNo == 0) {
             affectedArea.initAt(p);
         } else {

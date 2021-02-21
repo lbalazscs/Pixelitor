@@ -135,10 +135,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         return paramSet.canHaveUserPresets();
     }
 
-    public void saveAsPreset(DialogMenuBar menu) {
-
-    }
-
     @Override
     public UserPreset createUserPreset(String presetName) {
         return paramSet.toUserPreset(getName(), presetName);

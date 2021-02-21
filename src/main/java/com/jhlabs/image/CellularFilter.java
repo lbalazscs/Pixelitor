@@ -22,7 +22,7 @@ import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.utils.CachedFloatRandom;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.concurrent.Future;
 
 /**
@@ -34,8 +34,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     protected float angle = 0.0f;
     public float amount = 1.0f;
     public float turbulence = 1.0f;
-    public float gain = 0.5f;
-    public float bias = 0.5f;
+    //    public float gain = 0.5f;
+//    public float bias = 0.5f;
     public float distancePower = 2;
     public static final boolean useColor = false;
     protected Colormap colormap = new Gradient();

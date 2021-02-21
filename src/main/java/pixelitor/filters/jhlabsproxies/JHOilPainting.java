@@ -77,14 +77,7 @@ public class JHOilPainting extends ParametrizedFilter {
 
         var helper = new ResizingFilterHelper(src);
         if (helper.shouldResize()) {
-            ScaleUpQuality scaleUpQuality;
-            if (detailQuality.getValue() == BETTER) {
-                scaleUpQuality = ScaleUpQuality.BILINEAR11;
-            } else if (detailQuality.getValue() == FASTER) {
-                scaleUpQuality = ScaleUpQuality.BILINEAR_FAST;
-            } else {
-                throw new IllegalStateException("value = " + detailQuality.getValue());
-            }
+            ScaleUpQuality scaleUpQuality = getScaleUpQuality();
 
             double resizeFactor = helper.getResizeFactor();
             // these will determine the real running time of the filter
@@ -114,6 +107,15 @@ public class JHOilPainting extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    private ScaleUpQuality getScaleUpQuality() {
+        int quality = detailQuality.getValue();
+        return switch (quality) {
+            case BETTER -> ScaleUpQuality.BILINEAR11;
+            case FASTER -> ScaleUpQuality.BILINEAR_FAST;
+            default -> throw new IllegalStateException("quality = " + quality);
+        };
     }
 
     @Override

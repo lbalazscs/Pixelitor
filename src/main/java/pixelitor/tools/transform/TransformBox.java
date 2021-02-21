@@ -278,9 +278,8 @@ public class TransformBox implements ToolWidget {
     @Override
     public void paint(Graphics2D g) {
         // paint the lines
-        Shapes.drawVisible(g, boxShape);
-        var line = new Line2D.Double(Shapes.calcCenter(nw, ne), rot);
-        Shapes.drawVisible(g, line);
+        Shapes.drawVisibly(g, boxShape);
+        Shapes.drawVisibly(g, new Line2D.Double(Shapes.calcCenter(nw, ne), rot));
 
         // paint the handles
         for (DraggablePoint handle : handles) {
@@ -459,12 +458,10 @@ public class TransformBox implements ToolWidget {
         double dx = x - wholeBoxDragStartX;
         double dy = y - wholeBoxDragStartY;
 
-        var comp = e.getComp();
-
-        moveWholeBoxBy(dx, dy, comp);
+        moveWholeBox(dx, dy);
     }
 
-    private void moveWholeBoxBy(double dx, double dy, Composition comp) {
+    private void moveWholeBox(double dx, double dy) {
         nw.setLocation(
             beforeMovement.nw.getX() + dx,
             beforeMovement.nw.getY() + dy);
@@ -521,13 +518,12 @@ public class TransformBox implements ToolWidget {
 
         double dx = key.getMoveX();
         double dy = key.getMoveY();
-        var comp = view.getComp();
-        moveWholeBoxBy(dx, dy, comp);
+        moveWholeBox(dx, dy);
 
         String editName = key.isShiftDown()
             ? "Shift-nudge Transform Box"
             : "Nudge Transform Box";
-        addMovementToHistory(comp, editName);
+        addMovementToHistory(view.getComp(), editName);
     }
 
     public void setAngle(double angle) {

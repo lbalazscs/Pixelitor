@@ -1169,9 +1169,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void debugImages() {
-        Debug.image(image, "image");
+        Debug.debugImage(image, "image");
         if (previewImage != null) {
-            Debug.image(previewImage, "previewImage");
+            Debug.debugImage(previewImage, "previewImage");
         } else {
             Messages.showInfo("null", "previewImage is null");
         }

@@ -477,15 +477,17 @@ public class AppRunner {
             dialog.button("resetAll").click();
             dialog.button("randomize").click();
 
-            // load first the saved preset, to force it loading it from the disk
-            String testPresetName = "test preset";
-            boolean alreadyExists = hasPreset(dialog, testPresetName);
-            if (alreadyExists) {
-                findMenuItemByText(testPresetName).click();
-                dialog.button("randomize").click();
-            }
+            if (testPresets) {
+                // load first the saved preset, to force it loading it from the disk
+                String testPresetName = "test preset";
+                boolean alreadyExists = hasPreset(dialog, testPresetName);
+                if (alreadyExists) {
+                    findMenuItemByText(testPresetName).click();
+                    dialog.button("randomize").click();
+                }
 
-            savePreset(dialog, testPresetName);
+                savePreset(dialog, testPresetName);
+            }
         }
 
         if (showOriginal == ShowOriginal.YES) {

@@ -55,19 +55,7 @@ public class ResizingFilterHelper {
             public int getWorkUnits(double resizeFactor) {
                 return 1 + (int) (resizeFactor / 2); // estimate
             }
-        }, BILINEAR12 {
-            @Override
-            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
-                                         double resizeFactor, ProgressTracker pt) {
-                return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
-                    VALUE_INTERPOLATION_BILINEAR, 1.2, pt);
-            }
-
-            @Override
-            public int getWorkUnits(double resizeFactor) {
-                return ImageUtils.calcNumStepsForEnlargeSmooth(resizeFactor, 1.2);
-            }
-        }, BILINEAR11 { // highest quality with 1.1 steps
+        }, BILINEAR11 { // high quality with 1.1 steps
 
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,

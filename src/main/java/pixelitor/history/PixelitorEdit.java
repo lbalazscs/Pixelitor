@@ -142,9 +142,8 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return name;
     }
 
-    public PixelitorEdit setEmbedded(boolean embedded) {
+    public void setEmbedded(boolean embedded) {
         this.embedded = embedded;
-        return this;
     }
 
     public DebugNode createDebugNode() {
