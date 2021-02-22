@@ -208,8 +208,7 @@ public class OpenRaster {
 
             int tx = Utils.parseInt(layerX, 0);
             int ty = Utils.parseInt(layerY, 0);
-            ImageLayer layer = new ImageLayer(comp, image, layerName,
-                null, tx, ty);
+            ImageLayer layer = new ImageLayer(comp, image, layerName, tx, ty);
 
             layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);

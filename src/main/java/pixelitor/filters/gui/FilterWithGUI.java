@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.filters.Filter;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.Tools;
 
 import javax.swing.*;
 
@@ -99,6 +100,8 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     @Override
     public void startOn(Drawable dr) {
         dr.startPreviewing();
+
+        Tools.editedObjectChanged(dr.getLayer());
 
         FilterGUI gui = createGUI(dr);
         new DialogBuilder()

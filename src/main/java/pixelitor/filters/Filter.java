@@ -115,7 +115,8 @@ public abstract class Filter implements Serializable {
         } catch (Throwable e) {
             Layer layer = (Layer) dr;
             if (layer instanceof LayerMask) {
-                layer = layer.getOwner();
+                LayerMask mask = (LayerMask) layer;
+                layer = mask.getOwner();
             }
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +

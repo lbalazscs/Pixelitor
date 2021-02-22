@@ -101,20 +101,20 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient boolean imageContentChanged = false;
 
-    private ImageLayer(Composition comp, String name, Layer owner) {
-        super(comp, name, owner);
+    private ImageLayer(Composition comp, String name) {
+        super(comp, name);
     }
 
     public ImageLayer(Composition comp, BufferedImage image, String name) {
-        this(comp, image, name, null, 0, 0);
+        this(comp, image, name, 0, 0);
     }
 
     /**
      * Creates a new layer with the given image
      */
     public ImageLayer(Composition comp, BufferedImage image,
-                      String name, Layer owner, int tx, int ty) {
-        this(comp, name, owner);
+                      String name, int tx, int ty) {
+        this(comp, name);
 
         requireNonNull(image);
 
@@ -131,7 +131,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Creates a new empty layer
      */
     public static ImageLayer createEmpty(Composition comp, String name) {
-        ImageLayer imageLayer = new ImageLayer(comp, name, null);
+        ImageLayer imageLayer = new ImageLayer(comp, name);
 
         BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
             comp.getCanvasWidth(), comp.getCanvasHeight());
@@ -148,7 +148,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public static ImageLayer fromExternalImage(BufferedImage pastedImage,
                                                Composition comp,
                                                String layerName) {
-        ImageLayer layer = new ImageLayer(comp, layerName, null);
+        ImageLayer layer = new ImageLayer(comp, layerName);
         requireNonNull(pastedImage);
 
         BufferedImage newImage = layer.calcNewImageFromPasted(pastedImage);
@@ -279,8 +279,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         String duplicateName = compCopy ? name : Utils.createCopyName(name);
 
-        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName,
-            null, getTx(), getTy());
+        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, getTx(), getTy());
         d.setOpacity(getOpacity(), false);
         d.setBlendingMode(getBlendingMode(), false);
 
@@ -1225,6 +1224,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     public void changeMode(ImageMode mode) {
         image = mode.convert(image);
+    }
+
+    @Override
+    public Layer getLayer() {
+        return this;
     }
 
     public String toDebugCanvasString() {

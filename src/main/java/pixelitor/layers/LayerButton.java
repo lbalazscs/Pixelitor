@@ -403,7 +403,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
             if (!hasMaskIcon()) {
                 return;
             }
-            boolean disabledMask = !layer.getOwner().isMaskEnabled();
+            boolean disabledMask = !((LayerMask) layer).getOwner().isMaskEnabled();
             if (disabledMask) {
                 ImageUtils.paintRedXOn(thumb);
             }

@@ -46,6 +46,9 @@ public class LayerMask extends ImageLayer {
     public static final ColorModel RUBYLITH_COLOR_MODEL;
     private boolean linked = true; // whether it moves together with its parent layer
 
+    // the real layer for this mask
+    private Layer owner;
+
     static {
         byte[] lookup = new byte[256];
         for (int i = 0; i < 256; i++) {
@@ -74,9 +77,11 @@ public class LayerMask extends ImageLayer {
 
     public LayerMask(Composition comp, BufferedImage bwImage,
                      Layer owner, int tx, int ty) {
-        super(comp, bwImage, owner.getName() + " MASK", owner, tx, ty);
+        super(comp, bwImage, owner.getName() + " MASK", tx, ty);
 
         assert bwImage.getType() == TYPE_BYTE_GRAY;
+
+        this.owner = owner;
 
         // layer masks use the button of their owner
         ui = owner.getUI();
@@ -203,6 +208,30 @@ public class LayerMask extends ImageLayer {
     @Override
     public Rectangle getSnappingBoundingBox() {
         return getContentBounds();
+    }
+
+    @Override
+    protected Layer getLinked() {
+        if (owner.isMaskEditing()) {
+            if (isLinked()) {
+                return owner;
+            }
+        }
+        return null;
+    }
+
+    public void changeOwner(Layer owner) {
+        this.owner = owner;
+        this.ui = owner.ui;
+    }
+
+    public Layer getOwner() {
+        return owner;
+    }
+
+    @Override
+    public Layer getLayer() {
+        return owner;
     }
 
     @Override

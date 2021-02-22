@@ -44,7 +44,7 @@ public class AdjustmentLayer extends Layer {
     private final Filter filter;
 
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
-        super(comp, name, null);
+        super(comp, name);
         this.filter = filter;
         isAdjustment = true;
     }

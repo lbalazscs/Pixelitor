@@ -114,7 +114,7 @@ public class MoveTool extends DragTool {
         }
 
         comp.drawMovementContours(g2, currentMode);
-        super.paintOverImage(g2, comp);
+        DragDisplayType.REL_MOUSE_POS.draw(g2, userDrag);
     }
 
     @Override

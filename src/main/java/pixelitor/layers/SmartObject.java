@@ -39,7 +39,7 @@ public class SmartObject extends ContentLayer {
     private Composition content;
 
     SmartObject(Composition comp, String name) {
-        super(comp, name, null);
+        super(comp, name);
     }
 
     @Override

@@ -1,13 +1,13 @@
 !include "FileAssociation.nsh"
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_NAME "Pixelitor"
-!define PRODUCT_VERSION "4.2.4"
-!define PRODUCT_PUBLISHER "Laszlo Balazs-Csiki"
-!define PRODUCT_WEB_SITE "https://pixelitor.sourceforge.io"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\pixelitor.exe"
-!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
-!define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define PIXELITOR_NAME "Pixelitor"
+!define PIXELITOR_VERSION "4.2.4"
+!define PIXELITOR_PUBLISHER "Laszlo Balazs-Csiki"
+!define PIXELITOR_WEB_SITE "https://pixelitor.sourceforge.io"
+!define PIXELITOR_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\pixelitor.exe"
+!define PIXELITOR_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PIXELITOR_NAME}"
+!define PIXELITOR_UNINST_ROOT_KEY "HKLM"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -34,8 +34,8 @@
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_LINK "Visit the ${PRODUCT_NAME} site for the latest version."
-!define MUI_FINISHPAGE_LINK_LOCATION "${PRODUCT_WEB_SITE}"
+!define MUI_FINISHPAGE_LINK "Visit the ${PIXELITOR_NAME} site for the latest version."
+!define MUI_FINISHPAGE_LINK_LOCATION "${PIXELITOR_WEB_SITE}"
 
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -53,19 +53,19 @@
 
 ; MUI end ------
 
-Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "${PRODUCT_NAME}_${PRODUCT_VERSION}_Setup.exe"
+Name "${PIXELITOR_NAME} ${PIXELITOR_VERSION}"
+OutFile "${PIXELITOR_NAME}_${PIXELITOR_VERSION}_Setup.exe"
 InstallDir "$PROGRAMFILES\Pixelitor"
-InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
+InstallDirRegKey HKLM "${PIXELITOR_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
-VIProductVersion "${PRODUCT_VERSION}.0"
+VIProductVersion "${PIXELITOR_VERSION}.0"
 VIAddVersionKey ProductName "Pixelitor"
-VIAddVersionKey ProductVersion ${PRODUCT_VERSION}
+VIAddVersionKey ProductVersion ${PIXELITOR_VERSION}
 VIAddVersionKey LegalCopyright "GPLv3"
 VIAddVersionKey FileDescription "Pixelitor Installer"
-VIAddVersionKey FileVersion "${PRODUCT_VERSION}.0"
+VIAddVersionKey FileVersion "${PIXELITOR_VERSION}.0"
 
 Section "MainSection" SEC01
   ; delete old files
@@ -85,25 +85,25 @@ Section "MainSection" SEC01
 SectionEnd
 
 Section -AdditionalIcons
-  WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\Pixelitor\Pixelitor Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
+  WriteIniStr "$INSTDIR\Website.url" "InternetShortcut" "URL" "${PIXELITOR_WEB_SITE}"
+  CreateShortCut "$SMPROGRAMS\Pixelitor\Pixelitor Website.lnk" "$INSTDIR\Website.url"
 ;  CreateShortCut "$SMPROGRAMS\Pixelitor\Uninstall Pixelitor.lnk" "$INSTDIR\pixelitor_uninstaller.exe"
 SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\pixelitor_uninstaller.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\pixelitor.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\pixelitor_uninstaller.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\pixelitor.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+  WriteRegStr HKLM "${PIXELITOR_DIR_REGKEY}" "" "$INSTDIR\pixelitor.exe"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "DisplayName" "$(^Name)"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "UninstallString" "$INSTDIR\pixelitor_uninstaller.exe"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "DisplayIcon" "$INSTDIR\pixelitor.exe"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "DisplayVersion" "${PIXELITOR_VERSION}"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "URLInfoAbout" "${PIXELITOR_WEB_SITE}"
+  WriteRegStr ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "Publisher" "${PIXELITOR_PUBLISHER}"
   
   ; Estimates size - http://nsis.sourceforge.net/Add_uninstall_information_to_Add/Remove_Programs#Computing_EstimatedSize
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $0 "0x%08X" $0
-  WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "EstimatedSize" "$0"
+  WriteRegDWORD ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}" "EstimatedSize" "$0"
 SectionEnd
 
 Function finishpageaction
@@ -135,7 +135,7 @@ Section Uninstall
   ; Remove user settings
   DeleteRegKey HKEY_CURRENT_USER "Software\JavaSoft\Prefs\pixelitor"
 
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
+  DeleteRegKey ${PIXELITOR_UNINST_ROOT_KEY} "${PIXELITOR_UNINST_KEY}"
+  DeleteRegKey HKLM "${PIXELITOR_DIR_REGKEY}"
   SetAutoClose true
 SectionEnd

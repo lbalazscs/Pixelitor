@@ -91,5 +91,7 @@ public interface Drawable {
 
     boolean isMaskEditing();
 
+    Layer getLayer();
+
     String getName();
 }

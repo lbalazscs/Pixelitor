@@ -61,10 +61,6 @@ public abstract class Layer implements Serializable {
 
     protected String name;
 
-    // the real layer for layer masks,
-    // null for real layers
-    protected Layer owner;
-
     private boolean visible = true;
     private float opacity = 1.0f;
     private BlendingMode blendingMode = BlendingMode.NORMAL;
@@ -93,13 +89,12 @@ public abstract class Layer implements Serializable {
     public static Function<Layer, LayerUI> uiFactory = LayerButton::new;
 
     // can be called on any thread
-    Layer(Composition comp, String name, Layer owner) {
+    Layer(Composition comp, String name) {
         assert comp != null;
         assert name != null;
 
         setComp(comp);
         this.name = name;
-        this.owner = owner;
         opacity = 1.0f;
 
         listeners = new ArrayList<>();
@@ -114,6 +109,12 @@ public abstract class Layer implements Serializable {
 
         in.defaultReadObject();
         listeners = new ArrayList<>();
+
+        if (mask != null) {
+            // necessary for pre-4.2.4 pxc files, which store
+            // the mask's owner at the Layer level
+            mask.changeOwner(this);
+        }
     }
 
     public LayerUI createUI() {
@@ -653,18 +654,11 @@ public abstract class Layer implements Serializable {
      * (Assuming that we are in the edited layer)
      * or null if this layer should move alone
      */
-    private Layer getLinked() {
+    protected Layer getLinked() {
         if (hasMask()) {
             if (!maskEditing) { // we are in the edited layer
                 if (mask.isLinked()) {
                     return mask;
-                }
-            }
-        }
-        if (owner != null) { // we are in a mask
-            if (owner.isMaskEditing()) { // we are in the edited layer
-                if (((LayerMask) this).isLinked()) {
-                    return owner;
                 }
             }
         }
@@ -676,15 +670,6 @@ public abstract class Layer implements Serializable {
      * This can be the temporarily rasterized image of a text layer.
      */
     public abstract BufferedImage getRepresentingImage();
-
-    public Layer getOwner() {
-        return owner;
-    }
-
-    public void changeOwner(Layer owner) {
-        this.owner = owner;
-        this.ui = owner.ui;
-    }
 
     public void addListener(LayerListener listener) {
         listeners.add(listener);

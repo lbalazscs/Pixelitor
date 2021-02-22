@@ -70,7 +70,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     public TextLayer(Composition comp, String name) {
-        super(comp, name, null);
+        super(comp, name);
 
         painter = new TransformedTextPainter();
         setSettings(new TextSettings());

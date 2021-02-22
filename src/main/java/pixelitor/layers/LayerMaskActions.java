@@ -177,7 +177,8 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void layerStateChanged(Layer mask) {
+        public void layerStateChanged(Layer layer) {
+            LayerMask mask = (LayerMask) layer;
             assert mask.getOwner() == this.layer : "this.name = " + this.layer.getName()
                 + ", origin.name = " + mask.getOwner().getName()
                 + ", this.class = " + this.layer.getClass().getSimpleName()
