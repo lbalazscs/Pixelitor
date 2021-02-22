@@ -29,6 +29,7 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
@@ -104,6 +105,16 @@ public class MoveTool extends DragTool {
         double relY = imDrag.getDY();
 
         e.getComp().moveActiveContent(currentMode, relX, relY);
+    }
+
+    @Override
+    public void paintOverImage(Graphics2D g2, Composition comp) {
+        if (userDrag == null || !userDrag.isDragging()) {
+            return;
+        }
+
+        comp.drawMovementContours(g2, currentMode);
+        super.paintOverImage(g2, comp);
     }
 
     @Override

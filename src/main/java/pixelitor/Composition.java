@@ -41,6 +41,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -707,6 +708,17 @@ public class Composition implements Serializable {
         if (combinedEdit != null) {
             History.add(combinedEdit);
             imageChanged();
+        }
+    }
+
+    public void drawMovementContours(Graphics2D g, MoveMode mode) {
+        if (mode.movesLayer()) {
+            Layer layer = getActiveMaskOrLayer();
+            if (layer instanceof ContentLayer) {
+                ContentLayer contentLayer = (ContentLayer) layer;
+                Rectangle imBounds = contentLayer.getContentBounds();
+                Shapes.drawVisibly(g, view.imageToComponentSpace(imBounds));
+            }
         }
     }
 
