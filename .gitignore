@@ -4,22 +4,17 @@ hs_err_pid*
 *.txt
 *.bat
 build.num
-*.nsh
-*.nsi
 *.exe
 *.sh
-*.ico
 *.zip
 *.7z
-*.xml
 Pixelitor.iml
-MUI*.bmp
+dependency-reduced-pom.xml
 website/*
 out/*
 target/*
 .idea/*
 /target/
-/installer/
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,linux

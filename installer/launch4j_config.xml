@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2021 Laszlo Balazs-Csiki and Contributors
+  ~
+  ~ This file is part of Pixelitor. Pixelitor is free software: you
+  ~ can redistribute it and/or modify it under the terms of the GNU
+  ~ General Public License, version 3 as published by the Free
+  ~ Software Foundation.
+  ~
+  ~ Pixelitor is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<launch4jConfig>
+    <dontWrapJar>false</dontWrapJar>
+    <headerType>gui</headerType>
+    <jar>C:\dev_p\pixelitor\target\Pixelitor-4.2.4.jar</jar>
+    <outfile>C:\dev_p\pixelitor\installer\pixelitor.exe</outfile>
+    <errTitle>Pixelitor - Java 15+ required</errTitle>
+    <cmdLine></cmdLine>
+    <chdir></chdir>
+    <priority>normal</priority>
+    <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+    <supportUrl></supportUrl>
+    <stayAlive>false</stayAlive>
+    <restartOnCrash>false</restartOnCrash>
+    <manifest></manifest>
+    <icon>C:\dev_p\pixelitor\installer\pixelitor_icon.ico</icon>
+    <jre>
+        <path>runtime</path>
+        <bundledJre64Bit>true</bundledJre64Bit>
+        <bundledJreAsFallback>false</bundledJreAsFallback>
+        <minVersion>15</minVersion>
+        <maxVersion></maxVersion>
+        <jdkPreference>preferJre</jdkPreference>
+        <runtimeBits>64/32</runtimeBits>
+        <initialHeapPercent>7</initialHeapPercent>
+        <maxHeapPercent>95</maxHeapPercent>
+    </jre>
+    <versionInfo>
+        <fileVersion>4.2.4.0</fileVersion>
+        <txtFileVersion>4.2.4</txtFileVersion>
+        <fileDescription>Pixelitor Image Editor</fileDescription>
+        <copyright>Copyright (c) 2009-2021 Laszlo Balazs-Csiki and Contributors</copyright>
+        <productVersion>4.2.4.0</productVersion>
+        <txtProductVersion>4.2.4</txtProductVersion>
+        <productName>Pixelitor</productName>
+        <companyName>http://pixelitor.sourceforge.net/</companyName>
+        <internalName>Pixelitor</internalName>
+        <originalFilename>Pixelitor.exe</originalFilename>
+        <trademarks></trademarks>
+        <language>ENGLISH_US</language>
+    </versionInfo>
+</launch4jConfig>
