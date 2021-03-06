@@ -60,7 +60,7 @@ public interface PenToolMode {
 
     boolean requiresExistingPath();
 
-    default void modeStarted(PenToolMode prevMode, Path path) {
+    default void modeStarted(PenToolMode prevMode) {
         if (path != null) {
             path.setPreferredPenToolMode(this);
         }

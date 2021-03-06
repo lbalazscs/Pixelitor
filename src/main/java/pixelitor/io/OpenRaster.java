@@ -182,6 +182,7 @@ public class OpenRaster {
 
         var comp = Composition.createEmpty(compWidth, compHeight, ImageMode.RGB);
         comp.setFile(file);
+        comp.createDebugName();
 
         NodeList layers = doc.getElementsByTagName("layer");
         for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order

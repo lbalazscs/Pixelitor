@@ -251,8 +251,8 @@ public class Dialogs {
         String basicErrorMessage = """
             A program error occurred.
                         
-            Please consider reporting this error to the developers by creating a new issue on GitHub (see "Help/Report an Issue..." in the menus).
-            If you do, then open "Details", click "Copy to Clipboard", and paste the details into the new issue.""";
+            Please consider reporting this error to the developers by creating a new issue on github (see "Help/Report an Issue..." in the menus).
+            If you do, then open "Details", click "Copy to Clipboard", and paste the details into the issue.""";
         var errorInfo = new ErrorInfo("Program Error",
             basicErrorMessage, null, null, e,
             Level.SEVERE, null);
@@ -278,8 +278,10 @@ public class Dialogs {
             }
         }
 
-        boolean autoTest = randomGUITest || assertJSwingTest;
-        if (!autoTest) {
+        // the following should happen only for the GUI tests,
+        // which are running for a long time
+        boolean guiTest = randomGUITest || assertJSwingTest;
+        if (!guiTest) {
             return;
         }
 
@@ -288,7 +290,7 @@ public class Dialogs {
         Utils.sleep(2, TimeUnit.SECONDS);
 
         if (randomGUITest) {
-            Events.dumpForActiveComp();
+            Events.dumpAll();
         }
         Toolkit.getDefaultToolkit().beep();
         playWarningSound();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,14 @@
 
 package pixelitor.menus.help;
 
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.utils.MemoryInfo;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
+
+import static java.lang.String.format;
 
 class SystemInfoPanel extends JPanel {
     private final GridBagHelper gbh;
@@ -39,6 +42,9 @@ class SystemInfoPanel extends JPanel {
         gbh.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
         gbh.addTwoLabels("Java vendor:", System.getProperty("java.vendor"));
         gbh.addTwoLabels("OS:", System.getProperty("os.name"));
+
+        gbh.addTwoLabels("UI scaling:", format("%.2f",
+            PixelitorWindow.get().getHiDPIScaling().getScaleY()));
     }
 
     private void addMemoryProperties() {

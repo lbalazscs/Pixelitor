@@ -68,12 +68,12 @@ public class Canvas implements Serializable {
     /**
      * Changes the size with values given in image space
      */
-    public void changeSize(int newWidth, int newHeight, View view) {
+    public void changeSize(int newWidth, int newHeight, View view, boolean notify) {
         width = newWidth;
         height = newHeight;
 
         // also update the component space values
-        recalcCoSize(view);
+        recalcCoSize(view, notify);
 
         activeCanvasSizeChanged(this);
     }
@@ -81,12 +81,18 @@ public class Canvas implements Serializable {
     /**
      * Recalculates the component-space (zoomed) size
      */
-    public void recalcCoSize(View view) {
+    public void recalcCoSize(View view, boolean notify) {
         double viewScale = view.getScaling();
+
+        int oldZoomedWidth = zoomedWidth;
+        int oldZoomedHeight = zoomedHeight;
+
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
 
-        view.canvasCoSizeChanged();
+        if (notify && (zoomedWidth != oldZoomedWidth || zoomedHeight != oldZoomedHeight)) {
+            view.canvasCoSizeChanged();
+        }
     }
 
     /**

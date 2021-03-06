@@ -25,6 +25,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
@@ -35,7 +36,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -61,15 +61,15 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JPanel northPanel = new JPanel(new BorderLayout());
         JPanel northLeftPanel = new JPanel(new FlowLayout(LEFT));
-        JButton expandButton = new JButton(new AbstractAction("Expand All") {
+        JButton expandButton = new JButton(new PAction("Expand All") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 treeTable.expandAll();
             }
         });
-        JButton collapseButton = new JButton(new AbstractAction("Collapse All") {
+        JButton collapseButton = new JButton(new PAction("Collapse All") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 treeTable.collapseAll();
             }
         });
@@ -78,9 +78,9 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         northLeftPanel.add(expandButton);
         northLeftPanel.add(collapseButton);
         northPanel.add(northLeftPanel, WEST);
-        JButton helpButton = new JButton(new AbstractAction("Help") {
+        JButton helpButton = new JButton(new PAction("Help") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 showHelp();
             }
         });

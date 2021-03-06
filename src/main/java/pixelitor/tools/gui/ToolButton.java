@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,13 @@ public class ToolButton extends JToggleButton {
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        Icon icon = Icons.load(tool.getIconFileName());
+        Icon icon;
+        if (tool == Tools.SMUDGE) {
+            icon = Icons.load("smudge_tool.png",
+                "smudge_tool_2x.png");
+        } else {
+            icon = Icons.load(tool.getIconFileName());
+        }
         setIcon(icon);
 
         assert icon.getIconWidth() == 30;
@@ -53,7 +59,7 @@ public class ToolButton extends JToggleButton {
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(true);
         setRolloverEnabled(false);
-        addActionListener(e -> Tools.changeTo(tool));
+        addActionListener(e -> Tools.start(tool));
 
         setPreferredSize(preferredSize);
     }

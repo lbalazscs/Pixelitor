@@ -605,6 +605,7 @@ public class TransformBox implements ToolWidget {
     public DebugNode createDebugNode() {
         var node = new DebugNode("transform box", this);
 
+        node.add(owner.createDebugNode());
         node.add(nw.createDebugNode());
         node.add(ne.createDebugNode());
         node.add(se.createDebugNode());

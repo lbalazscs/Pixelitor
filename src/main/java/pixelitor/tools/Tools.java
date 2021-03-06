@@ -24,7 +24,6 @@ import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
-import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
@@ -85,30 +84,29 @@ public class Tools {
         for (Tool tool : allTools) {
             if (tool.getName().equals(lastToolName)) {
                 found = true;
-                changeToProgrammatically(tool);
+                startAndSelect(tool);
                 break;
             }
         }
         if (!found) { // ui language changed
-            changeToProgrammatically(BRUSH);
+            startAndSelect(BRUSH);
         }
     }
 
     @VisibleForTesting
-    public static void setCurrentTool(Tool currentTool) {
-        Tools.currentTool = currentTool;
+    public static void setCurrentTool(Tool newTool) {
+        currentTool = newTool;
     }
 
-    private static void changeToProgrammatically(Tool tool) {
-        changeTo(tool);
+    private static void startAndSelect(Tool newTool) {
+        start(newTool);
 
-        // changeTo doesn't select the button, because it is
+        // start doesn't select the button, because it is
         // either called by the button event handler or by testing code
-        ToolButton button = currentTool.getButton();
-        button.setSelected(true);
+        currentTool.getButton().setSelected(true);
     }
 
-    public static void changeTo(Tool newTool) {
+    public static void start(Tool newTool) {
         // showing the message could be useful even if the tool didn't change
         Messages.showInStatusBar(newTool.getStatusBarMessage());
 
@@ -122,7 +120,7 @@ public class Tools {
             EventDispatcher.toolChanged(previousTool, newTool);
         }
 
-        currentTool = newTool;
+        setCurrentTool(newTool);
         newTool.toolStarted();
         ToolSettingsPanelContainer.get().showSettingsFor(newTool);
     }

@@ -74,6 +74,8 @@ public class TestHelper {
     public static Composition createEmptyComp(int width, int height) {
         var comp = Composition.createEmpty(width, height, ImageMode.RGB);
         comp.setName("Test");
+        comp.createDebugName();
+
         setupMockViewFor(comp);
 
         return comp;

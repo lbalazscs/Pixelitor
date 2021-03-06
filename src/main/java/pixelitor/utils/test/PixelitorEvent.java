@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Threads;
+import pixelitor.utils.debug.Ansi;
 
 import java.awt.geom.Rectangle2D;
 import java.time.LocalTime;
@@ -81,18 +82,18 @@ public class PixelitorEvent {
             return format("%s (%s) no composition", type, threadName);
         }
 
-        String layerType = layer.getClass().getSimpleName();
-        String formattedDate = dateFormatter.format(now);
         return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
-            type, threadName, comp.getName(), layer.getName(),
-            layerType, getSelectionInfo(), getMaskInfo(), formattedDate);
+            type, Ansi.yellow(threadName), Ansi.red(comp.getName()), layer.getName(),
+            layer.getClass().getSimpleName(), getSelectionInfo(), getMaskInfo(),
+            dateFormatter.format(now));
     }
 
     private String getSelectionInfo() {
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
-            Rectangle2D rect = comp.getSelection().getShapeBounds2D();
-            selectionInfo = format("sel. bounds = '%s'", rect);
+            Rectangle2D bounds = comp.getSelection().getShapeBounds2D();
+            selectionInfo = format("sel. bounds = ['x=%.1f, y=%.1f, w=%.1f, h=%.1f']",
+                bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
         }
         return selectionInfo;
     }
@@ -104,13 +105,6 @@ public class PixelitorEvent {
                 layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
         }
         return maskInfo;
-    }
-
-    public boolean isComp(Composition c) {
-        if (c == null) {
-            return true;
-        }
-        return comp == c;
     }
 
     @Override

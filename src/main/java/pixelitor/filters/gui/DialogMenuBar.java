@@ -19,13 +19,13 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Desktop;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -80,9 +80,9 @@ public class DialogMenuBar extends JMenuBar {
             if (owner.hasBuiltinPresets()) {
                 presetsMenu.addSeparator();
             }
-            Action savePresetAction = new AbstractAction("Save Preset...") {
+            Action savePresetAction = new PAction("Save Preset...") {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     String presetName = Dialogs.getTextDialog(
                         DialogMenuBar.this, "Preset Name", "Preset Name:");
                     if (presetName == null || presetName.isBlank()) {
@@ -116,9 +116,9 @@ public class DialogMenuBar extends JMenuBar {
         if (!CAN_USE_FILE_MANAGER) {
             return;
         }
-        presetsMenu.add(new AbstractAction("Manage Presets...") {
+        presetsMenu.add(new PAction("Manage Presets...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 try {
                     String dirPath = PRESETS_DIR + FILE_SEPARATOR + owner.getPresetDirName();
                     Desktop.getDesktop().open(new File(dirPath));

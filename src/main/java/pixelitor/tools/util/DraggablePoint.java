@@ -403,16 +403,22 @@ public class DraggablePoint extends Point2D.Double {
             name, x, y, imX, imY);
     }
 
+    private String toCoordsString() {
+        return format("co: (%.1f, %.1f) im:(%.1f, %.1f)", x, y, imX, imY);
+    }
+
     @Override
     public String toString() {
-        return format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
-            name, x, y, imX, imY);
+        return format("%s {%s}", name, toCoordsString());
     }
 
     public DebugNode createDebugNode() {
         var node = new DebugNode(name, this);
-        node.addDouble("x", getX());
-        node.addDouble("y", getY());
+        node.addString("coords", toCoordsString());
+        if (imTransformRefPoint != null) {
+            node.addDouble("ref X", imTransformRefPoint.getX());
+            node.addDouble("ref Y", imTransformRefPoint.getY());
+        }
         return node;
     }
 }

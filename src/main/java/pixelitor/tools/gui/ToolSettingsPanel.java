@@ -59,20 +59,22 @@ public class ToolSettingsPanel extends JPanel {
         addWithLabel(text, box, name);
     }
 
-    public void addButton(Action action, String name, String toolTip) {
+    public JButton addButton(Action action, String name, String toolTip) {
         JButton button = new JButton(action);
         button.setName(name);
         button.setToolTipText(toolTip);
         add(button);
+        return button;
     }
 
-    public void addButton(String text, ActionListener listener,
-                          String name, String toolTip) {
+    public JButton addButton(String text, ActionListener listener,
+                             String name, String toolTip) {
         JButton button = new JButton(text);
         button.setName(name);
         button.setToolTipText(toolTip);
         button.addActionListener(listener);
         add(button);
+        return button;
     }
 
     public void addCheckBox(String text, boolean selected, String name,

@@ -240,7 +240,7 @@ public abstract class Tool implements KeyListener {
         }
     }
 
-    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, boolean reloaded) {
         // empty by default
     }
 
@@ -310,7 +310,7 @@ public abstract class Tool implements KeyListener {
             toolButton.doClick();
         } else {
             assert AppContext.isUnitTesting();
-            Tools.changeTo(this);
+            Tools.start(this);
         }
     }
 

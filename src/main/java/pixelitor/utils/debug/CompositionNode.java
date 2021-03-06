@@ -34,7 +34,11 @@ import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
  */
 public class CompositionNode extends DebugNode {
     public CompositionNode(Composition comp) {
-        super("composition", comp);
+        this("composition", comp);
+    }
+
+    public CompositionNode(String name, Composition comp) {
+        super(name, comp);
 
         comp.forEachLayer(this::addLayerNode);
 
@@ -57,6 +61,7 @@ public class CompositionNode extends DebugNode {
 
         addInt("num layers", comp.getNumLayers());
         addQuotedString("name", comp.getName());
+        addQuotedString("debug name", comp.getDebugName());
 
         String filePath = "";
         File file = comp.getFile();

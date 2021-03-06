@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.gui.utils.PAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
@@ -28,7 +29,6 @@ import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -57,16 +57,16 @@ public class GlobalEvents {
 
     private static KeyListener keyListener;
 
-    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             Tools.increaseActiveBrushSize();
         }
     };
 
-    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             Tools.decreaseActiveBrushSize();
         }
     };

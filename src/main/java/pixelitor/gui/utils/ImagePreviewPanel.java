@@ -41,9 +41,9 @@ import java.util.Map;
 public class ImagePreviewPanel extends JPanel implements PropertyChangeListener {
     private static final int SIZE = 200;
     public static final int EMPTY_SPACE_AT_LEFT = 5;
+    private static final Map<String, SoftReference<ThumbInfo>> thumbsCache = new HashMap<>();
 
     private final Color backgroundColor;
-    private final Map<String, SoftReference<ThumbInfo>> thumbsCache;
     private ThumbInfo thumbInfo;
     private final ProgressPanel progressPanel;
 
@@ -51,7 +51,6 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         this.progressPanel = progressPanel;
         setPreferredSize(new Dimension(SIZE, SIZE));
         backgroundColor = getBackground();
-        thumbsCache = new HashMap<>();
 
         this.progressPanel.setVisible(true);
     }
@@ -62,8 +61,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         if (JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(e.getPropertyName())) {
             File file = (File) e.getNewValue();
             if (file != null && FileUtils.hasSupportedInputExt(file)) {
-                String filePath = file.getAbsolutePath();
-                thumbInfo = getOrCreateThumb(file, filePath);
+                thumbInfo = getOrCreateThumb(file);
             } else {
                 thumbInfo = null;
             }
@@ -74,7 +72,8 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         repaint();
     }
 
-    private ThumbInfo getOrCreateThumb(File file, String filePath) {
+    private ThumbInfo getOrCreateThumb(File file) {
+        String filePath = file.getAbsolutePath();
         if (thumbsCache.containsKey(filePath)) {
             SoftReference<ThumbInfo> thumbRef = thumbsCache.get(filePath);
             ThumbInfo cachedInfo = thumbRef.get();
@@ -104,6 +103,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             ex.printStackTrace();
             return fakeThumbInfo;
         }
+    }
+
+    public static void removeThumbFromCache(File file) {
+        thumbsCache.remove(file.getAbsolutePath());
     }
 
     @Override

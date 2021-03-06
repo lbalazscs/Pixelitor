@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.gui;
 
 import pixelitor.OpenImages;
+import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Lazy;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 import static pixelitor.utils.Keys.CTRL_SHIFT_TAB;
 import static pixelitor.utils.Keys.CTRL_TAB;
@@ -127,9 +127,9 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
-        return new JRadioButtonMenuItem(new AbstractAction(name) {
+        return new JRadioButtonMenuItem(new PAction(name) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 setTabPlacement(pos);
                 ImageArea.setTabPlacement(pos);
             }

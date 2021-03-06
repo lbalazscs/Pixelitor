@@ -16,7 +16,13 @@
  */
 package pixelitor.utils;
 
+import pixelitor.gui.utils.Dialogs;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.image.BaseMultiResolutionImage;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -28,8 +34,8 @@ public final class Icons {
     private static final Icon dice2Icon = load("dice2.png");
     private static final Icon northArrowIcon = load("north_arrow.gif");
     private static final Icon southArrowIcon = load("south_arrow.gif");
-    private static final Icon textLayerIcon = load("text_layer_icon.png");
-    private static final Icon adjLayerIcon = load("adj_layer_icon.png");
+    private static final Icon textLayerIcon = load("text_layer.png");
+    private static final Icon adjLayerIcon = load("adj_layer.png");
     private static final Icon undoIcon = load("undo.png");
     private static final Icon redoIcon = load("redo.png");
     private static final Icon searchIcon = load("search.png");
@@ -55,6 +61,21 @@ public final class Icons {
 
         URL imgURL = ImageUtils.imagePathToURL(iconFileName);
         return new ImageIcon(imgURL);
+    }
+
+    public static Icon load(String baseIconFileName, String bigIconFileName) {
+        try {
+            URL imgURL1 = ImageUtils.imagePathToURL(baseIconFileName);
+            BufferedImage img1 = ImageIO.read(imgURL1);
+
+            URL imgURL2 = ImageUtils.imagePathToURL(bigIconFileName);
+            BufferedImage img2 = ImageIO.read(imgURL2);
+
+            return new ImageIcon(new BaseMultiResolutionImage(img1, img2));
+        } catch (IOException e) {
+            Dialogs.showExceptionDialog(e);
+            return null;
+        }
     }
 
     public static Icon getNorthArrowIcon() {

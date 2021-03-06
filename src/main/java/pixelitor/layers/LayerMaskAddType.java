@@ -17,8 +17,10 @@
 
 package pixelitor.layers;
 
+import com.jhlabs.image.PointFilter;
 import pixelitor.Canvas;
 import pixelitor.colors.Colors;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -139,15 +141,22 @@ public enum LayerMaskAddType {
             image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
         Graphics2D g = bwImage.createGraphics();
 
-        // fill the background with white so that transparent parts become white
-        Colors.fillWith(Color.WHITE, g, image.getWidth(), image.getHeight());
-
         if (onlyTransparency) {
-            // with DstOut only the source alpha will matter
-            g.setComposite(AlphaComposite.DstOut);
+            PointFilter transparencyToBWFilter = new PointFilter("") {
+                @Override
+                public int filterRGB(int x, int y, int rgb) {
+                    int a = (rgb >>> 24) & 0xFF;
+                    return 0xFF_00_00_00 | a << 16 | a << 8 | a;
+                }
+            };
+            transparencyToBWFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
+            BufferedImage argbBWImage = transparencyToBWFilter.filter(image, null);
+            g.drawImage(argbBWImage, 0, 0, null);
+        } else {
+            // fill the background with white so that transparent parts become white
+            Colors.fillWith(Color.WHITE, g, image.getWidth(), image.getHeight());
+            g.drawImage(image, 0, 0, null);
         }
-
-        g.drawImage(image, 0, 0, null);
         g.dispose();
         return bwImage;
     }

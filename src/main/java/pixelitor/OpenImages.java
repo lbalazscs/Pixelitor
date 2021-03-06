@@ -113,8 +113,7 @@ public class OpenImages {
         setActiveView(null, false);
         activationListeners.forEach(ViewActivationListener::allViewsClosed);
         History.onAllImagesClosed();
-        SelectionActions.setEnabled(false, null);
-
+        SelectionActions.update(null);
         PixelitorWindow.get().updateTitle(null);
         FramesUI.resetCascadeIndex();
     }
@@ -172,7 +171,7 @@ public class OpenImages {
 
         var comp = view.getComp();
         setActiveView(view, false);
-        SelectionActions.setEnabled(comp.hasSelection(), comp);
+        SelectionActions.update(comp);
         view.activateUI(true);
 
         for (ViewActivationListener listener : activationListeners) {

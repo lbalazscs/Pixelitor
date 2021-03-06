@@ -30,7 +30,7 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class ZoomTool extends Tool {
     ZoomTool() {
-        super(ZOOM, 'Z', "zoom_tool_icon.png",
+        super(ZOOM, 'Z', "zoom_tool.png",
             "<b>click</b> to zoom in, " +
                 "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
             Cursors.HAND);

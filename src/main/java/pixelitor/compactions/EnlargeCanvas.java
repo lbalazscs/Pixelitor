@@ -85,7 +85,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     protected void changeCanvasSize(Canvas newCanvas, View view) {
         newCanvasWidth = newCanvas.getWidth() + east + west;
         newCanvasHeight = newCanvas.getHeight() + north + south;
-        newCanvas.changeSize(newCanvasWidth, newCanvasHeight, view);
+        newCanvas.changeSize(newCanvasWidth, newCanvasHeight, view, false);
     }
 
     @Override

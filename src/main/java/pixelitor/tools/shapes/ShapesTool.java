@@ -29,6 +29,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
@@ -51,7 +52,6 @@ import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.EnumMap;
@@ -89,9 +89,10 @@ public class ShapesTool extends DragTool {
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
-    private final AbstractAction shapeSettingsAction = new AbstractAction("Settings...") {
+    private JButton showShapeSettingsButton;
+    private final Action shapeSettingsAction = new PAction("Settings...") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             showShapeSettingsDialog();
         }
     };
@@ -106,9 +107,11 @@ public class ShapesTool extends DragTool {
     private final JComboBox<TwoPointPaintType> strokePaintCombo
         = createStrokePaintCombo();
 
+    private JButton showStrokeDialogButton;
     private Action strokeSettingsAction;
     private JDialog strokeSettingsDialog;
 
+    private JButton showEffectsDialogButton;
     private JDialog effectsDialog;
 
     private StyledShape styledShape;
@@ -116,15 +119,15 @@ public class ShapesTool extends DragTool {
 
     private DragToolState state = NO_INTERACTION;
 
-    private final Action convertToSelectionAction = new AbstractAction("Convert to Selection") {
+    private final Action convertToSelectionAction = new PAction("Convert to Selection") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             convertToSelection();
         }
     };
 
     public ShapesTool() {
-        super("Shapes", 'U', "shapes_tool_icon.png",
+        super("Shapes", 'U', "shapes_tool.png",
             "<b>drag</b> to draw a shape. " +
                 "Hold <b>Alt</b> down to drag from the center. " +
                 "Hold <b>SPACE</b> down while drawing to move the shape. ",
@@ -141,24 +144,25 @@ public class ShapesTool extends DragTool {
 
         JComboBox<ShapeType> shapeTypeCB = createShapeTypeCombo();
         settingsPanel.addComboBox("Shape:", shapeTypeCB, "shapeTypeCB");
-        settingsPanel.addButton(shapeSettingsAction, "shapeSettingsButton",
+        showShapeSettingsButton = settingsPanel.addButton(shapeSettingsAction, "shapeSettingsButton",
             "Configure the selected shape");
 
         settingsPanel.addSeparator();
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
-        strokeSettingsAction = new AbstractAction("Stroke Settings...") {
+        strokeSettingsAction = new PAction("Stroke Settings...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 initAndShowStrokeSettingsDialog();
             }
         };
-        settingsPanel.addButton(strokeSettingsAction,
+        showStrokeDialogButton = settingsPanel.addButton(strokeSettingsAction,
             "strokeSettingsButton",
             "Configure the stroke");
 
-        settingsPanel.addButton("Effects...", e -> showEffectsDialog(),
+        showEffectsDialogButton = settingsPanel.addButton("Effects...",
+            e -> showEffectsDialog(),
             "effectsButton", "Configure the effects");
 
         settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
@@ -270,12 +274,13 @@ public class ShapesTool extends DragTool {
             .content(configPanel)
             .noCancelButton()
             .okText(GUIText.CLOSE_DIALOG)
+            .parentComponent(showShapeSettingsButton)
             .show();
     }
 
     private void showEffectsDialog() {
         effectsDialog = effectsParam.buildDialog(null, false);
-        GUIUtils.showDialog(effectsDialog);
+        GUIUtils.showDialog(effectsDialog, showEffectsDialogButton);
     }
 
     @Override
@@ -466,7 +471,7 @@ public class ShapesTool extends DragTool {
     private void initAndShowStrokeSettingsDialog() {
         strokeSettingsDialog = createStrokeSettingsDialog();
 
-        GUIUtils.showDialog(strokeSettingsDialog);
+        GUIUtils.showDialog(strokeSettingsDialog, showStrokeDialogButton);
     }
 
     private void closeEffectsDialog() {
@@ -586,7 +591,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, boolean reloaded) {
         if (reloaded) {
             resetInitialState();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,9 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.gui.utils.PAction;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 /**
  * The type of an anchor point determines how its control
@@ -95,9 +96,9 @@ public enum AnchorPointType {
 
     static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {
         public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
-            super(new AbstractAction(type.toString()) {
+            super(new PAction(type.toString()) {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     ap.setType(type);
                 }
             });

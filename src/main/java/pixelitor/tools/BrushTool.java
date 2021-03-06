@@ -38,7 +38,7 @@ public class BrushTool extends BlendingModeBrushTool {
     private Color drawingColor;
 
     public BrushTool() {
-        super(NAME, 'B', "brush_tool_icon.png",
+        super(NAME, 'B', "brush_tool.png",
             "<b>click</b> or <b>drag</b> to draw with the current brush, " +
                 "<b>Shift-click</b> to draw lines, " +
                 "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",

@@ -22,6 +22,7 @@ import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
@@ -74,6 +75,8 @@ public class Composition implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private static long debugCounter = 0;
+
     private String name;
 
     private final List<Layer> layerList = new ArrayList<>();
@@ -90,6 +93,10 @@ public class Composition implements Serializable {
     //
     // transient variables from here
     //
+
+    // useful for distinguishing between versions with the same name
+    private transient String debugName;
+
     private transient File file;
     private transient boolean dirty = false;
 
@@ -140,6 +147,7 @@ public class Composition implements Serializable {
             // one of the file and name arguments must be given
             throw new IllegalArgumentException("no name could be set");
         }
+        comp.createDebugName();
         assert comp.getName() != null;
         return comp;
     }
@@ -194,6 +202,7 @@ public class Composition implements Serializable {
                 compCopy.guides = guides.copyForNewComp(view);
             }
         }
+        compCopy.createDebugName();
 
         assert compCopy.checkInvariant();
 
@@ -211,6 +220,7 @@ public class Composition implements Serializable {
         // init transient variables
         compositeImage = null; // will be set when needed
         file = null; // will be set later
+        debugName = null; // will be set later
         dirty = false;
         view = null; // will be set later
         selection = null; // the selection is not saved
@@ -226,7 +236,7 @@ public class Composition implements Serializable {
     public void setView(View view) {
         this.view = view;
         if (view != null) {
-            canvas.recalcCoSize(view);
+            canvas.recalcCoSize(view, true);
         }
 
         if (selection != null) { // can happen when duplicating
@@ -281,6 +291,15 @@ public class Composition implements Serializable {
             view.updateTitle();
             PixelitorWindow.get().updateTitle(this);
         }
+    }
+
+    public String getDebugName() {
+        return debugName;
+    }
+
+    public void createDebugName() {
+        assert name != null;
+        this.debugName = name + " " + debugCounter++;
     }
 
     public String generateNewLayerName() {
@@ -1045,7 +1064,7 @@ public class Composition implements Serializable {
     public void setSelectionRef(Selection selection) {
         this.selection = selection;
         if (isActive()) {
-            SelectionActions.setEnabled(selection != null, this);
+            SelectionActions.update(this);
             SelectionActions.getShowHide().updateTextFrom(selection);
         }
     }
@@ -1357,6 +1376,7 @@ public class Composition implements Serializable {
         if (addToRecentMenus) {
             RecentFilesMenu.getInstance().addFile(file);
         }
+        ImagePreviewPanel.removeThumbFromCache(file);
         Messages.showFileSavedMessage(file);
     }
 

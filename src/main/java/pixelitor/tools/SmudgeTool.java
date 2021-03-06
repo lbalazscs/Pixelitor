@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
  */
 public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
-        super("Smudge", 'K', "smudge_tool_icon.png",
+        super("Smudge", 'K', "smudge_tool.png",
             "<b>click and drag</b> to smudge. " +
                 "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
             Cursors.HAND, false);

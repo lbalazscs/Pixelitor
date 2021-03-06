@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.RestrictedLayerAction.Condition;
 import pixelitor.history.History;
@@ -31,7 +32,6 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.test.Events;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 import static pixelitor.utils.Keys.*;
 
@@ -84,9 +84,9 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the given layer and its image
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
-        var action = new AbstractAction(guiName) {
+        var action = new PAction(guiName) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 activate(layer);
             }
         };

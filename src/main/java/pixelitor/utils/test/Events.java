@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
@@ -103,16 +102,6 @@ public class Events {
 
     public static void postProgramError(String s, Composition comp, Layer layer) {
         post(new PixelitorEvent("[PROGRAM ERROR: " + s + "]", comp, layer));
-    }
-
-    /**
-     * Dumps the last events for the active Composition.
-     */
-    public static void dumpForActiveComp() {
-        var comp = OpenImages.getActiveComp();
-        events.stream()
-            .filter(e -> e.isComp(comp))
-            .forEach(System.out::println);
     }
 
     public static void dumpMouse() {

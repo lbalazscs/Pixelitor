@@ -126,6 +126,16 @@ public final class GUIUtils {
         return (JDialog) SwingUtilities.getWindowAncestor(c);
     }
 
+    public static void showDialog(JDialog d, JComponent parent) {
+        Point loc = lastDialogLocationsByTitle.get(d.getTitle());
+        if (loc != null) {
+            d.setLocation(loc);
+        } else {
+            d.setLocationRelativeTo(parent);
+        }
+        d.setVisible(true);
+    }
+
     public static void showDialog(JDialog d) {
         showDialog(d, SCREEN_CENTER);
     }
@@ -313,9 +323,9 @@ public final class GUIUtils {
     }
 
     public static AbstractAction createPrintFileAction(Composition comp, File file) {
-        return new AbstractAction("Print...") {
+        return new PAction("Print...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 if (comp.isDirty()) {
                     String msg = "<html>The file <i>" + file.getName() +
                         "</i> contains unsaved changes.<br>" +

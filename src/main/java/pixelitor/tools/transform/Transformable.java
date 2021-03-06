@@ -18,6 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.geom.AffineTransform;
 
@@ -37,4 +38,6 @@ public interface Transformable {
      * shapes tool, because the image has to be recalculated.
      */
     void updateUI(View view);
+
+    DebugNode createDebugNode();
 }

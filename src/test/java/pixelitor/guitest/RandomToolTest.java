@@ -784,7 +784,6 @@ public class RandomToolTest {
         enabledCB.click();
         if (enabledCB.target().isSelected()) {
             slideRandomly(dialog.slider("distSlider"));
-            slideRandomly(dialog.slider("spacingSlider"));
         }
 
         Utils.sleep(200, MILLISECONDS);

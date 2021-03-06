@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,11 @@ package pixelitor.gui;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
@@ -104,15 +104,15 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         JPopupMenu popup = new JPopupMenu();
 
         // close the clicked one, even if it is not the active!
-        popup.add(new AbstractAction(i18n("close")) {
+        popup.add(new PAction(i18n("close")) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 OpenImages.warnAndClose(view);
             }
         });
-        popup.add(new AbstractAction("Close Others") {
+        popup.add(new PAction("Close Others") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 OpenImages.warnAndCloseAllBut(view);
             }
         });

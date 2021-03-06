@@ -19,11 +19,11 @@ package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.*;
+import pixelitor.gui.utils.PAction;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
 import java.util.function.BooleanSupplier;
@@ -66,9 +66,9 @@ public class ChannelMixer extends ParametrizedFilter {
         // DO require explicit triggering because they are simple JButtons
     };
 
-    private final Action swapRedGreen = new AbstractAction("Swap Red-Green") {
+    private final Action swapRedGreen = new PAction("Swap Red-Green") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(100);
             redFromBlue.setValueNoTrigger(0);
@@ -85,9 +85,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action swapRedBlue = new AbstractAction("Swap Red-Blue") {
+    private final Action swapRedBlue = new PAction("Swap Red-Blue") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(100);
@@ -104,9 +104,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action swapGreenBlue = new AbstractAction("Swap Green-Blue") {
+    private final Action swapGreenBlue = new PAction("Swap Green-Blue") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -123,9 +123,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action shiftRGBR = new AbstractAction("R -> G -> B -> R") {
+    private final Action shiftRGBR = new PAction("R -> G -> B -> R") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(100);
@@ -142,9 +142,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action shiftRBGR = new AbstractAction("R -> B -> G -> R") {
+    private final Action shiftRBGR = new PAction("R -> B -> G -> R") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(100);
             redFromBlue.setValueNoTrigger(0);
@@ -161,9 +161,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action removeRed = new AbstractAction("Remove Red") {
+    private final Action removeRed = new PAction("Remove Red") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -180,9 +180,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action removeGreen = new AbstractAction("Remove Green") {
+    private final Action removeGreen = new PAction("Remove Green") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -199,9 +199,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action removeBlue = new AbstractAction("Remove Blue") {
+    private final Action removeBlue = new PAction("Remove Blue") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -218,9 +218,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action averageBW = new AbstractAction("Average BW") {
+    private final Action averageBW = new PAction("Average BW") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(33);
             redFromGreen.setValueNoTrigger(33);
             redFromBlue.setValueNoTrigger(33);
@@ -237,9 +237,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action luminosityBW = new AbstractAction("Luminosity BW") {
+    private final Action luminosityBW = new PAction("Luminosity BW") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(22);
             redFromGreen.setValueNoTrigger(71);
             redFromBlue.setValueNoTrigger(7);
@@ -256,9 +256,9 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action sepia = new AbstractAction("Sepia") {
+    private final Action sepia = new PAction("Sepia") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             redFromRed.setValueNoTrigger(39);
             redFromGreen.setValueNoTrigger(77);
             redFromBlue.setValueNoTrigger(19);

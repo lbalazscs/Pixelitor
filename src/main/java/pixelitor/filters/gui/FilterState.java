@@ -17,8 +17,9 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.utils.PAction;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,9 +99,9 @@ public class FilterState {
     }
 
     public Action asAction(ParamSet paramSet) {
-        return new AbstractAction(name) {
+        return new PAction(name) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 paramSet.applyState(FilterState.this);
             }
         };

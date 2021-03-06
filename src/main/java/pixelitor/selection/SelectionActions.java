@@ -38,7 +38,6 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 
 import static pixelitor.OpenImages.getActiveComp;
 import static pixelitor.OpenImages.getActiveSelection;
@@ -52,9 +51,9 @@ import static pixelitor.tools.pen.PenToolMode.EDIT;
 public final class SelectionActions {
     private static Shape copiedSelShape = null;
 
-    private static final Action crop = new AbstractAction("Crop Selection") {
+    private static final Action crop = new PAction("Crop Selection") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             Crop.selectionCropActiveImage();
         }
     };
@@ -75,9 +74,9 @@ public final class SelectionActions {
 
     private static final ShowHideSelectionAction showHide = new ShowHideSelectionAction();
 
-    private static final Action convertToPath = new AbstractAction("Convert to Path") {
+    private static final Action convertToPath = new PAction("Convert to Path") {
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             var comp = getActiveComp();
             selectionToPath(comp, true);
         }
@@ -168,7 +167,7 @@ public final class SelectionActions {
     }
 
     static {
-        setEnabled(false, null);
+        update(null);
     }
 
     private SelectionActions() {
@@ -178,18 +177,22 @@ public final class SelectionActions {
      * Selection actions must be enabled only if
      * the active composition has a selection
      */
-    public static void setEnabled(boolean b, Composition comp) {
-        assert comp == null || getActiveComp() == comp
-            : "comp = " + (comp == null ? "null" : comp.getName())
-            + ", active comp = " + (getActiveComp() == null ? "null" : getActiveComp().getName());
+    public static void update(Composition comp) {
+        boolean enabled;
+        if (comp == null) {
+            enabled = false;
+        } else {
+            assert comp.isActive();
+            enabled = comp.hasSelection();
+        }
 
-        crop.setEnabled(b);
-        deselect.setEnabled(b);
-        invert.setEnabled(b);
-        showHide.setEnabled(b);
-        modify.setEnabled(b);
-        convertToPath.setEnabled(b);
-        copySel.setEnabled(b);
+        crop.setEnabled(enabled);
+        deselect.setEnabled(enabled);
+        invert.setEnabled(enabled);
+        showHide.setEnabled(enabled);
+        modify.setEnabled(enabled);
+        convertToPath.setEnabled(enabled);
+        copySel.setEnabled(enabled);
     }
 
     public static boolean areEnabled() {

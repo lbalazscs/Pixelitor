@@ -68,7 +68,7 @@ public class GradientTool extends DragTool {
     private boolean ignoreRegenerate = false;
 
     public GradientTool() {
-        super("Gradient", 'G', "gradient_tool_icon.png",
+        super("Gradient", 'G', "gradient_tool.png",
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
                 "<b>Shift-drag</b> to constrain the direction. " +
                 "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
@@ -287,7 +287,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, boolean reloaded) {
         if (reloaded && handles != null) {
             hideHandles(newComp, false);
         }

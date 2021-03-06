@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.AppContext;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
 import pixelitor.tools.pen.history.AnchorPointChangeEdit;
 import pixelitor.tools.pen.history.SubPathEdit;
@@ -31,7 +32,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 
@@ -230,9 +230,9 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        popup.add(new AbstractAction("Retract Handles") {
+        popup.add(new PAction("Retract Handles") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 retractHandles();
             }
         });
@@ -240,9 +240,9 @@ public class AnchorPoint extends DraggablePoint {
         popup.addSeparator();
 
         if (AppContext.isDevelopment()) {
-            popup.add(new AbstractAction("Dump") {
+            popup.add(new PAction("Dump") {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     dump();
                 }
             });
@@ -252,26 +252,26 @@ public class AnchorPoint extends DraggablePoint {
         boolean isLastPoint = singleSubPath && subPath.getNumAnchors() == 1;
 
         if (!isLastPoint) {
-            popup.add(new AbstractAction("Delete Point") {
+            popup.add(new PAction("Delete Point") {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     delete();
                 }
             });
         }
 
         if (!singleSubPath) {
-            popup.add(new AbstractAction("Delete Subpath") {
+            popup.add(new PAction("Delete Subpath") {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     subPath.delete();
                 }
             });
         }
 
-        popup.add(new AbstractAction("Delete Path") {
+        popup.add(new PAction("Delete Path") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 subPath.deletePath();
             }
         });

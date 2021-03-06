@@ -99,6 +99,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void replaceJustReloadedComp(Composition newComp) {
         assert calledOnEDT() : threadInfo();
         assert newComp != comp;
+        assert !newComp.hasSelection();
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
@@ -109,7 +110,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // the view was active when the reload started, but since the
         // reload was asynchronous, this could have changed
         if (isActive()) {
-            SelectionActions.setEnabled(false, newComp);
+            SelectionActions.update(newComp);
         }
 
         String msg = format("The image <b>%s</b> was reloaded from the file <b>%s</b>.",
@@ -147,9 +148,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             HistogramsPanel.updateFrom(newComp);
         }
 
-        Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
+        Tools.currentTool.compReplaced(newComp, reloaded);
 
-        revalidate(); // make sure the scrollbars are OK if the new comp has a different size
+        revalidate(); // update the scrollbars if the new comp has a different size
         canvasCoSizeChanged();
         repaint();
     }
@@ -530,7 +531,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         this.zoomLevel = newZoom;
         scaling = newZoom.getViewScale();
-        canvas.recalcCoSize(this);
+        canvas.recalcCoSize(this, true);
 
         if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
             updateTitle();

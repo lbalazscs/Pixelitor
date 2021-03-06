@@ -109,7 +109,7 @@ public class Crop implements CompAction {
             }
         });
 
-        newCanvas.changeSize(cropRect.width, cropRect.height, view);
+        newCanvas.changeSize(cropRect.width, cropRect.height, view, false);
 
         // The intersected selection, tool widgets etc. have to be moved
         // into the coordinate system of the new, cropped image.
@@ -138,7 +138,7 @@ public class Crop implements CompAction {
         view.replaceComp(newComp);
 
         newComp.updateAllIconImages();
-        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+        SelectionActions.update(newComp);
 
         newComp.imageChanged(FULL, true);
 

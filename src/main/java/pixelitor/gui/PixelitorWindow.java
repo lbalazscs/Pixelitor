@@ -38,6 +38,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -371,6 +372,10 @@ public class PixelitorWindow extends JFrame {
                 savedNormalBounds = null;
             }
         });
+    }
+
+    public AffineTransform getHiDPIScaling() {
+        return getGraphicsConfiguration().getDefaultTransform();
     }
 }
 

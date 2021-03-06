@@ -156,7 +156,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
         var node = new DebugNode(nodeName, this);
         node.addClass();
-        node.addQuotedString("comp", comp.getName());
+        node.addQuotedString("comp debug name", comp.getDebugName());
         node.addBoolean("embedded", embedded);
         return node;
     }

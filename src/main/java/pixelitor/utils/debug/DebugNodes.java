@@ -24,7 +24,6 @@ import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
-import pixelitor.tools.pen.SubPath;
 import pixelitor.utils.Utils;
 
 import java.awt.GraphicsEnvironment;
@@ -51,13 +50,9 @@ public class DebugNodes {
         node.addString("OS name", System.getProperty("os.name"));
 
         var displayMode = device.getDisplayMode();
-
-        int width = displayMode.getWidth();
-        int height = displayMode.getHeight();
-        int bitDepth = displayMode.getBitDepth();
-        node.addInt("display width", width);
-        node.addInt("display height", height);
-        node.addInt("display bit depth", bitDepth);
+        node.addInt("display width", displayMode.getWidth());
+        node.addInt("display height", displayMode.getHeight());
+        node.addInt("display bit depth", displayMode.getBitDepth());
 
         var pw = PixelitorWindow.get();
         node.addInt("app window width", pw.getWidth());
@@ -66,11 +61,8 @@ public class DebugNodes {
         node.addString("max memory", Utils.getMaxHeapInMegabytes() + " Mb");
         node.addString("used memory", Utils.getUsedMemoryInMegabytes() + " Mb");
 
-        var configuration = device.getDefaultConfiguration();
-        var defaultColorModel = configuration.getColorModel();
-
-        var colorModelNode = createColorModelNode("default color model", defaultColorModel);
-        node.add(colorModelNode);
+        node.add(createColorModelNode("default color model",
+            device.getDefaultConfiguration().getColorModel()));
 
         return node;
     }
@@ -82,29 +74,22 @@ public class DebugNodes {
         node.add(new CompositionNode(comp));
 
         node.addQuotedString("name", comp.getName());
-
         node.addQuotedString("mask view mode", view.getMaskViewMode().toString());
 
-        int width = view.getWidth();
-        node.addInt("view width", width);
-        int height = view.getHeight();
-        node.addInt("view height", height);
+        node.addInt("view width", view.getWidth());
+        node.addInt("view height", view.getHeight());
 
         var viewContainer = view.getViewContainer();
         if (viewContainer instanceof ImageFrame) {
             var frame = (ImageFrame) viewContainer;
-            int frameWidth = frame.getWidth();
-            node.addInt("frame width", frameWidth);
-            int frameHeight = frame.getHeight();
-            node.addInt("frame height", frameHeight);
+            node.addInt("frame width", frame.getWidth());
+            node.addInt("frame height", frame.getHeight());
         }
 
         node.addString("zoom level", view.getZoomLevel().toString());
         Canvas canvas = view.getCanvas();
-        int zoomedCanvasWidth = canvas.getCoWidth();
-        node.addInt("zoomed canvas width", zoomedCanvasWidth);
-        int zoomedCanvasHeight = canvas.getCoHeight();
-        node.addInt("zoomed canvas height", zoomedCanvasHeight);
+        node.addInt("zoomed canvas width", canvas.getCoWidth());
+        node.addInt("zoomed canvas height", canvas.getCoHeight());
 
         return node;
     }
@@ -126,12 +111,8 @@ public class DebugNodes {
         var node = new DebugNode("writable raster", raster);
 
         node.addClass();
-
-        var sampleModel = raster.getSampleModel();
-        node.add(createSampleModelNode(sampleModel));
-
-        var dataBuffer = raster.getDataBuffer();
-        node.add(createDataBufferNode(dataBuffer));
+        node.add(createSampleModelNode(raster.getSampleModel()));
+        node.add(createDataBufferNode(raster.getDataBuffer()));
 
         return node;
     }
@@ -140,24 +121,14 @@ public class DebugNodes {
         var node = new DebugNode("sample model", sampleModel);
 
         node.addClass();
-
-        int width = sampleModel.getWidth();
-        node.addInt("width", width);
-
-        int height = sampleModel.getHeight();
-        node.addInt("height", height);
-
-        int dataType = sampleModel.getDataType();
-        node.addString("data type", Debug.dateBufferTypeAsString(dataType));
-
-        int numBands = sampleModel.getNumBands();
-        node.addInt("num bands", numBands);
-
-        int transferType = sampleModel.getTransferType();
-        node.addString("transfer type", Debug.dateBufferTypeAsString(transferType));
-
-        int numDataElements = sampleModel.getNumDataElements();
-        node.addInt("num data elements", numDataElements);
+        node.addInt("width", sampleModel.getWidth());
+        node.addInt("height", sampleModel.getHeight());
+        node.addString("data type",
+            Debug.dataBufferTypeAsString(sampleModel.getDataType()));
+        node.addInt("num bands", sampleModel.getNumBands());
+        node.addString("transfer type",
+            Debug.dataBufferTypeAsString(sampleModel.getTransferType()));
+        node.addInt("num data elements", sampleModel.getNumDataElements());
 
         return node;
     }
@@ -166,36 +137,26 @@ public class DebugNodes {
         var node = new DebugNode("data buffer", dataBuffer);
 
         node.addClass();
-
-        int numBanks = dataBuffer.getNumBanks();
-        node.addInt("num banks", numBanks);
-
-        int type = dataBuffer.getDataType();
-        node.addString("type", Debug.dateBufferTypeAsString(type));
-
-        int size = dataBuffer.getSize();
-        node.addInt("size", size);
+        node.addInt("num banks", dataBuffer.getNumBanks());
+        node.addString("type", Debug.dataBufferTypeAsString(dataBuffer.getDataType()));
+        node.addInt("size", dataBuffer.getSize());
 
         return node;
     }
 
     private static DebugNode createColorModelNode(String name, ColorModel colorModel) {
         var node = new DebugNode(name, colorModel);
+
         node.addClass();
-
         node.add(createColorSpaceNode(colorModel.getColorSpace()));
-
         node.addInt("num color components", colorModel.getNumColorComponents());
         node.addInt("num components", colorModel.getNumComponents());
         node.addBoolean("has alpha", colorModel.hasAlpha());
         node.addInt("pixel size", colorModel.getPixelSize());
-
         node.addString("transfer type",
-            Debug.dateBufferTypeAsString(colorModel.getTransferType()));
-
+            Debug.dataBufferTypeAsString(colorModel.getTransferType()));
         node.addString("transparency",
             Debug.transparencyAsString(colorModel.getTransparency()));
-
         node.addBoolean("is RGB", Debug.isRgbColorModel(colorModel));
         node.addBoolean("is BGR", Debug.isBgrColorModel(colorModel));
 
@@ -206,15 +167,9 @@ public class DebugNodes {
         var node = new DebugNode("color space", colorSpace);
 
         node.addClass();
-
-        int numComponents = colorSpace.getNumComponents();
-        node.addInt("num components", numComponents);
-
-        int type = colorSpace.getType();
-        node.addString("type", Debug.colorSpaceTypeAsString(type));
-
-        boolean sRGB = colorSpace.isCS_sRGB();
-        node.addBoolean("sRGB", sRGB);
+        node.addInt("num components", colorSpace.getNumComponents());
+        node.addString("type", Debug.colorSpaceTypeAsString(colorSpace.getType()));
+        node.addBoolean("sRGB", colorSpace.isCS_sRGB());
 
         return node;
     }
@@ -254,32 +209,10 @@ public class DebugNodes {
         node.addInt("number of subpaths", numSubpaths);
         node.addString("build state", path.getBuildState().toString());
 
-        var activeSubpath = path.getActiveSubpath();
         for (int i = 0; i < numSubpaths; i++) {
             var subPath = path.getSubPath(i);
-            if (subPath == activeSubpath) {
-                node.add(createSubpathNode(
-                    "active subpath " + subPath.getId(),
-                    subPath));
-            } else {
-                node.add(createSubpathNode(subPath));
-            }
+            node.add(subPath.createDebugNode());
         }
-
-        return node;
-    }
-
-    private static DebugNode createSubpathNode(SubPath subPath) {
-        return createSubpathNode("subpath " + subPath.getId(), subPath);
-    }
-
-    private static DebugNode createSubpathNode(String name, SubPath subPath) {
-        var node = new DebugNode(name, subPath);
-
-        node.addString("name", subPath.getId());
-        node.addBoolean("closed", subPath.isClosed());
-        node.addBoolean("finished", subPath.isFinished());
-        node.addBoolean("has moving point", subPath.hasMovingPoint());
 
         return node;
     }

@@ -74,7 +74,7 @@ public class Rotate extends SimpleCompAction {
                 // switch width and height
                 int newWidth = canvas.getHeight();
                 int newHeight = canvas.getWidth();
-                canvas.changeSize(newWidth, newHeight, view);
+                canvas.changeSize(newWidth, newHeight, view, false);
             }
 
             @Override

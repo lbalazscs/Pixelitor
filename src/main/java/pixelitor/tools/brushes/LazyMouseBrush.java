@@ -33,9 +33,7 @@ public class LazyMouseBrush extends BrushDecorator {
     private static final int DEFAULT_DIST = 30;
     private static final int MAX_DIST = 200;
 
-    private static final int MIN_SPACING = 1;
     private static final int DEFAULT_SPACING = 3;
-    private static final int MAX_SPACING = 20;
 
     private double mouseX;
     private double mouseY;
@@ -43,7 +41,6 @@ public class LazyMouseBrush extends BrushDecorator {
     private double drawY;
     private View view;
     private double spacing;
-    private static int defaultSpacing = DEFAULT_SPACING;
 
     // the lazy mouse distance is shared between the tools
     private static int dist = DEFAULT_DIST;
@@ -69,14 +66,10 @@ public class LazyMouseBrush extends BrushDecorator {
         dist2 = value * value;
     }
 
-    private static void setDefaultSpacing(int value) {
-        defaultSpacing = value;
-    }
-
     private void calcSpacing() {
         spacing = delegate.getPreferredSpacing();
         if (spacing == 0) {
-            spacing = defaultSpacing;
+            spacing = DEFAULT_SPACING;
         }
     }
 
@@ -149,13 +142,6 @@ public class LazyMouseBrush extends BrushDecorator {
         RangeParam param = new RangeParam(
             "Distance (px)", MIN_DIST, dist, MAX_DIST);
         param.setAdjustmentListener(() -> setDist(param.getValue()));
-        return param;
-    }
-
-    public static RangeParam createSpacingParam() {
-        RangeParam param = new RangeParam(
-            "Spacing (px)", MIN_SPACING, defaultSpacing, MAX_SPACING);
-        param.setAdjustmentListener(() -> setDefaultSpacing(param.getValue()));
         return param;
     }
 

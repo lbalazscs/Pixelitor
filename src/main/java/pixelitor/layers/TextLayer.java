@@ -33,6 +33,7 @@ import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
@@ -40,7 +41,6 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -376,16 +376,16 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 
-        popup.add(new AbstractAction("Rasterize") {
+        popup.add(new PAction("Rasterize") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 replaceWithRasterized();
             }
         });
 
-        popup.add(new AbstractAction("Selection from Text") {
+        popup.add(new PAction("Selection from Text") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 createSelectionFromText();
             }
         });

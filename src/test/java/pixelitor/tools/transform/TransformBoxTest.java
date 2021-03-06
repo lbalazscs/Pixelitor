@@ -20,6 +20,7 @@ package pixelitor.tools.transform;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -44,6 +45,11 @@ class TransformBoxTest {
         @Override
         public void updateUI(View view) {
             // do nothing
+        }
+
+        @Override
+        public DebugNode createDebugNode() {
+            return new DebugNode("test", null);
         }
     };
 

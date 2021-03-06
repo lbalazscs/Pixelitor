@@ -65,7 +65,7 @@ public class Debug {
         // shouldn't be instantiated
     }
 
-    public static String dateBufferTypeAsString(int type) {
+    public static String dataBufferTypeAsString(int type) {
         return switch (type) {
             case DataBuffer.TYPE_BYTE -> "BYTE";
             case DataBuffer.TYPE_USHORT -> "USHORT";
@@ -263,7 +263,7 @@ public class Debug {
         comp.getActiveDrawableOrThrow().setImage(copy);
 
         if (canvas.hasDifferentSizeThan(copy)) {
-            canvas.changeSize(copy.getWidth(), copy.getHeight(), comp.getView());
+            canvas.changeSize(copy.getWidth(), copy.getHeight(), comp.getView(), true);
         }
 
         comp.repaint();

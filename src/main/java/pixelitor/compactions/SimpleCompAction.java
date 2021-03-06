@@ -73,7 +73,7 @@ public abstract class SimpleCompAction extends OpenImageEnabledAction implements
         History.add(new CompositionReplacedEdit(
             getEditName(), view, oldComp, newComp, canvasAT, false));
         view.replaceComp(newComp);
-        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+        SelectionActions.update(newComp);
 
         Guides guides = oldComp.getGuides();
         if (guides != null) {

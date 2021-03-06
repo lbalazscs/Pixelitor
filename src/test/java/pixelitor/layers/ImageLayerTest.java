@@ -507,7 +507,7 @@ public class ImageLayerTest {
 
         comp.getCanvas().changeSize(
             (int) expectedNewCanvas.getWidth(),
-            (int) expectedNewCanvas.getHeight(), comp.getView());
+            (int) expectedNewCanvas.getHeight(), comp.getView(), true);
         ConsistencyChecks.imageCoversCanvas(layer);
     }
 

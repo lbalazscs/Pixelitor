@@ -38,7 +38,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.FlatteningPathIterator;
@@ -80,16 +79,17 @@ public abstract class AbstractBrushTool extends Tool {
     private SymmetryBrush symmetryBrush;
     protected AffectedArea affectedArea;
 
+    private JButton brushSettingsDialogButton;
     private Action brushSettingsAction;
     private JDialog settingsDialog;
 
     protected DrawDestination drawDestination;
 
     private RangeParam lazyMouseDist;
-    private RangeParam lazyMouseSpacing;
     protected boolean lazyMouse;
     protected LazyMouseBrush lazyMouseBrush;
     private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
+    private JButton showLazyMouseDialogButton;
 
     private int outlineCoX;
     private int outlineCoY;
@@ -165,13 +165,13 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addBrushSettingsButton() {
-        brushSettingsAction = new AbstractAction("Settings...") {
+        brushSettingsAction = new PAction("Settings...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 brushSettingsButtonPressed();
             }
         };
-        settingsPanel.addButton(brushSettingsAction,
+        brushSettingsDialogButton = settingsPanel.addButton(brushSettingsAction,
             "brushSettingsDialogButton", "Configure the selected brush");
 
         brushSettingsAction.setEnabled(false);
@@ -186,18 +186,19 @@ public abstract class AbstractBrushTool extends Tool {
             .withScrollbars()
             .okText(CLOSE_DIALOG)
             .noCancelButton()
+            .parentComponent(brushSettingsDialogButton)
             .show();
     }
 
     protected void addLazyMouseDialogButton() {
-        settingsPanel.addButton("Lazy Mouse...",
+        showLazyMouseDialogButton = settingsPanel.addButton("Lazy Mouse...",
             e -> showLazyMouseDialog(),
             "lazyMouseDialogButton", "Configure brush smoothing");
     }
 
     private void showLazyMouseDialog() {
         if (lazyMouseDialog != null) {
-            GUIUtils.showDialog(lazyMouseDialog);
+            GUIUtils.showDialog(lazyMouseDialog, showLazyMouseDialogButton);
             return;
         }
         var p = new JPanel(new GridBagLayout());
@@ -205,7 +206,8 @@ public abstract class AbstractBrushTool extends Tool {
         var gbh = new GridBagHelper(p);
 
         lazyMouseCB = new JCheckBox("", false);
-        lazyMouseCB.addActionListener(e -> setLazyBrush());
+        // actionListener doesn't react to programmatic setSelected calls
+        lazyMouseCB.addItemListener(e -> setLazyBrush());
         gbh.addLabelAndControlNoStretch("Enabled:", lazyMouseCB);
 
         lazyMouseDist = LazyMouseBrush.createDistParam();
@@ -214,17 +216,8 @@ public abstract class AbstractBrushTool extends Tool {
         distSlider.setEnabled(false);
         gbh.addLabelAndControl(lazyMouseDist.getName() + ":", distSlider);
 
-        lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
-        var spacingSlider = SliderSpinner.from(lazyMouseSpacing);
-        spacingSlider.setEnabled(false);
-        spacingSlider.setName("spacingSlider");
-        gbh.addLabelAndControl(lazyMouseSpacing.getName() + ":", spacingSlider);
-
-        lazyMouseCB.addActionListener(e -> {
-            boolean enable = lazyMouseCB.isSelected();
-            distSlider.setEnabled(enable);
-            spacingSlider.setEnabled(enable);
-        });
+        lazyMouseCB.addActionListener(e ->
+            distSlider.setEnabled(lazyMouseCB.isSelected()));
 
         lazyMouseDialog = new DialogBuilder()
             .content(p)
@@ -233,6 +226,7 @@ public abstract class AbstractBrushTool extends Tool {
             .willBeShownAgain()
             .okText(CLOSE_DIALOG)
             .noCancelButton()
+            .parentComponent(showLazyMouseDialogButton)
             .show();
     }
 
@@ -563,11 +557,17 @@ public abstract class AbstractBrushTool extends Tool {
      * Traces the given shape with the current brush tool
      */
     public void trace(Drawable dr, Shape shape) {
+        boolean wasLazy = lazyMouse;
         try {
+            if (wasLazy) {
+                lazyMouseCB.setSelected(false);
+            }
             doTrace(dr, shape);
             finishBrushStroke(dr);
         } finally {
-            resetInitialState();
+            if (wasLazy) {
+                lazyMouseCB.setSelected(true);
+            }
         }
     }
 
@@ -715,8 +715,6 @@ public abstract class AbstractBrushTool extends Tool {
         if (lazyMouse) {
             sb.append(", (lazy " + UNICODE_MOUSE_SYMBOL + " d=")
                 .append(lazyMouseDist.getValue())
-                .append(", sp=")
-                .append(lazyMouseSpacing.getValue())
                 .append(")");
         } else {
             sb.append(", eager ");

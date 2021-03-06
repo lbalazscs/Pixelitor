@@ -32,7 +32,6 @@ import pixelitor.utils.Rnd;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import static java.awt.Color.BLACK;
@@ -180,9 +179,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initResetDefaultsButton() {
-        resetToDefaultAction = new AbstractAction() {
+        resetToDefaultAction = new PAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 setDefaultColors();
             }
         };
@@ -199,9 +198,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initSwapColorsButton() {
-        swapColorsAction = new AbstractAction() {
+        swapColorsAction = new PAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 swapColors();
             }
         };
@@ -224,9 +223,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initRandomizeButton() {
-        randomizeColorsAction = new AbstractAction() {
+        randomizeColorsAction = new PAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 setFgColor(Rnd.createRandomColor(), false);
                 setBgColor(Rnd.createRandomColor(), true);
             }

@@ -27,7 +27,7 @@ public class HandTool extends Tool {
     private final HandToolSupport handToolSupport = new HandToolSupport();
 
     HandTool() {
-        super("Hand", 'H', "hand_tool_icon.png",
+        super("Hand", 'H', "hand_tool.png",
             "<b>drag</b> to move the view (if there are scrollbars).",
             Cursors.HAND);
     }

@@ -21,7 +21,6 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -84,7 +83,7 @@ public class LayerMaskActions {
         }
     }
 
-    private static class DeleteMaskAction extends AbstractAction {
+    private static class DeleteMaskAction extends PAction {
         private final Layer layer;
 
         public DeleteMaskAction(Layer layer) {
@@ -93,12 +92,12 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             layer.deleteMask(true);
         }
     }
 
-    private static class ApplyMaskAction extends AbstractAction {
+    private static class ApplyMaskAction extends PAction {
         private final Layer layer;
 
         public ApplyMaskAction(Layer layer) {
@@ -107,7 +106,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void onClick() {
             if (!(layer instanceof ImageLayer)) {
                 // actually we should never get here because the popup menu
                 // is enabled only for image layers

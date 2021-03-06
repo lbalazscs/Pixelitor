@@ -2333,11 +2333,9 @@ public class AssertJSwingTest {
             dialog.slider("distSlider")
                 .requireEnabled()
                 .slideToMinimum();
-            dialog.slider("spacingSlider").requireEnabled();
         } else {
             dialog.checkBox().uncheck();
             dialog.slider("distSlider").requireDisabled();
-            dialog.slider("spacingSlider").requireDisabled();
         }
         findButtonByText(dialog, "Close").click();
         dialog.requireNotVisible();

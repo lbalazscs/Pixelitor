@@ -88,11 +88,13 @@ public class Path implements Serializable {
     public Path deepCopy(Composition newComp) {
         Path copy = new Path(newComp, false);
         for (SubPath sp : subPaths) {
-            copy.subPaths.add(sp.deepCopy(copy, newComp));
+            SubPath spCopy = sp.deepCopy(copy, newComp);
+            copy.subPaths.add(spCopy);
+
+            if (sp == activeSubPath) {
+                copy.activeSubPath = spCopy;
+            }
         }
-        int activeIndex = subPaths.indexOf(activeSubPath);
-        assert activeIndex != -1 : "Index of " + activeSubPath + " is -1 in " + this;
-        copy.activeSubPath = copy.subPaths.get(activeIndex);
         return copy;
     }
 

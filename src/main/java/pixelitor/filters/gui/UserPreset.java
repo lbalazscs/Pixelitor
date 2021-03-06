@@ -18,12 +18,12 @@
 package pixelitor.filters.gui;
 
 import pixelitor.colors.Colors;
+import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -157,9 +157,9 @@ public class UserPreset {
     }
 
     public Action asAction(DialogMenuOwner owner) {
-        return new AbstractAction(name) {
+        return new PAction(name) {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 if (!loaded) {
                     try {
                         load();

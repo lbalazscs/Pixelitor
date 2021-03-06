@@ -46,7 +46,11 @@ public class PathTransformer implements PenToolMode {
     private static final String HELP_MESSAGE = "Pen Tool Transform Mode.";
 
     private List<TransformBox> boxes;
+
+    // Null if no box is being dragged.
     private TransformBox draggedBox;
+
+    // The receiver of keyboard nudges. Never null.
     private TransformBox lastActiveBox;
 
     private PathTransformer() {
@@ -87,16 +91,7 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public void compReplaced(Composition newComp) {
-        // the transform boxes store references to
-        // the old subpaths, they need to be updated
-        assert path.getNumSubpaths() == boxes.size();
-        for (int i = 0; i < boxes.size(); i++) {
-            SubPath subPath = path.getSubPath(i);
-            TransformBox box = boxes.get(i);
-            box.replaceOwner(subPath);
-
-            subPath.storeTransformRefPoints();
-        }
+        initBoxes();
     }
 
     @Override
@@ -168,7 +163,6 @@ public class PathTransformer implements PenToolMode {
             boolean contained = false;
             for (TransformBox box : boxes) {
                 if (box.contains(x, y)) {
-                    view.setCursor(MOVE);
                     contained = true;
                     break;
                 }
@@ -198,10 +192,13 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public void modeStarted(PenToolMode prevMode, Path path) {
-        PenToolMode.super.modeStarted(prevMode, path);
-        boxes = path.createTransformBoxes();
+    public void modeStarted(PenToolMode prevMode) {
+        PenToolMode.super.modeStarted(prevMode);
+        initBoxes();
+    }
 
+    private void initBoxes() {
+        boxes = path.createTransformBoxes();
         if (!boxes.isEmpty()) {
             lastActiveBox = boxes.get(0);
         } else {

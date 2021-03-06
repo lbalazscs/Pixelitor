@@ -36,6 +36,7 @@ import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.*;
@@ -141,9 +142,9 @@ public class RandomGUITest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new PAction() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                     stopRunning = true;
                 }
@@ -152,9 +153,9 @@ public class RandomGUITest {
         stopRunning = false;
 
         // This key not only stops the testing, but also exits the app
-        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new PAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                     EXIT_KEY_CHAR);
                 System.exit(1);
@@ -766,19 +767,19 @@ public class RandomGUITest {
 
     private static void traceWithCurrentBrush() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithBrush());
+            runAction(PenTool.getTraceWithBrushAction());
         }
     }
 
     private static void traceWithCurrentEraser() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithEraser());
+            runAction(PenTool.getTraceWithEraserAction());
         }
     }
 
     private static void traceWithCurrentSmudge() {
         if (canTrace()) {
-            runAction(PenTool.getTraceWithSmudge());
+            runAction(PenTool.getTraceWithSmudgeAction());
         }
     }
 

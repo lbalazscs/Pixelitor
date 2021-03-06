@@ -23,6 +23,7 @@ import pixelitor.OpenImages;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.utils.Cursors;
@@ -96,17 +97,17 @@ public class Navigator extends JComponent
         popup = new JPopupMenu();
         ZoomLevel[] levels = {ZoomLevel.Z100, ZoomLevel.Z50, ZoomLevel.Z25, ZoomLevel.Z12};
         for (ZoomLevel level : levels) {
-            popup.add(new AbstractAction("Navigator Zoom: " + level) {
+            popup.add(new PAction("Navigator Zoom: " + level) {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick() {
                     setNavigatorSizeFromZoom(level);
                 }
             });
         }
         popup.addSeparator();
-        popup.add(new AbstractAction("View Box Color...") {
+        popup.add(new PAction("View Box Color...") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 Colors.selectColorWithDialog(Navigator.this,
                     "View Box Color", viewBoxColor, true,
                     Navigator.this::setNewViewBoxColor);

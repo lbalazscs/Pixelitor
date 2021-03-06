@@ -73,10 +73,11 @@ public class Pixelitor {
         if (!Language.isCodeSupported(sysLangCode)) { // except if supported
             Locale.setDefault(Locale.US);
         }
-
         Language.load();
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
+
+//        System.setProperty("sun.java2d.uiScale", "2.0");
 
         if (JVM.isLinux) {
             // doesn't seem to pick up good defaults
@@ -225,14 +226,14 @@ public class Pixelitor {
 
 //        SplashImageCreator.saveManySplashImages();
 
-//        Debug.addTestPath();
-
 //        Debug.keepSwitchingToolsRandomly();
 //        Debug.startFilter(new Marble());
 
 //        Navigator.showInDialog(pw);
 
 //        Tools.PEN.activate();
+//        Debug.addTestPath();
+//        Tools.PEN.startRestrictedMode(PenToolMode.TRANSFORM, false);
 //        Debug.addMaskAndShowIt();
 
 //        Debug.showAddTextLayerDialog();

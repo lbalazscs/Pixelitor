@@ -31,8 +31,10 @@ import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -72,6 +74,10 @@ public class SubPath implements Serializable, Transformable {
 
     private boolean closed = false;
     private boolean finished = false;
+
+    // caching the transform box ensures that its
+    // image-space coordinates are correct after undo
+    private transient TransformBox box;
 
     public SubPath(Path path, Composition comp) {
         assert path != null;
@@ -157,6 +163,12 @@ public class SubPath implements Serializable, Transformable {
 
     public void addToComponentSpaceShape(GeneralPath path) {
         addToShape(path, p -> p.x, p1 -> p1.y);
+    }
+
+    public Shape toComponentSpaceShape() {
+        GeneralPath gp = new GeneralPath();
+        addToComponentSpaceShape(gp);
+        return gp;
     }
 
     public void addToImageSpaceShape(GeneralPath path) {
@@ -595,7 +607,7 @@ public class SubPath implements Serializable, Transformable {
         setFinished(true);
         path.setBuildState(NO_INTERACTION);
         comp.setActivePath(path);
-        Tools.PEN.enableActionsBasedOnFinishedPath(true);
+        Tools.PEN.enableActions(true);
 
         if (addToHistory) {
             History.add(new FinishSubPathEdit(comp, this));
@@ -669,21 +681,30 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public TransformBox createTransformBox() {
+        if (box != null) {
+            return box;
+        }
+        if (isEmpty()) {
+            return null;
+        }
         storeTransformRefPoints();
 
-        GeneralPath gp = new GeneralPath();
-        addToComponentSpaceShape(gp);
+        Shape coShape = toComponentSpaceShape();
 
-        assert ShapeUtils.isValid(gp) : "invalid shape for " + toDetailedString();
+        assert ShapeUtils.isValid(coShape) : "invalid shape for " + toDetailedString();
 
-        Rectangle2D coBoundingBox = gp.getBounds2D();
-
+        Rectangle2D coBoundingBox = coShape.getBounds2D();
         if (coBoundingBox.isEmpty()) {
-            // it can happen that a subpath consists of a single point
+            // it can still be empty if all x or y coordinates are the same
             return null;
         }
 
-        return new TransformBox(coBoundingBox, comp.getView(), this);
+        box = new TransformBox(coBoundingBox, comp.getView(), this);
+        return box;
+    }
+
+    public boolean isEmpty() {
+        return getNumAnchors() < 2;
     }
 
     @Override
@@ -695,7 +716,9 @@ public class SubPath implements Serializable, Transformable {
 
     @Override
     public void updateUI(View view) {
-        assert view.getComp() == comp;
+        assert view.getComp() == comp :
+            "subpath comp = " + comp.getDebugName() +
+                ", view comp = " + view.getComp().getDebugName();
         comp.repaint();
     }
 
@@ -720,6 +743,30 @@ public class SubPath implements Serializable, Transformable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean isActive() {
+        return path.getActiveSubpath() == this;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        String name = isActive() ? "active " : "";
+        name += "subpath " + getId();
+
+        var node = new DebugNode(name, this);
+
+        node.addString("comp debug name", comp.getDebugName());
+        node.addString("name", getId());
+        node.addBoolean("closed", isClosed());
+        node.addBoolean("finished", isFinished());
+        node.addBoolean("has moving point", hasMovingPoint());
+
+        for (AnchorPoint point : anchorPoints) {
+            node.add(point.createDebugNode());
+        }
+
+        return node;
     }
 
     @VisibleForTesting

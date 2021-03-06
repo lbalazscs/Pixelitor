@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tool;
@@ -39,7 +40,6 @@ import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -54,9 +54,8 @@ public class PenTool extends Tool {
     private final ComboBoxModel<PenToolMode> modeModel =
         new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
-    private final AbstractAction toSelectionAction;
-    //    private final AbstractAction traceAction;
-    private final AbstractAction dumpPathAction;
+    private final Action toSelectionAction;
+    private final Action dumpPathAction;
 
     private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
@@ -68,38 +67,39 @@ public class PenTool extends Tool {
 
     private boolean rubberBand = true;
 
-    private static final Action traceWithBrush = new TraceAction(
+    private static final Action traceWithBrushAction = new TraceAction(
         "Stroke with Current Brush", Tools.BRUSH);
-    private static final Action traceWithEraser = new TraceAction(
+    private static final Action traceWithEraserAction = new TraceAction(
         "Stroke with Current Eraser", Tools.ERASER);
-    private static final Action traceWithSmudge = new TraceAction(
+    private static final Action traceWithSmudgeAction = new TraceAction(
         "Stroke with Current Smudge", Tools.SMUDGE);
 
+    private static final Action deletePath = new PAction("Delete Path") {
+        @Override
+        public void onClick() {
+            path.delete();
+        }
+    };
+
     public PenTool() {
-        super("Pen", 'P', "pen_tool_icon.png",
+        super("Pen", 'P', "pen_tool.png",
             "", // getStatusBarMessage() is overridden
             Cursors.DEFAULT);
 
-        toSelectionAction = new AbstractAction("Convert to Selection") {
+        toSelectionAction = new PAction("Convert to Selection") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 convertToSelection();
             }
         };
-//        traceAction = new AbstractAction("Trace...") {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                TracePathPanel.showInDialog(path);
-//            }
-//        };
-        dumpPathAction = new AbstractAction("Dump") {
+        dumpPathAction = new PAction("Dump") {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void onClick() {
                 assert hasPath();
                 path.dump();
             }
         };
-        enableActionsBasedOnFinishedPath(false);
+        enableActions(false);
     }
 
     @Override
@@ -121,12 +121,14 @@ public class PenTool extends Tool {
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
 
-        settingsPanel.addButton(traceWithBrush, "traceWithBrush",
+        settingsPanel.addButton(traceWithBrushAction, "traceWithBrush",
             "Stroke the path using the current settings of the Brush Tool");
-        settingsPanel.addButton(traceWithEraser, "traceWithEraser",
+        settingsPanel.addButton(traceWithEraserAction, "traceWithEraser",
             "Stroke the path using the current settings of the Eraser Tool");
-        settingsPanel.addButton(traceWithSmudge, "traceWithSmudge",
+        settingsPanel.addButton(traceWithSmudgeAction, "traceWithSmudge",
             "Stroke the path using the current settings of the Smudge Tool");
+        settingsPanel.addButton(deletePath, "deletePath",
+            "Delete the path");
 
         if (AppContext.isDevelopment()) {
             settingsPanel.addButton(dumpPathAction, "dumpPathAction", "");
@@ -160,7 +162,7 @@ public class PenTool extends Tool {
             ignoreModeChooser = false;
         }
         changeMode(BUILD, path);
-        enableActionsBasedOnFinishedPath(hasPath());
+        enableActions(hasPath());
         OpenImages.repaintActive();
 
         assert checkPathConsistency();
@@ -196,7 +198,7 @@ public class PenTool extends Tool {
         }
 
         changeMode(mode, path);
-        enableActionsBasedOnFinishedPath(true);
+        enableActions(true);
         OpenImages.repaintActive();
 
         assert checkPathConsistency();
@@ -207,7 +209,7 @@ public class PenTool extends Tool {
     private void changeMode(PenToolMode mode, Path path) {
         if (this.mode != mode) {
             this.mode.modeEnded();
-            mode.modeStarted(this.mode, path);
+            mode.modeStarted(this.mode);
         }
         this.mode = mode;
 
@@ -327,7 +329,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+    public void compReplaced(Composition newComp, boolean reloaded) {
         if (newComp.isActive()) {
             // reloading is asynchronous, the view might not be active anymore
             setPathFromComp(newComp);
@@ -358,7 +360,7 @@ public class PenTool extends Tool {
             assert path == null;
         }
 
-        mode.modeStarted(null, path);
+        mode.modeStarted(null);
 
         assert checkPathConsistency();
     }
@@ -399,7 +401,7 @@ public class PenTool extends Tool {
             }
             comp.repaint();
         }
-        enableActionsBasedOnFinishedPath(path != null);
+        enableActions(path != null);
     }
 
     private void setNullPath() {
@@ -426,7 +428,7 @@ public class PenTool extends Tool {
     public void removePath() {
         OpenImages.setActivePath(null);
         setNullPath();
-        enableActionsBasedOnFinishedPath(false);
+        enableActions(false);
     }
 
     @Override
@@ -438,14 +440,15 @@ public class PenTool extends Tool {
     }
 
     // TODO enable them while building, as soon as the path != null
-    public void enableActionsBasedOnFinishedPath(boolean b) {
+    public void enableActions(boolean b) {
         toSelectionAction.setEnabled(b);
 
-        traceWithBrush.setEnabled(b);
-        traceWithEraser.setEnabled(b);
-        traceWithSmudge.setEnabled(b);
+        traceWithBrushAction.setEnabled(b);
+        traceWithEraserAction.setEnabled(b);
+        traceWithSmudgeAction.setEnabled(b);
 //        traceAction.setEnabled(b);
 
+        deletePath.setEnabled(b);
         dumpPathAction.setEnabled(b);
     }
 
@@ -462,16 +465,16 @@ public class PenTool extends Tool {
         return path != null;
     }
 
-    public static Action getTraceWithBrush() {
-        return traceWithBrush;
+    public static Action getTraceWithBrushAction() {
+        return traceWithBrushAction;
     }
 
-    public static Action getTraceWithEraser() {
-        return traceWithEraser;
+    public static Action getTraceWithEraserAction() {
+        return traceWithEraserAction;
     }
 
-    public static Action getTraceWithSmudge() {
-        return traceWithSmudge;
+    public static Action getTraceWithSmudgeAction() {
+        return traceWithSmudgeAction;
     }
 
     @Override

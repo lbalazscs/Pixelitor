@@ -53,6 +53,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private State state = NO_SOURCE;
     private boolean sampleAllLayers = false;
+
+    private JButton showTransformDialogButton;
     private JDialog transformDialog;
 
     private CloneBrush cloneBrush;
@@ -65,7 +67,7 @@ public class CloneTool extends BlendingModeBrushTool {
         "Mirror", Mirror.class);
 
     protected CloneTool() {
-        super("Clone Stamp", 'S', "clone_tool_icon.png",
+        super("Clone Stamp", 'S', "clone_tool.png",
             "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
                 "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
             Cursors.CROSSHAIR, false);
@@ -87,7 +89,8 @@ public class CloneTool extends BlendingModeBrushTool {
             "sampleAllLayersCB", selected -> sampleAllLayers = selected);
 
         settingsPanel.addSeparator();
-        settingsPanel.addButton("Transform...", e -> transformButtonPressed(),
+        showTransformDialogButton = settingsPanel.addButton("Transform...",
+            e -> transformButtonPressed(),
             "transformButton", "Transform while cloning");
         addLazyMouseDialogButton();
     }
@@ -100,6 +103,7 @@ public class CloneTool extends BlendingModeBrushTool {
             .notModal()
             .okText(CLOSE_DIALOG)
             .noCancelButton()
+            .parentComponent(showTransformDialogButton)
             .show();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tools;
+import pixelitor.utils.debug.CompositionNode;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -160,5 +162,15 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         backupCompRef = null;
         view = null;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+        Composition backupComp = backupCompRef.get();
+        if (backupComp != null) {
+            node.add(new CompositionNode("backup comp", backupComp));
+        }
+        return node;
     }
 }

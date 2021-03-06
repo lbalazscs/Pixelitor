@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,7 +108,7 @@ public class Resize implements CompAction {
         newComp.imCoordsChanged(canvasTransform, false);
 
         View view = newComp.getView();
-        newCanvas.changeSize(newCanvasSize.width, newCanvasSize.height, view);
+        newCanvas.changeSize(newCanvasSize.width, newCanvasSize.height, view, false);
 
         History.add(new CompositionReplacedEdit("Resize",
             view, oldComp, newComp, canvasTransform, false));
@@ -117,7 +117,7 @@ public class Resize implements CompAction {
         // the view was active when the resize started, but since the
         // resize was asynchronous, this could have changed
         if (view.isActive()) {
-            SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+            SelectionActions.update(newComp);
         }
 
         Guides oldGuides = oldComp.getGuides();

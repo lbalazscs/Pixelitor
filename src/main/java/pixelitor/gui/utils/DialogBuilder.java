@@ -54,6 +54,7 @@ public class DialogBuilder {
     private boolean modal = true;
     private boolean disposeWhenClosing = true;
     private Screens.Align align = SCREEN_CENTER;
+    private JComponent parent;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -203,6 +204,11 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder parentComponent(JComponent c) {
+        parent = c;
+        return this;
+    }
+
     public JButton getOkButton() {
         return okButton;
     }
@@ -216,7 +222,12 @@ public class DialogBuilder {
         }
 
         JDialog d = build();
-        GUIUtils.showDialog(d, align);
+        if (parent != null) {
+            GUIUtils.showDialog(d, parent);
+        } else {
+            GUIUtils.showDialog(d, align);
+        }
+
         return d;
     }
 

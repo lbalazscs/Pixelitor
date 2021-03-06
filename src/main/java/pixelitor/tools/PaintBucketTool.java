@@ -63,7 +63,7 @@ public class PaintBucketTool extends Tool {
 
     public PaintBucketTool() {
         super("Paint Bucket", 'N',
-            "paint_bucket_tool_icon.png",
+            "paint_bucket_tool.png",
             "<b>click</b> to fill with the selected color.",
             Cursors.DEFAULT);
     }
