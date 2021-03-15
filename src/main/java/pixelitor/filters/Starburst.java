@@ -24,16 +24,20 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Rnd;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -42,22 +46,12 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class Starburst extends ParametrizedFilter {
     public static final String NAME = "Starburst";
 
-    private static final int BG_BLACK = 1;
-    private static final int BG_ORIGINAL = 2;
-    private static final int BG_TRANSPARENT = 3;
-    private static final int BG_TOOL = 4;
-
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final IntChoiceParam background = new IntChoiceParam("Background", new IntChoiceParam.Item[]{
-        new IntChoiceParam.Item("Black", BG_BLACK),
-        new IntChoiceParam.Item("Original Image", BG_ORIGINAL),
-        new IntChoiceParam.Item("Transparent", BG_TRANSPARENT),
-        new IntChoiceParam.Item("Tool Background", BG_TOOL),
-    }, IGNORE_RANDOMIZE);
+    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
 
-    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, NO_TRANSPARENCY);
+    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final BooleanParam randomColors = new BooleanParam("Random Ray Colors", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
@@ -69,7 +63,7 @@ public class Starburst extends ParametrizedFilter {
 
         setParams(
             numberOfRaysParam,
-            background,
+            bgColor,
             raysColor,
             randomColors.withAction(reseedColorsAction),
             center,
@@ -89,33 +83,30 @@ public class Starburst extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         Random rand = ReseedSupport.reInitialize();
 
-        int bg = background.getValue();
-        if (bg == BG_ORIGINAL) {
-            dest = ImageUtils.copyImage(src);
-        } else {
-            dest = ImageUtils.createImageWithSameCM(src);
-        }
+        dest = ImageUtils.copyImage(src);
 
         int width = dest.getWidth();
         int height = dest.getHeight();
 
         Graphics2D g = dest.createGraphics();
-        if (bg != BG_ORIGINAL) {
-            if (bg == BG_BLACK) {
-                Colors.fillWith(Color.BLACK, g, width, height);
-            } else if (bg == BG_TOOL) {
-                Colors.fillWith(FgBgColors.getBGColor(), g, width, height);
-            }
-        }
+        Colors.fillWith(bgColor.getColor(), g, width, height);
 
         float cx = width * center.getRelativeX();
         float cy = height * center.getRelativeY();
+        boolean useRandomColors = randomColors.isChecked();
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setColor(raysColor.getColor());
+        if (useRandomColors) {
+            // still use the alpha of the selected color
+            int alpha = raysColor.getColor().getAlpha();
+            if (alpha != 255) {
+                g.setComposite(AlphaComposite.getInstance(SRC_OVER, alpha / 255.0f));
+            }
+        } else {
+            g.setColor(raysColor.getColor());
+        }
 
         int numberOfRays = numberOfRaysParam.getValue();
-        boolean useRandomColors = randomColors.isChecked();
 
         double averageRayAngle = Math.PI / numberOfRays;
         double angle = rotate.getValueInRadians();
