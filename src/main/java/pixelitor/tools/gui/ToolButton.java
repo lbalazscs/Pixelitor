@@ -43,7 +43,7 @@ public class ToolButton extends JToggleButton {
 
         Icon icon;
         if (tool == Tools.SMUDGE) {
-            icon = Icons.load("smudge_tool.png",
+            icon = Icons.loadMultiRes("smudge_tool.png",
                 "smudge_tool_2x.png");
         } else {
             icon = Icons.load(tool.getIconFileName());

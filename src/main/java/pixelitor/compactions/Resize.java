@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.utils.Threads.*;
 
 /**
@@ -133,7 +133,7 @@ public class Resize implements CompAction {
         // changed or if it was resized to a very small size
         newComp.updateAllIconImages();
 
-        newComp.imageChanged(REPAINT, true);
+        newComp.update(REPAINT, true);
         newComp.getView().revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();

@@ -59,12 +59,12 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
     private void swapTextSettings() {
         TextSettings tmp = layer.getSettings();
-        layer.setSettings(backupSettings);
+        layer.applySettings(backupSettings);
         backupSettings = tmp;
 
         layer.updateLayerName();
 
-        layer.getComp().imageChanged();
+        layer.getComp().update();
     }
 
     @Override

@@ -172,7 +172,8 @@ public class OpenImages {
         var comp = view.getComp();
         setActiveView(view, false);
         SelectionActions.update(comp);
-        view.activateUI(true);
+        view.getViewContainer().select();
+        view.showLayersUI();
 
         for (ViewActivationListener listener : activationListeners) {
             listener.viewActivated(oldView, view);
@@ -548,12 +549,6 @@ public class OpenImages {
 
         // there is no open image
         return null;
-    }
-
-    public static void onActiveSelection(Consumer<Selection> action) {
-        if (activeView != null) {
-            activeView.getComp().onSelection(action);
-        }
     }
 
     public static Path getActivePath() {

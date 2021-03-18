@@ -540,10 +540,6 @@ public class TransformBox implements ToolWidget {
         cursorOffset = calcCursorOffset(angleDegrees);
     }
 
-    public double getAngle() {
-        return angle;
-    }
-
     public int getAngleDegrees() {
         return angleDegrees;
     }

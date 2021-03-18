@@ -95,7 +95,7 @@ public class TranslationEdit extends PixelitorEdit {
         backupTy = tmpTy;
 
         if (!embedded) {
-            layer.getComp().imageChanged();
+            layer.getComp().update();
         }
     }
 

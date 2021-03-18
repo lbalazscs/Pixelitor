@@ -47,10 +47,6 @@ public class HueSatPaletteConfig implements PaletteConfig {
         return saturation;
     }
 
-    public void setSaturation(float saturation) {
-        this.saturation = saturation;
-    }
-
     @Override
     public JPanel createConfigPanel(PalettePanel palettePanel) {
         var p = new JPanel(new GridBagLayout());

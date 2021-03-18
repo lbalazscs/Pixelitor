@@ -354,7 +354,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     public void dragFinished(int newLayerIndex) {
-        layer.reorderingFinished(newLayerIndex);
+        layer.changeStackIndex(newLayerIndex);
     }
 
     public Layer getLayer() {

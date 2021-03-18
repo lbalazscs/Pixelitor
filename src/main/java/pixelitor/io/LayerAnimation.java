@@ -20,11 +20,8 @@ package pixelitor.io;
 import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
-import pixelitor.utils.ImageUtils;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -39,38 +36,25 @@ public class LayerAnimation {
 
     public LayerAnimation(Composition comp, int delayMillis, boolean pingPong) {
         this.delayMillis = delayMillis;
-        addComposition(comp, pingPong);
-    }
 
-    private void addComposition(Composition comp, boolean pingPong) {
         int numLayers = comp.getNumLayers();
         for (int i = 0; i < numLayers; i++) {
-            addLayerToAnimation(comp, i);
+            addLayer(comp, i);
         }
         if (pingPong && numLayers > 2) {
             for (int i = numLayers - 2; i > 0; i--) {
-                addLayerToAnimation(comp, i);
+                addLayer(comp, i);
             }
         }
     }
 
-    private void addLayerToAnimation(Composition comp, int layerIndex) {
+    private void addLayer(Composition comp, int layerIndex) {
         Layer layer = comp.getLayer(layerIndex);
-        if (layer instanceof AdjustmentLayer) {
+        BufferedImage image = layer.asImage(true);
+        if (image == null) {
             return;
         }
-        BufferedImage image = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-        Graphics2D g = image.createGraphics();
-
-        // using this takes care of masks, translations
-        BufferedImage returned = layer.applyLayer(g, image, true);
-
-        g.dispose();
-        if (returned != null) {
-            images.add(returned);
-        } else {
-            images.add(image);
-        }
+        images.add(image);
     }
 
     private void export(File f) {

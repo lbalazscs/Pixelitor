@@ -123,6 +123,16 @@ public class TextLayerTest {
         }
     }
 
+//    @Test
+//    public void createSelectionFromText() {
+//        assertThat(comp).doesNotHaveSelection();
+//
+//        layer.createSelectionFromText();
+//
+//        assertThat(comp).hasSelection();
+//        iconUpdates.check(0, 0);
+//    }
+
     @Test
     public void enlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
@@ -146,7 +156,7 @@ public class TextLayerTest {
         String newText = "New Text";
         TextSettings newSettings = new TextSettings(oldSettings);
         newSettings.setText(newText);
-        layer.setSettings(newSettings);
+        layer.applySettings(newSettings);
 
         layer.commitSettings(oldSettings);
 

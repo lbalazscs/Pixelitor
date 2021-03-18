@@ -30,10 +30,6 @@ public class LayerButtonFixture extends JToggleButtonFixture {
         super(robot, target);
     }
 
-    public LayerButtonFixture(Robot robot, String toggleButtonName) {
-        super(robot, toggleButtonName);
-    }
-
     public void setOpenEye(boolean b) {
         EDT.run(() -> ((LayerButton) target()).setOpenEye(b));
         robot().waitForIdle();

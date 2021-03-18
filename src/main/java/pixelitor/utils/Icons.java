@@ -63,7 +63,7 @@ public final class Icons {
         return new ImageIcon(imgURL);
     }
 
-    public static Icon load(String baseIconFileName, String bigIconFileName) {
+    public static Icon loadMultiRes(String baseIconFileName, String bigIconFileName) {
         try {
             URL imgURL1 = ImageUtils.imagePathToURL(baseIconFileName);
             BufferedImage img1 = ImageIO.read(imgURL1);

@@ -118,18 +118,6 @@ public class JHDropShadow extends ParametrizedFilter {
         return dest;
     }
 
-    public void setSoftness(int newSoftness) {
-        softness.setValue(newSoftness);
-    }
-
-    public void setDistance(int newDistance) {
-        distance.setValue(newDistance);
-    }
-
-    public void setOpacity(float newValue) {
-        opacity.setValue((int) (100 * newValue));
-    }
-
     @Override
     public boolean supportsGray() {
         return false;

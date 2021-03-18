@@ -68,8 +68,8 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public Layer duplicate(boolean compCopy) {
-        return new SmartObject(comp, name);
+    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+        return new SmartObject(comp, duplicateName);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public BufferedImage getRepresentingImage() {
-        throw new UnsupportedOperationException();
+    public BufferedImage asImage(boolean applyMask) {
+        return null;
     }
 }

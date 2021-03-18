@@ -816,8 +816,8 @@ public class RandomGUITest {
         switch (r) {
             case 0 -> moveActiveLayerToTop(comp);
             case 1 -> moveActiveLayerToBottom(comp);
-            case 2 -> moveLayerSelectionUp(comp);
-            case 3 -> moveLayerSelectionDown(comp);
+            case 2 -> raiseLayerSelection(comp);
+            case 3 -> lowerLayerSelection(comp);
             case 4 -> moveActiveLayerUp(comp);
             case 5 -> moveActiveLayerDown(comp);
             default -> throw new IllegalStateException("Unexpected value: " + r);
@@ -834,14 +834,14 @@ public class RandomGUITest {
         comp.moveActiveLayerToBottom();
     }
 
-    private static void moveLayerSelectionUp(Composition comp) {
-        log("layer order change: selection up");
-        comp.moveLayerSelectionUp();
+    private static void raiseLayerSelection(Composition comp) {
+        log("layer selection change: raise selection");
+        comp.raiseLayerSelection();
     }
 
-    private static void moveLayerSelectionDown(Composition comp) {
-        log("layer order change: selection down");
-        comp.moveLayerSelectionDown();
+    private static void lowerLayerSelection(Composition comp) {
+        log("layer selection change: lower selection");
+        comp.lowerLayerSelection();
     }
 
     private static void moveActiveLayerUp(Composition comp) {

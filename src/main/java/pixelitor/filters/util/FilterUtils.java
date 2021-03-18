@@ -25,7 +25,10 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.util.Comparator.comparing;
@@ -73,16 +76,6 @@ public class FilterUtils {
         } while (!conditions.test(filterAction.getFilter()));
 
         return filterAction.getFilter();
-    }
-
-    public static Filter[] getFiltersShuffled(Predicate<Filter> predicate) {
-        // used only in test code, no problem if all filters are instantiated
-        Filter[] filters = allFilters.stream()
-            .map(FilterAction::getFilter)
-            .filter(predicate).toArray(Filter[]::new);
-
-        Collections.shuffle(Arrays.asList(filters));
-        return filters;
     }
 
     public static void setLastFilter(Filter lastFilter) {

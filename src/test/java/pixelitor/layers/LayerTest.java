@@ -267,9 +267,9 @@ public class LayerTest {
     }
 
     @Test
-    public void reorderingFinished() {
+    public void changeStackIndex() {
         assertThat(comp.getLayerIndex(layer)).isEqualTo(0);
-        layer.reorderingFinished(1);
+        layer.changeStackIndex(1);
         assertThat(comp.getLayerIndex(layer)).isEqualTo(1);
         iconUpdates.check(0, 0);
     }

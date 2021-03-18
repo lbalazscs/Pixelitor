@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,6 @@ import java.awt.image.BufferedImage;
  * A debugging node for an ImageLayer
  */
 public class ImageLayerNode extends ContentLayerNode {
-    public ImageLayerNode(ImageLayer layer) {
-        this("Image Layer", layer);
-    }
-
     public ImageLayerNode(String name, ImageLayer layer) {
         super(name, layer);
 

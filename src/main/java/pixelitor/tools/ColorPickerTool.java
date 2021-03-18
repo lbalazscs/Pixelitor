@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
@@ -76,18 +77,19 @@ public class ColorPickerTool extends Tool {
 
         BufferedImage img;
         boolean isGray = false;
+        Composition comp = view.getComp();
         if (sampleLayerOnly.isSelected()) {
-            if (!view.activeIsDrawable()) {
+            Drawable dr = comp.getActiveDrawable();
+            if (dr == null) {
                 return;
             }
-            Drawable dr = view.getComp().getActiveDrawable();
             img = dr.getImage();
             isGray = img.getType() == TYPE_BYTE_GRAY;
 
             x -= dr.getTx();
             y -= dr.getTy();
         } else {
-            img = view.getComp().getCompositeImage();
+            img = comp.getCompositeImage();
         }
         int imgWidth = img.getWidth();
         int imgHeight = img.getHeight();

@@ -61,8 +61,8 @@ import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
-import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.LayerAdder.Position.*;
+import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.Utils.createCopyName;
@@ -504,7 +504,7 @@ public class Composition implements Serializable {
                 Layers.numLayersChanged(this, layerList.size());
             }
 
-            imageChanged();
+            update();
         }
     }
 
@@ -593,10 +593,6 @@ public class Composition implements Serializable {
 
     public int getNumImageLayers() {
         return getNumLayers(layer -> layer instanceof ImageLayer);
-    }
-
-    public int getNumTextLayers() {
-        return getNumLayers(layer -> layer instanceof TextLayer);
     }
 
     public void forEachLayer(Consumer<Layer> action) {
@@ -703,7 +699,7 @@ public class Composition implements Serializable {
                 selection.moveWhileDragging(relImX, relImY);
             }
         }
-        imageChanged();
+        update();
     }
 
     public void endMovement(MoveMode mode) {
@@ -726,7 +722,7 @@ public class Composition implements Serializable {
             layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
         if (combinedEdit != null) {
             History.add(combinedEdit);
-            imageChanged();
+            update();
         }
     }
 
@@ -778,7 +774,8 @@ public class Composition implements Serializable {
         changeLayerOrder(oldIndex, newIndex, false, null);
     }
 
-    public void changeLayerOrder(int oldIndex, int newIndex, boolean addToHistory, String editName) {
+    public void changeLayerOrder(int oldIndex, int newIndex,
+                                 boolean addToHistory, String editName) {
         if (newIndex < 0) {
             return;
         }
@@ -794,7 +791,7 @@ public class Composition implements Serializable {
         layerList.add(newIndex, layer);
 
         view.changeLayerButtonOrder(oldIndex, newIndex);
-        imageChanged();
+        update();
         Layers.layerOrderChanged(this);
 
         if (addToHistory) {
@@ -802,26 +799,28 @@ public class Composition implements Serializable {
         }
     }
 
-    public void moveLayerSelectionUp() {
+    public void raiseLayerSelection() {
         int oldIndex = layerList.indexOf(activeLayer);
 
         int newIndex = oldIndex + 1;
         if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layerList.get(newIndex), true, LayerMoveAction.RAISE_LAYER_SELECTION);
+        setActiveLayer(layerList.get(newIndex), true,
+            LayerMoveAction.RAISE_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
 
-    public void moveLayerSelectionDown() {
+    public void lowerLayerSelection() {
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = oldIndex - 1;
         if (newIndex < 0) {
             return;
         }
 
-        setActiveLayer(layerList.get(newIndex), true, LayerMoveAction.LOWER_LAYER_SELECTION);
+        setActiveLayer(layerList.get(newIndex), true,
+            LayerMoveAction.LOWER_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
@@ -905,6 +904,15 @@ public class Composition implements Serializable {
         }
     }
 
+    private void paintSelectionAsMarchingAnts(Graphics2D g) {
+        if (builtSelection != null) {
+            builtSelection.paintMarchingAnts(g);
+        }
+        if (selection != null) {
+            selection.paintMarchingAnts(g);
+        }
+    }
+
     private void paintSelectionAsRubyOverlay(Graphics2D g) {
         Shape totalShape = calcTotalSelectionShape();
         if (totalShape != null) {
@@ -931,15 +939,6 @@ public class Composition implements Serializable {
         return totalShape;
     }
 
-    private void paintSelectionAsMarchingAnts(Graphics2D g) {
-        if (builtSelection != null) {
-            builtSelection.paintMarchingAnts(g);
-        }
-        if (selection != null) {
-            selection.paintMarchingAnts(g);
-        }
-    }
-
     public DeselectEdit deselect(boolean addToHistory) {
         if (builtSelection != null) {
             builtSelection.die();
@@ -948,7 +947,10 @@ public class Composition implements Serializable {
 
         DeselectEdit edit = null;
         if (selection != null) {
-            edit = createDeselectEdit();
+            Shape shape = selection.getShape();
+            if (shape != null) { // null for a simple click without a previous selection
+                edit = new DeselectEdit(this, shape);
+            }
             if (addToHistory && edit != null) {
                 History.add(edit);
             }
@@ -965,25 +967,7 @@ public class Composition implements Serializable {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
-        if (AppContext.isDevelopment() && isActive()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(this);
-        }
         return edit;
-    }
-
-    private DeselectEdit createDeselectEdit() {
-        DeselectEdit edit = null;
-        Shape shape = selection.getShape();
-        if (shape != null) { // for a simple click without a previous selection this is null
-            edit = new DeselectEdit(this, shape);
-        }
-        return edit;
-    }
-
-    public void onSelection(Consumer<Selection> action) {
-        if (selection != null) {
-            action.accept(selection);
-        }
     }
 
     public Selection getSelection() {
@@ -1039,15 +1023,15 @@ public class Composition implements Serializable {
             selection.setHidden(false, false);
             edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);
         } else { // no existing selection
-            createSelectionFrom(newShape);
+            setSelectionRef(new Selection(newShape, view));
             edit = new NewSelectionEdit(this, selection.getShape());
         }
         return edit;
     }
 
     /**
-     * This should be called only if it can be assumed that there is
-     * no existing selection. Otherwise use changeSelection
+     * A shortcut for creating a selection without history.
+     * It assumes that there is no existing selection.
      */
     public void createSelectionFrom(Shape shape) {
         if (selection != null) {
@@ -1069,6 +1053,9 @@ public class Composition implements Serializable {
         }
     }
 
+    /**
+     * Promote a "built selection" into a final one.
+     */
     public void promoteSelection() {
         assert selection == null || !selection.isAlive() : "selection = " + selection;
         assert builtSelection != null;
@@ -1086,14 +1073,6 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Returns true if visually there are marching ants,
-     * even if the selection is not yet finished
-     */
-    public boolean showsSelection() {
-        return selection != null || builtSelection != null;
-    }
-
-    /**
      * Sets the clip area on the given graphics according to the selection.
      * It is assumed that the graphics is relative to the canvas:
      * if it is coming from the image of an ImageLayer, then it must be
@@ -1101,8 +1080,7 @@ public class Composition implements Serializable {
      */
     public void applySelectionClipping(Graphics2D g2) {
         if (selection != null) {
-            Shape shape = selection.getShape();
-            g2.setClip(shape);
+            g2.setClip(selection.getShape());
         }
     }
 
@@ -1111,7 +1089,7 @@ public class Composition implements Serializable {
             Shape backupShape = selection.getShape();
             Shape inverted = canvas.invertShape(backupShape);
             if (inverted.getBounds2D().isEmpty()) {
-                // presumably everything was selected, and now nothing is
+                // everything was selected, and now nothing is
                 deselect(true);
             } else {
                 selection.setShape(inverted);
@@ -1126,7 +1104,7 @@ public class Composition implements Serializable {
      * The selection is not translated here into the coordinate
      * system of the new, cropped image.
      */
-    public void cropSelection(Rectangle2D cropRect) {
+    public void intersectSelection(Rectangle2D cropRect) {
         if (selection != null) {
             Shape currentShape = selection.getShape();
             Shape intersection = ShapeCombination.INTERSECT.combine(currentShape, cropRect);
@@ -1139,7 +1117,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void createSelectionFromTextLayer() {
+    public void createSelectionFromText() {
         if (activeLayer instanceof TextLayer) {
             TextLayer textLayer = (TextLayer) activeLayer;
             textLayer.createSelectionFromText();
@@ -1149,7 +1127,8 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Called when the image-space coordinates have changed (resize, crop, etc.)
+     * Called when the image-space coordinates have been changed by the
+     * given transform (resize, crop, etc.)
      */
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
         // The selection is explicitly reset to a backup shape
@@ -1187,19 +1166,26 @@ public class Composition implements Serializable {
         return compositeImage;
     }
 
-    public void imageChanged() {
-        imageChanged(FULL);
+    private void invalidateCompositeCache() {
+        if (compositeImage != null) {
+            compositeImage.flush();
+        }
+        compositeImage = null;
     }
 
-    public void imageChanged(ImageChangeActions actions) {
-        imageChanged(actions, false);
+    public void update() {
+        update(FULL);
+    }
+
+    public void update(UpdateActions actions) {
+        update(actions, false);
     }
 
     /**
-     * The contents of this composition have been changed, the cache is invalidated,
-     * and additional actions might be necessary
+     * Signals that the contents of this composition have been changed:
+     * the cache is invalidated, and additional actions might be necessary
      */
-    public void imageChanged(ImageChangeActions actions, boolean sizeChanged) {
+    public void update(UpdateActions actions, boolean sizeChanged) {
         invalidateCompositeCache();
 
         if (actions.repaintNeeded()) {
@@ -1214,33 +1200,13 @@ public class Composition implements Serializable {
         }
     }
 
-    private void invalidateCompositeCache() {
-        if (compositeImage != null) {
-            compositeImage.flush();
-        }
-        compositeImage = null;
-    }
-
     public boolean isActive() {
         return OpenImages.activeCompIs(this);
     }
 
-    @VisibleForTesting
-    public Rectangle getMaxImageSize() {
-        Rectangle max = new Rectangle(0, 0, 0, 0);
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                Rectangle layerBounds = imageLayer.getContentBounds();
-                max.add(layerBounds);
-            }
-        }
-        return max;
-    }
-
     /**
      * Useful for testing, but not exposed in the UI, because
-     * it can create multiple undo events instead of just one
+     * it could create multiple undo events instead of just one.
      */
     @VisibleForTesting
     public void allImageLayersToCanvasSize() {
@@ -1280,13 +1246,10 @@ public class Composition implements Serializable {
         enlargeCanvas.process(this);
     }
 
-    /**
-     * The user reordered the layers by dragging
-     */
-    public void layerReorderingFinished(Layer layer, int newIndex) {
+    public void changeStackIndex(Layer layer, int newIndex) {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
-        imageChanged();
+        update();
     }
 
     // called from assertions and unit tests
@@ -1440,17 +1403,17 @@ public class Composition implements Serializable {
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                imageLayer.changeMode(newMode);
+                imageLayer.convertMode(newMode);
             }
         }
-        imageChanged();
+        update();
     }
 
     public ImageMode getMode() {
         return mode;
     }
 
-    public enum ImageChangeActions {
+    public enum UpdateActions {
         INVALIDATE_CACHE(false, false) {
         }, REPAINT(true, false) {
         }, HISTOGRAM(false, true) {
@@ -1460,7 +1423,7 @@ public class Composition implements Serializable {
         private final boolean repaint;
         private final boolean updateHistogram;
 
-        ImageChangeActions(boolean repaint, boolean updateHistogram) {
+        UpdateActions(boolean repaint, boolean updateHistogram) {
             this.repaint = repaint;
             this.updateHistogram = updateHistogram;
         }
@@ -1585,7 +1548,7 @@ public class Composition implements Serializable {
                 comp.setDirty(true);
 
                 if (refresh) {
-                    comp.imageChanged();
+                    comp.update();
                 }
             }
             if (needsHistory()) {

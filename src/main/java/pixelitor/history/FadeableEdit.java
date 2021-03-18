@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
  */
 public abstract class FadeableEdit extends PixelitorEdit {
     private final Drawable fadingLayer;
-    private boolean died = false;  // the variable "alive" in AbstractUndoableEdit is private...
 
     // actually some ImageEdits are possibly not fadeable
     protected boolean fadeable = true;
@@ -37,17 +36,6 @@ public abstract class FadeableEdit extends PixelitorEdit {
     }
 
     public abstract BufferedImage getBackupImage();
-
-    @Override
-    public void die() {
-        super.die();
-
-        died = true;
-    }
-
-    public boolean isAlive() {
-        return !died;
-    }
 
     public boolean isFadeable() {
         return fadeable;

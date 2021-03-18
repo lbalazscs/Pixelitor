@@ -166,7 +166,7 @@ public class PaintBucketTool extends Tool {
                 g.dispose();
                 workingImage.flush();
             }
-            comp.imageChanged();
+            comp.update();
             dr.updateIconImage();
         }
     }

@@ -46,7 +46,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.geom.PathIterator.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+import static pixelitor.Composition.UpdateActions.HISTOGRAM;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
@@ -370,7 +370,7 @@ public abstract class AbstractBrushTool extends Tool {
         drawDestination.finishBrushStroke(dr);
 
         dr.updateIconImage();
-        dr.getComp().imageChanged(HISTOGRAM);
+        dr.getComp().update(HISTOGRAM);
     }
 
     private void addBrushStrokeToHistory(Drawable dr) {

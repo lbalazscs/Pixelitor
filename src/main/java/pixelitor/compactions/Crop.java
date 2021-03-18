@@ -41,7 +41,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.UpdateActions.FULL;
 
 /**
  * A cropping action on all layers of a composition
@@ -99,7 +99,7 @@ public class Crop implements CompAction {
         if (!selectionCrop) {
             // if this crop was started from the crop tool, there
             // still could be a selection that needs to be cropped
-            newComp.cropSelection(cropRect);
+            newComp.intersectSelection(cropRect);
         }
 
         newComp.forEachLayer(layer -> {
@@ -140,7 +140,7 @@ public class Crop implements CompAction {
         newComp.updateAllIconImages();
         SelectionActions.update(newComp);
 
-        newComp.imageChanged(FULL, true);
+        newComp.update(FULL, true);
 
         Messages.showInStatusBar(format(
             "<b>%s</b> was cropped to %d x %d pixels.",
@@ -213,7 +213,7 @@ public class Crop implements CompAction {
         } else if (answer == 2) {
             // only hide
             addHidingMask(comp, sel.getShape(), true);
-            comp.imageChanged(FULL);
+            comp.update(FULL);
         } else {
             throw new IllegalStateException("answer = " + answer);
         }

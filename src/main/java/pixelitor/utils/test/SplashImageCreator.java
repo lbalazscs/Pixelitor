@@ -28,8 +28,6 @@ import pixelitor.Pixelitor;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
-import pixelitor.filters.ColorWheel;
-import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
@@ -61,7 +59,8 @@ import static java.awt.font.TextAttribute.*;
 import static java.lang.String.format;
 import static pixelitor.Composition.LayerAdder.Position.TOP;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
-import static pixelitor.layers.BlendingMode.*;
+import static pixelitor.layers.BlendingMode.MULTIPLY;
+import static pixelitor.layers.BlendingMode.NORMAL;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 import static pixelitor.utils.Threads.*;
@@ -149,34 +148,6 @@ public class SplashImageCreator {
         return comp;
     }
 
-    public static Composition createOldSplashImage() {
-        assert calledOnEDT() : threadInfo();
-
-        ValueNoise.reseed();
-        var comp = NewImage.addNewImage(FillType.WHITE,
-            SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
-        ImageLayer layer = (ImageLayer) comp.getLayer(0);
-
-        layer.setName("Color Wheel", true);
-        new ColorWheel().startOn(layer, FILTER_WITHOUT_DIALOG);
-
-        layer = addNewLayer(comp, "Value Noise");
-        var valueNoise = new ValueNoise();
-        valueNoise.setDetails(7);
-        valueNoise.startOn(layer, FILTER_WITHOUT_DIALOG);
-        layer.setOpacity(0.3f, true);
-        layer.setBlendingMode(SCREEN, true);
-
-        layer = addNewLayer(comp, "Gradient");
-        addBWGradientTo(layer);
-        layer.setOpacity(0.4f, true);
-        layer.setBlendingMode(LUMINOSITY, true);
-
-        addTextLayers(comp);
-
-        return comp;
-    }
-
     private static void addTextLayers(Composition comp) {
         FgBgColors.setFGColor(WHITE);
 
@@ -229,7 +200,7 @@ public class SplashImageCreator {
             HorizontalAlignment.CENTER,
             VerticalAlignment.CENTER, false, 0, null);
 
-        layer.setSettings(settings);
+        layer.applySettings(settings);
 
         layer.startMovement();
         layer.moveWhileDragging(0, translationY);

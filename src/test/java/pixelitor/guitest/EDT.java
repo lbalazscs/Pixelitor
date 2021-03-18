@@ -81,10 +81,6 @@ public class EDT {
         return call(() -> fun.apply(OpenImages.getActiveComp()));
     }
 
-    public static <T> T activeTool(Function<Tool, ? extends T> fun) {
-        return call(() -> fun.apply(Tools.getCurrent()));
-    }
-
     public static Selection getActiveSelection() {
         return call(OpenImages::getActiveSelection);
     }

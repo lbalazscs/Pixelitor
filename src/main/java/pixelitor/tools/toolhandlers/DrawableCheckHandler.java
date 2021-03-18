@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class DrawableCheckHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (e.getView().activeIsDrawable()) {
+        if (e.getComp().activeIsDrawable()) {
             // forwards the mouse event to the next handler
             return false;
         }
@@ -56,11 +56,11 @@ public class DrawableCheckHandler extends ToolHandler {
 
     @Override
     boolean mouseDragged(PMouseEvent e) {
-        return !e.getView().activeIsDrawable();
+        return !e.getComp().activeIsDrawable();
     }
 
     @Override
     boolean mouseReleased(PMouseEvent e) {
-        return !e.getView().activeIsDrawable();
+        return !e.getComp().activeIsDrawable();
     }
 }

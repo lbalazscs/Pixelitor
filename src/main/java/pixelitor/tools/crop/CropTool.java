@@ -281,7 +281,7 @@ public class CropTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         var comp = e.getComp();
-        comp.imageChanged();
+        comp.update();
 
         switch (state) {
             case NO_INTERACTION:

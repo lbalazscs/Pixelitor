@@ -37,7 +37,6 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,7 +72,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         super(comp, name);
 
         painter = new TransformedTextPainter();
-        setSettings(new TextSettings());
+        applySettings(new TextSettings());
     }
 
     @Serial
@@ -155,18 +154,16 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     private void resetOldSettings(TextSettings oldSettings) {
-        setSettings(oldSettings);
-        comp.imageChanged();
+        applySettings(oldSettings);
+        comp.update();
     }
 
     @Override
-    public TextLayer duplicate(boolean compCopy) {
-        String duplicateName = compCopy ? name : Utils.createCopyName(name);
+    protected Layer createTypeSpecificDuplicate(String duplicateName) {
         TextLayer d = new TextLayer(comp, duplicateName);
 
         d.setTranslation(getTx(), getTy());
-        d.setSettings(new TextSettings(settings));
-        duplicateMask(d, compCopy);
+        d.applySettings(new TextSettings(settings));
 
         return d;
     }
@@ -276,7 +273,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter.setTranslation(x, y);
     }
 
-    public void setSettings(TextSettings settings) {
+    public void applySettings(TextSettings settings) {
         this.settings = settings;
 
         isAdjustment = settings.hasWatermark();
@@ -289,7 +286,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     public void randomizeSettings() {
         settings.randomize();
-        setSettings(settings); // to re-configure the painter
+        applySettings(settings); // to re-configure the painter
     }
 
     public void updateLayerName() {
@@ -360,8 +357,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public BufferedImage getRepresentingImage() {
-        return createRasterizedImage(true);
+    public BufferedImage asImage(boolean applyMask) {
+        return createRasterizedImage(applyMask);
     }
 
     @Override

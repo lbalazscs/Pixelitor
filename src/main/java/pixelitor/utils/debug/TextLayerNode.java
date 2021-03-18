@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,6 @@ import pixelitor.layers.TextLayer;
  * A debugging node for a Layer
  */
 public class TextLayerNode extends ContentLayerNode {
-    public TextLayerNode(TextLayer layer) {
-        this("Layer", layer);
-    }
-
     public TextLayerNode(String name, TextLayer layer) {
         super(name, layer);
 

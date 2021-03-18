@@ -28,6 +28,8 @@ import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayersContainer;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
@@ -608,9 +610,8 @@ public class RandomToolTest {
     }
 
     private void cutBigLayersIfNecessary(Composition comp) {
-        Rectangle imgSize = EDT.call(comp::getMaxImageSize);
-        Dimension canvasSize = EDT.call(() ->
-            comp.getCanvas().getSize());
+        Rectangle imgSize = EDT.call(() -> calcMaxImageSize(comp));
+        Dimension canvasSize = EDT.call(() -> comp.getCanvas().getSize());
 
         if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
             // needs to be cut, otherwise there is a risk that
@@ -619,6 +620,20 @@ public class RandomToolTest {
         } else if (imgSize.width > canvasSize.width || imgSize.height > canvasSize.height) {
             Rnd.withProbability(0.3, this::cutBigLayers);
         }
+    }
+
+    private static Rectangle calcMaxImageSize(Composition comp) {
+        Rectangle max = new Rectangle(0, 0, 0, 0);
+        int numLayers = comp.getNumLayers();
+        for (int i = 0; i < numLayers; i++) {
+            Layer layer = comp.getLayer(i);
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                Rectangle layerBounds = imageLayer.getContentBounds();
+                max.add(layerBounds);
+            }
+        }
+        return max;
     }
 
     private void cutBigLayers() {

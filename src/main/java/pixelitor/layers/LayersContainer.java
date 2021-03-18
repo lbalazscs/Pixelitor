@@ -98,7 +98,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     }
 
     /**
-     * Not used. The layers panel of the View is set in {@link  View#activateUI}
+     * Not used. The layers panel of the View is set in {@link  View#showLayersUI}
      */
     @Override
     public void viewActivated(View oldView, View newView) {

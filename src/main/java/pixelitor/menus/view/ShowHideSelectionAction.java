@@ -17,6 +17,7 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.selection.Selection;
 
@@ -46,8 +47,13 @@ public class ShowHideSelectionAction extends ShowHideAction {
 
     @Override
     public void setVisibility(boolean value) {
-        OpenImages.onActiveSelection(
-            selection -> selection.setHidden(!value, true));
+        Composition comp = OpenImages.getActiveComp();
+        if (comp != null) {
+            Selection selection = comp.getSelection();
+            if (selection != null) {
+                selection.setHidden(!value, true);
+            }
+        }
     }
 
     public void updateTextFrom(Selection selection) {

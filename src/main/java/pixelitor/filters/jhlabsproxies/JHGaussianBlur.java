@@ -74,8 +74,4 @@ public class JHGaussianBlur extends ParametrizedFilter {
     protected boolean createDefaultDestImg() {
         return false;
     }
-
-    public void setRadius(int newRadius) {
-        radius.setValue(newRadius);
-    }
 }

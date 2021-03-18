@@ -83,10 +83,6 @@ public abstract class DabsBrush extends AbstractBrush {
         return settings;
     }
 
-    public void setSettings(DabsBrushSettings settings) {
-        this.settings = settings;
-    }
-
     @Override
     public void rememberPrevious(PPoint previous) {
         super.rememberPrevious(previous);

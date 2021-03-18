@@ -57,7 +57,7 @@ import java.awt.geom.AffineTransform;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.DragToolState.*;
@@ -328,7 +328,7 @@ public class ShapesTool extends DragTool {
         // therefore the continuous drawing of the shape.
         // It repaints the whole image because
         // some shapes extend beyond their drag rectangle.
-        comp.imageChanged(REPAINT);
+        comp.update(REPAINT);
     }
 
     @Override
@@ -391,7 +391,7 @@ public class ShapesTool extends DragTool {
             styledShape.updateFromDrag(userDrag);
 
             var comp = OpenImages.getActiveComp();
-            comp.imageChanged(REPAINT);
+            comp.update(REPAINT);
         }
         altDown = true;
     }
@@ -405,7 +405,7 @@ public class ShapesTool extends DragTool {
             styledShape.updateFromDrag(userDrag);
 
             var comp = OpenImages.getActiveComp();
-            comp.imageChanged(REPAINT);
+            comp.update(REPAINT);
         }
         altDown = false;
     }
@@ -583,7 +583,7 @@ public class ShapesTool extends DragTool {
 
         OpenImages.onActiveComp(comp -> {
             if (hadShape) {
-                comp.imageChanged();
+                comp.update();
             } else {
                 comp.repaint();
             }
@@ -607,7 +607,7 @@ public class ShapesTool extends DragTool {
         styledShape = shape;
         transformBox = box;
         setState(TRANSFORM);
-        OpenImages.getActiveComp().imageChanged();
+        OpenImages.getActiveComp().update();
     }
 
     public StyledShape getStyledShape() {

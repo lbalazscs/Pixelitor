@@ -17,7 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.Composition;
 import pixelitor.gui.View;
 
 import javax.swing.*;
@@ -93,9 +92,5 @@ public class PMouseEvent extends PPoint.LazyCo {
 
     public void repaint() {
         view.repaint();
-    }
-
-    public void imageChanged(Composition.ImageChangeActions actions) {
-        getComp().imageChanged(actions);
     }
 }

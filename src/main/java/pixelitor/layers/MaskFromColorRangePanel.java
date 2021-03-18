@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,7 +92,7 @@ public class MaskFromColorRangePanel extends JPanel {
         this.layer = layer;
 
         // by default use the layer image
-        srcImage = layer.getRepresentingImage();
+        srcImage = layer.asImage(false);
         srcIsLayer = true;
         imageSourceCB.addActionListener(e -> imageSourceChanged(comp));
 
@@ -108,7 +108,7 @@ public class MaskFromColorRangePanel extends JPanel {
         Object selectedSource = imageSourceCB.getSelectedItem();
         if (selectedSource.equals(IMG_SRC_LAYER) && !srcIsLayer) {
             // change to layer-based
-            srcImage = layer.getRepresentingImage();
+            srcImage = layer.asImage(false);
             srcIsLayer = true;
             refreshColorPickerImage(true);
         } else if (srcIsLayer) {

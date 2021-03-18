@@ -101,10 +101,6 @@ public class Messages {
         msgHandler.showNotDrawableError(layer);
     }
 
-    public static MessageHandler getMessageHandler() {
-        return msgHandler;
-    }
-
     public static void showPerformanceMessage(String filterName, long totalTime) {
         String msg;
         if (totalTime < 1000) {

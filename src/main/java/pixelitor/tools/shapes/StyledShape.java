@@ -47,7 +47,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.String.format;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -245,7 +245,7 @@ public class StyledShape implements Cloneable, Transformable {
 
     @Override
     public void updateUI(View view) {
-        view.getComp().imageChanged(REPAINT);
+        view.getComp().update(REPAINT);
     }
 
     private void setFillPaintType(TwoPointPaintType fillPaintType) {
@@ -388,7 +388,7 @@ public class StyledShape implements Cloneable, Transformable {
 
         if (imageEdit != null) {
             paintOnDrawable(dr);
-            comp.imageChanged();
+            comp.update();
             dr.updateIconImage();
         } else {
             // a repaint is necessary even if the box is outside the canvas
@@ -485,7 +485,7 @@ public class StyledShape implements Cloneable, Transformable {
 
         var comp = OpenImages.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
-        comp.imageChanged();
+        comp.update();
     }
 
     public ShapeType getShapeType() {

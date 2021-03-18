@@ -78,7 +78,7 @@ public class Screens {
             // if there is place between the canvas and the window,
             // then place the window at half distance
             View view = OpenImages.getActiveView();
-            if (view != null) {
+            if (view != null && view.isShowing()) {
                 Rectangle canvasBounds = view.getVisibleCanvasBoundsOnScreen();
                 int canvasMaxX = canvasBounds.x + canvasBounds.width;
                 if (canvasMaxX < locX) {

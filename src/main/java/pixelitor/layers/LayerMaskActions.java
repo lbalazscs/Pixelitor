@@ -116,7 +116,7 @@ public class LayerMaskActions {
 
             ((ImageLayer) layer).applyLayerMask(true);
 
-            layer.getComp().imageChanged();
+            layer.getComp().update();
         }
     }
 

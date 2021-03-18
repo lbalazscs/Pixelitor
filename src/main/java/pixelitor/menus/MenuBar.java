@@ -83,7 +83,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
@@ -412,7 +412,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 var comp = getActiveComp();
-                comp.moveLayerSelectionUp();
+                comp.raiseLayerSelection();
             }
         };
         raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
@@ -421,7 +421,7 @@ public class MenuBar extends JMenuBar {
         var lowerLayerSelection = new OpenImageEnabledAction(LOWER_LAYER_SELECTION) {
             @Override
             public void onClick() {
-                getActiveComp().moveLayerSelectionDown();
+                getActiveComp().lowerLayerSelection();
             }
         };
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
@@ -496,7 +496,7 @@ public class MenuBar extends JMenuBar {
 
                 // not necessary, as the result looks the same, but still
                 // useful because eventual problems would be spotted early
-                layer.getComp().imageChanged();
+                layer.getComp().update();
             }
         });
 
@@ -537,7 +537,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new RestrictedLayerAction("Selection from Text", IS_TEXT_LAYER) {
             @Override
             public void onActiveLayer(Layer layer) {
-                layer.getComp().createSelectionFromTextLayer();
+                layer.getComp().createSelectionFromText();
             }
         });
 
@@ -1207,7 +1207,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onActiveLayer(Layer layer) {
                 layer.getMask().updateFromBWImage();
-                layer.getComp().imageChanged();
+                layer.getComp().update();
             }
         });
 
@@ -1270,7 +1270,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenImageEnabledAction("imageChanged(FULL) on the active image") {
             @Override
             public void onClick() {
-                getActiveComp().imageChanged(FULL, true);
+                getActiveComp().update(FULL, true);
             }
         });
 
@@ -1300,7 +1300,7 @@ public class MenuBar extends JMenuBar {
                 if (layer.hasMask()) {
                     layer.getMask().setTranslation(0, 0);
                 }
-                comp.imageChanged();
+                comp.update();
             }
         });
 

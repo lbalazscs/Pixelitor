@@ -127,10 +127,6 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
         }
     }
 
-    public String getMenuName() {
-        return menuName;
-    }
-
     public String getName() {
         return name;
     }

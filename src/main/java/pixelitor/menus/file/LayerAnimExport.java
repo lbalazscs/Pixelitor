@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,12 +56,11 @@ public class LayerAnimExport {
             .show();
     }
 
-    private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
+    private static void export(Composition comp, int delayMillis, boolean pingPong) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
         if (file != null) {
-            var animation = new LayerAnimation(activeComp,
-                delayMillis, pingPong);
-            animation.saveToFile(file);
+            new LayerAnimation(comp, delayMillis, pingPong)
+                .saveToFile(file);
             Messages.showFileSavedMessage(file);
         }
     }

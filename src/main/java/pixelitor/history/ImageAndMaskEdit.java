@@ -72,7 +72,7 @@ public class ImageAndMaskEdit extends ImageEdit {
         // the two edits are set to embedded, so we update - except
         // if this edit is also embedded
         if (!embedded) {
-            comp.imageChanged();
+            comp.update();
             dr.updateIconImage();
             ((ImageLayer) dr).getMask().updateIconImage();
         }

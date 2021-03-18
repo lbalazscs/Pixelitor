@@ -39,10 +39,6 @@ public class DialogParam extends AbstractFilterParam {
     private final FilterParam[] children;
     private DefaultButton defaultButton;
 
-    public DialogParam(FilterParam... children) {
-        this("More Settings", children);
-    }
-
     public DialogParam(String name, FilterParam... children) {
         super(name, ALLOW_RANDOMIZE);
         this.children = children;

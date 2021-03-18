@@ -20,7 +20,6 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.utils.Utils;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -56,14 +55,9 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public Layer duplicate(boolean compCopy) {
+    protected Layer createTypeSpecificDuplicate(String duplicateName) {
         // TODO the filter should be copied so that it can be adjusted independently
-        String duplicateName = compCopy ? name : Utils.createCopyName(name);
-        var copy = new AdjustmentLayer(comp, duplicateName, filter);
-
-        duplicateMask(copy, compCopy);
-
-        return copy;
+        return new AdjustmentLayer(comp, duplicateName, filter);
     }
 
     @Override
@@ -88,8 +82,8 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public BufferedImage getRepresentingImage() {
-        throw new UnsupportedOperationException();
+    public BufferedImage asImage(boolean applyMask) {
+        return null;
     }
 
     @Override

@@ -22,6 +22,7 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Filter;
 import pixelitor.filters.Invert;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.*;
@@ -164,6 +165,13 @@ public class TestHelper {
     public static TextLayer createTextLayer(Composition comp, String name) {
         var textLayer = new TextLayer(comp, name);
         textLayer.randomizeSettings();
+
+        // ensure that the font is not too big for the tiny test layer
+        TextSettings settings = textLayer.getSettings();
+        Font smallFont = settings.getFont().deriveFont(Font.PLAIN, 10.0f);
+        settings.setFont(smallFont);
+        textLayer.applySettings(settings);
+
         textLayer.createUI();
         return textLayer;
     }
@@ -206,9 +214,6 @@ public class TestHelper {
 
         // when getComp() is called on the mock, then return the currentComp field
         when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
-
-        when(view.activeIsDrawable()).thenAnswer(
-            invocation -> comp.activeIsDrawable());
 
         comp.setView(view);
 

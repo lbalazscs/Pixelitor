@@ -22,10 +22,7 @@ import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
-import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -231,24 +228,9 @@ public class IO {
         int numSavedImages = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
             Layer layer = comp.getLayer(layerIndex);
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                BufferedImage image = imageLayer.getImage();
-
+            BufferedImage image = layer.asImage(true);
+            if (image != null) {
                 saveLayerImage(image, layer.getName(), layerIndex);
-                numSavedImages++;
-            } else if (layer instanceof TextLayer) {
-                TextLayer textLayer = (TextLayer) layer;
-                BufferedImage image = textLayer.createRasterizedImage(true);
-
-                saveLayerImage(image, layer.getName(), layerIndex);
-                numSavedImages++;
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                BufferedImage image = mask.getImage();
-
-                saveLayerImage(image, layer.getName() + "_mask", layerIndex);
                 numSavedImages++;
             }
         }

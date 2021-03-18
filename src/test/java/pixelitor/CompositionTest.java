@@ -435,7 +435,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.moveLayerSelectionDown(); // make the first layer active
+        comp.lowerLayerSelection(); // make the first layer active
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 1", "layer 2")
@@ -451,7 +451,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive();
 
-        comp.moveLayerSelectionUp(); // make the second layer active
+        comp.raiseLayerSelection(); // make the second layer active
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -639,11 +639,11 @@ class CompositionTest {
     }
 
     @Test
-    void dragFinished() {
+    void changeStackIndex() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.layerReorderingFinished(layer, 1);
+        comp.changeStackIndex(layer, 1);
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")
@@ -813,7 +813,7 @@ class CompositionTest {
     }
 
     @Test
-    void cropSelection() {
+    void intersectSelection() {
         var selectionShape = new Rectangle(4, 4, 8, 4);
         TestHelper.setSelection(comp, selectionShape);
         assertThat(comp)
@@ -821,7 +821,7 @@ class CompositionTest {
             .selectionBoundsIs(selectionShape);
 
         var cropRect = new Rectangle(2, 2, 4, 4);
-        comp.cropSelection(cropRect);
+        comp.intersectSelection(cropRect);
 
         assertThat(comp)
             .hasSelection()

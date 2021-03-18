@@ -29,6 +29,7 @@ import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -143,11 +144,23 @@ public abstract class Layer implements Serializable {
         ui.setSelected(true);
     }
 
-    public abstract Layer duplicate(boolean compCopy);
+    public final Layer duplicate(boolean compCopy) {
+        String duplicateName = compCopy ? this.name : Utils.createCopyName(name);
+        Layer d = createTypeSpecificDuplicate(duplicateName);
 
-    // Helper method used in multiple subclasses.
+        d.setOpacity(getOpacity(), false);
+        d.setBlendingMode(getBlendingMode(), false);
+        d.setVisible(isVisible(), false);
+
+        duplicateMask(d, compCopy);
+
+        return d;
+    }
+
+    protected abstract Layer createTypeSpecificDuplicate(String duplicateName);
+
     // Duplicates the mask of a duplicated layer.
-    protected void duplicateMask(Layer duplicate, boolean compCopy) {
+    private void duplicateMask(Layer duplicate, boolean compCopy) {
         if (hasMask()) {
             LayerMask newMask = mask.duplicate(duplicate);
             if (compCopy) {
@@ -170,7 +183,7 @@ public abstract class Layer implements Serializable {
         }
 
         visible = newVisibility;
-        comp.imageChanged();
+        comp.update();
 
         if (hasUI()) {
             ui.setOpenEye(newVisibility);
@@ -179,6 +192,10 @@ public abstract class Layer implements Serializable {
         if (addToHistory) {
             History.add(new LayerVisibilityChangeEdit(comp, this, newVisibility));
         }
+    }
+
+    public Object getVisibilityAsORAString() {
+        return isVisible() ? "visible" : "hidden";
     }
 
     public float getOpacity() {
@@ -192,16 +209,15 @@ public abstract class Layer implements Serializable {
         if (opacity == newOpacity) {
             return;
         }
-
-        if (addToHistory) {
-            History.add(new LayerOpacityEdit(this, opacity));
-        }
-
+        float prevOpacity = opacity;
         opacity = newOpacity;
 
         if (hasUI()) {
             LayerBlendingModePanel.get().setOpacityFromModel(newOpacity);
-            comp.imageChanged();
+            comp.update();
+        }
+        if (addToHistory) {
+            History.add(new LayerOpacityEdit(this, prevOpacity));
         }
     }
 
@@ -209,16 +225,21 @@ public abstract class Layer implements Serializable {
         return blendingMode;
     }
 
-    public void setBlendingMode(BlendingMode mode, boolean addToHistory) {
-        if (addToHistory) {
-            History.add(new LayerBlendingEdit(this, blendingMode));
+    public void setBlendingMode(BlendingMode newMode, boolean addToHistory) {
+        if (blendingMode == newMode) {
+            return;
         }
 
-        blendingMode = mode;
+        BlendingMode prevMode = blendingMode;
+        blendingMode = newMode;
 
         if (hasUI()) {
-            LayerBlendingModePanel.get().setBlendingModeFromModel(mode);
-            comp.imageChanged();
+            LayerBlendingModePanel.get().setBlendingModeFromModel(newMode);
+            comp.update();
+        }
+
+        if (addToHistory) {
+            History.add(new LayerBlendingEdit(this, prevMode));
         }
     }
 
@@ -227,18 +248,18 @@ public abstract class Layer implements Serializable {
     }
 
     public void setName(String newName, boolean addToHistory) {
-        String previousName = name;
+        String prevName = name;
         name = newName;
 
         // important because this might be called twice for a single rename
-        if (name.equals(previousName)) {
+        if (name.equals(prevName)) {
             return;
         }
 
         ui.setLayerName(newName);
 
         if (addToHistory) {
-            History.add(new LayerRenameEdit(this, previousName, name));
+            History.add(new LayerRenameEdit(this, prevName, name));
         }
     }
 
@@ -325,7 +346,7 @@ public abstract class Layer implements Serializable {
             return null;
         }
 
-        comp.imageChanged();
+        comp.update();
 
         Layers.maskAddedTo(this);
 
@@ -368,7 +389,7 @@ public abstract class Layer implements Serializable {
         assert mask.getOwner() == this;
 
         this.mask = mask;
-        comp.imageChanged();
+        comp.update();
         if (hasUI() && !ui.hasMaskIcon()) {
             ui.addMaskIcon();
         }
@@ -391,7 +412,7 @@ public abstract class Layer implements Serializable {
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
         }
-        comp.imageChanged();
+        comp.update();
     }
 
     public boolean isMaskEditing() {
@@ -460,7 +481,7 @@ public abstract class Layer implements Serializable {
         assert hasMask();
         this.maskEnabled = maskEnabled;
 
-        comp.imageChanged();
+        comp.update();
         mask.updateIconImage();
         notifyListeners();
 
@@ -542,7 +563,6 @@ public abstract class Layer implements Serializable {
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
-//            g.drawImage(maskedImage, getTx(), getTy(), null);
         setupDrawingComposite(g, firstVisibleLayer);
         g.drawImage(maskedImage, 0, 0, null);
     }
@@ -586,12 +606,8 @@ public abstract class Layer implements Serializable {
                               boolean deleteCroppedPixels,
                               boolean allowGrowing);
 
-    public Object getVisibilityAsORAString() {
-        return isVisible() ? "visible" : "hidden";
-    }
-
-    public void reorderingFinished(int newIndex) {
-        comp.layerReorderingFinished(this, newIndex);
+    public void changeStackIndex(int newIndex) {
+        comp.changeStackIndex(this, newIndex);
     }
 
     /**
@@ -668,8 +684,10 @@ public abstract class Layer implements Serializable {
     /**
      * Return a canvas-sized image representing this layer.
      * This can be the temporarily rasterized image of a text layer.
+     *
+     * @param applyMask if false, then the mask is ignored
      */
-    public abstract BufferedImage getRepresentingImage();
+    public abstract BufferedImage asImage(boolean applyMask);
 
     public void addListener(LayerListener listener) {
         listeners.add(listener);

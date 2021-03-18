@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,6 +58,6 @@ public class StyledShapeEdit extends PixelitorEdit {
         Tools.SHAPES.setStyledShape(backup);
         backup = tmp;
 
-        comp.imageChanged();
+        comp.update();
     }
 }

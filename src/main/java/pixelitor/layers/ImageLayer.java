@@ -25,7 +25,10 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageTrimUtil;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Assertions;
 
@@ -44,8 +47,8 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.Composition.UpdateActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
@@ -267,25 +270,18 @@ public class ImageLayer extends ContentLayer implements Drawable {
             setState(PREVIEW);
         }
         imageRefChanged();
-        comp.imageChanged(REPAINT);
+        comp.update(REPAINT);
     }
 
     @Override
-    public ImageLayer duplicate(boolean compCopy) {
+    protected Layer createTypeSpecificDuplicate(String duplicateName) {
         BufferedImage imageCopy = copyImage(image);
         if (imageCopy == null) {
             // there was an out of memory error
             return null;
         }
-        String duplicateName = compCopy ? name : Utils.createCopyName(name);
 
-        ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, getTx(), getTy());
-        d.setOpacity(getOpacity(), false);
-        d.setBlendingMode(getBlendingMode(), false);
-
-        duplicateMask(d, compCopy);
-
-        return d;
+        return new ImageLayer(comp, imageCopy, duplicateName, getTx(), getTy());
     }
 
     @Override
@@ -408,8 +404,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage getRepresentingImage() {
-        return getCanvasSizedSubImage();
+    public BufferedImage asImage(boolean applyMask) {
+        if (applyMask && hasMask() && isMaskEnabled()) {
+            BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+            Graphics2D g = img.createGraphics();
+            applyLayer(g, null, true);
+            g.dispose();
+            return img;
+        } else {
+            return getCanvasSizedSubImage();
+        }
     }
 
     private void setPreviewWithSelection(BufferedImage newImage) {
@@ -417,14 +421,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         setState(PREVIEW);
         imageRefChanged();
-        comp.imageChanged();
+        comp.update();
     }
 
     private void setImageWithSelection(BufferedImage newImage, boolean isUndoRedo) {
         image = replaceSelectedRegion(image, newImage, isUndoRedo);
         imageRefChanged();
 
-        comp.imageChanged(INVALIDATE_CACHE);
+        comp.update(INVALIDATE_CACHE);
     }
 
     /**
@@ -488,7 +492,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         assert Assertions.checkRasterMinimum(newImage);
 
-        comp.imageChanged(INVALIDATE_CACHE);
+        comp.update(INVALIDATE_CACHE);
         invalidateTrimCache();
 
         if (oldRef != null && oldRef != image) {
@@ -537,7 +541,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         imageRefChanged();
 
         previewImage = null;
-        comp.imageChanged();
+        comp.update();
     }
 
     @Override
@@ -566,7 +570,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setState(NORMAL);
 
         if (wasShowOriginal) {
-            comp.imageChanged();
+            comp.update();
         }
     }
 
@@ -617,7 +621,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             if (shouldRefresh) {
                 imageRefChanged();
-                comp.imageChanged();
+                comp.update();
             }
         } else {
             imageContentChanged = true; // history will be necessary
@@ -668,7 +672,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // not the actual one
         filterSourceImage = null;
         updateIconImage();
-        comp.imageChanged();
+        comp.update();
         invalidateTrimCache();
         Tools.editedObjectChanged(this);
     }
@@ -676,7 +680,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection) {
         requireNonNull(img);
-        assert img != image; // simple filters always change something
+        assert img != image;
         assert state == NORMAL;
 
         if (ignoreSelection) {
@@ -698,11 +702,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         return new Rectangle(
-            getTx() + trimmedBoundingBox.x,
-            getTy() + trimmedBoundingBox.y,
-            trimmedBoundingBox.width,
-            trimmedBoundingBox.height
-        );
+            getTx() + trimmedBoundingBox.x, getTy() + trimmedBoundingBox.y,
+            trimmedBoundingBox.width, trimmedBoundingBox.height);
     }
 
     @Override
@@ -715,9 +716,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     @Override
     public Rectangle getContentBounds() {
-        return new Rectangle(
-            getTx(), getTy(),
-            image.getWidth(), image.getHeight());
+        return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
     }
 
     @Override
@@ -742,7 +741,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return 0x00000000;
     }
 
-    private boolean checkImageDoesNotCoverCanvas() {
+    private boolean imageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle imageBounds = getContentBounds();
         boolean needsEnlarging = !imageBounds.contains(canvasBounds);
@@ -903,9 +902,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 BufferedImage newImage = ImageUtils.crop(image,
                     -westEnlargement, -northEnlargement, newWidth, newHeight);
                 setImage(newImage);
-                setTranslation(
-                    Math.min(-cropX, 0),
-                    Math.min(-cropY, 0));
+                setTranslation(Math.min(-cropX, 0), Math.min(-cropY, 0));
             }
             return;
         }
@@ -988,7 +985,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int newY = canvasBounds.y - north;
         int newWidth = canvasBounds.width + west + east;
         int newHeight = canvasBounds.height + north + south;
-        Rectangle newCanvasBounds = new Rectangle(newX, newY, newWidth, newHeight);
+        var newCanvasBounds = new Rectangle(newX, newY, newWidth, newHeight);
 
         if (imageBounds.contains(newCanvasBounds)) {
             // even after the canvas enlargement, the image does not need to be enlarged
@@ -1009,8 +1006,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (tmpDrawingLayer == null) {
             return;
         }
-        Graphics2D g = image.createGraphics();
 
+        Graphics2D g = image.createGraphics();
         tmpDrawingLayer.paintOn(g, -getTx(), -getTy());
         g.dispose();
 
@@ -1021,7 +1018,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
         ContentLayerMoveEdit edit;
-        boolean needsEnlarging = checkImageDoesNotCoverCanvas();
+        boolean needsEnlarging = imageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
             enlargeImage(comp.getCanvasBounds());
@@ -1222,7 +1219,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return previewImage;
     }
 
-    public void changeMode(ImageMode mode) {
+    public void convertMode(ImageMode mode) {
         image = mode.convert(image);
     }
 

@@ -110,7 +110,9 @@ public class ConnectBrushHistory {
     }
 
     public static void undo() {
-        indexOfNextAdd--;
+        if (indexOfNextAdd > 0) {
+            indexOfNextAdd--;
+        }
     }
 
     public static void redo() {

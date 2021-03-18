@@ -290,7 +290,7 @@ class LayerBlendingModesTest {
         settings.setText("T"); // a huge T should cover everything
         settings.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 100));
         settings.setColor(color);
-        layer.setSettings(settings);
+        layer.applySettings(settings);
         return layer;
     }
 

@@ -114,7 +114,7 @@ public class ImageEdit extends FadeableEdit {
         imgRef = new SoftReference<>(tmp);
 
         if (!embedded) {
-            comp.imageChanged();
+            comp.update();
             dr.updateIconImage();
         }
 

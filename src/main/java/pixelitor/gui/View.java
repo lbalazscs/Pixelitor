@@ -162,10 +162,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         MouseZoomMethod.CURRENT.installOnView(this);
     }
 
-    public boolean isDirty() {
-        return comp.isDirty();
-    }
-
     public boolean isActive() {
         return OpenImages.getActiveView() == this;
     }
@@ -230,20 +226,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public void close() {
         if (viewContainer != null) {
-            // this will also cause the calling of ImageComponents.imageClosed via
+            // this will also cause the calling of OpenImages.imageClosed via
             // ImageFrame.internalFrameClosed
             viewContainer.close();
         }
         comp.dispose();
     }
 
-    public void activateUI(boolean selectWindow) {
-        if (selectWindow) {
-            // it might be necessary to programmatically select a window:
-            // for example if in the frames UI a window is closed,
-            // another one is set to be the active one
-            getViewContainer().select();
-        }
+    public void showLayersUI() {
         LayersContainer.showLayersFor(this);
     }
 
@@ -447,17 +437,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void repaintRegion(PRectangle area) {
         repaint(area.getCo());
     }
-
-//    /**
-//     * All repaint requests go through this method,
-//     * it can be uncommented to debug repainting.
-//     */
-//    @Override
-//    public void repaint(long tm, int x, int y, int width, int height) {
-//        System.out.printf("View::repaint: tm = %d, x = %d, y = %d, width = %d, height = %d%n", tm, x, y, width, height);
-//        Thread.dumpStack();
-//        super.repaint(tm, x, y, width, height);
-//    }
 
     public void ensurePositiveLocation() {
         if (viewContainer != null) {
@@ -760,10 +739,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
     }
 
-    public boolean activeIsDrawable() {
-        return comp.activeIsDrawable();
-    }
-
     /**
      * The return value is changed only in unit tests
      */
@@ -783,21 +758,21 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void repaintNavigator(boolean viewSizeChanged) {
         assert calledOnEDT() : threadInfo();
 
-        if (navigator != null) {
-            if (viewSizeChanged) {
-                // defer until all
-                // pending events have been processed
-                SwingUtilities.invokeLater(() -> {
-                    if (navigator != null) { // check again for safety
-                        // will also repaint
-                        navigator.recalculateSize(this, false,
-                            true, false);
-                    }
-                });
-            } else {
-                // call here, painting calls will be coalesced anyway
-                navigator.repaint();
-            }
+        if (navigator == null) {
+            return;
+        }
+        if (viewSizeChanged) {
+            // defer until all pending events have been processed
+            SwingUtilities.invokeLater(() -> {
+                if (navigator != null) { // check again for safety
+                    // will also repaint
+                    navigator.recalculateSize(this, false,
+                        true, false);
+                }
+            });
+        } else {
+            // call here, painting calls will be coalesced anyway
+            navigator.repaint();
         }
     }
 

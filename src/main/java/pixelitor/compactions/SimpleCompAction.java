@@ -34,7 +34,7 @@ import pixelitor.utils.Messages;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.Composition.UpdateActions.REPAINT;
 
 /**
  * A {@link CompAction} where the processing can be simplified
@@ -85,7 +85,7 @@ public abstract class SimpleCompAction extends OpenImageEnabledAction implements
         // they are based on the canvas-sized subimage
         newComp.updateAllIconImages();
 
-        newComp.imageChanged(REPAINT, true);
+        newComp.update(REPAINT, true);
         if (affectsCanvasSize) {
             view.revalidate(); // make sure the scrollbars are OK
         }

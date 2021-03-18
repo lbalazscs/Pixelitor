@@ -65,10 +65,6 @@ public class ThumbInfo {
         return failure(-1, -1, errMsg);
     }
 
-    public BufferedImage getThumb() {
-        return thumb;
-    }
-
     public void paint(Graphics2D g, JPanel panel) {
         int width = panel.getWidth();
         int height = panel.getHeight();
