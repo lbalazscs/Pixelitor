@@ -19,6 +19,8 @@ package pixelitor.gui.utils;
 
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.menus.edit.CopyAction;
+import pixelitor.utils.Keys;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -29,6 +31,7 @@ import java.util.function.Predicate;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
+import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
@@ -55,6 +58,8 @@ public class DialogBuilder {
     private boolean disposeWhenClosing = true;
     private Screens.Align align = SCREEN_CENTER;
     private JComponent parent;
+
+    private boolean enableCopyVisibleShortcut;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -167,6 +172,11 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder enableCopyVisibleShortcut() {
+        enableCopyVisibleShortcut = true;
+        return this;
+    }
+
     public DialogBuilder noCancelButton() {
         addCancelButton = false;
         return this;
@@ -257,6 +267,14 @@ public class DialogBuilder {
         Runnable cancelTask = () -> dialogCancelled(d);
         GUIUtils.setupCancelWhenTheDialogIsClosed(d, cancelTask);
         GUIUtils.setupCancelWhenEscIsPressed(d, cancelTask);
+
+        if (enableCopyVisibleShortcut) {
+            JComponent contentPane = (JComponent) d.getContentPane();
+            contentPane.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(Keys.CTRL_SHIFT_C, "copyall");
+            contentPane.getActionMap()
+                .put("copyall", CopyAction.COPY_COMPOSITE);
+        }
 
         d.pack();
         return d;

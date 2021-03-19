@@ -41,7 +41,6 @@ import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.menus.edit.CopyAction;
-import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.view.*;
@@ -899,9 +898,9 @@ public class RandomGUITest {
 
     private static void randomCopy() {
         if (rand.nextBoolean()) {
-            runAction(new CopyAction(CopySource.LAYER_OR_MASK));
+            runAction(CopyAction.COPY_LAYER);
         } else {
-            runAction(new CopyAction(CopySource.COMPOSITE));
+            runAction(CopyAction.COPY_COMPOSITE);
         }
     }
 

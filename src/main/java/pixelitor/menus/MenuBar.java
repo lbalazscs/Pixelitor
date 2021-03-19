@@ -298,11 +298,8 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // copy
-        var copyLayerOrMask = new CopyAction(CopySource.LAYER_OR_MASK);
-        editMenu.add(copyLayerOrMask, CTRL_C);
-
-        var copyComposite = new CopyAction(CopySource.COMPOSITE);
-        editMenu.add(copyComposite, CTRL_SHIFT_C);
+        editMenu.add(CopyAction.COPY_LAYER, CTRL_C);
+        editMenu.add(CopyAction.COPY_COMPOSITE, CTRL_SHIFT_C);
 
         // paste
         var pasteAsNewImage = new PasteAction(PasteDestination.NEW_IMAGE);

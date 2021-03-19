@@ -111,6 +111,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
             .content(gui)
             .align(FRAME_RIGHT)
             .withScrollbars()
+            .enableCopyVisibleShortcut()
             .okAction(() -> dr.onFilterDialogAccepted(getName()))
             .cancelAction(dr::onFilterDialogCanceled)
             .show();

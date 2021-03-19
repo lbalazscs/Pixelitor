@@ -36,9 +36,12 @@ import static pixelitor.utils.Texts.i18n;
  * to the system clipboard
  */
 public class CopyAction extends OpenImageEnabledAction {
+    public static final CopyAction COPY_LAYER = new CopyAction(CopySource.LAYER_OR_MASK);
+    public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
+
     private final CopySource source;
 
-    public CopyAction(CopySource source) {
+    private CopyAction(CopySource source) {
         super(i18n(source.toResourceKey()));
         this.source = source;
     }

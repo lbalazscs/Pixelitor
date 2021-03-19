@@ -47,22 +47,13 @@ public enum CopySource {
                 layer = layer.getMask();
             }
 
-            BufferedImage canvasSizedImage = null;
-
-            if (layer instanceof AdjustmentLayer) {
-                return Result.error("adjustment layers cannot be copied");
-            } else if (layer instanceof ImageLayer) {
-                canvasSizedImage = ((ImageLayer) layer).getCanvasSizedSubImage();
-            } else if (layer instanceof TextLayer) {
-                // TODO Text layers are rasterized, but they should be probably copied
-                //   in other formats as well (as a string, as a serialized object)
-                //   and pasting into Pixelitor should choose the serialized object
-                //   There could be also an internal clipboard, to handle such cases
-                canvasSizedImage = ((TextLayer) layer).createRasterizedImage(true);
-            }
-
+            // TODO Text layers are rasterized, but they should be probably copied
+            //   in other formats as well (as a string, as a serialized object)
+            //   and pasting into Pixelitor should choose the serialized object
+            //   There could be also an internal clipboard, to handle such cases
+            BufferedImage canvasSizedImage = layer.asImage(true);
             if (canvasSizedImage == null) {
-                return Result.error("program error (no image from layer)");
+                return Result.error("this layer cannot be copied");
             }
 
             return createImageWithSelectedPixels(canvasSizedImage, comp);
