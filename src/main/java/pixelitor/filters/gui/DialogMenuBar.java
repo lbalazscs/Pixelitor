@@ -25,6 +25,7 @@ import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -83,14 +84,13 @@ public class DialogMenuBar extends JMenuBar {
             Action savePresetAction = new PAction("Save Preset...") {
                 @Override
                 public void onClick() {
-                    String presetName = Dialogs.getTextDialog(
-                        DialogMenuBar.this, "Preset Name", "Preset Name:");
+                    String presetName = Dialogs.showInputDialog(
+                        presetsMenu, "Preset Name", "Preset Name:");
                     if (presetName == null || presetName.isBlank()) {
                         return;
                     }
 
                     presetName = Utils.toFileName(presetName);
-
                     UserPreset preset = owner.createUserPreset(presetName);
                     addNewUserPreset(preset, owner);
                 }
@@ -103,9 +103,10 @@ public class DialogMenuBar extends JMenuBar {
             if (numUserPresets > 0) {
                 addManagePresetsMenu();
                 presetsMenu.addSeparator();
-            }
-            for (UserPreset preset : userPresets) {
-                presetsMenu.add(preset.asAction(owner));
+
+                for (UserPreset preset : userPresets) {
+                    presetsMenu.add(preset.asAction(owner));
+                }
             }
 
             add(presetsMenu);
@@ -129,16 +130,35 @@ public class DialogMenuBar extends JMenuBar {
         });
     }
 
-    public void addNewUserPreset(UserPreset preset, DialogMenuOwner owner) {
+    private void addNewUserPreset(UserPreset preset, DialogMenuOwner owner) {
         if (numUserPresets == 0) {
             addManagePresetsMenu();
             presetsMenu.addSeparator();
-            numUserPresets++;
+        } else if (preset.fileExists()) {
+            String title = "Preset exists";
+            String msg = String.format("The preset \"%s\" already exists. Overwrite?",
+                preset.getName());
+            int msgType = JOptionPane.WARNING_MESSAGE;
+            if (!Dialogs.showYesNoDialog(presetsMenu, title, msg, msgType)) {
+                return;
+            }
+            // "yes" was pressed, remove the old preset from the menu
+            Component[] menuComponents = presetsMenu.getMenuComponents();
+            for (Component item : menuComponents) {
+                if (item instanceof JMenuItem) {
+                    JMenuItem menuItem = (JMenuItem) item;
+                    if (menuItem.getText().equals(preset.getName())) {
+                        presetsMenu.remove(menuItem);
+                        break;
+                    }
+                }
+            }
         }
         Action presetAction = preset.asAction(owner);
         JMenuItem presetMI = new JMenuItem(presetAction);
         presetMI.setName(preset.getName());
         presetsMenu.add(presetMI);
         preset.save();
+        numUserPresets++;
     }
 }

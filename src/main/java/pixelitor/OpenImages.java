@@ -236,7 +236,7 @@ public class OpenImages {
                     "<br><b>%s</b>" +
                     "<br>doesn't exist anymore.",
                 comp.getName(), path);
-            Messages.showError("File not found", msg);
+            Messages.showError("File not found", msg, view);
             return;
         }
 

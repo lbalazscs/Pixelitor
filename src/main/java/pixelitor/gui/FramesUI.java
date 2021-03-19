@@ -75,7 +75,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
 
     public void cascadeWindows() {
         if (OpenImages.getNumOpenImages() == 0) {
-            Dialogs.showInfoDialog("No open windows",
+            Dialogs.showInfoDialog(this, "No open windows",
                 "There are no open internal windows to cascade.");
             return;
         }
@@ -107,7 +107,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     public void tileWindows() {
         int numWindows = OpenImages.getNumOpenImages();
         if (numWindows == 0) {
-            Dialogs.showInfoDialog("No open windows",
+            Dialogs.showInfoDialog(this, "No open windows",
                 "There are no open internal windows to tile.");
             return;
         }

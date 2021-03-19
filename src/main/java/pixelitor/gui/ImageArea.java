@@ -18,12 +18,12 @@
 package pixelitor.gui;
 
 import pixelitor.OpenImages;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
@@ -157,8 +157,8 @@ public class ImageArea {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.cascadeWindows();
         } else {
-            // the "Cascade Windows" menu should be grayed out, but for safety:
-            showCascadeTileHelp();
+            // the "Cascade Windows" menu should be disabled
+            throw new IllegalStateException("mode = " + mode);
         }
     }
 
@@ -167,14 +167,9 @@ public class ImageArea {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.tileWindows();
         } else {
-            // the "Tile Windows" menu should be grayed out, but for safety:
-            showCascadeTileHelp();
+            // the "Tile Windows" menu should be disabled
+            throw new IllegalStateException("mode = " + mode);
         }
-    }
-
-    private static void showCascadeTileHelp() {
-        Dialogs.showInfoDialog("Help", "<html><b>\"Cascade Windows\"</b> and <b>\"Tile Windows\"</b> works only<br>" +
-            "when images are displayed in internal windows, not tabs (see the Edit/Preferences dialog)");
     }
 
     public static int getTabPlacement() {
@@ -209,6 +204,6 @@ public class ImageArea {
         Messages.showInfo("Pixel Grid",
             """
                 The pixel grid consists of lines between the pixels,
-                and is shown only if the zoom is at least 1600%.""");
+                and is shown only if the zoom is at least 1600%.""", (Component) ui);
     }
 }

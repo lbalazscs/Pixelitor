@@ -22,6 +22,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
+import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -31,6 +32,7 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -50,9 +52,9 @@ public class DropListener extends DropTargetAdapter {
          */
         NEW_IMAGES {
             @Override
-            public void handleDrop(List<File> list) {
-                for (File file : list) {
-                    addDroppedFileAsNewImage(file);
+            public void handleDrop(List<File> files, Component target) {
+                for (File file : files) {
+                    addDroppedFileAsNewImage(file, target);
                 }
             }
         },
@@ -61,22 +63,22 @@ public class DropListener extends DropTargetAdapter {
          */
         NEW_LAYERS {
             @Override
-            public void handleDrop(List<File> list) {
+            public void handleDrop(List<File> files, Component target) {
                 var comp = OpenImages.getActiveComp();
                 if (comp == null) {
                     // if there is no active composition,
                     // fall back to opening the files as new images
-                    NEW_IMAGES.handleDrop(list);
+                    NEW_IMAGES.handleDrop(files, target);
                     return;
                 }
 
-                for (File file : list) {
-                    addDroppedFileAsNewLayer(file, comp);
+                for (File file : files) {
+                    addDroppedFileAsNewLayer(file, comp, target);
                 }
             }
         };
 
-        public abstract void handleDrop(List<File> list);
+        public abstract void handleDrop(List<File> files, Component target);
     }
 
     public DropListener(Destination destination) {
@@ -117,8 +119,8 @@ public class DropListener extends DropTargetAdapter {
 
                 try {
                     @SuppressWarnings("unchecked")
-                    List<File> list = (List<File>) transferable.getTransferData(flavor);
-                    destination.handleDrop(list);
+                    List<File> files = (List<File>) transferable.getTransferData(flavor);
+                    destination.handleDrop(files, e.getDropTargetContext().getComponent());
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Messages.showException(ex);
                     e.rejectDrop();
@@ -132,29 +134,37 @@ public class DropListener extends DropTargetAdapter {
         e.rejectDrop();
     }
 
-    private static void addDroppedFileAsNewImage(File file) {
+    private static void addDroppedFileAsNewImage(File file, Component target) {
         if (file.isDirectory()) {
             String question = format("<html>You have dropped the folder <b>\"%s\"</b>."
                 + "<br>Do you want to open all image files inside it?", file.getName());
 
-            if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+            if (Dialogs.showYesNoQuestionDialog(target, "Question", question)) {
                 IO.openAllImagesInDir(file);
             }
         } else if (file.isFile()) {
+            if (!Files.isReadable(file.toPath())) {
+                Dialogs.showFileNotReadableError(target, file);
+                return;
+            }
             IO.openFileAsync(file);
         }
     }
 
-    private static void addDroppedFileAsNewLayer(File file, Composition comp) {
+    private static void addDroppedFileAsNewLayer(File file, Composition comp, Component target) {
         if (file.isDirectory()) {
             String question = format("You have dropped the folder \"%s\".\n" +
                 "Do you want all image files inside it to be added as layers to "
                 + comp.getName() + "?", file.getName());
 
-            if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+            if (Dialogs.showYesNoQuestionDialog(target, "Question", question)) {
                 IO.addAllImagesInDirAsLayers(file, comp);
             }
         } else if (file.isFile()) {
+            if (!Files.isReadable(file.toPath())) {
+                Dialogs.showFileNotReadableError(target, file);
+                return;
+            }
             IO.loadToNewImageLayerAsync(file, comp);
         }
     }

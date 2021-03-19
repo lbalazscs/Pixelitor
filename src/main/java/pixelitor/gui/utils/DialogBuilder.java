@@ -270,10 +270,14 @@ public class DialogBuilder {
 
         if (enableCopyVisibleShortcut) {
             JComponent contentPane = (JComponent) d.getContentPane();
-            contentPane.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(Keys.CTRL_SHIFT_C, "copyall");
-            contentPane.getActionMap()
-                .put("copyall", CopyAction.COPY_COMPOSITE);
+            InputMap inputMap = contentPane.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            ActionMap actionMap = contentPane.getActionMap();
+
+            inputMap.put(Keys.CTRL_C, "copy");
+            actionMap.put("copy", CopyAction.COPY_LAYER);
+
+            inputMap.put(Keys.CTRL_SHIFT_C, "copyvis");
+            actionMap.put("copyvis", CopyAction.COPY_COMPOSITE);
         }
 
         d.pack();

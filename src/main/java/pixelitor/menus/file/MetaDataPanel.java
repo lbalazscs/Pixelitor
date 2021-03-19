@@ -23,6 +23,7 @@ import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
 import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
@@ -190,10 +191,11 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
     }
 
     public static void showInDialog(PixelitorWindow pw) {
-        var comp = OpenImages.getActiveComp();
+        View view = OpenImages.getActiveView();
+        var comp = view.getComp();
         File file = comp.getFile();
         if (file == null) {
-            Dialogs.showInfoDialog(pw, "No file", format(
+            Dialogs.showInfoDialog(view, "No file", format(
                 "<html>There is no file for <b>%s</b>.",
                 comp.getName()));
             return;
@@ -204,11 +206,12 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
                     "<b>%s</b><br>" +
                     "doesn't exist anymore.",
                 comp.getName(), file.getAbsolutePath());
-            Messages.showError("File not found", msg);
+            Messages.showError("File not found", msg, view);
             return;
         }
         if (FileUtils.hasTGAExtension(file.getName())) {
-            Messages.showError("TGA File", "Metadata for TGA files is not supported yet.");
+            String msg = "Metadata for TGA files is not supported yet.";
+            Messages.showError("TGA File", msg, view);
             return;
         }
         Metadata metadata = extractMetadata(file);

@@ -161,7 +161,7 @@ public class PenTool extends Tool {
             setModeChooserCombo(BUILD);
             ignoreModeChooser = false;
         }
-        changeMode(BUILD, path);
+        changeMode(BUILD);
         enableActions(hasPath());
         OpenImages.repaintActive();
 
@@ -197,7 +197,7 @@ public class PenTool extends Tool {
             ignoreModeChooser = false;
         }
 
-        changeMode(mode, path);
+        changeMode(mode);
         enableActions(true);
         OpenImages.repaintActive();
 
@@ -206,7 +206,7 @@ public class PenTool extends Tool {
 
     // This method should not be called directly,
     // otherwise the mode and the the combo box get out of sync.
-    private void changeMode(PenToolMode mode, Path path) {
+    private void changeMode(PenToolMode mode) {
         if (this.mode != mode) {
             this.mode.modeEnded();
             mode.modeStarted(this.mode);
@@ -239,7 +239,7 @@ public class PenTool extends Tool {
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
-            Dialogs.showInfoDialog("No Selection",
+            Dialogs.showInfoDialog(comp.getView(), "No Selection",
                 "No selection was created because the path is outside the canvas.");
             return;
         }

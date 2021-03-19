@@ -19,6 +19,8 @@ package pixelitor.utils;
 
 import pixelitor.layers.Layer;
 
+import java.awt.Component;
+
 /**
  * Abstracts away messages sent through the GUI
  * in order to enable GUI-independent testing.
@@ -32,9 +34,9 @@ public interface MessageHandler {
 
     // *** dialog messages ***
 
-    void showInfo(String title, String msg);
+    void showInfo(String title, String msg, Component parent);
 
-    void showError(String title, String msg);
+    void showError(String title, String msg, Component parent);
 
     void showNotImageLayerError(Layer layer);
 

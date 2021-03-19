@@ -50,7 +50,8 @@ public class TraceAction extends PAction {
 
         Path path = comp.getActivePath();
         if (path == null) {
-            Messages.showInfo("No path", "There is no path in the composition");
+            Messages.showInfo("No path",
+                "There is no path in the composition", comp.getView());
             return;
         }
 

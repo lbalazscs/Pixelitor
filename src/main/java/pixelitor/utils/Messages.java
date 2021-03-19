@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.layers.Layer;
 
+import java.awt.Component;
 import java.io.File;
 
 import static java.lang.String.format;
@@ -37,11 +38,19 @@ public class Messages {
     }
 
     public static void showInfo(String title, String message) {
-        msgHandler.showInfo(title, message);
+        msgHandler.showInfo(title, message, null);
+    }
+
+    public static void showInfo(String title, String message, Component parent) {
+        msgHandler.showInfo(title, message, parent);
     }
 
     public static void showError(String title, String message) {
-        msgHandler.showError(title, message);
+        msgHandler.showError(title, message, null);
+    }
+
+    public static void showError(String title, String message, Component parent) {
+        msgHandler.showError(title, message, parent);
     }
 
     @SuppressWarnings("SameReturnValue")

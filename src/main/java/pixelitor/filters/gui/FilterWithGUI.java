@@ -72,13 +72,13 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
 
     @Override
     public UserPreset createUserPreset(String presetName) {
-        // the subclasses implement this if they can have user presets
+        // the subclasses override this if they can have user presets
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        // the subclasses implement this if they can have user presets
+        // the subclasses override this if they can have user presets
         throw new UnsupportedOperationException();
     }
 

@@ -297,7 +297,7 @@ public abstract class Layer implements Serializable {
         }
         if (addType.needsSelection() && !comp.hasSelection()) {
             String msg = format("The composition \"%s\" has no selection.", comp.getName());
-            Messages.showInfo("No selection", msg);
+            Messages.showInfo("No selection", msg, comp.getView());
             return;
         }
 

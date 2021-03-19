@@ -32,6 +32,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.lang.ref.SoftReference;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,6 +81,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             if (cachedInfo != null) {
                 return cachedInfo;
             }
+        }
+
+        if (!Files.isReadable(file.toPath())) {
+            return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
         }
 
         // Currently no thumb extraction is attempted for ora and pxc files.

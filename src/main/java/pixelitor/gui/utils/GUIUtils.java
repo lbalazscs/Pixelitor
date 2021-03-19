@@ -322,7 +322,8 @@ public final class GUIUtils {
         }
     }
 
-    public static AbstractAction createPrintFileAction(Composition comp, File file) {
+    public static AbstractAction createPrintFileAction(Composition comp,
+                                                       File file, Component parent) {
         return new PAction("Print...") {
             @Override
             public void onClick() {
@@ -333,7 +334,7 @@ public final class GUIUtils {
                         "Do you want to save your changes now?";
 
                     String[] options = {"Save and Print", "Cancel"};
-                    boolean saveAndPrint = Dialogs.showOKCancelDialog(msg,
+                    boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,
                         "Unsaved Changes", options, 0, QUESTION_MESSAGE);
                     if (!saveAndPrint) {
                         return;

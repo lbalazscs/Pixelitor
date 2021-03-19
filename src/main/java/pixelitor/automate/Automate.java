@@ -54,8 +54,7 @@ public class Automate {
      * Processes each file in the input directory
      * with the given {@link CompAction}
      */
-    public static void processFiles(CompAction action,
-                                    String dialogTitle) {
+    public static void processFiles(CompAction action, String dialogTitle) {
         assert calledOnEDT() : threadInfo();
 
         File openDir = Dirs.getLastOpen();
@@ -63,7 +62,8 @@ public class Automate {
 
         List<File> inputFiles = FileUtils.listSupportedInputFilesIn(openDir);
         if (inputFiles.isEmpty()) {
-            Messages.showInfo("No files", "There are no supported files in " + openDir.getAbsolutePath());
+            String msg = "There are no supported files in " + openDir.getAbsolutePath();
+            Messages.showInfo("No files", msg);
             return;
         }
 

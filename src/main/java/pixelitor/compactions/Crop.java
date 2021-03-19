@@ -195,11 +195,12 @@ public class Crop implements CompAction {
     }
 
     private static void selectionCropWithQuestion(Composition comp, Selection sel) {
+        String title = "Selection Crop Type";
         String question = "<html>You have a nonrectangular selection, but every image has to be rectangular." +
             "<br>Pixelitor can crop to the rectangular bounds of the selection." +
             "<br>It can also hide parts of the image using layer masks.";
         // the yes-no-cancel dialog can actually show more than 3 options
-        int answer = Dialogs.showYesNoCancelDialog("Selection Crop Type", question,
+        int answer = Dialogs.showYesNoCancelDialog(comp.getView(), title, question,
             new String[]{"Crop and Hide", "Only Crop", "Only Hide", "Cancel"},
             JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {

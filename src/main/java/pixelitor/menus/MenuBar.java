@@ -677,7 +677,7 @@ public class MenuBar extends JMenuBar {
 
         colorsMenu.add(createExtractChannelsSubmenu());
         colorsMenu.add(createReduceColorsSubmenu());
-        colorsMenu.add(createFillSubmenu(texts));
+        colorsMenu.add(createFillSubmenu());
 
         return colorsMenu;
     }
@@ -722,7 +722,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createFillSubmenu(ResourceBundle texts) {
+    private static JMenu createFillSubmenu() {
         PMenu sub = new PMenu(GUIText.FILL_WITH);
 
         sub.add(FOREGROUND.asFillFilterAction(), ALT_BACKSPACE);
@@ -757,7 +757,7 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createRenderSubmenu(texts));
         filterMenu.add(createArtisticSubmenu(texts));
         filterMenu.add(createFindEdgesSubmenu(texts));
-        filterMenu.add(createOtherSubmenu(texts));
+        filterMenu.add(createOtherSubmenu());
 
         // the text as filter is still useful for batch operations
         filterMenu.addFilter("Text", TextFilter::new);
@@ -965,7 +965,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createOtherSubmenu(ResourceBundle texts) {
+    private static JMenu createOtherSubmenu() {
         PMenu sub = new PMenu("Other");
 
         sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);

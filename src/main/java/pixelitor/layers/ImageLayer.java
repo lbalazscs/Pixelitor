@@ -336,39 +336,17 @@ public class ImageLayer extends ContentLayer implements Drawable {
             return image;
         }
 
-        int x = -getTx();
-        int y = -getTy();
+        return image.getSubimage(-getTx(), -getTy(),
+            comp.getCanvasWidth(), comp.getCanvasHeight());
+    }
 
-        assert x >= 0 : "x = " + x;
-        assert y >= 0 : "y = " + y;
-
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-
-        assert ConsistencyChecks.imageCoversCanvas(this);
-
-        BufferedImage subImage;
-        try {
-            subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
-        } catch (RasterFormatException e) {
-            System.out.printf("ImageLayer.getCanvasSizedSubImage x = %d, y = %d, " +
-                    "canvasWidth = %d, canvasHeight = %d, " +
-                    "imageWidth = %d, imageHeight = %d%n",
-                x, y, canvasWidth, canvasHeight,
-                image.getWidth(), image.getHeight());
-            WritableRaster raster = image.getRaster();
-
-            System.out.printf("ImageLayer.getCanvasSizedSubImage " +
-                    "minX = %d, minY = %d, width = %d, height=%d %n",
-                raster.getMinX(), raster.getMinY(),
-                raster.getWidth(), raster.getHeight());
-
-            throw e;
+    public BufferedImage getCanvasSizedVisibleImage() {
+        if (!isBigLayer()) {
+            return getVisibleImage();
         }
 
-        assert subImage.getWidth() == canvasWidth;
-        assert subImage.getHeight() == canvasHeight;
-        return subImage;
+        return getVisibleImage().getSubimage(-getTx(), -getTy(),
+            comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
 //    private BufferedImage getMaskedImage() {
@@ -412,7 +390,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g.dispose();
             return img;
         } else {
-            return getCanvasSizedSubImage();
+            return getCanvasSizedVisibleImage();
         }
     }
 
@@ -508,6 +486,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setImage(newImage);
 
         History.add(new ImageEdit(editName, comp, this, oldImage, true));
+        comp.update();
         updateIconImage();
     }
 

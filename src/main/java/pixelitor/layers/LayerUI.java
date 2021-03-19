@@ -38,7 +38,7 @@ public interface LayerUI {
 
     void removeMaskIcon();
 
-    void updateLayerIconImageAsync(ImageLayer imageLayer);
+    void updateLayerIconImageAsync(ImageLayer layer);
 
     /**
      * Sets the border around the icon according to the selection state

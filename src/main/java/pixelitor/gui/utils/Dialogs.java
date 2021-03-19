@@ -58,7 +58,7 @@ public class Dialogs {
         Dialogs.mainWindowInitialized = mainWindowInitialized;
     }
 
-    private static Frame getParent() {
+    private static Frame getMainWindow() {
         if (mainWindowInitialized) {
             return PixelitorWindow.get();
         }
@@ -66,7 +66,7 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(String title, String msg) {
-        showInfoDialog(getParent(), title, msg);
+        showInfoDialog(getMainWindow(), title, msg);
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
@@ -78,13 +78,17 @@ public class Dialogs {
             return;
         }
 
+        if (parent == null) { // can happen when called via Messages
+            parent = getMainWindow();
+        }
+
         GlobalEvents.dialogOpened(title);
         showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
-        return showYesNoQuestionDialog(getParent(), title, msg);
+        return showYesNoQuestionDialog(getMainWindow(), title, msg);
     }
 
     public static boolean showYesNoQuestionDialog(Component parent, String title,
@@ -94,7 +98,7 @@ public class Dialogs {
 
     public static int showYesNoCancelDialog(String title, String question,
                                             Object[] options, int messageType) {
-        return showYesNoCancelDialog(getParent(), title, question, options, messageType);
+        return showYesNoCancelDialog(getMainWindow(), title, question, options, messageType);
     }
 
     public static int showYesNoCancelDialog(Component parent, String title,
@@ -109,7 +113,7 @@ public class Dialogs {
     }
 
     public static boolean showYesNoWarningDialog(String title, String msg) {
-        return showYesNoWarningDialog(getParent(), title, msg);
+        return showYesNoWarningDialog(getMainWindow(), title, msg);
     }
 
     public static boolean showYesNoWarningDialog(Component parent, String title,
@@ -136,8 +140,17 @@ public class Dialogs {
                                              Object[] options,
                                              int initialOptionIndex,
                                              int messageType) {
+        return showOKCancelDialog(getMainWindow(), msg, title, options,
+            initialOptionIndex, messageType);
+    }
+
+    public static boolean showOKCancelDialog(Component parent,
+                                             Object msg, String title,
+                                             Object[] options,
+                                             int initialOptionIndex,
+                                             int messageType) {
         GlobalEvents.dialogOpened(title);
-        int userAnswer = showOptionDialog(getParent(), msg, title,
+        int userAnswer = showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
             options, options[initialOptionIndex]);
         GlobalEvents.dialogClosed(title);
@@ -146,7 +159,7 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(String title, String msg) {
-        showErrorDialog(getParent(), title, msg);
+        showErrorDialog(getMainWindow(), title, msg);
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
@@ -156,21 +169,25 @@ public class Dialogs {
             return;
         }
 
+        if (parent == null) { // can happen when called via Messages
+            parent = getMainWindow();
+        }
+
         GlobalEvents.dialogOpened(title);
         showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
-    public static String getTextDialog(Component parent, String title, String msg) {
+    public static String showInputDialog(Component parent, String title, String msg) {
         GlobalEvents.dialogOpened(title);
-        String userInput = showInputDialog(parent, msg, title, QUESTION_MESSAGE);
+        String userInput = JOptionPane.showInputDialog(parent, msg, title, QUESTION_MESSAGE);
         GlobalEvents.dialogClosed(title);
 
         return userInput;
     }
 
     public static void showFileNotWritableDialog(File file) {
-        showFileNotWritableDialog(getParent(), file);
+        showFileNotWritableDialog(getMainWindow(), file);
     }
 
     public static void showFileNotWritableDialog(Component parent, File file) {
@@ -181,7 +198,7 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(String title, String msg) {
-        showWarningDialog(getParent(), title, msg);
+        showWarningDialog(getMainWindow(), title, msg);
     }
 
     public static void showNotAColorOnClipboardDialog(Window parent) {
@@ -247,7 +264,7 @@ public class Dialogs {
             e = e.getCause();
         }
 
-        Frame parent = getParent();
+        Frame parent = getMainWindow();
         String basicErrorMessage = """
             A program error occurred.
                         
@@ -339,5 +356,13 @@ public class Dialogs {
 
         return showYesNoCancelDialog("Unsaved changes",
             question, options, WARNING_MESSAGE);
+    }
+
+    public static void showFileNotReadableError(Component parent, File f) {
+        showErrorDialog(parent, "File not readable",
+            "<html>The file <b>" + f.getAbsolutePath()
+                + " </b> isn't readable. " +
+                "<br>Change the file's permissions and try again."
+        );
     }
 }

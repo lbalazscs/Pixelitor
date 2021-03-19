@@ -476,7 +476,7 @@ public final class AppPreferences {
     }
 
     public static String loadMouseZoom() {
-        return mainNode.get(MOUSE_ZOOM_KEY, MouseZoomMethod.CTRL_WHEEL.saveCode());
+        return mainNode.get(MOUSE_ZOOM_KEY, MouseZoomMethod.WHEEL.saveCode());
     }
 
     private static void saveMouseZoom() {

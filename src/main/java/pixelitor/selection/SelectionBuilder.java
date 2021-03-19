@@ -120,7 +120,8 @@ public class SelectionBuilder {
                 comp.deselect(true);
 
                 Messages.showInfo("Nothing selected", "As a result of the "
-                    + interaction.toString().toLowerCase() + " operation, nothing is selected now.");
+                    + interaction.toString().toLowerCase()
+                    + " operation, nothing is selected now.", comp.getView());
             } else {
                 oldSelection.die();
                 builtSelection.setShape(combinedShape);

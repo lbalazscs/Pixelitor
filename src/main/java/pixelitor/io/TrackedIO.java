@@ -45,9 +45,6 @@ public class TrackedIO {
                              String formatName,
                              File file,
                              Consumer<ImageWriteParam> customizer) throws IOException {
-        System.out.printf("TrackedIO::write: writing %dx%d %s image to %s%n",
-            img.getWidth(), img.getHeight(), formatName, file.getAbsolutePath());
-
         var tracker = new StatusBarProgressTracker(
             "Writing " + file.getName(), 100);
         // the creation of FileOutputStream is necessary, because if the

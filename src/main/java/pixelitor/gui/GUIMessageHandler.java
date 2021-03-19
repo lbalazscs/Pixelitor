@@ -22,6 +22,7 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.MessageHandler;
 import pixelitor.utils.ProgressHandler;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 
 import static pixelitor.utils.Threads.calledOnEDT;
@@ -49,13 +50,13 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showInfo(String title, String msg) {
-        Dialogs.showInfoDialog(title, msg);
+    public void showInfo(String title, String msg, Component parent) {
+        Dialogs.showInfoDialog(parent, title, msg);
     }
 
     @Override
-    public void showError(String title, String msg) {
-        Dialogs.showErrorDialog(title, msg);
+    public void showError(String title, String msg, Component parent) {
+        Dialogs.showErrorDialog(parent, title, msg);
     }
 
     @Override

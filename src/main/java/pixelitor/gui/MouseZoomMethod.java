@@ -26,7 +26,35 @@ import javax.swing.*;
  * The configurable ways to zoom with the mouse
  */
 public enum MouseZoomMethod {
-    CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel") {
+    WHEEL("Mouse Wheel", "wheel") {
+        @Override
+        public void installOnView(View view) {
+            removeExistingListeners(view);
+            view.addMouseWheelListener(e -> {
+                if (e.getWheelRotation() < 0) { // up, away from the user
+                    view.increaseZoom(e.getPoint());
+                } else {  // down, towards the user
+                    view.decreaseZoom(e.getPoint());
+                }
+            });
+        }
+
+        @Override
+        public void installOnNavigator(JComponent navigator, View view) {
+            navigator.addMouseWheelListener(e -> {
+                if (e.getWheelRotation() < 0) { // up, away from the user
+                    // this.view will be always the active image...
+                    if (view != null) { // ...and it is null if all images are closed
+                        view.increaseZoom();
+                    }
+                } else {  // down, towards the user
+                    if (view != null) {
+                        view.decreaseZoom();
+                    }
+                }
+            });
+        }
+    }, CTRL_WHEEL("Ctrl + Mouse Wheel", "ctrl-wheel") {
         @Override
         public void installOnView(View view) {
             removeExistingListeners(view);
@@ -55,34 +83,6 @@ public enum MouseZoomMethod {
                         if (view != null) {
                             view.decreaseZoom();
                         }
-                    }
-                }
-            });
-        }
-    }, WHEEL("Mouse Wheel", "wheel") {
-        @Override
-        public void installOnView(View view) {
-            removeExistingListeners(view);
-            view.addMouseWheelListener(e -> {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    view.increaseZoom(e.getPoint());
-                } else {  // down, towards the user
-                    view.decreaseZoom(e.getPoint());
-                }
-            });
-        }
-
-        @Override
-        public void installOnNavigator(JComponent navigator, View view) {
-            navigator.addMouseWheelListener(e -> {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    // this.view will be always the active image...
-                    if (view != null) { // ...and it is null if all images are closed
-                        view.increaseZoom();
-                    }
-                } else {  // down, towards the user
-                    if (view != null) {
-                        view.decreaseZoom();
                     }
                 }
             });

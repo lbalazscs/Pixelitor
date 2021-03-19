@@ -283,6 +283,7 @@ public class GradientTool extends DragTool {
     public void resetInitialState() {
         handles = null;
         activePoint = null;
+        lastGradient = null;
         OpenImages.repaintActive();
     }
 

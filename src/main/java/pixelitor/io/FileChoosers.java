@@ -31,6 +31,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
 import java.io.File;
+import java.nio.file.Files;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -94,11 +95,15 @@ public class FileChoosers {
             public void approveSelection() {
                 File f = getSelectedFile();
                 if (!f.exists()) {
-                    Dialogs.showErrorDialog("File not found",
+                    Dialogs.showErrorDialog(this, "File not found",
                         "<html>The file <b>" + f.getAbsolutePath()
-                            + " </b> does not exist. " +
+                            + " </b> doesn't exist. " +
                             "<br>Check the file name and try again."
                     );
+                    return;
+                }
+                if (!Files.isReadable(f.toPath())) {
+                    Dialogs.showFileNotReadableError(this, f);
                     return;
                 }
                 super.approveSelection();

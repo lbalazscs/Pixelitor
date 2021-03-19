@@ -521,9 +521,14 @@ public class AppRunner {
         JMenu presetsMenu = getPresetsMenu(dialog);
         if (presetsMenu != null) {
             dialog.menuItem("savePreset").click();
+            // expect a "preset name" OK-Cancel input dialog
             var pane = findJOptionPane();
             pane.textBox().enterText(presetName);
             pane.okButton().click();
+
+            // expect a "preset already exists" Yes-No warning dialog
+            pane = findJOptionPane();
+            pane.yesButton().click();
         }
     }
 

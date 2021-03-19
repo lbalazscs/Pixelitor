@@ -141,8 +141,12 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        Color newColor = Colors.fromHTMLHex(savedValue);
-        setColor(newColor, false);
+        try {
+            Color newColor = Colors.fromHTMLHex(savedValue);
+            setColor(newColor, false);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Could not parse " + savedValue);
+        }
     }
 
     @Override

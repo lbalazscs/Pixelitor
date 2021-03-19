@@ -830,14 +830,8 @@ public class Composition implements Serializable {
             Layer firstLayer = layerList.get(0);
             if (firstLayer instanceof ImageLayer) {
                 ImageLayer layer = (ImageLayer) firstLayer;
-                if (!layer.hasMask() && Tools.currentTool.isDirectDrawing()) {
-                    if (layer.getState() != ImageLayer.State.PREVIEW) {
-                        return layer.getCanvasSizedSubImage();
-                    } else if (!layer.isBigLayer()) {
-                        // the shortcut can work even for preview images
-                        // it it isn't a big layer
-                        return layer.getVisibleImage();
-                    }
+                if (Tools.currentTool.isDirectDrawing()) {
+                    return layer.asImage(true);
                 }
             }
         }
@@ -1002,7 +996,7 @@ public class Composition implements Serializable {
 
         PixelitorEdit edit;
         if (selection != null) {
-            int answer = Dialogs.showYesNoCancelDialog("Existing Selection",
+            int answer = Dialogs.showYesNoCancelDialog(view,"Existing Selection",
                 "<html>There is already a selection on " + getName() +
                     ".<br>How do you want to combine new selection with the existing one?",
                 new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
@@ -1238,7 +1232,7 @@ public class Composition implements Serializable {
         }
 
         if (enlargeCanvas.doesNothing()) {
-            Dialogs.showInfoDialog("Nothing to be done",
+            Dialogs.showInfoDialog(view, "Nothing to be done",
                 "The canvas is already large enough to show all layer content.");
             return;
         }
@@ -1289,10 +1283,6 @@ public class Composition implements Serializable {
                                              boolean addToRecentMenus) {
         FileFormat format = saveSettings.getFormat();
         File f = saveSettings.getFile();
-
-        if (AppContext.isDevelopment()) {
-            System.out.println("Composition::saveAsync: saving " + f.getAbsolutePath());
-        }
 
         Runnable saveTask = format.getSaveTask(this, saveSettings);
         FileFormat.setLastOutput(format);

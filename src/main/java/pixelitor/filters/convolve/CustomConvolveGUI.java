@@ -283,7 +283,8 @@ public class CustomConvolveGUI extends FilterGUI {
             try {
                 values[i] = Utils.string2float(s);
             } catch (NotANumberException ex) {
-                Messages.showError("Wrong Number Format", ex.getMessage());
+                Messages.showError("Wrong Number Format", ex.getMessage(), this);
+                return;
             }
             sum += values[i];
         }

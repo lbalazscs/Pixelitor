@@ -139,12 +139,7 @@ public class UserPreset {
         assert inFile == null;
         assert loaded;
 
-        File dir = new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        File outFile = new File(dir, name + ".txt");
-
+        File outFile = calcSaveFile(true);
         try (PrintWriter writer = new PrintWriter(outFile, StandardCharsets.UTF_8)) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 writer.println(entry.getKey() + "=" + entry.getValue());
@@ -178,21 +173,38 @@ public class UserPreset {
     }
 
     public static List<UserPreset> loadPresets(String presetDirName) {
-        File filterDir = new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
-        if (!filterDir.exists()) {
+        File presetsDir = calcSaveDir(presetDirName);
+        if (!presetsDir.exists()) {
             return List.of();
         }
 
-        String[] fileNames = filterDir.list((dir, name) -> name.endsWith(".txt"));
+        String[] fileNames = presetsDir.list((dir, name) -> name.endsWith(".txt"));
         if (fileNames == null || fileNames.length == 0) {
             return List.of();
         }
 
         List<UserPreset> list = new ArrayList<>();
         for (String fileName : fileNames) {
-            File presetFile = new File(filterDir, fileName);
+            File presetFile = new File(presetsDir, fileName);
             list.add(new UserPreset(presetFile, presetDirName));
         }
         return list;
+    }
+
+    public boolean fileExists() {
+        return calcSaveFile(false).exists();
+    }
+
+    private File calcSaveFile(boolean createDirs) {
+        File dir = calcSaveDir(presetDirName);
+        if (createDirs && !dir.exists()) {
+            dir.mkdirs();
+        }
+        File outFile = new File(dir, name + ".txt");
+        return outFile;
+    }
+
+    private static File calcSaveDir(String presetDirName) {
+        return new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
     }
 }

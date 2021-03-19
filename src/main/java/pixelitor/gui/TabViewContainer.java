@@ -34,6 +34,8 @@ import static pixelitor.utils.Texts.i18n;
  * A {@link ViewContainer} used in the tabs UI.
  */
 public class TabViewContainer extends JComponent implements ViewContainer {
+    private static final boolean DESKTOP_PRINT_SUPPORTED = Desktop.isDesktopSupported()
+        && Desktop.getDesktop().isSupported(Desktop.Action.PRINT);
     private final View view;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
@@ -100,7 +102,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         }
     }
 
-    private void showPopup(MouseEvent mouse) {
+    private void showPopup(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
 
         // close the clicked one, even if it is not the active!
@@ -127,7 +129,8 @@ public class TabViewContainer extends JComponent implements ViewContainer {
                 popup.add(GUIUtils.createShowInFolderAction(file));
 
                 if (canBePrintedByOS(file)) {
-                    popup.add(GUIUtils.createPrintFileAction(comp, file));
+                    popup.add(GUIUtils.createPrintFileAction(
+                        comp, file, e.getComponent()));
                 }
             }
         }
@@ -135,20 +138,22 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         popup.addSeparator();
         popup.add(tabsUI.getTabPlacementMenu());
 
-        popup.show(mouse.getComponent(), mouse.getX(), mouse.getY());
+        popup.show(e.getComponent(), e.getX(), e.getY());
     }
 
     private static boolean canBePrintedByOS(File file) {
-        String fileName = file.getName().toLowerCase();
-
-        if (fileName.endsWith("pxc")) {
+        if (!DESKTOP_PRINT_SUPPORTED) {
             return false;
         }
 
+        String fileName = file.getName().toLowerCase();
+        if (fileName.endsWith("pxc")) {
+            return false;
+        }
         if (fileName.endsWith("ora")) {
             return false;
         }
 
-        return Desktop.getDesktop().isSupported(Desktop.Action.PRINT);
+        return true;
     }
 }

@@ -19,6 +19,8 @@ package pixelitor.utils;
 
 import pixelitor.layers.Layer;
 
+import java.awt.Component;
+
 /**
  * A non-GUI message handler for tests
  */
@@ -33,12 +35,12 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showInfo(String title, String msg) {
+    public void showInfo(String title, String msg, Component parent) {
     }
 
     @Override
-    public void showError(String title, String msg) {
-        throw new AssertionError("error");
+    public void showError(String title, String msg, Component parent) {
+        throw new AssertionError(title + ":" + msg);
     }
 
     @Override

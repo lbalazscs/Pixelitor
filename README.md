@@ -1,7 +1,5 @@
-[![Build Status](https://travis-ci.com/lbalazscs/Pixelitor.svg?branch=master)](https://travis-ci.com/lbalazscs/Pixelitor)
-
 [![Latest beta release](https://img.shields.io/github/v/release/lbalazscs/pixelitor?include_prereleases)](https://github.com/lbalazscs/Pixelitor/releases)
-
+[![Build Status](https://travis-ci.com/lbalazscs/Pixelitor.svg?branch=master)](https://travis-ci.com/lbalazscs/Pixelitor)
 
 This is the source code of [Pixelitor](https://pixelitor.sourceforge.io/) - an advanced Java image editor with layers, layer masks, text layers, 110+ image filters and color adjustments, multiple undo etc.
 
