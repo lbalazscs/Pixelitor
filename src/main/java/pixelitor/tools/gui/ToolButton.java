@@ -29,6 +29,8 @@ import java.awt.Insets;
  * The button that activates a tool
  */
 public class ToolButton extends JToggleButton {
+    public static final int TOOL_ICON_SIZE = 28;
+
     private final Tool tool;
 
     public ToolButton(Tool tool, Dimension preferredSize) {
@@ -44,14 +46,14 @@ public class ToolButton extends JToggleButton {
         Icon icon;
         if (tool == Tools.SMUDGE) {
             icon = Icons.loadMultiRes("smudge_tool.png",
-                "smudge_tool_2x.png");
+                "smudge_tool_1.5x.png");
         } else {
             icon = Icons.load(tool.getIconFileName());
         }
         setIcon(icon);
 
-        assert icon.getIconWidth() == 30;
-        assert icon.getIconHeight() == 30;
+        assert icon.getIconWidth() == TOOL_ICON_SIZE;
+        assert icon.getIconHeight() == TOOL_ICON_SIZE;
 
         char c = tool.getActivationKey();
         setToolTipText("<html>" + tool.getName() + " Tool (<b>" + c + "</b>)");

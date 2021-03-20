@@ -30,6 +30,7 @@ import javax.swing.*;
 import java.awt.Dimension;
 
 import static javax.swing.BoxLayout.Y_AXIS;
+import static pixelitor.tools.gui.ToolButton.TOOL_ICON_SIZE;
 
 /**
  * The panel with the tool buttons and the color selector
@@ -66,20 +67,27 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setupTShortCut() {
-        // there is no text tool, but pressing T should add a text layer
-        // in the menu it was added using T, not t
+        // There is no text tool, but pressing T should add a text layer.
+        // In the menu it was added using T, not t.
         GlobalEvents.addHotKey('T', AddTextLayerAction.INSTANCE);
     }
 
     private static Dimension calcToolButtonSize(Dimension screen, PixelitorWindow pw) {
-        // the icons are 30x30
         Dimension buttonSize;
-        int threshold = (int) (768 * pw.getHiDPIScaling().getScaleY());
-        if (screen.height <= threshold) { // many laptops have 1366x768, minus the taskbar
-            buttonSize = new Dimension(44, 38); // compromise
+
+        int effectiveScreenHeight = (int) (screen.height / pw.getHiDPIScaling().getScaleY());
+        if (effectiveScreenHeight < 700) {
+            // 720 is the lowest supported height.
+            // The taskbar is already subtracted from the screen size.
+            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 8);
+        } else if (effectiveScreenHeight < 770) {
+            // Laptops with the height of 768 px are also common.
+            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 10);
         } else {
-            buttonSize = new Dimension(44, 44); // ideal
+            // in the ideal case the button can be square
+            buttonSize = new Dimension(TOOL_ICON_SIZE + 14, TOOL_ICON_SIZE + 14);
         }
+
         return buttonSize;
     }
 
