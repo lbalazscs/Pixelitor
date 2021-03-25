@@ -29,7 +29,37 @@ import java.awt.Dimension;
  * The available zoom levels
  */
 public enum ZoomLevel {
-    Z12("12.5%") {
+    Z6("6.25%") {
+        @Override
+        public double asPercent() {
+            return 6.25;
+        }
+
+        @Override
+        public ZoomLevel zoomIn() {
+            return Z8;
+        }
+
+        @Override
+        public ZoomLevel zoomOut() {
+            return Z6;
+        }
+    }, Z8("8,84%") {
+        @Override
+        public double asPercent () {
+            return 8.838834764831844;
+        }
+
+        @Override
+        public ZoomLevel zoomIn () {
+            return Z12;
+        }
+
+        @Override
+        public ZoomLevel zoomOut () {
+            return Z6;
+        }
+    }, Z12("12.5%") {
         @Override
         public double asPercent() {
             return 12.5;
@@ -42,7 +72,7 @@ public enum ZoomLevel {
 
         @Override
         public ZoomLevel zoomOut() {
-            return Z12;
+            return Z8;
         }
     }, Z18("17.7%") { // 12.5 * sqrt(2)
         @Override
