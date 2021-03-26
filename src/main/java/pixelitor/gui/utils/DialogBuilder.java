@@ -17,6 +17,7 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.edit.CopyAction;
@@ -40,10 +41,8 @@ import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
  * A fluent interface for building JDialogs
  */
 public class DialogBuilder {
-    private static final String DEFAULT_OK_TEXT =
-        UIManager.getString("OptionPane.okButtonText");
-    private static final String DEFAULT_CANCEL_TEXT =
-        UIManager.getString("OptionPane.cancelButtonText");
+    private static final String DEFAULT_OK_TEXT = GUIText.OK;
+    private static final String DEFAULT_CANCEL_TEXT = GUIText.CANCEL;
 
     private String okText;
     private String cancelText;

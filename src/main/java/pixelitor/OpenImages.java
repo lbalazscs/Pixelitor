@@ -575,4 +575,32 @@ public class OpenImages {
             activeView.getComp().setActivePath(path);
         }
     }
+
+    /**
+     * Return true if the opening of the file should proceed
+     */
+    public static boolean warnIfAlreadyOpen(File file) {
+        View view = viewOfFile(file);
+        if (view == null) {
+            return true;
+        }
+        setActiveView(view, true);
+        String title = "File already opened";
+        String msg = "<html>The file <b>" + file.getAbsolutePath()
+            + "</b> is already opened.";
+        String[] options = {"Open Again", GUIText.CANCEL};
+        boolean again = Dialogs.showOKCancelDialog(view, msg, title,
+            options, 1, WARNING_MESSAGE);
+        return again;
+    }
+
+    private static View viewOfFile(File newFile) {
+        for (View view : views) {
+            File file = view.getComp().getFile();
+            if (file != null && file.getPath().equals(newFile.getPath())) {
+                return view;
+            }
+        }
+        return null;
+    }
 }

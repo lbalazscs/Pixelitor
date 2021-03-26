@@ -43,7 +43,7 @@ public class RecentFilesMenuItem extends JMenuItem {
     private void openAsync() {
         File f = recentFile.getFile();
         if (f.exists()) {
-            IO.openFileAsync(f);
+            IO.openFileAsync(f, true);
         } else {
             // the file was deleted since Pixelitor started
             String msg = format("The file %s does not exist.", f);

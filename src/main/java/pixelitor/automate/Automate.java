@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,7 +106,7 @@ public class Automate {
 
     private static void processFile(File file, CompAction action, File saveDir) {
         assert calledOutsideEDT() : "on EDT";
-        IO.openFileAsync(file)
+        IO.openFileAsync(file, false)
             .thenComposeAsync(comp -> process(comp, action), onEDT)
             .thenComposeAsync(comp -> saveAndClose(comp, saveDir), onEDT)
             .exceptionally(Messages::showExceptionOnEDT)

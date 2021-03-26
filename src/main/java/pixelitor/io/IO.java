@@ -51,7 +51,11 @@ public class IO {
     private IO() {
     }
 
-    public static CompletableFuture<Composition> openFileAsync(File file) {
+    public static CompletableFuture<Composition> openFileAsync(File file,
+                                                               boolean checkAlreadyOpen) {
+        if (checkAlreadyOpen && !OpenImages.warnIfAlreadyOpen(file)) {
+            return CompletableFuture.completedFuture(null);
+        }
         return loadCompAsync(file)
             .thenApplyAsync(OpenImages::addJustLoadedComp, onEDT)
             .whenComplete((comp, e) -> checkForReadingProblems(e));
@@ -109,7 +113,7 @@ public class IO {
             String[] options = {"Try with ImageMagick Import", "Close"};
             boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error", options, 0, JOptionPane.ERROR_MESSAGE);
             if (doMagick) {
-                ImageMagick.importComposition(de.getFile());
+                ImageMagick.importComposition(de.getFile(), false);
             }
         }
     }
@@ -189,7 +193,7 @@ public class IO {
         boolean found = false;
         for (File file : files) {
             found = true;
-            openFileAsync(file);
+            openFileAsync(file, false);
         }
         if (!found) {
             String msg = format("<html>No supported image files found in <b>%s</b>.", dir.getName());

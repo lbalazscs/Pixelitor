@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,17 @@
 
 package pixelitor.gui;
 
+import javax.swing.*;
+
 import static pixelitor.utils.Texts.i18n;
 
 /**
  * Common strings
  */
 public class GUIText {
+    public static final String OK = UIManager.getString("OptionPane.okButtonText");
+    public static final String CANCEL = UIManager.getString("OptionPane.cancelButtonText");
+
     public static final String CLOSE_DIALOG = i18n("close_dialog");
     public static final String OPACITY = i18n("opacity") + " (%)";
     public static final String ZOOM = i18n("zoom");

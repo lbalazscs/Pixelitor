@@ -47,7 +47,6 @@ import static pixelitor.utils.Threads.onIOThread;
  * class provides static utility methods that use it.
  */
 public class ImageMagick {
-
     private ImageMagick() {
         // only static utility methods
     }
@@ -114,13 +113,17 @@ public class ImageMagick {
         }
         File file = FileChoosers.getAnyOpenFile();
         if (file != null) {
-            importComposition(file);
+            importComposition(file, true);
         }
     }
 
-    public static void importComposition(File file) {
+    public static void importComposition(File file, boolean checkAlreadyOpen) {
         if (!isInstalled()) {
             showNotInstalledDialog();
+            return;
+        }
+
+        if (checkAlreadyOpen && !OpenImages.warnIfAlreadyOpen(file)) {
             return;
         }
 

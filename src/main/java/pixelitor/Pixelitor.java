@@ -154,7 +154,7 @@ public class Pixelitor {
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {
-                openedFiles.add(IO.openFileAsync(f));
+                openedFiles.add(IO.openFileAsync(f, false));
             } else {
                 Messages.showError("File not found",
                     format("The file \"%s\" does not exist", f.getAbsolutePath()));

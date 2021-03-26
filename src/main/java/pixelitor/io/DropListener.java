@@ -147,7 +147,7 @@ public class DropListener extends DropTargetAdapter {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            IO.openFileAsync(file);
+            IO.openFileAsync(file, true);
         }
     }
 
