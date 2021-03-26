@@ -44,7 +44,8 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         var upperPanel = new JPanel(new BorderLayout());
         var leftPanel = GUIUtils.arrangeVertically(paramSet);
         var rightPanel = createPresetsPanel((Action[]) otherInfo);
-        var monochromeCB = new JCheckBox("Convert to Black and White", false);
+        var monochromeCB = new JCheckBox("Allow only Black and White", false);
+        monochromeCB.setToolTipText("Link the sliders so that the image always stays Black and White");
         monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         monochromeCB.addChangeListener(e ->
             ((ChannelMixer) filter).setMonochrome(monochromeCB.isSelected()));
