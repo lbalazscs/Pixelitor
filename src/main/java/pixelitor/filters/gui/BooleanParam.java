@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.EventQueue;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,13 +95,12 @@ public class BooleanParam extends AbstractFilterParam {
     private void setupOther(FilterSetting other, boolean enable) {
         other.setEnabled(enable ? isChecked() : !isChecked(), EnabledReason.APP_LOGIC);
 
-        // a change listener fires too much, even for rollover, and
-        // an action listener ignores changes caused by randomize!
+        // an item listener because a change listener fires too much, even for
+        // rollover, and an action listener ignores changes caused by randomize
         addItemListener(e -> {
-            // invoke later because by then isChecked()
-            // is guaranteed to return the correct new value
-            EventQueue.invokeLater(() ->
-                other.setEnabled(enable ? isChecked() : !isChecked(), EnabledReason.APP_LOGIC));
+            // isChecked() is not returning the correct new value yet
+            boolean checked = e.getStateChange() == ItemEvent.SELECTED;
+            other.setEnabled(enable ? checked : !checked, EnabledReason.APP_LOGIC);
         });
     }
 

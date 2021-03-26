@@ -95,7 +95,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean allowRandomize() {
-        return randomizePolicy == ALLOW_RANDOMIZE;
+        return randomizePolicy == ALLOW_RANDOMIZE && enabledByAppLogic;
     }
 
     @Override
