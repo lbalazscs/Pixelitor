@@ -394,15 +394,6 @@ public abstract class AbstractBrushTool extends Tool {
         }
     }
 
-    public void drawBrushStrokeProgrammatically(Drawable dr, PPoint start, PPoint end) {
-        prepareProgrammaticBrushStroke(dr, start);
-
-        brush.startAt(start);
-        brush.continueTo(end);
-
-        finishBrushStroke(dr);
-    }
-
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         drawDestination.prepareBrushStroke(dr);
         graphics = createGraphicsForNewBrushStroke(dr);
@@ -554,7 +545,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     /**
-     * Traces the given shape with the current brush tool
+     * Traces the given shape with the current brush tool.
+     * The given shape must be in image coordinates.
      */
     public void trace(Drawable dr, Shape shape) {
         boolean wasLazy = lazyMouse;

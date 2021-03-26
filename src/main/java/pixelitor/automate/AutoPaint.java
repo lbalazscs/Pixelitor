@@ -31,10 +31,12 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -158,9 +160,20 @@ public class AutoPaint {
                                         Settings settings) {
         Tool tool = settings.getTool();
         // tool.randomize();
+        float curvature = settings.getMaxCurvatureVariability();
         if (tool instanceof AbstractBrushTool) {
             AbstractBrushTool abt = (AbstractBrushTool) tool;
-            abt.drawBrushStrokeProgrammatically(dr, start, end);
+            Path2D shape = new Path2D.Double();
+            shape.moveTo(start.getImX(), start.getImY());
+            double cp1X = (start.getImX() + end.getImX()) / 2.0;
+            double cp1Y = (start.getImY() + end.getImY()) / 2.0;
+            if (curvature > 0) {
+                double maxShift = start.imDist(end) * curvature;
+                cp1X += (Rnd.nextDouble() - 0.5) * maxShift;
+                cp1Y += (Rnd.nextDouble() - 0.5) * maxShift;
+            }
+            shape.quadTo(cp1X, cp1Y, end.getImX(), end.getImY());
+            abt.trace(dr, shape);
         } else {
             throw new IllegalStateException("tool = " + tool.getClass().getName());
         }
@@ -192,6 +205,10 @@ public class AutoPaint {
         private final RangeParam lengthVariability =
             new RangeParam("", 0, defaultLengthVariability, 100);
 
+        private static int defaultMaxCurvature = 100;
+        private final RangeParam maxCurvature =
+            new RangeParam("", 0, defaultMaxCurvature, 300);
+
         private static String defaultColors = COL_INTERPOLATED;
 
         private ConfigPanel() {
@@ -218,6 +235,9 @@ public class AutoPaint {
             gbh.addLabelAndControl("Stroke Length Variability (%):",
                 SliderSpinner.from(lengthVariability));
 
+            maxCurvature.setValueNoTrigger(defaultMaxCurvature);
+            gbh.addLabelAndControl("Maximal Curvature (%):",
+                SliderSpinner.from(maxCurvature));
 
             colorsLabel = new JLabel("Random Colors:");
             colorsCB = new JComboBox<>(COLOR_SETTINGS);
@@ -259,8 +279,11 @@ public class AutoPaint {
             float lengthRandomnessPercentage = lengthVariability.getPercentageValF();
             defaultLengthVariability = lengthVariability.getValue();
 
-            return new Settings(tool, numStrokes, strokeLength,
-                randomColors, lengthRandomnessPercentage, interpolatedColors);
+            float maxCurvaturePercentage = maxCurvature.getPercentageValF();
+            defaultMaxCurvature = maxCurvature.getValue();
+
+            return new Settings(tool, numStrokes, strokeLength, randomColors,
+                lengthRandomnessPercentage, maxCurvaturePercentage, interpolatedColors);
         }
 
         private int getNumStrokes() {
@@ -311,6 +334,7 @@ public class AutoPaint {
     private static class Settings {
         private final Tool tool;
         private final int numStrokes;
+        private final float maxCurvatureVariability;
         private final int minStrokeLength;
         private final int maxStrokeLength;
         private final boolean randomColors;
@@ -318,9 +342,10 @@ public class AutoPaint {
 
         private Settings(Tool tool, int numStrokes, int strokeLength,
                          boolean randomColors, float lengthVariability,
-                         boolean interpolatedColors) {
+                         float maxCurvatureVariability, boolean interpolatedColors) {
             this.tool = tool;
             this.numStrokes = numStrokes;
+            this.maxCurvatureVariability = maxCurvatureVariability;
 
             if (lengthVariability == 0.0f) {
                 minStrokeLength = strokeLength;
@@ -332,6 +357,10 @@ public class AutoPaint {
 
             this.randomColors = randomColors;
             this.interpolatedColors = interpolatedColors;
+        }
+
+        public float getMaxCurvatureVariability() {
+            return maxCurvatureVariability;
         }
 
         public Tool getTool() {

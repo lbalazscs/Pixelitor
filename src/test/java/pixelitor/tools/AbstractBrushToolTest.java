@@ -107,14 +107,4 @@ public class AbstractBrushToolTest {
         verify(brushSpy).startAt(any());
         verify(brushSpy, times(5)).continueTo(any());
     }
-
-    @Test
-    public void drawBrushStrokeProgrammatically() {
-        PPoint start = PPoint.eagerFromIm(2.0, 2.0, view);
-        PPoint end = PPoint.eagerFromIm(5.0, 5.0, view);
-        tool.drawBrushStrokeProgrammatically(dr, start, end);
-
-        verify(brushSpy).startAt(any());
-        verify(brushSpy).continueTo(any());
-    }
 }

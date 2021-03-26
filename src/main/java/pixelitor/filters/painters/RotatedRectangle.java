@@ -17,16 +17,12 @@
 
 package pixelitor.filters.painters;
 
-import pixelitor.filters.gui.AngleParam;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.SOUTH;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -142,7 +138,7 @@ public class RotatedRectangle {
     }
 
     // paints the original and rotated corners for debugging
-    private void paintCorners(Graphics2D g) {
+    public void paintCorners(Graphics2D g) {
         g.setColor(Color.RED);
         g.fillOval((int) topLeftX - 5, (int) topLeftY - 5, 10, 10);
         g.fillOval((int) origTopLeftX - 5, (int) origTopLeftY - 5, 10, 10);
@@ -158,71 +154,5 @@ public class RotatedRectangle {
         g.setColor(new Color(0, 100, 0));
         g.fillOval((int) bottomLeftX - 5, (int) bottomLeftY - 5, 10, 10);
         g.fillOval((int) origBottomLeftX - 5, (int) origBottomLeftY - 5, 10, 10);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(RotatedRectangle::buildTestGUI);
-    }
-
-    private static void buildTestGUI() {
-        try {
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-
-        JFrame f = new JFrame("Test");
-        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        var p = new JPanel();
-        p.setLayout(new BorderLayout());
-
-        var testPanel = new RotatedRectangleTesterPanel();
-        testPanel.setPreferredSize(new Dimension(200, 200));
-        p.add(testPanel, CENTER);
-
-        var angleParam = new AngleParam("", 0);
-        angleParam.setAdjustmentListener(() -> testPanel.setRotation(angleParam.getValueInRadians()));
-        p.add(angleParam.createGUI(), SOUTH);
-        f.add(p);
-
-        f.pack();
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
-    }
-
-    private static class RotatedRectangleTesterPanel extends JPanel {
-        private double rotation;
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-            // paint the original rectangle in blue
-            Rectangle rect = new Rectangle(80, 60, 140, 80);
-            g2.setColor(Color.BLUE);
-            g2.draw(rect);
-
-            // paint the rotated rectangle in red
-            var rotatedRect = new RotatedRectangle(rect, rotation);
-            Shape rotatedShape = rotatedRect.asShape();
-            g2.setColor(Color.RED);
-            g2.draw(rotatedShape);
-
-            // paint the bounding box of the rotated rectangle in black
-            if (rotation != 0) {
-                g2.setColor(Color.BLACK);
-                g2.draw(rotatedRect.getBoundingBox());
-            }
-
-            rotatedRect.paintCorners(g2);
-        }
-
-        public void setRotation(double rotation) {
-            this.rotation = rotation;
-            repaint();
-        }
     }
 }
