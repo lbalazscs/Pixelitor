@@ -34,6 +34,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.Graphics2D;
 
 import static pixelitor.selection.ShapeCombination.*;
 
@@ -366,5 +367,37 @@ public class SelectionTool extends DragTool {
         node.addString("interaction", getCurrentInteraction().toString());
 
         return node;
+    }
+
+    @Override
+    public Icon createIcon() {
+        return new SelectionToolIcon();
+    }
+
+    private static class SelectionToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            // based on selection_tool.svg
+
+            // north
+            g.fillRect(1, 1, 4, 2);
+            g.fillRect(9, 1, 4, 2);
+            g.fillRect(17, 1, 4, 2);
+
+            // east
+            g.fillRect(25, 1, 2, 4);
+            g.fillRect(25, 9, 2, 4);
+            g.fillRect(25, 17, 2, 4);
+
+            // south
+            g.fillRect(7, 25, 4, 2);
+            g.fillRect(15, 25, 4, 2);
+            g.fillRect(23, 25, 4, 2);
+
+            // west
+            g.fillRect(1, 7, 2, 4);
+            g.fillRect(1, 15, 2, 4);
+            g.fillRect(1, 23, 2, 4);
+        }
     }
 }

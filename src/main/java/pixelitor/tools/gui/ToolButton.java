@@ -19,11 +19,15 @@ package pixelitor.tools.gui;
 
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
 /**
  * The button that activates a tool
@@ -43,13 +47,7 @@ public class ToolButton extends JToggleButton {
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        Icon icon;
-        if (tool == Tools.SMUDGE) {
-            icon = Icons.loadMultiRes("smudge_tool.png",
-                "smudge_tool_1.5x.png");
-        } else {
-            icon = Icons.load(tool.getIconFileName());
-        }
+        Icon icon = tool.createIcon();
         setIcon(icon);
 
         assert icon.getIconWidth() == TOOL_ICON_SIZE;
@@ -68,5 +66,14 @@ public class ToolButton extends JToggleButton {
 
     public Tool getTool() {
         return tool;
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        if (tool == Tools.BRUSH) {
+            g2d.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+        }
+        super.paintComponent(g2d);
     }
 }

@@ -32,11 +32,12 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_ROUND;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.tools.CloneTool.State.*;
@@ -263,5 +264,50 @@ public class CloneTool extends BlendingModeBrushTool {
         node.addString("mirror", mirrorParam.getSelected().toString());
 
         return node;
+    }
+
+    @Override
+    public Icon createIcon() {
+        return new CloneToolIcon();
+    }
+
+    private static class CloneToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            // based on clone_tool.svg
+
+            // body
+            Path2D shape = new Path2D.Float();
+            shape.moveTo(0.9556584, 15.885808);
+            shape.lineTo(4.6826134, 26.81291);
+            shape.lineTo(23.317389, 26.81291);
+            shape.lineTo(27.044344, 15.885808);
+            shape.lineTo(14.029414, 15.885808);
+            shape.lineTo(5.157098, 15.885808);
+            shape.closePath();
+
+            g.setStroke(new BasicStroke(1.4f, CAP_BUTT, JOIN_ROUND, 4));
+            g.draw(shape);
+
+            // triangle
+            shape = new Path2D.Float();
+            shape.moveTo(10.273045, 19.449001);
+            shape.lineTo(14.0, 25.150095);
+            shape.lineTo(17.726954, 19.449001);
+            shape.closePath();
+
+            g.fill(shape);
+            g.draw(shape);
+
+            // handle
+            shape = new Path2D.Float();
+            shape.moveTo(12.602392, 15.648266);
+            shape.curveTo(12.602392, 15.648266, 8.388771, 10.379845, 8.438116, 6.145397);
+            shape.curveTo(8.471819, 3.2532463, 10.364073, 1.4242454, 14.003829, 1.4242454);
+            shape.curveTo(17.643581, 1.4242454, 19.590433, 3.2958915, 19.574783, 6.2119613);
+            shape.curveTo(19.552193, 10.422222, 15.397608, 15.648266, 15.397608, 15.648266);
+
+            g.draw(shape);
+        }
     }
 }

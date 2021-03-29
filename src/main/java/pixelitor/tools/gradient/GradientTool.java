@@ -27,16 +27,21 @@ import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.Tool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
 import pixelitor.tools.gradient.history.NewGradientEdit;
+import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.*;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -491,6 +496,11 @@ public class GradientTool extends DragTool {
     }
 
     @Override
+    public Icon createIcon() {
+        return new GradientToolIcon();
+    }
+
+    @Override
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
@@ -503,5 +513,15 @@ public class GradientTool extends DragTool {
             blendingModePanel.getBlendingMode().toString());
 
         return node;
+    }
+
+    private static class GradientToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            Paint gradient = new GradientPaint(0, 0, Color.BLACK,
+                ToolButton.TOOL_ICON_SIZE, 0, Color.WHITE);
+            g.setPaint(gradient);
+            g.fillRect(0, 0, ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
+        }
     }
 }

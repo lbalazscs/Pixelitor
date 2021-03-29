@@ -29,6 +29,7 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
+import pixelitor.tools.Tool;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -538,5 +539,52 @@ public class CropTool extends DragTool {
         node.addString("state", state.toString());
 
         return node;
+    }
+
+    @Override
+    public Icon createIcon() {
+        return new CropToolIcon();
+    }
+
+    private static class CropToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            // the shape is based on crop_tool.svg
+            Path2D shape = new Path2D.Float();
+
+            // top-left little square
+            shape.moveTo(5, 1);
+            shape.lineTo(8, 1);
+            shape.lineTo(8, 4);
+            shape.lineTo(5, 4);
+            shape.closePath();
+
+            // top, bigger shape
+            shape.moveTo(1, 5);
+            shape.lineTo(23, 5);
+            shape.lineTo(23, 27);
+            shape.lineTo(20, 27);
+            shape.lineTo(20, 8);
+            shape.lineTo(1, 8);
+            shape.closePath();
+
+            // bottom, smaller shape
+            shape.moveTo(5, 9);
+            shape.lineTo(8, 9);
+            shape.lineTo(8, 20);
+            shape.lineTo(19, 20);
+            shape.lineTo(19, 23);
+            shape.lineTo(5, 23);
+            shape.closePath();
+
+            // bottom-right little square
+            shape.moveTo(24, 20);
+            shape.lineTo(27, 20);
+            shape.lineTo(27, 23);
+            shape.lineTo(24, 23);
+            shape.closePath();
+
+            g.fill(shape);
+        }
     }
 }

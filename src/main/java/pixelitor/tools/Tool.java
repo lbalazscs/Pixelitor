@@ -31,14 +31,19 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.Icons;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Cursor;
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+
+import static java.awt.Color.BLACK;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * An abstract superclass for all tools.
@@ -110,8 +115,8 @@ public abstract class Tool implements KeyListener {
         return name;
     }
 
-    public String getIconFileName() {
-        return iconFileName;
+    public Icon createIcon() {
+        return Icons.load(iconFileName);
     }
 
     public char getActivationKey() {
@@ -341,5 +346,31 @@ public abstract class Tool implements KeyListener {
     @Override
     public String toString() {
         return name; // so that they can be easily selected from a JComboBox
+    }
+
+    protected abstract static class ToolIcon implements Icon {
+        @Override
+        public int getIconWidth() {
+            return ToolButton.TOOL_ICON_SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return ToolButton.TOOL_ICON_SIZE;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g;
+
+            g2.translate(x, y);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g2.setColor(BLACK);
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+            paintIcon(g2);
+        }
+
+        protected abstract void paintIcon(Graphics2D g);
     }
 }

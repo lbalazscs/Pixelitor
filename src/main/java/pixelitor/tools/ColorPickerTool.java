@@ -27,9 +27,14 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.setBGColor;
@@ -143,5 +148,47 @@ public class ColorPickerTool extends Tool {
         node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
 
         return node;
+    }
+
+    @Override
+    public Icon createIcon() {
+        return new ColorPickerToolIcon();
+    }
+
+    private static class ColorPickerToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            // based on color_picker_tool.svg
+            Path2D shape = new Path2D.Float();
+
+            shape.moveTo(15.487128, 10.694453);
+            shape.lineTo(1.8488811, 24.332703);
+            shape.curveTo(1.8488811, 24.332703, 0.9396646, 25.241873, 1.8488811, 26.151114);
+            shape.curveTo(2.7580976, 27.060343, 3.667314, 26.151114, 3.667314, 26.151114);
+            shape.lineTo(17.305561, 12.512863);
+            shape.closePath();
+
+            g.setPaint(new Color(0x68000000, true));
+            g.fill(shape);
+            g.setPaint(new Color(0xA5000000, true));
+            g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(shape);
+
+            shape = new Path2D.Float();
+            shape.moveTo(13.668696, 7.966804);
+            shape.lineTo(16.396345, 5.239154);
+            shape.lineTo(18.214779, 7.057564);
+            shape.curveTo(18.214779, 7.057564, 21.90847, 1.6428838, 22.76086, 1.6022639);
+            shape.curveTo(23.694431, 1.642764, 26.438318, 4.549124, 26.397728, 5.239154);
+            shape.curveTo(26.397728, 6.132134, 20.942429, 9.785213, 20.942429, 9.785213);
+            shape.lineTo(22.76086, 11.603653);
+            shape.lineTo(20.03321, 14.331303);
+            shape.closePath();
+
+            g.setPaint(Color.BLACK);
+            g.fill(shape);
+            g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(shape);
+        }
     }
 }

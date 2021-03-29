@@ -77,7 +77,7 @@ public class Pixelitor {
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
-//        System.setProperty("sun.java2d.uiScale", "2.0");
+//        System.setProperty("sun.java2d.uiScale", "1.5");
 
         if (JVM.isLinux) {
             // doesn't seem to pick up good defaults

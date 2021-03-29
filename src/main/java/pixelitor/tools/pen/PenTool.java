@@ -37,12 +37,14 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
+import java.awt.geom.*;
 
+import static java.awt.BasicStroke.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.PenToolMode.*;
@@ -489,5 +491,91 @@ public class PenTool extends Tool {
         node.add(mode.createDebugNode());
 
         return node;
+    }
+
+    @Override
+    public Icon createIcon() {
+        return new PenToolIcon();
+    }
+
+    private static class PenToolIcon extends Tool.ToolIcon {
+        @Override
+        public void paintIcon(Graphics2D g) {
+            // based on pen_tool.svg
+            Path2D shape = new Path2D.Float();
+
+            // _0_0_0
+            shape.moveTo(21.943825, -0.9771605);
+            shape.lineTo(18.514313, 2.9093096);
+            shape.lineTo(25.373335, 10.68231);
+            shape.lineTo(28.802845, 6.7957993);
+
+            g.setStroke(new BasicStroke(1.5f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(shape);
+
+            // _0_0_1
+            shape = new Path2D.Float();
+            shape.moveTo(20.604853, 5.4759693);
+            shape.curveTo(20.604853, 5.4759693, 16.346796, 8.32926, 10.40564, 9.043369);
+            shape.lineTo(8.63166, 19.511);
+            shape.lineTo(19.275534, 17.76645);
+            shape.curveTo(19.275534, 17.76645, 20.935696, 11.648221, 22.770067, 7.706731);
+
+            g.draw(shape);
+
+            // _0_0_2
+            shape = new Path2D.Float();
+            shape.moveTo(16.814209, 13.010571);
+            shape.curveTo(16.842209, 14.07231, 16.040462, 14.956733, 15.023422, 14.986025);
+            shape.curveTo(14.006381, 15.015317, 13.159144, 14.178387, 13.131027, 13.11665);
+            shape.curveTo(13.10291, 12.0549135, 13.904558, 11.170394, 14.921596, 11.14098);
+            shape.curveTo(15.938634, 11.111565, 16.785963, 11.948393, 16.814198, 13.010126);
+
+            g.setStroke(new BasicStroke(1.0f, CAP_ROUND, JOIN_ROUND, 4));
+            g.draw(shape);
+
+            // _0_0_3
+            Line2D line = new Line2D.Double(9, 19, 14, 14);
+            g.setStroke(new BasicStroke(1.0f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(line);
+
+            // _0_0_4
+            shape = new Path2D.Float();
+            shape.moveTo(2.4258666, 4.2028494);
+            shape.curveTo(2.26799, 18.16415, 9.739916, 25.78004, 23.500244, 25.54416);
+
+            g.setStroke(new BasicStroke(1.0f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(shape);
+
+            // _0_0_5
+            line = new Line2D.Double(10.0, 25.5, 23.5, 25.5);
+            g.draw(line);
+
+            // _0_0_6
+            Rectangle2D rect = new Rectangle2D.Double(23.5, 23.5, 4.0, 4.0);
+            g.setStroke(new BasicStroke(1.0f, CAP_ROUND, JOIN_MITER, 4));
+            g.draw(rect);
+
+            // _0_0_7
+            rect = new Rectangle2D.Double(6.5, 23.5, 4.0, 4.0);
+            g.draw(rect);
+
+            // _0_0_8
+            shape = new GeneralPath();
+            shape.moveTo(2.4098015, 4.4834995);
+            shape.curveTo(2.6331227, 19.03479, 2.4901965, 17.52837, 2.4901965, 17.52837);
+
+            g.setStroke(new BasicStroke(1.0f, CAP_BUTT, JOIN_MITER, 4));
+            g.draw(shape);
+
+            // _0_0_9
+            rect = new Rectangle2D.Double(0.5, 17.5, 4.0, 4.0);
+            g.setStroke(new BasicStroke(1.0f, CAP_ROUND, JOIN_MITER, 4));
+            g.draw(rect);
+
+            // _0_0_10
+            rect = new Rectangle2D.Double(0.5, 0.5, 4.0, 4.0);
+            g.draw(rect);
+        }
     }
 }
