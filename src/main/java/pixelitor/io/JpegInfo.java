@@ -25,17 +25,10 @@ import static javax.imageio.ImageWriteParam.*;
 /**
  * Custom configuration for JPEG images
  */
-public class JpegInfo {
-    private final float quality;
-    private final boolean progressive;
+public record JpegInfo(float quality, boolean progressive) {
     private static final float DEFAULT_QUALITY = 0.87f;
 
     public static final JpegInfo DEFAULTS = new JpegInfo(DEFAULT_QUALITY, false);
-
-    public JpegInfo(float quality, boolean progressive) {
-        this.quality = quality;
-        this.progressive = progressive;
-    }
 
     public Consumer<ImageWriteParam> toCustomizer() {
         return imageWriteParam -> {
@@ -48,11 +41,5 @@ public class JpegInfo {
             imageWriteParam.setCompressionMode(MODE_EXPLICIT);
             imageWriteParam.setCompressionQuality(quality);
         };
-    }
-
-    @Override
-    public String toString() {
-        return String.format("JpegInfo{quality=%.2f, progressive=%s}",
-            quality, progressive);
     }
 }

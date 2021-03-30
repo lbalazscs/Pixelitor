@@ -160,13 +160,7 @@ public class ColorParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), color);
     }
 
-    private static class ColorParamState implements ParamState<ColorParamState> {
-        private final Color color;
-
-        public ColorParamState(Color color) {
-            this.color = color;
-        }
-
+    private record ColorParamState(Color color) implements ParamState<ColorParamState> {
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
             return new ColorParamState(Colors.rgbInterpolate(
@@ -176,12 +170,6 @@ public class ColorParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             return Colors.toHTMLHex(color, true);
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[color=%s]",
-                getClass().getSimpleName(), color);
         }
     }
 

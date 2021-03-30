@@ -137,18 +137,17 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         SwingUtilities.invokeLater(() -> finishOnEDT(animationWriter, finalCanceled));
     }
 
-    private BufferedImage renderFrame(ParametrizedFilter filter,
-                                      double time) {
-
+    private BufferedImage renderFrame(ParametrizedFilter filter, double time) {
         long runCountBefore = Filter.runCount;
-
-        FilterState intermediateState = animation.tween(time);
-        filter.getParamSet().setState(intermediateState, true);
 
         // all sorts of problems can happen
         // if filters run outside of EDT
         var busyCursorParent = PixelitorWindow.get();
-        Runnable filterRunTask = () -> filter.startOn(dr, TWEEN_PREVIEW, busyCursorParent);
+        Runnable filterRunTask = () -> {
+            FilterState intermediateState = animation.tween(time);
+            filter.getParamSet().setState(intermediateState, true);
+            filter.startOn(dr, TWEEN_PREVIEW, busyCursorParent);
+        };
         GUIUtils.invokeAndWait(filterRunTask);
 
         long runCountAfter = Filter.runCount;

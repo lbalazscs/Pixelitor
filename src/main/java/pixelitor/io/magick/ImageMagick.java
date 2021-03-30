@@ -20,6 +20,7 @@ package pixelitor.io.magick;
 import com.bric.util.JVM;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.DecodingException;
 import pixelitor.io.FileChoosers;
@@ -73,7 +74,7 @@ public class ImageMagick {
         if (settings instanceof JPanel) { // has GUI
             accepted = Dialogs.showOKCancelDialog(settings,
                 settings.getFormatName() + " Export Options for " + file.getName(),
-                new String[]{"Export", "Cancel"}, 0,
+                new String[]{"Export", GUIText.CANCEL}, 0,
                 JOptionPane.PLAIN_MESSAGE);
         }
         if (!accepted) {

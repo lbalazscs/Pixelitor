@@ -95,14 +95,17 @@ public class TrackedIO {
         }
         ImageWriter writer = writers.next();
 
+        ImageWriteParam param = null;
         if (customizer != null) {
-            customizer.accept(writer.getDefaultWriteParam());
+            param = writer.getDefaultWriteParam();
+            customizer.accept(param);
         }
 
         try {
             writer.setOutput(ios);
             writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
-            writer.write(img);
+            IIOImage iioImage = new IIOImage(img, null, null);
+            writer.write(null, iioImage, param);
         } finally {
             writer.dispose();
             ios.flush();

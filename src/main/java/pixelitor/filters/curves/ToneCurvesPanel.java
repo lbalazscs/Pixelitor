@@ -23,7 +23,6 @@ import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.util.EventListener;
 
 /**
@@ -36,23 +35,16 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     public final ToneCurves toneCurves;
     private int mouseKnotIndex = -1;
     private int mouseKnotIndexDeleted = -1;
-    private final BufferedImage img;
     private final EventListenerList actionListenerList = new EventListenerList();
+    private final Dimension size;
 
     public ToneCurvesPanel(ToneCurves toneCurves) {
         this.toneCurves = toneCurves;
         //size: grid(255px) + curvePadding(2*10px) + scales(20px)
-        var size = new Dimension(295, 295);
+        size = new Dimension(295, 295);
         setPreferredSize(size);
         addMouseMotionListener(this);
         addMouseListener(this);
-
-        img = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
-
-        Graphics2D g = img.createGraphics();
-        toneCurves.setG2D(g);
-        toneCurves.setSize(img.getWidth(), img.getHeight());
-        toneCurves.draw();
     }
 
     public void addActionListener(ActionListener listener) {
@@ -73,11 +65,12 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        g.drawImage(img, 0, 0, null);
+
+        toneCurves.setSize(size.width, size.height);
+        toneCurves.draw((Graphics2D) g);
     }
 
     public void stateChanged() {
-        toneCurves.draw();
         repaint();
 
         fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));

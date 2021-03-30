@@ -28,7 +28,6 @@ import java.util.StringTokenizer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -300,13 +299,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return childValues;
     }
 
-    private static class GroupedRangeParamState implements ParamState<GroupedRangeParamState> {
-        private final double[] values;
-
-        public GroupedRangeParamState(double[] values) {
-            this.values = values;
-        }
-
+    private record GroupedRangeParamState(double[] values) implements ParamState<GroupedRangeParamState> {
         @Override
         public GroupedRangeParamState interpolate(GroupedRangeParamState endState, double progress) {
             double[] interpolatedValues = new double[values.length];
@@ -323,13 +316,6 @@ public class GroupedRangeParam extends AbstractFilterParam {
             return DoubleStream.of(values)
                 .mapToObj("%.2f"::formatted)
                 .collect(joining(","));
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[values=%s]",
-                getClass().getSimpleName(),
-                Arrays.toString(values));
         }
     }
 }

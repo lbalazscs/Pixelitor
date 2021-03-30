@@ -98,7 +98,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        gui.setText(((TextParamState) state).getValue());
+        gui.setText(((TextParamState) state).value());
     }
 
     @Override
@@ -121,17 +121,7 @@ public class TextParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
     }
 
-    private static class TextParamState implements ParamState<TextParamState> {
-        private final String value;
-
-        public TextParamState(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
+    private record TextParamState(String value) implements ParamState<TextParamState> {
         @Override
         public TextParamState interpolate(TextParamState endState, double progress) {
             throw new UnsupportedOperationException();

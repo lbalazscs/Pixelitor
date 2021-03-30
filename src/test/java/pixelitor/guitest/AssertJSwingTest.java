@@ -1184,7 +1184,8 @@ public class AssertJSwingTest {
 
         runMenuCommand("Export Tweening Animation...");
         var dialog = findDialogByTitle("Export Tweening Animation");
-        dialog.textBox("searchTF").enterText("wav");
+        String[] searchTexts = {"wav", "kalei"};
+        dialog.textBox("searchTF").enterText(Rnd.chooseFrom(searchTexts));
         dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
             .pressKey(VK_DOWN).releaseKey(VK_DOWN);
         dialog.button("ok").click(); // next

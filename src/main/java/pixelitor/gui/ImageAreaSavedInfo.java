@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,20 +20,5 @@ package pixelitor.gui;
 /**
  * Represents the information that is saved about an {@link ImageArea}.
  */
-public class ImageAreaSavedInfo {
-    private final ImageArea.Mode mode;
-    private final int tabPlacement;
-
-    public ImageAreaSavedInfo(ImageArea.Mode mode, int tabPlacement) {
-        this.mode = mode;
-        this.tabPlacement = tabPlacement;
-    }
-
-    public ImageArea.Mode getMode() {
-        return mode;
-    }
-
-    public int getTabPlacement() {
-        return tabPlacement;
-    }
+public record ImageAreaSavedInfo(ImageArea.Mode mode, int tabPlacement) {
 }

@@ -23,6 +23,7 @@ import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.IO;
 import pixelitor.utils.Icons;
@@ -327,7 +328,7 @@ public final class GUIUtils {
                         "Only the saved changes can be printed.<br>" +
                         "Do you want to save your changes now?";
 
-                    String[] options = {"Save and Print", "Cancel"};
+                    String[] options = {"Save and Print", GUIText.CANCEL};
                     boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,
                         "Unsaved Changes", options, 0, QUESTION_MESSAGE);
                     if (!saveAndPrint) {

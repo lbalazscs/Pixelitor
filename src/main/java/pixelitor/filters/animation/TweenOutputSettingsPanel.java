@@ -30,6 +30,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.text.ParseException;
 
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -148,7 +149,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private void updateCalculations() {
         try {
             numFramesLabel.setText(calculateNrFramesText());
-        } catch (NumberFormatException e) {
+        } catch (ParseException e) {
             // expected behaviour, we can swallow the exception
             numFramesLabel.setText("??");
         } catch (Exception e) {
@@ -157,7 +158,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         }
     }
 
-    private String calculateNrFramesText() {
+    private String calculateNrFramesText() throws ParseException {
         double nrSeconds = parseDouble(numSecondsTF.getText().trim());
         fps = parseDouble(fpsTF.getText().trim());
         nrFrames = (int) (nrSeconds * fps);

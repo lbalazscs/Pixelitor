@@ -44,7 +44,7 @@ public class Texts {
         return new MessageFormat(i18n(key)).format(args);
     }
 
-    public static void setLocale(Locale newLocale) {
-        resources = ResourceBundle.getBundle("texts", newLocale);
+    public static void init() {
+        resources = ResourceBundle.getBundle("texts", Locale.getDefault());
     }
 }

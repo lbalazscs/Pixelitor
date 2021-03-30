@@ -22,8 +22,6 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.function.Predicate;
 
-import static java.lang.String.format;
-
 /**
  * Base class for filter params that have a JComboBox as their GUI
  */
@@ -58,7 +56,7 @@ public abstract class AbstractMultipleChoiceParam<E>
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         @SuppressWarnings("unchecked")
         ChoiceParamState<E> paramState = (ChoiceParamState<E>) state;
-        setSelectedItem(paramState.getValue(), false);
+        setSelectedItem(paramState.value(), false);
     }
 
     @Override
@@ -116,31 +114,15 @@ public abstract class AbstractMultipleChoiceParam<E>
         });
     }
 
-    public static class ChoiceParamState<E> implements ParamState<ChoiceParamState<E>> {
-        final E value;
-
-        public ChoiceParamState(E value) {
-            this.value = value;
-        }
-
+    public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {
         @Override
         public ChoiceParamState<E> interpolate(ChoiceParamState<E> endState, double progress) {
             throw new UnsupportedOperationException();
         }
 
-        public E getValue() {
-            return value;
-        }
-
         @Override
         public String toSaveString() {
             return value.toString();
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[value=%s]",
-                getClass().getSimpleName(), value);
         }
     }
 }

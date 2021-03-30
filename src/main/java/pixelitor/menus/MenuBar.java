@@ -1028,7 +1028,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(ShowHideHistogramsAction.INSTANCE, F6);
         viewMenu.add(ShowHideLayersAction.INSTANCE, F7);
         viewMenu.add(ShowHideToolsAction.INSTANCE);
-        viewMenu.add(ShowHideAllAction.INSTANCE, TAB);
+        viewMenu.add(ShowHideAllAction.INSTANCE, F8);
 
         viewMenu.add(new PAction("Set Default Workspace") {
             @Override
@@ -1268,7 +1268,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new OpenImageEnabledAction("imageChanged(FULL) on the active image") {
+        sub.add(new OpenImageEnabledAction("update(FULL) on the active image") {
             @Override
             public void onClick() {
                 getActiveComp().update(FULL, true);
@@ -1400,7 +1400,7 @@ public class MenuBar extends JMenuBar {
     }
 
     private static JMenu createHelpMenu(PixelitorWindow pw, ResourceBundle texts) {
-        PMenu helpMenu = new PMenu(texts.getString("help"), 'H');
+        PMenu helpMenu = new PMenu(GUIText.HELP, 'H');
 
         String tipOfTheDayText = texts.getString("tip_of_the_day");
         helpMenu.add(new PAction(tipOfTheDayText) {

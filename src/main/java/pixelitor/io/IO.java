@@ -20,6 +20,7 @@ package pixelitor.io;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
@@ -109,7 +110,7 @@ public class IO {
         if (de.wasMagick()) {
             Messages.showError("Error", msg);
         } else {
-            String[] options = {"Try with ImageMagick Import", "Close"};
+            String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
             boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error", options, 0, JOptionPane.ERROR_MESSAGE);
             if (doMagick) {
                 ImageMagick.importComposition(de.getFile(), false);
@@ -264,7 +265,7 @@ public class IO {
             for (FileFormat format : fileFormats) {
                 File f = new File(saveDir, "all_formats." + format);
                 var saveSettings = new SaveSettings(format, f);
-                comp.saveAsync(saveSettings, false).join();
+                comp.saveAsync(saveSettings, false);
             }
         }
     }

@@ -76,7 +76,7 @@ public enum TweenWizardPage implements WizardPage {
     }, INITIAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the <i>"
+            return "<html><b><font color=blue size=+1>Initial</font></b> settings for the <i>"
                 + getFilter(wizard).getName() + "</i> filter.";
         }
 
@@ -106,7 +106,7 @@ public enum TweenWizardPage implements WizardPage {
     }, FINAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the <i>"
+            String text = "<html><b><font color=green size=+1>Final</font></b> settings for the <i>"
                 + getFilter(wizard).getName() + "</i> filter.";
             boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
             if (hasGradient) {

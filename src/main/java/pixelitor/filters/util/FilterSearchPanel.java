@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import org.jdesktop.swingx.prompt.PromptSupport;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TFValidationLayerUI;
-import pixelitor.utils.Icons;
+import pixelitor.gui.utils.VectorIcon;
+import pixelitor.layers.LayerButton;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -32,10 +33,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 
 import static java.awt.event.KeyEvent.*;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
@@ -64,9 +68,9 @@ public class FilterSearchPanel extends JPanel {
         searchTF = new JXTextField("Search");
         searchTF.setName("searchTF");
         PromptSupport.setFocusBehavior(SHOW_PROMPT, searchTF);
-        JLabel searchIcon = new JLabel(Icons.getSearchIcon());
-        searchIcon.setForeground(Color.GRAY);
-        BuddySupport.addLeft(searchIcon, searchTF);
+        JLabel searchBuddy = new JLabel(new SearchIcon());
+        searchBuddy.setForeground(Color.GRAY);
+        BuddySupport.addLeft(searchBuddy, searchTF);
 
         searchTF.requestFocusInWindow();
 
@@ -241,5 +245,28 @@ public class FilterSearchPanel extends JPanel {
         });
 
         GUIUtils.showDialog(dialog, SCREEN_CENTER);
+    }
+
+    private static class SearchIcon extends VectorIcon {
+        public SearchIcon() {
+            super(LayerButton.SELECTED_COLOR, 20, 14);
+        }
+
+        @Override
+        protected void paintIcon(Graphics2D g) {
+            // the shape is based on search.svg
+            Path2D shape = new Path2D.Float();
+            shape.moveTo(7.897525, 8.923619);
+            shape.lineTo(12.009847, 12.81312);
+            shape.curveTo(12.009847, 12.81312, 12.87233, 13.229692, 13.303571, 12.81312);
+            shape.curveTo(13.734813, 12.396544, 13.303571, 11.563393, 13.303571, 11.563393);
+            shape.lineTo(9.032443, 7.5904202);
+
+            g.fill(shape);
+            g.draw(shape);
+
+            Ellipse2D circle = new Ellipse2D.Double(1.0, 1.0, 8.5, 8.5);
+            g.draw(circle);
+        }
     }
 }

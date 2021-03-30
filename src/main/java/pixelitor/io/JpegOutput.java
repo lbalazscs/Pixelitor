@@ -66,21 +66,9 @@ public final class JpegOutput {
         return new ImageWithSize(previewImage, sizeInBytes);
     }
 
-    static class ImageWithSize {
-        final BufferedImage image;
-        final int size;
-
-        private ImageWithSize(BufferedImage image, int size) {
-            this.image = image;
-            this.size = size;
-        }
-
-        public BufferedImage getImage() {
-            return image;
-        }
-
-        public int getSize() {
-            return size;
-        }
+    /**
+     * A pair of an image and its estimated disk size.
+     */
+    record ImageWithSize(BufferedImage image, int size) {
     }
 }

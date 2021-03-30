@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.OpenInBrowserAction;
@@ -55,7 +56,7 @@ public class DialogMenuBar extends JMenuBar {
         }
 
         if (owner.hasHelp()) {
-            JMenu helpMenu = new JMenu("Help");
+            JMenu helpMenu = new JMenu(GUIText.HELP);
             helpMenu.add(new OpenInBrowserAction("Online Help", owner.getHelpURL()));
             add(helpMenu);
         }

@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.compactions.EnlargeCanvas;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -993,10 +994,10 @@ public class Composition implements Serializable {
 
         PixelitorEdit edit;
         if (selection != null) {
-            int answer = Dialogs.showYesNoCancelDialog(view,"Existing Selection",
+            int answer = Dialogs.showYesNoCancelDialog(view, "Existing Selection",
                 "<html>There is already a selection on " + getName() +
                     ".<br>How do you want to combine new selection with the existing one?",
-                new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
+                new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
                 JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
                 // canceled

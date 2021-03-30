@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.SliderSpinner;
@@ -64,7 +65,7 @@ public class CropTool extends DragTool {
     private Composite maskComposite = AlphaComposite.getInstance(
         SRC_OVER, maskOpacity.getPercentageValF());
 
-    private final JButton cancelButton = new JButton("Cancel");
+    private final JButton cancelButton = new JButton(GUIText.CANCEL);
     private JButton cropButton;
 
     private final JLabel widthLabel = new JLabel("Width:");

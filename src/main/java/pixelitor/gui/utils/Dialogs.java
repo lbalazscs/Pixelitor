@@ -20,6 +20,7 @@ package pixelitor.gui.utils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.AppContext;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Layer;
@@ -348,7 +349,7 @@ public class Dialogs {
     }
 
     public static int showCloseWarningDialog(String compName) {
-        Object[] options = {"Save", "Don't Save", "Cancel"};
+        Object[] options = {"Save", "Don't Save", GUIText.CANCEL};
         String question = format(
             "<html><b>Do you want to save the changes made to %s?</b>" +
                 "<br>Your changes will be lost if you don't save them.</html>",

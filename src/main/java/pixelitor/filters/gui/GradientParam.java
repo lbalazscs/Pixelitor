@@ -28,7 +28,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -251,15 +250,8 @@ public class GradientParam extends AbstractFilterParam {
         return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
-    private static class GradientParamState implements ParamState<GradientParamState> {
-        final float[] thumbPositions;
-        final Color[] colors;
-
-        public GradientParamState(float[] thumbPositions, Color[] colors) {
-            this.thumbPositions = thumbPositions;
-            this.colors = colors;
-        }
-
+    private record GradientParamState(float[] thumbPositions,
+                                      Color[] colors) implements ParamState<GradientParamState> {
         @Override
         public GradientParamState interpolate(GradientParamState endState, double progress) {
             // This will not work if the number of thumbs changes
@@ -301,13 +293,6 @@ public class GradientParam extends AbstractFilterParam {
                 .collect(joining(","));
 
             return thumbsString + colorsString;
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[thumbPositions=%s]",
-                getClass().getSimpleName(),
-                Arrays.toString(thumbPositions));
         }
     }
 

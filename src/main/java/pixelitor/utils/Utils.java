@@ -410,22 +410,8 @@ public final class Utils {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }
 
-    public static double parseDouble(String s) {
-        // don't accept strings that end with an 'f' or 'd',
-        // which are accepted by Double.parseDouble(s)
-        if (s.indexOf('f') != -1) {
-            throw new NumberFormatException();
-        }
-        if (s.indexOf('F') != -1) {
-            throw new NumberFormatException();
-        }
-        if (s.indexOf('d') != -1) {
-            throw new NumberFormatException();
-        }
-        if (s.indexOf('D') != -1) {
-            throw new NumberFormatException();
-        }
-        return Double.parseDouble(s);
+    public static double parseDouble(String s) throws ParseException {
+        return NumberFormat.getInstance().parse(s).doubleValue();
     }
 }
 

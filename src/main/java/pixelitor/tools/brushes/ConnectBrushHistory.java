@@ -119,14 +119,7 @@ public class ConnectBrushHistory {
         indexOfNextAdd++;
     }
 
-    private static class HistoryPoint {
-        final double x;
-        final double y;
-
-        HistoryPoint(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
+    private record HistoryPoint(double x, double y) {
     }
 
     public static class Edit extends PixelitorEdit {

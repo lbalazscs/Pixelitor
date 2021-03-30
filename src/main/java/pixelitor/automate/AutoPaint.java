@@ -160,12 +160,12 @@ public class AutoPaint {
                                         Settings settings) {
         Tool tool = settings.getTool();
         // tool.randomize();
-        float curvature = settings.getMaxCurvatureVariability();
         if (tool instanceof AbstractBrushTool abt) {
             Path2D shape = new Path2D.Double();
             shape.moveTo(start.getImX(), start.getImY());
             double cp1X = (start.getImX() + end.getImX()) / 2.0;
             double cp1Y = (start.getImY() + end.getImY()) / 2.0;
+            float curvature = settings.getMaxCurvature();
             if (curvature > 0) {
                 double maxShift = start.imDist(end) * curvature;
                 cp1X += (Rnd.nextDouble() - 0.5) * maxShift;
@@ -333,7 +333,7 @@ public class AutoPaint {
     private static class Settings {
         private final Tool tool;
         private final int numStrokes;
-        private final float maxCurvatureVariability;
+        private final float maxCurvature;
         private final int minStrokeLength;
         private final int maxStrokeLength;
         private final boolean randomColors;
@@ -341,10 +341,10 @@ public class AutoPaint {
 
         private Settings(Tool tool, int numStrokes, int strokeLength,
                          boolean randomColors, float lengthVariability,
-                         float maxCurvatureVariability, boolean interpolatedColors) {
+                         float maxCurvature, boolean interpolatedColors) {
             this.tool = tool;
             this.numStrokes = numStrokes;
-            this.maxCurvatureVariability = maxCurvatureVariability;
+            this.maxCurvature = maxCurvature;
 
             if (lengthVariability == 0.0f) {
                 minStrokeLength = strokeLength;
@@ -358,8 +358,8 @@ public class AutoPaint {
             this.interpolatedColors = interpolatedColors;
         }
 
-        public float getMaxCurvatureVariability() {
-            return maxCurvatureVariability;
+        public float getMaxCurvature() {
+            return maxCurvature;
         }
 
         public Tool getTool() {

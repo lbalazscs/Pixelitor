@@ -315,17 +315,7 @@ public class VoronoiFilter extends PointFilter {
         System.arraycopy(aaPixels, 0, pixels, 0, pixels.length);
     }
 
-    private static class VorPoint {
-        final int x;
-        final int y;
-        final int color;
-
-        public VorPoint(int x, int y, int color) {
-            this.x = x;
-            this.y = y;
-            this.color = color;
-        }
-
+    private record VorPoint(int x, int y, int color) {
         @Override
         public String toString() {
             return "{x=" + x + ", y=" + y + '}';

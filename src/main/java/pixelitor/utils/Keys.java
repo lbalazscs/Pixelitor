@@ -95,8 +95,8 @@ public class Keys {
     public static final KeyStroke F3 = getKeyStroke(VK_F3, 0);
     public static final KeyStroke F6 = getKeyStroke(VK_F6, 0);
     public static final KeyStroke F7 = getKeyStroke(VK_F7, 0);
+    public static final KeyStroke F8 = getKeyStroke(VK_F8, 0);
     public static final KeyStroke F12 = getKeyStroke(VK_F12, 0);
-    public static final KeyStroke TAB = getKeyStroke(VK_TAB, 0);
 
     public static final KeyStroke CTRL_NUMPAD_PLUS = getKeyStroke(VK_ADD, CTRL);
     public static final KeyStroke CTRL_NUMPAD_MINUS = getKeyStroke(VK_SUBTRACT, CTRL);

@@ -81,6 +81,6 @@ public enum Language {
         currentLang = lang;
         Locale newLocale = new Locale(currentLang.getCode());
         Locale.setDefault(newLocale);
-        Texts.setLocale(newLocale);
+        Texts.init();
     }
 }

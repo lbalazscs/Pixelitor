@@ -33,6 +33,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
@@ -139,7 +140,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return constrainProportionsCB.isSelected();
     }
 
-    private static double parseDouble(String s) {
+    private static double parseDouble(String s) throws ParseException {
         if (s.isEmpty()) {
             return 0;
         }
@@ -228,7 +229,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     newHeightInPercent = newWidthInPercent;
                     updateHeightTextPercent();
                 }
-            } catch (NumberFormatException e) {
+            } catch (ParseException e) {
                 resetWidthInPercent();
             }
         }
@@ -275,7 +276,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     newWidthInPercent = newHeightInPercent;
                     updateWidthTextPercent();
                 }
-            } catch (NumberFormatException e) {
+            } catch (ParseException e) {
                 resetHeightInPercent();
             }
         }

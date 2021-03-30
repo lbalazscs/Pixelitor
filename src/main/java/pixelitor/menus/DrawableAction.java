@@ -18,6 +18,7 @@
 package pixelitor.menus;
 
 import pixelitor.OpenImages;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.layers.*;
@@ -113,7 +114,7 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
                     "but the text will no longer be editable.",
                 layer.getName(), firstName, secondName);
 
-            String[] options = {"Rasterize", "Cancel"};
+            String[] options = {"Rasterize", GUIText.CANCEL};
 
             if (Dialogs.showOKCancelWarningDialog(msg, "Text Layer", options, 1)) {
                 ImageLayer newImageLayer = textLayer.replaceWithRasterized();

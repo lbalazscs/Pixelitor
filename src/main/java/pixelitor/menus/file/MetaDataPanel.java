@@ -22,6 +22,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
 import pixelitor.OpenImages;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
@@ -49,7 +50,7 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 public class MetaDataPanel extends JPanel implements DropTargetListener {
     private final JXTreeTable treeTable;
 
-    public MetaDataPanel(MetaDataTreeTableModel model) {
+    private MetaDataPanel(MetaDataTreeTableModel model) {
         super(new BorderLayout());
 
         treeTable = new JXTreeTable(model);
@@ -62,29 +63,34 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JPanel northPanel = new JPanel(new BorderLayout());
         JPanel northLeftPanel = new JPanel(new FlowLayout(LEFT));
+
         JButton expandButton = new JButton(new PAction("Expand All") {
             @Override
             public void onClick() {
                 treeTable.expandAll();
             }
         });
+        expandButton.setName("expandButton");
+
         JButton collapseButton = new JButton(new PAction("Collapse All") {
             @Override
             public void onClick() {
                 treeTable.collapseAll();
             }
         });
-        expandButton.setName("expandButton");
         collapseButton.setName("collapseButton");
+
         northLeftPanel.add(expandButton);
         northLeftPanel.add(collapseButton);
         northPanel.add(northLeftPanel, WEST);
-        JButton helpButton = new JButton(new PAction("Help") {
+
+        JButton helpButton = new JButton(new PAction(GUIText.HELP) {
             @Override
             public void onClick() {
                 showHelp();
             }
         });
+
         JPanel northRightPanel = new JPanel();
         northRightPanel.add(helpButton);
         northPanel.add(northRightPanel, EAST);
@@ -196,8 +202,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         File file = comp.getFile();
         if (file == null) {
             Dialogs.showInfoDialog(view, "No file", format(
-                "<html>There is no file for <b>%s</b>.",
-                comp.getName()));
+                "<html>There is no file for <b>%s</b>.", comp.getName()));
             return;
         }
         if (!file.exists()) {
@@ -215,8 +220,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
             return;
         }
         Metadata metadata = extractMetadata(file);
-        MetaDataTreeTableModel model = new MetaDataTreeTableModel(metadata);
-        MetaDataPanel panel = new MetaDataPanel(model);
+        MetaDataPanel panel = new MetaDataPanel(new MetaDataTreeTableModel(metadata));
         new DialogBuilder()
             .title("Metadata for " + file.getName())
             .content(panel)

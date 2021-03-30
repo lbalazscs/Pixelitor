@@ -48,7 +48,6 @@ public class ToneCurve {
     private int[] curvePlotData;
     private boolean dirty = true;
     private boolean active = false;
-    private Graphics2D gr;
     private final BasicStroke curveStroke = new BasicStroke(1);
     private final BasicStroke pointStroke = new BasicStroke(2);
 
@@ -232,22 +231,18 @@ public class ToneCurve {
         return -1;
     }
 
-    public void setG2D(Graphics2D gr) {
-        this.gr = gr;
-    }
-
     public void setActive(boolean active) {
         this.active = active;
     }
 
-    public void draw() {
-        drawCurve();
+    public void draw(Graphics2D g) {
+        drawCurve(g);
         if (active) {
-            drawKnots();
+            drawKnots(g);
         }
     }
 
-    private void drawCurve() {
+    private void drawCurve(Graphics2D g) {
         initCurvePlotData();
         Path2D path = new Path2D.Float();
         path.moveTo(0, ((float) curvePlotData[0] / 255) * height);
@@ -257,17 +252,17 @@ public class ToneCurve {
             path.lineTo(x, y);
         }
 
-        gr.setColor(channel.getDrawColor(active));
-        gr.setStroke(curveStroke);
-        gr.draw(path);
+        g.setColor(channel.getDrawColor(active));
+        g.setStroke(curveStroke);
+        g.draw(path);
     }
 
-    private void drawKnots() {
-        gr.setColor(Color.black);
-        gr.setStroke(pointStroke);
+    private void drawKnots(Graphics2D g) {
+        g.setColor(Color.black);
+        g.setStroke(pointStroke);
         int knotSize = 2 * KNOT_RADIUS_PX;
         for (int i = 0; i < curve.x.length; i++) {
-            gr.drawOval(
+            g.drawOval(
                 (int) (curve.x[i] * width) - KNOT_RADIUS_PX,
                 (int) (curve.y[i] * height) - KNOT_RADIUS_PX,
                 knotSize,

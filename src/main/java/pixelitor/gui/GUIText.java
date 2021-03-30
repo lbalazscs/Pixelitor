@@ -45,6 +45,8 @@ public class GUIText {
     public static final String FG_COLOR = i18n("fg_color");
     public static final String BG_COLOR = i18n("bg_color");
 
+    public static final String HELP = i18n("help");
+
     private GUIText() {
     }
 }

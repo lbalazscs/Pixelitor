@@ -191,13 +191,7 @@ public class AngleParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), angle);
     }
 
-    private static class AngleParamState implements ParamState<AngleParamState> {
-        private final double angle;
-
-        public AngleParamState(double angle) {
-            this.angle = angle;
-        }
-
+    private record AngleParamState(double angle) implements ParamState<AngleParamState> {
         @Override
         public AngleParamState interpolate(AngleParamState endState, double progress) {
             double interpolatedAngle = ImageMath.lerp(progress, angle, endState.angle);
@@ -207,12 +201,6 @@ public class AngleParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             return "%.2f".formatted(angle);
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[degrees=%.2f]",
-                getClass().getSimpleName(), angle);
         }
     }
 }

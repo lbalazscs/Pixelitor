@@ -51,8 +51,6 @@ public class GlobalEvents {
     private static boolean spaceDown = false;
 
     // Dialogs can be inside dialogs, and this keeps track of the nesting
-    // so that in a dialog the Tab key can be used for navigating the UI,
-    // and not for "Hide All". Non-modal dialogs are not counted.
     private static int numModalDialogs = 0;
 
     private static KeyListener keyListener;
@@ -117,9 +115,6 @@ public class GlobalEvents {
     }
 
     public static void init() {
-        // we want to use the tab key as "hide all", but
-        // tab is the focus traversal key, it must be
-        // handled before it gets consumed
         KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         keyboardFocusManager.addKeyEventDispatcher(e -> {
             if (numModalDialogs > 0) {
@@ -136,12 +131,10 @@ public class GlobalEvents {
 
         // Remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
         // so that they can be used to switch between tabs/internal frames.
-        // Also remove Tab so that is works as Show/Hide All
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
             .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
         forwardKeys = new HashSet<>(forwardKeys); // make modifiable
         forwardKeys.remove(Keys.CTRL_TAB);
-        forwardKeys.remove(Keys.TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
 
         Set<AWTKeyStroke> backwardKeys = keyboardFocusManager

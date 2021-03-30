@@ -66,8 +66,8 @@ public class ImageArea {
 
     static {
         ImageAreaSavedInfo savedInfo = AppPreferences.loadDesktopMode();
-        mode = savedInfo.getMode();
-        tabPlacement = savedInfo.getTabPlacement();
+        mode = savedInfo.mode();
+        tabPlacement = savedInfo.tabPlacement();
 
         setUI();
         setupKeysAndDnD();

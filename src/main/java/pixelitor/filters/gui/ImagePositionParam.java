@@ -157,15 +157,8 @@ public class ImagePositionParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 
-    private static class ImagePositionParamState implements ParamState<ImagePositionParamState> {
-        private final double relativeX;
-        private final double relativeY;
-
-        public ImagePositionParamState(double relX, double relY) {
-            relativeX = relX;
-            relativeY = relY;
-        }
-
+    private record ImagePositionParamState(double relativeX,
+                                           double relativeY) implements ParamState<ImagePositionParamState> {
         @Override
         public ImagePositionParamState interpolate(ImagePositionParamState endState, double progress) {
             double interpolatedX = ImageMath.lerp(progress, relativeX, endState.relativeX);
@@ -177,13 +170,6 @@ public class ImagePositionParam extends AbstractFilterParam {
         public String toSaveString() {
             // mandelbrot has 2 decimal places
             return "%.4f,%.4f".formatted(relativeX, relativeY);
-        }
-
-        @Override
-        public String toString() {
-            return format("%s[relX=%.2f, relY=%.2f]",
-                getClass().getSimpleName(),
-                relativeX, relativeY);
         }
     }
 }

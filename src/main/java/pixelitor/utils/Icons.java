@@ -38,7 +38,6 @@ public final class Icons {
     private static final Icon adjLayerIcon = load("adj_layer.png");
     private static final Icon undoIcon = load("undo.png");
     private static final Icon redoIcon = load("redo.png");
-    private static final Icon searchIcon = load("search.png");
 
     private Icons() {
         // should not be instantiated
@@ -100,9 +99,5 @@ public final class Icons {
 
     public static Icon getRedoIcon() {
         return redoIcon;
-    }
-
-    public static Icon getSearchIcon() {
-        return searchIcon;
     }
 }

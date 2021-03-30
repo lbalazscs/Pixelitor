@@ -20,6 +20,7 @@ package pixelitor.compactions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
@@ -201,7 +202,7 @@ public class Crop implements CompAction {
             "<br>It can also hide parts of the image using layer masks.";
         // the yes-no-cancel dialog can actually show more than 3 options
         int answer = Dialogs.showYesNoCancelDialog(comp.getView(), title, question,
-            new String[]{"Crop and Hide", "Only Crop", "Only Hide", "Cancel"},
+            new String[]{"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL},
             JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {
             // canceled, do nothing
