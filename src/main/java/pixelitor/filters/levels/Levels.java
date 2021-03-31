@@ -45,8 +45,14 @@ public class Levels extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
-        return new LevelsGUI(this, dr, levelsModel);
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        LevelsGUI gui = new LevelsGUI(this, dr, levelsModel);
+        if (reset) {
+            levelsModel.resetAllToDefault();
+        } else {
+            levelsModel.settingsChanged();
+        }
+        return gui;
     }
 
     public void setRGBLookup(RGBLookup rgbLookup) {

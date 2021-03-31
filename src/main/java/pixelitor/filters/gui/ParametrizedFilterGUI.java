@@ -36,28 +36,22 @@ import static java.awt.BorderLayout.SOUTH;
  * An automatically built GUI for {@link ParametrizedFilter} filters.
  */
 public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
-    /**
-     * Whether the params are reset to the default values when a new
-     * parametrized GUI is created
-     */
-    private static boolean resetParams = true;
-
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedFilterGUI(ParametrizedFilter filter,
-                                 Drawable dr,
-                                 boolean addShowOriginal) {
-        this(filter, dr, addShowOriginal, null);
+    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr,
+                                 boolean addShowOriginal, boolean reset) {
+        this(filter, dr, addShowOriginal, reset, null);
     }
 
     public ParametrizedFilterGUI(ParametrizedFilter filter,
                                  Drawable dr,
                                  boolean addShowOriginal,
+                                 boolean reset,
                                  Object otherInfo) {
         super(filter, dr);
 
         ParamSet paramSet = filter.getParamSet();
-        if (resetParams) {
+        if (reset) {
             paramSet.reset();
             paramSet.adaptToImageSize(dr.getComp().getCanvas().getSize());
         }
@@ -128,10 +122,6 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
     private boolean hasShowOriginal() {
         return showOriginalCB != null;
-    }
-
-    public static void setResetParams(boolean resetParams) {
-        ParametrizedFilterGUI.resetParams = resetParams;
     }
 
     private static class ShowOriginalCB extends JCheckBox {

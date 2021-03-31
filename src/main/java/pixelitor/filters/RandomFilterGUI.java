@@ -94,7 +94,7 @@ public class RandomFilterGUI extends FilterGUI {
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }
-            FilterGUI filterGUI = ((FilterWithGUI) newFilter).createGUI(dr);
+            FilterGUI filterGUI = ((FilterWithGUI) newFilter).createGUI(dr, true);
             realSettingsPanel.add(filterGUI);
             filterGUI.revalidate();
             lastFilterPanel = filterGUI;

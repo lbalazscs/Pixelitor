@@ -36,10 +36,14 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENC
 public class JHFourColorGradient extends ParametrizedFilter {
     public static final String NAME = "Four Color Gradient";
 
-    private final ColorParam northWestParam = new ColorParam("Northwest", new Color(20, 128, 20), NO_TRANSPARENCY);
-    private final ColorParam northEastParam = new ColorParam("Northeast", new Color(200, 200, 20), NO_TRANSPARENCY);
-    private final ColorParam southWestParam = new ColorParam("Southwest", new Color(20, 20, 200), NO_TRANSPARENCY);
-    private final ColorParam southEastParam = new ColorParam("Southeast", new Color(200, 20, 20), NO_TRANSPARENCY);
+    private final ColorParam northWestParam =
+        new ColorParam("Northwest", new Color(20, 128, 20), NO_TRANSPARENCY);
+    private final ColorParam northEastParam =
+        new ColorParam("Northeast", new Color(200, 200, 20), NO_TRANSPARENCY);
+    private final ColorParam southWestParam =
+        new ColorParam("Southwest", new Color(20, 20, 200), NO_TRANSPARENCY);
+    private final ColorParam southEastParam =
+        new ColorParam("Southeast", new Color(200, 20, 20), NO_TRANSPARENCY);
 
     private FourColorFilter filter;
 
@@ -88,7 +92,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
-        return new GridAdjustmentPanel(this, dr, true, false);
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        return new GridAdjustmentPanel(this, dr, true, false, reset);
     }
 }

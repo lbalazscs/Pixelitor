@@ -61,7 +61,7 @@ public class FilterAction extends DrawableAction {
     protected void process(Drawable dr) {
         createFilter();
 
-        filter.startOn(dr);
+        filter.startOn(dr, true);
     }
 
     private void createFilter() {

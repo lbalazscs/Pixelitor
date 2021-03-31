@@ -44,17 +44,25 @@ public class ToneCurvesFilter extends FilterWithGUI {
 
     public ToneCurvesFilter() {
         helpURL = "https://en.wikipedia.org/wiki/Curve_(tonality)";
+
+        curves = new ToneCurves();
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        if (reset) {
+            curves.reset();
+            curves.setActiveChannel(Channel.RGB);
+        }
         lastGUI = new ToneCurvesGUI(this, dr);
-        curves = lastGUI.getCurves();
+        if (!reset) {
+            lastGUI.runFilterPreview();
+        }
         return lastGUI;
     }
 
-    public void setCurves(ToneCurves curves) {
-        this.curves = curves;
+    public ToneCurves getCurves() {
+        return curves;
     }
 
     @Override

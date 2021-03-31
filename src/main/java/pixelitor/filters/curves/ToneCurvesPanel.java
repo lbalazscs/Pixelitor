@@ -33,13 +33,14 @@ import java.util.EventListener;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesPanel extends JPanel implements MouseMotionListener, MouseListener {
-    public final ToneCurves toneCurves = new ToneCurves();
+    public final ToneCurves toneCurves;
     private int mouseKnotIndex = -1;
     private int mouseKnotIndexDeleted = -1;
     private final BufferedImage img;
     private final EventListenerList actionListenerList = new EventListenerList();
 
-    public ToneCurvesPanel() {
+    public ToneCurvesPanel(ToneCurves toneCurves) {
+        this.toneCurves = toneCurves;
         //size: grid(255px) + curvePadding(2*10px) + scales(20px)
         var size = new Dimension(295, 295);
         setPreferredSize(size);
@@ -54,18 +55,18 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         toneCurves.draw();
     }
 
-    public void addActionListener(ActionListener actionListener) {
-        actionListenerList.add(ActionListener.class, actionListener);
+    public void addActionListener(ActionListener listener) {
+        actionListenerList.add(ActionListener.class, listener);
     }
 
-    public void removeActionListener(ActionListener actionListener) {
-        actionListenerList.remove(ActionListener.class, actionListener);
+    public void removeActionListener(ActionListener listener) {
+        actionListenerList.remove(ActionListener.class, listener);
     }
 
-    private void fireActionPerformed(ActionEvent actionEvent) {
+    private void fireActionPerformed(ActionEvent event) {
         EventListener[] listeners = actionListenerList.getListeners(ActionListener.class);
         for (EventListener eventListener : listeners) {
-            ((ActionListener) eventListener).actionPerformed(actionEvent);
+            ((ActionListener) eventListener).actionPerformed(event);
         }
     }
 
@@ -89,7 +90,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     public void setActiveCurve(Channel channel) {
-        toneCurves.setActiveCurve(channel);
+        toneCurves.setActiveChannel(channel);
         stateChanged();
     }
 

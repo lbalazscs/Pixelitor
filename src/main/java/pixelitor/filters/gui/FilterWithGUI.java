@@ -40,8 +40,10 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      * The panel must be created at the moment of this call (can't be cached).
      * Creating a {@link FilterGUI} should also automatically calculate
      * the first preview of this filter based on the default settings.
+     * If the reset argument is false, then the GUI must be initialized
+     * with the settings stored in this filter.
      */
-    public abstract FilterGUI createGUI(Drawable dr);
+    public abstract FilterGUI createGUI(Drawable dr, boolean reset);
 
     public abstract void randomizeSettings();
 
@@ -98,12 +100,12 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public void startOn(Drawable dr) {
+    public void startOn(Drawable dr, boolean reset) {
         dr.startPreviewing();
 
         Tools.editedObjectChanged(dr.getLayer());
 
-        FilterGUI gui = createGUI(dr);
+        FilterGUI gui = createGUI(dr, reset);
         new DialogBuilder()
             .title(getName())
             .menuBar(getMenuBar())

@@ -40,8 +40,8 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private boolean addGridLabels;
 
     public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr,
-                               boolean addGridLabels, boolean showOriginal) {
-        super(filter, dr, showOriginal);
+                               boolean addGridLabels, boolean showOriginal, boolean reset) {
+        super(filter, dr, showOriginal, reset);
         this.addGridLabels = addGridLabels;
     }
 

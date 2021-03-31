@@ -48,7 +48,7 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
         this(name, hasDialog, true);
     }
 
-    protected DrawableAction(String name, boolean hasDialog, boolean allowMasks) {
+    private DrawableAction(String name, boolean hasDialog, boolean allowMasks) {
         this.hasDialog = hasDialog;
         assert name != null;
 

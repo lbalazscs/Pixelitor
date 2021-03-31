@@ -51,6 +51,10 @@ public class Convolve extends FilterWithGUI {
         this.kernelMatrix = kernelMatrix;
     }
 
+    public float[] getKernelMatrix() {
+        return kernelMatrix;
+    }
+
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Kernel kernel = new Kernel(size, size, kernelMatrix);
@@ -65,13 +69,13 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
-        return new CustomConvolveGUI(this, dr);
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        return new CustomConvolveGUI(this, dr, reset);
     }
 
     @Override
     public void randomizeSettings() {
-        kernelMatrix = getRandomKernelMatrix(size);
+        kernelMatrix = createRandomKernelMatrix(size);
     }
 
     private BufferedImageOp createConvolveOp(Kernel kernel) {
@@ -84,7 +88,7 @@ public class Convolve extends FilterWithGUI {
     /**
      * Returns a randomized array that is on average close to being normalized
      */
-    public static float[] getRandomKernelMatrix(int size) {
+    public static float[] createRandomKernelMatrix(int size) {
         Random rand = new Random();
         float[] retVal = new float[size * size];
         for (int i = 0; i < retVal.length; i++) {

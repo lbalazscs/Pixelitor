@@ -17,7 +17,11 @@
 
 package pixelitor.filters.util;
 
-import pixelitor.filters.*;
+import pixelitor.filters.Fade;
+import pixelitor.filters.Filter;
+import pixelitor.filters.RGBPixelOp;
+import pixelitor.filters.RepeatLast;
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 
@@ -80,8 +84,15 @@ public class FilterUtils {
             return;
         }
         FilterUtils.lastFilter = lastFilter;
-        RepeatLast.INSTANCE.setText("Repeat " + lastFilter.getName());
-        RepeatLast.INSTANCE.setEnabled(true);
+        RepeatLast.update(lastFilter);
+    }
+
+    public static boolean hasLastFilter() {
+        return lastFilter != null;
+    }
+
+    public static boolean hasLastGUIFilter() {
+        return lastFilter instanceof FilterWithGUI;
     }
 
     public static Optional<Filter> getLastFilter() {

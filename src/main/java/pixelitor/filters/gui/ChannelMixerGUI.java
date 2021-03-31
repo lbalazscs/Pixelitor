@@ -33,8 +33,9 @@ import static javax.swing.BoxLayout.Y_AXIS;
  * The GUI for the "Channel Mixer"
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
-    public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr, Action[] actions) {
-        super(filter, dr, true, actions);
+    public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr,
+                           Action[] actions, boolean reset) {
+        super(filter, dr, true, reset, actions);
     }
 
     @Override

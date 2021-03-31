@@ -375,7 +375,7 @@ public class Debug {
     }
 
     public static void startFilter(Filter filter) {
-        filter.startOn(OpenImages.getActiveDrawableOrThrow());
+        filter.startOn(OpenImages.getActiveDrawableOrThrow(), true);
     }
 
     public static void addNewImageWithMask() {

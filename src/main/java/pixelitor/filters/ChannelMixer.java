@@ -438,8 +438,8 @@ public class ChannelMixer extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
-        return new ChannelMixerGUI(this, dr, presets);
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        return new ChannelMixerGUI(this, dr, presets, reset);
     }
 
     private static RangeParam from(String first, String second, int defaultValue) {

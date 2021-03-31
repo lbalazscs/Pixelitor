@@ -17,10 +17,14 @@
 
 package pixelitor.filters;
 
+import pixelitor.FilterContext;
+import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
-import static pixelitor.FilterContext.REPEAT_LAST;
+import java.util.Optional;
+
 import static pixelitor.filters.util.FilterUtils.getLastFilter;
 
 /**
@@ -28,17 +32,56 @@ import static pixelitor.filters.util.FilterUtils.getLastFilter;
  * Currently only the filters can be repeated.
  */
 public class RepeatLast extends DrawableAction {
-    public static final RepeatLast INSTANCE = new RepeatLast();
-    private static final String DEFAULT_NAME = "Repeat Last";
+    public static final RepeatLast REPEAT_LAST_ACTION = new RepeatLast(false);
+    public static final RepeatLast SHOW_LAST_ACTION = new RepeatLast(true);
 
-    private RepeatLast() {
-        super(DEFAULT_NAME);
+    private static final String REPEAT_LAST_DEFAULT_NAME = "Repeat Last";
+    private static final String SHOW_LAST_DEFAULT_NAME = "Show Last";
+
+    private final boolean showDialog;
+
+    private RepeatLast(boolean showDialog) {
+        super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME);
+        this.showDialog = showDialog;
         setEnabled(false);
     }
 
     @Override
     protected void process(Drawable dr) {
-        getLastFilter()
-            .ifPresent(filter -> filter.startOn(dr, REPEAT_LAST));
+        Optional<Filter> lastFilter = getLastFilter();
+        if (showDialog) {
+            lastFilter.ifPresent(filter -> filter.startOn(dr, false));
+        } else {
+            lastFilter.ifPresent(filter -> filter.startOn(dr, FilterContext.REPEAT_LAST));
+        }
+    }
+
+    @Override
+    public void setEnabled(boolean newValue) {
+        // This is called both when images are opened/closed AND when filters are running
+        if (newValue) {
+            boolean hasLast;
+            if (showDialog) {
+                hasLast = FilterUtils.hasLastGUIFilter();
+            } else {
+                hasLast = FilterUtils.hasLastFilter();
+            }
+            super.setEnabled(hasLast);
+        } else {
+            super.setEnabled(false);
+        }
+    }
+
+    public static void update(Filter lastFilter) {
+        REPEAT_LAST_ACTION.setText("Repeat " + lastFilter.getName());
+        REPEAT_LAST_ACTION.setEnabled(true);
+
+        if (lastFilter instanceof FilterWithGUI) {
+            SHOW_LAST_ACTION.setText("Show " + lastFilter.getName());
+            SHOW_LAST_ACTION.setEnabled(true);
+        } else {
+            SHOW_LAST_ACTION.setText(REPEAT_LAST_DEFAULT_NAME);
+            SHOW_LAST_ACTION.setEnabled(false);
+        }
     }
 }

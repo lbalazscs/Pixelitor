@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.animation;
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
@@ -91,7 +90,7 @@ public enum TweenWizardPage implements WizardPage {
             ParametrizedFilter filter = getFilter(wizard);
             dr.startPreviewing();
 
-            return filter.createGUI(dr);
+            return filter.createGUI(dr, true);
         }
 
         @Override
@@ -102,8 +101,6 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public void finish(Wizard wizard, Drawable dr) {
             getAnimation(wizard).copyInitialStateFromCurrent();
-
-            ParametrizedFilterGUI.setResetParams(false);
             getFilter(wizard).getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
@@ -130,7 +127,7 @@ public enum TweenWizardPage implements WizardPage {
             dr.stopPreviewing(); // stop the initial one
             dr.startPreviewing(); // start the final one
 
-            return getFilter(wizard).createGUI(dr);
+            return getFilter(wizard).createGUI(dr, false);
         }
 
         @Override

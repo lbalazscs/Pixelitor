@@ -66,7 +66,7 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
         return new TextSettingsPanel(this, dr);
     }
 

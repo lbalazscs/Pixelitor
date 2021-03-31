@@ -17,7 +17,6 @@
 
 package pixelitor.filters.curves;
 
-import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.levels.Channel;
 import pixelitor.gui.utils.GUIUtils;
@@ -37,45 +36,35 @@ import static javax.swing.BoxLayout.PAGE_AXIS;
 public class ToneCurvesGUI extends FilterGUI {
     private final ToneCurvesPanel curvesPanel;
 
-    public ToneCurvesGUI(Filter filter, Drawable dr) {
+    public ToneCurvesGUI(ToneCurvesFilter filter, Drawable dr) {
         super(filter, dr);
+        setLayout(new BoxLayout(this, PAGE_AXIS));
+        ToneCurves curves = filter.getCurves();
 
-        // listen for any change in curves to run filter preview
-        curvesPanel = new ToneCurvesPanel();
-        curvesPanel.addActionListener(e -> {
-            ((ToneCurvesFilter) filter).setCurves(curvesPanel.toneCurves);
-            runFilterPreview();
-        });
+        add(createChannelPanel(curves.getActiveChannel()));
 
-        JPanel chartPanel = new JPanel(new FlowLayout(LEFT));
-        chartPanel.add(curvesPanel);
+        curvesPanel = new ToneCurvesPanel(curves);
+        curvesPanel.addActionListener(e -> runFilterPreview());
+        add(curvesPanel);
 
-        JPanel buttonsPanel = createButtonsPanel(dr, curvesPanel);
-
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, PAGE_AXIS));
-        mainPanel.add(createChannelPanel(curvesPanel));
-        mainPanel.add(chartPanel);
-        mainPanel.add(buttonsPanel);
-
-        add(mainPanel);
+        add(createButtonsPanel(dr, curvesPanel));
     }
 
-    private static JPanel createChannelPanel(ToneCurvesPanel curvesPanel) {
+    private JPanel createChannelPanel(Channel activeChannel) {
         JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
 
         channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(createChannelsCombo(curvesPanel));
+        channelPanel.add(createChannelsCombo(activeChannel));
         channelPanel.add(GUIUtils.createResetChannelButton(e ->
             curvesPanel.resetActiveCurve()));
 
         return channelPanel;
     }
 
-    private static JComboBox<Channel> createChannelsCombo(ToneCurvesPanel panel) {
+    private JComboBox<Channel> createChannelsCombo(Channel activeChannel) {
         var channelTypeCB = GUIUtils.createComboBox(Channel.values());
-        channelTypeCB.setSelectedItem(Channel.RGB);
-        channelTypeCB.addActionListener(e -> panel.setActiveCurve(
+        channelTypeCB.setSelectedItem(activeChannel);
+        channelTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
             (Channel) channelTypeCB.getSelectedItem()));
         return channelTypeCB;
     }

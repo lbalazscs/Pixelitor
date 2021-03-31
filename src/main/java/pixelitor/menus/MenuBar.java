@@ -59,7 +59,10 @@ import pixelitor.io.OptimizedJpegSavePanel;
 import pixelitor.io.magick.ExportSettings;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.*;
-import pixelitor.menus.edit.*;
+import pixelitor.menus.edit.CopyAction;
+import pixelitor.menus.edit.FadeAction;
+import pixelitor.menus.edit.PasteAction;
+import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.file.LayerAnimExport;
 import pixelitor.menus.file.MetaDataPanel;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -745,7 +748,8 @@ public class MenuBar extends JMenuBar {
             }
         }, F3);
 
-        filterMenu.add(RepeatLast.INSTANCE, CTRL_F);
+        filterMenu.add(RepeatLast.REPEAT_LAST_ACTION, CTRL_F);
+        filterMenu.add(RepeatLast.SHOW_LAST_ACTION, CTRL_ALT_F);
 
         filterMenu.addSeparator();
 

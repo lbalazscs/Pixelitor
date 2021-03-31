@@ -45,7 +45,7 @@ public class CustomConvolveGUI extends FilterGUI {
     private Box presetsBox;
     private final int size;
 
-    public CustomConvolveGUI(Convolve filter, Drawable dr) {
+    public CustomConvolveGUI(Convolve filter, Drawable dr, boolean reset) {
         super(filter, dr);
         setLayout(new BoxLayout(this, X_AXIS));
 
@@ -54,7 +54,13 @@ public class CustomConvolveGUI extends FilterGUI {
         initLeftVerticalBox();
         initPresetBox();
 
-        reset(size);
+        if (reset) {
+            reset(size);
+        } else {
+            // use the last values
+            setMatrix(filter.getKernelMatrix());
+            collectValuesAndRun(null);
+        }
     }
 
     private void initLeftVerticalBox() {
@@ -62,7 +68,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
         addTextFieldsPanel(box);
         addNormalizeButton(box);
-        addTryButton(box);
+        addRunButton(box);
 
         box.add(Box.createVerticalStrut(20));
 
@@ -99,10 +105,11 @@ public class CustomConvolveGUI extends FilterGUI {
         leftVerticalBox.add(normalizeButton);
     }
 
-    private void addTryButton(Box leftVerticalBox) {
-        JButton tryButton = new JButton("Try");
-        tryButton.addActionListener(this::collectValuesAndRun);
-        leftVerticalBox.add(tryButton);
+    private void addRunButton(Box leftVerticalBox) {
+        JButton runButton = new JButton("Run");
+        runButton.setToolTipText("Run the filter with the current values.");
+        runButton.addActionListener(this::collectValuesAndRun);
+        leftVerticalBox.add(runButton);
     }
 
     private void initPresetBox() {
@@ -121,7 +128,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
-            setValues(Convolve.getRandomKernelMatrix(size));
+            setMatrix(Convolve.createRandomKernelMatrix(size));
             collectValuesAndRun(e);
         });
         presetsBox.add(randomizeButton);
@@ -142,7 +149,7 @@ public class CustomConvolveGUI extends FilterGUI {
     private void initPreset(String name, float[] kernel) {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
-            setValues(kernel);
+            setMatrix(kernel);
             collectValuesAndRun(e);
         });
         presetsBox.add(button);
@@ -267,7 +274,7 @@ public class CustomConvolveGUI extends FilterGUI {
         float[] defaultValues = new float[size * size];
         defaultValues[defaultValues.length / 2] = 1.0f;
 
-        setValues(defaultValues);
+        setMatrix(defaultValues);
     }
 
     private void setupTextField(JTextField textField) {
@@ -290,12 +297,12 @@ public class CustomConvolveGUI extends FilterGUI {
         }
         enableNormalizeButton(sum);
 
-        if (e.getSource() == normalizeButton && sum != 0.0f) {
+        if (e != null && e.getSource() == normalizeButton && sum != 0.0f) {
             for (int i = 0; i < values.length; i++) {
                 values[i] /= sum;
             }
 
-            setValues(values);
+            setMatrix(values);
         }
 
         Convolve convolve = (Convolve) this.filter;
@@ -303,13 +310,12 @@ public class CustomConvolveGUI extends FilterGUI {
         runFilterPreview();
     }
 
-    private void setValues(float[] values) {
+    public void setMatrix(float[] values) {
         assert values.length == size * size;
 
         float sum = 0;
         for (int i = 0; i < textFields.length; i++) {
-            JTextField textField = textFields[i];
-            textField.setText(Utils.float2String(values[i]));
+            textFields[i].setText(Utils.float2String(values[i]));
             sum += values[i];
         }
 

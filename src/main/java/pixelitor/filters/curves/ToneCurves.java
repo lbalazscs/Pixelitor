@@ -33,7 +33,7 @@ import java.util.EnumMap;
 public class ToneCurves {
     private final EnumMap<Channel, ToneCurve> curvesByChannel
         = new EnumMap<>(Channel.class);
-    private Channel activeChannel = Channel.RGB;
+    private Channel activeChannel;
     private Graphics2D gr;
     private final BasicStroke gridStroke = new BasicStroke(1);
     private int width = 295;
@@ -50,7 +50,7 @@ public class ToneCurves {
         curvesByChannel.put(Channel.RED, new ToneCurve(Channel.RED));
         curvesByChannel.put(Channel.GREEN, new ToneCurve(Channel.GREEN));
         curvesByChannel.put(Channel.BLUE, new ToneCurve(Channel.BLUE));
-        setActiveCurve(Channel.RGB);
+        setActiveChannel(Channel.RGB);
     }
 
     public ToneCurve getCurve(Channel channel) {
@@ -61,10 +61,18 @@ public class ToneCurves {
         return curvesByChannel.get(activeChannel);
     }
 
-    public void setActiveCurve(Channel channel) {
-        curvesByChannel.get(activeChannel).setActive(false);
-        curvesByChannel.get(channel).setActive(true);
-        activeChannel = channel;
+    public void setActiveChannel(Channel channel) {
+        if (activeChannel != channel) {
+            if (activeChannel != null) {
+                curvesByChannel.get(activeChannel).setActive(false);
+            }
+            curvesByChannel.get(channel).setActive(true);
+            activeChannel = channel;
+        }
+    }
+
+    public Channel getActiveChannel() {
+        return activeChannel;
     }
 
     public void setSize(int width, int height) {

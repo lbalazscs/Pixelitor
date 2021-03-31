@@ -55,8 +55,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr) {
-        return new ParametrizedFilterGUI(this, dr, addShowOriginal);
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        return new ParametrizedFilterGUI(this, dr, addShowOriginal, reset);
     }
 
     @Override

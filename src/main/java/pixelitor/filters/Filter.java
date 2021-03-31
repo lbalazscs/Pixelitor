@@ -74,10 +74,13 @@ public abstract class Filter implements Serializable {
      * Filters that work normally without a dialog can still have a
      * dialog when invoked from places like "Random Filter"
      */
-    public void startOn(Drawable dr) {
+    public void startOn(Drawable dr, boolean reset) {
         startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
+    /**
+     * This method never shows a dialog.
+     */
     public void startOn(Drawable dr, FilterContext context) {
         startOn(dr, context, PixelitorWindow.get());
     }
