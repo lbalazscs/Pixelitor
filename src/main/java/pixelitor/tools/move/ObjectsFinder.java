@@ -83,7 +83,7 @@ public class ObjectsFinder {
         ListIterator<Layer> li = layers.listIterator(layers.size());
         while (li.hasPrevious()) {
             Layer layer = li.previous();
-            if (!(layer instanceof ContentLayer)) {
+            if (!(layer instanceof ContentLayer contentLayer)) {
                 continue;
             }
             if (!layer.isVisible()) {
@@ -93,7 +93,6 @@ public class ObjectsFinder {
                 continue;
             }
 
-            ContentLayer contentLayer = (ContentLayer) layer;
             int pixel = contentLayer.getPixelAtPoint(pPixel);
 
             if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {

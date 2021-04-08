@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,14 +42,13 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public Object getValueAt(Object node, int column) {
-        if (node instanceof DirNode) {
+        if (node instanceof DirNode dir) {
             return switch (column) {
-                case 0 -> ((DirNode) node).getName();
+                case 0 -> dir.getName();
                 case 1 -> null;
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
-        } else if (node instanceof TagNode) {
-            TagNode tag = (TagNode) node;
+        } else if (node instanceof TagNode tag) {
             return switch (column) {
                 case 0 -> tag.getName();
                 case 1 -> tag.getValue();
@@ -61,8 +60,7 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof DirNode) {
-            DirNode dir = (DirNode) parent;
+        if (parent instanceof DirNode dir) {
             return dir.nodes.get(index);
         }
         return dirNodes.get(index);
@@ -70,8 +68,7 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof DirNode) {
-            DirNode dir = (DirNode) parent;
+        if (parent instanceof DirNode dir) {
             return dir.nodes.size();
         }
         return dirNodes.size();

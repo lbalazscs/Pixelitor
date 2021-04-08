@@ -87,14 +87,14 @@ public class RandomFilterGUI extends FilterGUI {
         filter = newFilter;
         String filterName = newFilter.getName();
         realSettingsPanel.setBorder(createTitledBorder(filterName));
-        if (newFilter instanceof FilterWithGUI) {
+        if (newFilter instanceof FilterWithGUI newFilterWithGUI) {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }
-            FilterGUI filterGUI = ((FilterWithGUI) newFilter).createGUI(dr, true);
+            FilterGUI filterGUI = newFilterWithGUI.createGUI(dr, true);
             realSettingsPanel.add(filterGUI);
             filterGUI.revalidate();
             lastFilterPanel = filterGUI;

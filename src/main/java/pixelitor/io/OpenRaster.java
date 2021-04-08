@@ -81,8 +81,7 @@ public class OpenRaster {
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
         for (int i = numLayers - 1; i >= 0; i--) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
+            if (layer instanceof ImageLayer imageLayer) {
                 var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
                 stackXML += writeLayer(imageLayer, i, zos, subTracker);
             }

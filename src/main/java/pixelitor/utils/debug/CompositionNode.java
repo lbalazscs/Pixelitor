@@ -91,10 +91,10 @@ public class CompositionNode extends DebugNode {
     }
 
     private void addLayerNode(Layer layer) {
-        if (layer instanceof ImageLayer) {
-            addImageLayerNode((ImageLayer) layer);
-        } else if (layer instanceof TextLayer) {
-            addTextLayerNode((TextLayer) layer);
+        if (layer instanceof ImageLayer imageLayer) {
+            addImageLayerNode(imageLayer);
+        } else if (layer instanceof TextLayer textLayer) {
+            addTextLayerNode(textLayer);
         } else {
             addQuotedString("layer class", layer.getClass().getName());
         }

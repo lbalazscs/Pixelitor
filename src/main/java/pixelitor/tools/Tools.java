@@ -145,14 +145,14 @@ public class Tools {
     }
 
     public static void increaseActiveBrushSize() {
-        if (currentTool instanceof AbstractBrushTool) {
-            ((AbstractBrushTool) currentTool).increaseBrushSize();
+        if (currentTool instanceof AbstractBrushTool abt) {
+            abt.increaseBrushSize();
         }
     }
 
     public static void decreaseActiveBrushSize() {
-        if (currentTool instanceof AbstractBrushTool) {
-            ((AbstractBrushTool) currentTool).decreaseBrushSize();
+        if (currentTool instanceof AbstractBrushTool abt) {
+            abt.decreaseBrushSize();
         }
     }
 

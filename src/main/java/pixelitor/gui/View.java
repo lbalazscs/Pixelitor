@@ -472,8 +472,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     private void updateContainerSize() {
-        if (viewContainer instanceof ImageFrame) {
-            ImageFrame frame = (ImageFrame) viewContainer;
+        if (viewContainer instanceof ImageFrame frame) {
             frame.setToCanvasSize();
         }
     }
@@ -730,8 +729,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             Layers.numLayersChanged(comp, comp.getNumLayers());
         }
 
-        if (newLayer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) newLayer;
+        if (newLayer instanceof ImageLayer imageLayer) {
             imageLayer.updateIconImage();
         }
         if (newLayer.hasMask()) {

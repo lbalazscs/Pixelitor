@@ -117,8 +117,7 @@ public abstract class Filter implements Serializable {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) {
             Layer layer = (Layer) dr;
-            if (layer instanceof LayerMask) {
-                LayerMask mask = (LayerMask) layer;
+            if (layer instanceof LayerMask mask) {
                 layer = mask.getOwner();
             }
             String errorDetails = String.format(

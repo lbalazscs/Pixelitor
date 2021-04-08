@@ -220,8 +220,7 @@ public class History {
             return Optional.empty();
         }
         PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit instanceof FadeableEdit) {
-            FadeableEdit fadeableEdit = (FadeableEdit) lastEdit;
+        if (lastEdit instanceof FadeableEdit fadeableEdit) {
             if (!fadeableEdit.isFadeable()) {
                 return Optional.empty();
             }

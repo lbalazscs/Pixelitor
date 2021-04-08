@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,11 +82,10 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
     public DraggablePointAssert isRetracted() {
         isNotNull();
 
-        if (!(actual instanceof ControlPoint)) {
+        if (!(actual instanceof ControlPoint cp)) {
             throw new AssertionError("This is not an ControlPoint");
         }
 
-        ControlPoint cp = (ControlPoint) actual;
         if (!cp.isRetracted()) {
             AnchorPoint anchor = cp.getAnchor();
             throw new AssertionError(format(
@@ -101,11 +100,10 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
     public DraggablePointAssert isNotRetracted() {
         isNotNull();
 
-        if (!(actual instanceof ControlPoint)) {
+        if (!(actual instanceof ControlPoint cp)) {
             throw new AssertionError("This is not an ControlPoint");
         }
 
-        ControlPoint cp = (ControlPoint) actual;
         if (cp.isRetracted()) {
             throw new AssertionError("retracted");
         }
@@ -117,11 +115,10 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
     public DraggablePointAssert bothControlsAreRetracted() {
         isNotNull();
 
-        if (!(actual instanceof AnchorPoint)) {
+        if (!(actual instanceof AnchorPoint ap)) {
             throw new AssertionError("This is not an AnchorPoint");
         }
 
-        AnchorPoint ap = (AnchorPoint) actual;
         assertThat(ap.ctrlIn).isRetracted();
         assertThat(ap.ctrlOut).isRetracted();
 

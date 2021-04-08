@@ -1169,15 +1169,13 @@ public class ImageUtils {
 
     public static BufferedImage copyToBufferedImage(Image img) {
         BufferedImage copy;
-        if (img instanceof BufferedImage) {
-            BufferedImage bufferedImage = (BufferedImage) img;
+        if (img instanceof BufferedImage bufferedImage) {
             if (bufferedImage.getColorModel() instanceof IndexColorModel) {
                 copy = convertToARGB(bufferedImage, false);
             } else {
                 copy = copyImage(bufferedImage);
             }
-        } else if (img instanceof VolatileImage) {
-            VolatileImage volatileImage = (VolatileImage) img;
+        } else if (img instanceof VolatileImage volatileImage) {
             copy = volatileImage.getSnapshot();
         } else {
             throw new UnsupportedOperationException("img class is " + img.getClass().getName());

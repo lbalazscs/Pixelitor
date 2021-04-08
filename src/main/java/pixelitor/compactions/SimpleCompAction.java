@@ -96,8 +96,7 @@ public abstract class SimpleCompAction extends OpenImageEnabledAction implements
     }
 
     private void processLayer(Layer layer) {
-        if (layer instanceof ContentLayer) {
-            ContentLayer contentLayer = (ContentLayer) layer;
+        if (layer instanceof ContentLayer contentLayer) {
             transform(contentLayer);
         }
         if (layer.hasMask()) {

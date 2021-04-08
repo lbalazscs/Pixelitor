@@ -164,9 +164,8 @@ public class ResizingFilterHelper {
     private static boolean onlyNullTrackersHaveFilterUnits(BufferedImageOp filter,
                                                            int filterUnits) {
         if (filterUnits > 0) {
-            if (filter instanceof AbstractBufferedImageOp) {
-                return ((AbstractBufferedImageOp) filter).getProgressTracker()
-                    == ProgressTracker.NULL_TRACKER;
+            if (filter instanceof AbstractBufferedImageOp imgOp) {
+                return imgOp.getProgressTracker() == ProgressTracker.NULL_TRACKER;
             }
         }
         return true;

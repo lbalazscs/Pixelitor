@@ -221,10 +221,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activate(layer);
         } else {
-            if (layer instanceof TextLayer) {
-                ((TextLayer) layer).edit(PixelitorWindow.get());
-            } else if (layer instanceof AdjustmentLayer) {
-                ((AdjustmentLayer) layer).configure();
+            if (layer instanceof TextLayer textLayer) {
+                textLayer.edit(PixelitorWindow.get());
+            } else if (layer instanceof AdjustmentLayer adjLayer) {
+                adjLayer.configure();
             }
         }
     }
@@ -534,8 +534,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         this.layer = newLayer;
         Icon icon = createLayerIcon(layer);
         layerIconLabel.setIcon(icon);
-        if (newLayer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) newLayer;
+        if (newLayer instanceof ImageLayer imageLayer) {
             updateLayerIconImageAsync(imageLayer);
         }
 

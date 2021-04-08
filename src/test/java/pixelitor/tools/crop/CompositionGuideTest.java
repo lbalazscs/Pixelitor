@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -252,8 +252,7 @@ class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
     @Override
     public boolean matches(List<Shape> shapes) {
         for (int i = 0; i < shapes.size(); i++) {
-            if (shapes.get(i) instanceof Line2D) {
-                Line2D line = (Line2D) shapes.get(i);
+            if (shapes.get(i) instanceof Line2D line) {
                 Line2D line2 = this.shapes.get(i);
                 assertEquals(line.getX1(), line2.getX1(), 1.0e-15);
                 assertEquals(line.getY1(), line2.getY1(), 1.0e-15);

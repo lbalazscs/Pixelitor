@@ -174,11 +174,11 @@ public class Canvas implements Serializable {
 
         Rectangle2D canvasBounds = getBounds();
 
-        if (shape instanceof Rectangle2D) {
+        if (shape instanceof Rectangle2D rect) {
             // don't ruin the type information in the shape by
             // creating an unnecessary Area, because this is useful
             // info in many ways (crop selection, AA selection clipping)
-            return ((Rectangle2D) shape).createIntersection(canvasBounds);
+            return rect.createIntersection(canvasBounds);
         }
 
         Area canvasArea = new Area(canvasBounds);

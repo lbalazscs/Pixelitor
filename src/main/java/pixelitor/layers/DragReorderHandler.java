@@ -102,8 +102,7 @@ public class DragReorderHandler extends MouseInputAdapter {
         Component c = e.getComponent();
         // the source of the event must be either the layer button
         // or the textfield inside it
-        if (c instanceof LayerNameEditor) {
-            LayerNameEditor nameEditor = (LayerNameEditor) c;
+        if (c instanceof LayerNameEditor nameEditor) {
             layerButton = nameEditor.getLayerButton();
             // translate into the LayerButton coordinate system
             e.translatePoint(nameEditor.getX(), nameEditor.getY());

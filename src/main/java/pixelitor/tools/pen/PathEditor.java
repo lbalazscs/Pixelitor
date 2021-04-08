@@ -77,8 +77,7 @@ public class PathEditor implements PenToolMode {
         boolean altDown = e.isAltDown();
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
-            if (e.isPopupTrigger() && hit instanceof AnchorPoint) {
-                AnchorPoint ap = (AnchorPoint) hit;
+            if (e.isPopupTrigger() && hit instanceof AnchorPoint ap) {
                 ap.showPopup((int) x, (int) y);
             } else if (altDown) {
                 altMousePressedHit(hit, x, y);
@@ -91,11 +90,9 @@ public class PathEditor implements PenToolMode {
     }
 
     private static void altMousePressedHit(DraggablePoint hit, double x, double y) {
-        if (hit instanceof ControlPoint) {
-            ControlPoint cp = (ControlPoint) hit;
+        if (hit instanceof ControlPoint cp) {
             altMousePressedHitControl(cp, x, y);
-        } else if (hit instanceof AnchorPoint) {
-            AnchorPoint ap = (AnchorPoint) hit;
+        } else if (hit instanceof AnchorPoint ap) {
             altMousePressedHitAnchor(ap, x, y);
         }
     }
@@ -133,8 +130,7 @@ public class PathEditor implements PenToolMode {
         double y = e.getCoY();
 
         if (activePoint != null) {
-            if (e.isPopupTrigger() && activePoint instanceof AnchorPoint) {
-                AnchorPoint ap = (AnchorPoint) activePoint;
+            if (e.isPopupTrigger() && activePoint instanceof AnchorPoint ap) {
                 ap.showPopup((int) x, (int) y);
             } else {
                 activePoint.mouseReleased(x, y, e.isShiftDown());

@@ -80,8 +80,7 @@ public class DebugNodes {
         node.addInt("view height", view.getHeight());
 
         var viewContainer = view.getViewContainer();
-        if (viewContainer instanceof ImageFrame) {
-            var frame = (ImageFrame) viewContainer;
+        if (viewContainer instanceof ImageFrame frame) {
             node.addInt("frame width", frame.getWidth());
             node.addInt("frame height", frame.getHeight());
         }

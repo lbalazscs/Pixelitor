@@ -446,19 +446,16 @@ public class RandomGUITest {
 
         long runCountBefore = Filter.runCount;
 
-        if (f instanceof FilterWithGUI) {
-            ((FilterWithGUI) f).randomizeSettings();
-        }
-
-        if (f instanceof FilterWithGUI) {
+        if (f instanceof FilterWithGUI filterWithGUI) {
+            filterWithGUI.randomizeSettings();
             dr.startPreviewing();
 
             try {
                 f.startOn(dr, PREVIEWING);
             } catch (Throwable e) {
                 BufferedImage src = dr.getFilterSourceImage();
-                if (f instanceof ParametrizedFilter) {
-                    ParamSet paramSet = ((ParametrizedFilter) f).getParamSet();
+                if (filterWithGUI instanceof ParametrizedFilter pf) {
+                    ParamSet paramSet = pf.getParamSet();
                     System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
                             "src.width = %d, src.height = %d, params = %s%n",
@@ -1007,8 +1004,7 @@ public class RandomGUITest {
 
     private static void randomTextLayerRasterize() {
         Layer layer = OpenImages.getActiveLayer();
-        if (layer instanceof TextLayer) {
-            TextLayer textLayer = (TextLayer) layer;
+        if (layer instanceof TextLayer textLayer) {
             log("rasterize text layer " + layer.getName());
 
             textLayer.replaceWithRasterized();
@@ -1067,14 +1063,14 @@ public class RandomGUITest {
                     log("re-link layer mask");
                     mask.setLinked(true, true);
                 }
-            } else if (layer instanceof ImageLayer) {
+            } else if (layer instanceof ImageLayer imageLayer) {
                 double d = rand.nextDouble();
                 if (d > 0.5) {
                     log("apply layer mask");
-                    ((ImageLayer) layer).applyLayerMask(true);
+                    imageLayer.applyLayerMask(true);
                 } else {
                     log("delete layer mask");
-                    layer.deleteMask(true);
+                    imageLayer.deleteMask(true);
                 }
             } else {
                 log("delete layer mask");

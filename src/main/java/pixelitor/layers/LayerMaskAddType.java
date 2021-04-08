@@ -119,12 +119,10 @@ public enum LayerMaskAddType {
     // the visible contents of the layer
     private static BufferedImage createMaskFromLayer(Layer layer,
                                                      boolean onlyTransparency) {
-        if (layer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) layer;
+        if (layer instanceof ImageLayer imageLayer) {
             BufferedImage image = imageLayer.getCanvasSizedSubImage();
             return createMaskFromImage(image, onlyTransparency);
-        } else if (layer instanceof TextLayer) {
-            TextLayer textLayer = (TextLayer) layer;
+        } else if (layer instanceof TextLayer textLayer) {
             // the rasterized image is canvas-sized
             BufferedImage rasterizedImage = textLayer.createRasterizedImage(true);
             return createMaskFromImage(rasterizedImage, onlyTransparency);

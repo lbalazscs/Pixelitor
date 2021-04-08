@@ -116,11 +116,11 @@ public class PathBuilder implements PenToolMode {
             if (altDown) {
                 DraggablePoint hit = path.handleWasHit(x, y, altDown);
                 if (hit != null) {
-                    if (hit instanceof ControlPoint) {
-                        breakAndStartMoving((ControlPoint) hit, x, y);
+                    if (hit instanceof ControlPoint cp) {
+                        breakAndStartMoving(cp, x, y);
                         return;
-                    } else if (hit instanceof AnchorPoint) {
-                        startDraggingOutNewHandles((AnchorPoint) hit, x, y);
+                    } else if (hit instanceof AnchorPoint ap) {
+                        startDraggingOutNewHandles(ap, x, y);
                         return;
                     }
                 } else {
@@ -159,11 +159,11 @@ public class PathBuilder implements PenToolMode {
         // if only alt is down, then break control points
         DraggablePoint hit = path.handleWasHit(x, y, true);
         if (hit != null) {
-            if (hit instanceof ControlPoint) {
-                breakAndStartMoving((ControlPoint) hit, x, y);
+            if (hit instanceof ControlPoint cp) {
+                breakAndStartMoving(cp, x, y);
                 return true;
-            } else if (hit instanceof AnchorPoint) {
-                startDraggingOutNewHandles((AnchorPoint) hit, x, y);
+            } else if (hit instanceof AnchorPoint ap) {
+                startDraggingOutNewHandles(ap, x, y);
                 return true;
             }
         }

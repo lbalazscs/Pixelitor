@@ -312,10 +312,9 @@ public class DraggablePoint extends Point2D.Double {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DraggablePoint)) {
+        if (!(o instanceof DraggablePoint that)) {
             return false;
         }
-        DraggablePoint that = (DraggablePoint) o;
         return samePositionAs(that);
     }
 

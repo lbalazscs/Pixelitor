@@ -74,8 +74,8 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
 
     private String getExtensionFromFileFilter() {
         FileFilter currentFilter = getFileFilter();
-        if (currentFilter instanceof FileNameExtensionFilter) { // not "Accept All"
-            return ((FileNameExtensionFilter) currentFilter).getExtensions()[0];
+        if (currentFilter instanceof FileNameExtensionFilter extFilter) { // not "Accept All"
+            return extFilter.getExtensions()[0];
         }
         return null;
     }

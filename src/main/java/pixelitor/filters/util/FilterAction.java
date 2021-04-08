@@ -92,10 +92,9 @@ public class FilterAction extends DrawableAction {
         }
 
         createFilter();
-        if (!(filter instanceof ParametrizedFilter)) {
+        if (!(filter instanceof ParametrizedFilter pf)) {
             return false;
         }
-        ParametrizedFilter pf = (ParametrizedFilter) filter;
         if (pf.excludedFromAnimation()) {
             return false;
         }

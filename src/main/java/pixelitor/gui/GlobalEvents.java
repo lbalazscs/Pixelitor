@@ -308,8 +308,7 @@ public class GlobalEvents {
         String descr = c.getClass().getSimpleName();
         if (c instanceof View) {
             descr += "(name = " + c.getName() + ")";
-        } else if (c instanceof ToolButton) {
-            ToolButton b = (ToolButton) c;
+        } else if (c instanceof ToolButton b) {
             descr += "(name = " + b.getTool().getName() + ")";
         }
 

@@ -161,8 +161,7 @@ public class AutoPaint {
         Tool tool = settings.getTool();
         // tool.randomize();
         float curvature = settings.getMaxCurvatureVariability();
-        if (tool instanceof AbstractBrushTool) {
-            AbstractBrushTool abt = (AbstractBrushTool) tool;
+        if (tool instanceof AbstractBrushTool abt) {
             Path2D shape = new Path2D.Double();
             shape.moveTo(start.getImX(), start.getImY());
             double cp1X = (start.getImX() + end.getImX()) / 2.0;

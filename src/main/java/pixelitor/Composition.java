@@ -601,8 +601,7 @@ public class Composition implements Serializable {
 
     public void forEachContentLayer(Consumer<ContentLayer> action) {
         for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
+            if (layer instanceof ContentLayer contentLayer) {
                 action.accept(contentLayer);
             }
         }
@@ -610,8 +609,8 @@ public class Composition implements Serializable {
 
     public void forEachDrawable(Consumer<Drawable> action) {
         for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                action.accept((ImageLayer) layer);
+            if (layer instanceof ImageLayer imageLayer) {
+                action.accept(imageLayer);
             }
             if (layer.hasMask()) {
                 action.accept(layer.getMask());
@@ -729,8 +728,7 @@ public class Composition implements Serializable {
     public void drawMovementContours(Graphics2D g, MoveMode mode) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
+            if (layer instanceof ContentLayer contentLayer) {
                 Rectangle imBounds = contentLayer.getContentBounds();
                 Shapes.drawVisibly(g, view.imageToComponentSpace(imBounds));
             }
@@ -828,8 +826,7 @@ public class Composition implements Serializable {
     public BufferedImage calculateCompositeImage() {
         if (layerList.size() == 1) { // shortcut
             Layer firstLayer = layerList.get(0);
-            if (firstLayer instanceof ImageLayer) {
-                ImageLayer layer = (ImageLayer) firstLayer;
+            if (firstLayer instanceof ImageLayer layer) {
                 if (Tools.currentTool.isDirectDrawing()) {
                     return layer.asImage(true);
                 }
@@ -1112,8 +1109,7 @@ public class Composition implements Serializable {
     }
 
     public void createSelectionFromText() {
-        if (activeLayer instanceof TextLayer) {
-            TextLayer textLayer = (TextLayer) activeLayer;
+        if (activeLayer instanceof TextLayer textLayer) {
             textLayer.createSelectionFromText();
         } else {
             throw new IllegalStateException("active layer is not text layer");
@@ -1205,8 +1201,7 @@ public class Composition implements Serializable {
     @VisibleForTesting
     public void allImageLayersToCanvasSize() {
         for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
+            if (layer instanceof ImageLayer imageLayer) {
                 imageLayer.toCanvasSizeWithHistory();
             }
         }
@@ -1225,8 +1220,7 @@ public class Composition implements Serializable {
         EnlargeCanvas enlargeCanvas = new EnlargeCanvas(0, 0, 0, 0);
 
         for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
+            if (layer instanceof ContentLayer contentLayer) {
                 enlargeCanvas.setupToFitContentOf(contentLayer);
             }
         }
@@ -1391,8 +1385,7 @@ public class Composition implements Serializable {
         }
         mode = newMode;
         for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
+            if (layer instanceof ImageLayer imageLayer) {
                 imageLayer.convertMode(newMode);
             }
         }

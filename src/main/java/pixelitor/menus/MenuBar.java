@@ -1294,8 +1294,7 @@ public class MenuBar extends JMenuBar {
             public void onClick() {
                 var comp = getActiveComp();
                 Layer layer = comp.getActiveLayer();
-                if (layer instanceof ContentLayer) {
-                    ContentLayer contentLayer = (ContentLayer) layer;
+                if (layer instanceof ContentLayer contentLayer) {
                     contentLayer.setTranslation(0, 0);
                 }
                 if (layer.hasMask()) {

@@ -325,8 +325,7 @@ public abstract class Layer implements Serializable {
 
         int maskTx = 0;
         int maskTy = 0;
-        if (inheritTranslation && this instanceof ContentLayer) {
-            ContentLayer contentLayer = (ContentLayer) this;
+        if (inheritTranslation && this instanceof ContentLayer contentLayer) {
             maskTx = contentLayer.getTx();
             maskTy = contentLayer.getTy();
         }

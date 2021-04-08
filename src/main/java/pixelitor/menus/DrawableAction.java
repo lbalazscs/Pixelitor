@@ -96,9 +96,9 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
                 Dialogs.showErrorDialog("Mask is active",
                     name + " cannot be applied to masks.");
             }
-        } else if (layer instanceof ImageLayer) {
-            process((ImageLayer) layer);
-        } else if (layer instanceof TextLayer) {
+        } else if (layer instanceof ImageLayer imageLayer) {
+            process(imageLayer);
+        } else if (layer instanceof TextLayer textLayer) {
             if (RandomGUITest.isRunning()) {
                 return;
             }
@@ -116,7 +116,7 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
             String[] options = {"Rasterize", "Cancel"};
 
             if (Dialogs.showOKCancelWarningDialog(msg, "Text Layer", options, 1)) {
-                ImageLayer newImageLayer = ((TextLayer) layer).replaceWithRasterized();
+                ImageLayer newImageLayer = textLayer.replaceWithRasterized();
                 process(newImageLayer);
             }
         } else if (layer instanceof AdjustmentLayer) {

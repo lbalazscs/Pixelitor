@@ -145,8 +145,7 @@ public class DialogMenuBar extends JMenuBar {
             // "yes" was pressed, remove the old preset from the menu
             Component[] menuComponents = presetsMenu.getMenuComponents();
             for (Component item : menuComponents) {
-                if (item instanceof JMenuItem) {
-                    JMenuItem menuItem = (JMenuItem) item;
+                if (item instanceof JMenuItem menuItem) {
                     if (menuItem.getText().equals(preset.getName())) {
                         presetsMenu.remove(menuItem);
                         break;

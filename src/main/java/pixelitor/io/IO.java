@@ -93,8 +93,7 @@ public class IO {
             checkForReadingProblems(e.getCause());
             return;
         }
-        if (e instanceof DecodingException) {
-            DecodingException de = (DecodingException) e;
+        if (e instanceof DecodingException de) {
             if (calledOnEDT()) {
                 showDecodingError(de);
             } else {

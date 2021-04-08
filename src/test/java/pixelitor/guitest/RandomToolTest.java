@@ -627,8 +627,7 @@ public class RandomToolTest {
         int numLayers = comp.getNumLayers();
         for (int i = 0; i < numLayers; i++) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
+            if (layer instanceof ImageLayer imageLayer) {
                 Rectangle layerBounds = imageLayer.getContentBounds();
                 max.add(layerBounds);
             }

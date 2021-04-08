@@ -139,10 +139,9 @@ public class Debug {
     }
 
     public static boolean isRgbColorModel(ColorModel cm) {
-        if (cm instanceof DirectColorModel
+        if (cm instanceof DirectColorModel dcm
             && cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            var dcm = (DirectColorModel) cm;
             return dcm.getRedMask() == 0x00FF0000
                 && dcm.getGreenMask() == 0x0000FF00
                 && dcm.getBlueMask() == 0x000000FF
@@ -153,10 +152,9 @@ public class Debug {
     }
 
     public static boolean isBgrColorModel(ColorModel cm) {
-        if (cm instanceof DirectColorModel &&
+        if (cm instanceof DirectColorModel dcm &&
             cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            var dcm = (DirectColorModel) cm;
             return dcm.getRedMask() == 0x000000FF
                 && dcm.getGreenMask() == 0x0000FF00
                 && dcm.getBlueMask() == 0x00FF0000
