@@ -65,8 +65,12 @@ public class CopyAction extends OpenImageEnabledAction {
         Transferable imageTransferable = new ImageTransferable(copy);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
-        // TODO JDK bug? a stack trace is printed, but the image is copied.
-        clipboard.setContents(imageTransferable, null);
+        try {
+            // TODO JDK bug? a stack trace is printed, but the image is copied.
+            clipboard.setContents(imageTransferable, null);
+        } catch (IllegalStateException e) {
+            // ignore, see issue #181
+        }
     }
 }
 
