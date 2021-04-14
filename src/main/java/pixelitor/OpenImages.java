@@ -449,7 +449,7 @@ public class OpenImages {
         addAsNewComp(comp);
 
         File file = comp.getFile();
-        RecentFilesMenu.getInstance().addFile(file);
+        RecentFilesMenu.INSTANCE.addFile(file);
         Messages.showFileOpenedMessage(file);
 
         return comp;

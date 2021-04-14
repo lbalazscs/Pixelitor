@@ -351,7 +351,7 @@ public final class AppPreferences {
 
     private static void savePreferences() {
         saveDesktopMode();
-        saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileInfosForSaving());
+        saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFileInfosForSaving());
         saveFramePosition(PixelitorWindow.get());
         saveLastOpenDir();
         saveLastSaveDir();

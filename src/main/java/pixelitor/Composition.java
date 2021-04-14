@@ -1322,7 +1322,7 @@ public class Composition implements Serializable {
 
         setFile(file);
         if (addToRecentMenus) {
-            RecentFilesMenu.getInstance().addFile(file);
+            RecentFilesMenu.INSTANCE.addFile(file);
         }
         ImagePreviewPanel.removeThumbFromCache(file);
         Messages.showFileSavedMessage(file);

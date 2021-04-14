@@ -137,9 +137,7 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_O);
 
-        // recent files
-        JMenu recentFiles = RecentFilesMenu.getInstance();
-        fileMenu.add(recentFiles);
+        fileMenu.add(RecentFilesMenu.INSTANCE);
 
         fileMenu.addSeparator();
 

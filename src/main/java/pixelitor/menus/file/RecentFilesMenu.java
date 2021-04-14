@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,6 @@ import javax.swing.*;
 import java.io.File;
 
 import static pixelitor.utils.Texts.i18n;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The "File/Recent Files" menu
@@ -34,18 +32,18 @@ import static pixelitor.utils.Threads.threadInfo;
 public final class RecentFilesMenu extends JMenu {
     public static final int MAX_RECENT_FILES = 10;
 
-    private static RecentFilesMenu singleInstance;
+    public static final RecentFilesMenu INSTANCE = new RecentFilesMenu();
 
     private final JMenuItem clearMenuItem;
 
-    private BoundedUniqueList<RecentFile> recentFiles;
+    private final BoundedUniqueList<RecentFile> recentFiles;
 
     private RecentFilesMenu() {
         super(i18n("recent_files"));
 
         clearMenuItem = new JMenuItem(i18n("clear_recent"));
         clearMenuItem.addActionListener(e -> clear());
-        load();
+        recentFiles = AppPreferences.loadRecentFiles();
         rebuildGUI();
     }
 
@@ -53,20 +51,10 @@ public final class RecentFilesMenu extends JMenu {
         try {
             AppPreferences.removeRecentFiles();
             recentFiles.clear();
-            clearGUI();
+            rebuildGUI();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
-    }
-
-    public static RecentFilesMenu getInstance() {
-        assert calledOnEDT() : threadInfo();
-
-        if (singleInstance == null) {
-            //noinspection NonThreadSafeLazyInitialization
-            singleInstance = new RecentFilesMenu();
-        }
-        return singleInstance;
     }
 
     public void addFile(File f) {
@@ -76,11 +64,7 @@ public final class RecentFilesMenu extends JMenu {
         }
     }
 
-    private void load() {
-        recentFiles = AppPreferences.loadRecentFiles();
-    }
-
-    private void clearGUI() {
+    private void removeAllMenuItems() {
         removeAll();
     }
 
@@ -89,7 +73,7 @@ public final class RecentFilesMenu extends JMenu {
     }
 
     private void rebuildGUI() {
-        clearGUI();
+        removeAllMenuItems();
 
         for (int i = 0; i < recentFiles.size(); i++) {
             RecentFile recentFile = recentFiles.get(i);
@@ -100,8 +84,9 @@ public final class RecentFilesMenu extends JMenu {
 
         if (!recentFiles.isEmpty()) {
             addSeparator();
-            add(clearMenuItem);
         }
+
+        add(clearMenuItem);
     }
 }
 
