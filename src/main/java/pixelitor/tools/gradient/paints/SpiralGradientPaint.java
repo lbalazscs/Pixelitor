@@ -32,25 +32,11 @@ import static java.awt.MultipleGradientPaint.CycleMethod.*;
 /**
  * A Paint that creates an "spiral gradient"
  */
-public class SpiralGradientPaint implements Paint {
-    private final boolean clockwise;
-    private final ImDrag imDrag;
-    private final Color startColor;
-    private final Color endColor;
-    private final CycleMethod cycleMethod;
-
+public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
+                                  Color startColor, Color endColor,
+                                  CycleMethod cycleMethod) implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
     private static final int AA_RES2 = AA_RES * AA_RES;
-
-    public SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
-                               Color startColor, Color endColor,
-                               CycleMethod cycleMethod) {
-        this.clockwise = clockwise;
-        this.imDrag = imDrag;
-        this.startColor = startColor;
-        this.endColor = endColor;
-        this.cycleMethod = cycleMethod;
-    }
 
     @Override
     public PaintContext createContext(ColorModel cm,

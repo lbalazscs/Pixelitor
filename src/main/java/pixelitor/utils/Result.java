@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public interface Result<V, E> {
 
     V get();
 
-    E getError();
+    E errorDetail();
 
     <W> Result<W, E> map(Function<? super V, ? extends W> mapper);
 
@@ -44,13 +44,7 @@ public interface Result<V, E> {
     }
 }
 
-class OK<V, E> implements Result<V, E> {
-    private final V value;
-
-    OK(V value) {
-        this.value = value;
-    }
-
+record OK<V, E>(V value) implements Result<V, E> {
     @Override
     public boolean isOK() {
         return true;
@@ -62,7 +56,7 @@ class OK<V, E> implements Result<V, E> {
     }
 
     @Override
-    public E getError() {
+    public E errorDetail() {
         throw new IllegalStateException("no error");
     }
 
@@ -72,13 +66,7 @@ class OK<V, E> implements Result<V, E> {
     }
 }
 
-class Error<V, E> implements Result<V, E> {
-    private final E errorDetail;
-
-    Error(E errorDetail) {
-        this.errorDetail = errorDetail;
-    }
-
+record Error<V, E>(E errorDetail) implements Result<V, E> {
     @Override
     public boolean isOK() {
         return false;
@@ -87,11 +75,6 @@ class Error<V, E> implements Result<V, E> {
     @Override
     public V get() {
         throw new IllegalStateException("no value");
-    }
-
-    @Override
-    public E getError() {
-        return errorDetail;
     }
 
     @Override

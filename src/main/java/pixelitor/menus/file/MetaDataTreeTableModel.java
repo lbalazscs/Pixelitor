@@ -44,14 +44,14 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     public Object getValueAt(Object node, int column) {
         if (node instanceof DirNode dir) {
             return switch (column) {
-                case 0 -> dir.getName();
+                case 0 -> dir.name();
                 case 1 -> null;
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
         } else if (node instanceof TagNode tag) {
             return switch (column) {
-                case 0 -> tag.getName();
-                case 1 -> tag.getValue();
+                case 0 -> tag.name();
+                case 1 -> tag.value();
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
         }
@@ -76,8 +76,7 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        TagNode tag = (TagNode) child;
-        return tag.getIndex();
+        return ((TagNode) child).index();
     }
 
     @Override
@@ -122,32 +121,11 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
             }
         }
 
-        public String getName() {
+        public String name() {
             return dir.getName();
         }
     }
 
-    static class TagNode {
-        final String name;
-        final String value;
-        final int index;
-
-        TagNode(String name, String value, int index) {
-            this.name = name;
-            this.value = value;
-            this.index = index;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public int getIndex() {
-            return index;
-        }
+    private record TagNode(String name, String value, int index) {
     }
 }

@@ -27,54 +27,15 @@ import pixelitor.tools.shapes.StrokeType;
  * Represents the configuration of a stroke.
  * It also functions as the {@link ParamState} of {@link StrokeParam}
  */
-public class StrokeSettings implements ParamState<StrokeSettings> {
-    private final double width;
-    private final StrokeCap cap;
-    private final StrokeJoin join;
-    private final StrokeType type;
-    private final ShapeType shapeType;
-    private final boolean dashed;
-
-    public StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
-                          StrokeType type, ShapeType shapeType, boolean dashed) {
-        this.width = width;
-        this.cap = cap;
-        this.join = join;
-        this.type = type;
-        this.shapeType = shapeType;
-        this.dashed = dashed;
-    }
-
+public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
+                             StrokeType type, ShapeType shapeType,
+                             boolean dashed) implements ParamState<StrokeSettings> {
     @Override
     public StrokeSettings interpolate(StrokeSettings endState, double progress) {
         // the stroke width is the only thing that can be animated
         double newWidth = ImageMath.lerp(progress, width, endState.width);
 
         return new StrokeSettings(newWidth, cap, join, type, shapeType, dashed);
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public StrokeCap getCap() {
-        return cap;
-    }
-
-    public StrokeJoin getJoin() {
-        return join;
-    }
-
-    public StrokeType getType() {
-        return type;
-    }
-
-    public ShapeType getShapeType() {
-        return shapeType;
-    }
-
-    public boolean isDashed() {
-        return dashed;
     }
 
     @Override

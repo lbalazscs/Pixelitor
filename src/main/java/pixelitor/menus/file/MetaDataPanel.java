@@ -23,7 +23,6 @@ import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
 import pixelitor.OpenImages;
 import pixelitor.gui.GUIText;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -196,7 +195,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         return metadata;
     }
 
-    public static void showInDialog(PixelitorWindow pw) {
+    public static void showInDialog() {
         View view = OpenImages.getActiveView();
         var comp = view.getComp();
         File file = comp.getFile();

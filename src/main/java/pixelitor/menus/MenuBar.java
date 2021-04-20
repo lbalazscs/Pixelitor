@@ -194,7 +194,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.add(new OpenImageEnabledAction(texts.getString("show_metadata") + "...") {
             @Override
             public void onClick() {
-                MetaDataPanel.showInDialog(pw);
+                MetaDataPanel.showInDialog();
             }
         });
 

@@ -145,10 +145,6 @@ public class Pixelitor {
      * Schedules the opening of the files given as command-line arguments
      */
     private static CompletableFuture<Void> openCLFilesAsync(String[] args) {
-        if (args.length == 0) {
-            return CompletableFuture.completedFuture(null);
-        }
-
         List<CompletableFuture<Composition>> openedFiles = new ArrayList<>();
 
         for (String fileName : args) {
@@ -161,7 +157,7 @@ public class Pixelitor {
             }
         }
 
-        return Utils.allOfList(openedFiles);
+        return Utils.allOf(openedFiles);
     }
 
     public static void exitApp(PixelitorWindow pw) {

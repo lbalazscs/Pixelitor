@@ -63,44 +63,37 @@ public class FlowerOfLife extends ShapeFilter {
         double cy = height * center.getRelativeY();
 
         Circle firstCircle = new Circle(cx, cy, r);
-        Set<Circle> circles = new HashSet<>();
-        circles.add(firstCircle);
+        Set<Circle> circlesSet = new HashSet<>();
+        circlesSet.add(firstCircle);
 
         int gridType = grid.getValue();
-
         int numIterations = iterations.getValue();
+
         for (int it = 2; it <= numIterations; it++) {
-            List<Circle> circlesSoFar = new ArrayList<>(circles);
+            List<Circle> circlesSoFar = new ArrayList<>(circlesSet);
             for (Circle circle : circlesSoFar) {
-                List<Circle> neighbors = switch (gridType) {
-                    case GRID_TYPE_TRIANGULAR -> circle.genTriangleGridNeighbors();
-                    case GRID_TYPE_SQUARE -> circle.genSquareGridNeighbors();
-                    case GRID_TYPE_SQUARE_2 -> circle.genSquare2GridNeighbors();
-                    default -> throw new IllegalStateException("gridType = " + gridType);
-                };
-                circles.addAll(neighbors);
+                circlesSet.addAll(circle.calcNeighbors(gridType));
             }
         }
 
-        for (Circle circle : circles) {
+        for (Circle circle : circlesSet) {
             shape.append(circle.toShape(), false);
         }
 
         return shape;
     }
 
-    private static class Circle {
-        final double cx;
-        final double cy;
-        final double r;
-
-        public Circle(double cx, double cy, double r) {
-            this.cx = cx;
-            this.cy = cy;
-            this.r = r;
+    private record Circle(double cx, double cy, double r) {
+        private List<Circle> calcNeighbors(int gridType) {
+            return switch (gridType) {
+                case GRID_TYPE_TRIANGULAR -> calcTriangleGridNeighbors();
+                case GRID_TYPE_SQUARE -> calcSquareGridNeighbors();
+                case GRID_TYPE_SQUARE_2 -> calcSquare2GridNeighbors();
+                default -> throw new IllegalStateException("gridType = " + gridType);
+            };
         }
 
-        List<Circle> genTriangleGridNeighbors() {
+        private List<Circle> calcTriangleGridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
             double rowHeight = r * 0.8660254037844386; // sqrt(3)/2
             double halfRadius = r / 2;
@@ -113,7 +106,7 @@ public class FlowerOfLife extends ShapeFilter {
             return n;
         }
 
-        List<Circle> genSquareGridNeighbors() {
+        private List<Circle> calcSquareGridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
             double distance = r * SQRT_2;
             n.add(new Circle(cx - distance, cy, r)); // left
@@ -123,7 +116,7 @@ public class FlowerOfLife extends ShapeFilter {
             return n;
         }
 
-        List<Circle> genSquare2GridNeighbors() {
+        private List<Circle> calcSquare2GridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
             double distance = r * SQRT_2;
             n.add(new Circle(cx - distance, cy - distance, r)); // top left

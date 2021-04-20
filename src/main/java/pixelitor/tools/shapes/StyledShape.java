@@ -554,6 +554,6 @@ public class StyledShape implements Cloneable, Transformable {
 
     @Override
     public String toString() {
-        return format("StyledShape, width = %.2f", strokeSettings.getWidth());
+        return format("StyledShape, width = %.2f", strokeSettings.width());
     }
 }

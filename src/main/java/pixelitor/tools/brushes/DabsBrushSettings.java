@@ -42,7 +42,7 @@ public class DabsBrushSettings extends BrushSettings {
     }
 
     public boolean isAngleAware() {
-        return angleSettings.isAngleAware();
+        return angleSettings.angleAware();
     }
 
     public AngleSettings getAngleSettings() {

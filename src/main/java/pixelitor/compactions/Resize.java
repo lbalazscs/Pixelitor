@@ -159,7 +159,6 @@ public class Resize implements CompAction {
                 futures.add(layer.getMask().resize(newSize));
             }
         });
-        return Utils.allOfList(futures)
-            .thenApply(v -> comp);
+        return Utils.allOf(futures).thenApply(v -> comp);
     }
 }

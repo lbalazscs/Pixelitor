@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.awt.Color;
 import java.util.function.Consumer;
 
 /**
- * Color picker dialog helper class, to make using {@link ColorSwatch} easier.
+ * Color picker dialog helper, makes using {@link ColorSwatch} easier.
  * When the user selects a new color, the provided action is performed.
  */
 public class ColorPickerDialog {

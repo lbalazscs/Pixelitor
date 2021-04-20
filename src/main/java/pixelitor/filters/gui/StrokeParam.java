@@ -175,12 +175,12 @@ public class StrokeParam extends AbstractFilterParam {
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         StrokeSettings setting = (StrokeSettings) state;
 
-        strokeWidthParam.setValueNoTrigger(setting.getWidth());
-        strokeCapParam.setSelectedItem(setting.getCap(), false);
-        strokeJoinParam.setSelectedItem(setting.getJoin(), false);
-        strokeTypeParam.setSelectedItem(setting.getType(), false);
-        shapeTypeParam.setSelectedItem(setting.getShapeType(), false);
-        dashedParam.setValue(setting.isDashed(), true, false);
+        strokeWidthParam.setValueNoTrigger(setting.width());
+        strokeCapParam.setSelectedItem(setting.cap(), false);
+        strokeJoinParam.setSelectedItem(setting.join(), false);
+        strokeTypeParam.setSelectedItem(setting.type(), false);
+        shapeTypeParam.setSelectedItem(setting.shapeType(), false);
+        dashedParam.setValue(setting.dashed(), true, false);
     }
 
     @Override

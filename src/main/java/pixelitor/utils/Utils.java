@@ -263,17 +263,20 @@ public final class Utils {
 
         int index = orig.lastIndexOf(copyString);
         if (index == -1) {
+            // "name" => "name copy"
             return orig + ' ' + copyString;
         }
         if (index == orig.length() - copyStringLength) {
-            // it ends with the copyString - this was the first copy
+            // "name copy" => "name copy 2"
             return orig + " 2";
         }
-        String afterCopyString = orig.substring(index + copyStringLength);
+
+        // "name copy x" => "name copy y", where y = x + 1
+        String afterCopyPart = orig.substring(index + copyStringLength);
 
         int copyNr;
         try {
-            copyNr = Integer.parseInt(afterCopyString.trim());
+            copyNr = Integer.parseInt(afterCopyPart.trim());
         } catch (NumberFormatException e) {
             // the part after copy was not a number...
             return orig + ' ' + copyString;
@@ -318,7 +321,6 @@ public final class Utils {
         }
         return false;
     }
-
 
     /**
      * Quick anyMatch for lists (without creating Streams)
@@ -406,7 +408,11 @@ public final class Utils {
      * Returns a new CompletableFuture that is completed when all of the
      * CompletableFutures in the given list complete
      */
-    public static CompletableFuture<Void> allOfList(List<? extends CompletableFuture<?>> list) {
+    public static CompletableFuture<Void> allOf(List<? extends CompletableFuture<?>> list) {
+        if (list.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }
 

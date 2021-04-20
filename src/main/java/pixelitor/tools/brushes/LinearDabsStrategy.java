@@ -47,7 +47,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         distFromLastDab = 0; // moved from reset()
 
         prev = p;
-        if (angleSettings.isAngleAware()) {
+        if (angleSettings.angleAware()) {
             // No dab is drawn for the angle-aware brushes in this method,
             // because there is no angle information yet.
             // However, the distance from the last dab is set
@@ -72,7 +72,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double theta = 0;
         double dx = endX - prevX;
         double dy = endY - prevY;
-        if (angleSettings.isAngleAware()) {
+        if (angleSettings.angleAware()) {
             theta = Math.atan2(dy, dx);
         }
 

@@ -54,7 +54,7 @@ public class CopyAction extends OpenImageEnabledAction {
     private void copyToClipboard(Composition comp) {
         Result<BufferedImage, String> result = source.getImage(comp);
         if (!result.isOK()) {
-            String msg = "Could not copy because " + result.getError();
+            String msg = "Could not copy because " + result.errorDetail();
             Dialogs.showErrorDialog("Error", msg);
             return;
         }

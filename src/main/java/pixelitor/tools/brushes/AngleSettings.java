@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,22 +20,10 @@ package pixelitor.tools.brushes;
 /**
  * Angle-related settings for the brushes
  */
-public class AngleSettings {
-    private final boolean angleAware;
-    private final double maxAngleJitter;
-
+public record AngleSettings(boolean angleAware, double maxAngleJitter) {
     // global shared immutable instances for the most common cases
     public static final AngleSettings NOT_ANGLE_AWARE = new AngleSettings(false, 0);
     public static final AngleSettings ANGLE_AWARE_NO_JITTER = new AngleSettings(true, 0);
-
-    public AngleSettings(boolean angleAware, double maxAngleJitter) {
-        this.angleAware = angleAware;
-        this.maxAngleJitter = maxAngleJitter;
-    }
-
-    public boolean isAngleAware() {
-        return angleAware;
-    }
 
     public boolean shouldJitterAngle() {
         return maxAngleJitter > 0;
