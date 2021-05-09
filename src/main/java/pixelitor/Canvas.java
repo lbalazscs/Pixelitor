@@ -127,6 +127,10 @@ public class Canvas implements Serializable {
         return new Dimension(width, height);
     }
 
+    public String getSizeString() {
+        return width + "x" + height;
+    }
+
     /**
      * Returns the (zoomed) size in component space
      */

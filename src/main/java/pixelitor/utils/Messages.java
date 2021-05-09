@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import pixelitor.Composition;
 import pixelitor.layers.Layer;
 
 import java.awt.Component;
@@ -73,8 +74,9 @@ public class Messages {
         showInStatusBar("<b>" + file.getAbsolutePath() + "</b> was saved.");
     }
 
-    public static void showFileOpenedMessage(File file) {
-        showInStatusBar("<b>" + file.getName() + "</b> was opened.");
+    public static void showFileOpenedMessage(Composition comp) {
+        showInStatusBar("<b>" + comp.getName() + "</b> ("
+            + comp.getCanvas().getSizeString() + ") was opened.");
     }
 
     public static void showFilesSavedMessage(int numFiles, File dir) {

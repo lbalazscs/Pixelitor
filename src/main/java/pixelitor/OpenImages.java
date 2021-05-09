@@ -450,7 +450,7 @@ public class OpenImages {
 
         File file = comp.getFile();
         RecentFilesMenu.INSTANCE.addFile(file);
-        Messages.showFileOpenedMessage(file);
+        Messages.showFileOpenedMessage(comp);
 
         return comp;
     }

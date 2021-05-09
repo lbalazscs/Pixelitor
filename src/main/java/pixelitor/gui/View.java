@@ -146,6 +146,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             newMaskViewMode.activate(this, newComp.getActiveLayer());
             repaintNavigator(true);
             HistogramsPanel.updateFrom(newComp);
+            PixelitorWindow.get().updateTitle(newComp);
         }
 
         Tools.currentTool.compReplaced(newComp, reloaded);

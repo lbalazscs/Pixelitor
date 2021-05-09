@@ -272,7 +272,7 @@ public class PixelitorWindow extends JFrame {
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.getName() + " - " + AppContext.getPixelitorWindowFixTitle();
+            title = comp.calcTitle() + " - " + AppContext.getPixelitorWindowFixTitle();
         } else {
             title = AppContext.getPixelitorWindowFixTitle();
         }

@@ -286,6 +286,10 @@ public class Composition implements Serializable {
         return name;
     }
 
+    public String calcTitle() {
+        return name + " (" + canvas.getSizeString() + ")";
+    }
+
     public void setName(String name) {
         this.name = name;
         if (view != null) {
