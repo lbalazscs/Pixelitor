@@ -158,13 +158,6 @@ public class Pixelitor {
                 projectIntegrationFlag = true;
                 continue;
 
-            } else if (fileName.startsWith("-PP=")) {
-                ProjectIntegrationFilesMenu.INSTANCE.setProjectDirectory(fileName.substring(4));
-                continue;
-
-            } else if (fileName.startsWith("-PP='")) {
-                ProjectIntegrationFilesMenu.INSTANCE.setProjectDirectory(fileName.substring(5, fileName.length() - 1));
-                continue;
             }
 
 

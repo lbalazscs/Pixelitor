@@ -32,10 +32,9 @@ public class TestProjectIntegration {
     }
 
     private static String[] getArgs() {
-        String[] args = new String[files.size() + 2];
-        args[0] = "-PP='" + root + "'";
-        args[1] = "-PI";
-        for (int i = 0; i < files.size(); i++) args[i + 2] = files.get(i).getAbsolutePath();
+        String[] args = new String[files.size() + 1];
+        args[0] = "-PI";
+        for (int i = 0; i < files.size(); i++) args[i + 1] = files.get(i).getAbsolutePath();
         return args;
     }
 
@@ -53,7 +52,13 @@ public class TestProjectIntegration {
 
         for (int i = 0; i < image.getWidth(); i++)
             for (int j = 0; j < image.getHeight(); j++)
-                image.setRGB(i, j, new Color((Noise.noise2(i / 20f, j / 20f) + 1) / 3f, 0f, 0f).getRGB());
+                image.setRGB(i, j, new Color(
+                        Math.min(1,
+                                Math.max(0,
+                                        (Noise.noise2(i / 20f, j / 20f) + 1) / 2f
+                                )
+                        )
+                        , 0f, 0f).getRGB());
 
         try {
             ImageIO.write(image, "png", mark(root + File.separator + "tests" + File.separator + name + ".png"));
