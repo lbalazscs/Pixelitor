@@ -16,7 +16,7 @@ public class ProjectIntegrationFilesMenu extends PMenu {
 
     private JMenuItem newImageMenuItem = null;
 
-    private String projectDirectory = null;
+    
 
     private final ArrayList<RecentFile> projectFiles;
 
