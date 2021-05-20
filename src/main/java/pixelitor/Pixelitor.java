@@ -28,14 +28,14 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Themes;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
+import pixelitor.menus.file.ProjectIntegrationFilesMenu;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
-import java.awt.EventQueue;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +116,7 @@ public class Pixelitor {
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
         Themes.install(AppPreferences.getDefaultTheme(),
-            false, true);
+                false, true);
 
         var pw = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
@@ -135,10 +135,10 @@ public class Pixelitor {
         // to run after all the files have been opened,
         // and on the same IO thread
         openCLFilesAsync(args)
-            .exceptionally(throwable -> null) // recover
-            .thenAcceptAsync(v -> afterStartTestActions(), onEDT)
-            .thenRunAsync(Utils::preloadFontNames, onIOThread)
-            .exceptionally(Messages::showExceptionOnEDT);
+                .exceptionally(throwable -> null) // recover
+                .thenAcceptAsync(v -> afterStartTestActions(), onEDT)
+                .thenRunAsync(Utils::preloadFontNames, onIOThread)
+                .exceptionally(Messages::showExceptionOnEDT);
     }
 
     /**
@@ -147,13 +147,40 @@ public class Pixelitor {
     private static CompletableFuture<Void> openCLFilesAsync(String[] args) {
         List<CompletableFuture<Composition>> openedFiles = new ArrayList<>();
 
+        // This marker is used to indicate is the upcoming files have to
+        // be loaded and opened, or if '-PI' marker is used, to be loaded
+        // in a separate menu.
+        boolean projectIntegrationFlag = false;
+
         for (String fileName : args) {
+
+            if (fileName.equals("-PI")) {
+                projectIntegrationFlag = true;
+                continue;
+
+            } else if (fileName.startsWith("-PP=")) {
+                ProjectIntegrationFilesMenu.INSTANCE.setProjectDirectory(fileName.substring(4));
+                continue;
+
+            } else if (fileName.startsWith("-PP='")) {
+                ProjectIntegrationFilesMenu.INSTANCE.setProjectDirectory(fileName.substring(5, fileName.length() - 1));
+                continue;
+            }
+
+
             File f = new File(fileName);
             if (f.exists()) {
-                openedFiles.add(IO.openFileAsync(f, false));
+
+                if (projectIntegrationFlag)
+//                    IO.openFileForPI(f, true);
+                    ProjectIntegrationFilesMenu.INSTANCE.addFile(f);
+
+                else
+                    openedFiles.add(IO.openFileAsync(f, false));
+
             } else {
                 Messages.showError("File not found",
-                    format("The file \"%s\" does not exist", f.getAbsolutePath()));
+                        format("The file \"%s\" does not exist", f.getAbsolutePath()));
             }
         }
 
@@ -172,7 +199,7 @@ public class Pixelitor {
 
             String[] options = {"Wait 10 seconds", "Exit now"};
             boolean wait = Dialogs.showOKCancelWarningDialog(
-                msg, "Warning", options, 0);
+                    msg, "Warning", options, 0);
 
             if (wait && IOTasks.isBusyWriting()) {
                 // wait on another thread so that the status bar
@@ -191,11 +218,11 @@ public class Pixelitor {
             String msg;
             if (unsavedComps.size() == 1) {
                 msg = format("<html>There are unsaved changes in <b>%s</b>." +
-                        "<br>Are you sure you want to exit?",
-                    unsavedComps.get(0).getName());
+                                "<br>Are you sure you want to exit?",
+                        unsavedComps.get(0).getName());
             } else {
                 msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
-                    "<br>Unsaved images:<ul>";
+                        "<br>Unsaved images:<ul>";
                 for (Composition comp : unsavedComps) {
                     msg += "<li>" + comp.getName();
                 }

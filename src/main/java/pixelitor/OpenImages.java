@@ -24,6 +24,7 @@ import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
+import pixelitor.menus.file.ProjectIntegrationFilesMenu;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
@@ -450,6 +451,19 @@ public class OpenImages {
 
         File file = comp.getFile();
         RecentFilesMenu.INSTANCE.addFile(file);
+        Messages.showFileOpenedMessage(comp);
+
+        return comp;
+    }
+
+    public static Composition addPIComp(Composition comp) {
+        assert comp != null;
+
+        // TODO: Is it required?
+//        addAsNewComp(comp);
+
+        File file = comp.getFile();
+        ProjectIntegrationFilesMenu.INSTANCE.addFile(file);
         Messages.showFileOpenedMessage(comp);
 
         return comp;

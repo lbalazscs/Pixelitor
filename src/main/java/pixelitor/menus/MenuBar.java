@@ -63,10 +63,7 @@ import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.FadeAction;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.file.LayerAnimExport;
-import pixelitor.menus.file.MetaDataPanel;
-import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.menus.file.ScreenCaptureAction;
+import pixelitor.menus.file.*;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
 import pixelitor.menus.view.*;
@@ -79,9 +76,7 @@ import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
-import java.awt.GraphicsConfiguration;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
@@ -108,6 +103,7 @@ public class MenuBar extends JMenuBar {
         ResourceBundle texts = Texts.getResources();
 
         add(createFileMenu(pw, texts));
+        add(createProjectMenu());
         add(createEditMenu(texts));
         add(createLayerMenu(pw, texts));
         add(createSelectMenu(texts));
@@ -218,7 +214,7 @@ public class MenuBar extends JMenuBar {
 
         // exit
         String exitName = JVM.isMac ?
-            texts.getString("exit_mac") : texts.getString("exit");
+                texts.getString("exit_mac") : texts.getString("exit");
         fileMenu.add(new PAction(exitName) {
             @Override
             public void onClick() {
@@ -227,6 +223,10 @@ public class MenuBar extends JMenuBar {
         });
 
         return fileMenu;
+    }
+
+    private static JMenu createProjectMenu() {
+        return ProjectIntegrationFilesMenu.INSTANCE;
     }
 
     private static JMenu createImageMagickSubmenu() {
@@ -769,7 +769,7 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("blur")
-            + "/" + texts.getString("sharpen"));
+                + "/" + texts.getString("sharpen"));
 
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);
@@ -850,11 +850,11 @@ public class MenuBar extends JMenuBar {
 
         String reduceNoiseFilterName = "Reduce Single Pixel Noise";
         sub.addForwardingFilter(reduceNoiseFilterName,
-            () -> new ReduceNoiseFilter(reduceNoiseFilterName));
+                () -> new ReduceNoiseFilter(reduceNoiseFilterName));
 
         String medianFilterName = "3x3 Median Filter";
         sub.addForwardingFilter(medianFilterName,
-            () -> new MedianFilter(medianFilterName));
+                () -> new MedianFilter(medianFilterName));
 
         sub.addSeparator();
 
@@ -959,7 +959,7 @@ public class MenuBar extends JMenuBar {
 
         String laplacianFilterName = "Laplacian";
         sub.addNoGrayForwardingFilter(laplacianFilterName,
-            () -> new LaplaceFilter(laplacianFilterName));
+                () -> new LaplaceFilter(laplacianFilterName));
 
         sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
         sub.addFilter("Canny", Canny::new);
@@ -1016,7 +1016,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 PalettePanel.showDialog(pw, new FullPalette(),
-                    ColorSwatchClickHandler.STANDARD);
+                        ColorSwatchClickHandler.STANDARD);
             }
         });
 
@@ -1038,7 +1038,7 @@ public class MenuBar extends JMenuBar {
 //        if (!JVM.isLinux) { // see https://github.com/lbalazscs/Pixelitor/issues/140
         var showPixelGridMI = new OpenImageEnabledCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
-            View.setShowPixelGrid(showPixelGridMI.getState()));
+                View.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 //        }
 
@@ -1092,14 +1092,14 @@ public class MenuBar extends JMenuBar {
             }
         });
         variations.add(new PAction(
-            "HSB Mix Foreground with Background...") {
+                "HSB Mix Foreground with Background...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, true);
             }
         });
         variations.add(new PAction(
-            "RGB Mix Foreground with Background...") {
+                "RGB Mix Foreground with Background...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, true);
@@ -1115,14 +1115,14 @@ public class MenuBar extends JMenuBar {
             }
         });
         variations.add(new PAction(
-            "HSB Mix Background with Foreground...") {
+                "HSB Mix Background with Foreground...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, false);
             }
         });
         variations.add(new PAction(
-            "RGB Mix Background with Foreground...") {
+                "RGB Mix Background with Foreground...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, false);
@@ -1411,7 +1411,7 @@ public class MenuBar extends JMenuBar {
         helpMenu.addSeparator();
 
         helpMenu.add(new OpenInBrowserAction("Report an Issue...",
-            "https://github.com/lbalazscs/Pixelitor/issues"));
+                "https://github.com/lbalazscs/Pixelitor/issues"));
 
         helpMenu.add(new PAction("Internal State...") {
             @Override

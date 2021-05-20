@@ -62,6 +62,15 @@ public class IO {
             .whenComplete((comp, e) -> checkForReadingProblems(e));
     }
 
+    public static CompletableFuture<Composition> openFileForPI(File file) {
+        if (!OpenImages.warnIfAlreadyOpen(file)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        return loadCompAsync(file)
+                .thenApplyAsync(OpenImages::addPIComp, onEDT)
+                .whenComplete((comp, e) -> checkForReadingProblems(e));
+    }
+
     public static CompletableFuture<Composition> loadCompAsync(File file) {
         // if the file format is not recognized, this will still try to
         // read it in a single-layered format, which doesn't have to be JPG
