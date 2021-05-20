@@ -14,9 +14,6 @@ public class ProjectIntegrationFilesMenu extends PMenu {
 
     public static final ProjectIntegrationFilesMenu INSTANCE = new ProjectIntegrationFilesMenu();
 
-    private JMenuItem newImageMenuItem = null;
-
-    private String projectDirectory = null;
 
     private final ArrayList<RecentFile> projectFiles;
 
@@ -39,17 +36,6 @@ public class ProjectIntegrationFilesMenu extends PMenu {
         }
     }
 
-    public void setProjectDirectory(String projectDirectory) {
-        this.projectDirectory = projectDirectory;
-
-        if (projectDirectory != null) {
-            newImageMenuItem = new JMenuItem(i18n("new_image"));
-            newImageMenuItem.setAction(NewImage.getAction());
-//            newImageMenuItem.addActionListener();
-            rebuildGUI();
-        }
-    }
-
     private void removeAllMenuItems() {
         removeAll();
     }
@@ -65,9 +51,6 @@ public class ProjectIntegrationFilesMenu extends PMenu {
 
     private void rebuildGUI() {
         removeAllMenuItems();
-
-        if (newImageMenuItem != null)
-            add(newImageMenuItem);
 
         addSeparator();
 
