@@ -161,7 +161,7 @@ public class Pixelitor {
             }
 
 
-            File f = new File(fileName);
+            File f = new File(fileName.replaceAll("\"", ""));
             if (f.exists()) {
 
                 if (projectIntegrationFlag)
