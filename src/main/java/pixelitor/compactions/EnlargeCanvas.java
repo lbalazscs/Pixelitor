@@ -210,10 +210,6 @@ public class EnlargeCanvas extends SimpleCompAction {
 
             private boolean initialised = false;
 
-            //            private Composition composition;
-            private Canvas canvas;
-
-
             public CanvasEditor() {
                 setBackground(Color.WHITE);
                 addComponentListener(new ResizeListener());
@@ -223,11 +219,6 @@ public class EnlargeCanvas extends SimpleCompAction {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     initialised = true;
-                    canvas = OpenImages.getActiveComp().getCanvas();
-
-                    // Gives the part of image placed within the canvas
-                    OpenImages.getActiveComp().getCompositeImage();
-
                     repaint();
                 }
             }
@@ -237,6 +228,7 @@ public class EnlargeCanvas extends SimpleCompAction {
                 super.paintComponent(g);
 
                 if (!initialised) return;
+                Canvas canvas = OpenImages.getActiveComp().getCanvas();
                 if (canvas == null) return;
 
                 g.setColor(Color.RED);
