@@ -199,13 +199,6 @@ public class EnlargeCanvas extends SimpleCompAction {
             return eastRange.getValue();
         }
 
-
-        //
-
-
-        //
-
-
         private class CanvasEditor extends JPanel {
 
             private boolean initialised = false;
