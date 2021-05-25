@@ -28,7 +28,12 @@ import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Graphics;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
