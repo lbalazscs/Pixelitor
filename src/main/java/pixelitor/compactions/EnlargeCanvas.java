@@ -218,8 +218,11 @@ public class EnlargeCanvas extends SimpleCompAction {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     initialised = true;
-//                    composition = OpenImages.getActiveComp();
                     canvas = OpenImages.getActiveComp().getCanvas();
+
+                    // Gives the part of image placed within the canvas
+                    OpenImages.getActiveComp().getCompositeImage();
+
                     repaint();
                 }
             }
@@ -257,10 +260,10 @@ public class EnlargeCanvas extends SimpleCompAction {
 
                 g.setColor(Color.RED);
                 g.fillRect(
-                        ox - (int) (canvasW / 2) - W,
-                        oy - (int) (canvasH / 2) - N,
-                        E + W + (int) canvasW,
-                        N + S + (int) canvasH
+                        (int) (ox - canvasW / 2 - W),
+                        (int) (oy - canvasH / 2 - N),
+                        (int) (E + W + canvasW),
+                        (int) (N + S + canvasH)
                 );
 
                 g.setColor(Color.BLUE);
