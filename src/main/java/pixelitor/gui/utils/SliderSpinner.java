@@ -41,10 +41,14 @@ import static javax.swing.BorderFactory.createTitledBorder;
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
     private final TextPosition textPosition;
+    private final int orientation;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
     }
+
+    public static final int HORIZONTAL = JSlider.HORIZONTAL;
+    public static final int VERTICAL   = JSlider.VERTICAL;
 
     private final JSlider slider;
     private final JSpinner spinner;
@@ -59,17 +63,28 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private boolean spinnerMoved = false;
 
     public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton) {
-        this(model, null, null, position, addDefaultButton);
+        this(model, position, addDefaultButton, HORIZONTAL);
+    }
+
+    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton, int orientation) {
+        this(model, null, null, position, addDefaultButton, orientation);
+    }
+
+    public SliderSpinner(RangeParam model, Color leftColor, Color rightColor, int orientation) {
+        this(model, leftColor, rightColor, TextPosition.BORDER, true, orientation);
     }
 
     public SliderSpinner(RangeParam model, Color leftColor, Color rightColor) {
-        this(model, leftColor, rightColor, TextPosition.BORDER, true);
+        this(model, leftColor, rightColor, TextPosition.BORDER, true, HORIZONTAL);
     }
 
     private SliderSpinner(RangeParam model,
                           Color leftColor, Color rightColor,
-                          TextPosition textPosition, boolean addDefaultButton) {
+                          TextPosition textPosition,
+                          boolean addDefaultButton,
+                          int orientation) {
         this.textPosition = textPosition;
+        this.orientation = orientation;
 
         setLayout(new BorderLayout());
         this.model = model;
@@ -114,7 +129,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             createDefaultButton(model);
             p.add(defaultButton);
         }
-        add(p, EAST);
+        add(p, orientation==HORIZONTAL?EAST:SOUTH);
 
 //        showTicksAsFloat();
     }
@@ -125,6 +140,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     private JSlider createSlider(RangeParam model) {
         JSlider s = new JSlider(model);
+        s.setOrientation(orientation);
         s.addChangeListener(this);
         return s;
     }
@@ -142,16 +158,16 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 throw new IllegalStateException();
             }
             spinnerModel = new SpinnerNumberModel(
-                model.getValueAsDouble(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                stepSize);
+                    model.getValueAsDouble(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    stepSize);
         } else {
             spinnerModel = new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1);
+                    model.getValue(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    1);
         }
         JSpinner s = new JSpinner(spinnerModel);
 
