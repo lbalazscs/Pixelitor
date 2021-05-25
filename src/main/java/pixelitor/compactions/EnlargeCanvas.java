@@ -28,16 +28,13 @@ import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Graphics;
-import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 
+import static java.awt.Color.GRAY;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
@@ -177,10 +174,13 @@ public class EnlargeCanvas extends SimpleCompAction {
         private void addCanvasEditor() {
             GridBagConstraints c = new GridBagConstraints();
             c.weightx = c.weighty = c.gridx = c.gridy = 1;
-            c.insets = new Insets(20, 20, 20, 20);
+//            c.insets = new Insets(20, 20, 20, 20);
             c.fill = GridBagConstraints.BOTH;
 
-            add(canvasEditor, c);
+            add(new JPanel(new BorderLayout()) {{
+                setBorder(createTitledBorder("Preview"));
+                add(canvasEditor);
+            }}, c);
         }
 
         public int getNorth() {
@@ -210,8 +210,11 @@ public class EnlargeCanvas extends SimpleCompAction {
 
             private boolean initialised = false;
 
+            private static final Color currentCanvasColor = new Color(246, 247, 246);
+            private static final Color newCanvasColor = new Color(136, 139, 146);
+
             public CanvasEditor() {
-                setBackground(Color.WHITE);
+                setBackground(new Color(214, 217, 223));
                 addComponentListener(new ResizeListener());
             }
 
@@ -228,7 +231,9 @@ public class EnlargeCanvas extends SimpleCompAction {
                 super.paintComponent(g);
 
                 if (!initialised) return;
+
                 Canvas canvas = OpenImages.getActiveComp().getCanvas();
+
                 if (canvas == null) return;
 
                 g.setColor(Color.RED);
@@ -255,7 +260,7 @@ public class EnlargeCanvas extends SimpleCompAction {
                 int W = (int) (getWest() * factor);
                 int S = (int) (getSouth() * factor);
 
-                g.setColor(Color.RED);
+                g.setColor(newCanvasColor);
                 g.fillRect(
                         (int) (ox - canvasW / 2 - W),
                         (int) (oy - canvasH / 2 - N),
@@ -263,7 +268,7 @@ public class EnlargeCanvas extends SimpleCompAction {
                         (int) (N + S + canvasH)
                 );
 
-                g.setColor(Color.BLUE);
+                g.setColor(currentCanvasColor);
                 g.fillRect((int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH);
 
             }
