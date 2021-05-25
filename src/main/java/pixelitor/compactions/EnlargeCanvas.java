@@ -28,10 +28,13 @@ import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 
-import static javax.swing.BoxLayout.Y_AXIS;
+import static java.awt.Color.GRAY;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
@@ -111,7 +114,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     @Override
     protected String getStatusBarMessage() {
         return "The canvas was enlarged to "
-            + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
+                + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
     }
 
     public static Action getAction() {
@@ -126,35 +129,58 @@ public class EnlargeCanvas extends SimpleCompAction {
     private static void showInDialog() {
         var p = new EnlargeCanvasPanel();
         new DialogBuilder()
-            .title(NAME)
-            .content(p)
-            .okAction(() -> {
-                var comp = OpenImages.getActiveComp();
-                new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
-                    .process(comp);
-            })
-            .show();
+                .title(NAME)
+                .content(p)
+                .okAction(() -> {
+                    var comp = OpenImages.getActiveComp();
+                    new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
+                            .process(comp);
+                })
+                .show();
     }
 
     static class EnlargeCanvasPanel extends JPanel {
+
         final RangeParam northRange = new RangeParam("North", 0, 0, 500);
         final RangeParam eastRange = new RangeParam("East", 0, 0, 500);
         final RangeParam southRange = new RangeParam("South", 0, 0, 500);
         final RangeParam westRange = new RangeParam("West", 0, 0, 500);
 
-        private EnlargeCanvasPanel() {
-            setLayout(new BoxLayout(this, Y_AXIS));
+        final CanvasEditor canvasEditor = new CanvasEditor();
 
-            addSliderSpinner(northRange, "north");
-            addSliderSpinner(eastRange, "east");
-            addSliderSpinner(southRange, "south");
-            addSliderSpinner(westRange, "west");
+        private EnlargeCanvasPanel() {
+            setLayout(new GridBagLayout());
+
+            addSliderSpinner(northRange, "north", 1, 0, SliderSpinner.HORIZONTAL);
+            addSliderSpinner(eastRange, "east", 2, 1, SliderSpinner.VERTICAL);
+            addSliderSpinner(southRange, "south", 1, 2, SliderSpinner.HORIZONTAL);
+            addSliderSpinner(westRange, "west", 0, 1, SliderSpinner.VERTICAL);
+
+            addCanvasEditor();
         }
 
-        private void addSliderSpinner(RangeParam range, String sliderName) {
-            var s = new SliderSpinner(range, BORDER, false);
+        private void addSliderSpinner(RangeParam range, String sliderName, int layout_x, int layout_y, int orientation) {
+            var s = new SliderSpinner(range, BORDER, false, orientation);
             s.setName(sliderName);
-            add(s);
+            s.addChangeListener(e -> canvasEditor.repaint());
+
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridx = layout_x;
+            c.gridy = layout_y;
+
+            add(s, c);
+        }
+
+        private void addCanvasEditor() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.weightx = c.weighty = c.gridx = c.gridy = 1;
+//            c.insets = new Insets(20, 20, 20, 20);
+            c.fill = GridBagConstraints.BOTH;
+
+            add(new JPanel(new BorderLayout()) {{
+                setBorder(createTitledBorder("Preview"));
+                add(canvasEditor);
+            }}, c);
         }
 
         public int getNorth() {
@@ -172,5 +198,76 @@ public class EnlargeCanvas extends SimpleCompAction {
         public int getEast() {
             return eastRange.getValue();
         }
+
+        private class CanvasEditor extends JPanel {
+
+            private boolean initialised = false;
+
+            private static final Color currentCanvasColor = new Color(246, 247, 246);
+            private static final Color newCanvasColor = new Color(136, 139, 146);
+
+            public CanvasEditor() {
+                setBackground(new Color(214, 217, 223));
+                addComponentListener(new ResizeListener());
+            }
+
+            private class ResizeListener extends ComponentAdapter {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    initialised = true;
+                    repaint();
+                }
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                if (!initialised) return;
+
+                Canvas canvas = OpenImages.getActiveComp().getCanvas();
+
+                if (canvas == null) return;
+
+                g.setColor(Color.RED);
+
+                float canvasW = canvas.getWidth(), canvasH = canvas.getHeight();
+
+                float allocatedW = canvasW + 2 * Math.max(getEast(), getWest());
+                float allocatedH = canvasH + 2 * Math.max(getNorth(), getSouth());
+
+                int drawW = getWidth(), drawH = getHeight();
+                int ox = drawW / 2, oy = drawH / 2; // Origin
+
+                float factor;
+
+                if (allocatedW / drawW > allocatedH / drawH)
+                    factor = drawW * 0.75f / allocatedW;
+                else factor = drawH * 0.75f / allocatedH;
+
+                canvasH *= factor;
+                canvasW *= factor;
+
+                int N = (int) (getNorth() * factor);
+                int E = (int) (getEast() * factor);
+                int W = (int) (getWest() * factor);
+                int S = (int) (getSouth() * factor);
+
+                g.setColor(newCanvasColor);
+                g.fillRect(
+                        (int) (ox - canvasW / 2 - W),
+                        (int) (oy - canvasH / 2 - N),
+                        (int) (E + W + canvasW),
+                        (int) (N + S + canvasH)
+                );
+
+                g.setColor(currentCanvasColor);
+                g.fillRect((int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH);
+
+            }
+
+        }
+
     }
+
 }
