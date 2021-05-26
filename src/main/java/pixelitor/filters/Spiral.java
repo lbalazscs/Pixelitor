@@ -107,18 +107,14 @@ public class Spiral extends ShapeFilter {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
-        int numSpins = numSpinsParam.getValue();
-
         double w = width / 2.0;
         double h = height / 2.0;
 
         if (!scale.isChecked())
             w = h = Math.max(w, h);
 
-        double maxAngle = 2 * Math.PI * numSpins;
-        double dt = 2 * Math.PI / sidesParam.getValue();
-        System.out.println(sidesParam.getValue());
-        System.out.println(dt / Math.PI);
+        double maxAngle = 2 * Math.PI * numSpinsParam.getValue();
+        double dt = (2 * Math.PI) / sidesParam.getValue();
         double a = 1.0 / maxAngle;
 
         shape.moveTo(cx, cy);
