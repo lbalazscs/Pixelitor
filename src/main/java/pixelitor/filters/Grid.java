@@ -17,9 +17,9 @@
 
 package pixelitor.filters;
 
-import net.jafama.FastMath;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
@@ -27,34 +27,35 @@ import java.awt.geom.Path2D;
 /**
  * The "Render/Shapes/Grid" filter
  */
-public class RenderGrid extends ShapeFilter {
+public class Grid extends ShapeFilter {
+    private static final int TYPE_RECTANGLE = 0;
+    private static final int TYPE_TRIANGLE = 1;
+    private static final int TYPE_HEXAGON = 2;
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new IntChoiceParam.Item[]{
-            new IntChoiceParam.Item("Triangular", 0),
-            new IntChoiceParam.Item("Square", 1),
-            new IntChoiceParam.Item("Hexagon", 2)
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Rectangle", TYPE_RECTANGLE),
+        new Item("Triangle", TYPE_TRIANGLE),
+        new Item("Hexagon", TYPE_HEXAGON)
     });
     private final GroupedRangeParam divisions = new GroupedRangeParam(
-            "Divisions", 1, 4, 49, false);
+        "Divisions", 1, 4, 49, false);
 
-    public RenderGrid() {
+    public Grid() {
         addParamsToFront(type, divisions);
     }
 
     @Override
     protected Shape createShape(int width, int height) {
         return switch (type.getValue()) {
-            case 1 -> createRectangularGrid(width, height);
-            case 2 -> createHexagonalGrid(width, height);
-            default -> createTriangularGrid(width, height);
+            case TYPE_RECTANGLE -> createRectangularGrid(width, height);
+            case TYPE_HEXAGON -> createHexagonalGrid(width, height);
+            case TYPE_TRIANGLE -> createTriangularGrid(width, height);
+            default -> throw new IllegalStateException("Unexpected value: " + type.getValue());
         };
     }
 
     private Shape createTriangularGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
-
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
 
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
@@ -62,19 +63,23 @@ public class RenderGrid extends ShapeFilter {
         double divHei = height / (double) verDiv / 2; // Height of one triangle
 
         // / lines
-        for (int i = 1 - verDiv; i < horDiv; i++)
-            line(shape, i * divWid + horShift, height + verShift, (i + verDiv) * divWid, 0);
+        for (int i = 1 - verDiv; i < horDiv; i++) {
+            line(shape, i * divWid, height, (i + verDiv) * divWid, 0);
+        }
 
         // \ lines
-        for (int i = 1 - verDiv; i < horDiv; i++)
-            line(shape, i * divWid + horShift, verShift, (i + verDiv) * divWid, height);
+        for (int i = 1 - verDiv; i < horDiv; i++) {
+            line(shape, i * divWid, 0, (i + verDiv) * divWid, height);
+        }
 
-        verDiv *= 2; // Earlier it was the number of Vertical Divisions, Now it's the number of triangles.
+        // Earlier it was the number of Vertical Divisions,
+        // Now it's the number of triangles.
+        verDiv *= 2;
 
         // _ lines
-        for (int i = 1; i < verDiv; i++)
-            line(shape, horShift, i * divHei + verShift, width, i * divHei);
-
+        for (int i = 1; i < verDiv; i++) {
+            line(shape, 0, i * divHei, width, i * divHei);
+        }
 
         return shape;
     }
@@ -82,15 +87,12 @@ public class RenderGrid extends ShapeFilter {
     private Shape createRectangularGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-
         // horizontal lines
         int numHorDivisions = divisions.getValue(0);
         double divisionHeight = height / (double) numHorDivisions;
         for (int i = 1; i < numHorDivisions; i++) {
             double lineY = i * divisionHeight;
-            line(shape, horShift, lineY + verShift, width, lineY);
+            line(shape, 0, lineY, width, lineY);
         }
 
         // vertical lines
@@ -98,13 +100,13 @@ public class RenderGrid extends ShapeFilter {
         double divisionWidth = width / (double) numVerDivisions;
         for (int i = 1; i < numVerDivisions; i++) {
             double lineX = i * divisionWidth;
-            line(shape, lineX + horShift, verShift, lineX, height);
+            line(shape, lineX, 0, lineX, height);
         }
 
         return shape;
     }
 
-    private void line(Path2D shape, double x, double y, double x2, double y2) {
+    private static void line(Path2D shape, double x, double y, double x2, double y2) {
         shape.moveTo(x, y);
         shape.lineTo(x2, y2);
     }
@@ -112,13 +114,10 @@ public class RenderGrid extends ShapeFilter {
     private Shape createHexagonalGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-
         int slabs = divisions.getValue(0);
         int levels = divisions.getValue(1);
 
-        double slabWidth = 2. * width / (3 * slabs - 1);
+        double slabWidth = 2.0 * width / (3 * slabs - 1);
         double slabHeight = height / (double) levels;
 
         double slabSpace = 3 * slabWidth / 2;
@@ -140,6 +139,4 @@ public class RenderGrid extends ShapeFilter {
         shape.lineTo(x + 3 * width / 4, y - height);
         shape.lineTo(x + width, y);
     }
-
-
 }

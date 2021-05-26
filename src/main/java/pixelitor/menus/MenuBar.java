@@ -893,7 +893,7 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Shapes");
 
         sub.addFilter("Flower of Life", FlowerOfLife::new);
-        sub.addFilter("Grid", RenderGrid::new);
+        sub.addFilter("Grid", Grid::new);
         sub.addFilter(Lissajous.NAME, Lissajous::new);
         sub.addFilter(MysticRose.NAME, MysticRose::new);
         sub.addFilter(SpiderWeb.NAME, SpiderWeb::new);
