@@ -76,6 +76,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
     protected final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
+    private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     protected ShapeFilter() {
         super(false);
@@ -84,7 +85,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             background,
             foreground,
             waterMark,
-            new DialogParam("Transform", center, scale),
+            new DialogParam("Transform", center, rotate, scale),
             strokeParam,
             effectsParam
         );
@@ -128,7 +129,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             float relY = center.getRelativeY();
             boolean hasTranslation = relX != 0.5f || relY != 0.5f;
 
-            if (hasScaling || hasTranslation) {
+            boolean hasRotation = !rotate.isSetToDefault();
+
+            if (hasTranslation || hasRotation || hasScaling) {
                 double cx = srcWidth * relX;
                 double cy = srcHeight * relY;
 
@@ -140,6 +143,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                     at.scale(scaleX, scaleY);
                 } else {
                     at = new AffineTransform();
+                }
+                if (hasRotation) {
+                    at.rotate(rotate.getValueInRadians(), cx, cy);
                 }
                 if (hasTranslation) {
                     at.translate(cx - srcWidth / 2.0, cy - srcHeight / 2.0);

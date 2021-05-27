@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.GUIText;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -30,14 +29,10 @@ public class MysticRose extends ShapeFilter {
     public static final String NAME = "Mystic Rose";
 
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 43);
-    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 500, 1000);
-    private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
 
     public MysticRose() {
         addParamsToFront(
-            nrPoints,
-            rotate,
-            radius.withAdjustedRange(0.6)
+            nrPoints
         );
 
         helpURL = "https://en.wikipedia.org/wiki/Complete_graph";
@@ -62,23 +57,17 @@ public class MysticRose extends ShapeFilter {
     private Point2D[] calcPoints(int width, int height) {
         int numPoints = nrPoints.getValue();
         Point2D[] points = new Point2D[numPoints];
-        double r = radius.getValueAsDouble();
+        double r = Math.min(width, height) * 0.45;
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
         double angle = 2 * Math.PI / numPoints;
-        double startAngle = angle * rotate.getPercentageValD();
         for (int i = 0; i < points.length; i++) {
-            double theta = startAngle + i * angle;
+            double theta = i * angle;
             points[i] = new Point2D.Double(
                 cx + r * Math.cos(theta),
                 cy + r * Math.sin(theta));
         }
         return points;
-    }
-
-    @Override
-    protected float getGradientRadius(float cx, float cy) {
-        return radius.getValueAsFloat();
     }
 }
