@@ -4,7 +4,7 @@
 
 This is the source code of [Pixelitor](https://pixelitor.sourceforge.io/) - an advanced Java image editor with layers, layer masks, text layers, 110+ image filters and color adjustments, multiple undo etc.
 
-Contributions are welcome!
+Contributions are welcome! Check out the [good first issues](https://github.com/lbalazscs/Pixelitor/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## Starting Pixelitor in an IDE
 
