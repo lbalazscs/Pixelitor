@@ -33,12 +33,12 @@ public class Grid extends ShapeFilter {
     private static final int TYPE_HEXAGON = 2;
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
-        new Item("Rectangle", TYPE_RECTANGLE),
-        new Item("Triangle", TYPE_TRIANGLE),
-        new Item("Hexagon", TYPE_HEXAGON)
+            new Item("Rectangle", TYPE_RECTANGLE),
+            new Item("Triangle", TYPE_TRIANGLE),
+            new Item("Hexagon", TYPE_HEXAGON)
     });
     private final GroupedRangeParam divisions = new GroupedRangeParam(
-        "Divisions", 1, 4, 49, false);
+            "Divisions", 1, 4, 49, false);
 
     public Grid() {
         addParamsToFront(type, divisions);
@@ -87,20 +87,33 @@ public class Grid extends ShapeFilter {
     private Shape createRectangularGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        // horizontal lines
-        int numHorDivisions = divisions.getValue(0);
-        double divisionHeight = height / (double) numHorDivisions;
-        for (int i = 1; i < numHorDivisions; i++) {
-            double lineY = i * divisionHeight;
-            line(shape, 0, lineY, width, lineY);
+        int horiDiv = divisions.getValue(0);
+        int vertDiv = divisions.getValue(1);
+
+        double cellW = width / (double) vertDiv;
+        double cellH = height / (double) horiDiv;
+
+        // Number of extra segments (lines) to be drawn
+        // in order to cope up with transform shifts.
+        // In extrema case, we draw just enough segments
+        // to fill up 50% of view [height/width] from one side
+        // while not drawing those from the other side as
+        // they'll placed outside.:
+        double horShift = (center.getRelativeX() - 0.5) * width;
+        double verShift = (center.getRelativeY() - 0.5) * height;
+        int horSeg = (int) (horShift / cellW);
+        int verSeg = (int) (verShift / cellH);
+
+        // horizontal _ lines
+        for (int i = -verSeg; i < horiDiv - verSeg + 1; i++) {
+            double lineY = i * cellH;
+            line(shape, -horShift, lineY, width - horShift, lineY);
         }
 
-        // vertical lines
-        int numVerDivisions = divisions.getValue(1);
-        double divisionWidth = width / (double) numVerDivisions;
-        for (int i = 1; i < numVerDivisions; i++) {
-            double lineX = i * divisionWidth;
-            line(shape, lineX, 0, lineX, height);
+        // vertical | lines
+        for (int i = -horSeg; i < vertDiv - horSeg + 1; i++) {
+            double lineX = i * cellW;
+            line(shape, lineX, -verShift, lineX, height-verShift);
         }
 
         return shape;
