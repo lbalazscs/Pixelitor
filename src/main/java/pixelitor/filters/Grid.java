@@ -31,11 +31,13 @@ public class Grid extends ShapeFilter {
     private static final int TYPE_RECTANGLE = 0;
     private static final int TYPE_TRIANGLE = 1;
     private static final int TYPE_HEXAGON = 2;
+    private static final int TYPE_FISH_SCALE = 3;
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
             new Item("Rectangle", TYPE_RECTANGLE),
             new Item("Triangle", TYPE_TRIANGLE),
-            new Item("Hexagon", TYPE_HEXAGON)
+            new Item("Hexagon", TYPE_HEXAGON),
+            new Item("Fish Scales", TYPE_FISH_SCALE)
     });
     private final GroupedRangeParam divisions = new GroupedRangeParam(
             "Divisions", 1, 4, 49, false);
@@ -50,6 +52,7 @@ public class Grid extends ShapeFilter {
             case TYPE_RECTANGLE -> createRectangularGrid(width, height);
             case TYPE_HEXAGON -> createHexagonalGrid(width, height);
             case TYPE_TRIANGLE -> createTriangularGrid(width, height);
+            case TYPE_FISH_SCALE -> createFishScaleGrid(width, height);
             default -> throw new IllegalStateException("Unexpected value: " + type.getValue());
         };
     }
@@ -181,8 +184,8 @@ public class Grid extends ShapeFilter {
 
         for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
             for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
-                hexagonTopHalf(shape, i * cellSpace,j * cellH, cellW, cellH);
-                hexagonTopHalf(shape, i * cellSpace + cellInterval,  (j + 1) * cellH, cellW, cellH);
+                hexagonTopHalf(shape, i * cellSpace, j * cellH, cellW, cellH);
+                hexagonTopHalf(shape, i * cellSpace + cellInterval, (j + 1) * cellH, cellW, cellH);
             }
         }
 
@@ -194,5 +197,43 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x + width / 4, y - height);
         shape.lineTo(x + 3 * width / 4, y - height);
         shape.lineTo(x + width, y);
+    }
+
+    private Shape createFishScaleGrid(int width, int height) {
+        Path2D shape = new Path2D.Double();
+
+        int horDiv = divisions.getValue(0);
+        int verDiv = divisions.getValue(1);
+
+        double cellW = width / (double) verDiv;
+        double cellH = height / (double) horDiv;
+
+        // double cellSpace = cellW;
+
+        double cellInterval = cellW / 2;
+
+        double horShift = (center.getRelativeX() - 0.5) * width;
+        double verShift = (center.getRelativeY() - 0.5) * height;
+
+        int horSeg = (int) (horShift / cellW);
+        int verSeg = (int) (verShift / (2 * cellH));
+
+        for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
+            for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
+                halfCircle(shape, i * cellW, j * cellH, cellW, cellH);
+                halfCircle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
+            }
+        }
+
+        return shape;
+    }
+
+    private void halfCircle(Path2D shape, double x, double y, double w, double h) {
+        shape.moveTo(x, y - h);
+        shape.curveTo(
+                x + w / 4, y + h / 3,
+                x + 3 * w / 4, y + h / 3,
+                x + w, y - h
+        );
     }
 }
