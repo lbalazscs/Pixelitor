@@ -88,8 +88,8 @@ public class Grid extends ShapeFilter {
 
         for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
             for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
-                BaselessTriangle(shape, i * cellW, j * cellH, cellW, cellH);
-                BaselessTriangle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
+                baselessTriangle(shape, i * cellW, j * cellH, cellW, cellH);
+                baselessTriangle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
             }
         }
 
@@ -103,7 +103,7 @@ public class Grid extends ShapeFilter {
         return shape;
     }
 
-    private void BaselessTriangle(Path2D shape, double x, double y, double width, double height) {
+    private void baselessTriangle(Path2D shape, double x, double y, double width, double height) {
         shape.moveTo(x, y);
         shape.lineTo(x + width / 2, y - height);
         shape.lineTo(x + width, y);
@@ -150,6 +150,49 @@ public class Grid extends ShapeFilter {
     private static void line(Path2D shape, double x, double y, double x2, double y2) {
         shape.moveTo(x, y);
         shape.lineTo(x2, y2);
+    }
+
+    private Shape createPentagonalGrid(int width, int height) {
+        Path2D shape = new Path2D.Double();
+
+        int horDiv = divisions.getValue(0);
+        int verDiv = divisions.getValue(1);
+
+        // Comments Note: imagine /\ to be more skew to match a pentagon as
+        //  /\
+        // \_/
+
+        // Width and Height of  /\ or \_/
+        double cellW = 2.0 * width / (3 * verDiv - 1);
+        double cellH = height / (double) horDiv;
+
+        // Adding the line below just to relate stuff with Hexagonal Grid.
+        // Though i don't expect anyone to understand most of it...
+        //                          /\ /\ /\
+        // Cell space is Width of  \_/\_/\_/
+        //                        ^  ^
+        // double cellSpace = cellW;
+
+        // Cell interval is the horizontal length after which another cell starts above it.
+        //     ___
+        //   _/_  \___
+        //  /   \___
+        // ^  ^
+        double cellInterval = cellW / 2; // 3/4th of the cellW
+
+        double horShift = (center.getRelativeX() - 0.5) * width;
+        double verShift = (center.getRelativeY() - 0.5) * height;
+        int horSeg = (int) (horShift / cellW);
+        int verSeg = (int) (verShift / (2 * cellH));
+
+        for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
+            for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
+                hexagonTopHalf(shape, i * cellW,j * cellH, cellW, cellH);
+                hexagonTopHalf(shape, i * cellW + cellInterval,  (j + 1) * cellH, cellW, cellH);
+            }
+        }
+
+        return shape;
     }
 
     private Shape createHexagonalGrid(int width, int height) {
