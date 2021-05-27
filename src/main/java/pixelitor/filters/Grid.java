@@ -59,61 +59,89 @@ public class Grid extends ShapeFilter {
 
         int horDiv = divisions.getValue(0);
         int verDiv = divisions.getValue(1);
-        double divWid = width / (double) horDiv;
-        double divHei = height / (double) verDiv / 2; // Height of one triangle
 
-        // / lines
-        for (int i = 1 - verDiv; i < horDiv; i++) {
-            line(shape, i * divWid, height, (i + verDiv) * divWid, 0);
+        //                      /\
+        // Width and height of /  \
+        double cellW = width / (double) verDiv;
+        double cellH = height / (double) horDiv;
+
+        // Adding the line below just to relate stuff with Hexagonal Grid.
+        // Though i dont expect anyone to understand most of it...
+        //                          /\  /\  /\
+        // Cell space is Width of  /  \/  \/  \
+        //                        ^   ^
+        // double cellSpace = cellW;
+
+        // Cell interval is the horizontal length after which another cell starts above it.
+        //     /\
+        //    /  \
+        //   /\
+        //  /  \
+        // ^ ^
+        double cellInterval = cellW / 2;
+
+        double horShift = (center.getRelativeX() - 0.5) * width;
+        double verShift = (center.getRelativeY() - 0.5) * height;
+
+        int horSeg = (int) (horShift / cellW);
+        int verSeg = (int) (verShift / (2 * cellH));
+
+        for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
+            for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
+                peak(shape, i * cellW, j * cellH, cellW, cellH);
+                peak(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
+            }
         }
 
-        // \ lines
-        for (int i = 1 - verDiv; i < horDiv; i++) {
-            line(shape, i * divWid, 0, (i + verDiv) * divWid, height);
-        }
-
-        // Earlier it was the number of Vertical Divisions,
-        // Now it's the number of triangles.
-        verDiv *= 2;
+        verSeg *= 2;
 
         // _ lines
-        for (int i = 1; i < verDiv; i++) {
-            line(shape, 0, i * divHei, width, i * divHei);
+        for (int i = -verSeg - 1; i < horDiv - verSeg + 2; i++) {
+            line(shape, -horShift, i * cellH, width - horShift, i * cellH);
         }
 
         return shape;
     }
 
+    private void peak(Path2D shape, double x, double y, double width, double height) {
+        shape.moveTo(x, y);
+        shape.lineTo(x + width / 2, y - height);
+        shape.lineTo(x + width, y);
+    }
+
     private Shape createRectangularGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        int horiDiv = divisions.getValue(0);
-        int vertDiv = divisions.getValue(1);
+        // Here one cell is defined as the smallest
+        // square/rectangle you can see
 
-        double cellW = width / (double) vertDiv;
-        double cellH = height / (double) horiDiv;
+        int horDiv = divisions.getValue(0);
+        int verDiv = divisions.getValue(1);
+
+        double cellW = width / (double) verDiv;
+        double cellH = height / (double) horDiv;
 
         // Number of extra segments (lines) to be drawn
         // in order to cope up with transform shifts.
         // In extrema case, we draw just enough segments
         // to fill up 50% of view [height/width] from one side
         // while not drawing those from the other side as
-        // they'll placed outside.:
+        // they'll placed outside.
         double horShift = (center.getRelativeX() - 0.5) * width;
         double verShift = (center.getRelativeY() - 0.5) * height;
         int horSeg = (int) (horShift / cellW);
         int verSeg = (int) (verShift / cellH);
 
         // horizontal _ lines
-        for (int i = -verSeg; i < horiDiv - verSeg + 1; i++) {
+        for (int i = -verSeg; i < horDiv - verSeg + 1; i++) {
             double lineY = i * cellH;
             line(shape, -horShift, lineY, width - horShift, lineY);
         }
 
         // vertical | lines
-        for (int i = -horSeg; i < vertDiv - horSeg + 1; i++) {
+        for (int i = -horSeg; i < verDiv - horSeg + 1; i++) {
             double lineX = i * cellW;
-            line(shape, lineX, -verShift, lineX, height-verShift);
+            line(shape, lineX, -verShift, lineX, height - verShift);
         }
 
         return shape;
@@ -127,19 +155,34 @@ public class Grid extends ShapeFilter {
     private Shape createHexagonalGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        int slabs = divisions.getValue(0);
-        int levels = divisions.getValue(1);
+        int horDiv = divisions.getValue(0);
+        int verDiv = divisions.getValue(1);
 
-        double slabWidth = 2.0 * width / (3 * slabs - 1);
-        double slabHeight = height / (double) levels;
+        //                       ___
+        // Width and Height of  /   \
+        double cellW = 2.0 * width / (3 * verDiv - 1);
+        double cellH = height / (double) horDiv;
 
-        double slabSpace = 3 * slabWidth / 2;
-        double slabInterval = slabSpace / 2; // 3/4th of the slabWidth
+        //                          ___     ___     ___
+        // Cell space is Width of  /   \___/   \___/   \___
+        //                        ^       ^
+        double cellSpace = 3 * cellW / 2;
+        // Cell interval is the horizontal length after which another cell starts above it.
+        //     ___
+        //   _/_  \___
+        //  /   \___
+        // ^  ^
+        double cellInterval = cellSpace / 2; // 3/4th of the cellW
 
-        for (int i = -1; i < slabs; i++) {
-            for (int j = -1; j < levels; j += 2) {
-                slab(shape, i * slabSpace, height - j * slabHeight, slabWidth, slabHeight);
-                slab(shape, i * slabSpace + slabInterval, height - (j + 1) * slabHeight, slabWidth, slabHeight);
+        double horShift = (center.getRelativeX() - 0.5) * width;
+        double verShift = (center.getRelativeY() - 0.5) * height;
+        int horSeg = (int) (horShift / cellW);
+        int verSeg = (int) (verShift / (2 * cellH));
+
+        for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
+            for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
+                slab(shape, i * cellSpace,j * cellH, cellW, cellH);
+                slab(shape, i * cellSpace + cellInterval,  (j + 1) * cellH, cellW, cellH);
             }
         }
 
