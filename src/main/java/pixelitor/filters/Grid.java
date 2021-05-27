@@ -88,8 +88,8 @@ public class Grid extends ShapeFilter {
 
         for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
             for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
-                peak(shape, i * cellW, j * cellH, cellW, cellH);
-                peak(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
+                BaselessTriangle(shape, i * cellW, j * cellH, cellW, cellH);
+                BaselessTriangle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
             }
         }
 
@@ -103,7 +103,7 @@ public class Grid extends ShapeFilter {
         return shape;
     }
 
-    private void peak(Path2D shape, double x, double y, double width, double height) {
+    private void BaselessTriangle(Path2D shape, double x, double y, double width, double height) {
         shape.moveTo(x, y);
         shape.lineTo(x + width / 2, y - height);
         shape.lineTo(x + width, y);
@@ -181,15 +181,15 @@ public class Grid extends ShapeFilter {
 
         for (int i = -2 - horSeg; i < verDiv - horSeg + 1; i++) {
             for (int j = -2 * (verSeg + 1); j < horDiv - 2 * (verSeg - 2); j += 2) {
-                slab(shape, i * cellSpace,j * cellH, cellW, cellH);
-                slab(shape, i * cellSpace + cellInterval,  (j + 1) * cellH, cellW, cellH);
+                hexagonTopHalf(shape, i * cellSpace,j * cellH, cellW, cellH);
+                hexagonTopHalf(shape, i * cellSpace + cellInterval,  (j + 1) * cellH, cellW, cellH);
             }
         }
 
         return shape;
     }
 
-    private void slab(Path2D shape, double x, double y, double width, double height) {
+    private void hexagonTopHalf(Path2D shape, double x, double y, double width, double height) {
         shape.moveTo(x, y);
         shape.lineTo(x + width / 4, y - height);
         shape.lineTo(x + 3 * width / 4, y - height);
