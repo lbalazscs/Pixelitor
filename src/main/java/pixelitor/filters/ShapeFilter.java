@@ -122,15 +122,28 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         if (shape != null) {
             double scaleX = scale.getValueAsPercentage(0);
             double scaleY = scale.getValueAsPercentage(1);
+            boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
 
-            if (scaleX != 1.0 || scaleY != 1.0) {
-                double cx = srcWidth * center.getRelativeX();
-                double cy = srcHeight * center.getRelativeY();
+            float relX = center.getRelativeX();
+            float relY = center.getRelativeY();
+            boolean hasTranslation = relX != 0.5f || relY != 0.5f;
 
-                // http://stackoverflow.com/questions/17113234/affine-transform-scale-around-a-point
-                var at = AffineTransform.getTranslateInstance
-                    (cx - scaleX * cx, cy - scaleY * cy);
-                at.scale(scaleX, scaleY);
+            if (hasScaling || hasTranslation) {
+                double cx = srcWidth * relX;
+                double cy = srcHeight * relY;
+
+                AffineTransform at;
+                if (hasScaling) {
+                    // scale around the center point
+                    at = AffineTransform.getTranslateInstance
+                        (cx - scaleX * cx, cy - scaleY * cy);
+                    at.scale(scaleX, scaleY);
+                } else {
+                    at = new AffineTransform();
+                }
+                if (hasTranslation) {
+                    at.translate(cx - srcWidth / 2.0, cy - srcHeight / 2.0);
+                }
 
                 shape = at.createTransformedShape(shape);
             }
