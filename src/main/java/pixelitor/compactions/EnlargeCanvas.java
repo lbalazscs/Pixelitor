@@ -153,10 +153,10 @@ public class EnlargeCanvas extends SimpleCompAction {
         final RangeParam westRangePercent = new RangeParam("West", 0, 0, 100);
 
         // Actual Pixel Based
-        final RangeParam northRangePixels = new RangeParam("North", 0, 0, 500);
-        final RangeParam eastRangePixels = new RangeParam("East", 0, 0, 500);
-        final RangeParam southRangePixels = new RangeParam("South", 0, 0, 500);
-        final RangeParam westRangePixels = new RangeParam("West", 0, 0, 500);
+        final RangeParam northRangePixels;
+        final RangeParam eastRangePixels;
+        final RangeParam southRangePixels;
+        final RangeParam westRangePixels;
 
         final JRadioButton btnUsePixels = new JRadioButton("Pixels");
         final JRadioButton btnUsePercentage = new JRadioButton("Percentage");
@@ -165,6 +165,12 @@ public class EnlargeCanvas extends SimpleCompAction {
 
         private EnlargeCanvasGUI() {
             setLayout(new GridBagLayout());
+
+            Canvas c = OpenImages.getActiveComp().getCanvas();
+            northRangePixels = new RangeParam("North", 0, 0, c.getHeight());
+            eastRangePixels = new RangeParam("East", 0, 0, c.getWidth());
+            southRangePixels = new RangeParam("South", 0, 0, c.getHeight());
+            westRangePixels = new RangeParam("West", 0, 0, c.getWidth());
 
             addRadioButtons();
 
@@ -187,6 +193,20 @@ public class EnlargeCanvas extends SimpleCompAction {
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = c.gridy = 2;
             c.anchor = GridBagConstraints.WEST;
+
+            btnUsePixels.addActionListener(e -> {
+                northRangePixels.setValue(northRangePixels.getMaximum() * northRangePercent.getValueAsDouble() / 100, false);
+                eastRangePixels.setValue(eastRangePixels.getMaximum() * eastRangePercent.getValueAsDouble() / 100, false);
+                westRangePixels.setValue(westRangePixels.getMaximum() * westRangePercent.getValueAsDouble() / 100, false);
+                southRangePixels.setValue(southRangePixels.getMaximum() * southRangePercent.getValueAsDouble() / 100, false);
+            });
+
+            btnUsePercentage.addActionListener(e -> {
+                northRangePercent.setValue(100 * northRangePixels.getValueAsDouble() / northRangePixels.getMaximum(), false);
+                eastRangePercent.setValue(100 * eastRangePixels.getValueAsDouble() / eastRangePixels.getMaximum(), false);
+                westRangePercent.setValue(100 * westRangePixels.getValueAsDouble() / westRangePixels.getMaximum(), false);
+                southRangePercent.setValue(100 * southRangePixels.getValueAsDouble() / southRangePixels.getMaximum(), false);
+            });
 
             new ButtonGroup() {{
                 add(btnUsePixels);
@@ -250,7 +270,7 @@ public class EnlargeCanvas extends SimpleCompAction {
 
         public int getEast(int width) {
             if (btnUsePixels.isSelected())
-                return eastRangePixels.getValue() ;
+                return eastRangePixels.getValue();
             else
                 return (int) (width * eastRangePercent.getValueAsFloat() / 100);
         }
@@ -327,7 +347,7 @@ public class EnlargeCanvas extends SimpleCompAction {
                 // = 20 + 2 * Math.max(10, 15) x 50 + 2 * Math.max(5, 20)
                 // = 20 + 2 * 15 x 50 + 2 * 20
                 // = 50x90
-                float N = getNorth(canvas.getHeight()) , E = getEast(canvas.getWidth()), W = getWest(canvas.getWidth()), S = getSouth(canvas.getHeight());
+                float N = getNorth(canvas.getHeight()), E = getEast(canvas.getWidth()), W = getWest(canvas.getWidth()), S = getSouth(canvas.getHeight());
                 float allocatedW = canvasW + 2 * Math.max(E, W);
                 float allocatedH = canvasH + 2 * Math.max(N, S);
 
