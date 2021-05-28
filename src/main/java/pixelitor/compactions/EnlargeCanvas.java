@@ -18,6 +18,7 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
@@ -26,14 +27,15 @@ import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
+import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
-import static java.awt.Color.GRAY;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
@@ -127,42 +129,84 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     private static void showInDialog() {
-        var p = new EnlargeCanvasPanel();
+        var p = new EnlargeCanvasGUI();
         new DialogBuilder()
                 .title(NAME)
                 .content(p)
                 .okAction(() -> {
                     var comp = OpenImages.getActiveComp();
-                    new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
+                    p.getCompAction(comp.getCanvas())
                             .process(comp);
                 })
                 .show();
     }
 
-    static class EnlargeCanvasPanel extends JPanel {
+    /**
+     * The GUI which a the four sliders and a view {@link CanvasEditsViewer} in center.
+     */
+    static class EnlargeCanvasGUI extends JPanel {
 
-        final RangeParam northRange = new RangeParam("North", 0, 0, 500);
-        final RangeParam eastRange = new RangeParam("East", 0, 0, 500);
-        final RangeParam southRange = new RangeParam("South", 0, 0, 500);
-        final RangeParam westRange = new RangeParam("West", 0, 0, 500);
+        // Percentage Based
+        final RangeParam northRangePercent = new RangeParam("North", 0, 0, 100);
+        final RangeParam eastRangePercent = new RangeParam("East", 0, 0, 100);
+        final RangeParam southRangePercent = new RangeParam("South", 0, 0, 100);
+        final RangeParam westRangePercent = new RangeParam("West", 0, 0, 100);
 
-        final CanvasEditor canvasEditor = new CanvasEditor();
+        // Actual Pixel Based
+        final RangeParam northRangePixels = new RangeParam("North", 0, 0, 500);
+        final RangeParam eastRangePixels = new RangeParam("East", 0, 0, 500);
+        final RangeParam southRangePixels = new RangeParam("South", 0, 0, 500);
+        final RangeParam westRangePixels = new RangeParam("West", 0, 0, 500);
 
-        private EnlargeCanvasPanel() {
+        final JRadioButton btnUsePixels = new JRadioButton("Pixels");
+        final JRadioButton btnUsePercentage = new JRadioButton("Percentage");
+
+        final CanvasEditsViewer canvasEditsViewer = new CanvasEditsViewer();
+
+        private EnlargeCanvasGUI() {
             setLayout(new GridBagLayout());
 
-            addSliderSpinner(northRange, "north", 1, 0, SliderSpinner.HORIZONTAL);
-            addSliderSpinner(eastRange, "east", 2, 1, SliderSpinner.VERTICAL);
-            addSliderSpinner(southRange, "south", 1, 2, SliderSpinner.HORIZONTAL);
-            addSliderSpinner(westRange, "west", 0, 1, SliderSpinner.VERTICAL);
+            addRadioButtons();
+
+            addSliderSpinner(northRangePercent, "north", 1, 0, SliderSpinner.HORIZONTAL, false);
+            addSliderSpinner(eastRangePercent, "east", 2, 1, SliderSpinner.VERTICAL, false);
+            addSliderSpinner(southRangePercent, "south", 1, 2, SliderSpinner.HORIZONTAL, false);
+            addSliderSpinner(westRangePercent, "west", 0, 1, SliderSpinner.VERTICAL, false);
+
+            addSliderSpinner(northRangePixels, "north", 1, 0, SliderSpinner.HORIZONTAL, true);
+            addSliderSpinner(eastRangePixels, "east", 2, 1, SliderSpinner.VERTICAL, true);
+            addSliderSpinner(southRangePixels, "south", 1, 2, SliderSpinner.HORIZONTAL, true);
+            addSliderSpinner(westRangePixels, "west", 0, 1, SliderSpinner.VERTICAL, true);
+
+            btnUsePixels.doClick();
 
             addCanvasEditor();
         }
 
-        private void addSliderSpinner(RangeParam range, String sliderName, int layout_x, int layout_y, int orientation) {
+        private void addRadioButtons() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridx = c.gridy = 2;
+            c.anchor = GridBagConstraints.WEST;
+
+            new ButtonGroup() {{
+                add(btnUsePixels);
+                add(btnUsePercentage);
+            }};
+
+            add(new Box(BoxLayout.Y_AXIS) {{
+                add(btnUsePixels);
+                add(btnUsePercentage);
+            }}, c);
+        }
+
+        private void addSliderSpinner(RangeParam range, String sliderName, int layout_x, int layout_y, int orientation, boolean isPixel) {
             var s = new SliderSpinner(range, BORDER, false, orientation);
             s.setName(sliderName);
-            s.addChangeListener(e -> canvasEditor.repaint());
+            s.addChangeListener(e -> canvasEditsViewer.repaint());
+            s.setVisible(false);
+
+            btnUsePixels.addActionListener(e -> s.setVisible(isPixel));
+            btnUsePercentage.addActionListener(e -> s.setVisible(!isPixel));
 
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = layout_x;
@@ -179,43 +223,82 @@ public class EnlargeCanvas extends SimpleCompAction {
 
             add(new JPanel(new BorderLayout()) {{
                 setBorder(createTitledBorder("Preview"));
-                add(canvasEditor);
+                add(canvasEditsViewer);
             }}, c);
         }
 
-        public int getNorth() {
-            return northRange.getValue();
+        public int getNorth(int height) {
+            if (btnUsePixels.isSelected())
+                return northRangePixels.getValue();
+            else
+                return (int) (height * northRangePercent.getValueAsFloat() / 100);
         }
 
-        public int getSouth() {
-            return southRange.getValue();
+        public int getSouth(int height) {
+            if (btnUsePixels.isSelected())
+                return southRangePixels.getValue();
+            else
+                return (int) (height * southRangePercent.getValueAsFloat() / 100);
         }
 
-        public int getWest() {
-            return westRange.getValue();
+        public int getWest(int width) {
+            if (btnUsePixels.isSelected())
+                return westRangePixels.getValue();
+            else
+                return (int) (width * westRangePercent.getValueAsFloat() / 100);
         }
 
-        public int getEast() {
-            return eastRange.getValue();
+        public int getEast(int width) {
+            if (btnUsePixels.isSelected())
+                return eastRangePixels.getValue() ;
+            else
+                return (int) (width * eastRangePercent.getValueAsFloat() / 100);
         }
 
-        private class CanvasEditor extends JPanel {
+        public EnlargeCanvas getCompAction(Canvas canvas) {
+            int w = canvas.getWidth(), h = canvas.getHeight();
+            return new EnlargeCanvas(
+                    getNorth(h),
+                    getEast(w),
+                    getSouth(h),
+                    getWest(w)
+            );
+        }
 
-            private boolean initialised = false;
+        /**
+         * This is a JPanel, in charge of showing the relative size of new canvas to the current canvas.
+         */
+        private class CanvasEditsViewer extends JPanel {
 
-            private static final Color currentCanvasColor = new Color(246, 247, 246);
             private static final Color newCanvasColor = new Color(136, 139, 146);
+            private BufferedImage board;
+            private BufferedImage thumb;
 
-            public CanvasEditor() {
+            public CanvasEditsViewer() {
                 setBackground(new Color(214, 217, 223));
-                addComponentListener(new ResizeListener());
+                addComponentListener(new EventAdaptor());
             }
 
-            private class ResizeListener extends ComponentAdapter {
+            private class EventAdaptor extends ComponentAdapter {
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    initialised = true;
+                    createTheThumb();
+                }
+
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    componentResized(e);
                     repaint();
+                }
+            }
+
+            public void createTheThumb() {
+                Composition comp = OpenImages.getActiveComp();
+                if (comp != null) {
+                    BufferedImage actualImage = comp.getCompositeImage();
+                    thumb = ImageUtils.createThumbnail(actualImage, getWidth() / 2, null);
+                    board = new BufferedImage(thumb.getWidth(), thumb.getHeight(), thumb.getType());
+                    ImageUtils.createCheckerboardPainter().paint(board.createGraphics(), null, board.getWidth(), board.getHeight());
                 }
             }
 
@@ -223,36 +306,53 @@ public class EnlargeCanvas extends SimpleCompAction {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
-                if (!initialised) return;
-
                 Canvas canvas = OpenImages.getActiveComp().getCanvas();
 
+                // If canvas is null, what are you resizing?
                 if (canvas == null) return;
 
-                g.setColor(Color.RED);
-
+                // Actual canvas Width and Height.
                 float canvasW = canvas.getWidth(), canvasH = canvas.getHeight();
 
-                float allocatedW = canvasW + 2 * Math.max(getEast(), getWest());
-                float allocatedH = canvasH + 2 * Math.max(getNorth(), getSouth());
+                // As how I imagined the tool, I wanted the canvas be always drawn
+                // in the center! So when the new canvas size is set, I take only
+                // the maximum of the axial size.
+                // Just another note: So the two boxes, ie the newCanvas and the
+                // original canvas, are drawn as if being part of a big box (called
+                // allocated space) enclosing them to fit the original canvas in
+                // center.
+                // Say the original canvas is 20x50, and the extension [N/E/W/S]
+                // are [5, 10, 15, 20] respectively. So the new box will be of size
+                // WxH = canvasW + 2 * Math.max(E, W) x canvasH + 2 * Math.max(N, S)
+                // = 20 + 2 * Math.max(10, 15) x 50 + 2 * Math.max(5, 20)
+                // = 20 + 2 * 15 x 50 + 2 * 20
+                // = 50x90
+                float N = getNorth(canvas.getHeight()) , E = getEast(canvas.getWidth()), W = getWest(canvas.getWidth()), S = getSouth(canvas.getHeight());
+                float allocatedW = canvasW + 2 * Math.max(E, W);
+                float allocatedH = canvasH + 2 * Math.max(N, S);
 
+                // These represent the total space in which we can draw!
                 int drawW = getWidth(), drawH = getHeight();
                 int ox = drawW / 2, oy = drawH / 2; // Origin
 
+                // So we need to scale down every value to fit draw space.
+                // (canvas's, newCanvas*'s, allocated space's  W and H)
+                // * by newCanvas, I meant [N/E/W/S]
+                // We scale down everything to fit 75% of the draw space...
+                // well that gives a nice spacing/padding...
                 float factor;
-
                 if (allocatedW / drawW > allocatedH / drawH)
                     factor = drawW * 0.75f / allocatedW;
                 else factor = drawH * 0.75f / allocatedH;
 
                 canvasH *= factor;
                 canvasW *= factor;
+                N *= factor;
+                E *= factor;
+                W *= factor;
+                S *= factor;
 
-                int N = (int) (getNorth() * factor);
-                int E = (int) (getEast() * factor);
-                int W = (int) (getWest() * factor);
-                int S = (int) (getSouth() * factor);
-
+                // Drawing the newCanvas
                 g.setColor(newCanvasColor);
                 g.fillRect(
                         (int) (ox - canvasW / 2 - W),
@@ -261,8 +361,11 @@ public class EnlargeCanvas extends SimpleCompAction {
                         (int) (N + S + canvasH)
                 );
 
-                g.setColor(currentCanvasColor);
-                g.fillRect((int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH);
+
+                if (thumb == null) createTheThumb();
+                // Drawing the thumb, which also represents the old canvas!
+                g.drawImage(board, (int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH, null);
+                g.drawImage(thumb, (int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH, null);
 
             }
 
