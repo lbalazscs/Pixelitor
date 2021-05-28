@@ -552,6 +552,9 @@ public class ImageUtils {
         return new BufferedImage(icm2, raster, image.isAlphaPremultiplied(), null);
     }
 
+    /**
+     * Shrinks the "src" image to match it's width to "size" and returns the new image.
+     */
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
 
@@ -560,6 +563,10 @@ public class ImageUtils {
         return downSizeFast(src, thumbDim.width, thumbDim.height, painter);
     }
 
+    /**
+     * Returns a Dimension object representing the given srcWidth
+     * and srcHeight scaled down to match srcWidth to size.
+     */
     public static Dimension calcThumbDimensions(int srcWidth, int srcHeight, int size) {
         int thumbWidth;
         int thumbHeight;
