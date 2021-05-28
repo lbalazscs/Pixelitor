@@ -32,7 +32,9 @@ import java.io.Serializable;
 
 /**
  * The canvas represents the size of the composition.
- * A layer can be bigger than the canvas if it is partially hidden.
+ * A layer can be bigger than the canvas, if it is partially hidden (for example
+ * because it was moved with the Move Tool).
+ * The saved images always have the size of the canvas.
  */
 public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;

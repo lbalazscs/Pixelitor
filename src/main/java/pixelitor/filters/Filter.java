@@ -39,7 +39,10 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 
 /**
- * The superclass of all Pixelitor filters and color adjustments
+ * The superclass of all Pixelitor filters and color adjustments.
+ * A filter always works on a {@link Drawable}. If there is a selection,
+ * the filter modifies only the selection bounds, otherwise the whole
+ * {@link Drawable} is modified, not just the part included in the canvas.
  */
 public abstract class Filter implements Serializable {
     @Serial
