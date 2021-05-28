@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,15 +35,12 @@ public class SpiderWeb extends ShapeFilter {
         new RangeParam("Number of Connections", 0, 6, 50);
     private final RangeParam curvatureParam =
         new RangeParam("Curvature", -10, 2, 10);
-    private final RangeParam rotate =
-        new RangeParam("Rotate", 0, 0, 100);
 
     public SpiderWeb() {
         addParamsToFront(
             numBranchesParam,
             numConnectionsParam,
-            curvatureParam,
-            rotate
+            curvatureParam
         );
     }
 
@@ -59,7 +56,6 @@ public class SpiderWeb extends ShapeFilter {
         int numBranches = numBranchesParam.getValue();
         double radius = Math.min(w, h);
         double angle = 2 * Math.PI / numBranches;
-        double startAngle = angle * rotate.getPercentageValD();
 
         double[] cos = new double[numBranches];
         double[] sin = new double[numBranches];
@@ -68,7 +64,7 @@ public class SpiderWeb extends ShapeFilter {
         for (int br = 0; br < numBranches; br++) {
             shape.moveTo(cx, cy);
 
-            double alpha = startAngle + br * angle;
+            double alpha = br * angle;
             cos[br] = FastMath.cos(alpha);
             sin[br] = FastMath.sin(alpha);
             double x = radius * cos[br] + cx;
