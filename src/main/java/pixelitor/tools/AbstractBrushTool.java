@@ -52,7 +52,7 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * Abstract base class for all brush-like tools.
+ * Abstract base class for the tools working with {@link Brush} objects.
  */
 public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;

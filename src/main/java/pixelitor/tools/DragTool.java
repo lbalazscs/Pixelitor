@@ -27,8 +27,10 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 
 /**
- * A tool where where only the drag start and end positions
- * matter, and not the intermediate mouse point positions.
+ * An abstract superclass for tools which only care about the mouse drag
+ * start and end positions, and not about the intermediate mouse positions.
+ * The start and end points of the drag gesture are continuously
+ * updated in the {@link UserDrag} object.
  */
 public abstract class DragTool extends Tool {
     protected UserDrag userDrag;

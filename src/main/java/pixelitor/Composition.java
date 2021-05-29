@@ -1161,6 +1161,10 @@ public class Composition implements Serializable {
         return compositeImage;
     }
 
+    /**
+     * Forces the recalculation of the composite image
+     * the next time when getCompositeImage() is called.
+     */
     private void invalidateCompositeCache() {
         if (compositeImage != null) {
             compositeImage.flush();

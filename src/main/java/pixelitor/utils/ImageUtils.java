@@ -74,6 +74,8 @@ public class ImageUtils {
     }
 
     public static CheckerboardPainter createCheckerboardPainter() {
+        // return a different instance for each painting
+        // scenario, because the painters use cached images
         return new CheckerboardPainter(CHECKERBOARD_GRAY, WHITE);
     }
 

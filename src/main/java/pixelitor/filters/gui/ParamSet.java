@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
@@ -31,7 +32,8 @@ import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 
 /**
- * A fixed set of filter parameter objects
+ * All the information needed to automatically
+ * build the user interface of a {@link ParametrizedFilter}
  */
 public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
