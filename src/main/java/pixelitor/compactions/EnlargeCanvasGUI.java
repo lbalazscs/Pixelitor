@@ -17,6 +17,7 @@
 
 package pixelitor.compactions;
 
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
@@ -185,10 +186,10 @@ class EnlargeCanvasGUI extends JPanel {
     public EnlargeCanvas getCompAction(Canvas canvas) {
         int w = canvas.getWidth(), h = canvas.getHeight();
         return new EnlargeCanvas(
-            getNorth(h),
-            getEast(w),
-            getSouth(h),
-            getWest(w)
+                getNorth(h),
+                getEast(w),
+                getSouth(h),
+                getWest(w)
         );
     }
 
@@ -197,7 +198,7 @@ class EnlargeCanvasGUI extends JPanel {
      */
     private class CanvasEditsViewer extends JPanel {
         private static final Color newCanvasColor = new Color(136, 139, 146);
-        private BufferedImage board;
+        private static final CheckerboardPainter painter = ImageUtils.createCheckerboardPainter();
         private BufferedImage thumb;
 
         public CanvasEditsViewer() {
@@ -223,11 +224,6 @@ class EnlargeCanvasGUI extends JPanel {
             if (comp != null) {
                 BufferedImage actualImage = comp.getCompositeImage();
                 thumb = ImageUtils.createThumbnail(actualImage, getWidth() / 2, null);
-                board = new BufferedImage(thumb.getWidth(), thumb.getHeight(), thumb.getType());
-
-                Graphics2D g = board.createGraphics();
-                ImageUtils.createCheckerboardPainter().paint(g, null, board.getWidth(), board.getHeight());
-                g.dispose();
             }
         }
 
@@ -240,64 +236,50 @@ class EnlargeCanvasGUI extends JPanel {
             // Actual canvas Width and Height.
             float canvasW = canvas.getWidth(), canvasH = canvas.getHeight();
 
-            // As how I imagined the tool, I wanted the canvas be always drawn
-            // in the center! So when the new canvas size is set, I take only
-            // the maximum of the axial size.
-            // Just another note: So the two boxes, ie the newCanvas and the
-            // original canvas, are drawn as if being part of a big box (called
-            // allocated space) enclosing them to fit the original canvas in
-            // center.
-            // Say the original canvas is 20x50, and the extension [N/E/W/S]
-            // are [5, 10, 15, 20] respectively. So the new box will be of size
-            // WxH = canvasW + 2 * Math.max(E, W) x canvasH + 2 * Math.max(N, S)
-            // = 20 + 2 * Math.max(10, 15) x 50 + 2 * Math.max(5, 20)
-            // = 20 + 2 * 15 x 50 + 2 * 20
-            // = 50x90
             float N = getNorth(canvas.getHeight());
-            float E = getEast(canvas.getWidth());
             float W = getWest(canvas.getWidth());
-            float S = getSouth(canvas.getHeight());
-            float allocatedW = canvasW + 2 * Math.max(E, W);
-            float allocatedH = canvasH + 2 * Math.max(N, S);
+            float newCanvasW = W + canvasW + getEast(canvas.getWidth());;
+            float newCanvasH = N + canvasH + getSouth(canvas.getHeight());
 
             // These represent the total space in which we can draw!
             int drawW = getWidth(), drawH = getHeight();
             int ox = drawW / 2, oy = drawH / 2; // Origin
 
-            // So we need to scale down every value to fit draw space.
-            // (canvas's, newCanvas*'s, allocated space's  W and H)
-            // * by newCanvas, I meant [N/E/W/S]
-            // We scale down everything to fit 75% of the draw space...
-            // well that gives a nice spacing/padding...
             float factor;
-            if (allocatedW / drawW > allocatedH / drawH) {
-                factor = drawW * 0.75f / allocatedW;
+            if (newCanvasW / drawW > newCanvasH / drawH) {
+                factor = drawW * 0.75f / newCanvasW;
             } else {
-                factor = drawH * 0.75f / allocatedH;
+                factor = drawH * 0.75f / newCanvasH;
             }
 
+            newCanvasH *= factor;
+            newCanvasW *= factor;
             canvasH *= factor;
             canvasW *= factor;
             N *= factor;
-            E *= factor;
             W *= factor;
-            S *= factor;
 
             // Drawing the newCanvas
             g.setColor(newCanvasColor);
             g.fillRect(
-                (int) (ox - canvasW / 2 - W),
-                (int) (oy - canvasH / 2 - N),
-                (int) (E + W + canvasW),
-                (int) (N + S + canvasH)
+                    (int) (ox - newCanvasW / 2),
+                    (int) (oy - newCanvasH / 2),
+                    (int) (newCanvasW),
+                    (int) (newCanvasH)
             );
 
             if (thumb == null) {
                 createTheThumb();
             }
-            // Drawing the thumb, which also represents the old canvas!
-            g.drawImage(board, (int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH, null);
-            g.drawImage(thumb, (int) (ox - canvasW / 2), (int) (oy - canvasH / 2), (int) canvasW, (int) canvasH, null);
+
+            BufferedImage board = new BufferedImage((int) canvasW, (int) canvasH, thumb.getType());
+            Graphics2D g_b = board.createGraphics();
+            painter.paint(g_b, null, board.getWidth(), board.getHeight());
+            g_b.dispose();
+
+            // Drawing the thumb, which represents the old canvas
+            g.drawImage(board, (int) (ox - newCanvasW / 2 + W), (int) (oy - newCanvasH / 2 + N), (int) canvasW, (int) canvasH, null);
+            g.drawImage(thumb, (int) (ox - newCanvasW / 2 + W), (int) (oy - newCanvasH / 2 + N), (int) canvasW, (int) canvasH, null);
         }
     }
 }
