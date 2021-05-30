@@ -36,25 +36,21 @@ import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.tools.DragToolState.*;
 
-public class ZoomTool_new extends DragTool {
+public class ZoomTool extends DragTool {
 
     private final RangeParam maskOpacity = new RangeParam("Mask Opacity (%)", 0, 75, 100);
-    private final CompositionGuide compositionGuide;
     private DragToolState state = NO_INTERACTION;
     private ZoomBox zoomBox;
     private Composite maskComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacity.getPercentageValF());
     private JComboBox<CompositionGuideType> guidesCB;
 
-    public ZoomTool_new() { // Do I need this false in super call?
+    public ZoomTool() { // Do I need this false in super call?
         super("Zoom", 'Z', "zoom_tool.png",
                 "<b>click</b> to zoom in, " +
                         "<b>right-click</b> (or <b>Alt-click</b>) to zoom out." +
                         "<b>drag</b> to select an area.",
                 Cursors.HAND, false);
         spaceDragStartPoint = true;
-
-        GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
-        compositionGuide = new CompositionGuide(renderer);
     }
 
     @Override
@@ -88,11 +84,11 @@ public class ZoomTool_new extends DragTool {
         float alpha = maskOpacity.getPercentageValF();
         // because of a swing bug, the slider can get out of range?
         if (alpha < 0.0f) {
-            System.out.printf("CropTool::maskOpacityChanged: alpha = %.2f%n", alpha);
+            System.out.printf("ZoomTool::maskOpacityChanged: alpha = %.2f%n", alpha);
             alpha = 0.0f;
             maskOpacity.setValue(0);
         } else if (alpha > 1.0f) {
-            System.out.printf("CropTool::maskOpacityChanged: alpha = %.2f%n", alpha);
+            System.out.printf("ZoomTool::maskOpacityChanged: alpha = %.2f%n", alpha);
             alpha = 1.0f;
             maskOpacity.setValue(100);
         }
@@ -108,6 +104,21 @@ public class ZoomTool_new extends DragTool {
         guidesCB.addActionListener(e -> OpenImages.repaintActive());
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }
+
+//    @Override
+//    public void mouseClicked(PMouseEvent e) {
+//        Point mousePos = e.getPoint();
+//        View view = e.getView();
+//        if (e.isLeft()) {
+//            if (e.isAltDown()) {
+//                view.decreaseZoom(mousePos);
+//            } else {
+//                view.increaseZoom(mousePos);
+//            }
+//        } else if (e.isRight()) {
+//            view.decreaseZoom(mousePos);
+//        }
+//    }
 
     @Override
     public void dragStarted(PMouseEvent e) {
@@ -195,9 +206,9 @@ public class ZoomTool_new extends DragTool {
         }
     }
 
-    // Paint the semi-transparent dark area outside the crop rectangle.
+    // Paint the semi-transparent dark area outside the zoom rectangle.
     // All calculations are in component space.
-    private void paintDarkMask(Graphics2D g2, Composition comp, PRectangle cropRect) {
+    private void paintDarkMask(Graphics2D g2, Composition comp, PRectangle zoomRect) {
 
         // The Swing clip ensures that we can't draw outside the component,
         // even if the canvas is outside of it (scrollbars)
@@ -213,7 +224,7 @@ public class ZoomTool_new extends DragTool {
 
         Path2D maskAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         maskAreaClip.append(visibleCanvasArea, false);
-        maskAreaClip.append(cropRect.getCo(), false); // subtract the crop rect
+        maskAreaClip.append(zoomRect.getCo(), false); // subtract the zoom rect
 
         g2.setColor(BLACK);
         g2.setComposite(maskComposite);
@@ -226,15 +237,12 @@ public class ZoomTool_new extends DragTool {
     }
 
     // Paint the handles and the guides.
-    private void paintBox(Graphics2D g2, PRectangle cropRect) {
-        compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
-        compositionGuide.draw(cropRect.getCo(), g2);
-
+    private void paintBox(Graphics2D g2, PRectangle zoomRect) {
         zoomBox.paint(g2);
     }
 
     /**
-     * Returns the crop rectangle
+     * Returns the zoom rectangle
      */
     public PRectangle getZoomRect() {
         if (state == INITIAL_DRAG) {
@@ -331,7 +339,7 @@ public class ZoomTool_new extends DragTool {
         }
 
         resetInitialState();
-        Messages.showPlainInStatusBar("Crop canceled.");
+        Messages.showPlainInStatusBar("Zoom canceled.");
     }
 
     @Override
@@ -351,8 +359,6 @@ public class ZoomTool_new extends DragTool {
                 // Shift-O: change the orientation
                 // within the current composition guide family
                 if (state == TRANSFORM) {
-                    int o = compositionGuide.getOrientation();
-                    compositionGuide.setOrientation(o + 1);
                     OpenImages.repaintActive();
                     e.consume();
                 }

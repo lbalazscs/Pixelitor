@@ -29,7 +29,7 @@ import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.zoom.ZoomTool_new;
+import pixelitor.tools.zoom.ZoomTool;
 import pixelitor.utils.*;
 
 import java.awt.event.MouseEvent;
@@ -55,7 +55,7 @@ public class Tools {
     public static final PenTool PEN = new PenTool();
     public static final ShapesTool SHAPES = new ShapesTool();
     public static final HandTool HAND = new HandTool();
-    public static final ZoomTool_new ZOOM = new ZoomTool_new();
+    public static final ZoomTool ZOOM = new ZoomTool();
 
     private static final Tool[] allTools = {
         MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
