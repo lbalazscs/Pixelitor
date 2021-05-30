@@ -105,20 +105,20 @@ public class ZoomTool extends DragTool {
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }
 
-//    @Override
-//    public void mouseClicked(PMouseEvent e) {
-//        Point mousePos = e.getPoint();
-//        View view = e.getView();
-//        if (e.isLeft()) {
-//            if (e.isAltDown()) {
-//                view.decreaseZoom(mousePos);
-//            } else {
-//                view.increaseZoom(mousePos);
-//            }
-//        } else if (e.isRight()) {
-//            view.decreaseZoom(mousePos);
-//        }
-//    }
+    @Override
+    public void mouseClicked(PMouseEvent e) {
+        Point mousePos = e.getPoint();
+        View view = e.getView();
+        if (e.isLeft()) {
+            if (e.isAltDown()) {
+                view.decreaseZoom(mousePos);
+            } else {
+                view.increaseZoom(mousePos);
+            }
+        } else if (e.isRight()) {
+            view.decreaseZoom(mousePos);
+        }
+    }
 
     @Override
     public void dragStarted(PMouseEvent e) {
