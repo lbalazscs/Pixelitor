@@ -55,7 +55,6 @@ public class Tools {
     public static final PenTool PEN = new PenTool();
     public static final ShapesTool SHAPES = new ShapesTool();
     public static final HandTool HAND = new HandTool();
-//    public static final ZoomTool_new ZOOM = new ZoomTool_new();
     public static final ZoomTool ZOOM = new ZoomTool();
 
     private static final Tool[] allTools = {

@@ -27,7 +27,7 @@ import static pixelitor.tools.DragToolState.*;
 public class ZoomTool extends DragTool {
 
     private DragToolState state = NO_INTERACTION;
-    private ZoomBox zoomBox;
+    private PRectangle box;
 
     public ZoomTool() { // Do I need this false in super call?
         super("Zoom", 'Z', "zoom_tool.png",
@@ -45,7 +45,7 @@ public class ZoomTool extends DragTool {
                 addActionListener(e -> {
                     System.out.println("ZoomTool::actionPerformed: canvas = " + OpenImages.getActiveView().getCanvas());
                     System.out.println("ZoomTool::initSettingsPanel: state = " + state);
-                    System.out.println("ZoomTool::initSettingsPanel: dumpBox = " + zoomBox);
+                    System.out.println("ZoomTool::initSettingsPanel: dumpBox = " + box);
                 });
             }});
         }
@@ -84,12 +84,12 @@ public class ZoomTool extends DragTool {
         }
 
         if (state == INITIAL_DRAG) {
-            if (zoomBox != null) {
+            if (box != null) {
                 throw new IllegalStateException();
             }
 
             View view = e.getView();
-            zoomBox = new ZoomBox(PRectangle.positiveFromCo(userDrag.toCoRect(), view), view);
+            box = PRectangle.positiveFromCo(userDrag.toCoRect(), view);
             setState(TRANSFORM);
 
             executeZoomCommand(view);
@@ -117,7 +117,7 @@ public class ZoomTool extends DragTool {
         if (state == INITIAL_DRAG) {
             return userDrag.toPosPRect();
         } else if (state == TRANSFORM) {
-            return zoomBox.getRect();
+            return box;
         }
         // initial state
         return null;
@@ -131,7 +131,7 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void resetInitialState() {
-        zoomBox = null;
+        box = null;
         setState(NO_INTERACTION);
 
         OpenImages.repaintActive();
@@ -151,15 +151,15 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void coCoordsChanged(View view) {
-        if (zoomBox != null && state == TRANSFORM) {
-            zoomBox.coCoordsChanged(view);
+        if (box != null && state == TRANSFORM) {
+            box.coCoordsChanged(view);
         }
     }
 
     @Override
     public void imCoordsChanged(AffineTransform at, Composition comp) {
-        if (zoomBox != null && state == TRANSFORM) {
-            zoomBox.imCoordsChanged(at, comp);
+        if (box != null && state == TRANSFORM) {
+            box.imCoordsChanged(comp.getView(), at);
         }
     }
 
