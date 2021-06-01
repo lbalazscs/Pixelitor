@@ -44,6 +44,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
@@ -329,31 +330,21 @@ public class CropTool extends DragTool {
     // Paint the semi-transparent dark area outside the crop rectangle.
     // All calculations are in component space.
     private void paintDarkMask(Graphics2D g2, Composition comp, PRectangle cropRect) {
-
-        // The Swing clip ensures that we can't draw outside the component,
-        // even if the canvas is outside of it (scrollbars)
-        Shape origClip = g2.getClip();
         Color origColor = g2.getColor();
         Composite origComposite = g2.getComposite();
 
         View view = comp.getView();
         Rectangle2D coCanvasBounds = comp.getCanvas().getCoBounds(view);
 
-        Rectangle2D visibleCanvasArea = coCanvasBounds.createIntersection(
-            view.getVisiblePart());
-
-        Path2D maskAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        maskAreaClip.append(visibleCanvasArea, false);
-        maskAreaClip.append(cropRect.getCo(), false); // subtract the crop rect
+        Area darkAreaShape = new Area(coCanvasBounds);
+        darkAreaShape.subtract(new Area(cropRect.getCo()));
 
         g2.setColor(BLACK);
         g2.setComposite(maskComposite);
-        g2.setClip(maskAreaClip);
-        g2.fill(visibleCanvasArea);
+        g2.fill(darkAreaShape);
 
         g2.setColor(origColor);
         g2.setComposite(origComposite);
-        g2.setClip(origClip);
     }
 
     // Paint the handles and the guides.
