@@ -1,4 +1,4 @@
-package pixelitor.tools.zoom;
+package pixelitor.tools;
 
 import pixelitor.AppContext;
 import pixelitor.Canvas;

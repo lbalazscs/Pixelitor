@@ -29,7 +29,6 @@ import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.zoom.ZoomTool;
 import pixelitor.utils.*;
 
 import java.awt.event.MouseEvent;
