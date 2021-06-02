@@ -167,6 +167,7 @@ public class ZoomTool extends DragTool {
 
         Rectangle2D zoomRect = getZoomRect().getIm();
         if (zoomRect.isEmpty()) {
+            resetInitialState();
             return;
         }
 
@@ -188,19 +189,10 @@ public class ZoomTool extends DragTool {
 
     @Override
     public Icon createIcon() {
-        return ZoomToolIcon.POSITIVE;
+        return new ZoomToolIcon();
     }
 
     private static class ZoomToolIcon extends Tool.ToolIcon {
-
-        public static final ToolIcon POSITIVE = new ZoomToolIcon(true);
-        public static final ToolIcon NEGETIVE = new ZoomToolIcon(false);
-
-        private final boolean drawMinus;
-
-        public ZoomToolIcon(boolean drawMinus) {
-            this.drawMinus = drawMinus;
-        }
 
         @Override
         public void paintIcon(Graphics2D g) {
@@ -213,10 +205,8 @@ public class ZoomTool extends DragTool {
             Line2D hor = new Line2D.Double(12.0, 10.0, 24.0, 10.0);
             g.draw(hor);
 
-            if (drawMinus) {
-                Line2D ver = new Line2D.Double(18.0, 16.0, 18.0, 4.0);
-                g.draw(ver);
-            }
+            Line2D ver = new Line2D.Double(18.0, 16.0, 18.0, 4.0);
+            g.draw(ver);
 
             Path2D shape = new Path2D.Float();
             shape.moveTo(13.447782, 17.801485);
