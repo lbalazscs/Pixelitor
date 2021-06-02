@@ -559,6 +559,18 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         repaint();
     }
 
+    public void zoomToRect(PRectangle rect) {
+        Rectangle2D zoomRect = rect.getIm();
+        if (zoomRect.isEmpty()) {
+            return;
+        }
+
+        Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
+
+        setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
+        scrollRectToVisible(rect.getCo());
+    }
+
     public void increaseZoom() {
         increaseZoom(null);
     }

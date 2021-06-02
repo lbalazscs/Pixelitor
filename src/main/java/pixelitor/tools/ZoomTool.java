@@ -1,15 +1,26 @@
+/*
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.tools;
 
 import pixelitor.AppContext;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.gui.AutoZoom;
 import pixelitor.gui.View;
-import pixelitor.menus.view.ZoomLevel;
-import pixelitor.tools.DragTool;
-import pixelitor.tools.DragToolState;
-import pixelitor.tools.Tool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
@@ -17,24 +28,28 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static pixelitor.tools.DragToolState.*;
 
 public class ZoomTool extends DragTool {
-
     private DragToolState state = NO_INTERACTION;
     private PRectangle box;
 
     public ZoomTool() { // Do I need this false in super call?
         super("Zoom", 'Z', "zoom_tool.png",
-                "<b>click</b> to zoom in, " +
-                        "<b>right-click</b> (or <b>Alt-click</b>) to zoom out." +
-                        "<b>drag</b> to select an area.",
-                Cursors.HAND, false);
+            "<b>click</b> to zoom in, " +
+                "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
+                "<b>Drag</b> to select an area.",
+            Cursors.HAND, false);
         spaceDragStartPoint = true;
     }
 
@@ -94,7 +109,9 @@ public class ZoomTool extends DragTool {
             box = PRectangle.positiveFromCo(userDrag.toCoRect(), view);
             setState(TRANSFORM);
 
-            executeZoomCommand(view);
+            view.zoomToRect(getZoomRect());
+            resetInitialState();
+
             e.consume();
         }
     }
@@ -163,23 +180,6 @@ public class ZoomTool extends DragTool {
         if (box != null && state == TRANSFORM) {
             box.imCoordsChanged(comp.getView(), at);
         }
-    }
-
-    private void executeZoomCommand(View view) {
-
-        Rectangle2D zoomRect = getZoomRect().getIm();
-        if (zoomRect.isEmpty()) {
-            resetInitialState();
-            return;
-        }
-
-        Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
-
-        view.setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
-
-        view.scrollRectToVisible(getZoomRect().getCo());
-
-        resetInitialState();
     }
 
     @Override
