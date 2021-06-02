@@ -19,7 +19,7 @@
 <launch4jConfig>
     <dontWrapJar>false</dontWrapJar>
     <headerType>gui</headerType>
-    <jar>C:\dev_p\pixelitor\target\Pixelitor-4.2.4.jar</jar>
+    <jar>C:\dev_p\pixelitor\target\Pixelitor-4.3.0.jar</jar>
     <outfile>C:\dev_p\pixelitor\installer\pixelitor.exe</outfile>
     <errTitle>Pixelitor - Java 15+ required</errTitle>
     <cmdLine></cmdLine>
@@ -43,12 +43,12 @@
         <maxHeapPercent>95</maxHeapPercent>
     </jre>
     <versionInfo>
-        <fileVersion>4.2.4.0</fileVersion>
-        <txtFileVersion>4.2.4</txtFileVersion>
+        <fileVersion>4.3.0.0</fileVersion>
+        <txtFileVersion>4.3.0</txtFileVersion>
         <fileDescription>Pixelitor Image Editor</fileDescription>
         <copyright>Copyright (c) 2009-2021 Laszlo Balazs-Csiki and Contributors</copyright>
-        <productVersion>4.2.4.0</productVersion>
-        <txtProductVersion>4.2.4</txtProductVersion>
+        <productVersion>4.3.0.0</productVersion>
+        <txtProductVersion>4.3.0</txtProductVersion>
         <productName>Pixelitor</productName>
         <companyName>http://pixelitor.sourceforge.net/</companyName>
         <internalName>Pixelitor</internalName>

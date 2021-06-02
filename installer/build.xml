@@ -17,7 +17,7 @@
   -->
 
 <project name="pixelitor" default="02_build_setup">
-    <property name="version" value="4.2.4"/>
+    <property name="version" value="4.3.0"/>
     <property name="launch4j.dir" location="C:\Program Files (x86)\Launch4j"/>
 
     <target name="00_clean" description="Clean up">
