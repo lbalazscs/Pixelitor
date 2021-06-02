@@ -1,77 +1,192 @@
-/*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
- *
- * This file is part of Pixelitor. Pixelitor is free software: you
- * can redistribute it and/or modify it under the terms of the GNU
- * General Public License, version 3 as published by the Free
- * Software Foundation.
- *
- * Pixelitor is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package pixelitor.tools;
 
+import pixelitor.AppContext;
+import pixelitor.Canvas;
+import pixelitor.Composition;
+import pixelitor.OpenImages;
+import pixelitor.gui.AutoZoom;
 import pixelitor.gui.View;
+import pixelitor.menus.view.ZoomLevel;
+import pixelitor.tools.DragTool;
+import pixelitor.tools.DragToolState;
+import pixelitor.tools.Tool;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
+import java.awt.*;
+import java.awt.geom.*;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
-import static pixelitor.gui.GUIText.ZOOM;
+import static pixelitor.tools.DragToolState.*;
 
-/**
- * The zoom tool.
- */
-public class ZoomTool extends Tool {
-    ZoomTool() {
-        super(ZOOM, 'Z', "zoom_tool.png",
-            "<b>click</b> to zoom in, " +
-                "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
-            Cursors.HAND);
+public class ZoomTool extends DragTool {
+
+    private DragToolState state = NO_INTERACTION;
+    private PRectangle box;
+
+    public ZoomTool() { // Do I need this false in super call?
+        super("Zoom", 'Z', "zoom_tool.png",
+                "<b>click</b> to zoom in, " +
+                        "<b>right-click</b> (or <b>Alt-click</b>) to zoom out." +
+                        "<b>drag</b> to select an area.",
+                Cursors.HAND, false);
+        spaceDragStartPoint = true;
     }
 
     @Override
     public void initSettingsPanel() {
         settingsPanel.addAutoZoomButtons();
-    }
 
-    @Override
-    public void mousePressed(PMouseEvent e) {
-        Point mousePos = e.getPoint();
-        View view = e.getView();
-        if (e.isLeft()) {
-            if (e.isAltDown()) {
-                view.decreaseZoom(mousePos);
-            } else {
-                view.increaseZoom(mousePos);
-            }
-        } else if (e.isRight()) {
-            view.decreaseZoom(mousePos);
+        if (AppContext.isDevelopment()) {
+            settingsPanel.add(new JButton("Dump State") {{
+                addActionListener(e -> {
+                    System.out.println("ZoomTool::actionPerformed: canvas = " + OpenImages.getActiveView().getCanvas());
+                    System.out.println("ZoomTool::initSettingsPanel: state = " + state);
+                    System.out.println("ZoomTool::initSettingsPanel: dumpBox = " + box);
+                });
+            }});
         }
     }
 
     @Override
-    public void mouseDragged(PMouseEvent e) {
-        // do nothing
+    public void mouseClicked(PMouseEvent e) {
+        Point mousePos = e.getPoint();
+        View view = e.getView();
+
+        if (e.isRight() || (e.isLeft() && e.isAltDown())) {
+            view.decreaseZoom(mousePos);
+        } else {
+            view.increaseZoom(mousePos);
+        }
     }
 
     @Override
-    public void mouseReleased(PMouseEvent e) {
-        // do nothing
+    public void dragStarted(PMouseEvent e) {
+        if (state == NO_INTERACTION) {
+            setState(INITIAL_DRAG);
+        } else if (state == INITIAL_DRAG) {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public void ongoingDrag(PMouseEvent e) {
+        e.repaint();
+    }
+
+    @Override
+    public void dragFinished(PMouseEvent e) {
+        if (state == NO_INTERACTION) {
+            return;
+        }
+
+        if (state == INITIAL_DRAG) {
+            if (box != null) {
+                throw new IllegalStateException();
+            }
+
+            View view = e.getView();
+            box = PRectangle.positiveFromCo(userDrag.toCoRect(), view);
+            setState(TRANSFORM);
+
+            executeZoomCommand(view);
+            e.consume();
+        }
+    }
+
+    @Override
+    public void paintOverImage(Graphics2D g2, Composition comp) {
+        if (state == NO_INTERACTION) {
+            return;
+        }
+        PRectangle zoomRect = getZoomRect();
+        if (zoomRect == null) {
+            return;
+        }
+
+        Shapes.drawVisibly(g2, zoomRect.getCo());
+    }
+
+    /**
+     * Returns the zoom rectangle
+     */
+    public PRectangle getZoomRect() {
+        if (state == INITIAL_DRAG) {
+            return userDrag.toPosPRect();
+        } else if (state == TRANSFORM) {
+            return box;
+        }
+        // initial state
+        return null;
+    }
+
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+        resetInitialState();
+    }
+
+    @Override
+    public void resetInitialState() {
+        box = null;
+        setState(NO_INTERACTION);
+
+        OpenImages.repaintActive();
+        OpenImages.setCursorForAll(Cursors.HAND);
+    }
+
+    private void setState(DragToolState newState) {
+        state = newState;
+    }
+
+    @Override
+    public void compReplaced(Composition newComp, boolean reloaded) {
+        if (reloaded) {
+            resetInitialState();
+        }
+    }
+
+    @Override
+    public void coCoordsChanged(View view) {
+        if (box != null && state == TRANSFORM) {
+            box.coCoordsChanged(view);
+        }
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
+        if (box != null && state == TRANSFORM) {
+            box.imCoordsChanged(comp.getView(), at);
+        }
+    }
+
+    private void executeZoomCommand(View view) {
+
+        Rectangle2D zoomRect = getZoomRect().getIm();
+        if (zoomRect.isEmpty()) {
+            resetInitialState();
+            return;
+        }
+
+        Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
+
+        view.setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
+
+        view.scrollRectToVisible(getZoomRect().getCo());
+
+        resetInitialState();
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        var node = super.createDebugNode();
+        node.addString("state", state.toString());
+        return node;
     }
 
     @Override
@@ -80,6 +195,7 @@ public class ZoomTool extends Tool {
     }
 
     private static class ZoomToolIcon extends Tool.ToolIcon {
+
         @Override
         public void paintIcon(Graphics2D g) {
             // based on zoom_tool.svg
@@ -105,4 +221,5 @@ public class ZoomTool extends Tool {
             g.draw(shape);
         }
     }
+
 }
