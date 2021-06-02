@@ -40,6 +40,8 @@ public class ZoomTool extends DragTool {
 
     @Override
     public void initSettingsPanel() {
+        settingsPanel.addAutoZoomButtons();
+
         if (AppContext.isDevelopment()) {
             settingsPanel.add(new JButton("Dump State") {{
                 addActionListener(e -> {
