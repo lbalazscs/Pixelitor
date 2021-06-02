@@ -17,14 +17,12 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.tools.shapes.*;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Stroke;
-import java.awt.Window;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -67,9 +65,7 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
-        paramGUI = new ConfigureParamGUI(
-            owner -> createSettingsDialog(this, owner),
-            defaultButton);
+        paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, defaultButton);
 
         setGUIEnabledState();
         return (JComponent) paramGUI;
@@ -111,20 +107,14 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeTypeParam.getSelected();
     }
 
-    public JDialog createSettingsDialog() {
-        return createSettingsDialog(this, PixelitorWindow.get());
-    }
-
-    public static JDialog createSettingsDialog(StrokeParam param, Window owner) {
-        return new DialogBuilder()
-            .owner(owner)
+    public void configureSettingsDialog(DialogBuilder builder) {
+        builder
             .title("Stroke Settings")
             .notModal()
-            .content(new StrokeSettingsPanel(param))
+            .content(new StrokeSettingsPanel(this))
             .withScrollbars()
             .noCancelButton()
-            .okText(CLOSE_DIALOG)
-            .build();
+            .okText(CLOSE_DIALOG);
     }
 
     public Stroke createStroke() {

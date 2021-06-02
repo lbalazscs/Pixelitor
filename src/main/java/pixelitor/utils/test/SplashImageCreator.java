@@ -184,27 +184,24 @@ public class SplashImageCreator {
         return imageLayer;
     }
 
-    private static TextLayer addNewTextLayer(Composition comp, String name) {
-        var textLayer = new TextLayer(comp, name);
-        new LayerAdder(comp).atPosition(TOP).add(textLayer);
-        return textLayer;
+    private static TextLayer addNewTextLayer(Composition comp, String name, TextSettings settings, int translationY) {
+        var layer = new TextLayer(comp, name, settings);
+
+        layer.setTranslation(0, translationY);
+
+        new LayerAdder(comp).atPosition(TOP).add(layer);
+        return layer;
     }
 
     private static void addTextLayer(Composition comp, String text,
                                      Font font,
                                      int translationY) {
-        TextLayer layer = addNewTextLayer(comp, text);
         AreaEffects effects = createDropShadowEffect();
-
         var settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER,
             VerticalAlignment.CENTER, false, 0, null);
 
-        layer.applySettings(settings);
-
-        layer.startMovement();
-        layer.moveWhileDragging(0, translationY);
-        layer.endMovement();
+        TextLayer layer = addNewTextLayer(comp, text, settings, translationY);
     }
 
     private static AreaEffects createDropShadowEffect() {

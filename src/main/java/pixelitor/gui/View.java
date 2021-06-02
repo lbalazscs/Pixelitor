@@ -274,10 +274,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         layersPanel.changeLayerButtonOrder(oldIndex, newIndex);
     }
 
-    public CanvasMargins getCanvasMargins() {
-        return new CanvasMargins(canvasStartY, canvasStartX, canvasStartY, canvasStartX);
-    }
-
     @Override
     public void paint(Graphics g) {
         try {

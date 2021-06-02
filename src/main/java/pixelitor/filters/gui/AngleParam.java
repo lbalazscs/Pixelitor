@@ -34,7 +34,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 public class AngleParam extends AbstractFilterParam {
     // as returned form Math.atan2, this is between -PI and PI
     private double angle;
-    private double defaultVal = 0.0;
+    private final double defaultVal;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
@@ -154,7 +154,11 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public RangeParam createRangeParam() {
-        return new RangeParam(getName(), 0, getValueInDegrees(), getMaxAngleInDegrees());
+        // At this point the actual value can already be different from the
+        // default one => make sure the returned param has the same default.
+        RangeParam rangeParam = new RangeParam(getName(), 0, defaultVal, getMaxAngleInDegrees());
+        rangeParam.setValueNoTrigger(getValueInDegrees());
+        return rangeParam;
     }
 
     @Override

@@ -99,7 +99,7 @@ public class TextSettings implements Serializable {
     /**
      * Copy constructor
      */
-    public TextSettings(TextSettings other) {
+    private TextSettings(TextSettings other) {
         text = other.text;
         font = other.font;
         // even mutable objects can be shared, since they are re-created
@@ -221,6 +221,10 @@ public class TextSettings implements Serializable {
 
     public void setGuiUpdater(Consumer<TextSettings> guiUpdater) {
         this.guiUpdater = guiUpdater;
+    }
+
+    public TextSettings copy() {
+        return new TextSettings(this);
     }
 
     public UserPreset createUserPreset(String presetName) {

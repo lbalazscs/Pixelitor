@@ -48,22 +48,20 @@ public class DialogParam extends AbstractFilterParam {
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
 
-        paramGUI = new ConfigureParamGUI(this::createDialog, defaultButton);
+        paramGUI = new ConfigureParamGUI(this::configureDialog, defaultButton);
 
         setGUIEnabledState();
         return (JComponent) paramGUI;
     }
 
-    private JDialog createDialog(JDialog owner) {
+    private void configureDialog(DialogBuilder builder) {
         JPanel p = GUIUtils.arrangeVertically(List.of(children));
-        return new DialogBuilder()
-            .owner(owner)
+        builder
             .content(p)
             .title(getName())
             .withScrollbars()
             .okText(CLOSE_DIALOG)
-            .noCancelButton()
-            .build();
+            .noCancelButton();
     }
 
     @Override

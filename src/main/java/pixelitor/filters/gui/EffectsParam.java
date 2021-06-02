@@ -50,8 +50,8 @@ public class EffectsParam extends AbstractFilterParam {
             var defaultButton = new DefaultButton(effectsPanel);
             effectsPanel.setDefaultButton(defaultButton);
 
-            var configureParamGUI = new ConfigureParamGUI(owner ->
-                buildDialog(owner, true), defaultButton);
+            var configureParamGUI = new ConfigureParamGUI(
+                this::configureDialog, defaultButton);
 
             paramGUI = configureParamGUI;
             setGUIEnabledState();
@@ -62,17 +62,9 @@ public class EffectsParam extends AbstractFilterParam {
         }
     }
 
-    public JDialog buildDialog(JDialog owner, boolean modal) {
+    public void configureDialog(DialogBuilder builder) {
         ensureEffectsPanelIsCreated();
-
-        var builder = new DialogBuilder();
-        if (owner != null) {
-            builder = builder.owner(owner);
-        }
-        if (!modal) {
-            builder = builder.notModal();
-        }
-        return builder
+        builder
             .title("Effects")
             .content(effectsPanel)
             .withScrollbars()

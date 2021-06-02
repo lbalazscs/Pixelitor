@@ -35,7 +35,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
- * The GUI which has the four sliders and a {@link CanvasEditsViewer} in center.
+ * The GUI which has the four sliders and a {@link PreviewPanel} in center.
  */
 class EnlargeCanvasGUI extends JPanel {
     // Percentage Based
@@ -53,7 +53,7 @@ class EnlargeCanvasGUI extends JPanel {
     private final JRadioButton btnUsePixels = new JRadioButton("Pixels");
     private final JRadioButton btnUsePercentage = new JRadioButton("Percentage");
 
-    private final CanvasEditsViewer canvasEditsViewer = new CanvasEditsViewer();
+    private final PreviewPanel previewPanel = new PreviewPanel();
 
     EnlargeCanvasGUI() {
         setLayout(new GridBagLayout());
@@ -114,14 +114,14 @@ class EnlargeCanvasGUI extends JPanel {
         percent.setValue(100 * pixels.getValueAsDouble() / pixels.getMaximum(), false);
     }
 
-    private void addSliderSpinner(RangeParam percent, RangeParam pixels, String sliderName, int layout_x, int layout_y, int orientation) {
+    private void addSliderSpinner(RangeParam percent, RangeParam pixels, String sliderName, int gridX, int gridY, int orientation) {
         var percentGUI = new SliderSpinner(percent, BORDER, false, orientation);
         percentGUI.setName(sliderName);
-        percentGUI.addChangeListener(e -> canvasEditsViewer.repaint());
+        percentGUI.addChangeListener(e -> previewPanel.repaint());
 
         var pixelGUI = new SliderSpinner(pixels, BORDER, false, orientation);
         pixelGUI.setName(sliderName);
-        pixelGUI.addChangeListener(e -> canvasEditsViewer.repaint());
+        pixelGUI.addChangeListener(e -> previewPanel.repaint());
 
         CardLayout cardLayout = new CardLayout();
         JPanel card = new JPanel(cardLayout);
@@ -133,8 +133,8 @@ class EnlargeCanvasGUI extends JPanel {
         btnUsePercentage.addActionListener(e -> cardLayout.last(card));
 
         GridBagConstraints c = new GridBagConstraints();
-        c.gridx = layout_x;
-        c.gridy = layout_y;
+        c.gridx = gridX;
+        c.gridy = gridY;
 
         add(card, c);
     }
@@ -142,13 +142,9 @@ class EnlargeCanvasGUI extends JPanel {
     private void addCanvasEditor() {
         GridBagConstraints c = new GridBagConstraints();
         c.weightx = c.weighty = c.gridx = c.gridy = 1;
-//            c.insets = new Insets(20, 20, 20, 20);
         c.fill = GridBagConstraints.BOTH;
 
-        add(new JPanel(new BorderLayout()) {{
-            setBorder(createTitledBorder("Preview"));
-            add(canvasEditsViewer);
-        }}, c);
+        add(previewPanel, c);
     }
 
     private int getNorth(int height) {
@@ -186,24 +182,25 @@ class EnlargeCanvasGUI extends JPanel {
     public EnlargeCanvas getCompAction(Canvas canvas) {
         int w = canvas.getWidth(), h = canvas.getHeight();
         return new EnlargeCanvas(
-                getNorth(h),
-                getEast(w),
-                getSouth(h),
-                getWest(w)
+            getNorth(h),
+            getEast(w),
+            getSouth(h),
+            getWest(w)
         );
     }
 
     /**
-     * This is a JPanel, in charge of showing the relative size of new canvas to the current canvas.
+     * Shows the relative size of new canvas to the current canvas.
      */
-    private class CanvasEditsViewer extends JPanel {
+    private class PreviewPanel extends JPanel {
         private static final Color newCanvasColor = new Color(136, 139, 146);
         private static final CheckerboardPainter painter = ImageUtils.createCheckerboardPainter();
         private BufferedImage thumb;
 
-        public CanvasEditsViewer() {
+        public PreviewPanel() {
             setBackground(new Color(214, 217, 223));
-            addComponentListener(new CanvasEditsViewer.EventAdaptor());
+            addComponentListener(new PreviewPanel.EventAdaptor());
+            setBorder(createTitledBorder("Preview"));
         }
 
         private class EventAdaptor extends ComponentAdapter {
@@ -238,7 +235,7 @@ class EnlargeCanvasGUI extends JPanel {
 
             float N = getNorth(canvas.getHeight());
             float W = getWest(canvas.getWidth());
-            float newCanvasW = W + canvasW + getEast(canvas.getWidth());;
+            float newCanvasW = W + canvasW + getEast(canvas.getWidth());
             float newCanvasH = N + canvasH + getSouth(canvas.getHeight());
 
             // These represent the total space in which we can draw!
@@ -262,10 +259,10 @@ class EnlargeCanvasGUI extends JPanel {
             // Drawing the newCanvas
             g.setColor(newCanvasColor);
             g.fillRect(
-                    (int) (ox - newCanvasW / 2),
-                    (int) (oy - newCanvasH / 2),
-                    (int) (newCanvasW),
-                    (int) (newCanvasH)
+                (int) (ox - newCanvasW / 2),
+                (int) (oy - newCanvasH / 2),
+                (int) (newCanvasW),
+                (int) (newCanvasH)
             );
 
             if (thumb == null) {

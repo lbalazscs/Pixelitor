@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,12 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
@@ -35,7 +36,7 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
     private final JButton configureButton;
     private final DefaultButton defaultButton;
 
-    public ConfigureParamGUI(Function<JDialog, JDialog> dialogFactory,
+    public ConfigureParamGUI(Consumer<DialogBuilder> dialogConfig,
                              DefaultButton defaultButton) {
         super(new BorderLayout());
 
@@ -43,13 +44,15 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
         configureButton = new JButton("Configure...");
         add(configureButton, CENTER);
         add(defaultButton, EAST);
-        configureButton.addActionListener(e -> createAndShowDialog(dialogFactory));
+        configureButton.addActionListener(e -> createAndShowDialog(dialogConfig));
     }
 
-    private void createAndShowDialog(Function<JDialog, JDialog> dialogFactory) {
-        JDialog owner = GUIUtils.getDialogAncestor(configureButton);
-        JDialog dialog = dialogFactory.apply(owner);
-        GUIUtils.showDialog(dialog);
+    private void createAndShowDialog(Consumer<DialogBuilder> dialogConfig) {
+        DialogBuilder builder = new DialogBuilder()
+            .owner(GUIUtils.getDialogAncestor(configureButton))
+            .parentComponent(configureButton);
+        dialogConfig.accept(builder);
+        builder.show();
     }
 
     @Override

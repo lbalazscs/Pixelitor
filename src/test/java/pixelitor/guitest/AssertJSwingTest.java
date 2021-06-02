@@ -854,6 +854,9 @@ public class AssertJSwingTest {
 
         runMenuCommand("Preferences...");
         var dialog = findDialogByTitle("Preferences");
+        if (preferencesTested) {
+            dialog.tabbedPane().selectTab("General");
+        }
 
         // Test "Images In"
         var uiChooser = dialog.comboBox("uiChooser");

@@ -25,6 +25,7 @@ import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.GUIText;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -110,6 +111,8 @@ public class ShapesTool extends DragTool {
     private final JComboBox<TwoPointPaintType> strokePaintCombo
         = createStrokePaintCombo();
 
+    private JDialog shapeSettingsDialog;
+
     private JButton showStrokeDialogButton;
     private Action strokeSettingsAction;
     private JDialog strokeSettingsDialog;
@@ -181,7 +184,11 @@ public class ShapesTool extends DragTool {
         }
         updateStrokeEnabledState();
         if (editName.equals(CHANGE_SHAPE_TYPE)) {
-            shapeSettingsAction.setEnabled(getSelectedType().hasSettings());
+            boolean hasSettings = getSelectedType().hasSettings();
+            shapeSettingsAction.setEnabled(hasSettings);
+            if (!hasSettings) {
+                closeShapeSettingsDialog();
+            }
         }
     }
 
@@ -237,7 +244,11 @@ public class ShapesTool extends DragTool {
     }
 
     private JDialog createStrokeSettingsDialog() {
-        return strokeParam.createSettingsDialog();
+        DialogBuilder builder = new DialogBuilder()
+            .owner(PixelitorWindow.get())
+            .notModal();
+        strokeParam.configureSettingsDialog(builder);
+        return builder.build();
     }
 
     public StrokeParam getStrokeParam() {
@@ -257,33 +268,6 @@ public class ShapesTool extends DragTool {
         } finally {
             regenerateShape = true;
         }
-    }
-
-    private void showShapeSettingsDialog() {
-        ShapeType selectedType = getSelectedType();
-        ShapeTypeSettings settings;
-        if (styledShape != null) {
-            // if there is an active shape, then configure it
-            settings = styledShape.getShapeTypeSettings();
-        } else {
-            // else configure and store the tool's default
-            settings = getDefaultSettingsFor(selectedType);
-        }
-        JPanel configPanel = settings.getConfigPanel();
-        new DialogBuilder()
-            .title("Settings for " + selectedType)
-            .notModal()
-            .withScrollbars()
-            .content(configPanel)
-            .noCancelButton()
-            .okText(GUIText.CLOSE_DIALOG)
-            .parentComponent(showShapeSettingsButton)
-            .show();
-    }
-
-    private void showEffectsDialog() {
-        effectsDialog = effectsParam.buildDialog(null, false);
-        GUIUtils.showDialog(effectsDialog, showEffectsDialogButton);
     }
 
     @Override
@@ -471,26 +455,6 @@ public class ShapesTool extends DragTool {
         enableStrokeSettings(getSelectedStrokePaint() != NONE);
     }
 
-    private void initAndShowStrokeSettingsDialog() {
-        strokeSettingsDialog = createStrokeSettingsDialog();
-
-        GUIUtils.showDialog(strokeSettingsDialog, showStrokeDialogButton);
-    }
-
-    private void closeEffectsDialog() {
-        GUIUtils.closeDialog(effectsDialog, true);
-    }
-
-    private void closeStrokeDialog() {
-        GUIUtils.closeDialog(strokeSettingsDialog, true);
-    }
-
-    @Override
-    protected void closeToolDialogs() {
-        closeStrokeDialog();
-        closeEffectsDialog();
-    }
-
     @Override
     public void paintOverActiveLayer(Graphics2D g) {
         // updates the shape continuously while drawing
@@ -674,6 +638,74 @@ public class ShapesTool extends DragTool {
             assert state == TRANSFORM : "state = " + state;
             rasterizeShape(comp);
         }
+    }
+
+    private void showShapeSettingsDialog() {
+        if (shapeSettingsDialog != null && shapeSettingsDialog.isVisible()) {
+            // don't allow two dialogs
+            return;
+        }
+
+        ShapeType selectedType = getSelectedType();
+        ShapeTypeSettings settings;
+        if (styledShape != null) {
+            // if there is an active shape, then configure it
+            settings = styledShape.getShapeTypeSettings();
+        } else {
+            // else configure and store the tool's default
+            settings = getDefaultSettingsFor(selectedType);
+        }
+        JPanel configPanel = settings.getConfigPanel();
+        shapeSettingsDialog = new DialogBuilder()
+            .title("Settings for " + selectedType)
+            .notModal()
+            .withScrollbars()
+            .content(configPanel)
+            .noCancelButton()
+            .okText(GUIText.CLOSE_DIALOG)
+            .parentComponent(showShapeSettingsButton)
+            .show();
+    }
+
+    private void showEffectsDialog() {
+        if (effectsDialog != null && effectsDialog.isVisible()) {
+            // don't allow two dialogs
+            return;
+        }
+
+        DialogBuilder builder = new DialogBuilder()
+            .parentComponent(showEffectsDialogButton)
+            .notModal();
+        effectsParam.configureDialog(builder);
+        effectsDialog = builder.show();
+    }
+
+    private void initAndShowStrokeSettingsDialog() {
+        if (strokeSettingsDialog != null && strokeSettingsDialog.isVisible()) {
+            // don't allow two dialogs
+            return;
+        }
+        strokeSettingsDialog = createStrokeSettingsDialog();
+        GUIUtils.showDialog(strokeSettingsDialog, showStrokeDialogButton);
+    }
+
+    private void closeEffectsDialog() {
+        GUIUtils.closeDialog(effectsDialog, true);
+    }
+
+    private void closeStrokeDialog() {
+        GUIUtils.closeDialog(strokeSettingsDialog, true);
+    }
+
+    private void closeShapeSettingsDialog() {
+        GUIUtils.closeDialog(shapeSettingsDialog, true);
+    }
+
+    @Override
+    protected void closeToolDialogs() {
+        closeStrokeDialog();
+        closeEffectsDialog();
+        closeShapeSettingsDialog();
     }
 
     @VisibleForTesting

@@ -19,8 +19,8 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
@@ -37,17 +37,15 @@ public class Spiral extends ShapeFilter {
 
     private final RangeParam numSpinsParam = new RangeParam("Number of Spins",
         1, 3, 10);
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new IntChoiceParam.Item[]{
-        new IntChoiceParam.Item("Circular", TYPE_CIRCULAR),
-        new IntChoiceParam.Item("Polygon", TYPE_POLYGON)
+    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
+        new Item("Circular", TYPE_CIRCULAR),
+        new Item("Polygon", TYPE_POLYGON)
     });
     private final RangeParam sidesParam = new RangeParam("Sides", 3, 4, 10);
     private final BooleanParam symmetry = new BooleanParam("Symmetric", false);
     private final BooleanParam scale = new BooleanParam("Scale", true);
 
     public Spiral() {
-        sidesParam.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-
         addParamsToFront(
             numSpinsParam,
             typeParam,

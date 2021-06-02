@@ -154,7 +154,7 @@ public class TextLayerTest {
         String oldText = oldSettings.getText();
         assertThat(layer).nameIs(oldText);
         String newText = "New Text";
-        TextSettings newSettings = new TextSettings(oldSettings);
+        TextSettings newSettings = oldSettings.copy();
         newSettings.setText(newText);
         layer.applySettings(newSettings);
 

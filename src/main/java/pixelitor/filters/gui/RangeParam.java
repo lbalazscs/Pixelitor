@@ -150,7 +150,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * Synchronizes the value of this object with the value of another
      * {@link RangeParam} so that there is a constant multiplier between the values.
      */
-    public void linkWith(RangeParam other, double multiplier) {
+    public void scaledLinkWith(RangeParam other, double multiplier) {
         addChangeListener(e -> other.setValueNoTrigger(
             getValueAsDouble() * multiplier));
         other.addChangeListener(e -> setValueNoTrigger(

@@ -18,7 +18,6 @@
 package pixelitor.guides;
 
 import pixelitor.Canvas;
-import pixelitor.CanvasMargins;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.filters.gui.BooleanParam;
@@ -255,31 +254,6 @@ public class Guides implements Serializable {
         }
     }
 
-    public void addAbsoluteGrid(int horNumber, // number of horizontal lines
-                                int horDist,   // vertical abs. distance between them
-                                int verNumber,
-                                int verDist,
-                                View view) {
-        Canvas canvas = view.getCanvas();
-        // horizontal lines
-        int distFromTop = 0;
-        int canvasHeight = canvas.getHeight();
-        for (int i = 0; i < horNumber; i++) {
-            distFromTop += horDist;
-            double lineY = distFromTop / (double) canvasHeight;
-            horizontals.add(lineY);
-        }
-
-        // vertical lines
-        int distFromLeft = 0;
-        int canvasWidth = canvas.getWidth();
-        for (int i = 0; i < verNumber; i++) {
-            distFromLeft += verDist;
-            double lineX = distFromLeft / (double) canvasWidth;
-            verticals.add(lineX);
-        }
-    }
-
     @VisibleForTesting
     public List<Double> getHorizontals() {
         return horizontals;
@@ -292,29 +266,30 @@ public class Guides implements Serializable {
 
     private void regenerateLines(View view) {
         Canvas canvas = view.getCanvas();
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
-        CanvasMargins margins = view.getCanvasMargins();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+        double canvasMarginX = view.getCanvasStartX();
+        double canvasMarginY = view.getCanvasStartY();
 
         lines = new ArrayList<>();
 
         for (Double h : horizontals) {
-            double y = h * height;
+            double y = h * canvasHeight;
 
             // the generated lines have to be in component space
             double coY = view.imageYToComponentSpace(y);
-            double coStartX = view.imageXToComponentSpace(0) - margins.left();
-            double coEndX = view.imageXToComponentSpace(width) + margins.right();
+            double coStartX = view.imageXToComponentSpace(0) - canvasMarginX;
+            double coEndX = view.imageXToComponentSpace(canvasWidth) + canvasMarginX;
 
             lines.add(new Line2D.Double(coStartX, coY, coEndX, coY));
         }
 
         for (Double v : verticals) {
-            double x = v * width;
+            double x = v * canvasWidth;
 
             double coX = view.imageXToComponentSpace(x);
-            double coStartY = view.imageYToComponentSpace(0) - margins.top();
-            double coEndY = view.imageYToComponentSpace(height) + margins.bottom();
+            double coStartY = view.imageYToComponentSpace(0) - canvasMarginY;
+            double coEndY = view.imageYToComponentSpace(canvasHeight) + canvasMarginY;
 
             lines.add(new Line2D.Double(coX, coStartY, coX, coEndY));
         }

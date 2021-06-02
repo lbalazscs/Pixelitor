@@ -39,7 +39,7 @@ public enum FileFormat {
     }, JPG(false, ImageUtils::convertToRGB, FileChoosers.jpegFilter) {
     }, ORA(true, null, FileChoosers.oraFilter) {
         @Override
-        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+        public Runnable createSaveTask(Composition comp, SaveSettings settings) {
             return () -> OpenRaster.uncheckedWrite(comp, settings.getFile());
         }
 
@@ -53,7 +53,7 @@ public enum FileFormat {
     }, PPM(false, ImageUtils::convertToInterleavedRGB, FileChoosers.ppmFilter) {
     }, PXC(true, null, FileChoosers.pxcFilter) {
         @Override
-        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+        public Runnable createSaveTask(Composition comp, SaveSettings settings) {
             return () -> PXCFormat.write(comp, settings.getFile());
         }
 
@@ -76,7 +76,7 @@ public enum FileFormat {
         this.fileFilter = fileFilter;
     }
 
-    public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+    public Runnable createSaveTask(Composition comp, SaveSettings settings) {
         assert !hasLayers; // overwritten for multi-layered formats
 
         return () -> saveSingleLayered(comp, settings);

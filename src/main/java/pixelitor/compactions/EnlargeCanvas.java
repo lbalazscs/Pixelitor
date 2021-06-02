@@ -30,7 +30,8 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 
 /**
- * Enlarges the canvas for all layers of a composition
+ * Enlarges the canvas for all layers of a composition. It's the opposite of cropping:
+ * it adds empty space around a layer or makes the hidden part of the layer visible.
  */
 public class EnlargeCanvas extends SimpleCompAction {
     public static final String NAME = "Enlarge Canvas";
@@ -106,7 +107,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     @Override
     protected String getStatusBarMessage() {
         return "The canvas was enlarged to "
-                + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
+            + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
     }
 
     public static Action getAction() {
@@ -121,14 +122,12 @@ public class EnlargeCanvas extends SimpleCompAction {
     private static void showInDialog() {
         var p = new EnlargeCanvasGUI();
         new DialogBuilder()
-                .title(NAME)
-                .content(p)
-                .okAction(() -> {
-                    var comp = OpenImages.getActiveComp();
-                    p.getCompAction(comp.getCanvas())
-                            .process(comp);
-                })
-                .show();
+            .title(NAME)
+            .content(p)
+            .okAction(() -> {
+                var comp = OpenImages.getActiveComp();
+                p.getCompAction(comp.getCanvas()).process(comp);
+            })
+            .show();
     }
-
 }

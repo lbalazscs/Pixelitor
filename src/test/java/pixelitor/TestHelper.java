@@ -163,11 +163,11 @@ public class TestHelper {
     }
 
     public static TextLayer createTextLayer(Composition comp, String name) {
-        var textLayer = new TextLayer(comp, name);
-        textLayer.randomizeSettings();
+        TextSettings settings = new TextSettings();
+        settings.randomize();
+        var textLayer = new TextLayer(comp, name, settings);
 
         // ensure that the font is not too big for the tiny test layer
-        TextSettings settings = textLayer.getSettings();
         Font smallFont = settings.getFont().deriveFont(Font.PLAIN, 10.0f);
         settings.setFont(smallFont);
         textLayer.applySettings(settings);

@@ -832,7 +832,7 @@ public class Composition implements Serializable {
         if (layerList.size() == 1) { // shortcut
             Layer firstLayer = layerList.get(0);
             if (firstLayer instanceof ImageLayer layer) {
-                if (Tools.currentTool.isDirectDrawing()) {
+                if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
                     return layer.asImage(true);
                 }
             }
@@ -1284,23 +1284,16 @@ public class Composition implements Serializable {
 
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
-        FileFormat format = saveSettings.getFormat();
-        File f = saveSettings.getFile();
-
-        Runnable saveTask = format.getSaveTask(this, saveSettings);
-        FileFormat.setLastOutput(format);
-
-        return saveAsync(saveTask, f, addToRecentMenus);
-    }
-
-    public CompletableFuture<Void> saveAsync(Runnable saveTask,
-                                             File file,
-                                             boolean addToRecentMenus) {
         assert calledOnEDT() : threadInfo();
+
+        FileFormat format = saveSettings.getFormat();
+        Runnable saveTask = format.createSaveTask(this, saveSettings);
+        FileFormat.setLastOutput(format);
 
         // prevents starting a new save on the EDT while an asynchronous
         // save is already scheduled or running on the IO thread
-        String path = file.getAbsolutePath();
+        File savedFile = saveSettings.getFile();
+        String path = savedFile.getAbsolutePath();
         if (IOTasks.isProcessing(path)) {
             return CompletableFuture.completedFuture(null);
         }
@@ -1318,7 +1311,7 @@ public class Composition implements Serializable {
                     Messages.showException(e);
                     setDirty(wasDirty);
                 } else {
-                    afterSuccessfulSaveActions(file, addToRecentMenus);
+                    afterSuccessfulSaveActions(savedFile, addToRecentMenus);
                 }
                 IOTasks.writingFinishedFor(path);
                 return null;

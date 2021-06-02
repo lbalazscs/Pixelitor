@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,15 +74,5 @@ class GuidesTest {
         guides.addRelativeGrid(4, 4);
         assertThat(guides.getHorizontals()).containsOnly(0.25, 0.5, 0.75);
         assertThat(guides.getVerticals()).containsOnly(0.25, 0.5, 0.75);
-    }
-
-    @Test
-    @DisplayName("absolute grid")
-    void addAbsoluteGrid() {
-        int horDist = (int) (TestHelper.TEST_HEIGHT * 0.2);
-        int verDist = (int) (TestHelper.TEST_WIDTH * 0.25);
-        guides.addAbsoluteGrid(2, horDist, 2, verDist, comp.getView());
-        assertThat(guides.getHorizontals()).containsOnly(0.2, 0.4);
-        assertThat(guides.getVerticals()).containsOnly(0.25, 0.5);
     }
 }

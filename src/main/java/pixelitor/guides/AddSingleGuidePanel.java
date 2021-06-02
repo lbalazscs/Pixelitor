@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.guides;
 
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GUIUtils;
@@ -42,12 +43,15 @@ public class AddSingleGuidePanel extends JPanel {
 
         var canvas = builder.getCanvas();
         int maxSize = horizontal ? canvas.getWidth() : canvas.getHeight();
-        percents = new RangeParam("Position (%)", 0, 50, 100);
-        var pixels = new RangeParam("Position (Pixels)", 0, maxSize / 2.0, maxSize);
-        percents.linkWith(pixels, maxSize / 100.0);
+        percents = new RangeParam("Percent", 0, 50, 100);
+        var pixels = new RangeParam("Pixels", 0, maxSize / 2.0, maxSize);
+        percents.scaledLinkWith(pixels, maxSize / 100.0);
+
+        var groupedSliders = new GroupedRangeParam("Position",
+            new RangeParam[]{pixels, percents}, false).notLinkable();
 
         BooleanParam clearExisting = builder.getClearExisting();
-        GUIUtils.arrangeVertically(this, List.of(percents, pixels, clearExisting));
+        GUIUtils.arrangeVertically(this, List.of(groupedSliders, clearExisting));
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
         percents.setAdjustmentListener(updatePreview);

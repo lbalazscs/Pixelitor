@@ -114,6 +114,10 @@ public abstract class Tool implements KeyListener {
         return name;
     }
 
+    /**
+     * Creates the tool's icon. For most tools, this is overridden, and the icon
+     * file name field is not used, because the icon doesn't come from a file.
+     */
     public Icon createIcon() {
         return Icons.load(iconFileName);
     }

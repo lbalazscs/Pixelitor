@@ -65,14 +65,14 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
-        this(comp, "");
+        this(comp, "", new TextSettings());
     }
 
-    public TextLayer(Composition comp, String name) {
+    public TextLayer(Composition comp, String name, TextSettings settings) {
         super(comp, name);
 
         painter = new TransformedTextPainter();
-        applySettings(new TextSettings());
+        applySettings(settings);
     }
 
     @Serial
@@ -99,7 +99,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var textLayer = new TextLayer(comp);
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
-        // don't add it yet to history, only after the user chooses to press OK
+        // don't add it yet to history, only after the user presses OK (and not Cancel!)
         new LayerAdder(comp).add(textLayer);
 
         var settingsPanel = new TextSettingsPanel(textLayer);
@@ -160,11 +160,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     protected Layer createTypeSpecificDuplicate(String duplicateName) {
-        TextLayer d = new TextLayer(comp, duplicateName);
-
+        TextLayer d = new TextLayer(comp, duplicateName, settings.copy());
         d.setTranslation(getTx(), getTy());
-        d.applySettings(new TextSettings(settings));
-
         return d;
     }
 
