@@ -34,14 +34,13 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.GUIText.OPACITY;
+import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**
  * Fills the image with random circles
  */
 public class RandomSpheres extends ParametrizedFilter {
     public static final String NAME = "Random Spheres";
-
-    private static final double INTUITIVE_RADIANS_45 = 5.497787143782138;
 
     private static final int COLORS_SAMPLE_IMAGE = 1;
     private static final int COLORS_FG_BG = 2;
@@ -57,9 +56,9 @@ public class RandomSpheres extends ParametrizedFilter {
     private final BooleanParam addHighLightsCB = new BooleanParam(
         "Add Highlights", true);
     private final AngleParam highlightAngleSelector = new AngleParam(
-        "Light Direction (Azimuth) - Degrees", 0);
+        "Light Direction (Azimuth)", 0);
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
-        "Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
+        "Highlight Elevation", 45, CCW_DEGREES);
 
     private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
 

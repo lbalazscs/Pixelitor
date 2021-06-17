@@ -19,12 +19,18 @@ package pixelitor.tools.util;
 
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
@@ -34,7 +40,7 @@ import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
  * by the user while using a {@link DragTool}.
  * Only the start and end points are relevant.
  */
-public class UserDrag {
+public class Drag {
     private boolean dragging;
     private boolean canceled;
 
@@ -61,7 +67,62 @@ public class UserDrag {
     private boolean startFromCenter = false;
     private boolean equallySized = false;
 
-    public UserDrag() {
+    public Drag() {
+    }
+
+    public Drag(double imStartX, double imStartY, double imEndX, double imEndY) {
+        this.imStartX = imStartX;
+        this.imStartY = imStartY;
+        this.imEndX = imEndX;
+        this.imEndY = imEndY;
+    }
+
+    public Drag(PPoint start, PPoint end) {
+        imStartX = start.getImX();
+        imStartY = start.getImY();
+        imEndX = end.getImX();
+        imEndY = end.getImY();
+    }
+
+    public Drag(Rectangle2D r) {
+        imStartX = r.getX();
+        imStartY = r.getY();
+        imEndX = imStartX + r.getWidth();
+        imEndY = imStartY + r.getHeight();
+    }
+
+    public static Drag createRandom(int width, int height, int minDist) {
+        int minDist2 = minDist * minDist;
+        Drag drag;
+
+        while (true) {
+            int x1 = Rnd.intInRange(-width, 2 * width);
+            int x2 = Rnd.intInRange(-width, 2 * width);
+            int y1 = Rnd.intInRange(-height, 2 * height);
+            int y2 = Rnd.intInRange(-height, 2 * height);
+
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            if (dx * dx + dy * dy > minDist2) {
+                drag = new Drag(x1, y1, x2, y2);
+                break;
+            }
+        }
+        return drag;
+    }
+
+    public Drag transformedCopy(AffineTransform at) {
+        Point2D start = new Point2D.Double(imStartX, imStartY);
+        Point2D end = new Point2D.Double(imEndX, imEndY);
+        at.transform(start, start);
+        at.transform(end, end);
+        return new Drag(start.getX(), start.getY(), end.getX(), end.getY());
+    }
+
+    public Drag translatedCopy(double tx, double ty) {
+        return new Drag(
+            imStartX + tx, imStartY + ty,
+            imEndX + tx, imEndY + ty);
     }
 
     public void setStart(PPoint e) {
@@ -86,9 +147,9 @@ public class UserDrag {
         coEndY = e.getCoY();
 
         if (constrained) {
-            Point2D constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
-            coEndX = constrainedEnd.getX();
-            coEndY = constrainedEnd.getY();
+            Point2D newEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
+            coEndX = newEnd.getX();
+            coEndY = newEnd.getY();
         } else if (equallySized) { // the two special cases are not used at the same time
             double width = Math.abs(coEndX - coStartX);
             double height = Math.abs(coEndY - coStartY);
@@ -132,8 +193,64 @@ public class UserDrag {
         return coEndY;
     }
 
+    public double getStartX() {
+        return imStartX;
+    }
+
+    public double getStartY() {
+        return imStartY;
+    }
+
+    public double getEndX() {
+        return imEndX;
+    }
+
+    public double getEndY() {
+        return imEndY;
+    }
+
+    public Point2D getStartPoint() {
+        return new Point2D.Double(imStartX, imStartY);
+    }
+
+    public Point2D getEndPoint() {
+        return new Point2D.Double(imEndX, imEndY);
+    }
+
+    public Point2D getCenterPoint() {
+        double cx = (imStartX + imEndX) / 2.0;
+        double cy = (imStartY + imEndY) / 2.0;
+
+        return new Point2D.Double(cx, cy);
+    }
+
+    public Drag getCenterDrag() {
+        Point2D center = getCenterPoint();
+        return new Drag(center.getX(), center.getY(), getEndX(), getEndY());
+    }
+
+    public double getDX() {
+        return imEndX - imStartX;
+    }
+
+    public double getDY() {
+        return imEndY - imStartY;
+    }
+
+    /**
+     * Return the horizontal line that runs through the center in image space
+     */
+    public Drag getCenterHorizontalDrag() {
+        double centerY = imStartY + getDY() / 2.0;
+        return new Drag(imStartX, centerY, imEndX, centerY);
+    }
+
     public boolean isClick() {
         return coStartX == coEndX && coStartY == coEndY;
+    }
+
+    public boolean isImClick() {
+        return imStartX == imEndX && imStartY == imEndY;
     }
 
     public boolean hasZeroWidth() {
@@ -142,13 +259,6 @@ public class UserDrag {
 
     public boolean hasZeroHeight() {
         return coStartY == coEndY;
-    }
-
-    public ImDrag toImDrag() {
-        ImDrag d = new ImDrag(imStartX, imStartY, imEndX, imEndY);
-        // the equally sized property is already contained in the coordinates
-        d.setStartFromCenter(startFromCenter);
-        return d;
     }
 
     public void setConstrained(boolean constrained) {
@@ -181,8 +291,32 @@ public class UserDrag {
         this.startFromCenter = startFromCenter;
     }
 
+    public boolean isStartFromCenter() {
+        return startFromCenter;
+    }
+
     public void setEquallySized(boolean equallySized) {
         this.equallySized = equallySized;
+    }
+
+    public double getStartXFromCenter() {
+        if (startFromCenter) {
+            return imStartX - (imEndX - imStartX);
+        } else {
+            return imStartX;
+        }
+    }
+
+    public double getStartYFromCenter() {
+        if (startFromCenter) {
+            return imStartY - (imEndY - imStartY);
+        } else {
+            return imStartY;
+        }
+    }
+
+    public Line2D asLine() {
+        return new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
     }
 
     public boolean isDragging() {
@@ -233,6 +367,94 @@ public class UserDrag {
         return PRectangle.positiveFromCo(toCoRect(), view);
     }
 
+
+    /**
+     * Creates a Rectangle where the sign of with/height indicate the direction of drawing
+     *
+     * @return a Rectangle where the width and height can be < 0
+     */
+    public Rectangle2D createPossiblyEmptyImRect() {
+        double x;
+        double y;
+        double width;
+        double height;
+
+        if (startFromCenter) {
+            double halfWidth = imEndX - imStartX; // can be negative
+            double halfHeight = imEndY - imStartY; // can be negative
+
+            x = imStartX - halfWidth;
+            y = imStartY - halfHeight;
+
+            width = 2 * halfWidth;
+            height = 2 * halfHeight;
+        } else {
+            x = imStartX;
+            y = imStartY;
+            width = imEndX - imStartX;
+            height = imEndY - imStartY;
+        }
+
+        return new Rectangle2D.Double(x, y, width, height);
+    }
+
+    /**
+     * Creates a Rectangle where the width/height are >=0 independently of the direction of the drawing
+     *
+     * @return a Rectangle where the width and height are >= 0
+     */
+    public Rectangle2D createPositiveImRect() {
+        double x;
+        double y;
+        double width;
+        double height;
+
+        if (startFromCenter) {
+            double halfWidth;  // positive or zero
+            if (imEndX > imStartX) {
+                halfWidth = imEndX - imStartX;
+                x = imStartX - halfWidth;
+            } else {
+                halfWidth = imStartX - imEndX;
+                x = imEndX;
+            }
+
+            double halfHeight; // positive or zero
+            if (imEndY > imStartY) {
+                halfHeight = imEndY - imStartY;
+                y = imStartY - halfHeight;
+            } else {
+                halfHeight = imStartY - imEndY;
+                y = imEndY;
+            }
+
+            width = 2 * halfWidth;
+            height = 2 * halfHeight;
+        } else {
+            double tmpEndX;
+            if (imEndX > imStartX) {
+                x = imStartX;
+                tmpEndX = imEndX;
+            } else {
+                x = imEndX;
+                tmpEndX = imStartX;
+            }
+
+            double tmpEndY;
+            if (imEndY > imStartY) {
+                y = imStartY;
+                tmpEndY = imEndY;
+            } else {
+                y = imEndY;
+                tmpEndY = imStartY;
+            }
+
+            width = tmpEndX - x;
+            height = tmpEndY - y;
+        }
+        return new Rectangle2D.Double(x, y, width, height);
+    }
+
     public double calcCoDist() {
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
@@ -242,6 +464,16 @@ public class UserDrag {
     public double calcImDist() {
         double dx = imEndX - imStartX;
         double dy = imEndY - imStartY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public double taxiCabMetric(int x, int y) {
+        return Math.abs(x - imStartX) + Math.abs(y - imStartY);
+    }
+
+    public double getStartDistanceFrom(double x, double y) {
+        double dx = imStartX - x;
+        double dy = imStartY - y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -256,6 +488,14 @@ public class UserDrag {
 
     protected double calcReversedAngle() {
         return Math.atan2(coStartY - coEndY, coStartX - coEndX);
+    }
+
+    public double getDrawAngle() {
+        return Math.atan2(imEndX - imStartX, imEndY - imStartY); //  between -PI and PI
+    }
+
+    public double getAngleFromStartTo(double x, double y) {
+        return Math.atan2(x - imStartX, y - imStartY);
     }
 
     public void displayWidthHeight(Graphics2D g) {
@@ -381,9 +621,16 @@ public class UserDrag {
         dd.finish();
     }
 
+    public void debug(Graphics2D g, Color c) {
+        var line = new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
+        Shape circle = Shapes.createCircle(imStartX, imStartY, 10);
+        Shapes.debug(g, c, line);
+        Shapes.debug(g, c, circle);
+    }
+
     @Override
     public String toString() {
-        return format("(%.2f, %.2f) => (%.2f, %.2f)",
-            coStartX, coStartY, coEndX, coEndY);
+        return format("(%.2f, %.2f) => (%.2f, %.2f), center start = %s",
+            imStartX, imStartY, imEndX, imEndY, startFromCenter);
     }
 }

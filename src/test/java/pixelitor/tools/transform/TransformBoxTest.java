@@ -29,7 +29,7 @@ import java.awt.geom.Point2D;
 
 import static java.awt.event.MouseEvent.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
+import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 @DisplayName("TransformBox tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -253,7 +253,7 @@ class TransformBoxTest {
         assertThat(se).cursorNameIs("Northeast Resize Cursor");
 
         // rotate by setting an angle
-        box.rotateTo(180, INTUITIVE_DEGREES);
+        box.rotateTo(180, CCW_DEGREES);
         box.updateDirections();
         assertThat(box).angleDegreesIs(180);
 

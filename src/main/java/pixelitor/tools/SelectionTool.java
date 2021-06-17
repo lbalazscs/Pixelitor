@@ -140,13 +140,13 @@ public class SelectionTool extends DragTool {
             altMeansSubtract = false;
         }
 
-        userDrag.setStartFromCenter(startFromCenter);
-        selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), e.getComp());
+        drag.setStartFromCenter(startFromCenter);
+        selectionBuilder.updateBuiltSelection(drag, e.getComp());
     }
 
     @Override
     public void dragFinished(PMouseEvent e) {
-        if (userDrag.isClick() && !polygonal) { // will be handled by mouseClicked
+        if (drag.isClick() && !polygonal) { // will be handled by mouseClicked
             restoreInteraction();
             return;
         }
@@ -195,9 +195,9 @@ public class SelectionTool extends DragTool {
         restoreInteraction();
 
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
-        userDrag.setStartFromCenter(startFromCenter);
+        drag.setStartFromCenter(startFromCenter);
 
-        selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
+        selectionBuilder.updateBuiltSelection(drag, comp);
         selectionBuilder.combineShapes(comp);
         stopBuildingSelection();
 
@@ -246,20 +246,20 @@ public class SelectionTool extends DragTool {
 
     @Override
     public void altPressed() {
-        if (!altDown && !altMeansSubtract && userDrag != null && userDrag.isDragging()) {
-            userDrag.setStartFromCenter(true);
+        if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
+            drag.setStartFromCenter(true);
             var comp = OpenImages.getActiveComp();
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
+            selectionBuilder.updateBuiltSelection(drag, comp);
         }
         altDown = true;
     }
 
     @Override
     public void altReleased() {
-        if (!altMeansSubtract && userDrag != null && userDrag.isDragging()) {
-            userDrag.setStartFromCenter(false);
+        if (!altMeansSubtract && drag != null && drag.isDragging()) {
+            drag.setStartFromCenter(false);
             var comp = OpenImages.getActiveComp();
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
+            selectionBuilder.updateBuiltSelection(drag, comp);
         }
         altDown = false;
     }

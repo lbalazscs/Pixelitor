@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient.paints;
 
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -32,7 +32,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.*;
 /**
  * A Paint that creates an "spiral gradient"
  */
-public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
+public record SpiralGradientPaint(boolean clockwise, Drag drag,
                                   Color startColor, Color endColor,
                                   CycleMethod cycleMethod) implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
@@ -45,10 +45,10 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GraySpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+            return new GraySpiralGradientPaintContext(clockwise, drag, startColor, endColor, cm, cycleMethod);
         }
 
-        return new SpiralGradientPaintContext(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+        return new SpiralGradientPaintContext(clockwise, drag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override
@@ -60,7 +60,7 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
 
     static class SpiralGradientPaintContext implements PaintContext {
         protected final boolean clockwise;
-        protected final ImDrag imDrag;
+        protected final Drag drag;
         protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
@@ -77,11 +77,11 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
         protected final double drawAngle;
         protected final double dragDistance;
 
-        private SpiralGradientPaintContext(boolean clockwise, ImDrag imDrag,
+        private SpiralGradientPaintContext(boolean clockwise, Drag drag,
                                            Color startColor, Color endColor,
                                            ColorModel cm, CycleMethod cycleMethod) {
             this.clockwise = clockwise;
-            this.imDrag = imDrag;
+            this.drag = drag;
             this.cycleMethod = cycleMethod;
 
             startAlpha = startColor.getAlpha();
@@ -95,9 +95,9 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
             endBlue = endColor.getBlue();
 
             this.cm = cm;
-            drawAngle = imDrag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
+            drawAngle = drag.getDrawAngle() + Math.PI;  // between 0 and 2*PI
 
-            dragDistance = imDrag.getDistance();
+            dragDistance = drag.calcImDist();
         }
 
         @Override
@@ -183,7 +183,7 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
         }
 
         public double interpolate(double x, double y) {
-            double renderAngle = imDrag.getAngleFromStartTo(x, y) + Math.PI;
+            double renderAngle = drag.getAngleFromStartTo(x, y) + Math.PI;
             double relativeAngle;
             if (clockwise) {
                 relativeAngle = renderAngle - drawAngle;
@@ -196,7 +196,7 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
             relativeAngle /= 2.0 * Math.PI;
 
 //                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
-            double renderDist = imDrag.getStartDistanceFrom(x, y);
+            double renderDist = drag.getStartDistanceFrom(x, y);
 
             double relativeDist = renderDist / dragDistance;
 
@@ -228,10 +228,10 @@ public record SpiralGradientPaint(boolean clockwise, ImDrag imDrag,
         private final int startGray;
         private final int endGray;
 
-        private GraySpiralGradientPaintContext(boolean clockwise, ImDrag imDrag,
+        private GraySpiralGradientPaintContext(boolean clockwise, Drag drag,
                                                Color startColor, Color endColor,
                                                ColorModel cm, CycleMethod cycleMethod) {
-            super(clockwise, imDrag, startColor, endColor, cm, cycleMethod);
+            super(clockwise, drag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();

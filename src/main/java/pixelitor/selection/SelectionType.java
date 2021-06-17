@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.selection;
 
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Shape;
@@ -33,20 +33,20 @@ public enum SelectionType {
     RECTANGLE("Rectangle", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            ImDrag imDrag = (ImDrag) mouseInfo;
-            return imDrag.createPositiveRect();
+            Drag drag = (Drag) mouseInfo;
+            return drag.createPositiveImRect();
         }
     }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            ImDrag imDrag = (ImDrag) mouseInfo;
-            Rectangle2D dr = imDrag.createPositiveRect();
+            Drag drag = (Drag) mouseInfo;
+            Rectangle2D dr = drag.createPositiveImRect();
             return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
     }, LASSO("Freehand", false) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            ImDrag imDrag = (ImDrag) mouseInfo;
+            Drag drag = (Drag) mouseInfo;
             boolean createNew;
             if (oldShape == null) {
                 createNew = true;
@@ -58,12 +58,12 @@ public enum SelectionType {
 
             if (createNew) {
                 GeneralPath p = new GeneralPath();
-                p.moveTo(imDrag.getStartX(), imDrag.getStartY());
-                p.lineTo(imDrag.getEndX(), imDrag.getEndY());
+                p.moveTo(drag.getStartX(), drag.getStartY());
+                p.lineTo(drag.getEndX(), drag.getEndY());
                 return p;
             } else {
                 GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(imDrag.getEndX(), imDrag.getEndY());
+                gp.lineTo(drag.getEndX(), drag.getEndY());
 
                 return gp;
             }

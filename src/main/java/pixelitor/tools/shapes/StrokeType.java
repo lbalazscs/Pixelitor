@@ -25,7 +25,7 @@ import com.jhlabs.awt.ShapeStroke;
 import com.jhlabs.awt.WobbleStroke;
 import com.jhlabs.awt.ZigzagStroke;
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 
 import java.awt.BasicStroke;
 import java.awt.Shape;
@@ -163,7 +163,7 @@ public enum StrokeType {
             if (shapeType == null) {
                 shapeType = ShapeType.KIWI;
             }
-            return shapeType.createShape(new ImDrag(0, 0, size, size), null);
+            return shapeType.createShape(new Drag(0, 0, size, size), null);
         }
 
         @Override

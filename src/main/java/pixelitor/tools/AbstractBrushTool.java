@@ -59,20 +59,13 @@ public abstract class AbstractBrushTool extends Tool {
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
 
-    // some extra space is added to the repaint region
-    // since repaint() is asynchronous
-    private static final int REPAINT_EXTRA_SPACE = 20;
-
-    private final boolean canHaveSymmetry;
-
     private JComboBox<BrushType> typeCB;
-    protected JCheckBox lazyMouseCB;
-    private JDialog lazyMouseDialog;
 
     protected Graphics2D graphics;
     private final RangeParam brushRadiusParam = new RangeParam(GUIText.RADIUS,
         MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
+    private final boolean canHaveSymmetry;
     private EnumComboBoxModel<Symmetry> symmetryModel;
 
     protected Brush brush;
@@ -85,16 +78,23 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected DrawDestination drawDestination;
 
-    private RangeParam lazyMouseDist;
     protected boolean lazyMouse;
+    protected JCheckBox lazyMouseCB;
+    private JDialog lazyMouseDialog;
+    private RangeParam lazyMouseDist;
     protected LazyMouseBrush lazyMouseBrush;
-    private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
     private JButton showLazyMouseDialogButton;
 
     private int outlineCoX;
     private int outlineCoY;
     private final BrushOutlinePainter outlinePainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
     private boolean paintBrushOutline = false;
+
+    // some extra space is added to the repaint region
+    // since repaint() is asynchronous
+    private static final int REPAINT_EXTRA_SPACE = 20;
+
+    private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
 
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
@@ -281,9 +281,6 @@ public abstract class AbstractBrushTool extends Tool {
         finishBrushStroke(dr);
 
         if (lazyMouse) {
-            // TODO two points have to be repainted:
-            //  1. the last draw point to clear the old outline
-            //  2. the actual mouse point to paint the new outline
             comp.repaint();
         }
     }
@@ -626,11 +623,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected int getRadius() {
-        int value = brushRadiusParam.getValue();
-
-        assert value >= MIN_BRUSH_RADIUS : "value = " + value;
-
-        return value;
+        return brushRadiusParam.getValue();
     }
 
     @Override

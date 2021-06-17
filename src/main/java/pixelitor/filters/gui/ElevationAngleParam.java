@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Rnd;
 
 /**
@@ -24,9 +25,12 @@ import pixelitor.utils.Rnd;
  * elevation (altitude) angle of a light source
  */
 public class ElevationAngleParam extends AngleParam {
+    public ElevationAngleParam(String name, double def) {
+        super(name, def);
+    }
 
-    public ElevationAngleParam(String name, double defaultValue) {
-        super(name, defaultValue);
+    public ElevationAngleParam(String name, double def, AngleUnit unit) {
+        super(name, def, unit);
     }
 
     @Override

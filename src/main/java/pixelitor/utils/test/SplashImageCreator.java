@@ -40,7 +40,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
@@ -130,7 +130,7 @@ public class SplashImageCreator {
         for (int i = 0; i < 3; i++) {
             GradientType gradientType = Rnd.chooseFrom(GradientType.values());
 
-            ImDrag randomDrag = ImDrag.createRandom(
+            Drag randomDrag = Drag.createRandom(
                 SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
             Gradient gradient = new Gradient(randomDrag,
                 gradientType, REFLECT, FG_TO_BG,
@@ -230,7 +230,7 @@ public class SplashImageCreator {
         }
 
         Gradient gradient = new Gradient(
-            new ImDrag(startX, startY, endX, endY),
+            new Drag(startX, startY, endX, endY),
             GradientType.RADIAL, REFLECT, BLACK_TO_WHITE,
             false, NORMAL, 1.0f);
         gradient.drawOn(dr);

@@ -25,7 +25,6 @@ import pixelitor.tools.DragTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
-import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -91,7 +90,7 @@ public class MoveTool extends DragTool {
             ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
 
             if (objectsSelection.isEmpty()) {
-                userDrag.cancel();
+                drag.cancel();
                 return;
             }
             e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
@@ -102,21 +101,20 @@ public class MoveTool extends DragTool {
 
     @Override
     public void ongoingDrag(PMouseEvent e) {
-        ImDrag imDrag = userDrag.toImDrag();
-        double relX = imDrag.getDX();
-        double relY = imDrag.getDY();
+        double relX = drag.getDX();
+        double relY = drag.getDY();
 
         e.getComp().moveActiveContent(currentMode, relX, relY);
     }
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (userDrag == null || !userDrag.isDragging()) {
+        if (drag == null || !drag.isDragging()) {
             return;
         }
 
         comp.drawMovementContours(g2, currentMode);
-        DragDisplayType.REL_MOUSE_POS.draw(g2, userDrag);
+        DragDisplayType.REL_MOUSE_POS.draw(g2, drag);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -44,7 +44,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * all vector graphics.
  */
 public class Gradient {
-    private ImDrag imDrag;
+    private Drag drag;
     private final GradientType type;
     private final CycleMethod cycleMethod;
     private final GradientColorType colorType;
@@ -56,11 +56,11 @@ public class Gradient {
     private final Color fgColor;
     private final Color bgColor;
 
-    public Gradient(ImDrag imDrag, GradientType type,
+    public Gradient(Drag drag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
                     boolean reverted, BlendingMode blendingMode, float opacity) {
-        assert !imDrag.isClick();
-        this.imDrag = imDrag;
+        assert !drag.isImClick();
+        this.drag = drag;
         this.type = type;
         this.cycleMethod = cycleMethod;
         this.colorType = colorType;
@@ -96,11 +96,11 @@ public class Gradient {
             var tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
             smallImage = tmpDrawingLayer.hasSmallImage();
-            imDrag = tmpDrawingLayer.translateDrag(imDrag);
+            drag = tmpDrawingLayer.translateDrag(drag);
         }
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        Paint paint = type.createPaint(imDrag, colors, cycleMethod);
+        Paint paint = type.createPaint(drag, colors, cycleMethod);
         g.setPaint(paint);
         if (smallImage) {
             Rectangle bounds = comp.getSelection().getShapeBounds();
@@ -157,8 +157,8 @@ public class Gradient {
     }
 
     public GradientHandles createHandles(View view) {
-        Point2D handleStart = view.imageToComponentSpace(imDrag.getStartPoint());
-        Point2D handleEnd = view.imageToComponentSpace(imDrag.getEndPoint());
+        Point2D handleStart = view.imageToComponentSpace(drag.getStartPoint());
+        Point2D handleEnd = view.imageToComponentSpace(drag.getEndPoint());
 
         return new GradientHandles(handleStart, handleEnd, view);
     }

@@ -33,8 +33,7 @@ import pixelitor.tools.shapes.history.FinalizeShapeEdit;
 import pixelitor.tools.shapes.history.StyledShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
-import pixelitor.tools.util.ImDrag;
-import pixelitor.tools.util.UserDrag;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
@@ -72,11 +71,11 @@ public class StyledShape implements Cloneable, Transformable {
 
     // this doesn't change after the transform box appears,
     // so that another untransformed shape can be generated
-    private ImDrag origImDrag;
+    private Drag origDrag;
 
     // this is transformed as the box is manipulated, so that
     // the gradients move together with the box
-    private ImDrag transformedImDrag;
+    private Drag transformedDrag;
 
     private TwoPointPaintType fillPaintType;
     private TwoPointPaintType strokePaintType;
@@ -110,12 +109,12 @@ public class StyledShape implements Cloneable, Transformable {
      * in image space.
      */
     public void paint(Graphics2D g) {
-        if (transformedImDrag == null) {
+        if (transformedDrag == null) {
             // this object is created when the mouse is pressed, but
             // it can be painted only after the first drag events arrive
             return;
         }
-        if (transformedImDrag.isClick()) {
+        if (transformedDrag.isImClick()) {
             return;
         }
         if (shape == null) { // should not happen
@@ -142,7 +141,7 @@ public class StyledShape implements Cloneable, Transformable {
 
     private void paintFill(Graphics2D g) {
         if (shapeType.isClosed()) {
-            fillPaintType.prepare(g, transformedImDrag);
+            fillPaintType.prepare(g, transformedDrag);
             g.fill(shape);
             fillPaintType.finish(g);
         } else if (!hasStroke()) {
@@ -150,7 +149,7 @@ public class StyledShape implements Cloneable, Transformable {
             // it can be only stroked, even if stroke is disabled.
             // So use the default stroke and the fill paint.
             g.setStroke(STROKE_FOR_OPEN_SHAPES);
-            fillPaintType.prepare(g, transformedImDrag);
+            fillPaintType.prepare(g, transformedDrag);
             g.draw(shape);
             fillPaintType.finish(g);
         }
@@ -158,7 +157,7 @@ public class StyledShape implements Cloneable, Transformable {
 
     private void paintStroke(Graphics2D g) {
         g.setStroke(stroke);
-        strokePaintType.prepare(g, transformedImDrag);
+        strokePaintType.prepare(g, transformedDrag);
         g.draw(shape);
         strokePaintType.finish(g);
     }
@@ -221,26 +220,25 @@ public class StyledShape implements Cloneable, Transformable {
     }
 
     // called during the initial drag, when there is no transform box yet
-    public void updateFromDrag(UserDrag userDrag) {
+    public void updateFromDrag(Drag drag) {
         assert !insideBox;
 
-        if (userDrag.isClick()) {
+        if (drag.isClick()) {
             return;
         }
-        ImDrag imDrag = userDrag.toImDrag();
 
-        origImDrag = imDrag;
-        unTransformedShape = shapeType.createShape(imDrag, shapeTypeSettings);
+        origDrag = drag;
+        unTransformedShape = shapeType.createShape(drag, shapeTypeSettings);
 
         // since there is no transform box yet
-        transformedImDrag = imDrag;
+        transformedDrag = drag;
         shape = unTransformedShape;
     }
 
     @Override
     public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
-        transformedImDrag = origImDrag.transformedCopy(at);
+        transformedDrag = origDrag.transformedCopy(at);
     }
 
     @Override
@@ -273,9 +271,9 @@ public class StyledShape implements Cloneable, Transformable {
             // make sure that the new directional shape is drawn
             // along the direction of the existing box
             // TODO this still ignores the height of the current box
-            unTransformedShape = shapeType.createShape(origImDrag.getCenterHorizontalDrag(), shapeTypeSettings);
+            unTransformedShape = shapeType.createShape(origDrag.getCenterHorizontalDrag(), shapeTypeSettings);
         } else {
-            unTransformedShape = shapeType.createShape(origImDrag, shapeTypeSettings);
+            unTransformedShape = shapeType.createShape(origDrag, shapeTypeSettings);
         }
         // the new transformed shape will be calculated later,
         // after the other parameters have been set
@@ -304,57 +302,56 @@ public class StyledShape implements Cloneable, Transformable {
         }
     }
 
-    public TransformBox createBox(UserDrag userDrag, View view) {
+    public TransformBox createBox(Drag drag, View view) {
         assert !insideBox;
         insideBox = true;
 
         TransformBox box;
         if (shapeType.isDirectional()) {
             // for directional shapes, zero-width or zero-height drags are allowed
-            box = createRotatedBox(userDrag, view);
+            box = createRotatedBox(drag, view);
         } else {
-            if (userDrag.hasZeroWidth() || userDrag.hasZeroHeight()) {
+            if (drag.hasZeroWidth() || drag.hasZeroHeight()) {
                 return null;
             }
-            Rectangle origCoRect = userDrag.toPosCoRect();
-            assert !origCoRect.isEmpty() : "userDrag = " + userDrag;
+            Rectangle origCoRect = drag.toPosCoRect();
+            assert !origCoRect.isEmpty() : "drag = " + drag;
             box = new TransformBox(origCoRect, view, this);
         }
         return box;
     }
 
-    private TransformBox createRotatedBox(UserDrag userDrag, View view) {
+    private TransformBox createRotatedBox(Drag drag, View view) {
         // First calculate the settings for a horizontal box.
         // The box is in component space, everything else is in image space.
 
         // Set the original shape to the horizontal shape.
         // It could also be rotated backwards with an AffineTransform.
-        ImDrag imDrag = userDrag.toImDrag();
-        unTransformedShape = shapeType.createHorizontalShape(imDrag, shapeTypeSettings);
+        unTransformedShape = shapeType.createHorizontalShape(drag, shapeTypeSettings);
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
-        double imDragDist = imDrag.getDistance();
+        double imDragDist = drag.calcImDist();
         double halfImHeight = imDragDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
-        origImDrag = new ImDrag(
-            imDrag.getStartX(),
-            imDrag.getStartY() - halfImHeight,
-            imDrag.getStartX() + imDragDist,
-            imDrag.getStartY() + halfImHeight);
+        origDrag = new Drag(
+            drag.getStartX(),
+            drag.getStartY() - halfImHeight,
+            drag.getStartX() + imDragDist,
+            drag.getStartY() + halfImHeight);
 //            transformedImDrag = origImDrag;
 
         // create the horizontal box
-        double coDist = userDrag.calcCoDist();
+        double coDist = drag.calcCoDist();
         Rectangle2D horizontalBoxBounds = new Rectangle.Double(
-            userDrag.getCoStartX(),
-            userDrag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+            drag.getCoStartX(),
+            drag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
             coDist,
             coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
         assert !horizontalBoxBounds.isEmpty();
         TransformBox box = new TransformBox(horizontalBoxBounds, view, this);
 
         // rotate the horizontal box into place
-        double angle = userDrag.calcAngle();
+        double angle = drag.calcAngle();
         double rotCenterCoX = horizontalBoxBounds.getX();
         double rotCenterCoY = horizontalBoxBounds.getY() + horizontalBoxBounds.getHeight() / 2.0;
         box.saveState(); // so that transform works

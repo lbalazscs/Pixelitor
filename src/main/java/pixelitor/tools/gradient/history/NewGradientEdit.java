@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,7 @@ public class NewGradientEdit extends PixelitorEdit {
 
         Tools.GRADIENT.setGradient(null, false, dr);
         imageEdit.undo();
+        comp.update();
         dr.updateIconImage();
     }
 
@@ -52,13 +53,14 @@ public class NewGradientEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        // this needs to be called even if the gradient is regenerated,
+        // this has to be called even if the gradient is regenerated,
         // in order to maintain the image edit's internal state
         imageEdit.redo();
 
         // set the handles
         Tools.GRADIENT.setGradient(gradient, false, dr);
 
+        comp.update();
         dr.updateIconImage();
     }
 }

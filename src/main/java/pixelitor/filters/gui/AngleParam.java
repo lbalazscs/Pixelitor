@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -39,12 +40,16 @@ public class AngleParam extends AbstractFilterParam {
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
 
-    public AngleParam(String name, double defaultValue) {
+    public AngleParam(String name, double def, AngleUnit unit) {
+        this(name, unit.toRadians(def));
+    }
+
+    public AngleParam(String name, double def) {
         super(name, ALLOW_RANDOMIZE);
 
-        setValue(defaultValue, false);
+        this.defaultVal = def;
 
-        defaultVal = defaultValue;
+        setValue(this.defaultVal, false);
     }
 
     @Override
@@ -85,13 +90,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public double getValueInDegrees() {
-        double degrees = Math.toDegrees(angle);
-        if (degrees <= 0) {
-            degrees = -degrees;
-        } else {
-            degrees = 360.0 - degrees;
-        }
-        return degrees;
+        return Utils.toIntuitiveDegrees(angle);
     }
 
     /**
@@ -156,7 +155,8 @@ public class AngleParam extends AbstractFilterParam {
     public RangeParam createRangeParam() {
         // At this point the actual value can already be different from the
         // default one => make sure the returned param has the same default.
-        RangeParam rangeParam = new RangeParam(getName(), 0, defaultVal, getMaxAngleInDegrees());
+        double defaultAsDegrees = Utils.toIntuitiveDegrees(defaultVal);
+        RangeParam rangeParam = new RangeParam(getName(), 0, defaultAsDegrees, getMaxAngleInDegrees());
         rangeParam.setValueNoTrigger(getValueInDegrees());
         return rangeParam;
     }

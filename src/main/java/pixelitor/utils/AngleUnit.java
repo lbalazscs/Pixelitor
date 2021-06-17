@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,9 @@ public enum AngleUnit {
     /**
      * Radians between -PI and PI, as returned form Math.atan2
      */
-    ATAN2_RADIANS {
+    RADIANS {
         @Override
-        public double toAtan2Radians(double a) {
+        public double toRadians(double a) {
             return a;
         }
 
@@ -36,7 +36,7 @@ public enum AngleUnit {
         }
 
         @Override
-        public double toAtan2Degrees(double a) {
+        public double toDegrees(double a) {
             return Math.toDegrees(a);
         }
 
@@ -46,11 +46,11 @@ public enum AngleUnit {
         }
     },
     /**
-     * Radians between 0 and 2*PI, and in the intuitive (CCW) direction
+     * Radians between 0 and 2*PI, and in the intuitive (counter-clockwise) direction
      */
-    INTUITIVE_RADIANS {
+    CCW_RADIANS {
         @Override
-        public double toAtan2Radians(double a) {
+        public double toRadians(double a) {
             return Utils.intuitiveToAtan2Angle(a);
         }
 
@@ -60,7 +60,7 @@ public enum AngleUnit {
         }
 
         @Override
-        public double toAtan2Degrees(double a) {
+        public double toDegrees(double a) {
             return Math.toDegrees(Utils.intuitiveToAtan2Angle(a));
         }
 
@@ -70,11 +70,11 @@ public enum AngleUnit {
         }
     },
     /**
-     * Degrees between -180 and 180, corresponding to ATAN2_RADIANS
+     * Degrees between -180 and 180, in the clockwise direction
      */
-    ATAN2_DEGREES {
+    DEGREES {
         @Override
-        public double toAtan2Radians(double a) {
+        public double toRadians(double a) {
             return Math.toRadians(a);
         }
 
@@ -84,7 +84,7 @@ public enum AngleUnit {
         }
 
         @Override
-        public double toAtan2Degrees(double a) {
+        public double toDegrees(double a) {
             return a;
         }
 
@@ -99,12 +99,13 @@ public enum AngleUnit {
         }
     },
     /**
-     * Degrees between 0 and 360, corresponding to INTUITIVE_RADIANS
+     * Degrees between 0 and 360, and in the intuitive (counter-clockwise) direction
      */
-    INTUITIVE_DEGREES {
+    CCW_DEGREES {
         @Override
-        public double toAtan2Radians(double a) {
-            return Utils.intuitiveToAtan2Angle(Math.toRadians(a));
+        public double toRadians(double a) {
+            assert a >= 0 && a <= 360 : "a = " + a;
+            return Math.toRadians(360 - a);
         }
 
         @Override
@@ -113,7 +114,7 @@ public enum AngleUnit {
         }
 
         @Override
-        public double toAtan2Degrees(double a) {
+        public double toDegrees(double a) {
             if (a > 180) {
                 return 360 - a;
             } else {
@@ -127,11 +128,11 @@ public enum AngleUnit {
         }
     };
 
-    public abstract double toAtan2Radians(double a);
+    public abstract double toRadians(double a);
 
     public abstract double toIntuitiveRadians(double a);
 
-    public abstract double toAtan2Degrees(double a);
+    public abstract double toDegrees(double a);
 
     public abstract double toIntuitiveDegrees(double a);
 }

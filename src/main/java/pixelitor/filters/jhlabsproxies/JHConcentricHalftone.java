@@ -22,7 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -74,13 +74,13 @@ public class JHConcentricHalftone extends JHMaskedHalftone {
             Color[] colors = {BLACK, WHITE};
             paint = new RadialGradientPaint(cx, cy, radius, fractions, colors, cycle);
         } else {
-            ImDrag imDrag = new ImDrag(cx, cy, cx + 2 * radius, cy);
+            Drag drag = new Drag(cx, cy, cx + 2 * radius, cy);
             Color startColor = BLACK;
             Color endColor = WHITE;
             if (type == TYPE_SPIRAL_CW) {
-                paint = new SpiralGradientPaint(true, imDrag, startColor, endColor, cycle);
+                paint = new SpiralGradientPaint(true, drag, startColor, endColor, cycle);
             } else if (type == TYPE_SPIRAL_CCW) {
-                paint = new SpiralGradientPaint(false, imDrag, startColor, endColor, cycle);
+                paint = new SpiralGradientPaint(false, drag, startColor, endColor, cycle);
             } else {
                 throw new IllegalStateException("type = " + type);
             }

@@ -55,14 +55,10 @@ public class Guides implements Serializable {
     private final List<Double> verticals = new ArrayList<>();
 
     // the rendered lines in component space
-    private List<Line2D> lines;
+    private transient List<Line2D> lines;
 
     // used only for debugging
     private String name;
-
-    @VisibleForTesting
-    Guides() {
-    }
 
     public Guides copyForNewComp(View view) {
         Guides copy = createCopyGuides();
@@ -189,9 +185,7 @@ public class Guides implements Serializable {
 
         // a crop is a negative enlargement
         return copyForEnlargedCanvas(
-            -northMargin, -eastMargin,
-            -southMargin, -westMargin,
-            view, oldCanvas);
+            -northMargin, -eastMargin, -southMargin, -westMargin, view, oldCanvas);
     }
 
     public static void showAddGridDialog(View view) {
@@ -268,8 +262,8 @@ public class Guides implements Serializable {
         Canvas canvas = view.getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
-        double canvasMarginX = view.getCanvasStartX();
-        double canvasMarginY = view.getCanvasStartY();
+        int canvasMarginX = view.getCanvasStartX();
+        int canvasMarginY = view.getCanvasStartY();
 
         lines = new ArrayList<>();
 

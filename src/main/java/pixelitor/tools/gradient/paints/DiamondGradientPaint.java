@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient.paints;
 
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -32,7 +32,7 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 /**
  * A Paint that creates a "diamond gradient"
  */
-public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
+public record DiamondGradientPaint(Drag drag, Color startColor,
                                    Color endColor,
                                    CycleMethod cycleMethod) implements Paint {
     private static final int AA_RES = 4; // the resolution of AA supersampling
@@ -45,11 +45,11 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
-            return new GrayDiamondGradientPaintContext(imDrag,
+            return new GrayDiamondGradientPaintContext(drag,
                 startColor, endColor, cm, cycleMethod);
         }
 
-        return new DiamondGradientPaintContext(imDrag,
+        return new DiamondGradientPaintContext(drag,
             startColor, endColor, cm, cycleMethod);
     }
 
@@ -61,7 +61,7 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
     }
 
     private static class DiamondGradientPaintContext implements PaintContext {
-        protected final ImDrag imDrag;
+        protected final Drag drag;
         protected final CycleMethod cycleMethod;
 
         private final int startAlpha;
@@ -80,10 +80,10 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
         protected final float dragRelDY;
         protected final double dragDist;
 
-        private DiamondGradientPaintContext(ImDrag imDrag,
+        private DiamondGradientPaintContext(Drag drag,
                                             Color startColor, Color endColor,
                                             ColorModel cm, CycleMethod cycleMethod) {
-            this.imDrag = imDrag;
+            this.drag = drag;
             this.cycleMethod = cycleMethod;
 
             startAlpha = startColor.getAlpha();
@@ -98,10 +98,10 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
 
             this.cm = cm;
 
-            dragDist = imDrag.getDistance();
+            dragDist = drag.calcImDist();
             double dragDistSqr = dragDist * dragDist;
-            dragRelDX = (float) (imDrag.getDX() / dragDistSqr);
-            dragRelDY = (float) (imDrag.getDY() / dragDistSqr);
+            dragRelDX = (float) (drag.getDX() / dragDistSqr);
+            dragRelDY = (float) (drag.getDY() / dragDistSqr);
         }
 
         @Override
@@ -182,8 +182,8 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
         }
 
         public double interpolate(double x, double y) {
-            double dx = x - imDrag.getStartX();
-            double dy = y - imDrag.getStartY();
+            double dx = x - drag.getStartX();
+            double dy = y - drag.getStartY();
 
             double v1 = Math.abs((dx * dragRelDX) + (dy * dragRelDY));
             double v2 = Math.abs((dx * dragRelDY) - (dy * dragRelDX));
@@ -221,10 +221,10 @@ public record DiamondGradientPaint(ImDrag imDrag, Color startColor,
         private final int startGray;
         private final int endGray;
 
-        private GrayDiamondGradientPaintContext(ImDrag imDrag,
+        private GrayDiamondGradientPaintContext(Drag drag,
                                                 Color startColor, Color endColor,
                                                 ColorModel cm, CycleMethod cycleMethod) {
-            super(imDrag, startColor, endColor, cm, cycleMethod);
+            super(drag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
             endGray = endColor.getRed();

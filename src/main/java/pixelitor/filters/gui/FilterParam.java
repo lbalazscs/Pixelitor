@@ -74,9 +74,6 @@ public interface FilterParam extends FilterSetting, Resettable {
         String key = getPresetKey();
         String savedValue = preset.get(key);
 
-        // In the tests there should be a value for every key
-        assert savedValue != null : "no value found for " + key;
-
         if (savedValue != null) {
             loadStateFrom(savedValue);
         }

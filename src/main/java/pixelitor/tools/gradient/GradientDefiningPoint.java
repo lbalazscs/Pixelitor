@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
@@ -72,8 +72,8 @@ public class GradientDefiningPoint extends DraggablePoint {
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {
-            UserDrag ud = gradientHandles.toUserDrag(this);
-            DragDisplayType.ANGLE_DIST.draw(g, ud);
+            Drag drag = gradientHandles.toDrag(this);
+            DragDisplayType.ANGLE_DIST.draw(g, drag);
         }
     }
 }

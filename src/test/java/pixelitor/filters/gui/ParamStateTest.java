@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import static java.awt.Color.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 @DisplayName("ParamState tests")
 class ParamStateTest {
@@ -42,7 +43,7 @@ class ParamStateTest {
         TestHelper.setUnitTestingMode();
 
         FilterParam angleParamStart = new AngleParam("AngleParam", 0);
-        FilterParam angleParamEnd = new AngleParam("AngleParam", 1);
+        FilterParam angleParamEnd = new AngleParam("AngleParam", 180, CCW_DEGREES);
 
         FilterParam rangeParamStart = new RangeParam("RangeParam", 0, 10, 100);
         FilterParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);

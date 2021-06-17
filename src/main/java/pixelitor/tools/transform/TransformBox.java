@@ -176,7 +176,7 @@ public class TransformBox implements ToolWidget {
     @VisibleForTesting
     public void rotateTo(double angle, AngleUnit unit) {
         saveState(); // so that transform works
-        double rad = unit.toAtan2Radians(angle);
+        double rad = unit.toRadians(angle);
         double angleBefore = this.angle;
         setAngle(rad);
         Point2D c = getCenter();

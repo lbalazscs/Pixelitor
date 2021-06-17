@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,25 +27,25 @@ import java.awt.Graphics2D;
 public enum DragDisplayType {
     NONE {
         @Override
-        public void draw(Graphics2D g, UserDrag userDrag) {
+        public void draw(Graphics2D g, Drag drag) {
             // do nothing
         }
     }, WIDTH_HEIGHT {
         @Override
-        public void draw(Graphics2D g, UserDrag userDrag) {
-            userDrag.displayWidthHeight(g);
+        public void draw(Graphics2D g, Drag drag) {
+            drag.displayWidthHeight(g);
         }
     }, REL_MOUSE_POS {
         @Override
-        public void draw(Graphics2D g, UserDrag userDrag) {
-            userDrag.displayRelativeMovement(g);
+        public void draw(Graphics2D g, Drag drag) {
+            drag.displayRelativeMovement(g);
         }
     }, ANGLE_DIST {
         @Override
-        public void draw(Graphics2D g, UserDrag userDrag) {
-            userDrag.displayAngleAndDist(g);
+        public void draw(Graphics2D g, Drag drag) {
+            drag.displayAngleAndDist(g);
         }
     };
 
-    public abstract void draw(Graphics2D g, UserDrag userDrag);
+    public abstract void draw(Graphics2D g, Drag drag);
 }

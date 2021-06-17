@@ -258,9 +258,9 @@ public class CropTool extends DragTool {
     public void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
             cropBox.mouseDragged(e);
-        } else if (userDrag != null) {
-            userDrag.setStartFromCenter(e.isAltDown());
-            userDrag.setEquallySized(e.isShiftDown());
+        } else if (drag != null) {
+            drag.setStartFromCenter(e.isAltDown());
+            drag.setEquallySized(e.isShiftDown());
         }
 
         PRectangle cropRect = getCropRect();
@@ -294,7 +294,7 @@ public class CropTool extends DragTool {
                     throw new IllegalStateException();
                 }
 
-                Rectangle r = userDrag.toCoRect();
+                Rectangle r = drag.toCoRect();
                 PRectangle rect = PRectangle.positiveFromCo(r, e.getView());
 
                 cropBox = new CropBox(rect, e.getView());
@@ -334,7 +334,7 @@ public class CropTool extends DragTool {
         Composite origComposite = g2.getComposite();
 
         View view = comp.getView();
-        Rectangle2D coCanvasBounds = comp.getCanvas().getCoBounds(view);
+        Rectangle coCanvasBounds = comp.getCanvas().getCoBounds(view);
 
         Area darkAreaShape = new Area(coCanvasBounds);
         darkAreaShape.subtract(new Area(cropRect.getCo()));
@@ -383,7 +383,7 @@ public class CropTool extends DragTool {
      */
     public PRectangle getCropRect() {
         if (state == INITIAL_DRAG) {
-            return userDrag.toPosPRect();
+            return drag.toPosPRect();
         } else if (state == TRANSFORM) {
             return cropBox.getRect();
         }

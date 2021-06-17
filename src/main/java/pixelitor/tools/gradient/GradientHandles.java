@@ -23,9 +23,8 @@ import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.tools.util.ImDrag;
-import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
@@ -88,37 +87,37 @@ public class GradientHandles implements ToolWidget {
         middle.paintHandle(g);
     }
 
-    public ImDrag toImDrag(View view) {
+    public Drag toDrag(View view) {
         double startX = view.componentXToImageSpace(start.x);
         double startY = view.componentYToImageSpace(start.y);
         double endX = view.componentXToImageSpace(end.x);
         double endY = view.componentYToImageSpace(end.y);
 
-        return new ImDrag(startX, startY, endX, endY);
+        return new Drag(startX, startY, endX, endY);
     }
 
-    public UserDrag toUserDrag(GradientDefiningPoint movingPoint) {
-        UserDrag ud;
+    public Drag toDrag(GradientDefiningPoint movingPoint) {
+        Drag drag;
         if (movingPoint == end) {
-            ud = new UserDrag();
-            ud.setStart(start.asPPoint());
-            ud.setEnd(end.asPPoint());
+            drag = new Drag();
+            drag.setStart(start.asPPoint());
+            drag.setEnd(end.asPPoint());
         } else if (movingPoint == start) {
             // if the user is moving the start point, then return
-            // an UserDrag that points backwards, but calculates
+            // a Drag that points backwards, but calculates
             // the forward angle
-            ud = new UserDrag() {
+            drag = new Drag() {
                 @Override
                 public double calcAngle() {
                     return calcReversedAngle();
                 }
             };
-            ud.setStart(end.asPPoint());
-            ud.setEnd(start.asPPoint());
+            drag.setStart(end.asPPoint());
+            drag.setEnd(start.asPPoint());
         } else {
             throw new IllegalStateException("movingPoint = " + movingPoint);
         }
-        return ud;
+        return drag;
     }
 
     @Override

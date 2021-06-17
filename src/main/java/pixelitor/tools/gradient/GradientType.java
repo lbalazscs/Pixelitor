@@ -19,7 +19,7 @@ package pixelitor.tools.gradient;
 import pixelitor.tools.gradient.paints.AngleGradientPaint;
 import pixelitor.tools.gradient.paints.DiamondGradientPaint;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
@@ -37,41 +37,41 @@ import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
 public enum GradientType {
     LINEAR("Linear") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            Point2D start = imDrag.getStartPoint();
-            Point2D end = imDrag.getEndPoint();
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            Point2D start = drag.getStartPoint();
+            Point2D end = drag.getEndPoint();
 
             return new LinearGradientPaint(start, end, FRACTIONS,
                 colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
     }, RADIAL("Radial") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            float radius = (float) imDrag.getDistance();
-            Point2D center = imDrag.getStartPoint();
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            float radius = (float) drag.calcImDist();
+            Point2D center = drag.getStartPoint();
 
             return new RadialGradientPaint(center, radius, center, FRACTIONS,
                 colors, cycle, SRGB, IDENTITY_TRANSFORM);
         }
     }, ANGLE("Angle") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            return new AngleGradientPaint(imDrag, colors[0], colors[1], cycle);
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            return new AngleGradientPaint(drag, colors[0], colors[1], cycle);
         }
     }, SPIRAL_CW("CW Spiral") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            return new SpiralGradientPaint(true, imDrag, colors[0], colors[1], cycle);
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            return new SpiralGradientPaint(true, drag, colors[0], colors[1], cycle);
         }
     }, SPIRAL_CCW("CCW Spiral") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            return new SpiralGradientPaint(false, imDrag, colors[0], colors[1], cycle);
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            return new SpiralGradientPaint(false, drag, colors[0], colors[1], cycle);
         }
     }, DIAMOND("Diamond") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
-            return new DiamondGradientPaint(imDrag, colors[0], colors[1], cycle);
+        public Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle) {
+            return new DiamondGradientPaint(drag, colors[0], colors[1], cycle);
         }
     };
 
@@ -84,7 +84,7 @@ public enum GradientType {
         this.guiName = guiName;
     }
 
-    public abstract Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle);
+    public abstract Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle);
 
     @Override
     public String toString() {

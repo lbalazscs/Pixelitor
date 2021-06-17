@@ -303,13 +303,13 @@ public class ShapesTool extends DragTool {
 
         assert state == INITIAL_DRAG : "state = " + state;
 
-        userDrag.setStartFromCenter(e.isAltDown());
-        userDrag.setEquallySized(e.isShiftDown());
+        drag.setStartFromCenter(e.isAltDown());
+        drag.setEquallySized(e.isShiftDown());
 
         var comp = e.getComp();
 
         assert styledShape != null;
-        styledShape.updateFromDrag(userDrag);
+        styledShape.updateFromDrag(drag);
 
         // This will trigger paintOverActiveLayer,
         // therefore the continuous drawing of the shape.
@@ -333,19 +333,19 @@ public class ShapesTool extends DragTool {
 
         assert state == INITIAL_DRAG : "state = " + state;
 
-        if (userDrag.isClick()) {
+        if (drag.isClick()) {
             // cancel the shape started in dragStarted
             styledShape = null;
             setState(NO_INTERACTION);
             return;
         }
 
-        userDrag.setStartFromCenter(e.isAltDown());
-        userDrag.setEquallySized(e.isShiftDown());
+        drag.setStartFromCenter(e.isAltDown());
+        drag.setEquallySized(e.isShiftDown());
 
         var comp = e.getComp();
 
-        transformBox = styledShape.createBox(userDrag, e.getView());
+        transformBox = styledShape.createBox(drag, e.getView());
         if (transformBox == null) {
             // The box could not be created.
             // Cancel just as for empty clicks.
@@ -371,11 +371,11 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void altPressed() {
-        if (!altDown && state == INITIAL_DRAG && userDrag.isDragging()) {
-            userDrag.setStartFromCenter(true);
+        if (!altDown && state == INITIAL_DRAG && drag.isDragging()) {
+            drag.setStartFromCenter(true);
 
             assert styledShape != null;
-            styledShape.updateFromDrag(userDrag);
+            styledShape.updateFromDrag(drag);
 
             var comp = OpenImages.getActiveComp();
             comp.update(REPAINT);
@@ -385,11 +385,11 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void altReleased() {
-        if (state == INITIAL_DRAG && userDrag.isDragging()) {
-            userDrag.setStartFromCenter(false);
+        if (state == INITIAL_DRAG && drag.isDragging()) {
+            drag.setStartFromCenter(false);
 
             assert styledShape != null;
-            styledShape.updateFromDrag(userDrag);
+            styledShape.updateFromDrag(drag);
 
             var comp = OpenImages.getActiveComp();
             comp.update(REPAINT);
@@ -459,7 +459,7 @@ public class ShapesTool extends DragTool {
     public void paintOverActiveLayer(Graphics2D g) {
         // updates the shape continuously while drawing
         if (state == INITIAL_DRAG) {
-            if (userDrag.isClick()) {
+            if (drag.isClick()) {
                 return;
             }
             styledShape.paint(g);

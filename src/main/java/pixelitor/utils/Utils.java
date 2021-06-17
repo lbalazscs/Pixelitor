@@ -138,7 +138,8 @@ public final class Utils {
 
     /**
      * Input: an angle between -PI and PI, as returned form Math.atan2
-     * Output: an angle between 0 and 2*PI, and in the intuitive direction
+     * Output: an angle between 0 and 2*PI, and in the intuitive
+     * (counter-clockwise) direction
      */
     public static double atan2AngleToIntuitive(double angleInRadians) {
         double angle;
@@ -159,6 +160,16 @@ public final class Utils {
         } else {
             return -radians;
         }
+    }
+
+    public static double toIntuitiveDegrees(double angle) {
+        double degrees = Math.toDegrees(angle);
+        if (degrees <= 0) {
+            degrees = -degrees;
+        } else {
+            degrees = 360.0 - degrees;
+        }
+        return degrees;
     }
 
     public static Point2D offsetFromPolar(double distance, double angle) {

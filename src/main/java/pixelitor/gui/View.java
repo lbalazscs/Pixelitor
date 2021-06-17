@@ -69,11 +69,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private static final CheckerboardPainter checkerBoardPainter
         = ImageUtils.createCheckerboardPainter();
 
-    // The start coordinates of the canvas in component space,
-    // (bigger than zero if the CompositionView is bigger
-    // than the canvas, and the canvas has to be centralized)
-    private double canvasStartX;
-    private double canvasStartY;
+    // The start coordinates of the canvas in component space (greater than zero
+    // if the canvas has to be centralized because it's smaller than the view).
+    // They can't have floating-point precision, otherwise the checkerboard
+    // and the image might be painted on slightly different coordinates.
+    private int canvasStartX;
+    private int canvasStartY;
 
     private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTransform);
     private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
@@ -292,10 +293,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // make a copy of the transform object which represents "component space"
         var componentTransform = g2.getTransform();
 
-        // TODO casting to int seems necessary, otherwise the
-        //   checkerboard and the image might be painted on slightly different
-        //   coordinates and this is visible when using a dark theme
-        g2.translate((int) canvasStartX, (int) canvasStartY);
+        g2.translate(canvasStartX, canvasStartY);
 
         boolean showMask = maskViewMode.showMask();
         if (!showMask) {
@@ -478,11 +476,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return canvas;
     }
 
-    public double getCanvasStartX() {
+    public int getCanvasStartX() {
         return canvasStartX;
     }
 
-    public double getCanvasStartY() {
+    public int getCanvasStartY() {
         return canvasStartY;
     }
 
@@ -611,8 +609,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         // centralize the canvas within this component
-        canvasStartX = (myWidth - canvasCoWidth) / 2.0;
-        canvasStartY = (myHeight - canvasCoHeight) / 2.0;
+        canvasStartX = (int) ((myWidth - canvasCoWidth) / 2.0);
+        canvasStartY = (int) ((myHeight - canvasCoHeight) / 2.0);
 
         // one can zoom an inactive image with the mouse wheel,
         // but the tools are interacting only with the active image
@@ -788,9 +786,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * in screen coordinates
      */
     public Rectangle getVisibleCanvasBoundsOnScreen() {
-        Rectangle canvasRelativeToView = new Rectangle(
-            (int) canvasStartX, (int) canvasStartY,
-            canvas.getCoWidth(), canvas.getCoHeight());
+        Rectangle canvasRelativeToView = canvas.getCoBounds(this);
 
         // take scrollbars into account
         Rectangle retVal = canvasRelativeToView.intersection(getVisiblePart());

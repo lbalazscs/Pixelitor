@@ -19,9 +19,9 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.util.UserDrag;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
@@ -30,10 +30,10 @@ import java.awt.Graphics2D;
  * An abstract superclass for tools which only care about the mouse drag
  * start and end positions, and not about the intermediate mouse positions.
  * The start and end points of the drag gesture are continuously
- * updated in the {@link UserDrag} object.
+ * updated in the {@link Drag} object.
  */
 public abstract class DragTool extends Tool {
-    protected UserDrag userDrag;
+    protected Drag drag;
 
     private boolean endPointInitialized = false;
     protected boolean spaceDragStartPoint = false;
@@ -53,8 +53,8 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        userDrag = new UserDrag();
-        userDrag.setStart(e);
+        drag = new Drag();
+        drag.setStart(e);
 
         dragStarted(e);
 
@@ -63,21 +63,21 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        if (userDrag.isCanceled()) {
+        if (drag.isCanceled()) {
             return;
         }
         if (spaceDragStartPoint) {
-            userDrag.saveEndValues();
+            drag.saveEndValues();
         }
         if (constrainIfShiftDown) {
-            userDrag.setConstrained(e.isShiftDown());
+            drag.setConstrained(e.isShiftDown());
         }
 
-        userDrag.setEnd(e);
+        drag.setEnd(e);
 
         if (spaceDragStartPoint) {
             if (endPointInitialized && GlobalEvents.isSpaceDown()) {
-                userDrag.adjustStartForSpaceDownDrag();
+                drag.adjustStartForSpaceDownDrag();
             }
 
             endPointInitialized = true;
@@ -88,11 +88,11 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        if (userDrag.isCanceled()) {
+        if (drag.isCanceled()) {
             return;
         }
-        userDrag.setEnd(e);
-        userDrag.mouseReleased();
+        drag.setEnd(e);
+        drag.mouseReleased();
         dragFinished(e);
         endPointInitialized = false;
     }
@@ -105,11 +105,11 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-        if (userDrag == null || !userDrag.isDragging()) {
+        if (drag == null || !drag.isDragging()) {
             return;
         }
 
-        getDragDisplayType().draw(g2, userDrag);
+        getDragDisplayType().draw(g2, drag);
     }
 
     public DragDisplayType getDragDisplayType() {

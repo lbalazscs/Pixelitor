@@ -106,7 +106,7 @@ public class ZoomTool extends DragTool {
             }
 
             View view = e.getView();
-            box = PRectangle.positiveFromCo(userDrag.toCoRect(), view);
+            box = PRectangle.positiveFromCo(drag.toCoRect(), view);
             setState(TRANSFORM);
 
             view.zoomToRect(getZoomRect());
@@ -134,7 +134,7 @@ public class ZoomTool extends DragTool {
      */
     public PRectangle getZoomRect() {
         if (state == INITIAL_DRAG) {
-            return userDrag.toPosPRect();
+            return drag.toPosPRect();
         } else if (state == TRANSFORM) {
             return box;
         }

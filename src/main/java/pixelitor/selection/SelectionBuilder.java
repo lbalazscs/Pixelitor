@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,6 @@ import java.awt.Shape;
 public class SelectionBuilder {
     private final SelectionType selectionType;
     private final ShapeCombination interaction;
-//    private final Composition comp;
 
     private Shape replacedShape;
 
@@ -127,8 +126,8 @@ public class SelectionBuilder {
                 builtSelection.setShape(combinedShape);
                 comp.promoteSelection();
 
-                PixelitorEdit edit = new SelectionShapeChangeEdit(interaction.getNameForUndo(), comp, oldShape);
-                History.add(edit);
+                History.add(new SelectionShapeChangeEdit(
+                    interaction.getNameForUndo(), comp, oldShape));
             }
         } else {
             // we can get here if either (1) a new selection

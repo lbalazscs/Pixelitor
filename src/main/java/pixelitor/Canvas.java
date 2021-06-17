@@ -117,8 +117,8 @@ public class Canvas implements Serializable {
     /**
      * Returns the (zoomed) bounds in component space
      */
-    public Rectangle2D getCoBounds(View view) {
-        return new Rectangle2D.Double(
+    public Rectangle getCoBounds(View view) {
+        return new Rectangle(
             view.getCanvasStartX(), view.getCanvasStartY(), zoomedWidth, zoomedHeight);
     }
 
@@ -175,6 +175,9 @@ public class Canvas implements Serializable {
         return fullArea;
     }
 
+    /**
+     * Intersects the given image-space shape with the canvas bounds, and returns the result.
+     */
     public Shape clip(Shape shape) {
         assert shape != null;
 
@@ -195,7 +198,7 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Create a temporary image with the size of this canvas
+     * Creates a temporary image with the size of this canvas.
      */
     public BufferedImage createTmpImage() {
         // it is important that the tmp image has transparency

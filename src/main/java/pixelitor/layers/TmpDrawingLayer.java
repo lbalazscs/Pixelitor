@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.selection.Selection;
-import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.Drag;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Composite;
@@ -103,7 +103,7 @@ public class TmpDrawingLayer {
         g.drawImage(image, tx + selStartX, ty + selStartY, null);
     }
 
-    public ImDrag translateDrag(ImDrag drag) {
+    public Drag translateDrag(Drag drag) {
         if (smallImage) {
             // the drag was relative to the canvas, but if small images are used,
             // then it must be transformed to be relative to the selection

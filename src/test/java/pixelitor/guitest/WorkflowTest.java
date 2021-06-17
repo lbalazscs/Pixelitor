@@ -128,7 +128,7 @@ public class WorkflowTest {
     private void addGuide() {
         app.runMenuCommand("Add Horizontal Guide...");
         var dialog = app.findDialogByTitle("Add Horizontal Guide");
-        dialog.slider("Position (%)").slideTo(60);
+        dialog.slider("Percent").slideTo(60);
         dialog.button("ok").click();
         dialog.requireNotVisible();
         assertThat(EDT.getGuides().getHorizontals())

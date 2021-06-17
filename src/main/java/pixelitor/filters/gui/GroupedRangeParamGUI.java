@@ -59,7 +59,10 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
             // doesn't call param.createGUI because we don't want another border
             sliders[i] = new SliderSpinner(param, NONE, true);
             sliders[i].setupTicks();
-            gbh.addLabelAndControl(param.getName() + ":", sliders[i], i);
+
+            String name = param.getName();
+            sliders[i].setName(name);
+            gbh.addLabelAndControl(name + ":", sliders[i], i);
         }
     }
 

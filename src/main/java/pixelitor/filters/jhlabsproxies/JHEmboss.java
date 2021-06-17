@@ -26,18 +26,18 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+
 /**
  * Emboss filter based on the JHLabs EmbossFilter
  */
 public class JHEmboss extends ParametrizedFilter {
     public static final String NAME = "Emboss";
 
-    private static final double INTUITIVE_RADIANS_30 = -0.54;
-
     private final AngleParam lightDirection = new AngleParam(
-        "Light Direction (Azimuth) - Degrees", 0);
+        "Light Direction (Azimuth)", 0);
     private final ElevationAngleParam lightElevation = new ElevationAngleParam(
-        "Light Elevation Angle - Degrees", INTUITIVE_RADIANS_30);
+        "Light Elevation Angle", 30, CCW_DEGREES);
     private final RangeParam depth = new RangeParam(
         "Depth", 2, 100, 502);
     private final BooleanParam texture = new BooleanParam(
