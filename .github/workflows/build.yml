@@ -25,4 +25,4 @@ jobs:
     - name: Build with Maven
       uses: GabrielBB/xvfb-action@v1
       with:
-        run: mvn -e -B package --file pom.xml
+        run: mvn -DtrimStackTrace=false -B package --file pom.xml
