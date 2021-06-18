@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.AppContext;
 import pixelitor.OpenImages;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
@@ -51,12 +52,13 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        Drawable dr = OpenImages.getActiveDrawable();
-        if (dr != null) { // in unit tests it might be null
-            BufferedImage actualImage = dr.getImageForFilterDialogs();
-            thumb = ImageUtils.createThumbnail(actualImage, size, null);
-            setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
+        if (AppContext.isUnitTesting()) {
+            return;
         }
+        Drawable dr = OpenImages.getActiveDrawable();
+        BufferedImage actualImage = dr.getImageForFilterDialogs();
+        thumb = ImageUtils.createThumbnail(actualImage, size, null);
+        setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
     }
 
     @Override
