@@ -20,6 +20,10 @@ package pixelitor.utils.debug;
 import pixelitor.layers.ContentLayer;
 
 public class ContentLayerNode extends LayerNode {
+    public ContentLayerNode(ContentLayer layer) {
+        this("content layer", layer);
+    }
+
     public ContentLayerNode(String name, ContentLayer layer) {
         super(name, layer);
 

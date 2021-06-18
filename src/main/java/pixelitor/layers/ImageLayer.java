@@ -18,7 +18,9 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
-import pixelitor.*;
+import pixelitor.Composition;
+import pixelitor.FilterContext;
+import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.gui.utils.Dialogs;
@@ -30,13 +32,14 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.ImageLayerNode;
+import pixelitor.utils.debug.LayerNode;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -1205,6 +1208,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public Layer getLayer() {
         return this;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String description) {
+        return new ImageLayerNode(LayerNode.descrToName(description, this), this);
     }
 
     public String toDebugCanvasString() {

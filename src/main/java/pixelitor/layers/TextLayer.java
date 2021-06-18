@@ -37,6 +37,9 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.LayerNode;
+import pixelitor.utils.debug.TextLayerNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -437,6 +440,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public String getHelpURL() {
         return null;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String description) {
+        return new TextLayerNode(LayerNode.descrToName(description, this), this);
     }
 
     @Override

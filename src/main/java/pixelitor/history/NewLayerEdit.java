@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -69,5 +70,17 @@ public class NewLayerEdit extends PixelitorEdit {
 
         newLayer = null;
         activeLayerBefore = null;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(activeLayerBefore.createDebugNode("active layer before"));
+        node.add(newLayer.createDebugNode("new layer"));
+        node.addInt("new layer index", newLayerIndex);
+        node.addString("view mode before", viewModeBefore.toString());
+
+        return node;
     }
 }

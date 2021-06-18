@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,15 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
 public class LayerNode extends DebugNode {
+    public LayerNode(Layer layer) {
+        this("layer \"" + layer.getName() + "\"", layer);
+    }
+
     public LayerNode(String name, Layer layer) {
         super(name, layer);
+
+        addQuotedString("name", layer.getName());
+        addClass();
 
         if (layer.hasMask()) {
             LayerMask mask = layer.getMask();
@@ -30,13 +37,15 @@ public class LayerNode extends DebugNode {
         } else {
             addString("has mask", "no");
         }
-
         addBoolean("mask enabled", layer.isMaskEnabled());
         addBoolean("mask editing", layer.isMaskEditing());
-        addBoolean("visible", layer.isVisible());
 
+        addBoolean("visible", layer.isVisible());
         addFloat("opacity", layer.getOpacity());
         addQuotedString("blending mode", layer.getBlendingMode().toString());
-        addQuotedString("name", layer.getName());
+    }
+
+    public static String descrToName(String descr, Layer layer) {
+        return descr + " - " + layer.getName();
     }
 }

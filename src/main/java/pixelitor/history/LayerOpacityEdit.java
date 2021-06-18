@@ -19,6 +19,8 @@ package pixelitor.history;
 
 import pixelitor.layers.Layer;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -71,5 +73,16 @@ public class LayerOpacityEdit extends PixelitorEdit {
     @VisibleForTesting
     public Layer getLayer() {
         return layer;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(new LayerNode(layer));
+        node.addString("current", String.format("%.2f", layer.getOpacity()));
+        node.addString("backup", String.format("%.2f", backupOpacity));
+
+        return node;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -56,5 +57,15 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
 
         oldLayer = null;
         newLayer = null;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(oldLayer.createDebugNode("old layer"));
+        node.add(newLayer.createDebugNode("new layer"));
+
+        return node;
     }
 }

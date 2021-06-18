@@ -30,6 +30,8 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -716,6 +718,16 @@ public abstract class Layer implements Serializable {
             return popup;
         }
         return null;
+    }
+
+    public DebugNode createDebugNode(String description) {
+        // convenience implementation that should be
+        // overridden in non-experimental layer types
+        return new LayerNode(LayerNode.descrToName(description, this), this);
+    }
+
+    public DebugNode createDebugNode() {
+        return createDebugNode("layer");
     }
 
     @Override

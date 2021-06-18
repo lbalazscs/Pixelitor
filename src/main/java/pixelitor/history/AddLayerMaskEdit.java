@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,9 @@ import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.LayerMaskNode;
+import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -67,5 +70,17 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         layer = null;
         layerMask = null;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(new LayerNode(layer));
+        node.add(new LayerMaskNode(layerMask));
+        node.addString("new mask view node",
+            newMode == null ? "null" : newMode.toString());
+
+        return node;
     }
 }

@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -55,5 +56,16 @@ public class HandleMovedEdit extends PixelitorEdit {
 
         handle.setLocation(after);
         comp.repaint();
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(handle.createDebugNode());
+        node.addString("before", before.toString());
+        node.addString("after", after.toString());
+
+        return node;
     }
 }
