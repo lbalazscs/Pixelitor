@@ -18,14 +18,18 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
+import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.Color;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
@@ -35,15 +39,36 @@ import java.util.concurrent.Future;
 public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
 
+    public enum ModelType {
+        HSB {
+            @Override
+            int toRGB(float a, float b, float c) {
+                return Color.HSBtoRGB(a, b, c);
+            }
+        },
+        HSL {
+            final int[] buffer = new int[3];
+
+            @Override
+            int toRGB(float a, float b, float c) {
+                ColorUtilities.HSLtoRGB((a - (float) Math.floor(a)), b, c, buffer);
+                return 0xff000000 | (buffer[0] << 16) | (buffer[1] << 8) | (buffer[2]);
+            }
+        };
+
+        abstract int toRGB(float a, float b, float c);
+    }
+
+    private final EnumParam<ModelType> type = new EnumParam<>("Model", ModelType.class);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate", 0);
-    private final RangeParam brightnessParam = new RangeParam("Brightness (%)", 0, 75, 100);
-    private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
+    private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
+    private final RangeParam satParam = new RangeParam("Saturation/Lightness (%)", 0, 90, 100);
 
     public ColorWheel() {
         super(false);
 
-        setParams(center, hueShiftParam, brightnessParam, satParam);
+        setParams(type, center, hueShiftParam, brgLumParam, satParam);
     }
 
     @Override
@@ -53,12 +78,14 @@ public class ColorWheel extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
+        ModelType model = type.getSelected();
+
         int cx = (int) (width * center.getRelativeX());
         int cy = (int) (height * center.getRelativeY());
 
         float hueShift = (float) hueShiftParam.getValueInRadians();
-        float saturation = satParam.getPercentageValF();
-        float brightness = brightnessParam.getPercentageValF();
+        float sat = satParam.getPercentageValF();
+        float brgLum = brgLumParam.getPercentageValF();
 
         var pt = new StatusBarProgressTracker(NAME, height);
 
@@ -66,7 +93,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(
-                destData, width, finalY, cx, cy, hueShift, saturation, brightness);
+                    destData, width, finalY, cx, cy, hueShift, sat, brgLum, model);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
@@ -77,14 +104,15 @@ public class ColorWheel extends ParametrizedFilter {
 
     private static void calculateLine(int[] destData, int width, int y,
                                       int cx, int cy, float hueShift,
-                                      float saturation, float brightness) {
+                                      float saturation, float brightness, ModelType model) {
         for (int x = 0; x < width; x++) {
             int yDiff = cy - y;
             int xDiff = x - cx;
             float angle = (float) FastMath.atan2(yDiff, xDiff) + hueShift;
             float hue = (float) (angle / (2 * Math.PI));
 
-            destData[x + y * width] = Color.HSBtoRGB(hue, saturation, brightness);
+//            destData[x + y * width] = Color.HSBtoRGB(hue, saturation, brightness);
+            destData[x + y * width] = model.toRGB(hue, saturation, brightness);
         }
     }
 
