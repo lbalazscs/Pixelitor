@@ -27,8 +27,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
@@ -39,7 +37,7 @@ import java.util.concurrent.Future;
 public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
 
-    public enum ModelType {
+    public enum ColorModelType {
         HSB {
             @Override
             int toRGB(float a, float b, float c) {
@@ -59,7 +57,7 @@ public class ColorWheel extends ParametrizedFilter {
         abstract int toRGB(float a, float b, float c);
     }
 
-    private final EnumParam<ModelType> type = new EnumParam<>("Model", ModelType.class);
+    private final EnumParam<ColorModelType> type = new EnumParam<>("Color Model", ColorModelType.class);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate", 0);
     private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
@@ -78,7 +76,7 @@ public class ColorWheel extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
-        ModelType model = type.getSelected();
+        ColorModelType model = type.getSelected();
 
         int cx = (int) (width * center.getRelativeX());
         int cy = (int) (height * center.getRelativeY());
@@ -104,7 +102,7 @@ public class ColorWheel extends ParametrizedFilter {
 
     private static void calculateLine(int[] destData, int width, int y,
                                       int cx, int cy, float hueShift,
-                                      float saturation, float brightness, ModelType model) {
+                                      float saturation, float brightness, ColorModelType model) {
         for (int x = 0; x < width; x++) {
             int yDiff = cy - y;
             int xDiff = x - cx;
