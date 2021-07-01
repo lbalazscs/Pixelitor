@@ -63,7 +63,7 @@ public class ColorWheel extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate", 0);
     private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
-    private final RangeParam satParam = new RangeParam("Saturation/Lightness (%)", 0, 90, 100);
+    private final RangeParam satParam = new RangeParam("Saturation (%)", 0, 90, 100);
 
     public ColorWheel() {
         super(false);
