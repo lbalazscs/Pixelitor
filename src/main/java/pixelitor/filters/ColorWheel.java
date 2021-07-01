@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
 public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
 
-    public enum ColorModelType {
+    public enum ColorSpaceType {
         HSB {
             @Override
             int toRGB(float a, float b, float c) {
@@ -57,7 +57,7 @@ public class ColorWheel extends ParametrizedFilter {
         abstract int toRGB(float a, float b, float c);
     }
 
-    private final EnumParam<ColorModelType> type = new EnumParam<>("Color Model", ColorModelType.class);
+    private final EnumParam<ColorSpaceType> type = new EnumParam<>("Color Space", ColorSpaceType.class);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam hueShiftParam = new AngleParam("Rotate", 0);
     private final RangeParam brgLumParam = new RangeParam("Brightness (%)", 0, 75, 100);
@@ -76,7 +76,7 @@ public class ColorWheel extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
 
-        ColorModelType model = type.getSelected();
+        ColorSpaceType space = type.getSelected();
 
         int cx = (int) (width * center.getRelativeX());
         int cy = (int) (height * center.getRelativeY());
@@ -91,7 +91,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(
-                    destData, width, finalY, cx, cy, hueShift, sat, brgLum, model);
+                    destData, width, finalY, cx, cy, hueShift, sat, brgLum, space);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
@@ -102,7 +102,7 @@ public class ColorWheel extends ParametrizedFilter {
 
     private static void calculateLine(int[] destData, int width, int y,
                                       int cx, int cy, float hueShift,
-                                      float saturation, float brightness, ColorModelType model) {
+                                      float saturation, float brightness, ColorSpaceType model) {
         for (int x = 0; x < width; x++) {
             int yDiff = cy - y;
             int xDiff = x - cx;
