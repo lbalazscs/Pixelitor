@@ -63,10 +63,7 @@ import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.FadeAction;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.file.LayerAnimExport;
-import pixelitor.menus.file.MetaDataPanel;
-import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.menus.file.ScreenCaptureAction;
+import pixelitor.menus.file.*;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
 import pixelitor.menus.view.*;
@@ -207,6 +204,8 @@ public class MenuBar extends JMenuBar {
         fileMenu.add(CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
+
+        fileMenu.add(new PrintAction(), CTRL_P);
 
         fileMenu.add(createAutomateSubmenu(pw, texts));
 

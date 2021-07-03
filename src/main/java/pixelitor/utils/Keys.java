@@ -48,6 +48,7 @@ public class Keys {
     public static final KeyStroke CTRL_M = getKeyStroke('M', CTRL);
     public static final KeyStroke CTRL_N = getKeyStroke('N', CTRL);
     public static final KeyStroke CTRL_O = getKeyStroke('O', CTRL);
+    public static final KeyStroke CTRL_P = getKeyStroke('P', CTRL);
     public static final KeyStroke CTRL_R = getKeyStroke('R', CTRL);
     public static final KeyStroke CTRL_S = getKeyStroke('S', CTRL);
     public static final KeyStroke CTRL_T = getKeyStroke('T', CTRL);

@@ -44,6 +44,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.awt.print.PageFormat;
+import java.awt.print.Paper;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -398,5 +400,24 @@ public class Debug {
         String text = node.toDetailedString();
         String title = "Internal State";
         GUIUtils.showCopyTextToClipboardDialog(form, text, title);
+    }
+
+    public static String pageFormatAsString(PageFormat pageFormat) {
+        int orientation = pageFormat.getOrientation();
+        String orientationString = switch (orientation) {
+            case PageFormat.LANDSCAPE -> "Landscape";
+            case PageFormat.PORTRAIT -> "Portrait";
+            case PageFormat.REVERSE_LANDSCAPE -> "Reverse Landscape";
+            default -> "Unexpected orientation " + orientation;
+        };
+        String paperString = paperAsString(pageFormat.getPaper());
+        return "PageFormat[" + orientationString + ", " + paperString + "]";
+    }
+
+    public static String paperAsString(Paper paper) {
+        return String.format("Paper[%.1fx%.1f, area = %.0f, %.0f, %.0f, %.0f]",
+            paper.getWidth(), paper.getHeight(),
+            paper.getImageableX(), paper.getImageableY(),
+            paper.getImageableWidth(), paper.getImageableHeight());
     }
 }
