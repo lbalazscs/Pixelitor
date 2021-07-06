@@ -303,19 +303,13 @@ public class ShapesTool extends DragTool {
 
         assert state == INITIAL_DRAG : "state = " + state;
 
-        drag.setStartFromCenter(e.isAltDown());
-        drag.setEquallySized(e.isShiftDown());
-
-        var comp = e.getComp();
-
-        assert styledShape != null;
-        styledShape.updateFromDrag(drag);
+        updateStyledShapeFromDrag(e);
 
         // This will trigger paintOverActiveLayer,
         // therefore the continuous drawing of the shape.
         // It repaints the whole image because
         // some shapes extend beyond their drag rectangle.
-        comp.update(REPAINT);
+        e.getComp().update(REPAINT);
     }
 
     @Override
@@ -340,10 +334,7 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        drag.setStartFromCenter(e.isAltDown());
-        drag.setEquallySized(e.isShiftDown());
-
-        var comp = e.getComp();
+        updateStyledShapeFromDrag(e);
 
         transformBox = styledShape.createBox(drag, e.getView());
         if (transformBox == null) {
@@ -357,9 +348,15 @@ public class ShapesTool extends DragTool {
 
         e.getView().repaint();
         setState(TRANSFORM);
-        History.add(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
+        History.add(new CreateBoxedShapeEdit(e.getComp(), styledShape, transformBox));
 
         invalidateStroke();
+    }
+
+    private void updateStyledShapeFromDrag(PMouseEvent e) {
+        drag.setStartFromCenter(e.isAltDown());
+        drag.setEquallySized(e.isShiftDown());
+        styledShape.updateFromDrag(drag);
     }
 
     @Override

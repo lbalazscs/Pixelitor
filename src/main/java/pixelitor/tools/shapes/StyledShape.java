@@ -338,7 +338,6 @@ public class StyledShape implements Cloneable, Transformable {
             drag.getStartY() - halfImHeight,
             drag.getStartX() + imDragDist,
             drag.getStartY() + halfImHeight);
-//            transformedImDrag = origImDrag;
 
         // create the horizontal box
         double coDist = drag.calcCoDist();
