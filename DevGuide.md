@@ -1,11 +1,17 @@
+# Developer Guide
+
+This work-in-progress document contains information that could be useful for Pixelitor contributors.
+
 # Understanding Buffered Images
 
-[```BufferedImage```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/BufferedImage.html) consists of a [```Raster```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/Raster.html) and a [```ColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/ColorModel.html).   
+There are many good online tutorials for Swing and for the Java 2D API, but there isn't much about the internals of BufferedImage, therefore I wrote the following overview.
+
+A [```BufferedImage```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/BufferedImage.html) consists of a [```Raster```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/Raster.html) and a [```ColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/ColorModel.html).   
 The ```Raster``` contains the pixels, and the ```ColorModel``` knows how to interpret the pixels as colors (more exactly ```ColorModel``` interprets the pixels as color components, and its [```ColorSpace```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/color/ColorSpace.html) interprets the color components as actual colors).
 
 ## Color Models
 
-It's important to understand that the pixel values in a ```Raster``` are not necessarily colors, indexed-color images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
+It's important to understand that the pixel values in a ```Raster``` are not necessarily colors, [indexed-color](https://en.wikipedia.org/wiki/Indexed_color) images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
 
 [```PackedColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/PackedColorModel.html) means that the colors are packed inside the pixel values. "Packed" always means that multiple values are packed into a larger Java primitive, and they can be retrieved by bit-shifting. For example four 8-bit values could be packed in a single 32-bit int in ARGB order, and they could be retrieved like this:
 
@@ -31,7 +37,7 @@ A ```DataBuffer``` stores the image data at the lowest level, as Java arrays. Th
 
 ### Sample Models
 
-Each pixel consists of a number of samples, which (together with the color model and its color space) will determine the color of the pixels. ```SampleModel``` knows how to get pixel samples from a data buffer's array(s). Sample models are about converting raw Java arrays to pixel data, which may or may not be the same as the color data (depending on the color model). 
+Each pixel consists of a number of samples, which (together with the color model and its color space) will determine the color of the pixels. ```SampleModel``` knows how to get pixel samples from a data buffer's array(s). Sample models are about converting raw Java arrays to pixel data, which may or may not be the same as the color data (depending on the color model).
 
 A common sample model is [```SinglePixelPackedSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/SinglePixelPackedSampleModel.html), which says that every pixel value is packed in an array element. ```SinglePixelPackedSampleModel``` works well with ```PackedColorModel```.
 

@@ -777,6 +777,8 @@ public class Composition implements Serializable {
         changeLayerOrder(oldIndex, newIndex, false, null);
     }
 
+    // Called when the layer order is changed by an action.
+    // The GUI has to be updated.
     public void changeLayerOrder(int oldIndex, int newIndex,
                                  boolean addToHistory, String editName) {
         if (newIndex < 0) {
@@ -800,6 +802,19 @@ public class Composition implements Serializable {
         if (addToHistory) {
             History.add(new LayerOrderChangeEdit(editName, this, oldIndex, newIndex));
         }
+    }
+
+    // Called when the layer order is changed by drag-reordering in the GUI.
+    // The GUI doesn't have to be updated.
+    public void changeLayerIndex(Layer layer, int newIndex) {
+        int oldIndex = layerList.indexOf(layer);
+
+        layerList.remove(layer);
+        layerList.add(newIndex, layer);
+        update();
+
+        History.add(new LayerOrderChangeEdit(
+            "Layer Reordering", this, oldIndex, newIndex));
     }
 
     public void raiseLayerSelection() {
@@ -1241,12 +1256,6 @@ public class Composition implements Serializable {
         }
 
         enlargeCanvas.process(this);
-    }
-
-    public void changeStackIndex(Layer layer, int newIndex) {
-        layerList.remove(layer);
-        layerList.add(newIndex, layer);
-        update();
     }
 
     // called from assertions and unit tests

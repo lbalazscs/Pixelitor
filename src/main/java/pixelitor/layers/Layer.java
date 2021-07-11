@@ -608,7 +608,7 @@ public abstract class Layer implements Serializable {
                               boolean allowGrowing);
 
     public void changeStackIndex(int newIndex) {
-        comp.changeStackIndex(this, newIndex);
+        comp.changeLayerIndex(this, newIndex);
     }
 
     /**

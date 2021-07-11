@@ -43,7 +43,7 @@ public interface Drawable {
 
     void stopPreviewing();
 
-    void changePreviewImage(BufferedImage img, String filterName, FilterContext context);
+    void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
 
     void onFilterDialogAccepted(String filterName);
 

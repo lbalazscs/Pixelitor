@@ -397,8 +397,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    private void setPreviewWithSelection(BufferedImage newImage) {
-        previewImage = replaceSelectedRegion(previewImage, newImage, false);
+    private void setPreviewWithSelection(BufferedImage newPreview) {
+        previewImage = replaceSelectedRegion(previewImage, newPreview, false);
 
         setState(PREVIEW);
         imageRefChanged();
@@ -437,14 +437,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g.dispose();
             return src;
         } else if (selection.isRectangular()) {
-            // rectangular selection, simple clipping is good,
-            // because there are no aliasing problems
+            // rectangular selection, simple selection shape clipping
+            // is enough, because there are no aliasing problems
             Graphics2D g = src.createGraphics();
             g.translate(-getTx(), -getTy());
+
+            // transparency comes from the new image
             g.setComposite(AlphaComposite.Src);
             Shape shape = selection.getShape();
             g.setClip(shape);
-            // add 1 for consistency with other code
             Rectangle bounds = selection.getShapeBounds();
             g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
@@ -458,6 +459,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g2.dispose();
 
             Graphics2D srcG = src.createGraphics();
+//            srcG.setComposite(AlphaComposite.Src);
             srcG.drawImage(tmpImg, bounds.x - getTx(), bounds.y - getTy(), null);
             srcG.dispose();
 
@@ -522,7 +524,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // from the real image after the previews
         imageRefChanged();
 
-        previewImage = null;
         comp.update();
     }
 
@@ -532,10 +533,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            var edit = new ImageEdit(filterName, comp, this,
-                getSelectedSubImage(true),
-                false);
-            History.add(edit);
+            History.add(new ImageEdit(filterName, comp, this,
+                getSelectedSubImage(true), false));
         }
 
         image = previewImage;
@@ -545,8 +544,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             updateIconImage();
             invalidateTrimCache();
         }
-
-        previewImage = null;
 
         boolean wasShowOriginal = state == SHOW_ORIGINAL;
         setState(NORMAL);
@@ -574,7 +571,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void changePreviewImage(BufferedImage img, String filterName, FilterContext context) {
+    public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
@@ -587,9 +584,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null :
             format("previewImage was null with %s, context = %s, class = %s",
                 filterName, context, getClass().getSimpleName());
-        assert img != null;
+        assert newPreview != null;
 
-        if (img == image) {
+        if (newPreview == image) {
             // this can happen if a filter with preview decides that no
             // change is necessary and returns the src
 
@@ -608,7 +605,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         } else {
             imageContentChanged = true; // history will be necessary
 
-            setPreviewWithSelection(img);
+            setPreviewWithSelection(newPreview);
         }
     }
 
@@ -1155,7 +1152,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    // called when the image variable points to a new reference
+    // called when the visible image's variable
+    // points to a new reference
     protected void imageRefChanged() {
         // empty here, but overridden in LayerMask
         // to update the transparency image
@@ -1173,9 +1171,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * to the transparency of the layer
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
-        // the image reference will not be replaced
         BufferedImage oldImage = copyImage(image);
-
         LayerMask oldMask = mask;
         MaskViewMode oldMode = comp.getView().getMaskViewMode();
 

@@ -1150,7 +1150,8 @@ public class ImageUtils {
      * (anti-aliased) selection clipping, following ideas from
      * https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
      */
-    public static Graphics2D setupForSoftSelection(Image image, Shape selShape, int selStartX, int selStartY) {
+    public static Graphics2D setupForSoftSelection(Image image, Shape selShape,
+                                                   int selStartX, int selStartY) {
         Graphics2D tmpG = (Graphics2D) image.getGraphics();
 
         // fill with transparent pixels
