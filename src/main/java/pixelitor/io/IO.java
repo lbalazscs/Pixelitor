@@ -17,6 +17,7 @@
 
 package pixelitor.io;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
@@ -25,15 +26,15 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
+import static pixelitor.io.FileChoosers.svgFilter;
 import static pixelitor.utils.Threads.*;
 
 /**
@@ -111,7 +113,8 @@ public class IO {
             Messages.showError("Error", msg);
         } else {
             String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
-            boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error", options, 0, JOptionPane.ERROR_MESSAGE);
+            boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error",
+                options, 0, JOptionPane.ERROR_MESSAGE);
             if (doMagick) {
                 ImageMagick.importComposition(de.getFile(), false);
             }
@@ -196,8 +199,8 @@ public class IO {
             openFileAsync(file, false);
         }
         if (!found) {
-            String msg = format("<html>No supported image files found in <b>%s</b>.", dir.getName());
-            Messages.showInfo("No files found", msg);
+            Messages.showInfo("No files found",
+                format("<html>No supported image files found in <b>%s</b>.", dir.getName()));
         }
     }
 
@@ -296,5 +299,29 @@ public class IO {
         }
 
         comp.saveAsync(settings, true);
+    }
+
+    public static void saveSVG(Path2D path) {
+        File file = FileChoosers.selectSaveFileForSpecificFormat(svgFilter);
+        String svgPath = Shapes.toSVGPath(path);
+
+        String svgFillRule = switch (path.getWindingRule()) {
+            case Path2D.WIND_EVEN_ODD -> "evenodd";
+            case Path2D.WIND_NON_ZERO -> "nonzero";
+            default -> throw new IllegalStateException("Error: " + path.getWindingRule());
+        };
+
+        Canvas canvas = OpenImages.getActiveComp().getCanvas();
+        String svg = """
+            <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+              <path d="%s" fill="none" stroke="black" fill-rule="%s"/>
+            </svg>
+            """.formatted(canvas.getWidth(), canvas.getHeight(), svgPath, svgFillRule);
+
+        try (PrintWriter out = new PrintWriter(file)) {
+            out.println(svg);
+        } catch (FileNotFoundException e) {
+            Messages.showException(e);
+        }
     }
 }

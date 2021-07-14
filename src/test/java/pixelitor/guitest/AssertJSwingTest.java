@@ -2192,17 +2192,17 @@ public class AssertJSwingTest {
         EDT.assertActiveToolIs(Tools.PEN);
         assertThat(EDT.getPenToolPath()).isNotNull();
 
-        findButtonByText(pw, "Stroke with Current Smudge")
+        pw.button("traceWithSmudge")
             .requireEnabled()
             .click();
         keyboard.undoRedo("Smudge");
 
-        findButtonByText(pw, "Stroke with Current Eraser")
+        pw.button("traceWithEraser")
             .requireEnabled()
             .click();
         keyboard.undoRedo("Eraser");
 
-        findButtonByText(pw, "Stroke with Current Brush")
+        pw.button("traceWithBrush")
             .requireEnabled()
             .click();
         keyboard.undoRedo(GUIText.BRUSH);
@@ -2219,7 +2219,7 @@ public class AssertJSwingTest {
         mouse.moveToScreen(rot.x, rot.y);
         mouse.dragToScreen(rot.x + 100, rot.y + 100);
 
-        findButtonByText(pw, "Stroke with Current Brush")
+        pw.button("traceWithBrush")
             .requireEnabled()
             .click();
     }

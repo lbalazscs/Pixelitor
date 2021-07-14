@@ -382,7 +382,7 @@ public class WorkflowTest {
         app.clickTool(Tools.PEN);
         pw.button("toSelectionButton").requireEnabled();
 
-        findButtonByText(pw, "Stroke with Current Brush")
+        pw.button("traceWithBrush")
             .requireEnabled()
             .click();
         keyboard.undoRedo(GUIText.BRUSH);

@@ -30,6 +30,7 @@ import java.util.List;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.geom.PathIterator.*;
+import static java.lang.String.format;
 
 /**
  * Static shape-related utility methods
@@ -245,6 +246,29 @@ public class Shapes {
             (p1.getX() + p2.getX()) / 2.0,
             (p1.getY() + p2.getY()) / 2.0
         );
+    }
+
+    public static String toSVGPath(Shape shape) {
+        StringBuilder sb = new StringBuilder();
+        PathIterator pathIterator = shape.getPathIterator(null);
+        double[] coords = new double[6];
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
+            sb.append(switch (type) {
+                case SEG_MOVETO -> format("M %.2f,%.2f ",
+                    coords[0], coords[1]);
+                case SEG_LINETO -> format("L %.2f,%.2f ",
+                    coords[0], coords[1]);
+                case SEG_QUADTO -> format("Q %.2f,%.2f,%.2f,%.2f ",
+                    coords[0], coords[1], coords[2], coords[3]);
+                case SEG_CUBICTO -> format("C %.2f,%.2f,%.2f,%.2f,%.2f,%.2f ",
+                    coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                case SEG_CLOSE -> "Z";
+                default -> throw new IllegalArgumentException("type = " + type);
+            });
+            pathIterator.next();
+        }
+        return sb.toString();
     }
 
     public static void debugPathIterator(Shape shape) {

@@ -33,6 +33,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -145,7 +146,7 @@ public class Path implements Serializable {
         return null;
     }
 
-    public Shape toImageSpaceShape() {
+    public Path2D toImageSpaceShape() {
         GeneralPath path = new GeneralPath();
         for (SubPath sp : subPaths) {
             sp.addToImageSpaceShape(path);

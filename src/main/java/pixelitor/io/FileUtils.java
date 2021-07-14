@@ -34,6 +34,10 @@ public class FileUtils {
     private static final Set<String> SUPPORTED_SAVE_EXTENSIONS =
         extensionSet(FileChoosers.SAVE_FILTERS);
 
+    // export-only formats that aren't offered when using save
+    private static final Set<String> SUPPORTED_EXPORT_EXTENSIONS =
+        Set.of("svg");
+
     private FileUtils() {
     }
 
@@ -98,8 +102,18 @@ public class FileUtils {
     public static boolean hasSupportedOutputExt(String fileName) {
         return findExtension(fileName)
             .map(String::toLowerCase)
-            .filter(SUPPORTED_SAVE_EXTENSIONS::contains)
+            .filter(FileUtils::isSupportedOutputExt)
             .isPresent();
+    }
+
+    private static boolean isSupportedOutputExt(String extension) {
+        if (SUPPORTED_SAVE_EXTENSIONS.contains(extension)) {
+            return true;
+        }
+        if (SUPPORTED_EXPORT_EXTENSIONS.contains(extension)) {
+            return true;
+        }
+        return false;
     }
 
     public static String replaceExt(String fileName, String newExt) {
