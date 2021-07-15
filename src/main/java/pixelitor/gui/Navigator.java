@@ -34,6 +34,7 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 /**
  * The navigator component that allows the user to pan a zoomed-in image.
@@ -58,6 +59,8 @@ public class Navigator extends JComponent
     private Point origRectLoc; // the view box rectangle location before starting the drag
     private Rectangle viewBoxRect;
     private static Color viewBoxColor = Color.RED;
+    private Rectangle viewRatioRect;
+    private static Color viewRatioColor = Color.YELLOW;
     private boolean dragging = false;
     private boolean draggingInside = false;
 
@@ -271,6 +274,7 @@ public class Navigator extends JComponent
         int boxHeight = (int) (viewRect.height * scaleY);
 
         viewBoxRect = new Rectangle(boxX, boxY, boxWidth, boxHeight);
+        viewRatioRect = new Rectangle(boxX, boxY, boxWidth, boxHeight);
         repaint();
     }
 
@@ -287,19 +291,6 @@ public class Navigator extends JComponent
         view.scrollRectToVisible(new Rectangle(x, y, width, height));
     }
 
-    // scrolls the main composition view based on the view box position and size
-    private void scrollViewFromViewBox() {
-        double scaleX = (double) view.getWidth() / thumbWidth;
-        double scaleY = (double) view.getHeight() / thumbHeight;
-
-        int x = (int) (viewBoxRect.x * scaleX);
-        int y = (int) (viewBoxRect.y * scaleY);
-        int width = (int) (viewBoxRect.width * scaleX);
-        int height = (int) (viewBoxRect.height * scaleY);
-
-        view.zoomToRect(PRectangle.fromCo(new Rectangle(x, y, width, height), view));
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         if (view == null) {
@@ -313,13 +304,17 @@ public class Navigator extends JComponent
         var origTransform = g2.getTransform();
 
         g2.scale(imgScalingRatio, imgScalingRatio);
-        g2.drawImage(view.getComp().getCompositeImage(), 0, 0, null);
+        BufferedImage compositeImage = view.getComp().getCompositeImage();
+        g2.drawImage(compositeImage, 0, 0, null);
         g2.setTransform(origTransform);
 
         g2.setStroke(VIEW_BOX_STROKE);
+        g2.setColor(viewRatioColor);
+        g2.draw(viewRatioRect);
         g2.setColor(viewBoxColor);
         g2.draw(viewBoxRect);
     }
+
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -345,6 +340,29 @@ public class Navigator extends JComponent
         if (e.isPopupTrigger()) {
             showPopup(e);
         }
+
+        if (!draggingInside) {
+
+            Point mouseNow = e.getPoint();
+
+            // initial point will always be in viewbox, else that will be an impossible drag star.
+
+            // making sure the drag wont exceed the available space.
+            if (mouseNow.x > thumbWidth) {
+                mouseNow.x = thumbWidth;
+            }
+            if (mouseNow.y > thumbHeight) {
+                mouseNow.y = thumbHeight;
+            }
+
+            int x = Math.min(dragStartPoint.x, mouseNow.x);
+            int y = Math.min(dragStartPoint.y, mouseNow.y);
+            int w = Math.max(dragStartPoint.x, mouseNow.x) - x;
+            int h = Math.max(dragStartPoint.y, mouseNow.y) - y;
+
+            zoomFrom(viewRatioRect);
+        }
+
         dragStartPoint = null;
         dragging = false;
     }
@@ -396,9 +414,28 @@ public class Navigator extends JComponent
                 int w = Math.max(dragStartPoint.x, mouseNow.x) - x;
                 int h = Math.max(dragStartPoint.y, mouseNow.y) - y;
 
-                updateViewBoxAndZoom(x, y, w, h);
+                updateRatioViewBox(dragStartPoint.x, dragStartPoint.y, mouseNow.x, mouseNow.y);
+                updateViewBox(x, y, w, h);
             }
         }
+    }
+
+    private void updateViewBox(int newBoxX, int newBoxY, int newWidth, int newHeight) {
+        if (newBoxX != viewBoxRect.x || newBoxY != viewBoxRect.y || newWidth != viewBoxRect.width || newHeight != viewBoxRect.height) {
+            viewBoxRect.setBounds(newBoxX, newBoxY, newWidth, newHeight);
+            repaint();
+        }
+    }
+
+    private void updateRatioViewBox(int xi, int yi, int xn, int yn) {
+
+        int h = Math.abs(yn - yi);
+        int w = (int) (view.getVisiblePart().width * 1d * h / view.getVisiblePart().height);
+
+        if (xn < xi) xi -= w;
+        if (yn < yi) yi -= h;
+
+        viewRatioRect.setBounds(xi, yi, w, h);
     }
 
     private void updateViewBoxLocation(int newBoxX, int newBoxY) {
@@ -409,10 +446,18 @@ public class Navigator extends JComponent
         }
     }
 
-    private void updateViewBoxAndZoom(int x, int y, int width, int height) {
-        viewBoxRect.setBounds(x, y, width, height);
+    private void zoomFrom(Rectangle rect) {
+        viewBoxRect.setBounds(rect);
         repaint();
-        scrollViewFromViewBox();
+
+        double scaleX = (double) view.getWidth() / thumbWidth;
+
+        int x = (int) (viewBoxRect.x * scaleX);
+        int y = (int) (viewBoxRect.y * scaleX);
+        int width = (int) (viewBoxRect.width * scaleX);
+        int height = (int) (viewBoxRect.height * scaleX);
+
+        view.zoomToRect(PRectangle.fromCo(new Rectangle(x, y, width, height), view));
     }
 
     private void recalculateScaling(View view, int width, int height) {
