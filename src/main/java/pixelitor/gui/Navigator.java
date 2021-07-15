@@ -26,6 +26,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ViewActivationListener;
@@ -38,12 +39,12 @@ import java.awt.event.*;
  * The navigator component that allows the user to pan a zoomed-in image.
  */
 public class Navigator extends JComponent
-    implements MouseListener, MouseMotionListener, ViewActivationListener {
+        implements MouseListener, MouseMotionListener, ViewActivationListener {
 
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter
-        = ImageUtils.createCheckerboardPainter();
+            = ImageUtils.createCheckerboardPainter();
 
     // The navigated active view.
     // Null if all images are closed.
@@ -58,6 +59,7 @@ public class Navigator extends JComponent
     private Rectangle viewBoxRect;
     private static Color viewBoxColor = Color.RED;
     private boolean dragging = false;
+    private boolean draggingInside = false;
 
     private int preferredWidth;
     private int preferredHeight;
@@ -78,7 +80,7 @@ public class Navigator extends JComponent
 
     private Navigator(View view) {
         adjListener = e ->
-            SwingUtilities.invokeLater(this::updateViewBoxPosition);
+                SwingUtilities.invokeLater(this::updateViewBoxPosition);
 
         recalculateSize(view, true, true, true);
 
@@ -109,8 +111,8 @@ public class Navigator extends JComponent
             @Override
             public void onClick() {
                 Colors.selectColorWithDialog(Navigator.this,
-                    "View Box Color", viewBoxColor, true,
-                    Navigator.this::setNewViewBoxColor);
+                        "View Box Color", viewBoxColor, true,
+                        Navigator.this::setNewViewBoxColor);
             }
         });
     }
@@ -168,13 +170,13 @@ public class Navigator extends JComponent
         navigatorPanel = new Navigator(view);
 
         dialog = new DialogBuilder()
-            .title("Navigator")
-            .content(navigatorPanel)
-            .notModal()
-            .noOKButton()
-            .noCancelButton()
-            .cancelAction(navigatorPanel::dispose) // when it is closed with X
-            .show();
+                .title("Navigator")
+                .content(navigatorPanel)
+                .notModal()
+                .noOKButton()
+                .noCancelButton()
+                .cancelAction(navigatorPanel::dispose) // when it is closed with X
+                .show();
     }
 
     public static void setMouseZoomMethod(MouseZoomMethod newZoomMethod) {
@@ -272,7 +274,7 @@ public class Navigator extends JComponent
         repaint();
     }
 
-    // scrolls the main composition view based on the view box position
+    // scrolls the main composition view based on the view box position and thumb size
     private void scrollView() {
         double scaleX = (double) viewWidth / thumbWidth;
         double scaleY = (double) viewHeight / thumbHeight;
@@ -283,6 +285,19 @@ public class Navigator extends JComponent
         int height = (int) (viewBoxRect.height * scaleY);
 
         view.scrollRectToVisible(new Rectangle(x, y, width, height));
+    }
+
+    // scrolls the main composition view based on the view box position and size
+    private void scrollViewFromViewBox() {
+        double scaleX = (double) view.getWidth() / thumbWidth;
+        double scaleY = (double) view.getHeight() / thumbHeight;
+
+        int x = (int) (viewBoxRect.x * scaleX);
+        int y = (int) (viewBoxRect.y * scaleY);
+        int width = (int) (viewBoxRect.width * scaleX);
+        int height = (int) (viewBoxRect.height * scaleY);
+
+        view.zoomToRect(PRectangle.fromCo(new Rectangle(x, y, width, height), view));
     }
 
     @Override
@@ -312,9 +327,13 @@ public class Navigator extends JComponent
             showPopup(e);
         } else {
             Point point = e.getPoint();
-            if (viewBoxRect.contains(point) && view != null) {
+            if (view != null) {
                 dragStartPoint = point;
                 origRectLoc = viewBoxRect.getLocation();
+                if (viewBoxRect.contains(point)) {
+                    draggingInside = true; // TODO: = isCtrlPressed;
+
+                } else draggingInside = false;
                 dragging = true;
             }
         }
@@ -341,21 +360,43 @@ public class Navigator extends JComponent
             int newBoxX = origRectLoc.x + dx;
             int newBoxY = origRectLoc.y + dy;
 
-            // make sure that the view box does not leave the thumb
-            if (newBoxX < 0) {
-                newBoxX = 0;
-            }
-            if (newBoxY < 0) {
-                newBoxY = 0;
-            }
-            if (newBoxX + viewBoxRect.width > thumbWidth) {
-                newBoxX = thumbWidth - viewBoxRect.width;
-            }
-            if (newBoxY + viewBoxRect.height > thumbHeight) {
-                newBoxY = thumbHeight - viewBoxRect.height;
-            }
+            if (draggingInside) {
 
-            updateViewBoxLocation(newBoxX, newBoxY);
+                // make sure that the view box does not leave the thumb
+                if (newBoxX < 0) {
+                    newBoxX = 0;
+                }
+                if (newBoxY < 0) {
+                    newBoxY = 0;
+                }
+                if (newBoxX + viewBoxRect.width > thumbWidth) {
+                    newBoxX = thumbWidth - viewBoxRect.width;
+                }
+                if (newBoxY + viewBoxRect.height > thumbHeight) {
+                    newBoxY = thumbHeight - viewBoxRect.height;
+                }
+
+                updateViewBoxLocation(newBoxX, newBoxY);
+
+            } else {
+
+                // initial point will always be in viewbox, else that will be an impossible drag star.
+
+                // making sure the drag wont exceed the available space.
+                if (mouseNow.x > thumbWidth) {
+                    mouseNow.x = thumbWidth;
+                }
+                if (mouseNow.y > thumbHeight) {
+                    mouseNow.y = thumbHeight;
+                }
+
+                int x = Math.min(dragStartPoint.x, mouseNow.x);
+                int y = Math.min(dragStartPoint.y, mouseNow.y);
+                int w = Math.max(dragStartPoint.x, mouseNow.x) - x;
+                int h = Math.max(dragStartPoint.y, mouseNow.y) - y;
+
+                updateViewBoxAndZoom(x, y, w, h);
+            }
         }
     }
 
@@ -365,6 +406,12 @@ public class Navigator extends JComponent
             repaint();
             scrollView();
         }
+    }
+
+    private void updateViewBoxAndZoom(int x, int y, int width, int height) {
+        viewBoxRect.setBounds(x, y, width, height);
+        repaint();
+        scrollViewFromViewBox();
     }
 
     private void recalculateScaling(View view, int width, int height) {
