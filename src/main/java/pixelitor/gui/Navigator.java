@@ -330,10 +330,11 @@ public class Navigator extends JComponent
             if (view != null) {
                 dragStartPoint = point;
                 origRectLoc = viewBoxRect.getLocation();
-                if (viewBoxRect.contains(point)) {
-                    draggingInside = true; // TODO: = isCtrlPressed;
 
+                if (viewBoxRect.contains(point)) {
+                    draggingInside = !e.isControlDown();
                 } else draggingInside = false;
+
                 dragging = true;
             }
         }
