@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
+import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
@@ -32,6 +33,7 @@ import pixelitor.utils.Utils;
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -301,22 +303,31 @@ public class IO {
         comp.saveAsync(settings, true);
     }
 
-    public static void saveSVG(Path2D path) {
+    public static void saveSVG(Shape shape, StrokeSettings strokeSettings) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(svgFilter);
-        String svgPath = Shapes.toSVGPath(path);
+        String svgPath = Shapes.toSVGPath(shape);
 
-        String svgFillRule = switch (path.getWindingRule()) {
-            case Path2D.WIND_EVEN_ODD -> "evenodd";
-            case Path2D.WIND_NON_ZERO -> "nonzero";
-            default -> throw new IllegalStateException("Error: " + path.getWindingRule());
-        };
+        String svgFillRule = "nonzero";
+        if (shape instanceof Path2D path) {
+            svgFillRule = switch (path.getWindingRule()) {
+                case Path2D.WIND_EVEN_ODD -> "evenodd";
+                case Path2D.WIND_NON_ZERO -> "nonzero";
+                default -> throw new IllegalStateException("Error: " + path.getWindingRule());
+            };
+        }
+
+        String strokeDescr = "";
+        if (strokeSettings != null) {
+            strokeDescr = strokeSettings.toSVGString();
+        }
 
         Canvas canvas = OpenImages.getActiveComp().getCanvas();
         String svg = """
             <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
-              <path d="%s" fill="none" stroke="black" fill-rule="%s"/>
+              <path d="%s" fill="none" stroke="black" fill-rule="%s" %s/>
             </svg>
-            """.formatted(canvas.getWidth(), canvas.getHeight(), svgPath, svgFillRule);
+            """.formatted(canvas.getWidth(), canvas.getHeight(),
+                    svgPath, svgFillRule, strokeDescr);
 
         try (PrintWriter out = new PrintWriter(file)) {
             out.println(svg);

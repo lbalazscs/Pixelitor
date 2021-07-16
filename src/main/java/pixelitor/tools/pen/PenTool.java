@@ -269,7 +269,7 @@ public class PenTool extends Tool {
     }
 
     private void exportSVG() {
-        IO.saveSVG(path.toImageSpaceShape());
+        IO.saveSVG(path.toImageSpaceShape(), null);
     }
 
     @Override

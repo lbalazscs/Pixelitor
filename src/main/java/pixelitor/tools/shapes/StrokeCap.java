@@ -57,4 +57,8 @@ public enum StrokeCap {
     public String toString() {
         return guiName;
     }
+
+    public String toSVG() {
+        return "stroke-linecap=\"" + guiName.toLowerCase() + "\"";
+    }
 }

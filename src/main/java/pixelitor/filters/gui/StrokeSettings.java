@@ -23,6 +23,8 @@ import pixelitor.tools.shapes.StrokeCap;
 import pixelitor.tools.shapes.StrokeJoin;
 import pixelitor.tools.shapes.StrokeType;
 
+import static java.lang.String.format;
+
 /**
  * Represents the configuration of a stroke.
  * It also functions as the {@link ParamState} of {@link StrokeParam}
@@ -41,5 +43,14 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
     @Override
     public String toSaveString() {
         throw new UnsupportedOperationException();
+    }
+
+    public String toSVGString() {
+        String svg = format("stroke-width=\"%.2f\" %s %s",
+            width, cap.toSVG(), join.toSVG());
+        if (dashed) {
+            svg += format(" stroke-dasharray=\"%.2f %.2f\"", 2 * width, 2 * width);
+        }
+        return svg;
     }
 }

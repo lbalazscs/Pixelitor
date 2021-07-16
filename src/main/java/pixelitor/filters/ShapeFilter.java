@@ -25,10 +25,12 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.GUIText;
+import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -78,6 +80,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
+    private transient Shape exportedShape;
+
     protected ShapeFilter() {
         super(false);
 
@@ -88,7 +92,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             new DialogParam("Transform", center, rotate, scale),
             strokeParam,
             effectsParam
-        );
+        ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
+            "Export the current shape to an SVG file"));
 
         // disable foreground and background if watermarking is selected
         waterMark.setupDisableOtherIfChecked(foreground);
@@ -120,59 +125,61 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape = createShape(srcWidth, srcHeight);
-        if (shape != null) {
-            double scaleX = scale.getValueAsPercentage(0);
-            double scaleY = scale.getValueAsPercentage(1);
-            boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
+        double scaleX = scale.getValueAsPercentage(0);
+        double scaleY = scale.getValueAsPercentage(1);
+        boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
 
-            float relX = center.getRelativeX();
-            float relY = center.getRelativeY();
-            boolean hasTranslation = relX != 0.5f || relY != 0.5f;
+        float relX = center.getRelativeX();
+        float relY = center.getRelativeY();
+        boolean hasTranslation = relX != 0.5f || relY != 0.5f;
 
-            boolean hasRotation = !rotate.isSetToDefault();
+        boolean hasRotation = !rotate.isSetToDefault();
 
-            if (hasTranslation || hasRotation || hasScaling) {
-                double cx = srcWidth * relX;
-                double cy = srcHeight * relY;
+        if (hasTranslation || hasRotation || hasScaling) {
+            double cx = srcWidth * relX;
+            double cy = srcHeight * relY;
 
-                AffineTransform at;
-                if (hasScaling) {
-                    // scale around the center point
-                    at = AffineTransform.getTranslateInstance
-                        (cx - scaleX * cx, cy - scaleY * cy);
-                    at.scale(scaleX, scaleY);
-                } else {
-                    at = new AffineTransform();
-                }
-                if (hasRotation) {
-                    at.rotate(rotate.getValueInRadians(), cx, cy);
-                }
-                if (hasTranslation) {
-                    at.translate(cx - srcWidth / 2.0, cy - srcHeight / 2.0);
-                }
-
-                shape = at.createTransformedShape(shape);
+            AffineTransform at;
+            if (hasScaling) {
+                // scale around the center point
+                at = AffineTransform.getTranslateInstance
+                    (cx - scaleX * cx, cy - scaleY * cy);
+                at.scale(scaleX, scaleY);
+            } else {
+                at = new AffineTransform();
+            }
+            if (hasRotation) {
+                at.rotate(rotate.getValueInRadians(), cx, cy);
+            }
+            if (hasTranslation) {
+                at.translate(cx - srcWidth / 2.0, cy - srcHeight / 2.0);
             }
 
-            AreaEffects effects = effectsParam.getEffects();
-//            if (effects.getInnerGlow() != null) {
+            shape = at.createTransformedShape(shape);
+        }
+
+        // The shape might be further transformed, but it should
+        // be exported in the current state
+        exportedShape = shape;
+
+        AreaEffects effects = effectsParam.getEffects();
+        if (effects.getInnerGlow() != null) {
             // work with the outline so that we can have "inner glow"
             shape = stroke.createStrokedShape(shape);
             g2.fill(shape);
-//            } else {
-//                g2.setStroke(stroke);
-//                g2.draw(shape);
-//            }
+        } else {
+            g2.setStroke(stroke);
+            g2.draw(shape);
+        }
 
-            // If there are effects and the foreground is set to transparent,
-            // then the effects have to be run on a temporary image, because
-            // they also set the composite. Also inner glow is ignored.
-            if (!effects.isEmpty()) {
-                if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
-                    drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
-                } else { // the simple case
-                    effects.drawOn(g2, shape);
-                }
+        // If there are effects and the foreground is set to transparent,
+        // then the effects have to be run on a temporary image, because
+        // they also set the composite. Also inner glow is ignored.
+        if (!effects.isEmpty()) {
+            if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
+                drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
+            } else { // the simple case
+                effects.drawOn(g2, shape);
             }
         }
 
@@ -256,7 +263,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         return (float) Math.sqrt(cx * cx + cy * cy);
     }
 
-    protected abstract Shape createShape(int width, int height);
+    protected abstract Path2D createShape(int width, int height);
 
     @Override
     protected boolean createDefaultDestImg() {
@@ -266,5 +273,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     @Override
     public boolean supportsGray() {
         return !waterMark.isChecked();
+    }
+
+    private void exportSVG() {
+        IO.saveSVG(exportedShape, strokeParam.copyState());
     }
 }
