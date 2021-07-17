@@ -22,15 +22,11 @@ import pixelitor.Composition;
 import pixelitor.FilterContext;
 import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
-import pixelitor.utils.ImageTrimUtil;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.ImageLayerNode;
@@ -784,7 +780,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void rotate(Rotate.SpecialAngle angle) {
+    public void rotate(QuadrantAngle angle) {
         int tx = getTx();
         int ty = getTy();
         int txAbs = -tx;

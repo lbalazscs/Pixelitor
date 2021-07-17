@@ -19,12 +19,12 @@ package pixelitor.guides;
 
 import pixelitor.Canvas;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
+import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
@@ -93,7 +93,7 @@ public class Guides implements Serializable {
         return copy;
     }
 
-    public Guides copyForRotate(Rotate.SpecialAngle angle, View view) {
+    public Guides copyForRotate(QuadrantAngle angle, View view) {
         Guides copy = createCopyGuides();
 
         switch (angle) {

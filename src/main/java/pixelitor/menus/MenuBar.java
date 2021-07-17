@@ -88,7 +88,6 @@ import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.*;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
@@ -96,6 +95,7 @@ import static pixelitor.gui.utils.RestrictedLayerAction.Condition.*;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.utils.Keys.*;
+import static pixelitor.utils.QuadrantAngle.*;
 
 /**
  * The menu bar of the app
@@ -918,6 +918,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
+        sub.addFilter(Truchet.NAME, Truchet::new);
 
         return sub;
     }

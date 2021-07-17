@@ -19,8 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.utils.QuadrantAngle;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -53,7 +53,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public void rotate(Rotate.SpecialAngle angle) {
+    public void rotate(QuadrantAngle angle) {
 
     }
 

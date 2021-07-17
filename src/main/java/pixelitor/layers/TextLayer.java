@@ -23,7 +23,6 @@ import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.FilterState;
@@ -37,6 +36,7 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
+import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.LayerNode;
 import pixelitor.utils.debug.TextLayerNode;
@@ -327,7 +327,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void rotate(Rotate.SpecialAngle angle) {
+    public void rotate(QuadrantAngle angle) {
         // TODO
     }
 
