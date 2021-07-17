@@ -61,7 +61,7 @@ public class Navigator extends JComponent
     private Rectangle ghostBoxRect;
     private static Color ghostBoxColor = Color.YELLOW;
     private boolean dragging = false;
-    private boolean draggingInside = false;
+    private boolean resizing = false;
 
     private int preferredWidth;
     private int preferredHeight;
@@ -320,7 +320,7 @@ public class Navigator extends JComponent
 
         g2.setStroke(VIEW_BOX_STROKE);
 
-        if(ghostBoxRect!= null){
+        if (ghostBoxRect != null) {
             g2.setColor(ghostBoxColor);
             g2.draw(ghostBoxRect);
         }
@@ -337,15 +337,17 @@ public class Navigator extends JComponent
         } else {
             Point point = e.getPoint();
             if (view != null) {
+
                 dragStartPoint = point;
                 origRectLoc = viewBoxRect.getLocation();
 
-                if (viewBoxRect.contains(point)) {
-                    draggingInside = !e.isControlDown();
-                } else draggingInside = false;
+                if (e.isControlDown()) {
+                    resizing = true;
+                } else if (viewBoxRect.contains(point)) {
+                    resizing = false;
+                }
 
                 ghostBoxRect = new Rectangle(viewBoxRect);
-
                 dragging = true;
             }
         }
@@ -359,7 +361,11 @@ public class Navigator extends JComponent
         dragStartPoint = null;
         ghostBoxRect = null;
         dragging = false;
-        updateViewBoxPosition();
+
+        EventQueue.invokeLater(() -> {
+            scrollViewFromViewBox();
+            updateViewBoxPosition();
+        });
     }
 
     @Override
@@ -374,7 +380,29 @@ public class Navigator extends JComponent
             int newBoxX = origRectLoc.x + dx;
             int newBoxY = origRectLoc.y + dy;
 
-            if (draggingInside) {
+            if (resizing) {
+
+                if (mouseNow.x < 0) {
+                    mouseNow.x = 0;
+                }
+                if (mouseNow.y < 0) {
+                    mouseNow.y = 0;
+                }
+                if (mouseNow.x > thumbWidth) {
+                    mouseNow.x = thumbWidth;
+                }
+                if (mouseNow.y > thumbHeight) {
+                    mouseNow.y = thumbHeight;
+                }
+
+                int x = Math.min(dragStartPoint.x, mouseNow.x);
+                int y = Math.min(dragStartPoint.y, mouseNow.y);
+                int w = Math.max(dragStartPoint.x, mouseNow.x) - x;
+                int h = Math.max(dragStartPoint.y, mouseNow.y) - y;
+
+                updateViewBox(x, y, w, h);
+
+            } else {
 
                 // make sure that the view box does not leave the thumb
                 if (newBoxX < 0) {
@@ -391,25 +419,6 @@ public class Navigator extends JComponent
                 }
 
                 updateViewBoxLocation(newBoxX, newBoxY);
-
-            } else {
-
-                // initial point will always be in viewbox, else that will be an impossible drag star.
-
-                // making sure the drag wont exceed the available space.
-                if (mouseNow.x > thumbWidth) {
-                    mouseNow.x = thumbWidth;
-                }
-                if (mouseNow.y > thumbHeight) {
-                    mouseNow.y = thumbHeight;
-                }
-
-                int x = Math.min(dragStartPoint.x, mouseNow.x);
-                int y = Math.min(dragStartPoint.y, mouseNow.y);
-                int w = Math.max(dragStartPoint.x, mouseNow.x) - x;
-                int h = Math.max(dragStartPoint.y, mouseNow.y) - y;
-
-                updateViewBoxAndZoom(x, y, w, h);
             }
         }
     }
@@ -422,10 +431,9 @@ public class Navigator extends JComponent
         }
     }
 
-    private void updateViewBoxAndZoom(int x, int y, int width, int height) {
+    private void updateViewBox(int x, int y, int width, int height) {
         viewBoxRect.setBounds(x, y, width, height);
         repaint();
-        scrollViewFromViewBox();
     }
 
     private void recalculateScaling(View view, int width, int height) {
