@@ -562,7 +562,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
 
         setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
-        scrollRectToVisible(rect.getCo());
+        scrollRectToVisible(imageToComponentSpace(zoomRect));
     }
 
     public void increaseZoom() {
