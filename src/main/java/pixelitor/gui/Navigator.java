@@ -58,6 +58,8 @@ public class Navigator extends JComponent
     private Point origRectLoc; // the view box rectangle location before starting the drag
     private Rectangle viewBoxRect;
     private static Color viewBoxColor = Color.RED;
+    private Rectangle ghostBoxRect;
+    private static Color ghostBoxColor = Color.YELLOW;
     private boolean dragging = false;
     private boolean draggingInside = false;
 
@@ -317,8 +319,15 @@ public class Navigator extends JComponent
         g2.setTransform(origTransform);
 
         g2.setStroke(VIEW_BOX_STROKE);
+
+        if(ghostBoxRect!= null){
+            g2.setColor(ghostBoxColor);
+            g2.draw(ghostBoxRect);
+        }
+
         g2.setColor(viewBoxColor);
         g2.draw(viewBoxRect);
+
     }
 
     @Override
@@ -335,6 +344,8 @@ public class Navigator extends JComponent
                     draggingInside = !e.isControlDown();
                 } else draggingInside = false;
 
+                ghostBoxRect = new Rectangle(viewBoxRect);
+
                 dragging = true;
             }
         }
@@ -346,6 +357,7 @@ public class Navigator extends JComponent
             showPopup(e);
         }
         dragStartPoint = null;
+        ghostBoxRect = null;
         dragging = false;
         updateViewBoxPosition();
     }
