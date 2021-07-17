@@ -129,8 +129,7 @@ public class StrokeParam extends AbstractFilterParam {
             strokeWidth,
             strokeCapParam.getSelected().getValue(),
             strokeJoinParam.getSelected().getValue(),
-            dashFloats
-        );
+            dashFloats);
     }
 
     @Override

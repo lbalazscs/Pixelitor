@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.LogZoomParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -42,7 +43,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     private static final int AA_NONE = 1;
     private static final int AA_2x2 = 2;
 
-    protected final LogZoomParam zoomParam = new LogZoomParam("Log(Zoom)", 200, 200, 1000);
+    protected final LogZoomParam zoomParam = new LogZoomParam(GUIText.ZOOM, 200, 200, 1000);
     protected final ImagePositionParam zoomCenter;
     protected final RangeParam iterationsParam;
     private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Item[]{

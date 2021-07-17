@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,6 @@ import java.awt.GridBagLayout;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import static pixelitor.gui.GUIText.ZOOM;
-
 public class LogRangeGUI extends JPanel implements ParamGUI {
     private final LogZoomParam model;
     private final JLabel valueLabel;
@@ -52,7 +50,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
         updateValueLabel();
         gbh.addLabelAndControl("Value:", valueLabel);
 
-        setBorder(BorderFactory.createTitledBorder(ZOOM));
+        setBorder(BorderFactory.createTitledBorder(model.getName()));
     }
 
     private void updateValueLabel() {

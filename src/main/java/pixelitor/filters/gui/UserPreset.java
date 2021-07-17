@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import com.bric.util.JVM;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
@@ -32,20 +33,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a user-created preset for a filter.
+ * Represents a user-created preset.
  * It is similar to but different from {@link FilterState} because
  * its internal structure is more suitable for saving as a flat text file.
  */
 public class UserPreset {
     private final String name;
-    private File inFile;
+    private File file;
     private final String presetDirName;
-    private boolean loaded = false;
-    private final Map<String, String> map = new LinkedHashMap<>();
+    private boolean loaded; // whether the preset is in the memory
+    private final Map<String, String> content = new LinkedHashMap<>();
 
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    public static final String PRESETS_DIR = System.getProperty("user.home") +
-        FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
+    public static final String PRESETS_DIR;
+
+    static {
+        if (JVM.isWindows) {
+            PRESETS_DIR = System.getenv("APPDATA") +
+                FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
+        } else {
+            PRESETS_DIR = System.getProperty("user.home") +
+                FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
+        }
+    }
 
     /**
      * Used when a new preset is created by the user
@@ -59,9 +69,9 @@ public class UserPreset {
     /**
      * Used then the existence of a preset file is detected
      */
-    public UserPreset(File inFile, String presetDirName) {
-        this.name = FileUtils.stripExtension(inFile.getName());
-        this.inFile = inFile;
+    public UserPreset(File file, String presetDirName) {
+        this.name = FileUtils.stripExtension(file.getName());
+        this.file = file;
         this.presetDirName = presetDirName;
         loaded = false;
     }
@@ -71,17 +81,17 @@ public class UserPreset {
     }
 
     public String get(String key) {
-        String s = map.get(key);
-        if (s == null) {
+        String value = content.get(key);
+        if (value == null) {
             System.out.println("UserPreset::get: no value found for the key " + key);
         }
-        return s;
+        return value;
     }
 
     public void put(String key, String value) {
         assert !key.isBlank();
 
-        map.put(key, value);
+        content.put(key, value);
     }
 
     public int getInt(String key) {
@@ -119,7 +129,7 @@ public class UserPreset {
     // not using Properties because it is ugly to escape the spaces in keys
     private void load() throws IOException {
         assert !loaded;
-        InputStream input = new FileInputStream(inFile);
+        InputStream input = new FileInputStream(file);
         Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
         try (BufferedReader br = new BufferedReader(reader)) {
             String line;
@@ -128,7 +138,7 @@ public class UserPreset {
                 if (index > 0) {
                     String key = line.substring(0, index).trim();
                     String value = line.substring(index + 1).trim();
-                    map.put(key, value);
+                    content.put(key, value);
                 }
             }
         }
@@ -136,12 +146,12 @@ public class UserPreset {
     }
 
     public void save() {
-        assert inFile == null;
+        assert file == null;
         assert loaded;
 
         File outFile = calcSaveFile(true);
         try (PrintWriter writer = new PrintWriter(outFile, StandardCharsets.UTF_8)) {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
+            for (Map.Entry<String, String> entry : content.entrySet()) {
                 writer.println(entry.getKey() + "=" + entry.getValue());
             }
         } catch (IOException e) {
@@ -169,7 +179,7 @@ public class UserPreset {
 
     @Override
     public String toString() {
-        return name + " " + map.toString();
+        return name + " " + content.toString();
     }
 
     public static List<UserPreset> loadPresets(String presetDirName) {

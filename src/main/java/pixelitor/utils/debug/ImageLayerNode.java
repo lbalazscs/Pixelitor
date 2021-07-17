@@ -24,6 +24,10 @@ import java.awt.image.BufferedImage;
  * A debugging node for an ImageLayer
  */
 public class ImageLayerNode extends ContentLayerNode {
+    public ImageLayerNode(ImageLayer layer) {
+        this("image layer", layer);
+    }
+
     public ImageLayerNode(String name, ImageLayer layer) {
         super(name, layer);
 
