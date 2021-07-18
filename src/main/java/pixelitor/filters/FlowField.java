@@ -79,7 +79,7 @@ public class FlowField extends ParametrizedFilter {
 
         Graphics2D g2 = dest.createGraphics();
 //        g2.setStroke(stroke);
-        g2.setStroke(new VanishingStroke());
+        g2.setStroke(new VanishingStroke(20));
 
         int field_w = (int) (w * field_density) + 1;
         int field_h = (int) (h * field_density) + 1;
