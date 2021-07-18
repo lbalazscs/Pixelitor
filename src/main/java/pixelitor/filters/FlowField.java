@@ -10,8 +10,11 @@ import pixelitor.filters.gui.StrokeParam;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
 import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.VanishingStroke;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -20,9 +23,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
-public class FlowFields extends ParametrizedFilter {
+public class FlowField extends ParametrizedFilter {
 
-    public static final String NAME = "Flow Fields";
+    public static final String NAME = "Flow Field";
 
     private static final int PAD = 100;
     private static final int GROUP_COUNT = 128;
@@ -38,7 +41,7 @@ public class FlowFields extends ParametrizedFilter {
 
     private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false);
 
-    public FlowFields() {
+    public FlowField() {
         super(false);
 
         setParams(
@@ -76,6 +79,7 @@ public class FlowFields extends ParametrizedFilter {
 
         Graphics2D g2 = dest.createGraphics();
         g2.setStroke(stroke);
+//        g2.setStroke(new VanishingStroke());
 
         int field_w = (int) (w * field_density) + 1;
         int field_h = (int) (h * field_density) + 1;
@@ -105,8 +109,13 @@ public class FlowFields extends ParametrizedFilter {
 
             @Override
             protected void initializeParticle(SimpleParticle particle) {
+                if(particle.path!=null)
+                    g2.draw(particle.path);
+
                 particle.lastX = particle.x = bounds.x + bounds.width * r.nextFloat();
                 particle.lastY = particle.y = bounds.y + bounds.height * r.nextFloat();
+                particle.path = new GeneralPath();
+                particle.path.moveTo(particle.lastX, particle.lastY);
             }
 
             @Override
@@ -122,7 +131,7 @@ public class FlowFields extends ParametrizedFilter {
 
                 particle.update(displace, dirn);
 
-                g2.drawLine((int) particle.lastX, (int) particle.lastY, (int) particle.x, (int) particle.y);
+//                g2.drawLine((int) particle.lastX, (int) particle.lastY, (int) particle.x, (int) particle.y);
 
                 particle.life--;
             }
@@ -161,6 +170,7 @@ public class FlowFields extends ParametrizedFilter {
 
     private static class SimpleParticle implements Particle {
         public float x, y, lastX, lastY, vx, vy;
+        public GeneralPath path;
         public int life;
 
         public void update(float displace, float dirn) {
@@ -172,6 +182,8 @@ public class FlowFields extends ParametrizedFilter {
 
             x += vx;
             y += vy;
+
+            path.lineTo(x, y);
         }
     }
 

@@ -12,8 +12,11 @@ public class ParticleGroup<P extends Particle> {
         this.particleSystem = particleSystem;
 
         particles = new ArrayList<>(groupSize);
-        for (int i = 0; i < groupSize; i++)
-            particles.add(particleSystem.newParticle());
+        for (int i = 0; i < groupSize; i++) {
+            P particle = particleSystem.newParticle();
+            particleSystem.initializeParticle(particle);
+            particles.add(particle);
+        }
     }
 
     public void step() {
