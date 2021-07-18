@@ -878,6 +878,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Marble.NAME, Marble::new);
         sub.addFilter(Voronoi.NAME, Voronoi::new);
         sub.addFilter(JHWood.NAME, JHWood::new);
+        sub.addFilter(FlowFields_dev.NAME, FlowFields_dev::new);
 
         sub.addSeparator();
 
