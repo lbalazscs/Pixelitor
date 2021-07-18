@@ -21,6 +21,10 @@ public abstract class ParticleSystem<P extends Particle> {
         for (ParticleGroup<P> group : groups) group.step();
     }
 
+    public void step(int idx) {
+        groups.get(idx).step();
+    }
+
     protected abstract P newParticle();
 
     protected abstract void initializeParticle(P particle);
