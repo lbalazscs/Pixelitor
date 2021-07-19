@@ -26,7 +26,7 @@ public class FlowField extends ParametrizedFilter {
     public static final String NAME = "Flow Field";
 
     private static final int PAD = 100;
-    private static final int GROUP_COUNT = 128;
+    private static final int PARTICLES_PER_GROUP = 100;
 
     private final RangeParam iterationsParam = new RangeParam("Iterations", 0, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam particlesParam = new RangeParam("Particle Count", 0, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
@@ -95,18 +95,17 @@ public class FlowField extends ParametrizedFilter {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         g2.setColor(color);
-
-        ParticleSystem<SimpleParticle> system = new ParticleSystem<>(GROUP_COUNT, FastMath.ceilToInt(particle_count * 1d / GROUP_COUNT)) {
+//
+        ParticleSystem<SimpleParticle> system = new ParticleSystem<>(FastMath.ceilToInt(particle_count * 1d / PARTICLES_PER_GROUP), PARTICLES_PER_GROUP) {
 
             @Override
             protected SimpleParticle newParticle() {
-                SimpleParticle simpleParticle = new SimpleParticle();
-                simpleParticle.life = life;
-                return simpleParticle;
+                return new SimpleParticle();
             }
 
             @Override
             protected void initializeParticle(SimpleParticle particle) {
+                particle.life = life;
                 if (particle.path != null)
                     g2.draw(particle.path);
 
@@ -137,14 +136,17 @@ public class FlowField extends ParametrizedFilter {
 
         };
 
-        Future<?>[] futures = new Future[GROUP_COUNT];
+        Future<?>[] futures = new Future[system.getGroupCount()];
         var pt = new StatusBarProgressTracker(NAME, futures.length);
 
         for (int i = 0; i < futures.length; i++) {
             int finalI = i;
+
             futures[i] = ThreadPool.submit(() -> {
+
                 for (int j = 0; j < iteration_count; j++)
                     system.step(finalI);
+
                 for (SimpleParticle particle : system.group(finalI).getParticles()) {
                     if (particle.path != null)
                         g2.draw(particle.path);
