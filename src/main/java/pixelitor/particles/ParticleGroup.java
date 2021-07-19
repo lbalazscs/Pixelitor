@@ -26,4 +26,8 @@ public class ParticleGroup<P extends Particle> {
             particleSystem.updateParticle(particle);
         }
     }
+
+    public List<P> getParticles() {
+        return particles;
+    }
 }

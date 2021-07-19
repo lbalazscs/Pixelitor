@@ -10,11 +10,9 @@ import pixelitor.filters.gui.StrokeParam;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
 import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.VanishingStroke;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -78,8 +76,8 @@ public class FlowField extends ParametrizedFilter {
         Random r = ThreadLocalRandom.current();
 
         Graphics2D g2 = dest.createGraphics();
-//        g2.setStroke(stroke);
-        g2.setStroke(new VanishingStroke(20));
+        g2.setStroke(stroke);
+//        g2.setStroke(new VanishingStroke(20));
 
         int field_w = (int) (w * field_density) + 1;
         int field_h = (int) (h * field_density) + 1;
@@ -109,11 +107,12 @@ public class FlowField extends ParametrizedFilter {
 
             @Override
             protected void initializeParticle(SimpleParticle particle) {
-                if(particle.path!=null)
+                if (particle.path != null)
                     g2.draw(particle.path);
 
                 particle.lastX = particle.x = bounds.x + bounds.width * r.nextFloat();
                 particle.lastY = particle.y = bounds.y + bounds.height * r.nextFloat();
+
                 particle.path = new GeneralPath();
                 particle.path.moveTo(particle.lastX, particle.lastY);
             }
@@ -146,6 +145,10 @@ public class FlowField extends ParametrizedFilter {
             futures[i] = ThreadPool.submit(() -> {
                 for (int j = 0; j < iteration_count; j++)
                     system.step(finalI);
+                for (SimpleParticle particle : system.group(finalI).getParticles()) {
+                    if (particle.path != null)
+                        g2.draw(particle.path);
+                }
             });
         }
 
@@ -168,8 +171,7 @@ public class FlowField extends ParametrizedFilter {
         return dest;
     }
 
-    private static class SimpleParticle implements Particle {
-        public float x, y, lastX, lastY, vx, vy;
+    private static class SimpleParticle extends Particle {
         public GeneralPath path;
         public int life;
 

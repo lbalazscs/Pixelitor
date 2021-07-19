@@ -1,5 +1,5 @@
 package pixelitor.particles;
 
-public interface Particle {
-//    public float x, y, vx, vy, ax, ay;
+public abstract class Particle {
+    public float x, y, lastX, lastY, vx, vy;
 }

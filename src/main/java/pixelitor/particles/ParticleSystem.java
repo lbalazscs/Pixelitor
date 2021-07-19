@@ -33,4 +33,7 @@ public abstract class ParticleSystem<P extends Particle> {
 
     protected abstract void updateParticle(P particle);
 
+    public ParticleGroup<P> group(int i) {
+        return groups.get(i);
+    }
 }
