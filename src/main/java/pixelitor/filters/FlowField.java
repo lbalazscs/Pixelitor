@@ -7,6 +7,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
+import pixelitor.utils.OpenSimplex2F;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -36,8 +37,8 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 10000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam lifeParam = new RangeParam("Particle Life", 1, 1000, 5000);
-    private final RangeParam qualityParam = new RangeParam("Quality", 1, 50, 4000);
-    private final RangeParam noiseDensityParam = new RangeParam("Scale", 1000, 2000, 100000);
+    private final RangeParam qualityParam = new RangeParam("Quality", 1, 500, 4000);
+    private final RangeParam noiseDensityParam = new RangeParam("Scale", 1000, 40000, 100000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
 
@@ -83,6 +84,7 @@ public class FlowField extends ParametrizedFilter {
         int h = dest.getHeight();
 
         Random r = ThreadLocalRandom.current();
+        OpenSimplex2F noise = new OpenSimplex2F(r.nextLong());
 
         Graphics2D g2 = dest.createGraphics();
         g2.setStroke(stroke);
@@ -95,7 +97,7 @@ public class FlowField extends ParametrizedFilter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        float PI = 2 * (float) FastMath.PI;
+        float PI = (float) FastMath.PI;
 
         float[][] field = null;
         if (view_flow_vectors)
@@ -105,7 +107,8 @@ public class FlowField extends ParametrizedFilter {
 
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
-                float value = Noise.noise2(i / noise_density / field_density, j / noise_density / field_density) * PI;
+                float value = (float) (noise.noise2(i / noise_density / field_density, j / noise_density / field_density) * PI);
+                System.out.println(value);
                 if (view_flow_vectors)
                     field[i][j] = value;
                 cos_field[i][j] = (float) (force * FastMath.cos(value));
