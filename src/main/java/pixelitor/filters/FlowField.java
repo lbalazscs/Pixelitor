@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
@@ -110,11 +111,15 @@ public class FlowField extends ParametrizedFilter {
 
         float[][] cos_field = new float[field_w][field_h];
         float[][] sin_field = new float[field_w][field_h];
-        Color[][] col_field = null;
-        if (randomColor)
-            col_field = new Color[field_w][field_h];
 
-        float[] hsb_col = nu;
+        // TODO: verify that it's better than creating a `new Color[field_w][field_h] when not needed`.
+        Color[][] col_field = ((Supplier<Color[][]>) () -> {
+            if (randomColor)
+                return new Color[field_w][field_h];
+            return null;
+        }).get();
+
+        float[] hsb_col = null;
         if (randomColor)
             hsb_col = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
 
@@ -156,11 +161,10 @@ public class FlowField extends ParametrizedFilter {
                 particle.lastX = particle.x = bounds.x + bounds.width * r.nextFloat();
                 particle.lastY = particle.y = bounds.y + bounds.height * r.nextFloat();
 
-
                 int field_x = FastMath.toRange(0, field_w - 1, (int) (particle.x * field_density));
                 int field_y = FastMath.toRange(0, field_h - 1, (int) (particle.y * field_density));
-                particle.color = col_field[field_x][field_y];
 
+                particle.color = randomColor ? col_field[field_x][field_y] : color;
 
                 if (particle.path != null) {
                     g2.setColor(particle.color);
