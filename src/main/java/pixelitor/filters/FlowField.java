@@ -138,7 +138,6 @@ public class FlowField extends ParametrizedFilter {
                     col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
                     col |= (color.getAlpha() << 24); // Add the alpha specified by user.
                     col_field[i][j] = new Color(col, true);
-                    // TODO: Set the alpha of col_field[i][j] = to that of color
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
 
