@@ -134,7 +134,10 @@ public class FlowField extends ParametrizedFilter {
                 sin_field[i][j] = (float) (force * FastMath.sin(value));
 
                 if (randomColor) {
-                    col_field[i][j] = Color.getHSBColor(hsb_col[0], hsb_col[1], hsb_col[2]);
+                    int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
+                    col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
+                    col |= (color.getAlpha() << 24); // Add the alpha specified by user.
+                    col_field[i][j] = new Color(col, true);
                     // TODO: Set the alpha of col_field[i][j] = to that of color
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
