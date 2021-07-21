@@ -67,6 +67,8 @@ public class CloneTool extends BlendingModeBrushTool {
     private final EnumParam<Mirror> mirrorParam = new EnumParam<>(
         "Mirror", Mirror.class);
 
+    private boolean showUndefinedSourceDialog;
+
     protected CloneTool() {
         super("Clone Stamp", 'S', "clone_tool.png",
             "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
@@ -143,13 +145,28 @@ public class CloneTool extends BlendingModeBrushTool {
             setCloningSource(e);
         } else {
             if (state == NO_SOURCE) {
-                handleUndefinedSource(e);
+                noSourceInMousePressed(e);
                 return;
             }
             boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
             startNewCloningStroke(e, lineConnect);
 
             super.mousePressed(e);
+        }
+    }
+
+    @Override
+    public void mouseReleased(PMouseEvent e) {
+        super.mouseReleased(e);
+        if (showUndefinedSourceDialog) {
+            showUndefinedSourceDialog = false;
+            String msg = "<html>Define a source point first with " +
+                "<b>Alt-Click</b> or with <b>right-click</b>.";
+            if (JVM.isLinux) {
+                msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
+                    "<br><b>Alt-Click</b> for window dragging in the window manager)";
+            }
+            Messages.showError("No source point", msg, e.getView());
         }
     }
 
@@ -177,19 +194,15 @@ public class CloneTool extends BlendingModeBrushTool {
         }
     }
 
-    private void handleUndefinedSource(PMouseEvent e) {
+    private void noSourceInMousePressed(PMouseEvent e) {
         if (RandomGUITest.isRunning()) {
             // special case: do not show dialogs for RandomGUITest,
             // just act as if this was an alt-click
             setCloningSource(e);
         } else {
-            String msg = "<html>Define a source point first with " +
-                "<b>Alt-Click</b> or with <b>right-click</b>.";
-            if (JVM.isLinux) {
-                msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
-                    "<br><b>Alt-Click</b> for window dragging in the window manager)";
-            }
-            Messages.showError("No source point", msg, e.getView());
+            // only set a flag that will be checked in mouseReleased,
+            // otherwise the modal dialog swallows the mouse released event
+            showUndefinedSourceDialog = true;
         }
     }
 

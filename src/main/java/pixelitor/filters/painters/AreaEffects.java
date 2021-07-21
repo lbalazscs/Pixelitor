@@ -151,6 +151,11 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
             && neonBorderEffect == null && dropShadowEffect == null;
     }
 
+    public boolean isNotEmpty() {
+        return glowEffect != null || innerGlowEffect != null
+            || neonBorderEffect != null || dropShadowEffect != null;
+    }
+
     @Override
     public AreaEffects interpolate(AreaEffects endState, double progress) {
         float progressF = (float) progress;
