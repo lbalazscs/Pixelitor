@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import pd.OpenSimplex2F;
 import pixelitor.filters.gui.FilterButtonModel;
 
 import java.util.Random;

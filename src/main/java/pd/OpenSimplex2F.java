@@ -1,4 +1,4 @@
-package pixelitor.utils;
+package pd;
 
 /**
  * K.jpg's OpenSimplex 2, faster variant
@@ -57,6 +57,12 @@ public class OpenSimplex2F {
         double xs = x + s, ys = y + s;
 
         return noise2_Base(xs, ys);
+    }
+
+    public double turbulence2(double x, double y, int octaves) {
+        float t = 0.0f;
+        for (int f = 1; f <= octaves; f *= 2) t += Math.abs(noise2(f * x, f * y)) / f;
+        return t;
     }
 
     /**

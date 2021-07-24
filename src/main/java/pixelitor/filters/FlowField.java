@@ -1,12 +1,13 @@
 package pixelitor.filters;
 
+import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
+import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
-import pixelitor.utils.OpenSimplex2F;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -32,17 +33,20 @@ public class FlowField extends ParametrizedFilter {
     private static final int PARTICLES_PER_GROUP = 100;
 
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 10000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam qualityParam = new RangeParam("Quality", 1, 75, 100);
+    private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam zoomParam = new RangeParam("Zoom", 1000, 40000, 100000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
-    private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
 
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
-    private final ColorParam foregroundColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.01f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
+    private final ColorParam foregroundColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
     private final BooleanParam randomColorParam = new BooleanParam("Random Color", false);
 
+
+    private final RangeParam qualityParam = new RangeParam("Quality", 1, 75, 100);
+    private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
+    private final RangeParam octavesParam = new RangeParam("Noise Octaves", 1, 1, 8);
     private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false);
+    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, forceParam, octavesParam, showFlowVectors);
 
     public FlowField() {
         super(false);
@@ -50,15 +54,25 @@ public class FlowField extends ParametrizedFilter {
         setParams(
                 iterationsParam,
                 particlesParam,
-                qualityParam,
                 zoomParam,
                 strokeParam,
-                forceParam,
                 backgroundColorParam,
                 foregroundColorParam,
-                showFlowVectors,
-                randomColorParam
-        ).withAction(ReseedActions.reseedNoise());
+                randomColorParam,
+                advancedParam
+        ).withAction(ReseedSupport.createAction());
+
+        iterationsParam.setToolTip("Change filament thickness");
+        particlesParam.setToolTip("Number of filaments");
+        zoomParam.setToolTip("Adjust the zoom");
+        strokeParam.setToolTip("Adjust the stroke style");
+        randomColorParam.setToolTip("Creates new colors based on choosen color's hue and transparency.");
+
+        qualityParam.setToolTip("Smoothness of filament");
+        forceParam.setToolTip("Stroke Length");
+        octavesParam.setToolTip("Adjust the varience provided by Noise.");
+        showFlowVectors.setToolTip("View direction of flow");
+
     }
 
     @Override
@@ -66,23 +80,16 @@ public class FlowField extends ParametrizedFilter {
 
         int iteration_count = iterationsParam.getValue();
         int particle_count = particlesParam.getValue();
-
-        // field_density = number of field points / width of image
-        // field points are such evenly placed points through the image which pushed a particle with a specific force and specific direction.
-        // Enable "Flow Vectors" checkbox to get a rougn idea of where they are facing in a specific region of the image.
-        float quality = (qualityParam.getValueAsFloat() - 1) / 99;
-
         float zoom = zoomParam.getValue() * 0.01f;
         Stroke stroke = strokeParam.createStroke();
-
-        // That specific force
-        float force = (float) forceParam.getZoomRatio();
-
         Color bgColor = backgroundColorParam.getColor();
         Color fgColor = foregroundColorParam.getColor();
-
-        boolean showFlowVectors = this.showFlowVectors.isChecked();
         boolean randomColor = randomColorParam.isChecked();
+
+        float quality = (qualityParam.getValueAsFloat() - 1) / 99;
+        float force = (float) forceParam.getZoomRatio();
+        int octaves = octavesParam.getValue();
+        boolean showFlowVectors = this.showFlowVectors.isChecked();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +139,7 @@ public class FlowField extends ParametrizedFilter {
 
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
-                float value = initTheta + (float) (noise.noise2(i / zoom / field_density, j / zoom / field_density) * PI);
+                float value = initTheta + (float) (noise.turbulence2(i / zoom / field_density, j / zoom / field_density, octaves) * PI);
 
                 if (showFlowVectors)
                     field[i][j] = value;
