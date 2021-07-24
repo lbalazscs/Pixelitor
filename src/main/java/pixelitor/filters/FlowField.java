@@ -1,6 +1,5 @@
 package pixelitor.filters;
 
-import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
@@ -44,9 +43,9 @@ public class FlowField extends ParametrizedFilter {
 
     private final RangeParam qualityParam = new RangeParam("Quality", 1, 75, 100);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
-    private final RangeParam octavesParam = new RangeParam("Noise Octaves", 1, 1, 8);
+    private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
     private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false);
-    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, forceParam, octavesParam, showFlowVectors);
+    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, forceParam, turbulenceParam, showFlowVectors);
 
     public FlowField() {
         super(false);
@@ -70,7 +69,7 @@ public class FlowField extends ParametrizedFilter {
 
         qualityParam.setToolTip("Smoothness of filament");
         forceParam.setToolTip("Stroke Length");
-        octavesParam.setToolTip("Adjust the varience provided by Noise.");
+        turbulenceParam.setToolTip("Adjust the varience provided by Noise.");
         showFlowVectors.setToolTip("View direction of flow");
 
     }
@@ -88,7 +87,7 @@ public class FlowField extends ParametrizedFilter {
 
         float quality = (qualityParam.getValueAsFloat() - 1) / 99;
         float force = (float) forceParam.getZoomRatio();
-        int octaves = octavesParam.getValue();
+        int turbulence = turbulenceParam.getValue();
         boolean showFlowVectors = this.showFlowVectors.isChecked();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +138,7 @@ public class FlowField extends ParametrizedFilter {
 
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
-                float value = initTheta + (float) (noise.turbulence2(i / zoom / field_density, j / zoom / field_density, octaves) * PI);
+                float value = initTheta + (float) (noise.turbulence2(i / zoom / field_density, j / zoom / field_density, turbulence) * PI);
 
                 if (showFlowVectors)
                     field[i][j] = value;
