@@ -7,6 +7,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
 import pixelitor.utils.OpenSimplex2F;
+import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -16,7 +17,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -33,7 +33,7 @@ public class FlowField extends ParametrizedFilter {
 
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 10000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam qualityParam = new RangeParam("Quality", 1, 500, 4000);
+    private final RangeParam qualityParam = new RangeParam("Quality", 1, 75, 100);
     private final RangeParam zoomParam = new RangeParam("Zoom", 1000, 40000, 100000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
@@ -70,7 +70,7 @@ public class FlowField extends ParametrizedFilter {
         // field_density = number of field points / width of image
         // field points are such evenly placed points through the image which pushed a particle with a specific force and specific direction.
         // Enable "Flow Vectors" checkbox to get a rougn idea of where they are facing in a specific region of the image.
-        float field_density = qualityParam.getValue() * 0.001f;
+        float quality = (qualityParam.getValueAsFloat() - 1) / 99;
 
         float zoom = zoomParam.getValue() * 0.01f;
         Stroke stroke = strokeParam.createStroke();
@@ -89,15 +89,16 @@ public class FlowField extends ParametrizedFilter {
         int w = dest.getWidth();
         int h = dest.getHeight();
 
-        Random r = ThreadLocalRandom.current();
-        OpenSimplex2F noise = new OpenSimplex2F(r.nextLong());
+        Random r = ReseedSupport.reInitialize();
+        OpenSimplex2F noise = ReseedSupport.getSimplexNoise();
 
         Graphics2D g2 = dest.createGraphics();
         g2.setStroke(stroke);
         Colors.fillWith(bgColor, g2, w, h);
 
-        int field_w = (int) (w * field_density) + 1;
-        int field_h = (int) (h * field_density) + 1;
+        int field_w = (int) (w * quality + 1);
+        float field_density = field_w * 1f / w;
+        int field_h = (int) (h * field_density);
 
         Rectangle bounds = new Rectangle(-PAD, -PAD, w + PAD * 2, h + PAD * 2);
 
@@ -127,7 +128,7 @@ public class FlowField extends ParametrizedFilter {
 
         float[] hsb_col = null;
         if (randomColor)
-            hsb_col = Color.RGBtoHSB(fgColor.getRed(), fgColor.getGreen(), fgColor.getBlue(), null);
+            hsb_col = Colors.toHSB(fgColor);
 
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
@@ -140,13 +141,9 @@ public class FlowField extends ParametrizedFilter {
                 sin_field[i][j] = (float) (force * FastMath.sin(value));
 
                 if (randomColor) {
-                    int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
-                    col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
-                    col |= (fgColor.getAlpha() << 24); // Add the alpha specified by user.
-                    col_field[i][j] = new Color(col, true);
+                    col_field[i][j] = new Color(Colors.HSBAtoARGB(hsb_col, fgColor.getAlpha()), true);
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
-
             }
         }
 
@@ -213,33 +210,36 @@ public class FlowField extends ParametrizedFilter {
         ThreadPool.waitFor(futures, pt);
         pt.finished();
 
-        if (showFlowVectors) {
-
-            Shape unitArrow = AffineTransform.getScaleInstance(25, 25).createTransformedShape(Shapes.createUnitArrow());
-
-            g2.setColor(Color.RED);
-
-            int f;
-            if (1 / field_density > 31) f = 1;
-            else f = (int) (31 * field_density);
-
-            for (int i = 0; i < field_w; i += f) {
-                for (int j = 0; j < field_h; j += f) {
-
-                    int x = (int) (i / field_density);
-                    int y = (int) (j / field_density);
-
-                    AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
-                    transform.rotate(field[i][j]);
-                    g2.fill(transform.createTransformedShape(unitArrow));
-//                    g2.fillRect(x, y, 2, 2);
-//                    g2.drawLine(x, y, x + (int) (displacer * FastMath.cos(field[i][j])), y + (int) (displacer * FastMath.sin(field[i][j])));
-                }
-            }
-        }
+        if (showFlowVectors)
+            fillImageWithFieldPointArrows(field_density, g2, field_w, field_h, field);
 
         return dest;
     }
+
+    private void fillImageWithFieldPointArrows(float field_density, Graphics2D g2, int field_w, int field_h, float[][] field) {
+
+        Shape unitArrow = AffineTransform.getScaleInstance(25, 25).createTransformedShape(Shapes.createUnitArrow());
+
+        g2.setColor(Color.RED);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int f;
+        if (1 / field_density > 31) f = 1;
+        else f = (int) (31 * field_density);
+
+        for (int i = 0; i < field_w; i += f) {
+            for (int j = 0; j < field_h; j += f) {
+
+                int x = (int) (i / field_density);
+                int y = (int) (j / field_density);
+
+                AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
+                transform.rotate(field[i][j]);
+                g2.fill(transform.createTransformedShape(unitArrow));
+            }
+        }
+    }
+
 
     private static class SimpleParticle extends Particle {
         public GeneralPath path;

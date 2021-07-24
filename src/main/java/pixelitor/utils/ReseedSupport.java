@@ -31,6 +31,7 @@ import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 public class ReseedSupport {
     private static long seed = System.nanoTime();
     private static final Random rand = new Random();
+    private static OpenSimplex2F simplex = new OpenSimplex2F(seed);
 
     private ReseedSupport() {
     }
@@ -48,10 +49,21 @@ public class ReseedSupport {
     }
 
     /**
+     * Returns a new Simplex Noise object in order to
+     * make sure that the filter runs with the same random numbers
+     * as before (when the filter execution is not started from
+     * the "reseed" button).
+     * This must be called at the beginning of the filter.
+     */
+    public static OpenSimplex2F getSimplexNoise() {
+        return simplex;
+    }
+
+    /**
      * Called then the user presses the "reseed" button
      */
     private static void reseed() {
-        seed = System.nanoTime();
+        simplex = new OpenSimplex2F(seed = System.nanoTime());
     }
 
     public static FilterButtonModel createAction() {
