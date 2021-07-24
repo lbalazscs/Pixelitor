@@ -31,16 +31,10 @@ public class FlowField extends ParametrizedFilter {
     private static final int PAD = 100;
     private static final int PARTICLES_PER_GROUP = 100;
 
-    private static final int BG_BLACK = 1;
-    private static final int BG_ORIGINAL = 2;
-    private static final int BG_TRANSPARENT = 3;
-    private static final int BG_TOOL = 4;
-
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 10000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam lifeParam = new RangeParam("Particle Life", 1, 1000, 5000);
     private final RangeParam qualityParam = new RangeParam("Quality", 1, 500, 4000);
-    private final RangeParam noiseDensityParam = new RangeParam("Scale", 1000, 40000, 100000);
+    private final RangeParam zoomParam = new RangeParam("Zoom", 1000, 40000, 100000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
 
@@ -56,9 +50,8 @@ public class FlowField extends ParametrizedFilter {
         setParams(
                 iterationsParam,
                 particlesParam,
-                lifeParam,
                 qualityParam,
-                noiseDensityParam,
+                zoomParam,
                 strokeParam,
                 forceParam,
                 backgroundColorParam,
@@ -73,16 +66,23 @@ public class FlowField extends ParametrizedFilter {
 
         int iteration_count = iterationsParam.getValue();
         int particle_count = particlesParam.getValue();
-        int life = lifeParam.getValue();
-        float field_density = qualityParam.getValue() * 0.001f;
-        float noise_density = noiseDensityParam.getValue() * 0.01f;
-        Stroke stroke = strokeParam.createStroke();
-        float force = (float) forceParam.getZoomRatio();
-        Color bgColor = backgroundColorParam.getColor();
-        Color color = foregroundColorParam.getColor();
-        boolean viewFlowVectors = showFlowVectors.isChecked();
-        boolean randomColor = randomColorParam.isChecked();
 
+        // field_density = number of field points / width of image
+        // field points are such evenly placed points through the image which pushed a particle with a specific force and specific direction.
+        // Enable "Flow Vectors" checkbox to get a rougn idea of where they are facing in a specific region of the image.
+        float field_density = qualityParam.getValue() * 0.001f;
+
+        float zoom = zoomParam.getValue() * 0.01f;
+        Stroke stroke = strokeParam.createStroke();
+
+        // That specific force
+        float force = (float) forceParam.getZoomRatio();
+
+        Color bgColor = backgroundColorParam.getColor();
+        Color fgColor = foregroundColorParam.getColor();
+
+        boolean showFlowVectors = this.showFlowVectors.isChecked();
+        boolean randomColor = randomColorParam.isChecked();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,12 +101,18 @@ public class FlowField extends ParametrizedFilter {
 
         Rectangle bounds = new Rectangle(-PAD, -PAD, w + PAD * 2, h + PAD * 2);
 
+        int groupCount = FastMath.ceilToInt(particle_count * 1d / PARTICLES_PER_GROUP);
+        Future<?>[] futures = new Future[groupCount];
+        var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
+        pt.unitDone();
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         float PI = (float) FastMath.PI;
+        float initTheta = r.nextFloat() * 2 * PI;
 
         float[][] field = null;
-        if (viewFlowVectors)
+        if (showFlowVectors)
             field = new float[field_w][field_h];
 
         float[][] cos_field = new float[field_w][field_h];
@@ -121,13 +127,13 @@ public class FlowField extends ParametrizedFilter {
 
         float[] hsb_col = null;
         if (randomColor)
-            hsb_col = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+            hsb_col = Color.RGBtoHSB(fgColor.getRed(), fgColor.getGreen(), fgColor.getBlue(), null);
 
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
-                float value = (float) (noise.noise2(i / noise_density / field_density, j / noise_density / field_density) * PI);
+                float value = initTheta + (float) (noise.noise2(i / zoom / field_density, j / zoom / field_density) * PI);
 
-                if (viewFlowVectors)
+                if (showFlowVectors)
                     field[i][j] = value;
 
                 cos_field[i][j] = (float) (force * FastMath.cos(value));
@@ -136,7 +142,7 @@ public class FlowField extends ParametrizedFilter {
                 if (randomColor) {
                     int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
                     col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
-                    col |= (color.getAlpha() << 24); // Add the alpha specified by user.
+                    col |= (fgColor.getAlpha() << 24); // Add the alpha specified by user.
                     col_field[i][j] = new Color(col, true);
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
@@ -146,10 +152,9 @@ public class FlowField extends ParametrizedFilter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        g2.setColor(color);
+        g2.setColor(fgColor);
 
-//        ParticleSystem<SimpleParticle> system = new ParticleSystem<>(1, particle_count) {
-        ParticleSystem<SimpleParticle> system = new ParticleSystem<>(FastMath.ceilToInt(particle_count * 1d / PARTICLES_PER_GROUP), PARTICLES_PER_GROUP) {
+        ParticleSystem<SimpleParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP) {
 
             @Override
             protected SimpleParticle newParticle() {
@@ -158,7 +163,6 @@ public class FlowField extends ParametrizedFilter {
 
             @Override
             protected void initializeParticle(SimpleParticle particle) {
-                particle.life = life;
 
                 particle.lastX = particle.x = bounds.x + bounds.width * r.nextFloat();
                 particle.lastY = particle.y = bounds.y + bounds.height * r.nextFloat();
@@ -166,7 +170,7 @@ public class FlowField extends ParametrizedFilter {
                 int field_x = FastMath.toRange(0, field_w - 1, (int) (particle.x * field_density));
                 int field_y = FastMath.toRange(0, field_h - 1, (int) (particle.y * field_density));
 
-                particle.color = randomColor ? col_field[field_x][field_y] : color;
+                particle.color = randomColor ? col_field[field_x][field_y] : fgColor;
 
                 if (particle.path != null) {
                     g2.setColor(particle.color);
@@ -178,7 +182,7 @@ public class FlowField extends ParametrizedFilter {
 
             @Override
             protected boolean isParticleDead(SimpleParticle particle) {
-                return !bounds.contains(particle.x, particle.y) || particle.life <= 0;
+                return !bounds.contains(particle.x, particle.y);
             }
 
             @Override
@@ -187,14 +191,9 @@ public class FlowField extends ParametrizedFilter {
                 int field_y = FastMath.toRange(0, field_h - 1, (int) (particle.y * field_density));
 
                 particle.update(cos_field[field_x][field_y], sin_field[field_x][field_y]);
-
-                particle.life--;
             }
 
         };
-
-        Future<?>[] futures = new Future[system.getGroupCount()];
-        var pt = new StatusBarProgressTracker(NAME, futures.length);
 
         for (int i = 0; i < futures.length; i++) {
             int finalI = i;
@@ -214,7 +213,7 @@ public class FlowField extends ParametrizedFilter {
         ThreadPool.waitFor(futures, pt);
         pt.finished();
 
-        if (viewFlowVectors) {
+        if (showFlowVectors) {
 
             Shape unitArrow = AffineTransform.getScaleInstance(25, 25).createTransformedShape(Shapes.createUnitArrow());
 
@@ -244,7 +243,6 @@ public class FlowField extends ParametrizedFilter {
 
     private static class SimpleParticle extends Particle {
         public GeneralPath path;
-        public int life;
         public Color color;
 
         public void update(float vx, float vy) {
