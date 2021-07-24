@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import net.jafama.FastMath;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
@@ -322,6 +323,10 @@ public class Shapes {
         }
 
         return it2.isDone();
+    }
+
+    public static Shape createCircle(Point2D center, double radius) {
+        return createCircle(center.getX(), center.getY(), radius);
     }
 
     /**
@@ -1431,5 +1436,100 @@ public class Shapes {
             height = 1;
         }
         return new Rectangle(x, y, width, height);
+    }
+
+    private static double distance(Point2D start, Point2D end) {
+        return FastMath.hypot(start.getX() - end.getX(), start.getY() - end.getY());
+    }
+
+    /**
+     * Connects the given points smoothly with cubic Bezier curves.
+     * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
+     */
+    public static Path2D smoothConnect(List<Point2D> points) {
+        int numPoints = points.size();
+        if (numPoints <= 1) {
+            throw new IllegalArgumentException("numPoints = " + numPoints);
+        }
+
+        // calculate arrays of centers and lengths to avoid repeated computing
+        Point2D[] centers = new Point2D[numPoints - 1];
+        double[] lengths = new double[numPoints - 1];
+        for (int i = 0; i < numPoints - 1; i++) {
+            Point2D start = points.get(i);
+            Point2D end = points.get(i + 1);
+            centers[i] = calcCenter(start, end);
+            lengths[i] = distance(start, end);
+        }
+
+        Path2D.Double path = new Path2D.Double();
+        Point2D first = points.get(0);
+        path.moveTo(first.getX(), first.getY());
+
+        for (int i = 1; i < numPoints; i++) {
+            Point2D start = points.get(i - 1);
+            Point2D end = points.get(i);
+
+            double x1 = start.getX();
+            double y1 = start.getY();
+            double x2 = end.getX();
+            double y2 = end.getY();
+
+            double len2 = lengths[i - 1];
+            Point2D center2 = centers[i - 1];
+
+            double len1;
+            Point2D prev;
+            Point2D center1;
+            if (i == 1) {
+                len1 = 0;
+                prev = start;
+                center1 = start;
+            } else {
+                len1 = lengths[i - 2];
+                center1 = centers[i - 2];
+                prev = points.get(i - 1);
+            }
+
+            double len3;
+            Point2D next;
+            Point2D center3;
+
+            if (i == numPoints - 1) {
+                len3 = 0;
+                next = end;
+                center3 = end;
+            } else {
+                len3 = lengths[i];
+                center3 = centers[i];
+                next = points.get(i + 1);
+            }
+
+            double xc1 = center1.getX();
+            double yc1 = center1.getY();
+            double xc2 = center2.getX();
+            double yc2 = center2.getY();
+            double xc3 = center3.getX();
+            double yc3 = center3.getY();
+
+            double k1 = len1 / (len1 + len2);
+            double k2 = len2 / (len2 + len3);
+
+            double xm1 = xc1 + (xc2 - xc1) * k1;
+            double ym1 = yc1 + (yc2 - yc1) * k1;
+
+            double xm2 = xc2 + (xc3 - xc2) * k2;
+            double ym2 = yc2 + (yc3 - yc2) * k2;
+
+            double ctrl1X = xm1 + (xc2 - xm1) + x1 - xm1;
+            double ctrl1Y = ym1 + (yc2 - ym1) + y1 - ym1;
+
+            double ctrl2X = xm2 + (xc2 - xm2) + x2 - xm2;
+            double ctrl2Y = ym2 + (yc2 - ym2) + y2 - ym2;
+
+            path.curveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, end.getX(), end.getY());
+        }
+
+        return path;
     }
 }
