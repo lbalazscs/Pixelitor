@@ -58,7 +58,7 @@ public class Colors {
     public static Color rgbInterpolate(Color startColor, Color endColor, float progress) {
         int interpolatedRGB = ImageMath.mixColors(progress,
             startColor.getRGB(), endColor.getRGB());
-        return new Color(interpolatedRGB);
+        return new Color(interpolatedRGB, true);
     }
 
     /**
