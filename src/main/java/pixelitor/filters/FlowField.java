@@ -7,15 +7,17 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
-import pixelitor.utils.*;
+import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -42,9 +44,10 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam qualityParam = new RangeParam("Quality (%)", 1, 75, 100);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
-    private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 11, 50);
+    private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
+    private final RangeParam curvinessParam = new RangeParam("Curviness", 0, 100, 1000);
     private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false);
-    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, forceParam, turbulenceParam, drawToleranceParam, showFlowVectors);
+    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, forceParam, turbulenceParam, drawToleranceParam, curvinessParam, showFlowVectors);
 
     public FlowField() {
         super(false);
@@ -89,6 +92,7 @@ public class FlowField extends ParametrizedFilter {
         float force = (float) forceParam.getZoomRatio();
         int turbulence = turbulenceParam.getValue();
         int tolerance = drawToleranceParam.getValue();
+        float curviness = curvinessParam.getValue() / 100f;
         boolean showFlowVectors = this.showFlowVectors.isChecked();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,8 +104,8 @@ public class FlowField extends ParametrizedFilter {
         Future<?>[] futures = new Future[groupCount];
         var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
 //        var pt = new DebugProgressTracker(NAME, futures.length + 1, new StatusBarProgressTracker(NAME, futures.length + 1));
-        Utils.sleep(500, TimeUnit.MILLISECONDS);
-        pt.unitDone();
+//        Utils.sleep(500, TimeUnit.MILLISECONDS);
+//        pt.unitDone();
 
         Random r = ReseedSupport.reInitialize();
         OpenSimplex2F noise = ReseedSupport.getSimplexNoise();
@@ -128,7 +132,7 @@ public class FlowField extends ParametrizedFilter {
         float[][] cos_field = new float[field_w][field_h];
         float[][] sin_field = new float[field_w][field_h];
 
-        // NOTE: verify that it's better than creating a `new Color[field_w][field_h] when not needed`.
+        // NOTE: verify that it's better than creating a "new Color[field_w][field_h] when not needed".
         Color[][] col_field = ((Supplier<Color[][]>) () -> {
             if (randomColor)
                 return new Color[field_w][field_h];
@@ -165,7 +169,7 @@ public class FlowField extends ParametrizedFilter {
 
             @Override
             protected SimpleParticle newParticle() {
-                return new SimpleParticle(tolerance);
+                return new SimpleParticle(tolerance, curviness);
             }
 
             @Override
@@ -179,12 +183,12 @@ public class FlowField extends ParametrizedFilter {
 
                 particle.color = randomColor ? col_field[field_x][field_y] : fgColor;
 
-                if (particle.path != null) {
+                if (particle.isPathReady()) {
                     g2.setColor(particle.color);
-                    g2.draw(particle.path);
+                    g2.draw(particle.getPath());
                 }
-                particle.path = new GeneralPath();
-                particle.path.moveTo(particle.lastX, particle.lastY);
+                particle.path = new ArrayList<>();
+                particle.path.add(new float[]{particle.lastX, particle.lastY});
             }
 
             @Override
@@ -212,8 +216,8 @@ public class FlowField extends ParametrizedFilter {
                     system.step(finalI);
 
                 for (SimpleParticle particle : system.group(finalI).getParticles()) {
-                    if (particle.path != null)
-                        g2.draw(particle.path);
+                    if (particle.isPathReady())
+                        g2.draw(particle.getPath());
                 }
 
                 System.out.println(System.currentTimeMillis() - t);
@@ -255,20 +259,28 @@ public class FlowField extends ParametrizedFilter {
 
 
     private static class SimpleParticle extends Particle {
-        public GeneralPath path;
+        public ArrayList<float[]> path;
         public Color color;
         public float tolerance;
+        public float curviness;
+        public float mass;
 
-        public SimpleParticle(int tolerance) {
+        public SimpleParticle(float tolerance, float curviness) {
             this.tolerance = tolerance;
+            this.curviness = curviness;
+            mass = (float) FastMath.random()+1;
+            mass *= 10;
         }
 
-        public void update(float vx, float vy) {
-            x += vx;
-            y += vy;
+        public void update(float dx, float dy) {
+//            x += vx += dx/mass;
+//            y += vy += dy/mass;
+
+            x+=dx;
+            y+=dy;
 
             if (anyDisplacementInXOrYIsGreaterThanOne()) {
-                path.lineTo(x, y);
+                path.add(new float[]{x, y});
                 lastX = x;
                 lastY = y;
             }
@@ -276,6 +288,14 @@ public class FlowField extends ParametrizedFilter {
 
         private boolean anyDisplacementInXOrYIsGreaterThanOne() {
             return FastMath.abs(lastX - x) > tolerance || FastMath.abs(lastY - y) > tolerance;
+        }
+
+        public boolean isPathReady() {
+            return path != null && path.size() >= 3;
+        }
+
+        public Shape getPath() {
+            return Shapes.smoothConnect(path.toArray(value -> new float[value][2]), curviness);
         }
     }
 

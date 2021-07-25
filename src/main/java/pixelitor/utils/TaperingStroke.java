@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.awt.geom.PathIterator.*;
@@ -14,9 +15,15 @@ import static pixelitor.utils.FloatVectorMath.*;
 public class TaperingStroke implements Stroke {
 
     float thickness;
+    boolean reverse;
 
-    public TaperingStroke(float th) {
-        thickness = th;
+    public TaperingStroke(float thickness) {
+        this(thickness, false);
+    }
+
+    public TaperingStroke(float thickness, boolean reverse) {
+        this.thickness = thickness;
+        this.reverse = reverse;
     }
 
     @Override
@@ -39,6 +46,7 @@ public class TaperingStroke implements Stroke {
                 case SEG_MOVETO:
                     lastMoveToPoint = new float[]{points[0], points[1]};
                     if (!pts.isEmpty()) {
+                        if (reverse) Collections.reverse(pts);
                         drawTaperingStroke(pts, path);
                         pts.clear();
                     }
@@ -48,8 +56,11 @@ public class TaperingStroke implements Stroke {
             }
         }
 
-        if (!pts.isEmpty())
+
+        if (!pts.isEmpty()) {
+            if(reverse)Collections.reverse(pts);
             drawTaperingStroke(pts, path);
+        }
 
         return path;
     }
@@ -149,7 +160,6 @@ public class TaperingStroke implements Stroke {
 
         path.closePath();
     }
-
 
 
 }
