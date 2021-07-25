@@ -91,7 +91,7 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam qualityParam = new RangeParam("Quality (%)", 1, 75, 100);
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
-    private final RangeParam zFactorParam = new RangeParam("Z Factor", 0, 0, 100000000);
+    private final RangeParam zFactorParam = new RangeParam("Z Factor", 0, 0, 1000);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
     private final RangeParam curvinessParam = new RangeParam("Curviness", 0, 100, 1000);
     private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false, IGNORE_RANDOMIZE);
@@ -176,18 +176,16 @@ public class FlowField extends ParametrizedFilter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        float PI = (float) FastMath.PI;
-        float initTheta = r.nextFloat() * 2 * PI;
-        PI *= variance;
-
-        float[][] field = null;
-        if (showFlowVectors)
-            field = new float[field_w][field_h];
-
-        float[][] cos_field = new float[field_w][field_h];
-        float[][] sin_field = new float[field_w][field_h];
+        float PI = (float) FastMath.PI * variance;
+        float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
         // NOTE: verify that it's better than creating a "new Color[field_w][field_h] when not needed".
+        float[][] field = ((Supplier<float[][]>) () -> {
+            if (showFlowVectors)
+                return new float[field_w][field_h];
+            return null;
+        }).get();
+
         Color[][] col_field = ((Supplier<Color[][]>) () -> {
             if (randomColor)
                 return new Color[field_w][field_h];
@@ -198,24 +196,13 @@ public class FlowField extends ParametrizedFilter {
         if (randomColor)
             hsb_col = Colors.toHSB(Rnd.createRandomColor(r, false));
 
-        float z = 0;
         for (int i = 0; i < field_w; i++) {
             for (int j = 0; j < field_h; j++) {
-                float value = initTheta + (float) (noise.turbulence3(i / zoom / field_density, j / zoom / field_density, z, turbulence) * PI);
-
-                if (showFlowVectors)
-                    field[i][j] = value;
-
-                cos_field[i][j] = (float) (force * FastMath.cos(value));
-                sin_field[i][j] = (float) (force * FastMath.sin(value));
-
                 if (randomColor) {
                     col_field[i][j] = Colors.rgbInterpolate(fgColor, new Color(Colors.HSBAtoARGB(hsb_col, fgColor.getAlpha()), true), colorRandomness);
 
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
-
-                z += zFactor;
             }
         }
 
@@ -224,6 +211,14 @@ public class FlowField extends ParametrizedFilter {
         g2.setColor(fgColor);
 
         ParticleSystem<FlowFieldParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP) {
+
+            float z = 0;
+
+            @Override
+            public void step(int idx) {
+                super.step(idx);
+                z += zFactor;
+            }
 
             @Override
             protected FlowFieldParticle newParticle() {
@@ -261,7 +256,12 @@ public class FlowField extends ParametrizedFilter {
 
                 float vx = particle.vx;
                 float vy = particle.vy;
-                physicsMode.updateParticle(particle, cos_field[field_x][field_y], sin_field[field_x][field_y]);
+
+                float value = initTheta + (float) (noise.turbulence3(field_x / zoom / field_density, field_y / zoom / field_density, z, turbulence) * PI);
+                physicsMode.updateParticle(particle, (float) (force * FastMath.cos(value)), (float) (force * FastMath.sin(value)));
+
+//                physicsMode.updateParticle(particle, cos_field[field_x][field_y], sin_field[field_x][field_y]);
+
                 if (particle.vx * particle.vx + particle.vy * particle.vy > maximumVelocity) {
                     particle.vx = vx;
                     particle.vy = vy;
@@ -270,10 +270,8 @@ public class FlowField extends ParametrizedFilter {
                 particle.update();
 
             }
-
         };
 
-        final long t = System.currentTimeMillis();
         for (int i = 0; i < futures.length; i++) {
             int finalI = i;
 
@@ -286,16 +284,18 @@ public class FlowField extends ParametrizedFilter {
                     if (particle.isPathReady())
                         g2.draw(particle.getPath());
                 }
-
-                System.out.println(System.currentTimeMillis() - t);
             });
         }
 
         ThreadPool.waitFor(futures, pt);
         pt.finished();
 
-        if (showFlowVectors)
+        if (showFlowVectors) {
+            for(int i = 0; i < field_w; i++)
+                for (int j = 0; j < field_h; j++)
+                    field[i][j] /= 100;
             fillImageWithFieldPointArrows(field_density, g2, field_w, field_h, field);
+        }
 
         return dest;
     }
