@@ -98,8 +98,8 @@ public class FlowField extends ParametrizedFilter {
 
         int groupCount = FastMath.ceilToInt(particle_count * 1d / PARTICLES_PER_GROUP);
         Future<?>[] futures = new Future[groupCount];
-//        var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
-        var pt = new DebugProgressTracker(NAME, futures.length + 1, new StatusBarProgressTracker(NAME, futures.length + 1));
+        var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
+//        var pt = new DebugProgressTracker(NAME, futures.length + 1, new StatusBarProgressTracker(NAME, futures.length + 1));
         Utils.sleep(500, TimeUnit.MILLISECONDS);
         pt.unitDone();
 
@@ -128,7 +128,7 @@ public class FlowField extends ParametrizedFilter {
         float[][] cos_field = new float[field_w][field_h];
         float[][] sin_field = new float[field_w][field_h];
 
-        // TODO: verify that it's better than creating a `new Color[field_w][field_h] when not needed`.
+        // NOTE: verify that it's better than creating a `new Color[field_w][field_h] when not needed`.
         Color[][] col_field = ((Supplier<Color[][]>) () -> {
             if (randomColor)
                 return new Color[field_w][field_h];
@@ -137,7 +137,6 @@ public class FlowField extends ParametrizedFilter {
 
         float[] hsb_col = null;
         if (randomColor)
-//            hsb_col = Colors.toHSB(fgColor);
             hsb_col = Colors.toHSB(Rnd.createRandomColor(r, false));
 
         for (int i = 0; i < field_w; i++) {
@@ -152,7 +151,7 @@ public class FlowField extends ParametrizedFilter {
 
                 if (randomColor) {
                     col_field[i][j] = Colors.rgbInterpolate(fgColor, new Color(Colors.HSBAtoARGB(hsb_col, fgColor.getAlpha()), true), colorRandomness);
-                    ;
+
                     hsb_col[0] = (hsb_col[0] + GOLDEN_RATIO_CONJUGATE) % 1;
                 }
             }

@@ -21,7 +21,7 @@ class TaperingStrokeTest {
         float[] P = new float[2];
         float[] Q = new float[2];
 
-        TaperingStroke.perpendiculars(A, B, (float) Math.sqrt(2), P, Q);
+        FloatVectorMath.perpendiculars(A, B, (float) Math.sqrt(2), P, Q);
 
         System.out.println(Arrays.toString(P));
         System.out.println(Arrays.toString(Q));

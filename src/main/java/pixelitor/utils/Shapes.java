@@ -244,8 +244,8 @@ public class Shapes {
 
     public static Point2D calcCenter(Point2D p1, Point2D p2) {
         return new Point2D.Double(
-            (p1.getX() + p2.getX()) / 2.0,
-            (p1.getY() + p2.getY()) / 2.0
+                (p1.getX() + p2.getX()) / 2.0,
+                (p1.getY() + p2.getY()) / 2.0
         );
     }
 
@@ -257,13 +257,13 @@ public class Shapes {
             int type = pathIterator.currentSegment(coords);
             sb.append(switch (type) {
                 case SEG_MOVETO -> format("M %.2f,%.2f ",
-                    coords[0], coords[1]);
+                        coords[0], coords[1]);
                 case SEG_LINETO -> format("L %.2f,%.2f ",
-                    coords[0], coords[1]);
+                        coords[0], coords[1]);
                 case SEG_QUADTO -> format("Q %.2f,%.2f,%.2f,%.2f ",
-                    coords[0], coords[1], coords[2], coords[3]);
+                        coords[0], coords[1], coords[2], coords[3]);
                 case SEG_CUBICTO -> format("C %.2f,%.2f,%.2f,%.2f,%.2f,%.2f ",
-                    coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                        coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
                 case SEG_CLOSE -> "Z";
                 default -> throw new IllegalArgumentException("type = " + type);
             });
@@ -1149,24 +1149,24 @@ public class Shapes {
         path.moveTo(centerX, bottomY);
         // right side
         path.curveTo(cp1XRight, cp1Y, // control point 1
-            maxX, cp2Y,    // control point 2
-            maxX, sideY); // side point
+                maxX, cp2Y,    // control point 2
+                maxX, sideY); // side point
         path.curveTo(maxX, cp3Y, // control point 3
-            cp4XRight, y, // control point 4
-            topXRight, y); // top point
+                cp4XRight, y, // control point 4
+                topXRight, y); // top point
         path.curveTo(cp5XRight, y, // control point 5
-            centerX, topCenterY,  // this control point is the same as the following endpoint
-            centerX, topCenterY); // top center point
+                centerX, topCenterY,  // this control point is the same as the following endpoint
+                centerX, topCenterY); // top center point
         // left side
         path.curveTo(centerX, topCenterY,   // this control point is the same as the start point
-            cp5XLeft, y, // left mirror of control point 5
-            topXLeft, y);
+                cp5XLeft, y, // left mirror of control point 5
+                topXLeft, y);
         path.curveTo(cp4XLeft, y,
-            x, cp3Y,
-            x, sideY);
+                x, cp3Y,
+                x, sideY);
         path.curveTo(x, cp2Y,
-            cp1XLeft, cp1Y,
-            centerX, bottomY);
+                cp1XLeft, cp1Y,
+                centerX, bottomY);
 
         return path;
     }
@@ -1532,4 +1532,109 @@ public class Shapes {
 
         return path;
     }
+
+    public static Path2D smoothConnect(float[][] points, float smoothness) {
+
+        int numPoints = points.length;
+        assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
+
+        // Given points must represent an open curve:1 or a closed curve:2
+        // 1: first point != last point
+        // 2: first point == last point
+        boolean isClosed = FloatVectorMath.areEqual(points[0], points[numPoints - 1]);
+        int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
+
+        // Every two alternate points represent a side. There are numPoints - 1 sides.
+
+        // Mid points of all those sides.
+        float[][] centers = new float[numPoints - 1][2];
+        // Length of all those sides.
+        float[] lengths = new float[numPoints - 1];
+
+        for (int i = 0; i < numPoints - 1; i++) {
+            FloatVectorMath.midPoint(points[i], points[i + 1], centers[i]);
+            lengths[i] = FloatVectorMath.distance(points[i], points[i + 1]);
+        }
+
+        // controlPoints[i] represents the 2 control points after and before points[i]
+        // If the path is closed, last point == first point, so we make a less control point.
+        float[][][] controlPoints = new float[lastPointIndex + 1][2][2];
+
+        for (int i = 1; i < numPoints - 1; i++) {
+            float[] B = points[i];
+
+            controlPoints[i][0] = centers[i - 1].clone();
+            controlPoints[i][1] = centers[i].clone();
+            calculateControlPoint(B, controlPoints[i][0], controlPoints[i][1], lengths[i - 1], lengths[i], smoothness);
+        }
+
+        Path2D path = new Path2D.Float();
+        // for first point
+        if (isClosed) {
+            controlPoints[0][0] = centers[centers.length - 1].clone(); // first and last point's center
+            controlPoints[0][1] = centers[0].clone();// first and second's center
+            calculateControlPoint(points[0], controlPoints[0][0], controlPoints[0][1], lengths[lengths.length - 1], lengths[0], smoothness);
+
+            path.moveTo(points[lastPointIndex][0], points[lastPointIndex][1]);
+
+        } else {
+            controlPoints[0][1] = points[0];
+            controlPoints[lastPointIndex][0] = points[lastPointIndex];
+
+            path.moveTo(points[0][0], points[0][1]);
+        }
+
+        // i = 0 tries to put the curve between first and last point. Therefore, if shape is open, we start putting the curve from i=1.
+        for (int i = isClosed?0:1; i < controlPoints.length; i++) {
+
+            float[] P = controlPoints[i][0];
+            float[] oldQ = i == 0 ? controlPoints[controlPoints.length - 1][1] : controlPoints[i - 1][1];
+
+            path.curveTo(oldQ[0], oldQ[1], P[0], P[1], points[i][0], points[i][1]);
+        }
+
+        return path;
+    }
+
+    private static void calculateControlPoint(float[] B, float[] P, float[] Q, float AB, float BC, float smoothness) {
+        // A temporary point T calculated such that
+        // * For A=points[i-1], B=points[i] and C = points[i+1]
+        //   * For midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
+        //     * It lies on the line joining P and Q
+        //     * PT / AB == TQ / BC       - (1)
+        //
+        // Mathematically, with the given data,
+        //
+        // * Using section formula (on Vectors)
+        //   * T = (P * n + Q * m) / (m + n)
+        //   * T = P * n / (m + n) + Q * m / (m + n)
+        //   * T = P * TQ / PQ + Q * PT / PQ
+        //
+        // * Using Componendo rule on (1)
+        //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
+        //   * T = (P * AB + Q * BC) / (AB + BC)
+        //
+        float[] T = new float[2];
+
+        FloatVectorMath.sectionFormula(P.clone(), Q.clone(), AB, BC, T);
+
+        // Converting point vectors P and Q to show relative displacement from T
+        // P = P - T, Q = Q - T
+        FloatVectorMath.subtract(P, T, P);
+        FloatVectorMath.subtract(Q, T, Q);
+
+        // Scaling the point vectors P and Q about origin
+        if (smoothness != 1) {
+            FloatVectorMath.scale(P, smoothness);
+            FloatVectorMath.scale(Q, smoothness);
+        }
+
+        // translating point vectors P and Q by B so that
+        // the relative position of original P and Q to T is same as
+        // the relative position of new P and Q to B.
+        FloatVectorMath.add(P, B, P);
+        FloatVectorMath.add(Q, B, Q);
+
+    }
+
 }

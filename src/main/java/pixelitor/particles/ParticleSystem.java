@@ -45,4 +45,8 @@ public abstract class ParticleSystem<P extends Particle> {
     public int getGroupCount() {
         return groupCount;
     }
+
+    public int getParticleCount() {
+        return groupCount*groupSize;
+    }
 }
