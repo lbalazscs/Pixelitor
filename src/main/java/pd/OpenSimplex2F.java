@@ -60,7 +60,7 @@ public class OpenSimplex2F {
     }
 
     public double turbulence2(double x, double y, int octaves) {
-        float t = 0.0f;
+        double t = 0.0f;
         for (int f = 1; f <= octaves; f *= 2) t += Math.abs(noise2(f * x, f * y)) / f;
         return t;
     }
@@ -130,6 +130,12 @@ public class OpenSimplex2F {
 
         // Evaluate both lattices to form a BCC lattice.
         return noise3_BCC(xr, yr, zr);
+    }
+
+    public double turbulence3(double x, double y, double z, int octaves) {
+        double t = 0.0f;
+        for (int f = 1; f <= octaves; f *= 2) t += Math.abs(noise3_Classic(f * x, f * y, f * z)) / f;
+        return t;
     }
 
     /**
