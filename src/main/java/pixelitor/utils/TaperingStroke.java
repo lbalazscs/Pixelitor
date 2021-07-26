@@ -5,12 +5,13 @@ import net.jafama.FastMath;
 import java.awt.*;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static java.awt.geom.PathIterator.*;
-import static pixelitor.utils.FloatVectorMath.*;
+import static pixelitor.utils.Geometry.*;
 
 public class TaperingStroke implements Stroke {
 
@@ -33,8 +34,8 @@ public class TaperingStroke implements Stroke {
 
         GeneralPath path = new GeneralPath();
 
-        List<float[]> pts = new ArrayList<>();
-        float[] lastMoveToPoint = null;
+        List<Point2D> pts = new ArrayList<>();
+        Point2D lastMoveToPoint = null;
 
         for (var it = new FlatteningPathIterator(p.getPathIterator(null), 1); !it.isDone(); it.next()) {
 
@@ -44,56 +45,56 @@ public class TaperingStroke implements Stroke {
                         pts.add(lastMoveToPoint);
                     break;
                 case SEG_MOVETO:
-                    lastMoveToPoint = new float[]{points[0], points[1]};
+                    lastMoveToPoint = new Point2D.Float(points[0], points[1]);
                     if (!pts.isEmpty()) {
                         if (reverse) Collections.reverse(pts);
                         drawTaperingStroke(pts, path);
                         pts.clear();
                     }
                 case SEG_LINETO:
-                    pts.add(new float[]{points[0], points[1]});
+                    pts.add(new Point2D.Float(points[0], points[1]));
                     break;
             }
         }
 
 
         if (!pts.isEmpty()) {
-            if(reverse)Collections.reverse(pts);
+            if (reverse) Collections.reverse(pts);
             drawTaperingStroke(pts, path);
         }
 
         return path;
     }
 
-    private void drawTaperingStroke(List<float[]> pts, GeneralPath path) {
+    private void drawTaperingStroke(List<Point2D> pts, GeneralPath path) {
 
 
         float[] distances = new float[pts.size() - 1];
         float totalDistance = 0;
         for (int i = 0; i < distances.length; i++) {
-            float[] a = pts.get(i);
-            float[] b = pts.get(i + 1);
-            totalDistance += distances[i] = (float) FastMath.hypot(a[0] - b[0], a[1] - b[1]);
+            Point2D a = pts.get(i);
+            Point2D b = pts.get(i + 1);
+            totalDistance += distances[i] = (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
         }
 
 
         // first point
-        float[] P1 = pts.get(0);
+        Point2D P1 = pts.get(0);
         // second point
-        float[] P2 = pts.get(1);
+        Point2D P2 = pts.get(1);
 
         // first quad point
-        float[] Q1 = new float[2];
+        Point2D Q1 = new Point2D.Float();
         // second quad point
-        float[] Q2 = new float[2];
+        Point2D Q2 = new Point2D.Float();
 
         perpendiculars(P1, P2, thickness / 2, Q1, Q2);
 
-        path.moveTo(Q1[0], Q1[1]);
+        path.moveTo(Q1.getX(), Q1.getY());
 
         float distanceSoFar = distances[0];
 
-        float[][] returnPathf = new float[pts.size() - 1][2];
+        Point2D[] returnPathf = new Point2D[pts.size() - 1];
 
         returnPathf[0] = Q2;
 
@@ -104,7 +105,7 @@ public class TaperingStroke implements Stroke {
             // THE third point of consideration. the ith point.
             P1 = pts.get(i - 1);
             P2 = pts.get(i);
-            float[] P3 = pts.get(i + 1);
+            Point2D P3 = pts.get(i + 1);
 
             // Our target?
             // To calculate a line passing through P2
@@ -117,23 +118,23 @@ public class TaperingStroke implements Stroke {
             // We will first calculate the perpendiculars of P2P1 and P2P3 through P2
             // Later we can just take the mid points to get the two points Q3 and Q4.
 
-            float[] Perp_P2P1_1 = new float[2];
-            float[] Perp_P2P1_2 = new float[2];
+            var Perp_P2P1_1 = new Point2D.Float();
+            var Perp_P2P1_2 = new Point2D.Float();
 
             perpendiculars(P2, P1, Perp_P2P1_1, Perp_P2P1_2);
 
-            float[] Perp_P2P3_1 = new float[2];
-            float[] Perp_P2P3_2 = new float[2];
+            var Perp_P2P3_1 = new Point2D.Float();
+            var Perp_P2P3_2 = new Point2D.Float();
 
             perpendiculars(P2, P3, Perp_P2P3_1, Perp_P2P3_2);
 
             // third quad point
-            float[] Q3 = new float[]{(Perp_P2P1_1[0] + Perp_P2P3_2[0]) / 2, (Perp_P2P1_1[1] + Perp_P2P3_2[1]) / 2};
+            Point2D Q3 = new Point2D.Float((Perp_P2P1_1.x + Perp_P2P3_2.x) / 2, (Perp_P2P1_1.y + Perp_P2P3_2.y) / 2);
             // Q3 = Q3 - P2
             subtract(Q3, P2, Q3);
 
             // fourth quad point
-            float[] Q4 = new float[]{(Perp_P2P1_2[0] + Perp_P2P3_1[0]) / 2, (Perp_P2P1_2[1] + Perp_P2P3_1[1]) / 2};
+            Point2D Q4 = new Point2D.Float((Perp_P2P1_2.x + Perp_P2P3_1.x) / 2, (Perp_P2P1_2.y + Perp_P2P3_1.y) / 2);
             // Q4 = Q4 - P2
             subtract(Q4, P2, Q4);
 
@@ -146,16 +147,16 @@ public class TaperingStroke implements Stroke {
             add(Q4, P2, Q4);
 
             returnPathf[i] = Q3;
-            path.lineTo(Q4[0], Q4[1]);
+            path.lineTo(Q4.getX(), Q4.getY());
 
         }
 
-        float[] Ql = pts.get(pts.size() - 1);
-        path.lineTo(Ql[0], Ql[1]);
+        Point2D Ql = pts.get(pts.size() - 1);
+        path.lineTo(Ql.getX(), Ql.getY());
 
         for (int i = returnPathf.length - 1; i >= 0; i--) {
-            float[] P = returnPathf[i];
-            path.lineTo(P[0], P[1]);
+            Point2D P = returnPathf[i];
+            path.lineTo(P.getX(), P.getY());
         }
 
         path.closePath();

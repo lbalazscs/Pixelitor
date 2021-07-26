@@ -19,10 +19,10 @@ public abstract class ParticleSystem<P extends Particle> {
 
         groups = new ArrayList<>(groupCount);
         for (int i = 0; i < groupCount; i++)
-            groups.add(new ParticleGroup<>(this, groupSize));
+            groups.add(new ParticleGroup<>(this, i, groupSize));
     }
 
-    public final void step() {
+    public void step() {
         for (ParticleGroup<P> group : groups) group.step();
     }
 

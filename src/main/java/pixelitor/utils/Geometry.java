@@ -2,7 +2,9 @@ package pixelitor.utils;
 
 import net.jafama.FastMath;
 
-public class FloatVectorMath {
+import java.awt.geom.Point2D;
+
+public class Geometry {
 
     /**
      * <P>For two points A and B this function will set the value of outA and outB such that:</P>
@@ -26,9 +28,9 @@ public class FloatVectorMath {
      * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
-    public static void perpendiculars(float[] A, float[] B, float dist, float[] outA, float[] outB) {
+    public static void perpendiculars(Point2D A, Point2D B, float dist, Point2D outA, Point2D outB) {
 
-        float[] temp2 = new float[2];
+        Point2D temp2 = new Point2D.Float();
 
         // direction with magnitude = B - A
         subtract(B, A, temp2);
@@ -66,9 +68,9 @@ public class FloatVectorMath {
      * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
-    public static void perpendiculars(float[] A, float[] B, float[] outA, float[] outB) {
+    public static void perpendiculars(Point2D A, Point2D B, Point2D outA, Point2D outB) {
 
-        float[] temp2 = new float[2];
+        Point2D temp2 = new Point2D.Float();
 
         // direction with magnitude = B - A
         subtract(B, A, temp2);
@@ -99,13 +101,11 @@ public class FloatVectorMath {
      * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
-    public static void perpendiculars(float[] A, float[] outA, float[] outB) {
+    public static void perpendiculars(Point2D A, Point2D outA, Point2D outB) {
         // first quad point: [Ay, -Ax]
-        outA[0] = -A[1];
-        outA[1] = A[0];
+        outA.setLocation(-A.getY(), A.getX());
         // second quad point: [-Ay, Ax]
-        outB[0] = A[1];
-        outB[1] = -A[0];
+        outB.setLocation(A.getY(), -A.getX());
     }
 
     /**
@@ -131,48 +131,55 @@ public class FloatVectorMath {
      * @param n Later part of the ratio of division.
      * @param R A 2 valued empty array which will represent a point dividing AB.
      */
-    public static void sectionFormula(float[] A, float[] B, float m, float n, float[] R) {
+    public static void sectionFormula(Point2D A, Point2D B, float m, float n, Point2D R) {
         add(scale(A, n), scale(B, m), R);
         deScale(R, (m + n));
     }
 
-    public static void normalize(float[] A) {
-        deScale(A, (float) FastMath.hypot(A[0], A[1]));
+    public static Point2D newFrom(Point2D A) {
+        Point2D.Float B = new Point2D.Float();
+        B.setLocation(A);
+        return B;
     }
 
-    public static void deScale(float[] A, float factor) {
-        A[0] /= factor;
-        A[1] /= factor;
+    public static void normalize(Point2D A) {
+        deScale(A, (float) FastMath.hypot(A.getX(), A.getY()));
     }
 
-    public static float[] scale(float[] A, float factor) {
-        A[0] *= factor;
-        A[1] *= factor;
+    public static void deScale(Point2D A, float factor) {
+        A.setLocation(A.getX() / factor, A.getY() / factor);
+    }
+
+    public static Point2D scale(Point2D A, float factor) {
+        A.setLocation(A.getX() * factor, A.getY() * factor);
         return A;
     }
 
-    public static boolean areEqual(float[] A, float[] B) {
+    public static boolean areEqual(Point2D A, Point2D B) {
         // TODO: will using the epsilon method be any better??
-        return Float.compare(A[0], B[0]) == 0 && Float.compare(A[1], B[1]) == 0;
+        return Double.compare(A.getX(), B.getX()) == 0 && Double.compare(A.getY(), B.getY()) == 0;
     }
 
-    public static float distance(float[] A, float[] B) {
-        return (float) FastMath.hypot(A[0] - B[0], A[1] - B[1]);
+    public static void copy(Point2D A, Point2D B) {
+        A.setLocation(B.getX(), B.getY());
     }
 
-    public static float[] add(float[] A, float[] B, float[] R) {
-        R[0] = A[0] + B[0];
-        R[1] = A[1] + B[1];
+    public static float distance(Point2D A, Point2D B) {
+//        return (float) FastMath.hypot(A[0] - B[0], A[1] - B[1]);
+        return (float) A.distance(B);
+    }
+
+    public static Point2D add(Point2D A, Point2D B, Point2D R) {
+        R.setLocation(A.getX() + B.getX(), A.getY() + B.getY());
         return R;
     }
 
-    public static void midPoint(float[] A, float[] B, float[] R) {
+    public static void midPoint(Point2D A, Point2D B, Point2D R) {
         add(A, B, R);
         deScale(R, 2);
     }
 
-    public static void subtract(float[] A, float[] B, float[] R) {
-        R[0] = A[0] - B[0];
-        R[1] = A[1] - B[1];
+    public static void subtract(Point2D A, Point2D B, Point2D R) {
+        R.setLocation(A.getX() - B.getX(), A.getY() - B.getY());
     }
 }

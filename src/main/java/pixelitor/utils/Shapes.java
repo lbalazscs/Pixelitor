@@ -1533,70 +1533,81 @@ public class Shapes {
         return path;
     }
 
-    public static Path2D smoothConnect(float[][] points, float smoothness) {
+    public static Path2D smoothConnect(List<Point2D> points, float smoothness) {
 
-        int numPoints = points.length;
+        int numPoints = points.size();
         assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
 
         // Given points must represent an open curve:1 or a closed curve:2
         // 1: first point != last point
         // 2: first point == last point
-        boolean isClosed = FloatVectorMath.areEqual(points[0], points[numPoints - 1]);
+        boolean isClosed = Geometry.areEqual(points.get(0), points.get(numPoints - 1));
         int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
 
         // Every two alternate points represent a side. There are numPoints - 1 sides.
 
         // Mid points of all those sides.
-        float[][] centers = new float[numPoints - 1][2];
+        var centers = new Point2D.Float[numPoints - 1];
         // Length of all those sides.
         float[] lengths = new float[numPoints - 1];
 
         for (int i = 0; i < numPoints - 1; i++) {
-            FloatVectorMath.midPoint(points[i], points[i + 1], centers[i]);
-            lengths[i] = FloatVectorMath.distance(points[i], points[i + 1]);
+            Point2D A = points.get(i);
+            Point2D B = points.get(i + 1);
+            centers[i] = new Point2D.Float();
+            Geometry.midPoint(A, B, centers[i]);
+            lengths[i] = Geometry.distance(A, B);
         }
 
         // controlPoints[i] represents the 2 control points after and before points[i]
         // If the path is closed, last point == first point, so we make a less control point.
-        float[][][] controlPoints = new float[lastPointIndex + 1][2][2];
+        var controlPoints = new Point2D.Float[lastPointIndex + 1][2];
+        for (int i = 0; i < controlPoints.length; i++) {
+            controlPoints[i][0]=new Point2D.Float();
+            controlPoints[i][1]=new Point2D.Float();
+        }
 
         for (int i = 1; i < numPoints - 1; i++) {
-            float[] B = points[i];
-
-            controlPoints[i][0] = centers[i - 1].clone();
-            controlPoints[i][1] = centers[i].clone();
-            calculateControlPoint(B, controlPoints[i][0], controlPoints[i][1], lengths[i - 1], lengths[i], smoothness);
+            Geometry.copy(controlPoints[i][0], centers[i - 1]);
+            Geometry.copy(controlPoints[i][1], centers[i]);
+            calculateControlPoint(points.get(i), controlPoints[i][0], controlPoints[i][1], lengths[i - 1], lengths[i], smoothness);
         }
 
         Path2D path = new Path2D.Float();
+
+        Point2D point = points.get(0);
+        Point2D lastPoint = points.get(lastPointIndex);
+
         // for first point
         if (isClosed) {
-            controlPoints[0][0] = centers[centers.length - 1].clone(); // first and last point's center
-            controlPoints[0][1] = centers[0].clone();// first and second's center
-            calculateControlPoint(points[0], controlPoints[0][0], controlPoints[0][1], lengths[lengths.length - 1], lengths[0], smoothness);
+            Geometry.copy(controlPoints[0][0], centers[centers.length - 1]); // first and last point's center
+            Geometry.copy(controlPoints[0][1], centers[0]);                  // first and second's center
+            calculateControlPoint(point, controlPoints[0][0], controlPoints[0][1], lengths[lengths.length - 1], lengths[0], smoothness);
 
-            path.moveTo(points[lastPointIndex][0], points[lastPointIndex][1]);
+            path.moveTo(lastPoint.getX(), lastPoint.getY());
 
         } else {
-            controlPoints[0][1] = points[0];
-            controlPoints[lastPointIndex][0] = points[lastPointIndex];
 
-            path.moveTo(points[0][0], points[0][1]);
+            Geometry.copy(controlPoints[0][1], point);
+            Geometry.copy(controlPoints[lastPointIndex][0], lastPoint);
+
+            path.moveTo(point.getX(), point.getY());
         }
 
         // i = 0 tries to put the curve between first and last point. Therefore, if shape is open, we start putting the curve from i=1.
-        for (int i = isClosed?0:1; i < controlPoints.length; i++) {
+        for (int i = isClosed ? 0 : 1; i < controlPoints.length; i++) {
 
-            float[] P = controlPoints[i][0];
-            float[] oldQ = i == 0 ? controlPoints[controlPoints.length - 1][1] : controlPoints[i - 1][1];
+            Point2D A = points.get(i);
+            Point2D P = controlPoints[i][0];
+            Point2D oldQ = i == 0 ? controlPoints[controlPoints.length - 1][1] : controlPoints[i - 1][1];
 
-            path.curveTo(oldQ[0], oldQ[1], P[0], P[1], points[i][0], points[i][1]);
+            path.curveTo(oldQ.getX(), oldQ.getY(), P.getX(), P.getY(), A.getX(), A.getY());
         }
 
         return path;
     }
 
-    private static void calculateControlPoint(float[] B, float[] P, float[] Q, float AB, float BC, float smoothness) {
+    private static void calculateControlPoint(Point2D B, Point2D P, Point2D Q, float AB, float BC, float smoothness) {
         // A temporary point T calculated such that
         // * For A=points[i-1], B=points[i] and C = points[i+1]
         //   * For midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
@@ -1614,26 +1625,26 @@ public class Shapes {
         //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
         //   * T = (P * AB + Q * BC) / (AB + BC)
         //
-        float[] T = new float[2];
+        var T = new Point2D.Float();
 
-        FloatVectorMath.sectionFormula(P.clone(), Q.clone(), AB, BC, T);
+        Geometry.sectionFormula(Geometry.newFrom(P), Geometry.newFrom(Q), AB, BC, T);
 
         // Converting point vectors P and Q to show relative displacement from T
         // P = P - T, Q = Q - T
-        FloatVectorMath.subtract(P, T, P);
-        FloatVectorMath.subtract(Q, T, Q);
+        Geometry.subtract(P, T, P);
+        Geometry.subtract(Q, T, Q);
 
         // Scaling the point vectors P and Q about origin
         if (smoothness != 1) {
-            FloatVectorMath.scale(P, smoothness);
-            FloatVectorMath.scale(Q, smoothness);
+            Geometry.scale(P, smoothness);
+            Geometry.scale(Q, smoothness);
         }
 
         // translating point vectors P and Q by B so that
         // the relative position of original P and Q to T is same as
         // the relative position of new P and Q to B.
-        FloatVectorMath.add(P, B, P);
-        FloatVectorMath.add(Q, B, Q);
+        Geometry.add(P, B, P);
+        Geometry.add(Q, B, Q);
 
     }
 

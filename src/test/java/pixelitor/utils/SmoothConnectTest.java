@@ -39,7 +39,6 @@ public class SmoothConnectTest extends JPanel {
     private final JCheckBox isClosed = new JCheckBox("Close shape");
     private final JSlider smoothness = new JSlider(0, 1000, 100);
     private final List<Point2D> pointList;
-    private final float[][] pointArray;
 
     public SmoothConnectTest() {
         //<editor-fold defaultstate="collapsed" desc="Initializing Particle System">
@@ -47,14 +46,12 @@ public class SmoothConnectTest extends JPanel {
         int particleCount = 5;
 
         pointList = new ArrayList<>(particleCount);
-        pointArray = new float[particleCount][2];
 
         system = new ParticleSystem<IndexedParticle>(1, 5) {
             @Override
             protected IndexedParticle newParticle() {
                 IndexedParticle part = new IndexedParticle();
                 pointList.add(new Point2D.Float(part.x, part.y));
-                pointArray[part.index] = new float[]{part.x, part.y};
                 return part;
             }
 
@@ -72,8 +69,6 @@ public class SmoothConnectTest extends JPanel {
             protected void updateParticle(IndexedParticle particle) {
                 particle.update();
                 pointList.get(particle.index).setLocation(particle.x, particle.y);
-                pointArray[particle.index][0] = particle.x;
-                pointArray[particle.index][1] = particle.y;
             }
         };
 
@@ -101,21 +96,14 @@ public class SmoothConnectTest extends JPanel {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         system.step();
 
-        int particleCount = pointArray.length;
-        if (isClosed.isSelected()) particleCount++;
-
         List<Point2D> points = new ArrayList<>(pointList);
-
-        float[][] pointz = new float[particleCount][2];
-        System.arraycopy(pointArray, 0, pointz, 0, pointArray.length);
 
         if (isClosed.isSelected()) {
             points.add(points.get(0));
-            pointz[particleCount-1] = pointz[0].clone();
         }
 
 //        Path2D path = Shapes.smoothConnect(points);
-        Path2D path = Shapes.smoothConnect(pointz, smoothness.getValue()/100f);
+        Path2D path = Shapes.smoothConnect(points, smoothness.getValue()/100f);
 
         g2.setColor(Color.WHITE);
         g2.draw(path);

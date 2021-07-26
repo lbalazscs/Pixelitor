@@ -14,10 +14,12 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Supplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -91,11 +93,10 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam qualityParam = new RangeParam("Quality (%)", 1, 75, 100);
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
-    private final RangeParam zFactorParam = new RangeParam("Z Factor", 0, 0, 1000);
+    private final RangeParam zFactorParam = new RangeParam("Z Factor", 0, 0, 200);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
     private final RangeParam curvinessParam = new RangeParam("Curviness", 0, 100, 1000);
-    private final BooleanParam showFlowVectors = new BooleanParam("Flow Vectors", false, IGNORE_RANDOMIZE);
-    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, iterationsParam, turbulenceParam, zFactorParam, drawToleranceParam, curvinessParam, showFlowVectors);
+    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, iterationsParam, turbulenceParam, zFactorParam, drawToleranceParam, curvinessParam);
 
     public FlowField() {
         super(false);
@@ -120,7 +121,6 @@ public class FlowField extends ParametrizedFilter {
         qualityParam.setToolTip("Smoothness of filament");
         forceParam.setToolTip("Stroke Length");
         turbulenceParam.setToolTip("Adjust the varience provided by Noise.");
-        showFlowVectors.setToolTip("View direction of flow");
 
     }
 
@@ -144,10 +144,9 @@ public class FlowField extends ParametrizedFilter {
         float quality = qualityParam.getValueAsFloat() / 99;
         int iteration_count = iterationsParam.getValue();
         int turbulence = turbulenceParam.getValue();
-        float zFactor = zFactorParam.getValueAsFloat() / 1000000;
+        float zFactor = zFactorParam.getValueAsFloat() / 10000;
         int tolerance = drawToleranceParam.getValue();
         float curviness = curvinessParam.getValue() / 100f;
-        boolean showFlowVectors = this.showFlowVectors.isChecked();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -179,13 +178,6 @@ public class FlowField extends ParametrizedFilter {
         float PI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        // NOTE: verify that it's better than creating a "new Color[field_w][field_h] when not needed".
-        float[][] field = ((Supplier<float[][]>) () -> {
-            if (showFlowVectors)
-                return new float[field_w][field_h];
-            return null;
-        }).get();
-
         Color[][] col_field = ((Supplier<Color[][]>) () -> {
             if (randomColor)
                 return new Color[field_w][field_h];
@@ -210,14 +202,16 @@ public class FlowField extends ParametrizedFilter {
 
         g2.setColor(fgColor);
 
-        ParticleSystem<FlowFieldParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP) {
+        ArrayList<DoubleAdder> zFactors = new ArrayList<>(groupCount);
+        for (int i = 0; i < groupCount; i++)
+            zFactors.add(new DoubleAdder());
 
-            float z = 0;
+        ParticleSystem<FlowFieldParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP) {
 
             @Override
             public void step(int idx) {
                 super.step(idx);
-                z += zFactor;
+                zFactors.get(idx).add(zFactor);
             }
 
             @Override
@@ -241,7 +235,7 @@ public class FlowField extends ParametrizedFilter {
                     g2.draw(particle.getPath());
                 }
                 particle.path = new ArrayList<>();
-                particle.path.add(new float[]{particle.lastX, particle.lastY});
+                particle.path.add(new Point2D.Float(particle.lastX, particle.lastY));
             }
 
             @Override
@@ -257,7 +251,7 @@ public class FlowField extends ParametrizedFilter {
                 float vx = particle.vx;
                 float vy = particle.vy;
 
-                float value = initTheta + (float) (noise.turbulence3(field_x / zoom / field_density, field_y / zoom / field_density, z, turbulence) * PI);
+                float value = initTheta + (float) (noise.turbulence3(field_x / zoom / field_density, field_y / zoom / field_density, zFactors.get(particle.groupIndex).doubleValue(), turbulence) * PI);
                 physicsMode.updateParticle(particle, (float) (force * FastMath.cos(value)), (float) (force * FastMath.sin(value)));
 
 //                physicsMode.updateParticle(particle, cos_field[field_x][field_y], sin_field[field_x][field_y]);
@@ -290,13 +284,6 @@ public class FlowField extends ParametrizedFilter {
         ThreadPool.waitFor(futures, pt);
         pt.finished();
 
-        if (showFlowVectors) {
-            for(int i = 0; i < field_w; i++)
-                for (int j = 0; j < field_h; j++)
-                    field[i][j] /= 100;
-            fillImageWithFieldPointArrows(field_density, g2, field_w, field_h, field);
-        }
-
         return dest;
     }
 
@@ -327,7 +314,7 @@ public class FlowField extends ParametrizedFilter {
 
     private static class FlowFieldParticle extends Particle {
         float ax, ay;
-        public ArrayList<float[]> path;
+        public ArrayList<Point2D> path;
         public Color color;
         public float tolerance;
         public float curviness;
@@ -342,7 +329,7 @@ public class FlowField extends ParametrizedFilter {
 
         public void update() {
             if (anyDisplacementInXOrYIsGreaterThanOne()) {
-                path.add(new float[]{x, y});
+                path.add(new Point2D.Float(x, y));
                 lastX = x;
                 lastY = y;
             }
@@ -357,7 +344,7 @@ public class FlowField extends ParametrizedFilter {
         }
 
         public Shape getPath() {
-            return Shapes.smoothConnect(path.toArray(value -> new float[value][2]), curviness);
+            return Shapes.smoothConnect(path, curviness);
         }
     }
 
