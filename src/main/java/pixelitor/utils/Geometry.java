@@ -114,7 +114,7 @@ public class Geometry {
      * <P>For two points A and B, this function will set the values of R such that:</P>
      * <OL>
      * <LI>
-     * R lyes on the line segment joining A and B.
+     * R lies on the line segment joining A and B.
      * </LI>
      * <LI>
      * R divides AB in the ratio m:n.
@@ -165,8 +165,7 @@ public class Geometry {
     }
 
     public static float distance(Point2D A, Point2D B) {
-//        return (float) FastMath.hypot(A[0] - B[0], A[1] - B[1]);
-        return (float) A.distance(B);
+        return (float) FastMath.hypot(A.getX() - B.getX(), A.getY()- B.getY());
     }
 
     public static Point2D add(Point2D A, Point2D B, Point2D R) {

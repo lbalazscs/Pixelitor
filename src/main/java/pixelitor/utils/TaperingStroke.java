@@ -15,8 +15,8 @@ import static pixelitor.utils.Geometry.*;
 
 public class TaperingStroke implements Stroke {
 
-    float thickness;
-    boolean reverse;
+    private final float thickness;
+    private final boolean reverse;
 
     public TaperingStroke(float thickness) {
         this(thickness, false);
@@ -94,9 +94,9 @@ public class TaperingStroke implements Stroke {
 
         float distanceSoFar = distances[0];
 
-        Point2D[] returnPathf = new Point2D[pts.size() - 1];
+        Point2D[] returnPath = new Point2D[pts.size() - 1];
 
-        returnPathf[0] = Q2;
+        returnPath[0] = Q2;
 
         for (int i = 1, s = pts.size() - 1; i < s; i++) {
 
@@ -118,23 +118,23 @@ public class TaperingStroke implements Stroke {
             // We will first calculate the perpendiculars of P2P1 and P2P3 through P2
             // Later we can just take the mid points to get the two points Q3 and Q4.
 
-            var Perp_P2P1_1 = new Point2D.Float();
-            var Perp_P2P1_2 = new Point2D.Float();
+            var perpendicularToP2P1_1 = new Point2D.Float();
+            var perpendicularToP2P1_2 = new Point2D.Float();
 
-            perpendiculars(P2, P1, Perp_P2P1_1, Perp_P2P1_2);
+            perpendiculars(P2, P1, perpendicularToP2P1_1, perpendicularToP2P1_2);
 
-            var Perp_P2P3_1 = new Point2D.Float();
-            var Perp_P2P3_2 = new Point2D.Float();
+            var perpendicularToP2P3_1 = new Point2D.Float();
+            var perpendicularToP2P3_2 = new Point2D.Float();
 
-            perpendiculars(P2, P3, Perp_P2P3_1, Perp_P2P3_2);
+            perpendiculars(P2, P3, perpendicularToP2P3_1, perpendicularToP2P3_2);
 
             // third quad point
-            Point2D Q3 = new Point2D.Float((Perp_P2P1_1.x + Perp_P2P3_2.x) / 2, (Perp_P2P1_1.y + Perp_P2P3_2.y) / 2);
+            Point2D Q3 = new Point2D.Float((perpendicularToP2P1_1.x + perpendicularToP2P3_2.x) / 2, (perpendicularToP2P1_1.y + perpendicularToP2P3_2.y) / 2);
             // Q3 = Q3 - P2
             subtract(Q3, P2, Q3);
 
             // fourth quad point
-            Point2D Q4 = new Point2D.Float((Perp_P2P1_2.x + Perp_P2P3_1.x) / 2, (Perp_P2P1_2.y + Perp_P2P3_1.y) / 2);
+            Point2D Q4 = new Point2D.Float((perpendicularToP2P1_2.x + perpendicularToP2P3_1.x) / 2, (perpendicularToP2P1_2.y + perpendicularToP2P3_1.y) / 2);
             // Q4 = Q4 - P2
             subtract(Q4, P2, Q4);
 
@@ -146,7 +146,7 @@ public class TaperingStroke implements Stroke {
             scale(Q4, requiredThickness);
             add(Q4, P2, Q4);
 
-            returnPathf[i] = Q3;
+            returnPath[i] = Q3;
             path.lineTo(Q4.getX(), Q4.getY());
 
         }
@@ -154,8 +154,8 @@ public class TaperingStroke implements Stroke {
         Point2D Ql = pts.get(pts.size() - 1);
         path.lineTo(Ql.getX(), Ql.getY());
 
-        for (int i = returnPathf.length - 1; i >= 0; i--) {
-            Point2D P = returnPathf[i];
+        for (int i = returnPath.length - 1; i >= 0; i--) {
+            Point2D P = returnPath[i];
             path.lineTo(P.getX(), P.getY());
         }
 

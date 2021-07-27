@@ -26,7 +26,7 @@ public class FlowField extends ParametrizedFilter {
 
     public static final String NAME = "Flow Field";
 
-    public static float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
+    public static final float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
 
     private static final int PAD = 100;
     private static final int PARTICLES_PER_GROUP = 100;
@@ -81,7 +81,6 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam velocityCapParam = new RangeParam("Maximum Velocity", 1, 100000, 6300000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
-    private final DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, velocityCapParam, forceParam, varianceParam);
 
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
     private final ColorParam foregroundColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
@@ -92,10 +91,12 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
     private final RangeParam zFactorParam = new RangeParam("Wind", 0, 0, 200);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
-    private final DialogParam advancedParam = new DialogParam("Advanced", qualityParam, iterationsParam, turbulenceParam, zFactorParam, drawToleranceParam);
 
     public FlowField() {
         super(false);
+
+        DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, velocityCapParam, forceParam, varianceParam);
+        DialogParam advancedParam = new DialogParam("Advanced", qualityParam, iterationsParam, turbulenceParam, zFactorParam, drawToleranceParam);
 
         setParams(
                 particlesParam,
@@ -152,9 +153,6 @@ public class FlowField extends ParametrizedFilter {
         int groupCount = FastMath.ceilToInt(particle_count * 1d / PARTICLES_PER_GROUP);
         Future<?>[] futures = new Future[groupCount];
         var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
-//        var pt = new DebugProgressTracker(NAME, futures.length + 1, new StatusBarProgressTracker(NAME, futures.length + 1));
-//        Utils.sleep(500, TimeUnit.MILLISECONDS);
-//        pt.unitDone();
 
         Random r = ReseedSupport.reInitialize();
         OpenSimplex2F noise = ReseedSupport.getSimplexNoise();
@@ -285,7 +283,7 @@ public class FlowField extends ParametrizedFilter {
         float ax, ay;
         public ArrayList<Point2D> path;
         public Color color;
-        public float tolerance;
+        public final float tolerance;
 
         public FlowFieldParticle(float tolerance) {
             this.tolerance = tolerance;
