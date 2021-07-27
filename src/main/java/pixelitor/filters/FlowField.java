@@ -73,12 +73,12 @@ public class FlowField extends ParametrizedFilter {
     }
 
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 40000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam zoomParam = new RangeParam("Zoom", 1000, 40000, 100000);
+    private final RangeParam zoomParam = new RangeParam("Zoom", 100, 4000, 10000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
 
     private final EnumParam<PhysicsMode> physicsModeParam = new EnumParam<>("Field Effect", PhysicsMode.class);
     //    private final RangeParam massRandomnessParam = new RangeParam("Mass Randomness", 0, 10, 100);
-    private final RangeParam velocityCapParam = new RangeParam("Maximum Velocity", 1, 100000, 6300000);
+    private final RangeParam velocityCapParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
 
@@ -127,7 +127,7 @@ public class FlowField extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
         int particle_count = particlesParam.getValue();
-        float zoom = zoomParam.getValue() * 0.01f;
+        float zoom = zoomParam.getValue() * 0.1f;
         Stroke stroke = strokeParam.createStroke();
         Color bgColor = backgroundColorParam.getColor();
         Color fgColor = foregroundColorParam.getColor();

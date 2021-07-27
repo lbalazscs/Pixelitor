@@ -33,19 +33,12 @@ public class TaperingStroke implements Stroke {
         final float[] points = new float[6];
 
         GeneralPath path = new GeneralPath();
-
         List<Point2D> pts = new ArrayList<>();
-        Point2D lastMoveToPoint = null;
 
         for (var it = new FlatteningPathIterator(p.getPathIterator(null), 1); !it.isDone(); it.next()) {
 
             switch (it.currentSegment(points)) {
-                case SEG_CLOSE:
-                    if (lastMoveToPoint != null)
-                        pts.add(lastMoveToPoint);
-                    break;
                 case SEG_MOVETO:
-                    lastMoveToPoint = new Point2D.Float(points[0], points[1]);
                     if (!pts.isEmpty()) {
                         if (reverse) Collections.reverse(pts);
                         drawTaperingStroke(pts, path);
