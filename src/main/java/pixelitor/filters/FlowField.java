@@ -11,9 +11,6 @@ import pixelitor.particles.ParticleSystem;
 import pixelitor.utils.*;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -79,12 +76,12 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam zoomParam = new RangeParam("Zoom", 1000, 40000, 100000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
 
-    private final EnumParam<PhysicsMode> physicsModeParam = new EnumParam<>("Some Name", PhysicsMode.class);
+    private final EnumParam<PhysicsMode> physicsModeParam = new EnumParam<>("Field Effect", PhysicsMode.class);
     //    private final RangeParam massRandomnessParam = new RangeParam("Mass Randomness", 0, 10, 100);
-    private final RangeParam velocityCapParam = new RangeParam("MaximumVelocity", 1, 100000, 6300000);
+    private final RangeParam velocityCapParam = new RangeParam("Maximum Velocity", 1, 100000, 6300000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
-    private final RangeParam varienceParam = new RangeParam("Varience", 1, 20, 100);
-    private final DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, velocityCapParam, forceParam, varienceParam);
+    private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
+    private final DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, velocityCapParam, forceParam, varianceParam);
 
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
     private final ColorParam foregroundColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), ColorParam.TransparencyPolicy.FREE_TRANSPARENCY);
@@ -139,7 +136,7 @@ public class FlowField extends ParametrizedFilter {
         PhysicsMode physicsMode = physicsModeParam.getSelected();
         float maximumVelocity = velocityCapParam.getValue() * velocityCapParam.getValue() / 10000f;
         float force = (float) forceParam.getZoomRatio();
-        float variance = varienceParam.getValue() / 10f;
+        float variance = varianceParam.getValue() / 10f;
 
         float quality = qualityParam.getValueAsFloat() / 99 * 400 / zoom;
         int iteration_count = iterationsParam.getValue();
