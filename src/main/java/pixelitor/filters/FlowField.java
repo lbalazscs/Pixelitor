@@ -72,7 +72,7 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 40000, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 10000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam zoomParam = new RangeParam("Zoom", 100, 4000, 10000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
 
