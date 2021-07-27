@@ -8,18 +8,28 @@ public abstract class ParticleSystem<P extends Particle> {
     private final List<ParticleGroup<P>> groups;
     private final int groupCount;
     private final int groupSize;
+    private final int particleCount;
 
     public ParticleSystem() {
-        this(10, 100);
+        this(10, 100, -1);
     }
 
     public ParticleSystem(int groupCount, int groupSize) {
+        this(groupCount, groupSize, -1);
+    }
+
+    public ParticleSystem(int groupCount, int groupSize, int particleCount) {
         this.groupCount = groupCount;
         this.groupSize = groupSize;
+        if (particleCount == -1) particleCount = groupCount * groupSize;
+        assert particleCount < groupCount * groupSize : "Cant accommodate more particles than the groups can provided.";
+        this.particleCount = particleCount;
 
         groups = new ArrayList<>(groupCount);
-        for (int i = 0; i < groupCount; i++)
+        for (int i = 0; i < groupCount - 1; i++)
             groups.add(new ParticleGroup<>(this, i, groupSize));
+        int lastGroupSize = particleCount - groupSize * (groupCount - 1);
+        groups.add(new ParticleGroup<>(this, groupCount - 1, lastGroupSize));
     }
 
     public void step() {
@@ -47,6 +57,6 @@ public abstract class ParticleSystem<P extends Particle> {
     }
 
     public int getParticleCount() {
-        return groupCount*groupSize;
+        return particleCount;
     }
 }

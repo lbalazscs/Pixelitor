@@ -47,7 +47,6 @@ class TaperingStrokeTest {
         new TaperingStrokeTest().testingTheStroke();
     }
 
-    @Test
     void testingTheStroke() {
 
         BufferedImage image = new BufferedImage(100, 100, 2);
