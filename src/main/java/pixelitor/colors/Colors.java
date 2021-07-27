@@ -20,7 +20,6 @@ package pixelitor.colors;
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
-import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;

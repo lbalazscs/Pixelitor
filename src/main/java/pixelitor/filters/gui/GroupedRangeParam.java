@@ -292,11 +292,10 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public Object getParamValue() {
-        List<Object> childValues = Stream.of(children)
+    public List<Object> getParamValue() {
+        return Stream.of(children)
             .map(FilterParam::getParamValue)
             .collect(toList());
-        return childValues;
     }
 
     private record GroupedRangeParamState(double[] values) implements ParamState<GroupedRangeParamState> {

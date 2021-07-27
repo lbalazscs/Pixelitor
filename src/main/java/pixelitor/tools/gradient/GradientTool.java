@@ -460,8 +460,6 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        assert gradient != null;
-
         View view = comp.getView();
         handles = gradient.createHandles(view);
 

@@ -1,8 +1,26 @@
+/*
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.utils;
 
 import net.jafama.FastMath;
 
-import java.awt.*;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -10,11 +28,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
 import static pixelitor.utils.Geometry.*;
 
 public class TaperingStroke implements Stroke {
-
     private final float thickness;
     private final boolean reverse;
 
@@ -29,21 +47,22 @@ public class TaperingStroke implements Stroke {
 
     @Override
     public Shape createStrokedShape(Shape p) {
-
-        final float[] points = new float[6];
+        float[] points = new float[6];
 
         GeneralPath path = new GeneralPath();
         List<Point2D> pts = new ArrayList<>();
 
         for (var it = new FlatteningPathIterator(p.getPathIterator(null), 1); !it.isDone(); it.next()) {
-
             switch (it.currentSegment(points)) {
                 case SEG_MOVETO:
                     if (!pts.isEmpty()) {
-                        if (reverse) Collections.reverse(pts);
-                        drawTaperingStroke(pts, path);
+                        if (reverse) {
+                            Collections.reverse(pts);
+                        }
+                        createTaperingOutline(pts, path);
                         pts.clear();
                     }
+                    //noinspection fallthrough
                 case SEG_LINETO:
                     pts.add(new Point2D.Float(points[0], points[1]));
                     break;
@@ -52,16 +71,16 @@ public class TaperingStroke implements Stroke {
 
 
         if (!pts.isEmpty()) {
-            if (reverse) Collections.reverse(pts);
-            drawTaperingStroke(pts, path);
+            if (reverse) {
+                Collections.reverse(pts);
+            }
+            createTaperingOutline(pts, path);
         }
 
         return path;
     }
 
-    private void drawTaperingStroke(List<Point2D> pts, GeneralPath path) {
-
-
+    private void createTaperingOutline(List<Point2D> pts, GeneralPath path) {
         float[] distances = new float[pts.size() - 1];
         float totalDistance = 0;
         for (int i = 0; i < distances.length; i++) {
@@ -69,7 +88,6 @@ public class TaperingStroke implements Stroke {
             Point2D b = pts.get(i + 1);
             totalDistance += distances[i] = (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
         }
-
 
         // first point
         Point2D P1 = pts.get(0);
@@ -92,7 +110,6 @@ public class TaperingStroke implements Stroke {
         returnPath[0] = Q2;
 
         for (int i = 1, s = pts.size() - 1; i < s; i++) {
-
             // For now onwards, P1 will represent (i-1)th and P2 will represent ith point and P3 is (i+1)th point
             // But they can still be called first and second (as of context)
             // THE third point of consideration. the ith point.
@@ -154,6 +171,4 @@ public class TaperingStroke implements Stroke {
 
         path.closePath();
     }
-
-
 }

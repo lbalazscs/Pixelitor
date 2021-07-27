@@ -187,7 +187,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    },    TAPERING_REV("Reversed Tapering", false) {
+    }, TAPERING_REV("Reversed Tapering", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new TaperingStroke(width, true);

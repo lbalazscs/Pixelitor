@@ -278,10 +278,9 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public Object getParamValue() {
-        List<Object> childValues = Stream.of(allParams)
+    public List<Object> getParamValue() {
+        return Stream.of(allParams)
             .map(FilterParam::getParamValue)
             .collect(toList());
-        return childValues;
     }
 }

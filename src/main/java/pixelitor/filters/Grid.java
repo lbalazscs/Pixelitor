@@ -21,7 +21,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
-import java.awt.Shape;
 import java.awt.geom.Path2D;
 
 /**

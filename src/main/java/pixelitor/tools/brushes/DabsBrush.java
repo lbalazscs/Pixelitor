@@ -25,7 +25,7 @@ import pixelitor.utils.debug.DebugNode;
  */
 public abstract class DabsBrush extends AbstractBrush {
     private final Spacing spacing;
-    protected DabsBrushSettings settings;
+    protected final DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(double radius, Spacing spacing,

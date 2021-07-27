@@ -19,10 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Result;

@@ -38,7 +38,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
     public static final String NAME = i18n("curves");
 
     private CurvesFilter filter;
-    private ToneCurves curves;
+    private final ToneCurves curves;
 
     private ToneCurvesGUI lastGUI;
 

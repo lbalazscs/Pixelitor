@@ -27,6 +27,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
+import static pixelitor.utils.Geometry.GOLDEN_RATIO;
+import static pixelitor.utils.Geometry.orthogonalLineThroughPoint;
+
 /**
  * Crop composition guide
  */
@@ -35,7 +38,6 @@ public class CompositionGuide {
     private CompositionGuideType type = CompositionGuideType.NONE;
     private int orientation = 0;
     private final GuidesRenderer renderer;
-    private static final double GOLDEN_RATIO = 1.618;
     private static final int NUM_SPIRAL_SEGMENTS = 11;
 
     public CompositionGuide(GuidesRenderer renderer) {
@@ -184,40 +186,6 @@ public class CompositionGuide {
         }
 
         drawShapes(lines);
-    }
-
-    /**
-     * Calculate the projected point of the given point on the given line
-     *
-     * @return projected point p.
-     */
-    private static Point2D.Double projectPointOnLine(Line2D line, Point2D.Double p) {
-        Point2D.Double l1 = (Point2D.Double) line.getP1();
-        Point2D.Double l2 = (Point2D.Double) line.getP2();
-
-        // dot product of vectors v1, v2
-        Point2D.Double v1 = new Point2D.Double(l2.x - l1.x, l2.y - l1.y);
-        Point2D.Double v2 = new Point2D.Double(p.x - l1.x, p.y - l1.y);
-        double d = v1.x * v2.x + v1.y * v2.y;
-
-        // squared length of vector v1
-        double v1Length = v1.x * v1.x + v1.y * v1.y;
-        if (v1Length == 0) {
-            return l1;
-        }
-
-        return new Point2D.Double(
-            (int) (l1.x + (d * v1.x) / v1Length),
-            (int) (l1.y + (d * v1.y) / v1Length));
-    }
-
-    /**
-     * Calculate the line orthogonal to the given line that passes through the point P
-     *
-     * @return orthogonal line
-     */
-    private static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
-        return new Line2D.Double(p, projectPointOnLine(line, p));
     }
 
     private void drawTriangles(Rectangle2D rect) {

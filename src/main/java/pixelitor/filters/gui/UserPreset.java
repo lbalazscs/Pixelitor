@@ -210,8 +210,7 @@ public class UserPreset {
         if (createDirs && !dir.exists()) {
             dir.mkdirs();
         }
-        File outFile = new File(dir, name + ".txt");
-        return outFile;
+        return new File(dir, name + ".txt");
     }
 
     private static File calcSaveDir(String presetDirName) {

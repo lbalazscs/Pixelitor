@@ -47,7 +47,7 @@ public class SmoothConnectTest extends JPanel {
 
         pointList = new ArrayList<>(particleCount);
 
-        system = new ParticleSystem<IndexedParticle>(1, 5) {
+        system = new ParticleSystem<>(1, 5) {
             @Override
             protected IndexedParticle newParticle() {
                 IndexedParticle part = new IndexedParticle();

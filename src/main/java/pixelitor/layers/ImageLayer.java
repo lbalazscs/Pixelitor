@@ -719,8 +719,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private boolean imageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle imageBounds = getContentBounds();
-        boolean needsEnlarging = !imageBounds.contains(canvasBounds);
-        return needsEnlarging;
+        return !imageBounds.contains(canvasBounds);
     }
 
     /**
