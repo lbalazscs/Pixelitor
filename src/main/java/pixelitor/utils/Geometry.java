@@ -109,8 +109,6 @@ public class Geometry {
     }
 
     /**
-     * <B>WARNING: It will modify the values of A and B!!!</B>
-     *
      * <P>For two points A and B, this function will set the values of R such that:</P>
      * <OL>
      * <LI>
@@ -132,7 +130,7 @@ public class Geometry {
      * @param R A 2 valued empty array which will represent a point dividing AB.
      */
     public static void sectionFormula(Point2D A, Point2D B, float m, float n, Point2D R) {
-        add(scale(A, n), scale(B, m), R);
+        add(scale(A, n, new Point2D.Float()), scale(B, m, new Point2D.Float()), R);
         deScale(R, (m + n));
     }
 
@@ -147,12 +145,20 @@ public class Geometry {
     }
 
     public static void deScale(Point2D A, float factor) {
-        A.setLocation(A.getX() / factor, A.getY() / factor);
+        deScale(A, factor,A);
+    }
+
+    public static void deScale(Point2D A, float factor, Point2D R) {
+        R.setLocation(A.getX() / factor, A.getY() / factor);
     }
 
     public static Point2D scale(Point2D A, float factor) {
-        A.setLocation(A.getX() * factor, A.getY() * factor);
-        return A;
+        return scale(A, factor, A);
+    }
+
+    public static Point2D scale(Point2D A, float factor, Point2D R) {
+        R.setLocation(A.getX() * factor, A.getY() * factor);
+        return R;
     }
 
     public static boolean areEqual(Point2D A, Point2D B) {

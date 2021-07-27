@@ -1627,7 +1627,7 @@ public class Shapes {
         //
         var T = new Point2D.Float();
 
-        Geometry.sectionFormula(Geometry.newFrom(P), Geometry.newFrom(Q), AB, BC, T);
+        Geometry.sectionFormula(P, Q, AB, BC, T);
 
         // Converting point vectors P and Q to show relative displacement from T
         // P = P - T, Q = Q - T
