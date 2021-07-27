@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,16 +15,16 @@ class TaperingStrokeTest {
     @Test
     void testingPerpendicularCalculation() {
 
-        float[] A = {0, 0};
-        float[] B = {2, 2};
+        var A = new Point2D.Float();
+        var B = new Point2D.Float(2, 2);
 
-        float[] P = new float[2];
-        float[] Q = new float[2];
+        var P = new Point2D.Float();
+        var Q = new Point2D.Float();
 
-        TaperingStroke.perpendiculars(A, B, (float) Math.sqrt(2), P, Q);
+        Geometry.perpendiculars(A, B, (float) Math.sqrt(2), P, Q);
 
-        System.out.println(Arrays.toString(P));
-        System.out.println(Arrays.toString(Q));
+        System.out.println(P);
+        System.out.println(Q);
 
 //                   |
 //                   |
@@ -37,17 +37,16 @@ class TaperingStrokeTest {
 //                   |
 //                   |
 
-        assertEquals(-1f, P[0], 0.1);
-        assertEquals(1f, P[1], 0.1);
-        assertEquals(1f, Q[0], 0.1);
-        assertEquals(-1f, Q[1], 0.1);
+        assertEquals(-1f, P.x, 0.1);
+        assertEquals(1f, P.y, 0.1);
+        assertEquals(1f, Q.x, 0.1);
+        assertEquals(-1f, Q.y, 0.1);
     }
 
     public static void main(String[] args) {
         new TaperingStrokeTest().testingTheStroke();
     }
 
-    @Test
     void testingTheStroke() {
 
         BufferedImage image = new BufferedImage(100, 100, 2);

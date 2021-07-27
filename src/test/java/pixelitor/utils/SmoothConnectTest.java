@@ -18,12 +18,16 @@
 package pixelitor.utils;
 
 import pixelitor.colors.Colors;
+import pixelitor.particles.Particle;
+import pixelitor.particles.ParticleSystem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -31,7 +35,47 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class SmoothConnectTest extends JPanel {
     private final Dimension size = new Dimension(300, 300);
 
+    private final ParticleSystem<IndexedParticle> system;
+    private final JCheckBox isClosed = new JCheckBox("Close shape");
+    private final JSlider smoothness = new JSlider(0, 1000, 100);
+    private final List<Point2D> pointList;
+
     public SmoothConnectTest() {
+        //<editor-fold defaultstate="collapsed" desc="Initializing Particle System">
+
+        int particleCount = 5;
+
+        pointList = new ArrayList<>(particleCount);
+
+        system = new ParticleSystem<IndexedParticle>(1, 5) {
+            @Override
+            protected IndexedParticle newParticle() {
+                IndexedParticle part = new IndexedParticle();
+                pointList.add(new Point2D.Float(part.x, part.y));
+                return part;
+            }
+
+            @Override
+            protected void initializeParticle(IndexedParticle particle) {
+//                particle.randomize();
+            }
+
+            @Override
+            protected boolean isParticleDead(IndexedParticle particle) {
+                return false;
+            }
+
+            @Override
+            protected void updateParticle(IndexedParticle particle) {
+                particle.update();
+                pointList.get(particle.index).setLocation(particle.x, particle.y);
+            }
+        };
+
+        //</editor-fold>
+        add(isClosed);
+        isClosed.setBackground(Color.WHITE);
+        add(smoothness);
     }
 
     @Override
@@ -50,15 +94,16 @@ public class SmoothConnectTest extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         Colors.fillWith(Color.BLACK, g2, 300, 300);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        system.step();
 
-        List<Point2D> points = List.of(
-            new Point2D.Double(30, 30),
-            new Point2D.Double(100, 50),
-            new Point2D.Double(110, 100),
-            new Point2D.Double(90, 200),
-            new Point2D.Double(220, 250),
-            new Point2D.Double(270, 230));
-        Path2D path = Shapes.smoothConnect(points);
+        List<Point2D> points = new ArrayList<>(pointList);
+
+        if (isClosed.isSelected()) {
+            points.add(points.get(0));
+        }
+
+//        Path2D path = Shapes.smoothConnect(points);
+        Path2D path = Shapes.smoothConnect(points, smoothness.getValue()/100f);
 
         g2.setColor(Color.WHITE);
         g2.draw(path);
@@ -69,6 +114,7 @@ public class SmoothConnectTest extends JPanel {
             g2.fill(c);
         }
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(SmoothConnectTest::buildGUI);
@@ -84,10 +130,47 @@ public class SmoothConnectTest extends JPanel {
         JFrame f = new JFrame("Smooth Connect Test");
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        f.add(new SmoothConnectTest());
+        SmoothConnectTest test = new SmoothConnectTest();
+        f.add(test);
 
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
+
+        new Thread(() -> {
+            while (true) {
+                Utils.sleep(40, TimeUnit.MILLISECONDS);
+                test.repaint();
+            }
+        }).start();
     }
+
+
+    private class IndexedParticle extends Particle {
+        private static int idx = 0;
+        public int index;
+
+        public IndexedParticle() {
+            this.index = idx++;
+            randomize();
+        }
+
+        public void update() {
+            x += vx;
+            y += vy;
+
+            if(x<0||x>size.width) vx*=-1;
+            if(y<0||y>size.height) vy*=-1;
+        }
+
+        public void randomize() {
+            float fact = (float) (2 * Math.PI * Math.random());
+            vx = (float) Math.cos(fact);
+            vy = (float) Math.sin(fact);
+            x = (float) (size.width*Math.random());
+            y = (float) (size.width*Math.random());
+        }
+
+    }
+
 }

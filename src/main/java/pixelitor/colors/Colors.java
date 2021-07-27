@@ -20,6 +20,7 @@ package pixelitor.colors;
 import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
+import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
@@ -57,7 +58,7 @@ public class Colors {
     public static Color rgbInterpolate(Color startColor, Color endColor, float progress) {
         int interpolatedRGB = ImageMath.mixColors(progress,
             startColor.getRGB(), endColor.getRGB());
-        return new Color(interpolatedRGB);
+        return new Color(interpolatedRGB, true);
     }
 
     /**
@@ -228,6 +229,13 @@ public class Colors {
 
     public static float[] toHSB(Color c) {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+    }
+
+    public static int HSBAtoARGB(float[] hsb_col, int alpha) {
+        int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
+        col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
+        col |= (alpha << 24); // Add the alpha specified by user.
+        return col;
     }
 
     public static String toHTMLHex(Color c, boolean includeAlpha) {
