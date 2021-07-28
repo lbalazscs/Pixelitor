@@ -945,25 +945,25 @@ public class ImageUtils {
                                         BufferedImage bumpImage,
                                         String filterName) {
         return bumpMap(src, bumpImage,
-            (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
+            (float) DEG_315_IN_RADIANS, 2.0f, filterName);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
                                         BufferedImage bumpImage,
-                                        float azimuth, float elevation, float bumpHeight,
+                                        float azimuth, float bumpHeight,
                                         String filterName) {
-        return bumpMap(src, bumpImage, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
+        return bumpMap(src, bumpImage, BlendComposite.HardLight, azimuth, bumpHeight, filterName);
     }
 
     public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpImage, Composite composite,
-                                        float azimuth, float elevation, float bumpHeight,
+                                        float azimuth, float bumpHeight,
                                         String filterName) {
         // TODO optimize it so that the bumpImage can be smaller, and an offset is given - useful for text effects
         // tiling could be also an option
 
         var embossFilter = new EmbossFilter(filterName);
         embossFilter.setAzimuth(azimuth);
-        embossFilter.setElevation(elevation);
+        embossFilter.setElevation((float) (Math.PI / 6.0));
         embossFilter.setBumpHeight(bumpHeight);
 
         BufferedImage bumpMap = embossFilter.filter(bumpImage, null);

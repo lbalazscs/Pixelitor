@@ -17,9 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.layers.Drawable;
 import pixelitor.utils.VisibleForTesting;
-
-import java.awt.Dimension;
 
 /**
  * The model for a filter parameter, which (unlike a button) holds
@@ -37,10 +36,10 @@ public interface FilterParam extends FilterSetting, Resettable {
     void randomize();
 
     /**
-     * Can be used to adjust the maximum and default values
-     * according to the size of the current image
+     * Can be used to adapt the offered ranges/choices to the current
+     * drawable, composition or the list of open compositions.
      */
-    default void adaptToImageSize(Dimension size) {
+    default void updateOptions(Drawable dr) {
         // by default does nothing, as most controls are unaffected
     }
 

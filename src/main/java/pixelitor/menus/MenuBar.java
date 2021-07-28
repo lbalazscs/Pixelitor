@@ -835,6 +835,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLightSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("light"));
 
+        sub.addFilter(BumpMap.NAME, BumpMap::new);
         sub.addFilter(Flashlight.NAME, Flashlight::new);
         sub.addFilter(JHGlint.NAME, JHGlint::new);
         sub.addFilter(JHGlow.NAME, JHGlow::new);

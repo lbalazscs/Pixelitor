@@ -20,13 +20,9 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
-import pixelitor.utils.Rnd;
 
-import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -39,95 +35,22 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
  * A filter parameter for selecting a choice from a list of values
  */
 public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Item> {
-    private final List<Item> choicesList = new ArrayList<>();
-    private Item defaultChoice;
-    private Item currentChoice;
-
-    private final EventListenerList listenerList = new EventListenerList();
-
     public IntChoiceParam(String name, Item[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
     }
 
     public IntChoiceParam(String name, Item[] choices, RandomizePolicy randomizePolicy) {
-        super(name, randomizePolicy);
-
-        choicesList.addAll(List.of(choices));
-
-        defaultChoice = choices[0];
-        currentChoice = defaultChoice;
+        super(name, choices, randomizePolicy);
     }
 
-    @Override
-    public boolean isSetToDefault() {
-        return defaultChoice.equals(currentChoice);
-    }
-
-    @Override
-    public void reset(boolean trigger) {
-        setSelectedItem(defaultChoice, trigger);
-    }
-
-    @Override
-    protected void doRandomize() {
-        Item choice = Rnd.chooseFrom(choicesList);
-        setCurrentChoice(choice, false);
-    }
 
     public int getValue() {
         return currentChoice.getValue();
     }
 
-    private void setCurrentChoice(Item currentChoice, boolean trigger) {
-        setSelectedItem(currentChoice, trigger);
-    }
-
     public IntChoiceParam withDefaultChoice(Item defaultChoice) {
         this.defaultChoice = defaultChoice;
         return this;
-    }
-
-    @Override
-    public void setSelectedItem(Object item) {
-        setSelectedItem((IntChoiceParam.Item) item, true);
-    }
-
-    @Override
-    public void setSelectedItem(IntChoiceParam.Item item, boolean trigger) {
-        if (!currentChoice.equals(item)) {
-            currentChoice = item;
-            fireContentsChanged(this, -1, -1);
-            if (trigger) {
-                if (adjustmentListener != null) {  // it's null when called from randomize
-                    adjustmentListener.paramAdjusted();
-                }
-            }
-        }
-    }
-
-    @Override
-    public Item getSelectedItem() {
-        return currentChoice;
-    }
-
-    @Override
-    public int getSize() {
-        return choicesList.size();
-    }
-
-    @Override
-    public Item getElementAt(int index) {
-        return choicesList.get(index);
-    }
-
-    @Override
-    public void addListDataListener(ListDataListener l) {
-        listenerList.add(ListDataListener.class, l);
-    }
-
-    @Override
-    public void removeListDataListener(ListDataListener l) {
-        listenerList.remove(ListDataListener.class, l);
     }
 
     /**
@@ -253,31 +176,6 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
             }
         });
         return param;
-    }
-
-    private void fireContentsChanged(Object source, int index0, int index1) {
-        Object[] listeners = listenerList.getListenerList();
-        ListDataEvent e = null;
-
-        for (int i = listeners.length - 2; i >= 0; i -= 2) {
-            if (listeners[i] == ListDataListener.class) {
-                if (e == null) {
-                    e = new ListDataEvent(source,
-                        ListDataEvent.CONTENTS_CHANGED, index0, index1);
-                }
-                ((ListDataListener) listeners[i + 1]).contentsChanged(e);
-            }
-        }
-    }
-
-    @Override
-    public String getResetToolTip() {
-        return super.getResetToolTip() + " to " + defaultChoice;
-    }
-
-    @Override
-    public Object getParamValue() {
-        return currentChoice;
     }
 
     @Override

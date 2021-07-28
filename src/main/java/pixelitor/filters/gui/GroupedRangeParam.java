@@ -18,10 +18,10 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -200,9 +200,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void adaptToImageSize(Dimension size) {
+    public void updateOptions(Drawable dr) {
         for (RangeParam child : children) {
-            child.adaptToImageSize(size);
+            child.updateOptions(dr);
         }
     }
 

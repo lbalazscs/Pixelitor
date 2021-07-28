@@ -33,7 +33,7 @@ public class EmbossFilter extends WholeImageFilter {
     }
 
     public void setAzimuth(float azimuth) {
-        this.azimuth = azimuth;
+        this.azimuth = azimuth + ImageMath.PI;
     }
 
     public float getAzimuth() {

@@ -39,7 +39,8 @@ public class JHEmboss extends ParametrizedFilter {
     private final ElevationAngleParam lightElevation = new ElevationAngleParam(
         "Light Elevation Angle", 30, CCW_DEGREES);
     private final RangeParam depth = new RangeParam(
-        "Depth", 2, 100, 502);
+        "Depth", 1, 7, 15);
+
     private final BooleanParam texture = new BooleanParam(
         "Texture (Multiply with the Source Image)", false);
 
@@ -63,7 +64,10 @@ public class JHEmboss extends ParametrizedFilter {
         }
 
         filter.setAzimuth((float) lightDirection.getValueInIntuitiveRadians());
-        filter.setBumpHeight(depth.getPercentageValF());
+
+        float adjustedDepth = (float) (Math.pow(2, this.depth.getValue()) / 100.0);
+        filter.setBumpHeight(adjustedDepth);
+
         filter.setElevation((float) lightElevation.getValueInIntuitiveRadians());
         filter.setEmboss(texture.isChecked());
 

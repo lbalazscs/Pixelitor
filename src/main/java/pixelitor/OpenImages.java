@@ -427,6 +427,12 @@ public class OpenImages {
             .findFirst();
     }
 
+    public static List<String> getCompNames() {
+        return views.stream()
+            .map(View::getName)
+            .collect(toList());
+    }
+
     public static List<Composition> getUnsavedComps() {
         return views.stream()
             .map(View::getComp)

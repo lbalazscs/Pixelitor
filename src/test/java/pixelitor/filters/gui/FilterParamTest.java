@@ -28,7 +28,6 @@ import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -196,7 +195,7 @@ public class FilterParamTest {
         assertThat(param).nameIs("Param Name");
 
         JComponent gui = param.createGUI();
-        param.adaptToImageSize(new Dimension(1000, 600));
+//        param.updateOptions(new Dimension(1000, 600));
 
         param.canBeAnimated();
 
