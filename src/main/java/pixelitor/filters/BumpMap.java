@@ -54,4 +54,9 @@ public class BumpMap extends ParametrizedFilter {
             (float) lightDirection.getValueInIntuitiveRadians(),
             adjustedDepth, NAME);
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

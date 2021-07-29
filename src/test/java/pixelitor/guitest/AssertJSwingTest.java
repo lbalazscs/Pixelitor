@@ -1729,6 +1729,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersDislocate() {
+        testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
@@ -1738,6 +1739,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersLight() {
+        testFilterWithDialog("Bump Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Flashlight", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Glint", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1759,6 +1761,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);

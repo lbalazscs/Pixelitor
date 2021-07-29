@@ -822,6 +822,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDisplaceSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("displace"));
 
+        sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
         sub.addFilter(DrunkVision.NAME, DrunkVision::new);
         sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
         sub.addFilter(JHOffset.NAME, JHOffset::new);
