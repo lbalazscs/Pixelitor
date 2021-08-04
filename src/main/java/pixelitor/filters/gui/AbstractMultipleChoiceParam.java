@@ -223,6 +223,11 @@ public abstract class AbstractMultipleChoiceParam<E>
         });
     }
 
+    public String getDebugInfo() {
+        return String.format("choices = %s, default = %s, current = %s",
+            choices, defaultChoice, currentChoice);
+    }
+
     public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {
         @Override
         public ChoiceParamState<E> interpolate(ChoiceParamState<E> endState, double progress) {

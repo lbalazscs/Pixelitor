@@ -33,6 +33,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.AutoPaint;
+import pixelitor.automate.AutoPaintPanel;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
@@ -1326,7 +1327,7 @@ public class AssertJSwingTest {
                 continue;
             }
             if (tool == Tools.BRUSH) {
-                for (String colorSetting : AutoPaint.ConfigPanel.COLOR_SETTINGS) {
+                for (String colorSetting : AutoPaintPanel.COLOR_CHOICES) {
                     EDT.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
                     testAutoPaintWithTool(tool, colorSetting);
                 }
