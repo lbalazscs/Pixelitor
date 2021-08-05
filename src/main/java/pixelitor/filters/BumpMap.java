@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.SelectImageParam;
 import pixelitor.utils.ImageUtils;
@@ -31,6 +32,7 @@ public class BumpMap extends ParametrizedFilter {
     public static final String NAME = "Bump Map";
 
     private final SelectImageParam imageParam = new SelectImageParam("Bump Map");
+    private final BooleanParam tileParam = new BooleanParam("Tile", false);
     private final AngleParam lightDirection = new AngleParam(
         "Light Direction", 0);
     private final RangeParam depth = new RangeParam(
@@ -41,6 +43,7 @@ public class BumpMap extends ParametrizedFilter {
 
         setParams(
             imageParam,
+            tileParam,
             lightDirection,
             depth
         );
@@ -52,7 +55,7 @@ public class BumpMap extends ParametrizedFilter {
         float adjustedDepth = (float) (Math.pow(2, depth.getValue()) / 100.0);
         return ImageUtils.bumpMap(src, bumpImage,
             (float) lightDirection.getValueInIntuitiveRadians(),
-            adjustedDepth, NAME);
+            adjustedDepth, NAME, tileParam.isChecked());
     }
 
     @Override

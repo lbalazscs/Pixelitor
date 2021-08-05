@@ -18,10 +18,14 @@
 package pixelitor.guitest;
 
 import org.assertj.core.util.DoubleComparator;
+import org.assertj.swing.data.Index;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
+import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
 import pixelitor.gui.GUIText;
+import pixelitor.gui.ImageArea;
+import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
@@ -35,7 +39,7 @@ import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Utils;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -75,10 +79,15 @@ public class WorkflowTest {
         pw = app.getPW();
         keyboard = app.getKeyboard();
 
-        createNewImage();
+        wfTest1();
+        wfTest2();
+    }
+
+    private void wfTest1() {
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
         addGuide();
-        renderWood();
-        addTextLayer();
+        runFilterWithDialog("Wood", null);
+        addTextLayer("Wood", null);
         setTextSize();
         rasterizeThenUndo();
         selectionFromText();
@@ -93,7 +102,7 @@ public class WorkflowTest {
         renderCaustics();
         selectWoodLayer();
         addHeartShapedHoleToTheWoodLayer();
-        addDropShadowToTheWoodLayer();
+        runFilterWithDialog("Drop Shadow", null);
         mergeDown();
         createEllipseSelection();
         expandSelection();
@@ -111,18 +120,42 @@ public class WorkflowTest {
         flipHorizontal();
         clearGuides();
         selectBrushTool();
-        loadReferenceImage();
+        loadReferenceImage("wf1_reference.png");
     }
 
-    private void createNewImage() {
-        app.runMenuCommand("New Image...");
-        var dialog = app.findDialogByTitle("New Image");
-        dialog.textBox("widthTF").deleteText().enterText(String.valueOf(INITIAL_WIDTH));
-        dialog.textBox("heightTF").deleteText().enterText(String.valueOf(INITIAL_HEIGHT));
-        dialog.button("ok").click();
-        Utils.sleep(1, TimeUnit.SECONDS);
-        mouse.recalcCanvasBounds();
-        app.checkNumLayersIs(1);
+    private void wfTest2() {
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 2");
+        runFilterWithDialog("Spider Web", null);
+        app.runMenuCommand("Duplicate");
+
+        addTextLayer("Spider", dialog -> {
+            dialog.comboBox("hAlignmentCB").selectItem("Left");
+            dialog.comboBox("vAlignmentCB").selectItem("Top");
+        });
+        addTextLayer("Web", dialog -> {
+            dialog.comboBox("hAlignmentCB").selectItem("Right");
+            dialog.comboBox("vAlignmentCB").selectItem("Top");
+        });
+
+        // switch back to the main tab
+        pw.tabbedPane().selectTab("wf test 2");
+        int mainTabIndex = EDT.call(() -> ((TabsUI) ImageArea.getUI()).getSelectedIndex());
+
+        runFilterWithDialog("Clouds", null);
+
+        Consumer<DialogFixture> customizer = dialog ->
+            dialog.comboBox("Bump Map").selectItem("wf test 2 copy");
+        runFilterWithDialog("Bump Map", customizer);
+
+        // close the temporary tab
+        pw.tabbedPane().selectTab("wf test 2 copy");
+        app.runMenuCommand("Close");
+        app.closeDoYouWantToSaveChangesDialog();
+
+        // now the main tab should be the active one
+        pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
+
+        loadReferenceImage("wf2_reference.png");
     }
 
     private void addGuide() {
@@ -137,23 +170,29 @@ public class WorkflowTest {
         assertThat(EDT.getGuides().getVerticals()).isEmpty();
     }
 
-    private void renderWood() {
-        app.runFilterWithDialog("Wood", Randomize.NO, Reseed.NO, ShowOriginal.NO, false);
-        keyboard.undoRedo("Wood");
+    private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
+        app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
+        keyboard.undoRedo(filterName);
     }
 
-    private void addTextLayer() {
+    private void addTextLayer(String text, Consumer<DialogFixture> customizer) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
         pw.button("addTextLayer").click();
 
         var dialog = app.findDialogByTitle("Create Text Layer");
         dialog.textBox("textTF")
             .requireText("Pixelitor")
             .deleteText()
-            .enterText("Wood");
+            .enterText(text);
+
+        if (customizer != null) {
+            customizer.accept(dialog);
+        }
+
         dialog.button("ok").click();
 
         keyboard.undoRedo("Add Text Layer");
-        app.checkNumLayersIs(2);
+        app.checkNumLayersIs(numLayersBefore + 1);
     }
 
     private void setTextSize() {
@@ -325,11 +364,6 @@ public class WorkflowTest {
         keyboard.undoRedo("Apply Layer Mask");
     }
 
-    private void addDropShadowToTheWoodLayer() {
-        app.runFilterWithDialog("Drop Shadow", Randomize.NO, Reseed.NO, ShowOriginal.NO, false);
-        keyboard.undoRedo("Drop Shadow");
-    }
-
     private void mergeDown() {
         app.checkNumLayersIs(2);
 
@@ -425,8 +459,8 @@ public class WorkflowTest {
         app.clickTool(Tools.BRUSH);
     }
 
-    private void loadReferenceImage() {
-        File f = new File("C:\\pix_tests\\reference_images\\workflow1.png");
+    private void loadReferenceImage(String fileName) {
+        File f = new File("C:\\pix_tests\\reference_images\\" + fileName);
         app.openFileWithDialog(f.getParentFile(), f.getName());
     }
 }

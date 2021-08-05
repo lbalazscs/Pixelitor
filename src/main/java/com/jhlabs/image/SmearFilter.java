@@ -34,7 +34,6 @@ public class SmearFilter extends WholeImageFilter {
     //    private Colormap colormap = new LinearColormap();
     private float angle = 0;
     private float density = 0.5f;
-    private float scatter = 0.0f;
     private int distance = 8;
     private Random randomGenerator;
     //    private long seed = 567;
@@ -67,14 +66,6 @@ public class SmearFilter extends WholeImageFilter {
 
     public float getDensity() {
         return density;
-    }
-
-    public void setScatter(float scatter) {
-        this.scatter = scatter;
-    }
-
-    public float getScatter() {
-        return scatter;
     }
 
     /**

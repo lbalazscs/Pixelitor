@@ -43,7 +43,6 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
-
     public static final String NAME = "Flow Field";
 
     private static final int PAD = 100;
@@ -96,25 +95,25 @@ public class FlowField extends ParametrizedFilter {
 
     private final EnumParam<PhysicsMode> physicsModeParam = new EnumParam<>("Field Effect", PhysicsMode.class);
     //    private final RangeParam massRandomnessParam = new RangeParam("Mass Randomness", 0, 10, 100);
-    private final RangeParam velocityCapParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
+    private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
 
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
-    private final ColorParam foregroundColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
+    private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
 
-    private final RangeParam qualityParam = new RangeParam("Smoothness (%)", 1, 75, 100);
+    private final RangeParam smoothnessParam = new RangeParam("Smoothness (%)", 1, 75, 100);
     private final RangeParam iterationsParam = new RangeParam("Iterations (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
-    private final RangeParam zFactorParam = new RangeParam("Wind", 0, 0, 200);
+    private final RangeParam windParam = new RangeParam("Wind", 0, 0, 200);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
 
     public FlowField() {
         super(false);
 
-        DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, velocityCapParam, forceParam, varianceParam);
-        DialogParam advancedParam = new DialogParam("Advanced", qualityParam, iterationsParam, turbulenceParam, zFactorParam, drawToleranceParam);
+        DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, maxVelocityParam, forceParam, varianceParam);
+        DialogParam advancedParam = new DialogParam("Advanced", smoothnessParam, iterationsParam, turbulenceParam, windParam, drawToleranceParam);
 
         setParams(
             particlesParam,
@@ -122,10 +121,10 @@ public class FlowField extends ParametrizedFilter {
             strokeParam,
             physicsParam,
             backgroundColorParam,
-            foregroundColorParam,
+            particleColorParam,
             colorRandomnessParam,
             advancedParam
-        ).withAction(ReseedSupport.createAction());
+        ).withAction(ReseedSupport.createSimplexAction());
 
         iterationsParam.setToolTip("Change filament thickness");
         particlesParam.setToolTip("Number of filaments");
@@ -133,98 +132,99 @@ public class FlowField extends ParametrizedFilter {
         strokeParam.setToolTip("Adjust the stroke style");
         colorRandomnessParam.setToolTip("Randomize colors");
 
-        qualityParam.setToolTip("Smoothness of filament");
+        smoothnessParam.setToolTip("Smoothness of filament");
         forceParam.setToolTip("Stroke Length");
         turbulenceParam.setToolTip("Adjust the variance provided by Noise.");
-        zFactorParam.setToolTip("Spreads away the flow");
+        windParam.setToolTip("Spreads away the flow");
         drawToleranceParam.setToolTip("Require longer fibres to be drawn.");
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int particle_count = particlesParam.getValue();
+        int particleCount = particlesParam.getValue();
         float zoom = zoomParam.getValue() * 0.1f;
         Stroke stroke = strokeParam.createStroke();
         Color bgColor = backgroundColorParam.getColor();
-        Color fgColor = foregroundColorParam.getColor();
+        Color particleColor = particleColorParam.getColor();
         float colorRandomness = colorRandomnessParam.getPercentageValF();
         boolean randomizeColor = colorRandomness != 0;
 
         PhysicsMode physicsMode = physicsModeParam.getSelected();
-        float maximumVelocity = velocityCapParam.getValue() * velocityCapParam.getValue() / 10000.0f;
+        float maximumVelocity = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         float force = (float) forceParam.getZoomRatio();
         float variance = varianceParam.getValue() / 10.0f;
 
-        float quality = qualityParam.getValueAsFloat() / 99 * 400 / zoom;
-        int iteration_count = iterationsParam.getValue();
+        float quality = smoothnessParam.getValueAsFloat() / 99 * 400 / zoom;
+        int iterationCount = iterationsParam.getValue();
         int turbulence = turbulenceParam.getValue();
-        float zFactor = zFactorParam.getValueAsFloat() / 10000;
+        float zFactor = windParam.getValueAsFloat() / 10000;
         int tolerance = drawToleranceParam.getValue();
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        int w = dest.getWidth();
-        int h = dest.getHeight();
+        int imgWidth = dest.getWidth();
+        int imgHeight = dest.getHeight();
 
-        int groupCount = ceilToInt(particle_count / (double) PARTICLES_PER_GROUP);
+        int groupCount = ceilToInt(particleCount / (double) PARTICLES_PER_GROUP);
         Future<?>[] futures = new Future[groupCount];
         var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
 
-        Random r = ReseedSupport.reInitialize();
-        OpenSimplex2F noise = ReseedSupport.getSimplexNoise();
+        Random r = ReseedSupport.getLastSeedRandom();
+        OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
 
         Graphics2D g2 = dest.createGraphics();
         g2.setStroke(stroke);
-        Colors.fillWith(bgColor, g2, w, h);
+        Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
 
-        int field_w = (int) (w * quality + 1);
-        float field_density = field_w * 1.0f / w;
-        int field_h = (int) (h * field_density);
+        int fieldWidth = (int) (imgWidth * quality + 1);
+        float fieldDensity = fieldWidth * 1.0f / imgWidth;
+        int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        Rectangle bounds = new Rectangle(-PAD, -PAD, w + PAD * 2, h + PAD * 2);
+        Rectangle bounds = new Rectangle(-PAD, -PAD,
+            imgWidth + PAD * 2, imgHeight + PAD * 2);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////
 
         float PI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        Color[][] col_field = ((Supplier<Color[][]>) () -> {
+        Color[][] fieldColors = ((Supplier<Color[][]>) () -> {
             if (randomizeColor) {
-                return new Color[field_w][field_h];
+                return new Color[fieldWidth][fieldHeight];
             }
             return null;
         }).get();
 
-        float[] hsb_col = null;
+        float[] hsbColors = null;
         if (randomizeColor) {
-            hsb_col = Colors.toHSB(Rnd.createRandomColor(r, false));
+            hsbColors = Colors.toHSB(Rnd.createRandomColor(r, false));
         }
 
-        for (int i = 0; i < field_w; i++) {
-            for (int j = 0; j < field_h; j++) {
+        for (int i = 0; i < fieldWidth; i++) {
+            for (int j = 0; j < fieldHeight; j++) {
                 if (randomizeColor) {
-                    Color randomColor = new Color(Colors.HSBAtoARGB(hsb_col, fgColor.getAlpha()), true);
-                    col_field[i][j] = Colors.rgbInterpolate(fgColor, randomColor, colorRandomness);
+                    Color randomColor = new Color(Colors.HSBAtoARGB(hsbColors, particleColor.getAlpha()), true);
+                    fieldColors[i][j] = Colors.rgbInterpolate(particleColor, randomColor, colorRandomness);
 
-                    hsb_col[0] = (hsb_col[0] + Geometry.GOLDEN_RATIO_CONJUGATE) % 1;
+                    hsbColors[0] = (hsbColors[0] + Geometry.GOLDEN_RATIO_CONJUGATE) % 1;
                 }
             }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        g2.setColor(fgColor);
+        g2.setColor(particleColor);
 
         List<DoubleAdder> zFactors = new ArrayList<>(groupCount);
         for (int i = 0; i < groupCount; i++) {
             zFactors.add(new DoubleAdder());
         }
 
-        ParticleSystem<FlowFieldParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP, particle_count) {
+        ParticleSystem<FlowFieldParticle> system = new ParticleSystem<>(groupCount, PARTICLES_PER_GROUP, particleCount) {
             @Override
-            public void step(int idx) {
-                super.step(idx);
-                zFactors.get(idx).add(zFactor);
+            public void step(int groupIndex) {
+                super.step(groupIndex);
+                zFactors.get(groupIndex).add(zFactor);
             }
 
             @Override
@@ -237,10 +237,10 @@ public class FlowField extends ParametrizedFilter {
                 particle.lastX = particle.x = bounds.x + bounds.width * r.nextFloat();
                 particle.lastY = particle.y = bounds.y + bounds.height * r.nextFloat();
 
-                int field_x = toRange(0, field_w - 1, (int) (particle.x * field_density));
-                int field_y = toRange(0, field_h - 1, (int) (particle.y * field_density));
+                int fieldX = toRange(0, fieldWidth - 1, (int) (particle.x * fieldDensity));
+                int fieldY = toRange(0, fieldHeight - 1, (int) (particle.y * fieldDensity));
 
-                particle.color = randomizeColor ? col_field[field_x][field_y] : fgColor;
+                particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
 
                 if (particle.isPathReady()) {
                     g2.setColor(particle.color);
@@ -257,17 +257,19 @@ public class FlowField extends ParametrizedFilter {
 
             @Override
             protected void updateParticle(FlowFieldParticle particle) {
-                int field_x = toRange(0, field_w - 1, (int) (particle.x * field_density));
-                int field_y = toRange(0, field_h - 1, (int) (particle.y * field_density));
+                int fieldX = toRange(0, fieldWidth - 1, (int) (particle.x * fieldDensity));
+                int fieldY = toRange(0, fieldHeight - 1, (int) (particle.y * fieldDensity));
 
                 float vx = particle.vx;
                 float vy = particle.vy;
 
-                float sampleX = field_x / zoom / field_density;
-                float sampleY = field_y / zoom / field_density;
+                float sampleX = fieldX / zoom / fieldDensity;
+                float sampleY = fieldY / zoom / fieldDensity;
                 double sampleZ = zFactors.get(particle.groupIndex).doubleValue();
                 float value = initTheta + (float) (noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * PI);
-                physicsMode.updateParticle(particle, (float) (force * cos(value)), (float) (force * sin(value)));
+                float dx = (float) (force * cos(value));
+                float dy = (float) (force * sin(value));
+                physicsMode.updateParticle(particle, dx, dy);
 
                 if (particle.vx * particle.vx + particle.vy * particle.vy > maximumVelocity) {
                     particle.vx = vx;
@@ -282,7 +284,7 @@ public class FlowField extends ParametrizedFilter {
             int finalI = i;
 
             futures[i] = ThreadPool.submit(() -> {
-                for (int j = 0; j < iteration_count; j++) {
+                for (int j = 0; j < iterationCount; j++) {
                     system.step(finalI);
                 }
 

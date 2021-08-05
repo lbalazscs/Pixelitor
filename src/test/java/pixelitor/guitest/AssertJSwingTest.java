@@ -37,7 +37,6 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
@@ -77,6 +76,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -167,7 +167,7 @@ public class AssertJSwingTest {
             app.runSlowly();
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testShapesTool();
+            testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -188,13 +188,6 @@ public class AssertJSwingTest {
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in ",
             getCurrentTimeHM(), Utils.formatMillis(totalTimeMillis));
-        final int secondsToWait = 5;
-        int remainingSeconds = secondsToWait;
-        do {
-            System.out.print(remainingSeconds + "...");
-            GUIUtils.showTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
-            Utils.sleep(1, SECONDS);
-        } while (--remainingSeconds > 0);
 
         app.exit();
     }
@@ -1031,27 +1024,7 @@ public class AssertJSwingTest {
     private void testNewImage() {
         log(1, "new image");
 
-        runMenuCommand("New Image...");
-        var dialog = findDialogByTitle("New Image");
-        dialog.textBox("widthTF").deleteText().enterText("611");
-        dialog.textBox("heightTF").deleteText().enterText("e");
-
-        // try to accept the dialog
-        dialog.button("ok").click();
-
-        app.expectAndCloseErrorDialog();
-
-        // correct the error
-        dialog.textBox("heightTF").deleteText().enterText("411");
-
-        // try again
-        dialog.button("ok").click();
-
-        // this time the dialog should close
-        dialog.requireNotVisible();
-
-        String activeCompName = EDT.active(Composition::getName);
-        assertThat(activeCompName).startsWith("Untitled");
+        app.createNewImage(611, 411, null);
 
         runMenuCommand("Close");
     }
@@ -1072,7 +1045,7 @@ public class AssertJSwingTest {
         log(1, "save, ext = " + extension);
 
         // create a new image to be saved
-        String compName = createNewImage();
+        app.createNewImage(400, 400, null);
         maskMode.set(this);
 
         // the new image is unsaved => has no file
@@ -1088,6 +1061,8 @@ public class AssertJSwingTest {
         System.out.println("AssertJSwingTest::testSave: found file chooser, file = " + file);
 
         boolean fileExistsAlready = file.exists();
+
+        String compName = EDT.active(Composition::getName);
 
         saveDialog.setCurrentDirectory(baseTestingDir);
         saveDialog.fileNameTextBox()
@@ -1127,23 +1102,11 @@ public class AssertJSwingTest {
         runMenuCommand("Close");
 
         if (dirty) {
-            closeDoYouWantToSaveChangesDialog();
+            app.closeDoYouWantToSaveChangesDialog();
         }
 
         maskMode.set(this);
         checkConsistency();
-    }
-
-    private String createNewImage() {
-        runMenuCommand("New Image...");
-        findDialogByTitle("New Image").button("ok").click();
-
-        assert !EDT.active(Composition::isDirty);
-
-        String compName = EDT.active(Composition::getName);
-        assertThat(compName).startsWith("Untitled");
-
-        return compName;
     }
 
     private void testExportOptimizedJPEG() {
@@ -1229,7 +1192,7 @@ public class AssertJSwingTest {
 
         int numOpenImages = EDT.call(OpenImages::getNumOpenImages);
         if (numOpenImages == 1) {
-            createNewImage();
+            app.createNewImage(400, 400, null);
         }
 
         EDT.assertNumOpenImagesIs(2);
@@ -1239,17 +1202,13 @@ public class AssertJSwingTest {
         runMenuCommand("Close");
 
         if (dirty) {
-            closeDoYouWantToSaveChangesDialog();
+            app.closeDoYouWantToSaveChangesDialog();
         }
 
         EDT.assertNumOpenImagesIs(1);
 
         maskMode.set(this);
         checkConsistency();
-    }
-
-    private void closeDoYouWantToSaveChangesDialog() {
-        app.findJOptionPane().buttonWithText("Don't Save").click();
     }
 
     private void testCloseAll() {
@@ -1729,7 +1688,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersDislocate() {
-        testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
@@ -1910,7 +1869,16 @@ public class AssertJSwingTest {
         log(1, "filter " + name);
 
         boolean testPresets = !quick;
-        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonsToClick);
+
+        Consumer<DialogFixture> extraButtonClicker = dialog -> {
+            for (String buttonText : extraButtonsToClick) {
+                findButtonByText(dialog, buttonText)
+                    .requireEnabled()
+                    .click();
+            }
+        };
+
+        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonClicker);
 
         afterFilterRunActions(name);
     }

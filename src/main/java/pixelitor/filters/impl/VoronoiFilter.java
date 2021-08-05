@@ -79,12 +79,12 @@ public class VoronoiFilter extends PointFilter {
         int width = src.getWidth();
         int height = src.getHeight();
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         // Determining the number of cells is tricky because more
         // cells mean better performance, but if a cell and all
         // of its neighbors are empty, then the algorithm fails.
-        // Also the cells should be more or less square-shaped.
+        // The cells should be more or less square-shaped.
         double est = Math.sqrt(numPoints / 10.0);
         double aspectRatio = width / (double) height;
         int numVerGridCells;
@@ -169,7 +169,7 @@ public class VoronoiFilter extends PointFilter {
         return super.filter(src, dst);
     }
 
-    private int calcNumGridCells(int size, double estimated) {
+    private static int calcNumGridCells(int size, double estimated) {
         int numGridCells;
         if (estimated > size / 3.0) { // can happen for very small images
             // the cell size should be at least 3 pixels

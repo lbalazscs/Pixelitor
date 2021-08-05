@@ -193,9 +193,9 @@ public class Composition implements Serializable {
             compCopy.file = file;
             compCopy.name = name;
             compCopy.view = view;
-            // the new guides are set in the action that needed the undo
+            // the new guides are set in the action that needed undo
         } else { // duplicate
-            compCopy.dirty = true;
+            compCopy.dirty = false;
             compCopy.file = null;
             compCopy.name = createCopyName(stripExtension(name));
             compCopy.view = null;
@@ -240,9 +240,9 @@ public class Composition implements Serializable {
             canvas.recalcCoSize(view, true);
         }
 
-        if (selection != null) { // can happen when duplicating
+        if (selection != null) {
             if (view == null) {
-                throw new IllegalStateException(); // should deselect first
+                selection.die();
             } else {
                 selection.setView(view);
             }
@@ -274,12 +274,16 @@ public class Composition implements Serializable {
         return canvas.clip(shape);
     }
 
+    public boolean isDirty() {
+        return dirty;
+    }
+
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
     }
 
-    public boolean isDirty() {
-        return dirty;
+    public boolean isOpen() {
+        return view != null;
     }
 
     public String getName() {
@@ -665,13 +669,13 @@ public class Composition implements Serializable {
 
     /**
      * Returns the active mask or image layer.
-     * Calling this method assumes that the active layer is a Drawable.
+     * Calling this method assumes that the active layer is a {@link Drawable}.
      */
     public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
-            throw new IllegalStateException("The active layer is not an image layer or a mask, it is "
-                + activeLayer.getClass().getSimpleName());
+            throw new IllegalStateException("not drawable: "
+                                            + activeLayer.getClass().getSimpleName());
         }
         return dr;
     }
@@ -692,8 +696,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void moveActiveContent(MoveMode mode,
-                                  double relImX, double relImY) {
+    public void moveActiveContent(MoveMode mode, double relImX, double relImY) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
             layer.moveWhileDragging(relImX, relImY);

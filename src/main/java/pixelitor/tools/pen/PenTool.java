@@ -268,7 +268,7 @@ public class PenTool extends Tool {
         Tools.SELECTION.activate();
     }
 
-    private void exportSVG() {
+    private static void exportSVG() {
         IO.saveSVG(path.toImageSpaceShape(), null);
     }
 

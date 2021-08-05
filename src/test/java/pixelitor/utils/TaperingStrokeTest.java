@@ -58,16 +58,15 @@ class TaperingStrokeTest {
     }
 
     public static void main(String[] args) {
-        new TaperingStrokeTest().testingTheStroke();
+        testingTheStroke();
     }
 
-    void testingTheStroke() {
-
+    static void testingTheStroke() {
         BufferedImage image = new BufferedImage(100, 100, 2);
 
         Graphics2D g = image.createGraphics();
         g.setColor(Color.BLACK);
-        g.fillRect(0,0,100,100);
+        g.fillRect(0, 0, 100, 100);
 
         GeneralPath path = new GeneralPath();
         path.moveTo(40, 30);

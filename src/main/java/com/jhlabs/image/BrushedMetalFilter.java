@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 /**
  * A filter which produces an image simulating brushed metal.
@@ -30,7 +30,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
     private int color = 0xff888888;
     private float shine = 0.1f;
     private boolean monochrome = true;
-    private Random random;
+    private SplittableRandom random;
 
     /**
      * Constructs a BrushedMetalFilter object.
@@ -76,19 +76,29 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
         int r = (color >> 16) & 0xff;
         int g = (color >> 8) & 0xff;
         int b = color & 0xff;
+
+        int[] shineFactors = null;
+        if (shine != 0) {
+            shineFactors = new int[width];
+            for (int x = 0; x < width; x++) {
+                int f = (int) (255 * shine * FastMath.sin((double) x / width * Math.PI));
+                shineFactors[x] = f;
+            }
+        }
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int tr = r;
                 int tg = g;
                 int tb = b;
                 if (shine != 0) {
-                    int f = (int) (255 * shine * FastMath.sin((double) x / width * Math.PI));
+                    int f = shineFactors[x];
                     tr += f;
                     tg += f;
                     tb += f;
                 }
                 if (monochrome) {
-                    int n = (int) (255 * (2 * random.nextFloat() - 1) * amount);
+                    int n = (int) (255 * (2 * random.nextDouble() - 1) * amount);
                     inPixels[x] = a | (clamp(tr + n) << 16) | (clamp(tg + n) << 8) | clamp(tb + n);
                 } else {
                     inPixels[x] = a | (random(tr) << 16) | (random(tg) << 8) | random(tb);
@@ -97,19 +107,20 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
 
             if (radius != 0) {
                 blur(inPixels, outPixels, width, radius);
-                AbstractBufferedImageOp.setRGB(dst, 0, y, width, 1, outPixels);
+                setRGB(dst, 0, y, width, 1, outPixels);
             } else {
-                AbstractBufferedImageOp.setRGB(dst, 0, y, width, 1, inPixels);
+                setRGB(dst, 0, y, width, 1, inPixels);
             }
 
             pt.unitDone();
         }
+
         finishProgressTracker();
         return dst;
     }
 
     private int random(int x) {
-        x += (int) (255 * (2 * random.nextFloat() - 1) * amount);
+        x += (int) (255 * (2 * random.nextDouble() - 1) * amount);
         if (x < 0) {
             x = 0;
         } else if (x > 0xff) {
@@ -288,7 +299,7 @@ public class BrushedMetalFilter extends AbstractBufferedImageOp {
         return "Texture/Brushed Metal...";
     }
 
-    public void setRandom(Random random) {
+    public void setRandom(SplittableRandom random) {
         this.random = random;
     }
 }

@@ -945,22 +945,13 @@ public class ImageUtils {
                                         BufferedImage bumpImage,
                                         String filterName) {
         return bumpMap(src, bumpImage,
-            (float) DEG_315_IN_RADIANS, 2.0f, filterName);
+            (float) DEG_315_IN_RADIANS, 2.0f, filterName, false);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
                                         BufferedImage bumpImage,
                                         float azimuth, float bumpHeight,
-                                        String filterName) {
-        return bumpMap(src, bumpImage, BlendComposite.HardLight, azimuth, bumpHeight, filterName);
-    }
-
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpImage, Composite composite,
-                                        float azimuth, float bumpHeight,
-                                        String filterName) {
-        // TODO optimize it so that the bumpImage can be smaller, and an offset is given - useful for text effects
-        // tiling could be also an option
-
+                                        String filterName, boolean tile) {
         var embossFilter = new EmbossFilter(filterName);
         embossFilter.setAzimuth(azimuth);
         embossFilter.setElevation((float) (Math.PI / 6.0));
@@ -971,8 +962,25 @@ public class ImageUtils {
         BufferedImage dest = copyImage(src);
 
         Graphics2D g = dest.createGraphics();
-        g.setComposite(composite);
-        g.drawImage(bumpMap, 0, 0, null);
+        g.setComposite(BlendComposite.HardLight);
+        if (tile) {
+            // If 3 is not subtracted here, then for some reason
+            // there are 3 pixel wide gaps between the tiles.
+            int bumpMapWidth = Math.max(bumpMap.getWidth() - 3, 1);
+            int bumpMapHeight = Math.max(bumpMap.getHeight() - 3, 1);
+
+            int numHorTiles = dest.getWidth() / bumpMapWidth + 1;
+            int numVerTiles = dest.getHeight() / bumpMapHeight + 1;
+            for (int i = 0; i < numHorTiles; i++) {
+                for (int j = 0; j < numVerTiles; j++) {
+                    int x = i * bumpMapWidth;
+                    int y = j * bumpMapHeight;
+                    g.drawImage(bumpMap, x, y, null);
+                }
+            }
+        } else {
+            g.drawImage(bumpMap, 0, 0, null);
+        }
         g.dispose();
 
         return dest;

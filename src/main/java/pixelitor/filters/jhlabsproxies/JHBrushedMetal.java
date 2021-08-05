@@ -24,7 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static java.awt.Color.GRAY;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
@@ -53,7 +53,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.reInitialize();
+        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
 
         var filter = new BrushedMetalFilter(color.getColor().getRGB(),
             radius.getValue(),

@@ -23,10 +23,18 @@ import pixelitor.layers.TextLayer;
  * A debugging node for a Layer
  */
 public class TextLayerNode extends ContentLayerNode {
+    public TextLayerNode(TextLayer layer) {
+        this("text layer " + layer.getName(), layer);
+    }
+
     public TextLayerNode(String name, TextLayer layer) {
         super(name, layer);
 
         TextSettings settings = layer.getSettings();
-        addString("text", settings == null ? "NO TEXT SETTINGS!" : settings.getText());
+        if (settings == null) {
+            addString("text settings", "NO TEXT SETTINGS!");
+        } else {
+            add(settings.createDebugNode("text settings"));
+        }
     }
 }

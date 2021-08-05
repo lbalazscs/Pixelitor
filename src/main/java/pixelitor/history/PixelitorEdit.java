@@ -52,6 +52,10 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
+        if (!comp.isOpen()) {
+            throw new CannotUndoException();
+        }
+
         // any action triggered from this method
         // must not add something to the history
         try {
@@ -67,6 +71,10 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
+
+        if (!comp.isOpen()) {
+            throw new CannotRedoException();
+        }
 
         try {
             History.setForbidEdits(true);

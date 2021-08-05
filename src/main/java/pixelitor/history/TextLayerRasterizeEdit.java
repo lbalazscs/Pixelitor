@@ -20,6 +20,9 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.ImageLayerNode;
+import pixelitor.utils.debug.TextLayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -61,5 +64,15 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         before = null;
         after = null;
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(new TextLayerNode(before));
+        node.add(new ImageLayerNode(after));
+
+        return node;
     }
 }

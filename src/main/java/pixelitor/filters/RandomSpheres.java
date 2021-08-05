@@ -90,7 +90,7 @@ public class RandomSpheres extends ParametrizedFilter {
 
         var pt = new StatusBarProgressTracker(NAME, numCircles);
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         Graphics2D g = dest.createGraphics();
         g.setComposite(AlphaComposite.SrcOver.derive(opacity.getPercentageValF()));
@@ -98,8 +98,7 @@ public class RandomSpheres extends ParametrizedFilter {
 
         int colorSrc = colorSource.getValue();
 
-        double angle = highlightAngleSelector.getValueInRadians();
-        angle += Math.PI;
+        double angle = highlightAngleSelector.getValueInRadians() + Math.PI;
 
         double elevation = highlightElevationSelector.getValueInRadians();
         int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));

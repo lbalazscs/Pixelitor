@@ -99,6 +99,7 @@ public final class NewImage {
 
         private static final int BORDER_WIDTH = 5;
         private final JComboBox<FillType> backgroundSelector;
+        private final JTextField nameTF;
 
         private NewImagePanel() {
             setLayout(new GridBagLayout());
@@ -106,6 +107,10 @@ public final class NewImage {
 
             //noinspection SuspiciousNameCombination
             setBorder(createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
+
+            nameTF = new JTextField(generateTitle());
+            nameTF.setName("nameTF");
+            gbh.addLabelAndControl("Name", nameTF);
 
             widthTF = addTextField("widthTF", "Width:", lastSize.width, gbh);
             heightTF = addTextField("heightTF", "Height:", lastSize.height, gbh);
@@ -178,11 +183,14 @@ public final class NewImage {
             int selectedHeight = getSelectedHeight();
             FillType bg = getSelectedBackground();
 
-            String title = "Untitled" + untitledCount++;
-            addNewImage(bg, selectedWidth, selectedHeight, title);
+            addNewImage(bg, selectedWidth, selectedHeight, getTitle());
 
             lastSize.width = selectedWidth;
             lastSize.height = selectedHeight;
+        }
+
+        private String getTitle() {
+            return nameTF.getText().trim();
         }
 
         private int getSelectedWidth() {
@@ -196,6 +204,10 @@ public final class NewImage {
         private FillType getSelectedBackground() {
             return (FillType) backgroundSelector.getSelectedItem();
         }
+    }
+
+    private static String generateTitle() {
+        return "Untitled " + untitledCount++;
     }
 }
 

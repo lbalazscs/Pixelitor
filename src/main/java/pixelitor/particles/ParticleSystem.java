@@ -48,8 +48,8 @@ public abstract class ParticleSystem<P extends Particle> {
         }
     }
 
-    public void step(int idx) {
-        groups.get(idx).step();
+    public void step(int groupIndex) {
+        groups.get(groupIndex).step();
     }
 
     protected abstract P newParticle();
@@ -60,7 +60,7 @@ public abstract class ParticleSystem<P extends Particle> {
 
     protected abstract void updateParticle(P particle);
 
-    public ParticleGroup<P> group(int i) {
-        return groups.get(i);
+    public ParticleGroup<P> group(int groupIndex) {
+        return groups.get(groupIndex);
     }
 }

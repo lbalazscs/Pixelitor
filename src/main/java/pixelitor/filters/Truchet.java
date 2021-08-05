@@ -282,7 +282,7 @@ public class Truchet extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
         int size = sizeParam.getValue();
 
         // generates 4 images, although with the current tiles only 2 will be different
@@ -344,7 +344,7 @@ public class Truchet extends ParametrizedFilter {
         return dest;
     }
 
-    private int indexFromArray(int[][] array, int i, int j) {
+    private static int indexFromArray(int[][] array, int i, int j) {
         int sizeX = array[0].length;
         int sizeY = array.length;
         return array[j % sizeY][i % sizeX];

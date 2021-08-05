@@ -48,6 +48,8 @@ class PathTest {
 
     @Test
     void deletingSubPathPoints() {
+        History.clear();
+
         var shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
         SubPath sp = path.getActiveSubpath();
@@ -58,6 +60,7 @@ class PathTest {
         sp.getAnchor(0).delete(); // delete first (and last)
         assertThat(path.getActiveSubpath()).numAnchorsIs(0);
 
+        History.assertNumEditsIs(4);
         History.undo("Delete Anchor Point");
         History.undo("Delete Anchor Point");
         // check the active subpath because the undo replaced

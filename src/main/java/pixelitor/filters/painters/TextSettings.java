@@ -29,6 +29,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -261,5 +262,14 @@ public class TextSettings implements Serializable {
         // should be always non-null while loading a preset,
         // because this happens only in the dialog
         guiUpdater.accept(this);
+    }
+
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addQuotedString("text", getText());
+        node.addBoolean("watermark", watermark);
+
+        return node;
     }
 }

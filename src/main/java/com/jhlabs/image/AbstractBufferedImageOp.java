@@ -27,9 +27,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.awt.image.BufferedImage.*;
 
 /**
  * A convenience class which implements those methods of BufferedImageOp which are rarely changed.
@@ -85,8 +83,9 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
         if (dstCM == null) {
             dstCM = src.getColorModel();
         }
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
-                .isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM,
+            dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()),
+            dstCM.isAlphaPremultiplied(), null);
     }
 
     @Override
