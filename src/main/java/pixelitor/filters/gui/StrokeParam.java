@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -130,6 +131,22 @@ public class StrokeParam extends AbstractFilterParam {
             strokeCapParam.getSelected().getValue(),
             strokeJoinParam.getSelected().getValue(),
             dashFloats);
+    }
+
+    public Stroke createStrokeWithRandomWidth(Random random, float randomness) {
+        float strokeWidth = strokeWidthParam.getValueAsFloat();
+        strokeWidth += strokeWidth * randomness * random.nextFloat();
+
+        float[] dashFloats = null;
+        if (dashedParam.isChecked()) {
+            dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
+        }
+
+        return getStrokeType().createStroke(
+                strokeWidth,
+                strokeCapParam.getSelected().getValue(),
+                strokeJoinParam.getSelected().getValue(),
+                dashFloats);
     }
 
     @Override

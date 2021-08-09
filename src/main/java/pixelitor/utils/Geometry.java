@@ -24,6 +24,7 @@ import java.awt.geom.Point2D;
 
 public class Geometry {
     public static final double GOLDEN_RATIO = 1.61803398874989490253;
+    @Deprecated
     public static final float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
 
     private Geometry() {
@@ -182,6 +183,12 @@ public class Geometry {
         return r;
     }
 
+    public static Point2D setMagnitude(Point2D a, float factor) {
+        normalize(a);
+        scale(a, factor);
+        return a;
+    }
+
     public static boolean areEqual(Point2D a, Point2D b) {
         // TODO: will using the epsilon method be any better??
         return Double.compare(a.getX(), b.getX()) == 0 && Double.compare(a.getY(), b.getY()) == 0;
@@ -193,6 +200,24 @@ public class Geometry {
 
     public static float distance(Point2D a, Point2D b) {
         return (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+    }
+
+    public static float distance(Point2D a) {
+        return (float) FastMath.hypot(a.getX(), a.getY());
+    }
+
+    public static float distanceSq(Point2D a) {
+        return (float) (a.getX() * a.getX() + a.getY() + a.getY());
+    }
+
+    public static Point2D add(Point2D a, float add) {
+        a.setLocation(a.getX() + add, a.getY() + add);
+        return a;
+    }
+
+    public static Point2D add(Point2D a, Point2D b) {
+        add(a, b, a);
+        return a;
     }
 
     public static Point2D add(Point2D a, Point2D b, Point2D r) {
@@ -230,8 +255,8 @@ public class Geometry {
         }
 
         return new Point2D.Double(
-            (int) (l1.x + (d * v1.x) / v1Length),
-            (int) (l1.y + (d * v1.y) / v1Length));
+                (int) (l1.x + (d * v1.x) / v1Length),
+                (int) (l1.y + (d * v1.y) / v1Length));
     }
 
     /**
@@ -241,5 +266,19 @@ public class Geometry {
      */
     public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, projectPointOnLine(line, p));
+    }
+
+    public static void bound(Point2D pos, float x1, float y1, float x2, float y2) {
+        pos.setLocation(
+                FastMath.max(FastMath.min(pos.getX(), x2), x1),
+                FastMath.max(FastMath.min(pos.getY(), y2), y1)
+        );
+    }
+
+    public static void toRange(Point2D pos, float x1, float y1, float x2, float y2) {
+        pos.setLocation(
+                FastMath.toRange(x1, x2, pos.getX()),
+                FastMath.toRange(y1, y2, pos.getY())
+        );
     }
 }
