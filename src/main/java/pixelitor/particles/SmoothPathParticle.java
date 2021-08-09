@@ -26,6 +26,7 @@ public abstract class SmoothPathParticle extends Particle {
             g2.setColor(color);
             g2.draw(getPath());
         }
+        pathPoints.clear();
     }
 
     private boolean isPathReady() {
