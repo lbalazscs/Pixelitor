@@ -51,40 +51,90 @@ public class FlowField extends ParametrizedFilter {
     private static final int PAD = 100;
     private static final int PARTICLES_PER_GROUP = 100;
 
-    public enum PhysicsMode {
-        FORCE_MODE_VELOCITY("No Mass") {
+    public enum ParticleUpdater implements Modifier<FlowFieldParticle> {
+        FLOW_FIELD("Flow Fields") {
             @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.pos, delta);
+            public void physicsAct(FlowFieldParticle particle) {
+                ParticleFlowUpdater.FORCE_MODE_VELOCITY.modify(particle);
             }
-        }, FORCE_MODE_ACCELERATION("Uniform Mass") {
+        },
+        FLOW_FIELD_2("Distorted Flow") {
             @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.vel, delta);
-                Geometry.add(particle.pos, particle.vel);
+            public void physicsAct(FlowFieldParticle particle) {
+                ParticleFlowUpdater.FORCE_MODE_ACCELERATION.modify(particle);
             }
-        }, FORCE_MODE_JOLT("Jolt") {
+        },
+        FLOW_FIELD_3("Haywire") {
             @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.acc, delta);
-                Geometry.add(particle.vel, particle.acc);
-                Geometry.add(particle.pos, particle.vel);
+            public void physicsAct(FlowFieldParticle particle) {
+                ParticleFlowUpdater.FORCE_MODE_JOLT.modify(particle);
             }
-        }, FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
+        },
+        FLOW_FIELD_4("Spread Fields") {
             @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(delta, Noise.noise2((float) delta.getX(), (float) delta.getY()) * 10);
-                Geometry.add(particle.pos, delta);
+            public void physicsAct(FlowFieldParticle particle) {
+                ParticleFlowUpdater.FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS.modify(particle);
+            }
+        },
+        SINK("Sink") {
+            @Override
+            public void init(FlowFieldParticle particle) {
+                Geometry.subtract(particle.center, particle.pos, particle.tempPoint);
+                Geometry.setMagnitude(particle.tempPoint, particle.force);
+            }
+
+            @Override
+            public void physicsAct(FlowFieldParticle particle) {
+                Geometry.add(particle.pos, particle.tempPoint, particle.pos);
+            }
+        },
+        REVOLVE("Revolve") {
+            Point2D.Float none = new Point2D.Float();
+
+            @Override
+            public void init(FlowFieldParticle particle) {
+                particle.tempFloat = Geometry.distance(particle.pos, particle.center);
+            }
+
+            @Override
+            public void physicsAct(FlowFieldParticle particle) {
+                Geometry.subtract(particle.center, particle.pos, particle.tempPoint);
+                Geometry.perpendiculars(particle.tempPoint, particle.tempPoint, none);
+                Geometry.setMagnitude(particle.tempPoint, particle.force);
+                Geometry.add(particle.pos, particle.tempPoint, particle.pos);
+                // TODO: Optional improvements
+                Geometry.subtract(particle.center, particle.pos, particle.tempPoint);
+                Geometry.setMagnitude(particle.tempPoint,particle.tempFloat);
+                Geometry.subtract(particle.center,particle.tempPoint, particle.pos);
             }
         };
 
         private final String name;
 
-        PhysicsMode(String name) {
+        ParticleUpdater(String name) {
             this.name = name;
         }
 
-        abstract void updateParticle(FlowFieldParticle particle, Point2D delta);
+        public void init(FlowFieldParticle particle) {
+        }
+
+        @Override
+        public void modify(FlowFieldParticle particle) {
+            Point2D oldVel = Geometry.newFrom(particle.vel);
+
+            physicsAct(particle);
+
+            if (Geometry.distanceSq(particle.vel) > particle.maximumVelocitySq) {
+                particle.vel.setLocation(oldVel);
+            }
+
+            if (particle.anyDisplacementInXOrYIsGreaterThanTolerance()) {
+                particle.addPoint(Geometry.newFrom(particle.pos));
+                particle.las_pos.setLocation(particle.pos);
+            }
+        }
+
+        public abstract void physicsAct(FlowFieldParticle particle);
 
         @Override
         public String toString() {
@@ -92,11 +142,55 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
+    public enum ParticleFlowUpdater implements Modifier<FlowFieldParticle> {
+        FORCE_MODE_VELOCITY {
+            @Override
+            void updateParticle(FlowFieldParticle particle, Point2D delta) {
+                Geometry.add(particle.pos, delta);
+            }
+        }, FORCE_MODE_ACCELERATION {
+            @Override
+            void updateParticle(FlowFieldParticle particle, Point2D delta) {
+                Geometry.add(particle.vel, delta);
+                Geometry.add(particle.pos, particle.vel);
+            }
+        }, FORCE_MODE_JOLT {
+            @Override
+            void updateParticle(FlowFieldParticle particle, Point2D delta) {
+                Geometry.add(particle.acc, delta);
+                Geometry.add(particle.vel, particle.acc);
+                Geometry.add(particle.pos, particle.vel);
+            }
+        }, FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS {
+            @Override
+            void updateParticle(FlowFieldParticle particle, Point2D delta) {
+                Geometry.add(delta, Noise.noise2((float) delta.getX(), (float) delta.getY()) * 10);
+                Geometry.add(particle.pos, delta);
+            }
+        };
+
+        @Override
+        public void modify(FlowFieldParticle particle) {
+            Point2D fieldPoint = particle.getFieldPoint();
+            Point2D delta = new Point2D.Float();
+
+            Geometry.deScale(fieldPoint, particle.zoom * particle.fieldDensity);
+
+            double sampleZ = particle.zFactor.doubleValue();
+
+            float value = particle.noise.get(fieldPoint.getX(), fieldPoint.getY(), sampleZ);
+            delta.setLocation(particle.force * cos(value), particle.force * sin(value));
+            updateParticle(particle, delta);
+        }
+
+        abstract void updateParticle(FlowFieldParticle particle, Point2D delta);
+    }
+
+    private final EnumParam<ParticleUpdater> updaterParam = new EnumParam<>("Mode", ParticleUpdater.class);
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 10000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam zoomParam = new RangeParam("Zoom (%)", 100, 4000, 10000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
 
-    private final EnumParam<PhysicsMode> physicsModeParam = new EnumParam<>("Field Effect", PhysicsMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
@@ -114,10 +208,11 @@ public class FlowField extends ParametrizedFilter {
     public FlowField() {
         super(false);
 
-        DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, maxVelocityParam, forceParam, varianceParam);
+        DialogParam physicsParam = new DialogParam("Physics", maxVelocityParam, forceParam, varianceParam);
         DialogParam advancedParam = new DialogParam("Advanced", smoothnessParam, iterationsParam, turbulenceParam, windParam, drawToleranceParam);
 
         setParams(
+                updaterParam,
                 particlesParam,
                 zoomParam,
                 strokeParam,
@@ -141,10 +236,10 @@ public class FlowField extends ParametrizedFilter {
         drawToleranceParam.setToolTip("Require longer fibres to be drawn.");
     }
 
-
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
+        ParticleUpdater updater = updaterParam.getSelected();
         int particleCount = particlesParam.getValue();
         float zoom = zoomParam.getValue() * 0.1f;
         Stroke stroke = strokeParam.createStroke();
@@ -152,7 +247,6 @@ public class FlowField extends ParametrizedFilter {
         Color particleColor = particleColorParam.getColor();
         float colorRandomness = colorRandomnessParam.getPercentageValF();
 
-        PhysicsMode physicsMode = physicsModeParam.getSelected();
         float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         float force = (float) forceParam.getZoomRatio();
         float variance = varianceParam.getValue() / 10.0f;
@@ -167,6 +261,7 @@ public class FlowField extends ParametrizedFilter {
 
         int imgWidth = dest.getWidth();
         int imgHeight = dest.getHeight();
+        Point2D center = new Point2D.Float(imgWidth / 2f, imgHeight / 2f);
 
         int fieldWidth = (int) (imgWidth * quality + 1);
         float fieldDensity = fieldWidth * 1.0f / imgWidth;
@@ -215,7 +310,7 @@ public class FlowField extends ParametrizedFilter {
         }
 
         ParticleSystem<FlowFieldParticle> system = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-                .setParticleCreator(() -> new FlowFieldParticle(g2, bounds, fieldWidth, fieldHeight, fieldDensity, zoom, zFactors[particlesCreated.getAndIncrement() / PARTICLES_PER_GROUP], (x, y, z) -> initTheta + (float) (noise.turbulence3(x, y, z, turbulence) * PI), force, physicsMode, maximumVelocitySq, tolerance))
+                .setParticleCreator(() -> new FlowFieldParticle(g2, bounds, fieldWidth, fieldHeight, fieldDensity, zoom, zFactors[particlesCreated.getAndIncrement() / PARTICLES_PER_GROUP], (x, y, z) -> initTheta + (float) (noise.turbulence3(x, y, z, turbulence) * PI), force, maximumVelocitySq, tolerance, center, updater))
                 .addModifier(new Modifier.RandomizePosition<>(bounds.x, bounds.y, bounds.width, bounds.height, r))
                 .addModifier(particle -> {
                     int fieldX = toRange(0, fieldWidth - 1, (int) (particle.pos.getX() * fieldDensity));
@@ -225,6 +320,11 @@ public class FlowField extends ParametrizedFilter {
 
 //                    particle.pathPoints.clear();
                     particle.addPoint(Geometry.newFrom(particle.pos));
+                })
+                .addModifier(particle -> {
+                    for (ParticleUpdater particleUpdater : particle.updaters) {
+                        particleUpdater.init(particle);
+                    }
                 })
                 .build();
 
@@ -242,10 +342,6 @@ public class FlowField extends ParametrizedFilter {
             });
         }
 
-//        for (int i = 0; i < iterationCount; i++) {
-//            system.step();
-//        }
-
         ThreadPool.waitFor(futures, pt);
         system.flush();
         pt.finished();
@@ -256,7 +352,9 @@ public class FlowField extends ParametrizedFilter {
     public static class FlowFieldParticle extends SmoothPathParticle {
 
         // Our Fields
-        public Point2D acc;
+        public final Point2D acc;
+        public final Point2D tempPoint;
+        public float tempFloat = 0;
 
         // Imported Fields
         private final Rectangle bounds;
@@ -267,13 +365,17 @@ public class FlowField extends ParametrizedFilter {
         private final DoubleAdder zFactor;
         private final NoiseSupplier noise;
         private final float force;
-        private final PhysicsMode physicsMode;
         private final float maximumVelocitySq;
         private final double tolerance;
+        private final ParticleUpdater[] updaters;
 
-        public FlowFieldParticle(Graphics2D g2, Rectangle bounds, int fieldWidth, int fieldHeight, float fieldDensity, float zoom, DoubleAdder zFactor, NoiseSupplier noise, float force, PhysicsMode physicsMode, float maximumVelocitySq, double tolerance) {
+        private final Point2D center;
+
+        public FlowFieldParticle(Graphics2D g2, Rectangle bounds, int fieldWidth, int fieldHeight, float fieldDensity, float zoom, DoubleAdder zFactor, NoiseSupplier noise, float force, float maximumVelocitySq, double tolerance, Point2D center, ParticleUpdater... updaters) {
             super(g2);
+            this.center = center;
             this.acc = new Point2D.Float();
+            this.tempPoint = new Point2D.Float();
             this.vel = new Point2D.Float();
             this.pos = new Point2D.Float();
             this.las_pos = new Point2D.Float();
@@ -286,9 +388,10 @@ public class FlowField extends ParametrizedFilter {
             this.zFactor = zFactor;
             this.noise = noise;
             this.force = force;
-            this.physicsMode = physicsMode;
             this.maximumVelocitySq = maximumVelocitySq;
             this.tolerance = tolerance;
+
+            this.updaters = updaters;
         }
 
         @Override
@@ -303,30 +406,13 @@ public class FlowField extends ParametrizedFilter {
 
         @Override
         public void update() {
-            Point2D fieldPoint = getFieldPoint();
-            Point2D delta = new Point2D.Float();
-            Point2D oldVel = Geometry.newFrom(vel);
-
-            Geometry.deScale(fieldPoint, zoom * fieldDensity);
-
-            double sampleZ = zFactor.doubleValue();
-
-            float value = noise.get(fieldPoint.getX(), fieldPoint.getY(), sampleZ);
-            delta.setLocation(force * cos(value), force * sin(value));
-            physicsMode.updateParticle(this, delta);
-
-            if (Geometry.distanceSq(vel) > maximumVelocitySq) {
-                vel.setLocation(oldVel);
-            }
-
-            if (anyDisplacementInXOrYIsGreaterThanOne()) {
-                addPoint(Geometry.newFrom(pos));
-                las_pos.setLocation(pos);
+            for (ParticleUpdater updater : updaters) {
+                updater.modify(this);
             }
         }
 
-        private boolean anyDisplacementInXOrYIsGreaterThanOne() {
-            return abs(las_pos.getX() - pos.getX()) > tolerance || abs(las_pos.getX() - pos.getY()) > tolerance;
+        private boolean anyDisplacementInXOrYIsGreaterThanTolerance() {
+            return abs(las_pos.getX() - pos.getX()) > tolerance || abs(las_pos.getY() - pos.getY()) > tolerance;
         }
 
         public Point2D getFieldPoint() {
@@ -338,6 +424,7 @@ public class FlowField extends ParametrizedFilter {
         }
 
     }
+
 
     public interface NoiseSupplier {
         float get(double x, double y, double z);

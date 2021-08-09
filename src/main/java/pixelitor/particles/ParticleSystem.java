@@ -29,16 +29,18 @@ import java.util.function.Supplier;
 public class ParticleSystem<P extends Particle> {
 
     private final List<P> particles;
-    private final Supplier<P> supplier;
     private final List<Modifier<P>> modifiers;
+    private final List<Modifier<P>> updaters;
+    private final Supplier<P> supplier;
 
     public static <P extends Particle> ParticleSystemBuilder<P> createSystem(int particles) {
         return new ParticleSystemBuilder<>(particles);
     }
 
-    public ParticleSystem(int particleCount, List<Modifier<P>> modifiers, Supplier<P> supplier) {
+    public ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> supplier) {
         this.particles = new ArrayList<>(particleCount);
         this.modifiers = modifiers;
+        this.updaters = updaters;
         this.supplier = supplier;
         for (int i = 0; i < particleCount; i++) {
             P particle = newParticle();
@@ -85,6 +87,7 @@ public class ParticleSystem<P extends Particle> {
             particle.flush();
             initializeParticle(particle);
         }
+        updaters.forEach(modifier -> modifier.modify(particle));
         particle.update();
     }
 
@@ -101,12 +104,9 @@ public class ParticleSystem<P extends Particle> {
         particle.reset();
     }
 
-    public List<P> getParticles() {
-        return particles;
-    }
-
     public static class ParticleSystemBuilder<P extends Particle> {
         private final List<Modifier<P>> modifiers = new ArrayList<>();
+        private final List<Modifier<P>> updaters = new ArrayList<>();
         private Supplier<P> supplier = () -> null;
         private final int particles;
 
@@ -124,8 +124,13 @@ public class ParticleSystem<P extends Particle> {
             return this;
         }
 
+        public ParticleSystemBuilder<P> addUpdater(Modifier<P> modifier) {
+            updaters.add(modifier);
+            return this;
+        }
+
         public ParticleSystem<P> build() {
-            return new ParticleSystem<>(particles, modifiers, supplier);
+            return new ParticleSystem<>(particles, modifiers, updaters, supplier);
         }
 
     }
