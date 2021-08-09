@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public abstract class SmoothPathParticle extends Particle {
 
     private final ArrayList<Point2D> pathPoints;
-    private final Graphics2D g2;
+    protected final Graphics2D g2;
 
     public SmoothPathParticle(Graphics2D g2) {
         this.pathPoints = new ArrayList<>();
