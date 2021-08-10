@@ -24,6 +24,7 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import static java.awt.BorderLayout.*;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -45,13 +46,24 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         var upperPanel = new JPanel(new BorderLayout());
         var leftPanel = GUIUtils.arrangeVertically(paramSet);
         var rightPanel = createPresetsPanel((Action[]) otherInfo);
+
         var monochromeCB = new JCheckBox("Allow only Black and White", false);
-        monochromeCB.setToolTipText("Link the sliders so that the image always stays Black and White");
-        monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        monochromeCB.addChangeListener(e ->
+        monochromeCB.setToolTipText("Link the sliders so that the image always stays black and white");
+        monochromeCB.addChangeListener(e1 ->
             ((ChannelMixer) filter).setMonochrome(monochromeCB.isSelected()));
-        paramSet.setBeforeResetAction(() -> monochromeCB.setSelected(false));
-        upperPanel.add(monochromeCB, NORTH);
+
+        var autoNormalizeCB = new JCheckBox("Auto-Normalize", true);
+        autoNormalizeCB.setToolTipText("Preserve brightness by ensuring that the sum of percentages is around 100%");
+        autoNormalizeCB.addChangeListener(e ->
+            ((ChannelMixer) filter).setAutoNormalize(autoNormalizeCB.isSelected()));
+
+        paramSet.setBeforeResetAllAction(() ->
+            beforeResetAll(monochromeCB, autoNormalizeCB));
+
+        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        northPanel.add(autoNormalizeCB);
+        northPanel.add(monochromeCB);
+        upperPanel.add(northPanel, NORTH);
         upperPanel.add(leftPanel, CENTER);
         upperPanel.add(rightPanel, EAST);
 
@@ -61,6 +73,20 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         setLayout(new BorderLayout());
         add(upperPanel, CENTER);
         add(buttonsPanel, SOUTH);
+    }
+
+    private void beforeResetAll(JCheckBox monochromeCB, JCheckBox autoNormalizeCB) {
+        monochromeCB.setSelected(false);
+
+        if (!autoNormalizeCB.isSelected()) {
+            // prevent triggering the filter twice by pretending that it's already true
+            ChannelMixer cm = (ChannelMixer) this.filter;
+            cm.temporarilyEnableNormalization(true);
+            autoNormalizeCB.setSelected(true);
+
+            // has to be called here, because of the previous trick
+            cm.enablePresets();
+        }
     }
 
     private static JPanel createPresetsPanel(Action[] actions) {

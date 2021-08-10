@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
@@ -41,6 +42,10 @@ public class GroupedRangeParam extends AbstractFilterParam {
     private final ButtonModel checkBoxModel;
     private final boolean linkedByDefault;
     private boolean linkable = true; // whether a "Linked" checkbox appears
+
+    private boolean autoNormalizable = false;
+    private boolean autoNormalizationEnabled = false;
+    private boolean autoNormalizing = false;
 
     /**
      * Two linked children: "Horizontal" and "Vertical", with shared min/max/default values
@@ -108,20 +113,119 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     private void linkChildren() {
         for (RangeParam child : children) {
-            child.addChangeListener(e -> propagateChange(child));
+            child.addChangeListener(e -> linkOthersWith(child));
         }
     }
 
-    private void propagateChange(RangeParam param) {
+    private void linkOthersWith(RangeParam source) {
         if (isLinked()) {
             // set the value of every other child to the value of the changed child
             for (RangeParam other : children) {
-                if (other != param) {
-                    double newValue = param.getValueAsDouble();
+                if (other != source) {
+                    double newValue = source.getValueAsDouble();
                     other.setValueNoTrigger(newValue);
                 }
             }
         }
+    }
+
+    /**
+     * Ensures that the sum of values in the child {@link RangeParam}s
+     * is always 100, and therefore they can be interpreted as percentages.
+     */
+    public GroupedRangeParam autoNormalized() {
+        assert !linkedByDefault;
+        assert calcCurrentSumOfValues() == 100;
+
+        linkable = false;
+        for (RangeParam param : children) {
+            param.addChangeListener(e -> autoNormalize(param));
+        }
+        autoNormalizable = true;
+        autoNormalizationEnabled = true;
+        return this;
+    }
+
+    private void autoNormalize(RangeParam source) {
+        if (!autoNormalizationEnabled) {
+            return;
+        }
+        if (autoNormalizing) {
+            // avoid the scenario where the change listeners are calling each other
+            return;
+        }
+        autoNormalizing = true;
+
+        int sumOfAllValues = calcCurrentSumOfValues();
+        int diff = sumOfAllValues - 100;
+        if (diff == 0) {
+            autoNormalizing = false;
+            return;
+        }
+
+        // The other sliders are moved by
+        // an amount proportional to the space they have left.
+        // The algorithm is described in more detail as the "weighted move" approach at
+        // https://softwareengineering.stackexchange.com/questions/261017/algorithm-for-a-ui-showing-x-percentage-sliders-whose-linked-values-always-total
+
+        // The space left function depends on the direction of change.
+        ToDoubleFunction<RangeParam> spaceLeftFunc;
+        if (diff > 0) {
+            // the other sliders have to decrease their value
+            spaceLeftFunc = param -> param.getValueAsDouble() - param.getMinimum();
+        } else {
+            // the other sliders have to increase their value
+            spaceLeftFunc = param -> param.getMaximum() - param.getValueAsDouble();
+        }
+
+        // first pass: calculate the sum of spaces left
+        double sumOfSpacesLeft = 0;
+        for (RangeParam param : children) {
+            if (param != source) {
+                double spaceLeft = spaceLeftFunc.applyAsDouble(param);
+                sumOfSpacesLeft += spaceLeft;
+            }
+        }
+
+        // second pass: move the other sliders so that the difference is
+        // distributed among them proportional to their space left
+        for (RangeParam param : children) {
+            if (param != source) {
+                double spaceLeft = spaceLeftFunc.applyAsDouble(param);
+                double correction = diff * spaceLeft / sumOfSpacesLeft;
+                double newValue = param.getValueAsDouble() - correction;
+                param.setValue(newValue, false);
+            }
+        }
+
+        autoNormalizing = false;
+    }
+
+    private int calcCurrentSumOfValues() {
+        int sumOfAllValues = 0;
+        for (RangeParam param : children) {
+            sumOfAllValues += param.getValue();
+        }
+        return sumOfAllValues;
+    }
+
+    private void normalizeNow() {
+        int diff = calcCurrentSumOfValues() - 100;
+        if (diff != 0) {
+            double correction = diff / (double) children.length;
+            for (RangeParam param : children) {
+                double currentValue = param.getValueAsDouble();
+                param.setValueNoTrigger(currentValue - correction);
+            }
+        }
+    }
+
+    public void setAutoNormalizationEnabled(boolean enable, boolean force) {
+        assert autoNormalizable;
+        if (!this.autoNormalizationEnabled && enable && force) {
+            normalizeNow();
+        }
+        this.autoNormalizationEnabled = enable;
     }
 
     public ButtonModel getCheckBoxModel() {
@@ -182,6 +286,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
+        boolean wasNormalized = autoNormalizationEnabled;
+        autoNormalizationEnabled = false;
+
         for (RangeParam child : children) {
             // call the individual params without trigger...
             child.reset(false);
@@ -193,6 +300,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         }
 
         setLinked(linkedByDefault);
+        autoNormalizationEnabled = wasNormalized;
     }
 
     public RangeParam getRangeParam(int index) {

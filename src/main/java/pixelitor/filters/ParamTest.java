@@ -56,10 +56,10 @@ public class ParamTest extends ParametrizedFilter {
         RangeParam a = new RangeParam("A", 0, 50, 100);
         RangeParam b = new RangeParam("B", 0, 25, 100);
         RangeParam c = new RangeParam("C", 0, 25, 100);
-        new PercentageGroup(a, b, c);
 
         return new FilterParam[]{
-            a, b, c,
+            new GroupedRangeParam("Normalized Group", new RangeParam[]{
+                a, b, c}, false).autoNormalized(),
             new GradientParam("Colors", defaultThumbPositions, defaultValues),
             new RangeParam("RangeParam", 0, 50, 100),
             new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),

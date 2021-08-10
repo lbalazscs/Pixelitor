@@ -147,7 +147,7 @@ public class ParamSet {
     /**
      * Allows registering an action that will run before "reset all"
      */
-    public void setBeforeResetAction(Runnable beforeResetAction) {
+    public void setBeforeResetAllAction(Runnable beforeResetAction) {
         this.beforeResetAction = beforeResetAction;
     }
 
