@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
@@ -83,6 +84,21 @@ public class FlowField extends ParametrizedFilter {
             public void modify(FlowFieldParticle particle) {
                 Geometry.add(particle.vel, particle.delta);
                 Geometry.add(particle.pos, particle.vel);
+            }
+        },
+        FORCE_MODE_JOLT("Jolt") {
+            @Override
+            public void modify(FlowFieldParticle particle) {
+                Geometry.add(particle.acc, particle.delta);
+                Geometry.add(particle.vel, particle.acc);
+                Geometry.add(particle.pos, particle.vel);
+            }
+        },
+        FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
+            @Override
+            public void modify(FlowFieldParticle particle) {
+                Geometry.add(particle.delta, Noise.noise2((float) particle.delta.getX(), (float) particle.delta.getY()) * 10);
+                Geometry.add(particle.pos, particle.delta);
             }
         };
 
