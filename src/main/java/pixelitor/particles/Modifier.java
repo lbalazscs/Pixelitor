@@ -1,5 +1,6 @@
 package pixelitor.particles;
 
+import pixelitor.utils.Geometry;
 import pixelitor.utils.GoldenRatio;
 import pixelitor.utils.Rnd;
 
@@ -7,6 +8,7 @@ import java.awt.*;
 import java.util.Random;
 
 public interface Modifier<P extends Particle> {
+
     void modify(P particle);
 
     record RandomizePosition<P extends Particle>(int x, int y, int width, int height,
@@ -46,6 +48,5 @@ public interface Modifier<P extends Particle> {
             particle.color = goldenRatio.next();
         }
     }
-
 
 }

@@ -166,8 +166,14 @@ public class Geometry {
         deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
     }
 
-    public static void deScale(Point2D a, float factor) {
+    public static void normalizeIfNonzero(Point2D a) {
+        if (a.getX() == 0 && a.getY() == 0) return;
+        deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
+    }
+
+    public static Point2D deScale(Point2D a, float factor) {
         deScale(a, factor, a);
+        return a;
     }
 
     public static void deScale(Point2D a, float factor, Point2D r) {
@@ -266,13 +272,6 @@ public class Geometry {
      */
     public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, projectPointOnLine(line, p));
-    }
-
-    public static void bound(Point2D pos, float x1, float y1, float x2, float y2) {
-        pos.setLocation(
-                FastMath.max(FastMath.min(pos.getX(), x2), x1),
-                FastMath.max(FastMath.min(pos.getY(), y2), y1)
-        );
     }
 
     public static void toRange(Point2D pos, float x1, float y1, float x2, float y2) {

@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
@@ -36,7 +35,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Supplier;
 
@@ -46,91 +44,53 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// PUBLIC STATIC FIELDS
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static final String NAME = "Flow Field";
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// PRIVATE STATIC FIELDS
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold defaultstate="collapsed" desc="PRIVATE STATIC FIELDS">
+
+    // Determine the extra simulation space outside the canvas.
     private static final int PAD = 100;
+
+    // Number of particles distributed among groups. Here a group is just a conceptual term indicating the set of particles iterated per Thread.
     private static final int PARTICLES_PER_GROUP = 100;
 
-    public enum ParticleUpdater implements Modifier<FlowFieldParticle> {
-        FLOW_FIELD("Noise") {
-            @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                if (particle.noiseEffect == 0) return;
-//                ParticleFlowUpdater.FORCE_MODE_VELOCITY.modify(particle);
-                particle.physicsMode.modify(particle);
-            }
-        },
-        /*FLOW_FIELD_2("Distorted Flow") {
-            @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                ParticleFlowUpdater.FORCE_MODE_ACCELERATION.modify(particle);
-            }
-        },
-        FLOW_FIELD_3("Haywire") {
-            @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                ParticleFlowUpdater.FORCE_MODE_JOLT.modify(particle);
-            }
-        },
-        FLOW_FIELD_4("Spread Fields") {
-            @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                ParticleFlowUpdater.FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS.modify(particle);
-            }
-        },*/
-        SINK("Sink") {
-            @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                if (particle.sinkEffect == 0) return;
-                Geometry.subtract(particle.center, particle.pos, particle.tempPoint);
-                Geometry.setMagnitude(particle.tempPoint, particle.sinkEffect);
-//                particle.sinkPoint
-                Geometry.add(particle.pos, particle.tempPoint, particle.pos);
-            }
-        },
-        REVOLVE("Revolve") {
-            Point2D.Float none = new Point2D.Float();
+    private static final float SMOOTHNESS = 303.0303f;
 
+    // Force Modes, how "the delta force" is applied to a given particle.
+    private static final int NO_MASS = 0;
+    private static final int UNIFORM_MASS = 1;
+    private static final int RANDOM_MASS = 2;
+    private static final int JOLT = 3;
+
+    private enum ForceMode implements Modifier<FlowFieldParticle> {
+        FORCE_MODE_VELOCITY("No Mass") {
             @Override
-            public void physicsAct(FlowFieldParticle particle) {
-                if (particle.revolveEffect == 0) return;
-                Geometry.subtract(particle.center, particle.pos, particle.tempPoint);
-                Geometry.perpendiculars(particle.tempPoint, particle.tempPoint, none);
-                Geometry.setMagnitude(particle.tempPoint, particle.revolveEffect);
-                Geometry.add(particle.pos, particle.tempPoint, particle.pos);
-                // Optional improvements
-//                Geometry.subtract(particle.center, particle.pos, particle.revolvePoint);
-//                Geometry.setMagnitude(particle.revolvePoint, particle.tempFloat);
-//                Geometry.subtract(particle.center, particle.revolvePoint, particle.pos);
+            public void modify(FlowFieldParticle particle) {
+                Geometry.add(particle.pos, particle.delta);
+            }
+        },
+        FORCE_MODE_ACCELERATION("Uniform Mass") {
+            @Override
+            public void modify(FlowFieldParticle particle) {
+                Geometry.add(particle.vel, particle.delta);
+                Geometry.add(particle.pos, particle.vel);
             }
         };
 
-        private final String name;
+        final String name;
 
-        ParticleUpdater(String name) {
-            this.name = name;
+        ForceMode(String s) {
+            name = s;
         }
-
-        public void init(FlowFieldParticle particle) {
-        }
-
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            Point2D oldVel = Geometry.newFrom(particle.vel);
-
-            physicsAct(particle);
-
-            if (Geometry.distanceSq(particle.vel) > particle.maximumVelocitySq) {
-                particle.vel.setLocation(oldVel);
-            }
-
-            if (particle.anyDisplacementInXOrYIsGreaterThanTolerance()) {
-                particle.addPoint(Geometry.newFrom(particle.pos));
-                particle.las_pos.setLocation(particle.pos);
-            }
-        }
-
-        public abstract void physicsAct(FlowFieldParticle particle);
 
         @Override
         public String toString() {
@@ -138,292 +98,369 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    public enum ParticleFlowUpdater implements Modifier<FlowFieldParticle> {
-        FORCE_MODE_VELOCITY {
-            @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.pos, delta);
-            }
-        }, FORCE_MODE_ACCELERATION {
-            @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.vel, delta);
-                Geometry.add(particle.pos, particle.vel);
-            }
-        }, FORCE_MODE_JOLT {
-            @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(particle.acc, delta);
-                Geometry.add(particle.vel, particle.acc);
-                Geometry.add(particle.pos, particle.vel);
-            }
-        }, FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS {
-            @Override
-            void updateParticle(FlowFieldParticle particle, Point2D delta) {
-                Geometry.add(delta, Noise.noise2((float) delta.getX(), (float) delta.getY()) * 10);
-                Geometry.add(particle.pos, delta);
-            }
-        };
+    //</editor-fold>
 
-        @Override
-        public void modify(FlowFieldParticle particle) {
-            Point2D fieldPoint = particle.getFieldPoint();
-            Point2D delta = new Point2D.Float();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// GUI PARAM DEFINITIONS
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            Geometry.deScale(fieldPoint, particle.zoom * particle.fieldDensity);
+    //<editor-fold defaultstate="collapsed" desc="GUI PARAM DEFINITIONS">
 
-            double sampleZ = particle.zFactor.doubleValue();
-
-            float value = particle.noise.get(fieldPoint.getX(), fieldPoint.getY(), sampleZ);
-            delta.setLocation(particle.noiseEffect * cos(value), particle.noiseEffect * sin(value));
-            updateParticle(particle, delta);
-
-        }
-
-        abstract void updateParticle(FlowFieldParticle particle, Point2D delta);
-    }
-
-    //    private final EnumParam<ParticleUpdater> updaterParam = new EnumParam<>("Mode", ParticleUpdater.class);
+    // To choose how effective a specific force is.
     private final RangeParam noiseParam = new RangeParam("Noise", 0, 100, 100);
     private final RangeParam sinkParam = new RangeParam("Sink", 0, 0, 100);
     private final RangeParam revolveParam = new RangeParam("Revolve", 0, 0, 100);
 
+    // To manipulate the Particle Environment
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 10000, true, BORDER, IGNORE_RANDOMIZE);
-    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 100, 4000, 10000);
-    private final StrokeParam strokeParam = new StrokeParam("Stroke");
 
-    private final EnumParam<ParticleFlowUpdater> physicsModeParam = new EnumParam<>("Field Effect", ParticleFlowUpdater.class);
+    // Other force parameters
+    private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
 
+    // To manipulate the Drawing Strategy
+    private final RangeParam zoomParam = new RangeParam("Zoom (%)", 100, 4000, 10000);
+    private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam radiusRandomnessParam = new RangeParam("Radius Randomness (%)", 0, 0, 1000);
 
-    private final RangeParam smoothnessParam = new RangeParam("Smoothness (%)", 1, 75, 100);
+    // Advanced/Hidden features
     private final RangeParam iterationsParam = new RangeParam("Iterations (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
     private final RangeParam windParam = new RangeParam("Wind", 0, 0, 200);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
 
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// CONSTRUCTOR, SECOND STEP FOR INITIALIZATION
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold defaultstate="collapsed" desc="CONSTRUCTOR, SECOND STEP FOR INITIALIZATION">
+
     public FlowField() {
         super(false);
 
-        DialogParam physicsParam = new DialogParam("Physics", physicsModeParam, maxVelocityParam, forceParam, varianceParam);
-        DialogParam advancedParam = new DialogParam("Advanced", smoothnessParam, iterationsParam, turbulenceParam, windParam, drawToleranceParam);
+        DialogParam physicsParam = new DialogParam("Physics", forceModeParam, maxVelocityParam, forceParam, varianceParam);
+        DialogParam advancedParam = new DialogParam("Advanced", iterationsParam, turbulenceParam, windParam, drawToleranceParam);
 
         setParams(
+
                 noiseParam,
                 sinkParam,
                 revolveParam,
+
                 particlesParam,
+                physicsParam,
+
                 zoomParam,
                 strokeParam,
-                physicsParam,
                 backgroundColorParam,
                 particleColorParam,
                 colorRandomnessParam,
                 radiusRandomnessParam,
+
                 advancedParam
+
         ).withAction(ReseedSupport.createSimplexAction());
 
-        iterationsParam.setToolTip("Change filament thickness");
-        particlesParam.setToolTip("Number of filaments");
-        zoomParam.setToolTip("Adjust the zoom");
-        strokeParam.setToolTip("Adjust the stroke style");
-        colorRandomnessParam.setToolTip("Randomize colors");
+        noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
+        sinkParam.setToolTip("Make particles flow towards the center point.");
+        revolveParam.setToolTip("Make particles flow around the center point.");
 
-        smoothnessParam.setToolTip("Smoothness of filament");
-        forceParam.setToolTip("Stroke Length");
-        turbulenceParam.setToolTip("Adjust the variance provided by Noise.");
-        windParam.setToolTip("Spreads away the flow");
-        drawToleranceParam.setToolTip("Require longer fibres to be drawn.");
+        particlesParam.setToolTip("Adjust the number of particles flowing in the field.");
+
+        physicsParam.setToolTip("Some additional tweaks to manipulate the evaluation system.");
+        forceModeParam.setToolTip("TODO"); // TODO
+        maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
+        varianceParam.setToolTip("Increase variance to add more turns and twists to the flow.");
+        forceParam.setToolTip("Determine how powerful the final force applied is.");
+
+        zoomParam.setToolTip("Change zoom to make fields look bigger or smaller. Please note, that particle width will not take any effect.");
+        strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
+        backgroundColorParam.setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
+        particleColorParam.setToolTip("Change the initial color of the particles. Play with transparency to get interesting fills.");
+        colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
+        radiusRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
+
+        advancedParam.setToolTip("Advanced or Rarely used parameters which make slight adjustments to the simulation.");
+        iterationsParam.setToolTip("Make individual particles cover longer paths.");
+        turbulenceParam.setToolTip("Increase to make the flow path rougher.");
+        windParam.setToolTip("Spreads away the particles against the flow path.");
+        drawToleranceParam.setToolTip("Require only longer paths to be drawn.");
+
     }
+
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// FLOW FIELD CREATION LOGIC
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold desc="FLOW FIELD CREATION LOGIC">
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
-//        ParticleUpdater updater = updaterParam.getSelected();
-        float noiseEffect = noiseParam.getPercentageValF();
-        float sinkEffect = sinkParam.getPercentageValF();
-        float revolveEffect = revolveParam.getPercentageValF();
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////// FINAL FIELDS DECLARATIONS
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        int particleCount = particlesParam.getValue();
-        float zoom = zoomParam.getValue() * 0.1f;
-        Stroke stroke = strokeParam.createStroke();
-        Color bgColor = backgroundColorParam.getColor();
-        Color particleColor = particleColorParam.getColor();
-        float colorRandomness = colorRandomnessParam.getPercentageValF();
+        //<editor-fold defaultstate="collapsed" desc="FINAL FIELDS DECLARATIONS">
+
+        final int particleCount = particlesParam.getValue();
+        final ForceMode forceMode = forceModeParam.getSelected();
+        final float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
+        final float force = (float) forceParam.getZoomRatio();
+        final float variance = varianceParam.getValue() / 10.0f;
+
+        final float multiplierNoise = noiseParam.getPercentageValF() * force;
+        final float multiplierSink = sinkParam.getPercentageValF() * force;
+        final float multiplierRevolve = revolveParam.getPercentageValF() * force;
+
+        final float zoom = zoomParam.getValue() * 0.25f;
+        final Stroke stroke = strokeParam.createStroke();
+        final Color bgColor = backgroundColorParam.getColor();
+        final Color particleColor = particleColorParam.getColor();
+        final float colorRandomness = colorRandomnessParam.getPercentageValF();
         final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
 
-        ParticleFlowUpdater physicsMode = physicsModeParam.getSelected();
-        float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
-        float force = (float) forceParam.getZoomRatio();
-        float variance = varianceParam.getValue() / 10.0f;
-
-        float quality = smoothnessParam.getValueAsFloat() / 99 * 400 / zoom;
-        int iterationCount = iterationsParam.getValue();
-        int turbulence = turbulenceParam.getValue();
-        float zFactor = windParam.getValueAsFloat() / 10000;
-        int tolerance = drawToleranceParam.getValue();
+        final float quality = Math.min(1.2f,SMOOTHNESS / 99 * 400 / zoom);
+        final int iterationCount = iterationsParam.getValue();
+        final int turbulence = turbulenceParam.getValue();
+        final float zFactor = windParam.getValueAsFloat() / 10000;
+        final int tolerance = drawToleranceParam.getValue();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        int imgWidth = dest.getWidth();
-        int imgHeight = dest.getHeight();
-        Point2D center = new Point2D.Float(imgWidth / 2f, imgHeight / 2f);
+        // Image meta
+        final int imgWidth = dest.getWidth();
+        final int imgHeight = dest.getHeight();
 
-        int fieldWidth = (int) (imgWidth * quality + 1);
-        float fieldDensity = fieldWidth * 1.0f / imgWidth;
-        int fieldHeight = (int) (imgHeight * fieldDensity);
+        // Flow field meta
+        final int fieldWidth = (int) (imgWidth * quality + 1);
+        final float fieldDensity = fieldWidth * 1.0f / imgWidth;
+        final int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        Graphics2D g2 = dest.createGraphics();
-        g2.setStroke(stroke);
-        Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
+        // Random meta
+        final Random r = ReseedSupport.getLastSeedRandom();
+        final OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
 
-        Random r = ReseedSupport.getLastSeedRandom();
-        OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
-
-        int groupCount = ceilToInt(particleCount / (double) PARTICLES_PER_GROUP);
-        Future<?>[] futures = new Future[groupCount];
-        var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Rectangle bounds = new Rectangle(-PAD, -PAD,
-                imgWidth + PAD * 2, imgHeight + PAD * 2);
-        boolean randomizeColor = colorRandomness != 0;
-        float PI = (float) FastMath.PI * variance;
+        // Simulation meta
+        final Point2D center = Geometry.deScale(new Point2D.Float(fieldWidth, fieldHeight), 2);
+        final Rectangle bounds = new Rectangle(-PAD, -PAD,
+                fieldWidth + PAD * 2, fieldHeight + PAD * 2);
+        float variantPI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        Color[][] fieldColors = ((Supplier<Color[][]>) () -> {
-            if (randomizeColor) {
-                return new Color[fieldWidth][fieldHeight];
-            }
-            return null;
-        }).get();
+        // Multithreading meta
+        final int groupCount = ceilToInt(particleCount / (double) PARTICLES_PER_GROUP);
+        final Future<?>[] futures = new Future[groupCount];
+        final var pt = new StatusBarProgressTracker(NAME, futures.length + 1);
 
+        // Drawing meta
+        final Graphics2D g2 = dest.createGraphics();
+        final boolean randomizeColor = colorRandomness != 0;
+        final boolean randomizeRadius = radiusRandomness != 0;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Preparing the canvas
+        g2.setStroke(stroke);
+        Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
+        g2.setColor(particleColor);
+
+        // Flow fields pre-calculations
+        final Color[][] fieldColors = getIf(randomizeColor, () -> new Color[fieldWidth][fieldHeight]);
+        final Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
+        final Point2D.Float[][] fieldVelocities = new Point2D.Float[fieldWidth][fieldHeight];
+        final Point2D.Float[][] fieldAccelerations = new Point2D.Float[fieldWidth][fieldHeight];
+
+        // Initializing the colors, if applicable
         if (randomizeColor) {
             GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
+            fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
+        }
+
+        // Initializing the colors, if applicable
+        if (randomizeRadius) {
+            fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, radiusRandomness));
+        }
+
+        // Initializing the accelerations
+        {
+            Point2D none = new Point();
+            Point2D.Float position = new Point2D.Float();
+            Point2D.Float relativePosition = new Point2D.Float();
+            Point2D.Float forceDueToRevolution = new Point2D.Float();
+            Point2D.Float forceDueToSink = new Point2D.Float();
 
             for (int i = 0; i < fieldWidth; i++) {
                 for (int j = 0; j < fieldHeight; j++) {
-                    fieldColors[i][j] = goldenRatio.next();
+
+                    // Here the vector represents the point on canvas where it's present.
+                    position.setLocation(i, j);
+                    Geometry.subtract(center, position, /*out*/ relativePosition);
+
+                    forceDueToRevolution.setLocation(relativePosition);
+                    Geometry.perpendiculars(forceDueToRevolution, /*out*/ forceDueToRevolution, /*out*/ none);
+                    Geometry.setMagnitude( /*out*/ forceDueToRevolution, multiplierRevolve);
+
+                    // I doubt giving only the velocity by revolve will ever work
+                    var fieldVelocity = new Point2D.Float();
+                    fieldVelocity.setLocation(+forceDueToRevolution.y, -forceDueToRevolution.x);
+                    fieldVelocities[i][j] = fieldVelocity;
+
+                    Geometry.normalizeIfNonzero( /*out*/ forceDueToRevolution);
+                    Geometry.scale( /*out*/ forceDueToRevolution, multiplierRevolve);
+
+                    forceDueToSink.setLocation(relativePosition);
+                    Geometry.setMagnitude( /*out*/ forceDueToSink, multiplierSink);
+
+                    // Adding forces to get relative force.
+                    var fieldAcceleration = new Point2D.Float();
+                    Geometry.add( /*out*/ fieldAcceleration, forceDueToRevolution);
+                    Geometry.add( /*out*/ fieldAcceleration, forceDueToSink);
+                    fieldAccelerations[i][j] = fieldAcceleration;
                 }
             }
         }
 
-        final Stroke[] strokes = new Stroke[radiusRandomness == 0 ? 1 : FastMath.min(particleCount, 100)];
-        for (int i = 0; i < strokes.length; i++) {
-            strokes[i] = strokeParam.createStrokeWithRandomWidth(r, radiusRandomness);
-        }
-
-        AtomicInteger particlesCreated = new AtomicInteger();
-        DoubleAdder[] zFactors = new DoubleAdder[groupCount];
-        for (int i = 0; i < groupCount; i++) {
-            zFactors[i] = new DoubleAdder();
-        }
-
-
-        ParticleUpdater[] updaters = ParticleUpdater.values();
-        ParticleSystem<FlowFieldParticle> system = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-                .setParticleCreator(() -> new FlowFieldParticle(g2, bounds, fieldWidth, fieldHeight, fieldDensity, zoom, zFactors[particlesCreated.getAndIncrement() / PARTICLES_PER_GROUP], (x, y, z) -> initTheta + (float) (noise.turbulence3(x, y, z, turbulence) * PI), force, maximumVelocitySq, tolerance, noiseEffect, sinkEffect, revolveEffect, physicsMode, center, strokes[r.nextInt(strokes.length)], updaters))
-                .addModifier(new Modifier.RandomizePosition<>(bounds.x, bounds.y, bounds.width, bounds.height, r))
-                .addModifier(particle -> {
-                    int fieldX = toRange(0, fieldWidth - 1, (int) (particle.pos.getX() * fieldDensity));
-                    int fieldY = toRange(0, fieldHeight - 1, (int) (particle.pos.getY() * fieldDensity));
-
-                    particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
-
-//                    particle.pathPoints.clear();
-                    particle.addPoint(Geometry.newFrom(particle.pos));
-                })
-                .addModifier(particle -> {
-                    for (ParticleUpdater particleUpdater : particle.updaters) {
-                        particleUpdater.init(particle);
-                    }
-                })
-                .addUpdater(particle -> {
-
-                })
-                .build();
+        //</editor-fold>
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode);
+
+        Modifier.RandomizePosition<FlowFieldParticle> particleRandomizePosition = new Modifier.RandomizePosition<>(bounds.x, bounds.y, bounds.width, bounds.height, r);
+        ParticleInitializer particleInitializer = new ParticleInitializer(multiplierRevolve, particleColor, randomizeColor, fieldColors, fieldVelocities);
+        ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
+
+        ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
+                .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[r.nextInt(strokes.length)] : stroke, meta))
+                .addModifier(particleRandomizePosition)
+                .addModifier(particleInitializer)
+                .addUpdater(forceModeUpdater)
+                .build();
+
 
         for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
-            int finalGroupIndex = groupIndex;
+
+            final int finalGroupIndex = groupIndex;
+
             futures[groupIndex] = ThreadPool.submit(() -> {
-                int start = finalGroupIndex * PARTICLES_PER_GROUP;
-                int end = start + PARTICLES_PER_GROUP;
+
+                final int start = finalGroupIndex * PARTICLES_PER_GROUP;
+                final int end = start + PARTICLES_PER_GROUP;
+                final DoubleAdder zFactorAdder = new DoubleAdder();
+
                 for (int iterationIndex = 0; iterationIndex < iterationCount; iterationIndex++) {
-                    zFactors[finalGroupIndex].add(zFactor);
-                    system.step(start, end);
+                    particleSystem.step(start, end);
+                    zFactorAdder.add(zFactor);
                 }
             });
         }
 
         ThreadPool.waitFor(futures, pt);
-        system.flush();
+        particleSystem.flush();
         pt.finished();
         g2.dispose();
+
         return dest;
     }
 
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// UTILITIES TO MAKE STUFF A BIT MORE READABLE
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold defaultstate="collapsed" desc="UTILITIES TO MAKE STUFF A BIT MORE READABLE">
+
+    public static <T> T getIf(boolean value, Supplier<T> supplier) {
+        if (value) return supplier.get();
+        return null;
+    }
+
+    public static <T> void fill(T[] array, int w, Supplier<T> value) {
+        for (int i = 0; i < w; i++) {
+            array[i] = value.get();
+        }
+    }
+
+    public static <T> void fill(T[][] array, int w, int h, Supplier<T> value) {
+        for (int i = 0; i < w; i++) {
+            fill(array[i], h, value);
+        }
+    }
+
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// PARTICLE PROPERTY MODIFIERS
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold defaultstate="collapsed" desc="PARTICLE PROPERTY MODIFIERS">
+
+    private static record ParticleInitializer(float multiplierRevolve, Color particleColor, boolean randomizeColor,
+                                              Color[][] fieldColors,
+                                              Point2D.Float[][] fieldVelocities) implements Modifier<FlowFieldParticle> {
+
+        @Override
+        public void modify(FlowFieldParticle particle) {
+            particle.addPoint(particle.pos);
+            int fieldX = particle.getFieldX();
+            int fieldY = particle.getFieldY();
+            particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
+            if (multiplierRevolve != 0) particle.vel = fieldVelocities[fieldX][fieldY];
+        }
+    }
+
+    private static record ForceModeUpdater(ForceMode forceMode,
+                                           Point2D.Float[][] fieldAccelerations) implements Modifier<FlowFieldParticle> {
+
+        @Override
+        public void modify(FlowFieldParticle particle) {
+            particle.delta.setLocation(fieldAccelerations[particle.getFieldX()][particle.getFieldY()]);
+//            forceMode.modify(particle);
+        }
+    }
+
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////// FLOW FIELD PARTICLE
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //<editor-fold defaultstate="collapsed" desc="FLOW FIELD PARTICLE">
+
     public static class FlowFieldParticle extends SmoothPathParticle {
 
-        // Our Fields
-        public final Point2D acc;
-        public final Point2D tempPoint;
-        public float tempFloat = 0;
+        public final Point2D.Float delta = new Point2D.Float();
+        public final Point2D.Float acc = new Point2D.Float();
 
-        // Imported Fields
-        private final Rectangle bounds;
-        private final int fieldWidth;
-        private final int fieldHeight;
-        private final float fieldDensity;
-        private final float zoom;
-        private final DoubleAdder zFactor;
-        private final NoiseSupplier noise;
-        private final float force;
-        private final float maximumVelocitySq;
-        private final double tolerance;
-        private final ParticleUpdater[] updaters;
-        private final float noiseEffect;
-        private final float sinkEffect;
-        private final float revolveEffect;
-        private final ParticleFlowUpdater physicsMode;
         private final Stroke stroke;
+        private final FlowFieldMeta meta;
 
-        private final Point2D center;
-
-        public FlowFieldParticle(Graphics2D g2, Rectangle bounds, int fieldWidth, int fieldHeight, float fieldDensity, float zoom, DoubleAdder zFactor, NoiseSupplier noise, float force, float maximumVelocitySq, double tolerance, float noiseEffect, float sinkEffect, float revolveEffect, ParticleFlowUpdater physicsMode, Point2D center, Stroke stroke, ParticleUpdater... updaters) {
+        public FlowFieldParticle(Graphics2D g2, Stroke stroke, FlowFieldMeta meta) {
             super(g2);
-            this.center = center;
-            this.acc = new Point2D.Float();
-            this.tempPoint = new Point2D.Float();
             this.vel = new Point2D.Float();
             this.pos = new Point2D.Float();
             this.las_pos = new Point2D.Float();
 
-            this.bounds = bounds;
-            this.fieldWidth = fieldWidth - 1;
-            this.fieldHeight = fieldHeight - 1;
-            this.fieldDensity = fieldDensity;
-            this.zoom = zoom;
-            this.zFactor = zFactor;
-            this.noise = noise;
-            this.force = force;
-            this.maximumVelocitySq = maximumVelocitySq;
-            this.tolerance = tolerance + force;
-            this.noiseEffect = noiseEffect * this.force;
-            this.sinkEffect = sinkEffect * this.force;
-            this.revolveEffect = revolveEffect * this.force;
-            this.physicsMode = physicsMode;
             this.stroke = stroke;
+            this.meta = meta;
+        }
 
-            this.updaters = updaters;
+        @Override
+        public void addPoint(Point2D point) {
+            las_pos.setLocation(point);
+            super.addPoint(Geometry.deScale(Geometry.newFrom(point), meta.fieldDensity));
         }
 
         @Override
@@ -439,33 +476,83 @@ public class FlowField extends ParametrizedFilter {
 
         @Override
         public boolean isDead() {
-            return !bounds.contains(pos);
+            return !meta.bounds.contains(pos);
         }
 
         @Override
         public void update() {
-            for (ParticleUpdater updater : updaters) {
-                updater.modify(this);
+            Point2D oldVel = Geometry.newFrom(vel);
+
+            double sampleX = pos.getX() / meta.zoom;
+            double sampleY = pos.getY() / meta.zoom;
+            double sampleZ = meta.zFactor * iterationIndex;
+            double value = meta.initTheta + meta.noise.turbulence3(sampleX, sampleY, sampleZ, meta.turbulence) * meta.variantPI;
+
+            Point2D noiseDelta = new Point2D.Double(cos(value), sin(value));
+            Geometry.setMagnitude(noiseDelta, meta.multiplierNoise);
+            Geometry.add(delta, noiseDelta);
+            meta.forceMode.modify(this);
+
+            if (Geometry.distanceSq(vel) > meta.maximumVelocitySq) {
+                vel.setLocation(oldVel);
+            }
+
+            if (anyDisplacementInXOrYIsGreaterThanTolerance()) {
+                addPoint(Geometry.newFrom(pos));
+                las_pos.setLocation(pos);
             }
         }
 
         private boolean anyDisplacementInXOrYIsGreaterThanTolerance() {
-            return abs(las_pos.getX() - pos.getX()) > tolerance || abs(las_pos.getY() - pos.getY()) > tolerance;
+            return abs(las_pos.getX() - pos.getX()) > meta.tolerance || abs(las_pos.getY() - pos.getY()) > meta.tolerance;
         }
 
-        public Point2D getFieldPoint() {
-            Point2D fieldPoint = new Point2D.Float();
-            fieldPoint.setLocation(pos);
-            Geometry.scale(fieldPoint, fieldDensity);
-            Geometry.toRange(fieldPoint, 0, 0, fieldWidth, fieldHeight);
-            return fieldPoint;
+        public int getFieldX() {
+            return FastMath.toRange(0, meta.fieldWidth, (int) pos.getX());
         }
 
+        public int getFieldY() {
+            return FastMath.toRange(0, meta.fieldHeight, (int) pos.getY());
+        }
     }
 
+    public static class FlowFieldMeta {
+        public final int fieldWidth;
+        public final int fieldHeight;
+        public final float fieldDensity;
+        public final Rectangle bounds;
+        public final double tolerance;
+        public final float maximumVelocitySq;
+        public final double zFactor;
+        public final double zoom;
+        public final int turbulence;
+        public final OpenSimplex2F noise;
+        public final float multiplierNoise;
+        public final float initTheta;
+        public final float variantPI;
+        public final ForceMode forceMode;
 
-    public interface NoiseSupplier {
-        float get(double x, double y, double z);
+        public FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds, double tolerance, float maximumVelocitySq, double zFactor, double zoom, int turbulence, OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI, ForceMode forceMode) {
+            this.fieldWidth = fieldWidth;
+            this.fieldHeight = fieldHeight;
+            this.fieldDensity = fieldDensity;
+            this.bounds = bounds;
+            this.tolerance = tolerance;
+            this.maximumVelocitySq = maximumVelocitySq;
+            this.zFactor = zFactor;
+            this.zoom = zoom;
+            this.turbulence = turbulence;
+            this.noise = noise;
+            this.multiplierNoise = multiplierNoise;
+            this.initTheta = initTheta;
+            this.variantPI = variantPI;
+            this.forceMode = forceMode;
+        }
     }
+
+    //</editor-fold>
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

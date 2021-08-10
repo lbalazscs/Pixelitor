@@ -50,15 +50,14 @@ public class ParticleSystem<P extends Particle> {
     }
 
     public void step() {
-        for (P particle : particles) {
-            stepParticle(particle);
+        for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
+            stepParticle(i, particles.get(i));
         }
     }
 
     public void step(int start, int end) {
         for (int i = start, s = FastMath.min(particles.size(), end); i < s; i++) {
-            P particle = particles.get(i);
-            stepParticle(particle);
+            stepParticle(i, particles.get(i));
         }
     }
 
@@ -82,17 +81,22 @@ public class ParticleSystem<P extends Particle> {
         return futures;
     }
 
-    private void stepParticle(P particle) {
+    private void stepParticle(int iterationIndex, P particle) {
         if (particle.isDead()) {
             particle.flush();
             initializeParticle(particle);
         }
-        updaters.forEach(modifier -> modifier.modify(particle));
+        particle.iterationIndex = iterationIndex;
+        for (int i = 0, updatersSize = updaters.size(); i < updatersSize; i++) {
+            updaters.get(i).modify(particle);
+        }
         particle.update();
     }
 
     public void flush() {
-        particles.forEach(Particle::flush);
+        for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
+            particles.get(i).flush();
+        }
     }
 
     protected P newParticle() {
@@ -100,7 +104,9 @@ public class ParticleSystem<P extends Particle> {
     }
 
     protected void initializeParticle(P particle) {
-        modifiers.forEach(modifier -> modifier.modify(particle));
+        for (int i = 0, modifiersSize = modifiers.size(); i < modifiersSize; i++) {
+            modifiers.get(i).modify(particle);
+        }
         particle.reset();
     }
 

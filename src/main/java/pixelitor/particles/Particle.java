@@ -7,6 +7,7 @@ public abstract class Particle {
 
     public Point2D pos, las_pos, vel;
     public Color color;
+    public int iterationIndex;
 
     public abstract void flush();
 
