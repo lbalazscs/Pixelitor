@@ -64,13 +64,7 @@ public class FlowField extends ParametrizedFilter {
     // Number of particles distributed among groups. Here a group is just a conceptual term indicating the set of particles iterated per Thread.
     private static final int PARTICLES_PER_GROUP = 100;
 
-    private static final float SMOOTHNESS = 303.0303f;
-
-    // Force Modes, how "the delta force" is applied to a given particle.
-    private static final int NO_MASS = 0;
-    private static final int UNIFORM_MASS = 1;
-    private static final int RANDOM_MASS = 2;
-    private static final int JOLT = 3;
+    private static final float SMOOTHNESS = 1224.3649f;
 
     private enum ForceMode implements Modifier<FlowFieldParticle> {
         FORCE_MODE_VELOCITY("No Mass") {
@@ -245,7 +239,7 @@ public class FlowField extends ParametrizedFilter {
         final float colorRandomness = colorRandomnessParam.getPercentageValF();
         final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
 
-        final float quality = Math.min(1.2f,SMOOTHNESS / 99 * 400 / zoom);
+        final float quality = Math.min(1.2f,SMOOTHNESS / zoom);
         final int iterationCount = iterationsParam.getValue();
         final int turbulence = turbulenceParam.getValue();
         final float zFactor = windParam.getValueAsFloat() / 10000;
@@ -293,7 +287,6 @@ public class FlowField extends ParametrizedFilter {
         // Flow fields pre-calculations
         final Color[][] fieldColors = getIf(randomizeColor, () -> new Color[fieldWidth][fieldHeight]);
         final Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
-        final Point2D.Float[][] fieldVelocities = new Point2D.Float[fieldWidth][fieldHeight];
         final Point2D.Float[][] fieldAccelerations = new Point2D.Float[fieldWidth][fieldHeight];
 
         // Initializing the colors, if applicable
@@ -326,10 +319,7 @@ public class FlowField extends ParametrizedFilter {
                     Geometry.perpendiculars(forceDueToRevolution, /*out*/ forceDueToRevolution, /*out*/ none);
                     Geometry.setMagnitude( /*out*/ forceDueToRevolution, multiplierRevolve);
 
-                    // I doubt giving only the velocity by revolve will ever work
-                    var fieldVelocity = new Point2D.Float();
-                    fieldVelocity.setLocation(+forceDueToRevolution.y, -forceDueToRevolution.x);
-                    fieldVelocities[i][j] = fieldVelocity;
+//                    fieldVelocity.setLocation(+forceDueToRevolution.y, -forceDueToRevolution.x);
 
                     Geometry.normalizeIfNonzero( /*out*/ forceDueToRevolution);
                     Geometry.scale( /*out*/ forceDueToRevolution, multiplierRevolve);
@@ -354,7 +344,7 @@ public class FlowField extends ParametrizedFilter {
         final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode);
 
         Modifier.RandomizePosition<FlowFieldParticle> particleRandomizePosition = new Modifier.RandomizePosition<>(bounds.x, bounds.y, bounds.width, bounds.height, r);
-        ParticleInitializer particleInitializer = new ParticleInitializer(multiplierRevolve, particleColor, randomizeColor, fieldColors, fieldVelocities);
+        ParticleInitializer particleInitializer = new ParticleInitializer(multiplierRevolve, particleColor, randomizeColor, fieldColors);
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
@@ -424,8 +414,7 @@ public class FlowField extends ParametrizedFilter {
     //<editor-fold defaultstate="collapsed" desc="PARTICLE PROPERTY MODIFIERS">
 
     private static record ParticleInitializer(float multiplierRevolve, Color particleColor, boolean randomizeColor,
-                                              Color[][] fieldColors,
-                                              Point2D.Float[][] fieldVelocities) implements Modifier<FlowFieldParticle> {
+                                              Color[][] fieldColors) implements Modifier<FlowFieldParticle> {
 
         @Override
         public void modify(FlowFieldParticle particle) {
@@ -433,7 +422,6 @@ public class FlowField extends ParametrizedFilter {
             int fieldX = particle.getFieldX();
             int fieldY = particle.getFieldY();
             particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
-            if (multiplierRevolve != 0) particle.vel = fieldVelocities[fieldX][fieldY];
         }
     }
 
