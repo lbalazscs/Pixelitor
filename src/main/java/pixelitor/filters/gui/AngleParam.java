@@ -55,7 +55,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = new AngleParamGUI(this);
-        setGUIEnabledState();
+        afterGUICreation();
         return (JComponent) paramGUI;
     }
 

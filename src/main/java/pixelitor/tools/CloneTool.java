@@ -27,12 +27,17 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.*;
+import pixelitor.utils.Cursors;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Mirror;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -170,7 +175,7 @@ public class CloneTool extends BlendingModeBrushTool {
         }
     }
 
-    private void startNewCloningStroke(PPoint p, boolean lineConnect) {
+    private void startNewCloningStroke(PPoint strokeStart, boolean lineConnect) {
         state = CLONING;
 
         float scaleAbs = scaleParam.getPercentageValF();
@@ -182,7 +187,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
         // when drawing with line, a mouse press should not change the destination
         if (!lineConnect) {
-            cloneBrush.setCloningDestPoint(p);
+            cloneBrush.setCloningDestPoint(strokeStart);
         }
     }
 
@@ -196,7 +201,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     private void noSourceInMousePressed(PMouseEvent e) {
         if (RandomGUITest.isRunning()) {
-            // special case: do not show dialogs for RandomGUITest,
+            // special case: don't show dialogs for RandomGUITest,
             // just act as if this was an alt-click
             setCloningSource(e);
         } else {
@@ -241,20 +246,13 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
-        super.prepareProgrammaticBrushStroke(dr, start);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint strokeStart) {
+        super.prepareProgrammaticBrushStroke(dr, strokeStart);
 
-        setupRandomSource(dr, start);
-    }
+        PPoint randomPoint = dr.getComp().getRandomPointInCanvas();
+        setCloningSource(randomPoint);
 
-    private void setupRandomSource(Drawable dr, PPoint start) {
-        var comp = dr.getComp();
-
-        Rectangle canvasBounds = comp.getCanvasBounds();
-        Point source = Rnd.nextPoint(canvasBounds);
-
-        setCloningSource(PPoint.eagerFromIm(source, comp.getView()));
-        startNewCloningStroke(start, true);
+        startNewCloningStroke(strokeStart, false);
     }
 
     @Override

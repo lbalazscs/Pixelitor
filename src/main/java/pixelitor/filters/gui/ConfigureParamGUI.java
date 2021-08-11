@@ -67,7 +67,7 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-
+        configureButton.setToolTipText(tip);
     }
 
     @Override

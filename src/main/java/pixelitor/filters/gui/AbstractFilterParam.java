@@ -31,16 +31,26 @@ public abstract class AbstractFilterParam implements FilterParam {
     private boolean enabledByAppLogic = true;
     protected ParamGUI paramGUI;
     protected RandomizePolicy randomizePolicy;
+    private String toolTip;
 
-    // if this is not null, then it's the model of
-    // an extra action button to the right of the normal GUI,
-    // typically some randomization, which will be enabled
-    // only for certain values of this filter parameter
+    // If this is not null, then it's the model of an extra action button
+    // to the right of the normal GUI, typically some randomization, which
+    // will be enabled only for certain values of this filter parameter.
     protected FilterButtonModel action;
 
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
         this.name = Objects.requireNonNull(name);
         this.randomizePolicy = randomizePolicy;
+    }
+
+    /**
+     * Called by the subclasses only, after the GUI is initialized
+     */
+    protected void afterGUICreation() {
+        setGUIEnabledState();
+        if (toolTip != null) {
+            paramGUI.setToolTip(toolTip);
+        }
     }
 
     @Override
@@ -84,7 +94,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         }
     }
 
-    protected void setGUIEnabledState() {
+    private void setGUIEnabledState() {
         boolean b = shouldBeEnabled();
         paramGUI.setEnabled(b);
     }
@@ -120,6 +130,9 @@ public abstract class AbstractFilterParam implements FilterParam {
     public void setToolTip(String tip) {
         if (paramGUI != null) {
             paramGUI.setToolTip(tip);
+        } else {
+            // in the filters the GUI is not yet created, so store it for later
+            toolTip = tip;
         }
     }
 

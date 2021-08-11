@@ -17,7 +17,6 @@
 
 package pixelitor.automate;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.DialogBuilder;
@@ -115,11 +114,16 @@ public class AutoPaint {
         assert calledOnEDT() : threadInfo();
 
         setFgBgColors(settings, rand);
-
-        PPoint start = calcRandomStartPoint(comp, rand);
+        PPoint start = comp.getRandomPointInCanvas();
         PPoint end = settings.calcRandomEndPoint(start, comp, rand);
 
-        drawBrushStroke(dr, start, end, settings);
+        Tool tool = settings.getTool();
+        if (tool instanceof AbstractBrushTool abt) {
+            Path2D shape = calcStrokePath(start, end, settings);
+            abt.trace(dr, shape);
+        } else {
+            throw new IllegalStateException("tool = " + tool.getClass().getName());
+        }
     }
 
     private static void setFgBgColors(AutoPaintSettings settings, Random rand) {
@@ -132,36 +136,19 @@ public class AutoPaint {
         }
     }
 
-    private static PPoint calcRandomStartPoint(Composition comp, Random rand) {
-        Canvas canvas = comp.getCanvas();
-        return PPoint.lazyFromIm(
-            rand.nextInt(canvas.getWidth()),
-            rand.nextInt(canvas.getHeight()),
-            comp.getView()
-        );
-    }
-
-    private static void drawBrushStroke(Drawable dr,
-                                        PPoint start, PPoint end,
-                                        AutoPaintSettings settings) {
-        Tool tool = settings.getTool();
-        // tool.randomize();
-        if (tool instanceof AbstractBrushTool abt) {
-            Path2D shape = new Path2D.Double();
-            shape.moveTo(start.getImX(), start.getImY());
-            double cp1X = (start.getImX() + end.getImX()) / 2.0;
-            double cp1Y = (start.getImY() + end.getImY()) / 2.0;
-            float curvature = settings.getMaxCurvature();
-            if (curvature > 0) {
-                double maxShift = start.imDist(end) * curvature;
-                cp1X += (Rnd.nextDouble() - 0.5) * maxShift;
-                cp1Y += (Rnd.nextDouble() - 0.5) * maxShift;
-            }
-            shape.quadTo(cp1X, cp1Y, end.getImX(), end.getImY());
-            abt.trace(dr, shape);
-        } else {
-            throw new IllegalStateException("tool = " + tool.getClass().getName());
+    private static Path2D calcStrokePath(PPoint start, PPoint end, AutoPaintSettings settings) {
+        Path2D path = new Path2D.Double();
+        path.moveTo(start.getImX(), start.getImY());
+        double controlPointX = (start.getImX() + end.getImX()) / 2.0;
+        double controlPointY = (start.getImY() + end.getImY()) / 2.0;
+        float curvature = settings.getMaxCurvature();
+        if (curvature > 0) {
+            double maxShift = start.imDist(end) * curvature;
+            controlPointX += (Rnd.nextDouble() - 0.5) * maxShift;
+            controlPointY += (Rnd.nextDouble() - 0.5) * maxShift;
         }
+        path.quadTo(controlPointX, controlPointY, end.getImX(), end.getImY());
+        return path;
     }
 
     private static void saveOriginalFgBgColors() {
