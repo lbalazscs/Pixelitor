@@ -56,114 +56,106 @@ public class ChannelMixer extends ParametrizedFilter {
     private final RangeParam blueFromGreen = from(BLUE, GREEN, 0);
     private final RangeParam blueFromBlue = from(BLUE, BLUE, 100);
 
-    private final Runnable normalizeAction = () -> {
-        normalizeChannel(redFromRed, redFromGreen, redFromBlue);
-        normalizeChannel(greenFromRed, greenFromGreen, greenFromBlue);
-        normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
-
-        // no need for triggering the filter here, because it will happen
-        // automatically via ActionParam, but the presets on the right side
-        // DO require explicit triggering because they are simple JButtons
-    };
-
     private final Action swapRedGreen = new PAction("Swap Red-Green") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(0);
-            redFromGreen.setValueNoTrigger(100);
-            redFromBlue.setValueNoTrigger(0);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(0);
+                redFromGreen.setValueNoTrigger(100);
+                redFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValueNoTrigger(100);
-            greenFromGreen.setValueNoTrigger(0);
-            greenFromBlue.setValueNoTrigger(0);
+                greenFromRed.setValueNoTrigger(100);
+                greenFromGreen.setValueNoTrigger(0);
+                greenFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(100);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(0);
+                blueFromGreen.setValueNoTrigger(0);
+                blueFromBlue.setValueNoTrigger(100);
+            });
         }
     };
 
     private final Action swapRedBlue = new PAction("Swap Red-Blue") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(0);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(100);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(0);
+                redFromGreen.setValueNoTrigger(0);
+                redFromBlue.setValueNoTrigger(100);
 
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(100);
-            greenFromBlue.setValueNoTrigger(0);
+                greenFromRed.setValueNoTrigger(0);
+                greenFromGreen.setValueNoTrigger(100);
+                greenFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValueNoTrigger(100);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(0);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(100);
+                blueFromGreen.setValueNoTrigger(0);
+                blueFromBlue.setValueNoTrigger(0);
+            });
         }
     };
 
     private final Action swapGreenBlue = new PAction("Swap Green-Blue") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(100);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(0);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(100);
+                redFromGreen.setValueNoTrigger(0);
+                redFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(0);
-            greenFromBlue.setValueNoTrigger(100);
+                greenFromRed.setValueNoTrigger(0);
+                greenFromGreen.setValueNoTrigger(0);
+                greenFromBlue.setValueNoTrigger(100);
 
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(100);
-            blueFromBlue.setValueNoTrigger(0);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(0);
+                blueFromGreen.setValueNoTrigger(100);
+                blueFromBlue.setValueNoTrigger(0);
+            });
         }
     };
 
     private final Action shiftRGBR = new PAction("R -> G -> B -> R") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(0);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(100);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(0);
+                redFromGreen.setValueNoTrigger(0);
+                redFromBlue.setValueNoTrigger(100);
 
-            greenFromRed.setValueNoTrigger(100);
-            greenFromGreen.setValueNoTrigger(0);
-            greenFromBlue.setValueNoTrigger(0);
+                greenFromRed.setValueNoTrigger(100);
+                greenFromGreen.setValueNoTrigger(0);
+                greenFromBlue.setValueNoTrigger(0);
 
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(100);
-            blueFromBlue.setValueNoTrigger(0);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(0);
+                blueFromGreen.setValueNoTrigger(100);
+                blueFromBlue.setValueNoTrigger(0);
+            });
         }
     };
 
     private final Action shiftRBGR = new PAction("R -> B -> G -> R") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(0);
-            redFromGreen.setValueNoTrigger(100);
-            redFromBlue.setValueNoTrigger(0);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(0);
+                redFromGreen.setValueNoTrigger(100);
+                redFromBlue.setValueNoTrigger(0);
 
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(0);
-            greenFromBlue.setValueNoTrigger(100);
+                greenFromRed.setValueNoTrigger(0);
+                greenFromGreen.setValueNoTrigger(0);
+                greenFromBlue.setValueNoTrigger(100);
 
-            blueFromRed.setValueNoTrigger(100);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(0);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(100);
+                blueFromGreen.setValueNoTrigger(0);
+                blueFromBlue.setValueNoTrigger(0);
+            });
         }
     };
 
     private final Action removeRed = new PAction("Remove Red") {
         @Override
         public void onClick() {
+            assert !autoNormalize;
+
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -183,6 +175,8 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action removeGreen = new PAction("Remove Green") {
         @Override
         public void onClick() {
+            assert !autoNormalize;
+
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -202,6 +196,8 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action removeBlue = new PAction("Remove Blue") {
         @Override
         public void onClick() {
+            assert !autoNormalize;
+
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
             redFromBlue.setValueNoTrigger(0);
@@ -221,44 +217,46 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action averageBW = new PAction("Average BW") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(33);
-            redFromGreen.setValueNoTrigger(33);
-            redFromBlue.setValueNoTrigger(33);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(33);
+                redFromGreen.setValueNoTrigger(33);
+                redFromBlue.setValueNoTrigger(33);
 
-            greenFromRed.setValueNoTrigger(33);
-            greenFromGreen.setValueNoTrigger(33);
-            greenFromBlue.setValueNoTrigger(33);
+                greenFromRed.setValueNoTrigger(33);
+                greenFromGreen.setValueNoTrigger(33);
+                greenFromBlue.setValueNoTrigger(33);
 
-            blueFromRed.setValueNoTrigger(33);
-            blueFromGreen.setValueNoTrigger(33);
-            blueFromBlue.setValueNoTrigger(33);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(33);
+                blueFromGreen.setValueNoTrigger(33);
+                blueFromBlue.setValueNoTrigger(33);
+            });
         }
     };
 
     private final Action luminosityBW = new PAction("Luminosity BW") {
         @Override
         public void onClick() {
-            redFromRed.setValueNoTrigger(22);
-            redFromGreen.setValueNoTrigger(71);
-            redFromBlue.setValueNoTrigger(7);
+            runWithDisabledNormalization(() -> {
+                redFromRed.setValueNoTrigger(22);
+                redFromGreen.setValueNoTrigger(71);
+                redFromBlue.setValueNoTrigger(7);
 
-            greenFromRed.setValueNoTrigger(22);
-            greenFromGreen.setValueNoTrigger(71);
-            greenFromBlue.setValueNoTrigger(7);
+                greenFromRed.setValueNoTrigger(22);
+                greenFromGreen.setValueNoTrigger(71);
+                greenFromBlue.setValueNoTrigger(7);
 
-            blueFromRed.setValueNoTrigger(22);
-            blueFromGreen.setValueNoTrigger(71);
-            blueFromBlue.setValueNoTrigger(7);
-
-            getParamSet().runFilter();
+                blueFromRed.setValueNoTrigger(22);
+                blueFromGreen.setValueNoTrigger(71);
+                blueFromBlue.setValueNoTrigger(7);
+            });
         }
     };
 
     private final Action sepia = new PAction("Sepia") {
         @Override
         public void onClick() {
+            assert !autoNormalize;
+
             redFromRed.setValueNoTrigger(39);
             redFromGreen.setValueNoTrigger(77);
             redFromBlue.setValueNoTrigger(19);
@@ -278,25 +276,26 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action[] presets = {swapRedGreen, swapRedBlue, swapGreenBlue,
         shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
         averageBW, luminosityBW, sepia};
+    private boolean autoNormalize = true;
     private boolean monochrome = false;
+    private final GroupedRangeParam redPercentageGroup;
+    private final GroupedRangeParam greenPercentageGroup;
+    private final GroupedRangeParam bluePercentageGroup;
 
     public ChannelMixer() {
         super(true);
 
-        var normalize = new FilterButtonModel("Normalize", normalizeAction,
-            "Makes sure that the sum of the channel contributions is 100%");
+        redPercentageGroup = new GroupedRangeParam("Red Channel", new RangeParam[]{
+            redFromRed, redFromGreen, redFromBlue}, false).autoNormalized();
+        greenPercentageGroup = new GroupedRangeParam("Green Channel", new RangeParam[]{
+            greenFromRed, greenFromGreen, greenFromBlue}, false).autoNormalized();
+        bluePercentageGroup = new GroupedRangeParam("Blue Channel", new RangeParam[]{
+            blueFromRed, blueFromGreen, blueFromBlue}, false).autoNormalized();
+
         FilterParam[] params = {
-            redFromRed,
-            redFromGreen,
-            redFromBlue,
-
-            greenFromRed,
-            greenFromGreen,
-            greenFromBlue,
-
-            blueFromRed,
-            blueFromGreen,
-            blueFromBlue,
+            redPercentageGroup,
+            greenPercentageGroup,
+            bluePercentageGroup,
         };
         BooleanSupplier ifMonochrome = () -> monochrome;
         redFromRed.linkWith(greenFromRed, ifMonochrome);
@@ -308,16 +307,9 @@ public class ChannelMixer extends ParametrizedFilter {
         redFromGreen.linkWith(greenFromGreen, ifMonochrome);
         redFromGreen.linkWith(blueFromGreen, ifMonochrome);
 
-        setParams(params).withAction(normalize);
+        setParams(params);
 
-        // add this extra action, but after the standard "Randomize Settings"
-        var randomizeAndNormalize = new FilterButtonModel("Randomize and Normalize",
-            () -> {
-                paramSet.randomize();
-                normalizeAction.run();
-            }, "Randomizes settings and normalizes the brightness");
-        // insert it right after "Randomize Settings"
-        paramSet.insertAction(randomizeAndNormalize, 2);
+        enablePresets();
     }
 
     public void setMonochrome(boolean monochrome) {
@@ -327,22 +319,14 @@ public class ChannelMixer extends ParametrizedFilter {
         }
         this.monochrome = monochrome;
 
-        boolean allowColors = !monochrome;
-
-        swapGreenBlue.setEnabled(allowColors);
-        swapRedBlue.setEnabled(allowColors);
-        swapRedGreen.setEnabled(allowColors);
-
-        shiftRBGR.setEnabled(allowColors);
-        shiftRGBR.setEnabled(allowColors);
-
-        removeRed.setEnabled(allowColors);
-        removeGreen.setEnabled(allowColors);
-        removeBlue.setEnabled(allowColors);
-
-        sepia.setEnabled(allowColors);
+        enablePresets();
 
         if (monochrome) {
+            // since the channels will be synchronized, it is enough to have only
+            // one auto-normalization constraint - this also prevents feedback loops
+            greenPercentageGroup.setAutoNormalizationEnabled(false, true);
+            bluePercentageGroup.setAutoNormalizationEnabled(false, true);
+
             int fromRed = (redFromRed.getValue() + greenFromRed.getValue() + blueFromRed.getValue()) / 3;
             redFromRed.setValueNoTrigger(fromRed);
             greenFromRed.setValueNoTrigger(fromRed);
@@ -358,24 +342,57 @@ public class ChannelMixer extends ParametrizedFilter {
             greenFromBlue.setValueNoTrigger(fromBlue);
             blueFromBlue.setValueNoTrigger(fromBlue);
 
-            if (!wasMonochrome) {
-                getParamSet().runFilter();
-            }
+            getParamSet().runFilter();
+        } else {
+            // switching back to non-monochrome mode: enable all
+            // auto-normalization constraints if necessary
+            greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
+            bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
         }
     }
 
-    private static void normalizeChannel(RangeParam fromRed,
-                                         RangeParam fromGreen,
-                                         RangeParam fromBlue) {
-        int red = fromRed.getValue();
-        int green = fromGreen.getValue();
-        int blue = fromBlue.getValue();
-        int extra = red + green + blue - 100;
-        if (extra != 0) {
-            fromRed.setValueNoTrigger(red - extra / 3.0);
-            fromGreen.setValueNoTrigger(green - extra / 3.0);
-            fromBlue.setValueNoTrigger(blue - extra / 3.0);
+    public void setAutoNormalize(boolean autoNormalize) {
+        boolean wasAutoNormalized = this.autoNormalize;
+        if (wasAutoNormalized == autoNormalize) {
+            return;
         }
+
+        redPercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
+        greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
+        bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
+
+        if (autoNormalize) {
+            getParamSet().runFilter();
+        }
+        this.autoNormalize = autoNormalize;
+        enablePresets();
+    }
+
+    public void enablePresets() {
+        boolean allowColors = !monochrome;
+        boolean allowAnySum = !autoNormalize;
+
+        swapGreenBlue.setEnabled(allowColors);
+        swapRedBlue.setEnabled(allowColors);
+        swapRedGreen.setEnabled(allowColors);
+
+        shiftRBGR.setEnabled(allowColors);
+        shiftRGBR.setEnabled(allowColors);
+
+        removeRed.setEnabled(allowColors && allowAnySum);
+        removeGreen.setEnabled(allowColors && allowAnySum);
+        removeBlue.setEnabled(allowColors && allowAnySum);
+
+        sepia.setEnabled(allowColors && allowAnySum);
+    }
+
+    public void temporarilyEnableNormalization(boolean enable) {
+        autoNormalize = enable;
+        redPercentageGroup.setAutoNormalizationEnabled(enable, false);
+
+        // if monochrome, then it's enough to enable the red group
+        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
+        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
     }
 
     @Override
@@ -443,11 +460,24 @@ public class ChannelMixer extends ParametrizedFilter {
     }
 
     private static RangeParam from(String first, String second, int defaultValue) {
-        String name = "<html><b><font color=" + first + ">" + first
-            + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%)";
+        String name = "<html>from <b><font color=" + second + ">" + second + "</font></b> (%)";
         RangeParam param = new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
         param.setPresetKey(first + "From" + second);
         return param;
+    }
+
+    private void runWithDisabledNormalization(Runnable task) {
+        boolean wasNormalized = autoNormalize;
+        if (wasNormalized) {
+            temporarilyEnableNormalization(false);
+        }
+
+        task.run();
+
+        if (wasNormalized) {
+            temporarilyEnableNormalization(true);
+        }
+        getParamSet().runFilter();
     }
 
     @Override
