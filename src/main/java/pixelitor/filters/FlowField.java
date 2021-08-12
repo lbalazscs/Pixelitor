@@ -44,22 +44,12 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// PUBLIC STATIC FIELDS
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     public static final String NAME = "Flow Field";
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// PRIVATE STATIC FIELDS
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //<editor-fold defaultstate="collapsed" desc="PRIVATE STATIC FIELDS">
 
-    // Determine the extra simulation space outside the canvas.
     private static final int PAD = 100;
 
-    // Number of particles distributed among groups. Here a group is just a conceptual term indicating the set of particles iterated per Thread.
     private static final int PARTICLES_PER_GROUP = 100;
 
     private static final float SMOOTHNESS = 1224.3649f;
@@ -108,27 +98,19 @@ public class FlowField extends ParametrizedFilter {
 
     //</editor-fold>
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// GUI PARAM DEFINITIONS
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     //<editor-fold defaultstate="collapsed" desc="GUI PARAM DEFINITIONS">
 
-    // To choose how effective a specific force is.
     private final RangeParam noiseParam = new RangeParam("Noise", 0, 100, 100);
     private final RangeParam sinkParam = new RangeParam("Sink", 0, 0, 100);
     private final RangeParam revolveParam = new RangeParam("Revolve", 0, 0, 100);
 
-    // To manipulate the Particle Environment
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
 
-    // Other force parameters
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
 
-    // To manipulate the Drawing Strategy
     private final RangeParam zoomParam = new RangeParam("Zoom (%)", 100, 4000, 10000);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
@@ -138,17 +120,12 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam radiusRandomnessParam = new RangeParam("Radius Randomness (%)", 0, 0, 1000);
 
-    // Advanced/Hidden features
     private final RangeParam iterationsParam = new RangeParam("Iterations (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
     private final RangeParam windParam = new RangeParam("Wind", 0, 0, 200);
     private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
 
     //</editor-fold>
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// CONSTRUCTOR, SECOND STEP FOR INITIALIZATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //<editor-fold defaultstate="collapsed" desc="CONSTRUCTOR, SECOND STEP FOR INITIALIZATION">
 
@@ -214,20 +191,12 @@ public class FlowField extends ParametrizedFilter {
 
     //</editor-fold>
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// FLOW FIELD CREATION LOGIC
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     //<editor-fold desc="FLOW FIELD CREATION LOGIC">
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////// FINAL FIELDS DECLARATIONS
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //<editor-fold defaultstate="collapsed" desc="FINAL FIELDS DECLARATIONS">
+        //<editor-fold defaultstate="collapsed" desc="FINAL LOCAL VARIABLES DECLARATIONS">
 
         final int particleCount = particlesParam.getValue();
         final ForceMode forceMode = forceModeParam.getSelected();
@@ -256,49 +225,40 @@ public class FlowField extends ParametrizedFilter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Image meta
         final int imgWidth = dest.getWidth();
         final int imgHeight = dest.getHeight();
 
-        // Flow field meta
         final int fieldWidth = (int) (imgWidth * quality + 1);
         final float fieldDensity = fieldWidth * 1.0f / imgWidth;
         final int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        // Random meta
         final Random r = ReseedSupport.getLastSeedRandom();
         final OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
 
-        // Simulation meta
         final Point2D center = Geometry.deScale(new Point2D.Float(fieldWidth, fieldHeight), 2);
         final Rectangle bounds = new Rectangle(-PAD, -PAD,
                 fieldWidth + PAD * 2, fieldHeight + PAD * 2);
         float variantPI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        // Multithreading meta
         final int groupCount = ceilToInt(particleCount / (double) PARTICLES_PER_GROUP);
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
-        // Drawing meta
         final Graphics2D g2 = dest.createGraphics();
         final boolean useColorField = colorRandomness != 0 | inheritColors;
         final boolean randomizeRadius = radiusRandomness != 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Preparing the canvas
         g2.setStroke(stroke);
         Colors.fillWith(bgColor, g2, imgWidth, imgHeight);
         g2.setColor(particleColor);
 
-        // Flow fields pre-calculations
         final Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
         final Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
         final Point2D.Float[][] fieldAccelerations = new Point2D.Float[fieldWidth][fieldHeight];
         final int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
 
-        // Initializing the colors, if applicable
         if (useColorField) {
             GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
             if (inheritColors) {
@@ -307,62 +267,18 @@ public class FlowField extends ParametrizedFilter {
                 fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
         }
 
-        // Initializing the strokes, if applicable
         if (randomizeRadius) {
             fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, radiusRandomness));
         }
 
-        // Initializing the accelerations
-        {
-            Point2D none = new Point();
-            Point2D.Float position = new Point2D.Float();
-            Point2D.Float relativePosition = new Point2D.Float();
-            Point2D.Float forceDueToRevolution = new Point2D.Float();
-            Point2D.Float forceDueToSink = new Point2D.Float();
+        initializeAccelerations(multiplierSink, multiplierRevolve, fieldWidth, fieldHeight, center, /*out*/ fieldAccelerations);
 
-            for (int i = 0; i < fieldWidth; i++) {
-                for (int j = 0; j < fieldHeight; j++) {
-
-                    // Here the vector represents the point on canvas where it's present.
-                    position.setLocation(i, j);
-                    Geometry.subtract(center, position, /*out*/ relativePosition);
-
-                    forceDueToRevolution.setLocation(relativePosition);
-                    Geometry.perpendiculars(forceDueToRevolution, /*out*/ forceDueToRevolution, /*out*/ none);
-                    Geometry.setMagnitude( /*out*/ forceDueToRevolution, multiplierRevolve);
-
-                    Geometry.normalizeIfNonzero( /*out*/ forceDueToRevolution);
-                    Geometry.scale( /*out*/ forceDueToRevolution, multiplierRevolve);
-
-                    forceDueToSink.setLocation(relativePosition);
-                    Geometry.setMagnitude( /*out*/ forceDueToSink, multiplierSink);
-
-                    // Adding forces to get relative force.
-                    var fieldAcceleration = new Point2D.Float();
-                    Geometry.add( /*out*/ fieldAcceleration, forceDueToRevolution);
-                    Geometry.add( /*out*/ fieldAcceleration, forceDueToSink);
-                    fieldAccelerations[i][j] = fieldAcceleration;
-                }
-            }
-        }
-
-        // Initializing the positions, if applicable
         List<Point2D> spawns = null;
         if (inheritSpawnPoints) {
-            spawns = new ArrayList<>();
-            for (int i = 0; i < sourcePixels.length; i++) {
-                if ((sourcePixels[i] & 0xFF000000) != 0) {
-                    int y = i / imgWidth;
-                    int x = i - y * imgWidth;
-                    spawns.add(new Point(x *= fieldDensity, y *= fieldDensity));
-                }
-            }
+            spawns = initializeSpawnPoints(imgWidth, fieldDensity, sourcePixels);
         }
 
         //</editor-fold>
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode);
 
@@ -386,14 +302,54 @@ public class FlowField extends ParametrizedFilter {
         return dest;
     }
 
-
     //</editor-fold>
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// UTILITIES TO MAKE STUFF A BIT MORE READABLE
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     //<editor-fold defaultstate="collapsed" desc="UTILITIES TO MAKE STUFF A BIT MORE READABLE">
+
+    private void initializeAccelerations(float multiplierSink, float multiplierRevolve, int fieldWidth, int fieldHeight, Point2D center, Point2D.Float[][] fieldAccelerations) {
+        Point2D none = new Point();
+        Point2D.Float position = new Point2D.Float();
+        Point2D.Float relativePosition = new Point2D.Float();
+        Point2D.Float forceDueToRevolution = new Point2D.Float();
+        Point2D.Float forceDueToSink = new Point2D.Float();
+
+        for (int i = 0; i < fieldWidth; i++) {
+            for (int j = 0; j < fieldHeight; j++) {
+
+                // Here the vector represents the point on canvas where it's present.
+                position.setLocation(i, j);
+                Geometry.subtract(center, position, /*out*/ relativePosition);
+
+                forceDueToRevolution.setLocation(relativePosition);
+                Geometry.perpendiculars(forceDueToRevolution, /*out*/ forceDueToRevolution, /*out*/ none);
+                Geometry.setMagnitude( /*out*/ forceDueToRevolution, multiplierRevolve);
+
+                Geometry.normalizeIfNonzero( /*out*/ forceDueToRevolution);
+                Geometry.scale( /*out*/ forceDueToRevolution, multiplierRevolve);
+
+                forceDueToSink.setLocation(relativePosition);
+                Geometry.setMagnitude( /*out*/ forceDueToSink, multiplierSink);
+
+                // Adding forces to get relative force.
+                var fieldAcceleration = new Point2D.Float();
+                Geometry.add( /*out*/ fieldAcceleration, forceDueToRevolution);
+                Geometry.add( /*out*/ fieldAcceleration, forceDueToSink);
+                fieldAccelerations[i][j] = fieldAcceleration;
+            }
+        }
+    }
+
+    private List<Point2D> initializeSpawnPoints(int imgWidth, float fieldDensity, int[] sourcePixels) {
+        List<Point2D> spawns = new ArrayList<>();
+        for (int i = 0; i < sourcePixels.length; i++) {
+            if ((sourcePixels[i] & 0xFF000000) != 0) {
+                int y = i / imgWidth;
+                int x = i - y * imgWidth;
+                spawns.add(new Point(x *= fieldDensity, y *= fieldDensity));
+            }
+        }
+        return spawns;
+    }
 
     public static <T> T getIf(boolean value, Supplier<T> supplier) {
         if (value) return supplier.get();
@@ -423,10 +379,6 @@ public class FlowField extends ParametrizedFilter {
     }
 
     //</editor-fold>
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// PARTICLE PROPERTY MODIFIERS
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //<editor-fold defaultstate="collapsed" desc="PARTICLE PROPERTY MODIFIERS">
 
@@ -468,15 +420,10 @@ public class FlowField extends ParametrizedFilter {
         @Override
         public void modify(FlowFieldParticle particle) {
             particle.delta.setLocation(fieldAccelerations[particle.getFieldX()][particle.getFieldY()]);
-//            forceMode.modify(particle);
         }
     }
 
     //</editor-fold>
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// FLOW FIELD PARTICLE
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //<editor-fold defaultstate="collapsed" desc="FLOW FIELD PARTICLE">
 
@@ -592,8 +539,5 @@ public class FlowField extends ParametrizedFilter {
     }
 
     //</editor-fold>
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
