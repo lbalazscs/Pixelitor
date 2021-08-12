@@ -29,4 +29,11 @@ public class GoldenRatio {
         return randomColor;
     }
 
+    public Color next(Color root) {
+        Color randomColor = new Color(Colors.HSBAtoARGB(hsbColors, root.getAlpha()), true);
+        randomColor = Colors.rgbInterpolate(root, randomColor, colorRandomness);
+        hsbColors[0] = (hsbColors[0] + GOLDEN_RATIO_CONJUGATE) % 1;
+        return randomColor;
+    }
+
 }

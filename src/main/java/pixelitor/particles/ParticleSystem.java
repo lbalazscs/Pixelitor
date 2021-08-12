@@ -19,7 +19,6 @@ package pixelitor.particles;
 
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
-import pixelitor.utils.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,21 +60,27 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
-    public Future<?>[] takeStepsSplittingGroups(int iterations, int groupCount, ProgressTracker pt) {
-        Future<?>[] futures = new Future[groupCount];
+    public void iterate(int iterations) {
+        for (int i = 0; i < iterations; i++) {
+            step();
+        }
+    }
 
+    public void iterate(int iterations, int start, int end) {
+        for (int i = 0; i < iterations; i++) {
+            step(start, end);
+        }
+    }
+
+    public Future<?>[] iterate(int iterations, int groupCount) {
+
+        Future<?>[] futures = new Future[groupCount];
         int s = particles.size();
         int groupSize = (int) FastMath.ceil(s * 1d / groupCount);
 
-        for (int i = 0, k = 0; k < groupCount; i += groupSize, k++) {
-
-            int finalI = i;
-
-            futures[k] = ThreadPool.submit(() -> {
-                for (int j = 0; j < iterations; j++) {
-                    step(finalI, finalI + groupSize);
-                }
-            });
+        for (int i_itr = 0, k = 0; i_itr < s; i_itr += groupSize, k++) {
+            final int i_fin = i_itr;
+            futures[k] = ThreadPool.submit(() -> iterate(iterations, i_fin, i_fin + groupSize));
         }
 
         return futures;
