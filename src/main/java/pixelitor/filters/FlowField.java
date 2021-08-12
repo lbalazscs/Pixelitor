@@ -178,6 +178,8 @@ public class FlowField extends ParametrizedFilter {
         strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
         backgroundColorParam.setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
         particleColorParam.setToolTip("Change the initial color of the particles. Play with transparency to get interesting fills.");
+        useSourceImageAsInitialColorsParam.setToolTip("Make particles use the same color from their positions on the source image.");
+        useSourceImageAsStartingPositionParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
         radiusRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
 
