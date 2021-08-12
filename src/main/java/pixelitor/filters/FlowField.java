@@ -354,7 +354,7 @@ public class FlowField extends ParametrizedFilter {
                 if ((sourcePixels[i] & 0xFF000000) != 0) {
                     int y = i / imgWidth;
                     int x = i - y * imgWidth;
-                    spawns.add(new Point(x, y));
+                    spawns.add(new Point(x *= fieldDensity, y *= fieldDensity));
                 }
             }
         }
@@ -435,7 +435,7 @@ public class FlowField extends ParametrizedFilter {
         final Modifier<FlowFieldParticle> modifier;
 
         public PositionRandomizer(int x, int y, int width, int height, List<Point2D> spawnPoints, Random random) {
-            if (spawnPoints == null || spawnPoints.size()<=0) {
+            if (spawnPoints == null || spawnPoints.size() <= 0) {
                 modifier = new RandomizePosition<>(x, y, width, height, random);
             } else {
                 int size = spawnPoints.size();
