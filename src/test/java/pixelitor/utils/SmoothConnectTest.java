@@ -138,7 +138,7 @@ public class SmoothConnectTest extends JPanel {
 
         public IndexedParticle() {
             pos = new Point2D.Float();
-            vel = new Point2D.Float();
+            vel = new Vector2D();
             this.index = idx++;
             reset();
         }
@@ -151,7 +151,7 @@ public class SmoothConnectTest extends JPanel {
         @Override
         public void reset() {
             double fact = (2 * Math.PI * Math.random());
-            vel.setLocation(Math.cos(fact), Math.sin(fact));
+            vel.set((float) Math.cos(fact), (float) Math.sin(fact));
         }
 
         @Override
@@ -161,9 +161,12 @@ public class SmoothConnectTest extends JPanel {
 
         @Override
         public void update() {
-            Geometry.add(pos, vel, pos);
-            if (pos.getX() < 0 || pos.getX() > size.width) vel.setLocation(vel.getX() * -1, vel.getY());
-            if (pos.getY() < 0 || pos.getY() > size.height) vel.setLocation(vel.getX(), vel.getY() * -1);
+            pos.setLocation(
+                    pos.getX() + vel.x,
+                    pos.getY() + vel.y
+            );
+            if (pos.getX() < 0 || pos.getX() > size.width) vel.set(vel.x * -1, vel.y);
+            if (pos.getY() < 0 || pos.getY() > size.height) vel.set(vel.x, vel.y * -1);
         }
 
     }

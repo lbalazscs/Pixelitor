@@ -226,6 +226,13 @@ public class Geometry {
         return a;
     }
 
+    public static Point2D add(Point2D... a) {
+        for (int i = 1; i < a.length; i++) {
+            add(a[0], a[i], a[0]);
+        }
+        return a[0];
+    }
+
     public static Point2D add(Point2D a, Point2D b, Point2D r) {
         r.setLocation(a.getX() + b.getX(), a.getY() + b.getY());
         return r;
