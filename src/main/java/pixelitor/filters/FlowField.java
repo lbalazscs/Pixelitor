@@ -161,17 +161,16 @@ public class FlowField extends ParametrizedFilter {
         }, false).autoNormalized();
 
 
-        DialogParam physicsParam = new DialogParam("Physics", forceModeParam, maxVelocityParam, varianceParam);
-        DialogParam advancedParam = new DialogParam("Advanced", iterationsParam, turbulenceParam, windParam);
+        DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
+        noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
+
+        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, iterationsParam);
 
         setParams(
 
                 forceModifierParam,
 
                 particlesParam,
-                physicsParam,
-
-                zoomParam,
                 strokeParam,
                 backgroundColorParam,
                 particleColorParam,
@@ -180,17 +179,18 @@ public class FlowField extends ParametrizedFilter {
                 colorRandomnessParam,
                 radiusRandomnessParam,
 
+                noiseAdjustmentParam,
                 advancedParam
 
         ).withAction(ReseedSupport.createSimplexAction());
 
-        noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
+        this.noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
         sinkParam.setToolTip("Make particles flow towards the center point.");
         revolveParam.setToolTip("Make particles flow around the center point.");
 
         particlesParam.setToolTip("Adjust the number of particles flowing in the field.");
 
-        physicsParam.setToolTip("Some additional tweaks to manipulate the evaluation system.");
+        noiseAdjustmentParam.setToolTip("Some additional tweaks to manipulate the evaluation system.");
         forceModeParam.setToolTip("Advanced control over how forces act.");
         maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
         varianceParam.setToolTip("Increase variance to add more turns and twists to the flow.");
