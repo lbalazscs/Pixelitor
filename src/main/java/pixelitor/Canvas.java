@@ -19,7 +19,9 @@ package pixelitor;
 
 import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -221,6 +223,10 @@ public class Canvas implements Serializable {
 
     public boolean hasDifferentSizeThan(BufferedImage img) {
         return width != img.getWidth() || height != img.getHeight();
+    }
+
+    public PPoint getRandomPoint(View view) {
+        return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
     }
 
     @Override

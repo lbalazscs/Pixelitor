@@ -563,45 +563,40 @@ public abstract class AbstractBrushTool extends Tool {
     private void doTrace(Drawable dr, Shape shape) {
         View view = dr.getComp().getView();
         PPoint subPathStartingPoint = null;
-        boolean firstPoint = true;
+        boolean isFirstPoint = true;
         boolean brushStrokePrepared = false;
         float[] coords = new float[2];
         int subPathIndex = -1;
 
         var fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
         while (!fpi.isDone()) {
-            int type = fpi.currentSegment(coords);
-            double x = coords[0];
-            double y = coords[1];
-            PPoint p = PPoint.lazyFromIm(x, y, view);
+            int segmentType = fpi.currentSegment(coords);
+            PPoint pathPoint = PPoint.lazyFromIm(coords[0], coords[1], view);
 
-            if (firstPoint) {
-                affectedArea.initAt(p);
-                firstPoint = false;
+            if (isFirstPoint) {
+                affectedArea.initAt(pathPoint);
+                isFirstPoint = false;
             } else {
-                affectedArea.updateWith(p);
+                affectedArea.updateWith(pathPoint);
             }
 
-            // we can get here more than once if there are multiple subpaths!
-            switch (type) {
+            switch (segmentType) {
                 case SEG_MOVETO -> {
+                    // we can get here more than once if there are multiple subpaths!
                     subPathIndex++;
-                    subPathStartingPoint = p;
+                    subPathStartingPoint = pathPoint;
                     if (!brushStrokePrepared) {
-                        // TODO this should not be here, and it should not need
-                        // a point argument, but it is here because some hacks
-                        // in the clone and smudge tools need that point
-                        prepareProgrammaticBrushStroke(dr, p);
+                        prepareProgrammaticBrushStroke(dr, pathPoint);
                         brushStrokePrepared = true;
                     }
                     if (subPathIndex != 0) {
                         brush.finishBrushStroke();
                     }
-                    brush.startAt(p);
+                    brush.startAt(pathPoint);
                 }
-                case SEG_LINETO -> brush.continueTo(p);
+                case SEG_LINETO -> brush.continueTo(pathPoint);
                 case SEG_CLOSE -> brush.continueTo(subPathStartingPoint);
-                default -> throw new IllegalArgumentException("type = " + type);
+                default -> throw new IllegalArgumentException("segmentType = " + segmentType);
             }
 
             fpi.next();

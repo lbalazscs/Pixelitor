@@ -46,15 +46,16 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     @Override
     public void setupMaskEditing(boolean isMask) {
         maskEditing = isMask;
-        updateDrawing();
+        setupDrawDestination();
     }
 
-    private void updateDrawing() {
+    private void setupDrawDestination() {
         if (maskEditing) {
             drawDestination = DrawDestination.DIRECT;
             blendingModePanel.setEnabled(false);
         } else {
-            drawDestination = blendingModePanel.isNormalAndOpaque() ?
+            boolean noBlending = blendingModePanel.isNormalAndOpaque();
+            drawDestination = noBlending ?
                 DrawDestination.DIRECT :
                 DrawDestination.TMP_LAYER;
             blendingModePanel.setEnabled(true);
@@ -90,7 +91,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
-        blendingModePanel.addActionListener(e -> updateDrawing());
+        blendingModePanel.addActionListener(e -> setupDrawDestination());
     }
 
     @Override

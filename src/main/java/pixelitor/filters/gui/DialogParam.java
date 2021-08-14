@@ -50,7 +50,7 @@ public class DialogParam extends AbstractFilterParam {
 
         paramGUI = new ConfigureParamGUI(this::configureDialog, defaultButton);
 
-        setGUIEnabledState();
+        afterGUICreation();
         return (JComponent) paramGUI;
     }
 

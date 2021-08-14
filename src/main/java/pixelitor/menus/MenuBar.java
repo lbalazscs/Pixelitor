@@ -935,8 +935,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Orton.NAME, Orton::new);
         sub.addFilter(PhotoCollage.NAME, PhotoCollage::new);
         sub.addFilter(JHPointillize.NAME, JHPointillize::new);
-        sub.addFilter(RandomSpheres.NAME, RandomSpheres::new);
         sub.addFilter(JHSmear.NAME, JHSmear::new);
+        sub.addFilter(Spheres.NAME, Spheres::new);
         sub.addFilter(JHStamp.NAME, JHStamp::new);
         sub.addFilter(JHWeave.NAME, JHWeave::new);
 

@@ -98,7 +98,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new GroupedRangeParamGUI(this);
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
         return gui;
     }
 

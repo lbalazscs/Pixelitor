@@ -274,6 +274,10 @@ public class Composition implements Serializable {
         return canvas.clip(shape);
     }
 
+    public PPoint getRandomPointInCanvas() {
+        return canvas.getRandomPoint(view);
+    }
+
     public boolean isDirty() {
         return dirty;
     }

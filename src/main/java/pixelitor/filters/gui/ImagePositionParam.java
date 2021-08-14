@@ -55,7 +55,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
         var gui = new ImagePositionParamGUI(this, defaultX, defaultY);
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
         paramGUI.updateGUI();
         return gui;
     }

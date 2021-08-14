@@ -21,12 +21,9 @@ import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
 
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.ReseedActions.reseedNoise;
@@ -127,7 +124,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
     }
 
     private static final Item[] gridTypeChoices = {
-        new Item("Random", CellularFilter.GR_RANDOM),
+        new Item("Fully Random", CellularFilter.GR_RANDOM),
         new Item("Squares", CellularFilter.GR_SQUARE),
         new Item("Hexagons", CellularFilter.GR_HEXAGONAL),
         new Item("Octagons & Squares", CellularFilter.GR_OCTAGONAL),
@@ -147,34 +144,17 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
         var icp = new IntChoiceParam("Wave Type", waveTypeChoices);
         icp.withAction(reseedNoise);
 
-        // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
+        // enable the "Reseed Noise" button only if the wave type is "Noise"
         icp.setupEnableOtherIf(reseedNoise,
             selected -> selected.getValue() == WaveType.NOISE);
-
         return icp;
     }
 
     public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {
-        randomnessParam.setEnabled(false, APP_LOGIC);
         var param = new IntChoiceParam(name, gridTypeChoices);
-        param.addListDataListener(new ListDataListener() {
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-                // cannot happen
-            }
-
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-                // cannot happen
-            }
-
-            @Override
-            public void contentsChanged(ListDataEvent e) {
-                int selectedValue = param.getValue();
-                boolean newEnabled = selectedValue != CellularFilter.GR_RANDOM;
-                randomnessParam.setEnabled(newEnabled, APP_LOGIC);
-            }
-        });
+        // enable the randomness slider only if the grid type isn't "Fully Random"
+        param.setupEnableOtherIf(randomnessParam, selected ->
+            selected.getValue() != CellularFilter.GR_RANDOM);
         return param;
     }
 

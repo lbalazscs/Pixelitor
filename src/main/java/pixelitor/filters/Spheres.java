@@ -17,44 +17,39 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.*;
-import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ElevationAngleParam;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.GUIText.OPACITY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**
- * Fills the image with random circles
+ * Fills the image with 3D-like circles
  */
-public class RandomSpheres extends ParametrizedFilter {
-    public static final String NAME = "Random Spheres";
+public class Spheres extends ParametrizedFilter {
+    public static final String NAME = "Spheres";
 
-    private static final int COLORS_SAMPLE_IMAGE = 1;
-    private static final int COLORS_FG_BG = 2;
+    // see http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+    private static final double PHI_2 = 1.32471795724474602596;
+    private static final double a1 = 1.0 / PHI_2;
+    private static final double a2 = 1.0 / (PHI_2 * PHI_2);
 
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 2, 10, 100);
-    private final RangeParam density = new RangeParam("Density (%)", 1, 50, 221);
+    private final RangeParam density = new RangeParam("Density (%)", 1, 50, 100);
 
-    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source",
-        new Item[]{
-            new Item("Sample Image", COLORS_SAMPLE_IMAGE),
-            new Item("Use FG, BG Colors", COLORS_FG_BG),
-        });
     private final BooleanParam addHighLightsCB = new BooleanParam(
-        "Add Highlights", true);
+        "Add 3D Highlights", true);
     private final AngleParam highlightAngleSelector = new AngleParam(
         "Light Direction (Azimuth)", 0);
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
@@ -62,7 +57,7 @@ public class RandomSpheres extends ParametrizedFilter {
 
     private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
 
-    public RandomSpheres() {
+    public Spheres() {
         super(true);
 
         // enable "Light Direction" and "Highlight Elevation"
@@ -74,11 +69,10 @@ public class RandomSpheres extends ParametrizedFilter {
             radius.withAdjustedRange(0.1),
             density,
             opacity,
-            colorSource,
             addHighLightsCB,
             highlightAngleSelector,
             highlightElevationSelector
-        ).withAction(ReseedSupport.createAction());
+        );
     }
 
     @Override
@@ -90,13 +84,9 @@ public class RandomSpheres extends ParametrizedFilter {
 
         var pt = new StatusBarProgressTracker(NAME, numCircles);
 
-        Random rand = ReseedSupport.getLastSeedRandom();
-
         Graphics2D g = dest.createGraphics();
         g.setComposite(AlphaComposite.SrcOver.derive(opacity.getPercentageValF()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-        int colorSrc = colorSource.getValue();
 
         double angle = highlightAngleSelector.getValueInRadians() + Math.PI;
 
@@ -105,32 +95,27 @@ public class RandomSpheres extends ParametrizedFilter {
         int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
 
         Color[] colors = null;
-        Color c = null;
-
-        if (colorSrc == COLORS_FG_BG) {
-            colors = new Color[]{getFGColor(), getBGColor()};
-            c = colors[0];
-        }
 
         boolean addHighlights = addHighLightsCB.isChecked();
 
         for (int i = 0; i < numCircles; i++) {
-            int x = rand.nextInt(width);
-            int y = rand.nextInt(height);
+//            int x = rand.nextInt(width);
+//            int y = rand.nextInt(height);
+            // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+            int x = (int) (width * ((0.5 + a1 * (i + 1)) % 1));
+            int y = (int) (height * ((0.5 + a2 * (i + 1)) % 1));
 
             // could be faster, but the main bottleneck is
-            // the highlights generation anyway
+            // the highlights' generation anyway
             int srcColor = src.getRGB(x, y);
             int alpha = (srcColor >>> 24) & 0xFF;
             if (alpha == 0) {
                 continue;
             }
 
-            if (colorSrc == COLORS_SAMPLE_IMAGE) {
-                c = new Color(srcColor);
-                if (addHighlights) {
-                    colors = new Color[]{c.brighter().brighter(), c};
-                }
+            Color c = new Color(srcColor);
+            if (addHighlights) {
+                colors = new Color[]{c.brighter().brighter(), c};
             }
 
             // setup paint

@@ -56,7 +56,7 @@ public abstract class AbstractMultipleChoiceParam<E>
     public JComponent createGUI() {
         var gui = new ComboBoxParamGUI<E>(this, action);
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
         return gui;
     }
 
