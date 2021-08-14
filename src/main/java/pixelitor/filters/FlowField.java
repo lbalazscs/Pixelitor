@@ -52,7 +52,19 @@ public class FlowField extends ParametrizedFilter {
 
     private static final int PARTICLES_PER_GROUP = 100;
 
+    private static final float QUALITY = .8f;
+
     private static final float SMOOTHNESS = 1224.3649f;
+
+    private static final float LIMITING_ITERATIONS = 100;
+
+    private static final float FORCE_MAGNITUDE = (float) pow(10f, 330 / 100f) / 100f;
+
+    private static final int TOLERANCE = 30;
+
+    private static final float ITERATION_TO_FORCE_RATIO = FORCE_MAGNITUDE / LIMITING_ITERATIONS;
+
+    private static final float ITERATION_TO_TOLERANCE_RATIO = TOLERANCE / LIMITING_ITERATIONS;
 
     private enum ForceMode implements Modifier<FlowFieldParticle> {
         FORCE_MODE_VELOCITY("No Mass") {
@@ -120,7 +132,6 @@ public class FlowField extends ParametrizedFilter {
 
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
-    private final LogZoomParam forceParam = new LogZoomParam("Force", 1, 320, 400);
     private final RangeParam varianceParam = new RangeParam("Variance", 1, 20, 100);
 
     private final RangeParam zoomParam = new RangeParam("Zoom (%)", 100, 4000, 10000);
@@ -132,10 +143,9 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam radiusRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 1000);
 
-    private final RangeParam iterationsParam = new RangeParam("Path Length (Makes simulation slow!!)", 4, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam iterationsParam = new RangeParam("Path Length (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
     private final RangeParam turbulenceParam = new RangeParam("Turbulence", 1, 1, 8);
     private final RangeParam windParam = new RangeParam("Wind", 0, 0, 200);
-    private final RangeParam drawToleranceParam = new RangeParam("Tolerance", 0, 30, 200);
 
     //</editor-fold>
 
@@ -151,8 +161,8 @@ public class FlowField extends ParametrizedFilter {
         }, false).autoNormalized();
 
 
-        DialogParam physicsParam = new DialogParam("Physics", forceModeParam, maxVelocityParam, forceParam, varianceParam);
-        DialogParam advancedParam = new DialogParam("Advanced", iterationsParam, turbulenceParam, windParam, drawToleranceParam);
+        DialogParam physicsParam = new DialogParam("Physics", forceModeParam, maxVelocityParam, varianceParam);
+        DialogParam advancedParam = new DialogParam("Advanced", iterationsParam, turbulenceParam, windParam);
 
         setParams(
 
@@ -184,7 +194,6 @@ public class FlowField extends ParametrizedFilter {
         forceModeParam.setToolTip("Advanced control over how forces act.");
         maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
         varianceParam.setToolTip("Increase variance to add more turns and twists to the flow.");
-        forceParam.setToolTip("Determine how powerful the final force applied is.");
 
         zoomParam.setToolTip("Change zoom to make fields look bigger or smaller. Please note, that particle width will not take any effect.");
         strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
@@ -199,7 +208,6 @@ public class FlowField extends ParametrizedFilter {
         iterationsParam.setToolTip("Make individual particles cover longer paths.");
         turbulenceParam.setToolTip("Increase to make the flow path rougher.");
         windParam.setToolTip("Spreads away the particles against the flow path.");
-        drawToleranceParam.setToolTip("Require only longer paths to be drawn.");
 
     }
 
@@ -215,12 +223,7 @@ public class FlowField extends ParametrizedFilter {
         final int particleCount = particlesParam.getValue();
         final ForceMode forceMode = forceModeParam.getSelected();
         final float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
-        final float force = (float) forceParam.getZoomRatio();
         final float variance = varianceParam.getValue() / 10.0f;
-
-        final float multiplierNoise = noiseParam.getPercentageValF() * force;
-        final float multiplierSink = sinkParam.getPercentageValF() * force;
-        final float multiplierRevolve = revolveParam.getPercentageValF() * force;
 
         final float zoom = zoomParam.getValue() * 0.25f;
         final Stroke stroke = strokeParam.createStroke();
@@ -231,11 +234,17 @@ public class FlowField extends ParametrizedFilter {
         final float colorRandomness = colorRandomnessParam.getPercentageValF();
         final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
 
-        final float quality = Math.min(1.2f, SMOOTHNESS / zoom);
-        final int iterationCount = iterationsParam.getValue();
+        final int iterationCount = iterationsParam.getValue() + 1;
         final int turbulence = turbulenceParam.getValue();
         final float zFactor = windParam.getValueAsFloat() / 10000;
-        final int tolerance = drawToleranceParam.getValue();
+
+        final float quality = min(QUALITY, SMOOTHNESS / zoom);
+        final int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
+        final float force = min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
+
+        final float multiplierNoise = noiseParam.getPercentageValF() * force;
+        final float multiplierSink = sinkParam.getPercentageValF() * force;
+        final float multiplierRevolve = revolveParam.getPercentageValF() * force;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -424,14 +433,9 @@ public class FlowField extends ParametrizedFilter {
 
         @Override
         public void modify(FlowFieldParticle particle) {
-            Vector2D d = fieldAccelerations[particle.getFieldX()][particle.getFieldY()];
-            particle.color = new Color(0, sigmoid(d.y), sigmoid(d.x), particle.color.getAlpha() / 256f);
             particle.delta.set(fieldAccelerations[particle.getFieldX()][particle.getFieldY()]);
         }
 
-        public float sigmoid(float x) {
-            return (1 + (float) (1 / (1 + FastMath.exp(-x)))) / 2;
-        }
     }
 
     //</editor-fold>

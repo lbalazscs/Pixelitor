@@ -1,5 +1,7 @@
 package pixelitor.utils;
 
+import java.awt.geom.Point2D;
+
 import static net.jafama.FastMath.hypot;
 
 public class Vector2D {
@@ -8,6 +10,18 @@ public class Vector2D {
     public float y;
 
     public Vector2D() {
+    }
+
+    public Vector2D(Vector2D v) {
+        this(v.x, v.y);
+    }
+
+    public Vector2D(Point2D.Float p) {
+        this(p.x, p.y);
+    }
+
+    public Vector2D(Point2D p) {
+        this((float) p.getX(), (float) p.getY());
     }
 
     public Vector2D(float x, float y) {
@@ -57,7 +71,7 @@ public class Vector2D {
     }
 
     public void normalizeIfNonzero() {
-        if (x * y == 0) return;
+        if (x == 0 && y == 0) return;
         float factor = (float) hypot(x, y);
         x /= factor;
         y /= factor;
@@ -77,5 +91,11 @@ public class Vector2D {
 
     public float length() {
         return (float) hypot(x, y);
+    }
+
+    public void perpendicular() {
+        float oy = y;
+        y = x;
+        x = -oy;
     }
 }

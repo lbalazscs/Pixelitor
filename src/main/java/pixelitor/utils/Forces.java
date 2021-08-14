@@ -22,7 +22,7 @@ public class Forces {
 
         out.set(center);
         out.subtract(position);
-        out.set(-out.y, +out.x);
+        out.perpendicular();
         out.setMagnitude(magnitude);
         out.normalizeIfNonzero();
         out.scale(magnitude);

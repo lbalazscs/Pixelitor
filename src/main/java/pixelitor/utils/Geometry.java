@@ -24,8 +24,8 @@ import java.awt.geom.Point2D;
 
 public class Geometry {
     public static final double GOLDEN_RATIO = 1.61803398874989490253;
-    @Deprecated
-    public static final float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
+
+    public static final double EPSILON = 0.0001;
 
     private Geometry() {
         // utility class
@@ -196,8 +196,11 @@ public class Geometry {
     }
 
     public static boolean areEqual(Point2D a, Point2D b) {
-        // TODO: will using the epsilon method be any better??
         return Double.compare(a.getX(), b.getX()) == 0 && Double.compare(a.getY(), b.getY()) == 0;
+    }
+
+    public static boolean areEqualByEpsilon(Point2D a, Point2D b) {
+        return FastMath.abs(a.getX() - b.getX()) < EPSILON && FastMath.abs(a.getY() - b.getY()) < EPSILON;
     }
 
     public static void copy(Point2D a, Point2D b) {
