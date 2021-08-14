@@ -30,7 +30,7 @@ public class Forces {
         return out;
     }
 
-    public static Vector2D createFlowFieldForce(float magnitude, float initTheta, float variantPI, double sampleX, double sampleY, double sampleZ, int turbulence, OpenSimplex2F noise, Vector2D out) {
+    public static Vector2D createNoiseForce(float magnitude, float initTheta, float variantPI, double sampleX, double sampleY, double sampleZ, int turbulence, OpenSimplex2F noise, Vector2D out) {
         double value = initTheta + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variantPI;
         out.set((float) cos(value), (float) sin(value));
         out.setMagnitude(magnitude);

@@ -154,12 +154,11 @@ public class FlowField extends ParametrizedFilter {
     public FlowField() {
         super(false);
 
-        GroupedRangeParam forceModifierParam = new GroupedRangeParam("Noise", new RangeParam[]{
+        GroupedRangeParam forceMixerParam = new GroupedRangeParam("Force Mixer", new RangeParam[]{
                 noiseParam,
                 sinkParam,
                 revolveParam
         }, false).autoNormalized();
-
 
         DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
         noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
@@ -168,7 +167,8 @@ public class FlowField extends ParametrizedFilter {
 
         setParams(
 
-                forceModifierParam,
+                forceMixerParam,
+                noiseAdjustmentParam,
 
                 particlesParam,
                 strokeParam,
@@ -179,7 +179,6 @@ public class FlowField extends ParametrizedFilter {
                 colorRandomnessParam,
                 radiusRandomnessParam,
 
-                noiseAdjustmentParam,
                 advancedParam
 
         ).withAction(ReseedSupport.createSimplexAction());
@@ -345,7 +344,7 @@ public class FlowField extends ParametrizedFilter {
                 Forces.createRevolveForce(position, center, multiplierRevolve, forceDueToRevolution);
 
                 if (zFactor == 0) {
-                    Forces.createFlowFieldForce(multiplierNoise, initTheta, variantPI, position.x / zoom, position.y / zoom, 0, turbulence, noise, forceDueToNoise);
+                    Forces.createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom, position.y / zoom, 0, turbulence, noise, forceDueToNoise);
                 }
 
                 fieldAccelerations[i][j] = Vector2D.add(forceDueToRevolution, forceDueToSink, forceDueToNoise);
@@ -491,7 +490,7 @@ public class FlowField extends ParametrizedFilter {
                 double sampleY = pos.getY() / meta.zoom;
                 double sampleZ = meta.zFactor * iterationIndex;
                 Vector2D noiseDelta = new Vector2D();
-                Forces.createFlowFieldForce(meta.multiplierNoise, meta.initTheta, meta.variantPI, sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
+                Forces.createNoiseForce(meta.multiplierNoise, meta.initTheta, meta.variantPI, sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
                 delta.add(noiseDelta);
             }
 
