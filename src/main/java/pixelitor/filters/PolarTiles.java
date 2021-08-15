@@ -69,7 +69,7 @@ public class PolarTiles extends ParametrizedFilter {
             filter = new PolarTilesFilter();
         }
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());

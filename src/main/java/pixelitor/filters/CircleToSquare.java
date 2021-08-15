@@ -60,7 +60,7 @@ public class CircleToSquare extends ParametrizedFilter {
             filter = new CircleToSquareFilter();
         }
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setRadiusX(radius.getValueAsFloat(0));
         filter.setRadiusY(radius.getValueAsFloat(1));
         filter.setAmount(amount.getPercentageValF());

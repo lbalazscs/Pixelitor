@@ -20,7 +20,6 @@ import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.MirrorFilter;
 import pixelitor.gui.GUIText;
 
@@ -54,7 +53,7 @@ public class Mirror extends ParametrizedFilter {
             filter = new MirrorFilter();
         }
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR);
         filter.setAngle(angle.getValueInRadians());

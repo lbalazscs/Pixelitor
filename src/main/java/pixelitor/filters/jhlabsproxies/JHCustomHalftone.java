@@ -17,18 +17,18 @@
 
 package pixelitor.filters.jhlabsproxies;
 
-import pixelitor.Composition;
-import pixelitor.OpenImages;
-import pixelitor.utils.ImageUtils;
+import pixelitor.filters.gui.SelectImageParam;
 
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 public class JHCustomHalftone extends JHMaskedHalftone {
     public static final String NAME = "Custom Halftone";
 
+    private final SelectImageParam selectImageParam = new SelectImageParam("Select Image");
+
     public JHCustomHalftone() {
         setParams(
+            selectImageParam,
             softness,
             invert,
             monochrome
@@ -37,12 +37,13 @@ public class JHCustomHalftone extends JHMaskedHalftone {
 
     @Override
     protected BufferedImage createMaskImage(BufferedImage src) {
-        Optional<Composition> opt = OpenImages.findCompByName("Untitled1");
-        if (opt.isPresent()) {
-            return opt.get().getCompositeImage();
-        }
-        // to avoid exceptions if in an auto test
-        // this filter is selected as a random filter
-        return ImageUtils.copyImage(src);
+        return selectImageParam.getImage();
+//        Optional<Composition> opt = OpenImages.findCompByName("Untitled1");
+//        if (opt.isPresent()) {
+//            return opt.get().getCompositeImage();
+//        }
+//        // to avoid exceptions if in an auto test
+//        // this filter is selected as a random filter
+//        return ImageUtils.copyImage(src);
     }
 }

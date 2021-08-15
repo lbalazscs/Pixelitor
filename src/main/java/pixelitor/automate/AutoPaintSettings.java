@@ -25,8 +25,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.geom.Point2D;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.SplittableRandom;
 
 /**
  * The settings of Auto Paint
@@ -66,7 +65,7 @@ class AutoPaintSettings {
         this.interpolatedColors = interpolatedColors;
     }
 
-    public PPoint calcRandomEndPoint(PPoint start, Composition comp, Random rand) {
+    public PPoint calcRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
         Canvas canvas = comp.getCanvas();
         double angle = switch (angleType) {
             case ANGLE_TYPE_RANDOM -> rand.nextDouble() * 2 * Math.PI;
@@ -80,7 +79,7 @@ class AutoPaintSettings {
             default -> throw new IllegalStateException("Unexpected value: " + angleType);
         };
 
-        int strokeLength = genStrokeLength();
+        int strokeLength = genStrokeLength(rand);
         double endX = start.getImX() + strokeLength * FastMath.cos(angle);
         double endY = start.getImY() + strokeLength * FastMath.sin(angle);
         return PPoint.lazyFromIm(endX, endY, comp.getView());
@@ -104,12 +103,11 @@ class AutoPaintSettings {
         return numStrokes;
     }
 
-    public int genStrokeLength() {
+    public int genStrokeLength(SplittableRandom rand) {
         if (minStrokeLength == maxStrokeLength) {
             return minStrokeLength;
         } else {
-            return ThreadLocalRandom.current()
-                .nextInt(minStrokeLength, maxStrokeLength + 1);
+            return rand.nextInt(minStrokeLength, maxStrokeLength + 1);
         }
     }
 

@@ -34,7 +34,7 @@ import pixelitor.utils.Rnd;
 import java.awt.Color;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.*;
@@ -95,7 +95,7 @@ public class AutoPaint {
                                    ProgressHandler progressHandler) {
         assert calledOnEDT() : threadInfo();
 
-        var random = new Random();
+        var random = new SplittableRandom();
         var comp = dr.getComp();
 
         int numStrokes = settings.getNumStrokes();
@@ -110,7 +110,7 @@ public class AutoPaint {
     private static void paintSingleStroke(Drawable dr,
                                           AutoPaintSettings settings,
                                           Composition comp,
-                                          Random rand) {
+                                          SplittableRandom rand) {
         assert calledOnEDT() : threadInfo();
 
         setFgBgColors(settings, rand);
@@ -126,12 +126,12 @@ public class AutoPaint {
         }
     }
 
-    private static void setFgBgColors(AutoPaintSettings settings, Random rand) {
+    private static void setFgBgColors(AutoPaintSettings settings, SplittableRandom rand) {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
             Color interpolated = Colors.rgbInterpolate(
-                origFg, origBg, rand.nextFloat());
+                origFg, origBg, (float) rand.nextDouble());
             setFGColor(interpolated);
         }
     }
