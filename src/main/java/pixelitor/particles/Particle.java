@@ -2,7 +2,7 @@ package pixelitor.particles;
 
 import pixelitor.utils.Vector2D;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.geom.Point2D;
 
 public abstract class Particle {

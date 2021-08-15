@@ -1,10 +1,9 @@
 package pixelitor.particles;
 
-import pixelitor.utils.Geometry;
 import pixelitor.utils.GoldenRatio;
 import pixelitor.utils.Rnd;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 public interface Modifier<P extends Particle> {

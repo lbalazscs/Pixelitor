@@ -71,8 +71,8 @@ public class FlowField extends ParametrizedFilter {
             @Override
             public void modify(FlowFieldParticle particle) {
                 particle.pos.setLocation(
-                        particle.pos.getX() + particle.delta.x,
-                        particle.pos.getY() + particle.delta.y
+                    particle.pos.getX() + particle.delta.x,
+                    particle.pos.getY() + particle.delta.y
                 );
             }
         },
@@ -81,8 +81,8 @@ public class FlowField extends ParametrizedFilter {
             public void modify(FlowFieldParticle particle) {
                 particle.vel.add(particle.delta);
                 particle.pos.setLocation(
-                        particle.pos.getX() + particle.vel.x,
-                        particle.pos.getY() + particle.vel.y
+                    particle.pos.getX() + particle.vel.x,
+                    particle.pos.getY() + particle.vel.y
                 );
             }
         },
@@ -92,8 +92,8 @@ public class FlowField extends ParametrizedFilter {
                 particle.acc.add(particle.delta);
                 particle.vel.add(particle.acc);
                 particle.pos.setLocation(
-                        particle.pos.getX() + particle.vel.x,
-                        particle.pos.getY() + particle.vel.y
+                    particle.pos.getX() + particle.vel.x,
+                    particle.pos.getY() + particle.vel.y
                 );
             }
         },
@@ -102,8 +102,8 @@ public class FlowField extends ParametrizedFilter {
             public void modify(FlowFieldParticle particle) {
                 particle.delta.add(Noise.noise2(particle.delta.x, particle.delta.y) * 10);
                 particle.pos.setLocation(
-                        particle.pos.getX() + particle.delta.x,
-                        particle.pos.getY() + particle.delta.y
+                    particle.pos.getX() + particle.delta.x,
+                    particle.pos.getY() + particle.delta.y
                 );
             }
         };
@@ -155,9 +155,9 @@ public class FlowField extends ParametrizedFilter {
         super(false);
 
         GroupedRangeParam forceMixerParam = new GroupedRangeParam("Force Mixer", new RangeParam[]{
-                noiseParam,
-                sinkParam,
-                revolveParam
+            noiseParam,
+            sinkParam,
+            revolveParam
         }, false).autoNormalized();
 
         DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
@@ -167,19 +167,19 @@ public class FlowField extends ParametrizedFilter {
 
         setParams(
 
-                forceMixerParam,
-                noiseAdjustmentParam,
+            forceMixerParam,
+            noiseAdjustmentParam,
 
-                particlesParam,
-                strokeParam,
-                backgroundColorParam,
-                particleColorParam,
-                useSourceImageAsInitialColorsParam,
-                useSourceImageAsStartingPositionParam,
-                colorRandomnessParam,
-                radiusRandomnessParam,
+            particlesParam,
+            strokeParam,
+            backgroundColorParam,
+            particleColorParam,
+            useSourceImageAsInitialColorsParam,
+            useSourceImageAsStartingPositionParam,
+            colorRandomnessParam,
+            radiusRandomnessParam,
 
-                advancedParam
+            advancedParam
 
         ).withAction(ReseedSupport.createSimplexAction());
 
@@ -194,11 +194,15 @@ public class FlowField extends ParametrizedFilter {
         maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
         varianceParam.setToolTip("Increase variance to add more turns and twists to the flow.");
 
-        zoomParam.setToolTip("Change zoom to make fields look bigger or smaller. Please note, that particle width will not take any effect.");
+        zoomParam
+            .setToolTip("Change zoom to make fields look bigger or smaller. Please note, that particle width will not take any effect.");
         strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
-        backgroundColorParam.setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
-        particleColorParam.setToolTip("Change the initial color of the particles. Play with transparency to get interesting fills.");
-        useSourceImageAsInitialColorsParam.setToolTip("Make particles use the same color from their positions on the source image.");
+        backgroundColorParam
+            .setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
+        particleColorParam
+            .setToolTip("Change the initial color of the particles. Play with transparency to get interesting fills.");
+        useSourceImageAsInitialColorsParam
+            .setToolTip("Make particles use the same color from their positions on the source image.");
         useSourceImageAsStartingPositionParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
         radiusRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
@@ -259,7 +263,7 @@ public class FlowField extends ParametrizedFilter {
 
         final Vector2D center = new Vector2D(fieldWidth / 2f, fieldHeight / 2f);
         final Rectangle bounds = new Rectangle(-PAD, -PAD,
-                fieldWidth + PAD * 2, fieldHeight + PAD * 2);
+            fieldWidth + PAD * 2, fieldHeight + PAD * 2);
         float variantPI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
@@ -284,9 +288,11 @@ public class FlowField extends ParametrizedFilter {
         if (useColorField) {
             GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
             if (inheritColors) {
-                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio.next(new Color(sourcePixels[toRange(0, sourcePixels.length, (x /= fieldDensity) + (y /= fieldDensity) * imgWidth)], true)));
-            } else
+                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+                    .next(new Color(sourcePixels[toRange(0, sourcePixels.length, (x /= fieldDensity) + (y /= fieldDensity) * imgWidth)], true)));
+            } else {
                 fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
+            }
         }
 
         if (randomizeRadius) {
@@ -309,11 +315,12 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-                .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[r.nextInt(strokes.length)] : stroke, meta))
-                .addModifier(positionRandomizer)
-                .addModifier(particleInitializer)
-                .addUpdater(forceModeUpdater)
-                .build();
+            .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[r
+                .nextInt(strokes.length)] : stroke, meta))
+            .addModifier(positionRandomizer)
+            .addModifier(particleInitializer)
+            .addUpdater(forceModeUpdater)
+            .build();
 
         final Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount);
         ThreadPool.waitFor(futures, pt);
@@ -344,7 +351,8 @@ public class FlowField extends ParametrizedFilter {
                 Forces.createRevolveForce(position, center, multiplierRevolve, forceDueToRevolution);
 
                 if (zFactor == 0) {
-                    Forces.createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom, position.y / zoom, 0, turbulence, noise, forceDueToNoise);
+                    Forces
+                        .createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom, position.y / zoom, 0, turbulence, noise, forceDueToNoise);
                 }
 
                 fieldAccelerations[i][j] = Vector2D.add(forceDueToRevolution, forceDueToSink, forceDueToNoise);
@@ -365,7 +373,9 @@ public class FlowField extends ParametrizedFilter {
     }
 
     public static <T> T getIf(boolean value, Supplier<T> supplier) {
-        if (value) return supplier.get();
+        if (value) {
+            return supplier.get();
+        }
         return null;
     }
 
@@ -490,7 +500,8 @@ public class FlowField extends ParametrizedFilter {
                 double sampleY = pos.getY() / meta.zoom;
                 double sampleZ = meta.zFactor * iterationIndex;
                 Vector2D noiseDelta = new Vector2D();
-                Forces.createNoiseForce(meta.multiplierNoise, meta.initTheta, meta.variantPI, sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
+                Forces
+                    .createNoiseForce(meta.multiplierNoise, meta.initTheta, meta.variantPI, sampleX, sampleY, sampleZ, meta.turbulence, meta.noise, noiseDelta);
                 delta.add(noiseDelta);
             }
 
@@ -506,7 +517,8 @@ public class FlowField extends ParametrizedFilter {
         }
 
         private boolean anyDisplacementInXOrYIsGreaterThanTolerance() {
-            return abs(las_pos.getX() - pos.getX()) > meta.tolerance || abs(las_pos.getY() - pos.getY()) > meta.tolerance;
+            return abs(las_pos.getX() - pos.getX()) > meta.tolerance || abs(las_pos.getY() - pos
+                .getY()) > meta.tolerance;
         }
 
         public int getFieldX() {

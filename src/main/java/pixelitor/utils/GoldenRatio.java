@@ -2,7 +2,7 @@ package pixelitor.utils;
 
 import pixelitor.colors.Colors;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Random;
 
 public class GoldenRatio {

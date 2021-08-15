@@ -44,9 +44,9 @@ public class Vector2D {
         this.y += v.y;
     }
 
-    public void add(float value) {
-        this.x += value;
-        this.y += value;
+    public void add(float v) {
+        this.x += v;
+        this.y += v;
     }
 
     public void subtract(Vector2D v) {
@@ -54,35 +54,58 @@ public class Vector2D {
         this.y -= v.y;
     }
 
-    public void setMagnitude(float magnitude) {
-        normalize();
-        scale(magnitude);
+    public void subtract(float v) {
+        this.x -= v;
+        this.y -= v;
     }
 
-    public void scale(float magnitude) {
-        x *= magnitude;
-        y *= magnitude;
+    public void multiply(Vector2D v) {
+        this.x *= v.x;
+        this.y *= v.y;
+    }
+
+    public void multiply(float v) {
+        this.x *= v;
+        this.y *= v;
+    }
+
+    public void divide(Vector2D v) {
+        this.x /= v.x;
+        this.y /= v.y;
+    }
+
+    public void divide(float v) {
+        this.x /= v;
+        this.y /= v;
+    }
+
+    public void setMagnitude(float magnitude) {
+        normalize();
+        multiply(magnitude);
     }
 
     private void normalize() {
         float factor = (float) hypot(x, y);
-        x /= factor;
-        y /= factor;
+        divide(factor);
     }
 
     public void normalizeIfNonzero() {
-        if (x == 0 && y == 0) return;
-        float factor = (float) hypot(x, y);
-        x /= factor;
-        y /= factor;
+        if (x == 0 && y == 0) {
+            return;
+        }
+        normalize();
     }
 
-    public static Vector2D add(Vector2D... forces) {
+    public static Vector2D add(Vector2D... vectors) {
         Vector2D res = new Vector2D();
-        for (Vector2D force : forces) {
-            res.add(force);
+        for (Vector2D vector : vectors) {
+            res.add(vector);
         }
         return res;
+    }
+
+    public static double cross(Vector2D a, Vector2D b) {
+        return a.x * b.y - a.y * b.x;
     }
 
     public float lengthSq() {

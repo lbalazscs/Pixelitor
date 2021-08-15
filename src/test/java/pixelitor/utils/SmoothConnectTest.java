@@ -49,13 +49,13 @@ public class SmoothConnectTest extends JPanel {
         pointList = new ArrayList<>(particleCount);
 
         system = ParticleSystem.<IndexedParticle>createSystem(particleCount)
-                .setParticleCreator(() -> {
-                    IndexedParticle particle = new IndexedParticle();
-                    pointList.add(particle.pos);
-                    return particle;
-                })
-                .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, ReseedSupport.getLastSeedRandom()))
-                .build();
+            .setParticleCreator(() -> {
+                IndexedParticle particle = new IndexedParticle();
+                pointList.add(particle.pos);
+                return particle;
+            })
+            .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, ReseedSupport.getLastSeedRandom()))
+            .build();
 
         //</editor-fold>
 
@@ -162,11 +162,15 @@ public class SmoothConnectTest extends JPanel {
         @Override
         public void update() {
             pos.setLocation(
-                    pos.getX() + vel.x,
-                    pos.getY() + vel.y
+                pos.getX() + vel.x,
+                pos.getY() + vel.y
             );
-            if (pos.getX() < 0 || pos.getX() > size.width) vel.set(vel.x * -1, vel.y);
-            if (pos.getY() < 0 || pos.getY() > size.height) vel.set(vel.x, vel.y * -1);
+            if (pos.getX() < 0 || pos.getX() > size.width) {
+                vel.set(vel.x * -1, vel.y);
+            }
+            if (pos.getY() < 0 || pos.getY() > size.height) {
+                vel.set(vel.x, vel.y * -1);
+            }
         }
 
     }

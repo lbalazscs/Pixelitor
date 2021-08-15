@@ -8,7 +8,9 @@ import static net.jafama.FastMath.sin;
 public class Forces {
 
     public static Vector2D createSinkForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
-        if (magnitude == 0) return out;
+        if (magnitude == 0) {
+            return out;
+        }
 
         out.set(center);
         out.subtract(position);
@@ -18,14 +20,16 @@ public class Forces {
     }
 
     public static Vector2D createRevolveForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
-        if (magnitude == 0) return out;
+        if (magnitude == 0) {
+            return out;
+        }
 
         out.set(center);
         out.subtract(position);
         out.perpendicular();
         out.setMagnitude(magnitude);
         out.normalizeIfNonzero();
-        out.scale(magnitude);
+        out.multiply(magnitude);
 
         return out;
     }

@@ -167,7 +167,9 @@ public class Geometry {
     }
 
     public static void normalizeIfNonzero(Point2D a) {
-        if (a.getX() == 0 && a.getY() == 0) return;
+        if (a.getX() == 0 && a.getY() == 0) {
+            return;
+        }
         deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
     }
 
@@ -271,8 +273,8 @@ public class Geometry {
         }
 
         return new Point2D.Double(
-                (int) (l1.x + (d * v1.x) / v1Length),
-                (int) (l1.y + (d * v1.y) / v1Length));
+            (int) (l1.x + (d * v1.x) / v1Length),
+            (int) (l1.y + (d * v1.y) / v1Length));
     }
 
     /**
@@ -286,8 +288,8 @@ public class Geometry {
 
     public static void toRange(Point2D pos, float x1, float y1, float x2, float y2) {
         pos.setLocation(
-                FastMath.toRange(x1, x2, pos.getX()),
-                FastMath.toRange(y1, y2, pos.getY())
+            FastMath.toRange(x1, x2, pos.getX()),
+            FastMath.toRange(y1, y2, pos.getY())
         );
     }
 }
