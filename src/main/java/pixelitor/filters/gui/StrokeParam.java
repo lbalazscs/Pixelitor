@@ -59,8 +59,8 @@ public class StrokeParam extends AbstractFilterParam {
 
         strokeTypeParam.setupDisableOtherIf(dashedParam,
             strokeType -> strokeType != BASIC
-                && strokeType != ZIGZAG
-                && strokeType != SHAPE);
+                          && strokeType != ZIGZAG
+                          && strokeType != SHAPE);
     }
 
     @Override
@@ -143,10 +143,10 @@ public class StrokeParam extends AbstractFilterParam {
         }
 
         return getStrokeType().createStroke(
-                strokeWidth,
-                strokeCapParam.getSelected().getValue(),
-                strokeJoinParam.getSelected().getValue(),
-                dashFloats);
+            strokeWidth,
+            strokeCapParam.getSelected().getValue(),
+            strokeJoinParam.getSelected().getValue(),
+            dashFloats);
     }
 
     @Override
