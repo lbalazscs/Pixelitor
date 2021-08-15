@@ -25,7 +25,11 @@ public abstract class SmoothPathParticle extends Particle {
     public void flush() {
         if (isPathReady()) {
             g2.setColor(color);
-            g2.draw(getPath());
+            try {
+                g2.draw(getPath());
+            } catch (NullPointerException e) {
+                System.out.println("SmoothPathParticle::flush: color = " + color + ", alpha = " + color.getAlpha());
+            }
         }
         pathPoints.clear();
     }
@@ -35,6 +39,6 @@ public abstract class SmoothPathParticle extends Particle {
     }
 
     private Shape getPath() {
-        return Shapes.smoothConnect(pathPoints);
+        return Shapes.smoothConnect(pathPoints, 0.5f);
     }
 }
