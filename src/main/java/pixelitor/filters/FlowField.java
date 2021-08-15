@@ -144,10 +144,10 @@ public class FlowField extends ParametrizedFilter {
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final RangeParam iterationsParam = new RangeParam("Path Length (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
-    private final BooleanParam antialiasParam = new BooleanParam("Use Antialiasing", false);
 
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
+    private final BooleanParam antialiasParam = new BooleanParam("Use Antialiasing", false);
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
     private final IntChoiceParam initialColorsParam = new IntChoiceParam("Initialize colors,", new IntChoiceParam.Item[]{
@@ -176,7 +176,7 @@ public class FlowField extends ParametrizedFilter {
         DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
         noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
 
-        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, iterationsParam, antialiasParam);
+        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, iterationsParam);
 
         setParams(
 
@@ -185,6 +185,7 @@ public class FlowField extends ParametrizedFilter {
 
             particlesParam,
             strokeParam,
+            antialiasParam,
             backgroundColorParam,
             particleColorParam,
             initialColorsParam,
@@ -243,10 +244,10 @@ public class FlowField extends ParametrizedFilter {
         final ForceMode forceMode = forceModeParam.getSelected();
         final float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         final int iterationCount = iterationsParam.getValue() + 1;
-        final boolean antialias = antialiasParam.isChecked();
 
         final int particleCount = particlesParam.getValue();
         final Stroke stroke = strokeParam.createStroke();
+        final boolean antialias = antialiasParam.isChecked();
         final Color bgColor = backgroundColorParam.getColor();
         final Color particleColor = particleColorParam.getColor();
         final int colorSource = initialColorsParam.getValue();
