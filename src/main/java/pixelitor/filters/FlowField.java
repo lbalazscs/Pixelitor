@@ -120,6 +120,12 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
+    private static final int COLOR_SOURCE_DEFAULT = 0;
+
+    private static final int COLOR_SOURCE_FROM_SOURCE_IMAGE = 1;
+
+    private static final int COLOR_SOURCE_FROM_ACCELERATION = 3;
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="GUI PARAM DEFINITIONS">
@@ -138,7 +144,11 @@ public class FlowField extends ParametrizedFilter {
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
-    private final BooleanParam useSourceImageAsInitialColorsParam = new BooleanParam("Initialize colors from source,", false, IGNORE_RANDOMIZE);
+    private final IntChoiceParam initialColorsParam = new IntChoiceParam("Initialize colors,", new IntChoiceParam.Item[]{
+        new IntChoiceParam.Item("Default", COLOR_SOURCE_DEFAULT),
+        new IntChoiceParam.Item("Source Image", COLOR_SOURCE_FROM_SOURCE_IMAGE),
+        new IntChoiceParam.Item("Acceleration", COLOR_SOURCE_FROM_ACCELERATION)
+    });
     private final BooleanParam useSourceImageAsStartingPositionParam = new BooleanParam("Start flow from source,", false, IGNORE_RANDOMIZE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam radiusRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 1000);
@@ -174,7 +184,7 @@ public class FlowField extends ParametrizedFilter {
             strokeParam,
             backgroundColorParam,
             particleColorParam,
-            useSourceImageAsInitialColorsParam,
+            initialColorsParam,
             useSourceImageAsStartingPositionParam,
             colorRandomnessParam,
             radiusRandomnessParam,
@@ -201,7 +211,7 @@ public class FlowField extends ParametrizedFilter {
             .setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
         particleColorParam
             .setToolTip("Change the initial color of the particles. Play with transparency to get interesting fills.");
-        useSourceImageAsInitialColorsParam
+        initialColorsParam
             .setToolTip("Make particles use the same color from their positions on the source image.");
         useSourceImageAsStartingPositionParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
@@ -232,7 +242,7 @@ public class FlowField extends ParametrizedFilter {
         final Stroke stroke = strokeParam.createStroke();
         final Color bgColor = backgroundColorParam.getColor();
         final Color particleColor = particleColorParam.getColor();
-        final boolean inheritColors = useSourceImageAsInitialColorsParam.isChecked();
+        final int colorSource = initialColorsParam.getValue();
         final boolean inheritSpawnPoints = useSourceImageAsStartingPositionParam.isChecked();
         final float colorRandomness = colorRandomnessParam.getPercentageValF();
         final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
@@ -271,7 +281,7 @@ public class FlowField extends ParametrizedFilter {
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         final Graphics2D g2 = dest.createGraphics();
-        final boolean useColorField = colorRandomness != 0 | inheritColors;
+        final boolean useColorField = colorRandomness != 0 | ((colorSource & 1) == 1);
         final boolean randomizeRadius = radiusRandomness != 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,21 +295,29 @@ public class FlowField extends ParametrizedFilter {
         final Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
         final int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
 
-        if (useColorField) {
-            GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
-            if (inheritColors) {
-                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(new Color(sourcePixels[toRange(0, sourcePixels.length, (x /= fieldDensity) + (y /= fieldDensity) * imgWidth)], true)));
-            } else {
-                fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
-            }
-        }
-
         if (randomizeRadius) {
             fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, radiusRandomness));
         }
 
         initializeAcceleration(multiplierNoise, multiplierSink, multiplierRevolve, zoom, turbulence, zFactor, fieldWidth, fieldHeight, noise, center, variantPI, initTheta, fieldAccelerations);
+
+        if (useColorField) {
+
+            GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
+
+            switch (colorSource) {
+
+                case COLOR_SOURCE_FROM_SOURCE_IMAGE -> fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+                    .next(colorFromSourceImage(x, y, imgWidth, sourcePixels, fieldDensity)));
+
+                case COLOR_SOURCE_FROM_ACCELERATION -> fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor.getAlpha() / 255f)));
+
+                default -> fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
+
+            }
+
+        }
 
         List<Point2D> spawns = null;
         if (inheritSpawnPoints) {
@@ -395,6 +413,26 @@ public class FlowField extends ParametrizedFilter {
                 array[i][j] = value.get(i, j);
             }
         }
+    }
+
+    public static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
+        x /= fieldDensity;
+        y /= fieldDensity;
+        int i = toRange(0, sourcePixels.length, x + y * imgWidth);
+        return new Color(sourcePixels[i], true);
+    }
+
+    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, float alpha) {
+        Vector2D d = fieldAccelerations[x][y];
+        return new Color(0, sigmoidFit(d.y), sigmoidFit(d.x), alpha);
+    }
+
+    public static float sigmoidFit(float v) {
+        return (1 + sigmoid(v)) / 2;
+    }
+
+    public static float sigmoid(float v) {
+        return (float) (1 / (1 + FastMath.exp(-v)));
     }
 
     public interface Coord2DFunction<T> {
