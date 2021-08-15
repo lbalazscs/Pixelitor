@@ -32,11 +32,7 @@ public abstract class SmoothPathParticle extends Particle {
         if (isPathReady()) {
             Graphics2D g2 = getGraphics();
             g2.setColor(color);
-            try {
-                g2.draw(getPath());
-            } catch (NullPointerException e) {
-                System.out.println("SmoothPathParticle::flush: color = " + color + ", alpha = " + color.getAlpha());
-            }
+            g2.draw(getPath());
         }
         pathPoints.clear();
     }

@@ -32,6 +32,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -287,6 +288,11 @@ public class FlowField extends ParametrizedFilter {
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         final Graphics2D g2 = dest.createGraphics();
+        final Graphics2D[] gc = new Graphics2D[groupCount];
+        for (int i = 0; i < groupCount; i++) {
+            gc[i] = (Graphics2D) g2.create();
+        }
+
         final boolean useColorField = colorRandomness != 0 | ((colorSource & 1) == 1);
         final boolean randomizeRadius = radiusRandomness != 0;
 
@@ -346,7 +352,7 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[
+            .setParticleCreator(() -> new FlowFieldParticle(gc, randomizeRadius ? strokes[
                 r.nextInt(strokes.length)] : stroke, meta))
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)
@@ -357,6 +363,9 @@ public class FlowField extends ParametrizedFilter {
         ThreadPool.waitFor(futures, pt);
         particleSystem.flush();
         pt.finished();
+        for (Graphics2D gcmn : gc) {
+            gcmn.dispose();
+        }
         g2.dispose();
 
         return dest;
@@ -537,8 +546,8 @@ public class FlowField extends ParametrizedFilter {
         private final Stroke stroke;
         private final FlowFieldMeta meta;
 
-        public FlowFieldParticle(Graphics2D g2, Stroke stroke, FlowFieldMeta meta) {
-            super(g2);
+        public FlowFieldParticle(Graphics2D[] gc, Stroke stroke, FlowFieldMeta meta) {
+            super(gc);
             this.vel = new Vector2D();
             this.pos = new Point2D.Float();
             this.las_pos = new Point2D.Float();
@@ -555,7 +564,7 @@ public class FlowField extends ParametrizedFilter {
 
         @Override
         public void flush() {
-            g2.setStroke(stroke);
+            getGraphics().setStroke(stroke);
             super.flush();
         }
 
@@ -612,6 +621,30 @@ public class FlowField extends ParametrizedFilter {
                                 double tolerance, float maximumVelocitySq, double zFactor, double zoom, int turbulence,
                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
                                 ForceMode forceMode) {
+    }
+
+    public static class GraphicsCollection {
+        private String[] names;
+        private Graphics[] graphics;
+
+        public GraphicsCollection(Graphics root) {
+            names = new String[]{Thread.currentThread().getName()};
+            graphics = new Graphics[]{root};
+        }
+
+        public Graphics get() {
+            String currentThreadName = Thread.currentThread().getName();
+            for (int i = 0; i < names.length; i++) {
+                if (names[i].equals(currentThreadName)) {
+                    return graphics[i];
+                }
+            }
+            names = Arrays.copyOf(names, names.length + 1);
+            graphics = Arrays.copyOf(graphics, graphics.length + 1);
+            names[names.length - 1] = currentThreadName;
+            return graphics[graphics.length - 1] = graphics[0].create();
+        }
+
     }
 
     //</editor-fold>
