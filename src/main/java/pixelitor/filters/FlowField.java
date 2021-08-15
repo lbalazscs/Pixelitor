@@ -120,11 +120,13 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private static final int COLOR_SOURCE_DEFAULT = 0;
+    private static final int COLOR_SOURCE_DEFAULT = colorSourceInt(0, false);
 
-    private static final int COLOR_SOURCE_FROM_SOURCE_IMAGE = 1;
+    private static final int COLOR_SOURCE_FROM_SOURCE_IMAGE = colorSourceInt(1, true);
 
-    private static final int COLOR_SOURCE_FROM_ACCELERATION = 3;
+    private static final int COLOR_SOURCE_FROM_ACCELERATION_1 = colorSourceInt(2, true);
+
+    private static final int COLOR_SOURCE_FROM_ACCELERATION_2 = colorSourceInt(3, true);
 
     //</editor-fold>
 
@@ -147,7 +149,8 @@ public class FlowField extends ParametrizedFilter {
     private final IntChoiceParam initialColorsParam = new IntChoiceParam("Initialize colors,", new IntChoiceParam.Item[]{
         new IntChoiceParam.Item("Default", COLOR_SOURCE_DEFAULT),
         new IntChoiceParam.Item("Source Image", COLOR_SOURCE_FROM_SOURCE_IMAGE),
-        new IntChoiceParam.Item("Acceleration", COLOR_SOURCE_FROM_ACCELERATION)
+        new IntChoiceParam.Item("Acceleration", COLOR_SOURCE_FROM_ACCELERATION_1),
+        new IntChoiceParam.Item("Acceleration 2", COLOR_SOURCE_FROM_ACCELERATION_2)
     });
     private final BooleanParam useSourceImageAsStartingPositionParam = new BooleanParam("Start flow from source,", false, IGNORE_RANDOMIZE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
@@ -305,16 +308,20 @@ public class FlowField extends ParametrizedFilter {
 
             GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
 
-            switch (colorSource) {
-
-                case COLOR_SOURCE_FROM_SOURCE_IMAGE -> fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+            if (colorSource == COLOR_SOURCE_FROM_SOURCE_IMAGE) {
+                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
                     .next(colorFromSourceImage(x, y, imgWidth, sourcePixels, fieldDensity)));
 
-                case COLOR_SOURCE_FROM_ACCELERATION -> fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+            } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_1) {
+                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
                     .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor.getAlpha() / 255f)));
 
-                default -> fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
+            } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_2) {
+                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
+                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor.getAlpha())));
 
+            } else {
+                fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
             }
 
         }
@@ -415,6 +422,14 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
+    public static int colorSourceInt(int index, boolean requiresColorField) {
+        index <<= 1;
+        if (requiresColorField) {
+            index |= 1;
+        }
+        return index;
+    }
+
     public static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
         x /= fieldDensity;
         y /= fieldDensity;
@@ -425,6 +440,13 @@ public class FlowField extends ParametrizedFilter {
     public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, float alpha) {
         Vector2D d = fieldAccelerations[x][y];
         return new Color(0, sigmoidFit(d.y), sigmoidFit(d.x), alpha);
+    }
+
+    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, int alpha) {
+        Vector2D d = fieldAccelerations[x][y];
+        int hsbColor = Color.HSBtoRGB(d.x / 50.0f + d.y / 50.0f, 0.8f, 1.0f);
+        hsbColor &= 0xffffff;
+        return new Color(hsbColor | (alpha << 24), true);
     }
 
     public static float sigmoidFit(float v) {
