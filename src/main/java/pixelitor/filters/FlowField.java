@@ -622,31 +622,7 @@ public class FlowField extends ParametrizedFilter {
                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
                                 ForceMode forceMode) {
     }
-
-    public static class GraphicsCollection {
-        private String[] names;
-        private Graphics[] graphics;
-
-        public GraphicsCollection(Graphics root) {
-            names = new String[]{Thread.currentThread().getName()};
-            graphics = new Graphics[]{root};
-        }
-
-        public Graphics get() {
-            String currentThreadName = Thread.currentThread().getName();
-            for (int i = 0; i < names.length; i++) {
-                if (names[i].equals(currentThreadName)) {
-                    return graphics[i];
-                }
-            }
-            names = Arrays.copyOf(names, names.length + 1);
-            graphics = Arrays.copyOf(graphics, graphics.length + 1);
-            names[names.length - 1] = currentThreadName;
-            return graphics[graphics.length - 1] = graphics[0].create();
-        }
-
-    }
-
+    
     //</editor-fold>
 
 }
