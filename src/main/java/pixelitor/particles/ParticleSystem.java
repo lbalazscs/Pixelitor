@@ -19,6 +19,7 @@ package pixelitor.particles;
 
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
+import pixelitor.filters.FlowField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,9 @@ public class ParticleSystem<P extends Particle> {
 
     public void step(int start, int end) {
         for (int i = start, s = FastMath.min(particles.size(), end); i < s; i++) {
-            stepParticle(i, particles.get(i));
+            P particle = particles.get(i);
+            particle.groupIndex = start / (end - start);
+            stepParticle(i, particle);
         }
     }
 
