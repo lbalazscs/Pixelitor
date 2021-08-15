@@ -317,11 +317,11 @@ public class FlowField extends ParametrizedFilter {
 
             } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_1) {
                 fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor, colorRandomness)));
+                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor.getAlpha() / 255f)));
 
             } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_2) {
                 fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor, colorRandomness)));
+                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor.getAlpha())));
 
             } else {
                 fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
@@ -440,18 +440,16 @@ public class FlowField extends ParametrizedFilter {
         return new Color(sourcePixels[i], true);
     }
 
-    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor, float colorRandomness) {
+    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, float alpha) {
         Vector2D d = fieldAccelerations[x][y];
-        Color newColor = new Color(0, sigmoidFit(d.y), sigmoidFit(d.x), particleColor.getAlpha() / 255f);
-        return Colors.rgbInterpolate(particleColor, newColor, colorRandomness);
+        return new Color(0, sigmoidFit(d.y), sigmoidFit(d.x), alpha);
     }
 
-    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor, float colorRandomness) {
+    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, int alpha) {
         Vector2D d = fieldAccelerations[x][y];
         int hsbColor = Color.HSBtoRGB(d.x / 50.0f + d.y / 50.0f, 0.8f, 1.0f);
         hsbColor &= 0xffffff;
-        Color newColor = new Color(hsbColor | (particleColor.getAlpha() << 24), true);
-        return Colors.rgbInterpolate(particleColor, newColor, colorRandomness);
+        return new Color(hsbColor | (alpha << 24), true);
     }
 
     public static float sigmoidFit(float v) {
