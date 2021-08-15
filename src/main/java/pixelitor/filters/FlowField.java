@@ -48,6 +48,8 @@ public class FlowField extends ParametrizedFilter {
 
     //<editor-fold defaultstate="collapsed" desc="PRIVATE STATIC FIELDS">
 
+    public static final boolean IS_MULTI_THREADED = true;
+
     private static final int PAD = 100;
 
     private static final int PARTICLES_PER_GROUP = 100;
@@ -281,7 +283,7 @@ public class FlowField extends ParametrizedFilter {
         float variantPI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        final int groupCount = ceilToInt(particleCount / (double) PARTICLES_PER_GROUP);
+        final int groupCount = IS_MULTI_THREADED ? ceilToInt(particleCount / (double) PARTICLES_PER_GROUP) : 1;
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         final Graphics2D g2 = dest.createGraphics();
@@ -344,8 +346,8 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[r
-                .nextInt(strokes.length)] : stroke, meta))
+            .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[
+                r.nextInt(strokes.length)] : stroke, meta))
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)
             .addUpdater(forceModeUpdater)
