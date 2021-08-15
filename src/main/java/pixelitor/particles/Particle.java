@@ -11,6 +11,7 @@ public abstract class Particle {
     public Vector2D vel;
     public Color color;
     public int iterationIndex;
+    public int groupIndex = -1;
 
     public abstract void flush();
 
