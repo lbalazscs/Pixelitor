@@ -24,7 +24,8 @@ import java.awt.geom.Point2D;
 
 public class Geometry {
     public static final double GOLDEN_RATIO = 1.61803398874989490253;
-    public static final float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
+
+    public static final double EPSILON = 0.0001;
 
     private Geometry() {
         // utility class
@@ -165,8 +166,16 @@ public class Geometry {
         deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
     }
 
-    public static void deScale(Point2D a, float factor) {
+    public static void normalizeIfNonzero(Point2D a) {
+        if (a.getX() == 0 && a.getY() == 0) {
+            return;
+        }
+        deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
+    }
+
+    public static Point2D deScale(Point2D a, float factor) {
         deScale(a, factor, a);
+        return a;
     }
 
     public static void deScale(Point2D a, float factor, Point2D r) {
@@ -182,9 +191,18 @@ public class Geometry {
         return r;
     }
 
+    public static Point2D setMagnitude(Point2D a, float factor) {
+        normalize(a);
+        scale(a, factor);
+        return a;
+    }
+
     public static boolean areEqual(Point2D a, Point2D b) {
-        // TODO: will using the epsilon method be any better??
         return Double.compare(a.getX(), b.getX()) == 0 && Double.compare(a.getY(), b.getY()) == 0;
+    }
+
+    public static boolean areEqualByEpsilon(Point2D a, Point2D b) {
+        return FastMath.abs(a.getX() - b.getX()) < EPSILON && FastMath.abs(a.getY() - b.getY()) < EPSILON;
     }
 
     public static void copy(Point2D a, Point2D b) {
@@ -193,6 +211,31 @@ public class Geometry {
 
     public static float distance(Point2D a, Point2D b) {
         return (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+    }
+
+    public static float distance(Point2D a) {
+        return (float) FastMath.hypot(a.getX(), a.getY());
+    }
+
+    public static float distanceSq(Point2D a) {
+        return (float) (a.getX() * a.getX() + a.getY() + a.getY());
+    }
+
+    public static Point2D add(Point2D a, float add) {
+        a.setLocation(a.getX() + add, a.getY() + add);
+        return a;
+    }
+
+    public static Point2D add(Point2D a, Point2D b) {
+        add(a, b, a);
+        return a;
+    }
+
+    public static Point2D add(Point2D... a) {
+        for (int i = 1; i < a.length; i++) {
+            add(a[0], a[i], a[0]);
+        }
+        return a[0];
     }
 
     public static Point2D add(Point2D a, Point2D b, Point2D r) {
@@ -241,5 +284,12 @@ public class Geometry {
      */
     public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, projectPointOnLine(line, p));
+    }
+
+    public static void toRange(Point2D pos, float x1, float y1, float x2, float y2) {
+        pos.setLocation(
+            FastMath.toRange(x1, x2, pos.getX()),
+            FastMath.toRange(y1, y2, pos.getY())
+        );
     }
 }

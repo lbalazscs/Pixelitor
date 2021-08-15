@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.colors.Colors;
+import pixelitor.particles.Modifier;
 import pixelitor.particles.Particle;
 import pixelitor.particles.ParticleSystem;
 
@@ -37,7 +38,7 @@ public class SmoothConnectTest extends JPanel {
 
     private final ParticleSystem<IndexedParticle> system;
     private final JCheckBox isClosed = new JCheckBox("Close shape");
-    private final JSlider smoothness = new JSlider(0, 1000, 100);
+    private final JSlider smoothness = new JSlider(-1000, 1000, 100);
     private final List<Point2D> pointList;
 
     public SmoothConnectTest() {
@@ -47,32 +48,17 @@ public class SmoothConnectTest extends JPanel {
 
         pointList = new ArrayList<>(particleCount);
 
-        system = new ParticleSystem<>(1, 5) {
-            @Override
-            protected IndexedParticle newParticle() {
-                IndexedParticle part = new IndexedParticle();
-                pointList.add(new Point2D.Float(part.x, part.y));
-                return part;
-            }
-
-            @Override
-            protected void initializeParticle(IndexedParticle particle) {
-//                particle.randomize();
-            }
-
-            @Override
-            protected boolean isParticleDead(IndexedParticle particle) {
-                return false;
-            }
-
-            @Override
-            protected void updateParticle(IndexedParticle particle) {
-                particle.update();
-                pointList.get(particle.index).setLocation(particle.x, particle.y);
-            }
-        };
+        system = ParticleSystem.<IndexedParticle>createSystem(particleCount)
+            .setParticleCreator(() -> {
+                IndexedParticle particle = new IndexedParticle();
+                pointList.add(particle.pos);
+                return particle;
+            })
+            .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, ReseedSupport.getLastSeedRandom()))
+            .build();
 
         //</editor-fold>
+
         add(isClosed);
         isClosed.setBackground(Color.WHITE);
         add(smoothness);
@@ -103,7 +89,7 @@ public class SmoothConnectTest extends JPanel {
         }
 
 //        Path2D path = Shapes.smoothConnect(points);
-        Path2D path = Shapes.smoothConnect(points, smoothness.getValue()/100f);
+        Path2D path = Shapes.smoothConnect(points, smoothness.getValue() / 100f);
 
         g2.setColor(Color.WHITE);
         g2.draw(path);
@@ -151,24 +137,40 @@ public class SmoothConnectTest extends JPanel {
         public int index;
 
         public IndexedParticle() {
+            pos = new Point2D.Float();
+            vel = new Vector2D();
             this.index = idx++;
-            randomize();
+            reset();
         }
 
+        @Override
+        public void flush() {
+
+        }
+
+        @Override
+        public void reset() {
+            double fact = (2 * Math.PI * Math.random());
+            vel.set((float) Math.cos(fact), (float) Math.sin(fact));
+        }
+
+        @Override
+        public boolean isDead() {
+            return false;
+        }
+
+        @Override
         public void update() {
-            x += vx;
-            y += vy;
-
-            if(x<0||x>size.width) vx*=-1;
-            if(y<0||y>size.height) vy*=-1;
-        }
-
-        public void randomize() {
-            float fact = (float) (2 * Math.PI * Math.random());
-            vx = (float) Math.cos(fact);
-            vy = (float) Math.sin(fact);
-            x = (float) (size.width*Math.random());
-            y = (float) (size.width*Math.random());
+            pos.setLocation(
+                pos.getX() + vel.x,
+                pos.getY() + vel.y
+            );
+            if (pos.getX() < 0 || pos.getX() > size.width) {
+                vel.set(vel.x * -1, vel.y);
+            }
+            if (pos.getY() < 0 || pos.getY() > size.height) {
+                vel.set(vel.x, vel.y * -1);
+            }
         }
 
     }

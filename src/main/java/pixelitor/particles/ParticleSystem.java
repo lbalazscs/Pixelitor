@@ -17,50 +17,133 @@
 
 package pixelitor.particles;
 
+import net.jafama.FastMath;
+import pixelitor.ThreadPool;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
-public abstract class ParticleSystem<P extends Particle> {
-    private final List<ParticleGroup<P>> groups;
+public class ParticleSystem<P extends Particle> {
 
-    protected ParticleSystem(int groupCount, int groupSize) {
-        this(groupCount, groupSize, -1);
+    private final List<P> particles;
+    private final List<Modifier<P>> modifiers;
+    private final List<Modifier<P>> updaters;
+    private final Supplier<P> supplier;
+
+    public static <P extends Particle> ParticleSystemBuilder<P> createSystem(int particles) {
+        return new ParticleSystemBuilder<>(particles);
     }
 
-    protected ParticleSystem(int groupCount, int groupSize, int particleCount) {
-        if (particleCount == -1) {
-            particleCount = groupCount * groupSize;
+    public ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> supplier) {
+        this.particles = new ArrayList<>(particleCount);
+        this.modifiers = modifiers;
+        this.updaters = updaters;
+        this.supplier = supplier;
+        for (int i = 0; i < particleCount; i++) {
+            P particle = newParticle();
+            initializeParticle(particle);
+            particles.add(particle);
         }
-        assert particleCount <= groupCount * groupSize : "Cant accommodate more particles than the groups can provided.";
-
-        groups = new ArrayList<>(groupCount);
-        for (int i = 0; i < groupCount - 1; i++) {
-            groups.add(new ParticleGroup<>(this, i, groupSize));
-        }
-        int lastGroupSize = particleCount - groupSize * (groupCount - 1);
-        assert lastGroupSize != 0 : "We have an extra group!";
-        groups.add(new ParticleGroup<>(this, groupCount - 1, lastGroupSize));
     }
 
     public void step() {
-        for (ParticleGroup<P> group : groups) {
-            group.step();
+        for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
+            stepParticle(i, particles.get(i));
         }
     }
 
-    public void step(int groupIndex) {
-        groups.get(groupIndex).step();
+    public void step(int start, int end) {
+        for (int i = start, s = FastMath.min(particles.size(), end); i < s; i++) {
+            stepParticle(i, particles.get(i));
+        }
     }
 
-    protected abstract P newParticle();
-
-    protected abstract void initializeParticle(P particle);
-
-    protected abstract boolean isParticleDead(P particle);
-
-    protected abstract void updateParticle(P particle);
-
-    public ParticleGroup<P> group(int groupIndex) {
-        return groups.get(groupIndex);
+    public void iterate(int iterations) {
+        for (int i = 0; i < iterations; i++) {
+            step();
+        }
     }
+
+    public void iterate(int iterations, int start, int end) {
+        for (int i = 0; i < iterations; i++) {
+            step(start, end);
+        }
+    }
+
+    public Future<?>[] iterate(int iterations, int groupCount) {
+
+        Future<?>[] futures = new Future[groupCount];
+        int s = particles.size();
+        int groupSize = (int) FastMath.ceil(s * 1d / groupCount);
+
+        for (int i_itr = 0, k = 0; i_itr < s; i_itr += groupSize, k++) {
+            final int i_fin = i_itr;
+            futures[k] = ThreadPool.submit(() -> iterate(iterations, i_fin, i_fin + groupSize));
+        }
+
+        return futures;
+    }
+
+    private void stepParticle(int iterationIndex, P particle) {
+        if (particle.isDead()) {
+            particle.flush();
+            initializeParticle(particle);
+        }
+        particle.iterationIndex = iterationIndex;
+        for (int i = 0, updatersSize = updaters.size(); i < updatersSize; i++) {
+            updaters.get(i).modify(particle);
+        }
+        particle.update();
+    }
+
+    public void flush() {
+        for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
+            particles.get(i).flush();
+        }
+    }
+
+    protected P newParticle() {
+        return supplier.get();
+    }
+
+    protected void initializeParticle(P particle) {
+        for (int i = 0, modifiersSize = modifiers.size(); i < modifiersSize; i++) {
+            modifiers.get(i).modify(particle);
+        }
+        particle.reset();
+    }
+
+    public static class ParticleSystemBuilder<P extends Particle> {
+        private final List<Modifier<P>> modifiers = new ArrayList<>();
+        private final List<Modifier<P>> updaters = new ArrayList<>();
+        private Supplier<P> supplier = () -> null;
+        private final int particles;
+
+        public ParticleSystemBuilder(int particles) {
+            this.particles = particles;
+        }
+
+        public ParticleSystemBuilder<P> setParticleCreator(Supplier<P> supplier) {
+            this.supplier = supplier;
+            return this;
+        }
+
+        public ParticleSystemBuilder<P> addModifier(Modifier<P> modifier) {
+            modifiers.add(modifier);
+            return this;
+        }
+
+        public ParticleSystemBuilder<P> addUpdater(Modifier<P> modifier) {
+            updaters.add(modifier);
+            return this;
+        }
+
+        public ParticleSystem<P> build() {
+            return new ParticleSystem<>(particles, modifiers, updaters, supplier);
+        }
+
+    }
+
 }
