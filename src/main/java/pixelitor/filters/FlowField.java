@@ -32,7 +32,6 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -146,7 +145,7 @@ public class FlowField extends ParametrizedFilter {
 
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
-    private final RangeParam iterationsParam = new RangeParam("Path Length (Makes simulation slow!!)", 1, 100, 5000, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam iterationsParam = new RangeParam("Path Length (Makes simulation slow!!)", 1, 100, 100, true, BORDER, IGNORE_RANDOMIZE);
 
     private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
@@ -389,10 +388,8 @@ public class FlowField extends ParametrizedFilter {
 
                 Forces.createRevolveForce(position, center, multiplierRevolve, forceDueToRevolution);
 
-                if (zFactor == 0) {
-                    Forces
-                        .createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom, position.y / zoom, 0, turbulence, noise, forceDueToNoise);
-                }
+                Forces.createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom,
+                    position.y / zoom, 0, turbulence, noise, forceDueToNoise);
 
                 fieldAccelerations[i][j] = Vector2D.add(forceDueToRevolution, forceDueToSink, forceDueToNoise);
             }
@@ -463,7 +460,7 @@ public class FlowField extends ParametrizedFilter {
 
     public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor) {
         Vector2D d = fieldAccelerations[x][y];
-        int hsbColor = Color.HSBtoRGB(d.x / 50.0f + d.y / 50.0f, 0.8f, 1.0f);
+        int hsbColor = Color.HSBtoRGB(d.x / 250.0f + d.y / 250.0f, 0.8f, 1.0f);
         int r = (hsbColor >> 16) & 0xFF;
         int g = (hsbColor >> 8) & 0xFF;
         int b = hsbColor & 0xFF;
