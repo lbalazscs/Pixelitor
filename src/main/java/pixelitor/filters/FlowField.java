@@ -32,7 +32,6 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -299,10 +298,6 @@ public class FlowField extends ParametrizedFilter {
         if (antialias) {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
-        final Graphics2D[] gc = new Graphics2D[groupCount];
-        for (int i = 0; i < groupCount; i++) {
-            gc[i] = (Graphics2D) g2.create();
-        }
 
         final Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
         final Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
@@ -351,7 +346,7 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(gc, randomizeRadius ? strokes[
+            .setParticleCreator(() -> new FlowFieldParticle(g2, randomizeRadius ? strokes[
                 r.nextInt(strokes.length)] : stroke, meta))
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)
@@ -362,9 +357,6 @@ public class FlowField extends ParametrizedFilter {
         ThreadPool.waitFor(futures, pt);
         particleSystem.flush();
         pt.finished();
-        for (Graphics2D gcmn : gc) {
-            gcmn.dispose();
-        }
         g2.dispose();
 
         return dest;
@@ -545,8 +537,8 @@ public class FlowField extends ParametrizedFilter {
         private final Stroke stroke;
         private final FlowFieldMeta meta;
 
-        public FlowFieldParticle(Graphics2D[] gc, Stroke stroke, FlowFieldMeta meta) {
-            super(gc);
+        public FlowFieldParticle(Graphics2D g2, Stroke stroke, FlowFieldMeta meta) {
+            super(g2);
             this.vel = new Vector2D();
             this.pos = new Point2D.Float();
             this.las_pos = new Point2D.Float();
@@ -563,7 +555,7 @@ public class FlowField extends ParametrizedFilter {
 
         @Override
         public void flush() {
-            getGraphics().setStroke(stroke);
+            g2.setStroke(stroke);
             super.flush();
         }
 
