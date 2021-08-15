@@ -288,11 +288,6 @@ public class FlowField extends ParametrizedFilter {
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         final Graphics2D g2 = dest.createGraphics();
-        final Graphics2D[] gc = new Graphics2D[groupCount];
-        for (int i = 0; i < groupCount; i++) {
-            gc[i] = (Graphics2D) g2.create();
-        }
-
         final boolean useColorField = colorRandomness != 0 | ((colorSource & 1) == 1);
         final boolean randomizeRadius = radiusRandomness != 0;
 
@@ -303,6 +298,10 @@ public class FlowField extends ParametrizedFilter {
         g2.setColor(particleColor);
         if (antialias) {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        final Graphics2D[] gc = new Graphics2D[groupCount];
+        for (int i = 0; i < groupCount; i++) {
+            gc[i] = (Graphics2D) g2.create();
         }
 
         final Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
@@ -622,7 +621,7 @@ public class FlowField extends ParametrizedFilter {
                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
                                 ForceMode forceMode) {
     }
-    
+
     //</editor-fold>
 
 }
