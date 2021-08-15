@@ -317,11 +317,11 @@ public class FlowField extends ParametrizedFilter {
 
             } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_1) {
                 fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor.getAlpha() / 255f)));
+                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor)));
 
             } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_2) {
                 fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor.getAlpha())));
+                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor)));
 
             } else {
                 fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
@@ -440,16 +440,28 @@ public class FlowField extends ParametrizedFilter {
         return new Color(sourcePixels[i], true);
     }
 
-    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, float alpha) {
+    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor) {
         Vector2D d = fieldAccelerations[x][y];
-        return new Color(0, sigmoidFit(d.y), sigmoidFit(d.x), alpha);
+        float ra = sigmoidFit(d.x) / 255, rb = sigmoidFit(d.y) / 255;
+        return new Color(
+            ra * particleColor.getRed(),
+            rb * particleColor.getGreen(),
+            ra * particleColor.getBlue(),
+            particleColor.getAlpha() / 255f);
     }
 
-    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, int alpha) {
+    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor) {
         Vector2D d = fieldAccelerations[x][y];
         int hsbColor = Color.HSBtoRGB(d.x / 50.0f + d.y / 50.0f, 0.8f, 1.0f);
-        hsbColor &= 0xffffff;
-        return new Color(hsbColor | (alpha << 24), true);
+        int r = (hsbColor >> 16) & 0xFF;
+        int g = (hsbColor >> 8) & 0xFF;
+        int b = hsbColor & 0xFF;
+        int a = particleColor.getAlpha();
+        return new Color(
+            r * particleColor.getRed() / 65025f,
+            g * particleColor.getGreen() / 65025f,
+            b * particleColor.getBlue() / 65025f,
+            a / 255f);
     }
 
     public static float sigmoidFit(float v) {
