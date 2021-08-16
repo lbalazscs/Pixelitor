@@ -122,13 +122,71 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private static final int COLOR_SOURCE_DEFAULT = colorSourceInt(0, false);
+    private enum ColorSource implements Modifier<FlowFieldParticle> {
+        DEFAULT("Default", false) {
+            @Override
+            Color getColor(FlowFieldParticle particle) {
+                return particle.startingColor;
+            }
+        },
+        SOURCE_IMAGE("Source Image", true) {
+            @Override
+            public void initializeColorField(FlowFieldMeta meta) {
+                fill(meta.fieldColors, meta.fieldWidth, meta.fieldHeight, (x, y) -> meta.goldenRatio
+                    .next(colorFromSourceImage(x, y, meta.imgWidth, meta.sourcePixels, meta.fieldDensity)));
+            }
 
-    private static final int COLOR_SOURCE_FROM_SOURCE_IMAGE = colorSourceInt(1, true);
+            @Override
+            Color getColor(FlowFieldParticle particle) {
+                return particle.meta.fieldColors[particle.getFieldX()][particle.getFieldY()];
+            }
+        },
+        RGB("RGB", false) {
+            @Override
+            Color getColor(FlowFieldParticle particle) {
+                return rgbColorFromAcceleration(particle.delta, particle.startingColor);
+            }
+        },
+        HSB_Cycle("HSB Cycle", false) {
+            @Override
+            Color getColor(FlowFieldParticle particle) {
+                return hsbColorFromAcceleration(particle.delta, particle.startingColor, 6);
+            }
+        },
+        Warm("Warm", false) {
+            @Override
+            Color getColor(FlowFieldParticle particle) {
+                return hsbColorFromAcceleration(particle.delta, particle.startingColor, 400);
+            }
+        };
 
-    private static final int COLOR_SOURCE_FROM_ACCELERATION_1 = colorSourceInt(2, true);
+        private final String name;
+        private final boolean requiresColorField;
 
-    private static final int COLOR_SOURCE_FROM_ACCELERATION_2 = colorSourceInt(3, true);
+        ColorSource(String name, boolean requiresColorField) {
+            this.name = name;
+            this.requiresColorField = requiresColorField;
+        }
+
+        public void initializeColorField(FlowFieldMeta meta) {
+        }
+
+        @Override
+        public void modify(FlowFieldParticle particle) {
+            particle.color = getColor(particle);
+        }
+
+        abstract Color getColor(FlowFieldParticle particle);
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public boolean requiresColorField() {
+            return requiresColorField;
+        }
+    }
 
     //</editor-fold>
 
@@ -152,12 +210,7 @@ public class FlowField extends ParametrizedFilter {
     private final BooleanParam antialiasParam = new BooleanParam("Use Antialiasing", false);
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
-    private final IntChoiceParam initialColorsParam = new IntChoiceParam("Initialize colors,", new IntChoiceParam.Item[]{
-        new IntChoiceParam.Item("Default", COLOR_SOURCE_DEFAULT),
-        new IntChoiceParam.Item("Source Image", COLOR_SOURCE_FROM_SOURCE_IMAGE),
-        new IntChoiceParam.Item("Acceleration", COLOR_SOURCE_FROM_ACCELERATION_1),
-        new IntChoiceParam.Item("Acceleration 2", COLOR_SOURCE_FROM_ACCELERATION_2)
-    });
+    private final EnumParam<ColorSource> initialColorsParam = new EnumParam<>("Initialize colors,", ColorSource.class);
     private final BooleanParam useSourceImageAsStartingPositionParam = new BooleanParam("Start flow from source,", false, IGNORE_RANDOMIZE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
     private final RangeParam radiusRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 1000);
@@ -252,7 +305,7 @@ public class FlowField extends ParametrizedFilter {
         final boolean antialias = antialiasParam.isChecked();
         final Color bgColor = backgroundColorParam.getColor();
         final Color particleColor = particleColorParam.getColor();
-        final int colorSource = initialColorsParam.getValue();
+        ColorSource colorSource = initialColorsParam.getSelected();
         final boolean inheritSpawnPoints = useSourceImageAsStartingPositionParam.isChecked();
         final float colorRandomness = colorRandomnessParam.getPercentageValF();
         final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
@@ -287,7 +340,7 @@ public class FlowField extends ParametrizedFilter {
         final var pt = new StatusBarProgressTracker(NAME, groupCount);
 
         final Graphics2D g2 = dest.createGraphics();
-        final boolean useColorField = colorRandomness != 0 | ((colorSource & 1) == 1);
+        final boolean useColorField = colorRandomness != 0 || colorSource.requiresColorField();
         final boolean randomizeRadius = radiusRandomness != 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,36 +367,25 @@ public class FlowField extends ParametrizedFilter {
 
         initializeAcceleration(multiplierNoise, multiplierSink, multiplierRevolve, zoom, turbulence, zFactor, fieldWidth, fieldHeight, noise, center, variantPI, initTheta, fieldAccelerations);
 
-        if (useColorField) {
-
-            GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
-
-            if (colorSource == COLOR_SOURCE_FROM_SOURCE_IMAGE) {
-                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromSourceImage(x, y, imgWidth, sourcePixels, fieldDensity)));
-
-            } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_1) {
-                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration(x, y, fieldAccelerations, particleColor)));
-
-            } else if (colorSource == COLOR_SOURCE_FROM_ACCELERATION_2) {
-                fill(fieldColors, fieldWidth, fieldHeight, (x, y) -> goldenRatio
-                    .next(colorFromAcceleration2(x, y, fieldAccelerations, particleColor)));
-
-            } else {
-                fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
-            }
-
-        }
-
         List<Point2D> spawns = null;
         if (inheritSpawnPoints) {
             spawns = initializeSpawnPoints(imgWidth, fieldDensity, sourcePixels);
         }
 
-        //</editor-fold>
+        GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
+        final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
 
-        final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode);
+        if (useColorField) {
+            if (colorRandomness != 0) {
+                fill(fieldColors, fieldWidth, fieldHeight, goldenRatio::next);
+            }
+
+            if (colorSource.requiresColorField) {
+                colorSource.initializeColorField(meta);
+            }
+        }
+
+        //</editor-fold>
 
         PositionRandomizer positionRandomizer = new PositionRandomizer(bounds.x, bounds.y, bounds.width, bounds.height, spawns, r);
         ParticleInitializer particleInitializer = new ParticleInitializer(particleColor, useColorField, fieldColors);
@@ -355,6 +397,7 @@ public class FlowField extends ParametrizedFilter {
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)
             .addUpdater(forceModeUpdater)
+            .addUpdater(colorSource)
             .build();
 
         final Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount);
@@ -448,9 +491,8 @@ public class FlowField extends ParametrizedFilter {
         return new Color(sourcePixels[i], true);
     }
 
-    public static Color colorFromAcceleration(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor) {
-        Vector2D d = fieldAccelerations[x][y];
-        float ra = sigmoidFit(d.x) / 255, rb = sigmoidFit(d.y) / 255;
+    public static Color rgbColorFromAcceleration(Vector2D acc, Color particleColor) {
+        float ra = sigmoidFit(acc.x) / 255, rb = sigmoidFit(acc.y) / 255;
         return new Color(
             ra * particleColor.getRed(),
             rb * particleColor.getGreen(),
@@ -458,9 +500,8 @@ public class FlowField extends ParametrizedFilter {
             particleColor.getAlpha() / 255f);
     }
 
-    public static Color colorFromAcceleration2(int x, int y, Vector2D[][] fieldAccelerations, Color particleColor) {
-        Vector2D d = fieldAccelerations[x][y];
-        int hsbColor = Color.HSBtoRGB(d.x / 250.0f + d.y / 250.0f, 0.8f, 1.0f);
+    public static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float dividend) {
+        int hsbColor = Color.HSBtoRGB((acc.x + acc.y) / dividend, 0.8f, 1.0f);
         int r = (hsbColor >> 16) & 0xFF;
         int g = (hsbColor >> 8) & 0xFF;
         int b = hsbColor & 0xFF;
@@ -516,7 +557,7 @@ public class FlowField extends ParametrizedFilter {
             particle.addPoint(particle.pos);
             int fieldX = particle.getFieldX();
             int fieldY = particle.getFieldY();
-            particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
+            particle.startingColor = particle.color = randomizeColor ? fieldColors[fieldX][fieldY] : particleColor;
         }
     }
 
@@ -538,6 +579,7 @@ public class FlowField extends ParametrizedFilter {
 
         public final Vector2D delta = new Vector2D();
         public final Vector2D acc = new Vector2D();
+        public Color startingColor;
 
         private final Stroke stroke;
         private final FlowFieldMeta meta;
@@ -613,10 +655,12 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
-                                double tolerance, float maximumVelocitySq, double zFactor, double zoom, int turbulence,
+    public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds, double tolerance,
+                                float maximumVelocitySq, double zFactor, double zoom, int turbulence,
                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
-                                ForceMode forceMode) {
+                                ForceMode forceMode, GoldenRatio goldenRatio,
+                                Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
+
     }
 
     //</editor-fold>
