@@ -17,6 +17,9 @@
 
 package pixelitor.filters.levels;
 
+import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.lookup.LuminanceLookup;
+
 import java.awt.Color;
 
 import static java.awt.Color.BLACK;
@@ -38,6 +41,11 @@ public enum Channel {
         public Color getLightColor() {
             return WHITE;
         }
+
+        @Override
+        public double getValue(int r, int g, int b) {
+            return LuminanceLookup.from(r, g, b);
+        }
     }, RED(i18n("red"), "red", Color.RED) {
         @Override
         public Color getDarkColor() {
@@ -47,6 +55,11 @@ public enum Channel {
         @Override
         public Color getLightColor() {
             return LIGHT_PINK;
+        }
+
+        @Override
+        public double getValue(int r, int g, int b) {
+            return r;
         }
     }, GREEN(i18n("green"), "green", Color.GREEN) {
         @Override
@@ -58,6 +71,11 @@ public enum Channel {
         public Color getLightColor() {
             return LIGHT_GREEN;
         }
+
+        @Override
+        public double getValue(int r, int g, int b) {
+            return g;
+        }
     }, BLUE(i18n("blue"), "blue", Color.BLUE) {
         @Override
         public Color getDarkColor() {
@@ -67,6 +85,11 @@ public enum Channel {
         @Override
         public Color getLightColor() {
             return LIGHT_BLUE;
+        }
+
+        @Override
+        public double getValue(int r, int g, int b) {
+            return b;
         }
     };
 
@@ -98,6 +121,8 @@ public enum Channel {
         return active ? color : inactiveColor;
     }
 
+    public abstract double getValue(int r, int g, int b);
+
     public String getName() {
         return name;
     }
@@ -109,5 +134,9 @@ public enum Channel {
     @Override
     public String toString() {
         return name;
+    }
+
+    public static EnumParam<Channel> asParam() {
+        return new EnumParam<>("Channel", Channel.class);
     }
 }
