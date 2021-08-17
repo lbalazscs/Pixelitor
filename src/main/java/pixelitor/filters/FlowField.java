@@ -48,19 +48,19 @@ public class FlowField extends ParametrizedFilter {
 
     //<editor-fold defaultstate="collapsed" desc="PRIVATE STATIC FIELDS">
 
-    public static final boolean IS_MULTI_THREADED = true;
+    private static final boolean IS_MULTI_THREADED = true;
 
     private static final int PAD = 100;
 
     private static final int PARTICLES_PER_GROUP = 100;
 
-    private static final float QUALITY = .8f;
+    private static final float QUALITY = 0.8f;
 
     private static final float SMOOTHNESS = 1224.3649f;
 
     private static final float LIMITING_ITERATIONS = 100;
 
-    private static final float FORCE_MAGNITUDE = (float) pow(10f, 330 / 100f) / 100f;
+    private static final float FORCE_MAGNITUDE = (float) pow(10.0f, 330 / 100.0f) / 100.0f;
 
     private static final int TOLERANCE = 30;
 
@@ -102,7 +102,7 @@ public class FlowField extends ParametrizedFilter {
         FORCE_MODE_VELOCITY_AND_NOISE_BASED_RANDOMNESS("Thicken") {
             @Override
             public void modify(FlowFieldParticle particle) {
-                particle.delta.add(Noise.noise2(particle.delta.x, particle.delta.y) * 10);
+                particle.delta.add(Noise.noise2((float) particle.delta.x, (float) particle.delta.y) * 10);
                 particle.pos.setLocation(
                     particle.pos.getX() + particle.delta.x,
                     particle.pos.getY() + particle.delta.y
@@ -291,57 +291,57 @@ public class FlowField extends ParametrizedFilter {
 
         //<editor-fold defaultstate="collapsed" desc="FINAL LOCAL VARIABLES DECLARATIONS">
 
-        final float zoom = zoomParam.getValue() * 0.25f;
-        final float variance = varianceParam.getValue() / 10.0f;
-        final int turbulence = turbulenceParam.getValue();
-        final float zFactor = windParam.getValueAsFloat() / 10000;
+        float zoom = zoomParam.getValue() * 0.25f;
+        float variance = varianceParam.getValue() / 10.0f;
+        int turbulence = turbulenceParam.getValue();
+        float zFactor = windParam.getValueAsFloat() / 10000;
 
-        final ForceMode forceMode = forceModeParam.getSelected();
-        final float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
-        final int iterationCount = iterationsParam.getValue() + 1;
+        ForceMode forceMode = forceModeParam.getSelected();
+        float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
+        int iterationCount = iterationsParam.getValue() + 1;
 
-        final int particleCount = particlesParam.getValue();
-        final Stroke stroke = strokeParam.createStroke();
-        final boolean antialias = antialiasParam.isChecked();
-        final Color bgColor = backgroundColorParam.getColor();
-        final Color particleColor = particleColorParam.getColor();
+        int particleCount = particlesParam.getValue();
+        Stroke stroke = strokeParam.createStroke();
+        boolean antialias = antialiasParam.isChecked();
+        Color bgColor = backgroundColorParam.getColor();
+        Color particleColor = particleColorParam.getColor();
         ColorSource colorSource = initialColorsParam.getSelected();
-        final boolean inheritSpawnPoints = useSourceImageAsStartingPositionParam.isChecked();
-        final float colorRandomness = colorRandomnessParam.getPercentageValF();
-        final float radiusRandomness = radiusRandomnessParam.getPercentageValF();
+        boolean inheritSpawnPoints = useSourceImageAsStartingPositionParam.isChecked();
+        float colorRandomness = colorRandomnessParam.getPercentageValF();
+        float radiusRandomness = radiusRandomnessParam.getPercentageValF();
 
-        final float quality = min(QUALITY, SMOOTHNESS / zoom);
-        final int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
-        final float force = min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
+        float quality = min(QUALITY, SMOOTHNESS / zoom);
+        int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
+        float force = min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
 
-        final float multiplierNoise = noiseParam.getPercentageValF() * force;
-        final float multiplierSink = sinkParam.getPercentageValF() * force;
-        final float multiplierRevolve = revolveParam.getPercentageValF() * force;
+        float multiplierNoise = noiseParam.getPercentageValF() * force;
+        float multiplierSink = sinkParam.getPercentageValF() * force;
+        float multiplierRevolve = revolveParam.getPercentageValF() * force;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        final int imgWidth = dest.getWidth();
-        final int imgHeight = dest.getHeight();
+        int imgWidth = dest.getWidth();
+        int imgHeight = dest.getHeight();
 
-        final int fieldWidth = (int) (imgWidth * quality + 1);
-        final float fieldDensity = fieldWidth * 1.0f / imgWidth;
-        final int fieldHeight = (int) (imgHeight * fieldDensity);
+        int fieldWidth = (int) (imgWidth * quality + 1);
+        float fieldDensity = fieldWidth * 1.0f / imgWidth;
+        int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        final Random r = ReseedSupport.getLastSeedRandom();
-        final OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
+        Random r = ReseedSupport.getLastSeedRandom();
+        OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
 
-        final Vector2D center = new Vector2D(fieldWidth / 2f, fieldHeight / 2f);
-        final Rectangle bounds = new Rectangle(-PAD, -PAD,
+        Vector2D center = new Vector2D(fieldWidth / 2.0f, fieldHeight / 2.0f);
+        Rectangle bounds = new Rectangle(-PAD, -PAD,
             fieldWidth + PAD * 2, fieldHeight + PAD * 2);
         float variantPI = (float) FastMath.PI * variance;
         float initTheta = (float) (r.nextFloat() * 2 * FastMath.PI);
 
-        final int groupCount = IS_MULTI_THREADED ? ceilToInt(particleCount / (double) PARTICLES_PER_GROUP) : 1;
-        final var pt = new StatusBarProgressTracker(NAME, groupCount);
+        int groupCount = IS_MULTI_THREADED ? ceilToInt(particleCount / (double) PARTICLES_PER_GROUP) : 1;
+        var pt = new StatusBarProgressTracker(NAME, groupCount);
 
-        final Graphics2D g2 = dest.createGraphics();
-        final boolean useColorField = colorRandomness != 0 || colorSource.requiresColorField();
-        final boolean randomizeRadius = radiusRandomness != 0;
+        Graphics2D g2 = dest.createGraphics();
+        boolean useColorField = colorRandomness != 0 || colorSource.requiresColorField();
+        boolean randomizeRadius = radiusRandomness != 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -351,15 +351,15 @@ public class FlowField extends ParametrizedFilter {
         if (antialias) {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
-        final Graphics2D[] gc = new Graphics2D[groupCount];
+        Graphics2D[] graphicsCopies = new Graphics2D[groupCount];
         for (int i = 0; i < groupCount; i++) {
-            gc[i] = (Graphics2D) g2.create();
+            graphicsCopies[i] = (Graphics2D) g2.create();
         }
 
-        final Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
-        final Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
-        final Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
-        final int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
+        Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
+        Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
+        Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
+        int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
 
         if (randomizeRadius) {
             fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, radiusRandomness));
@@ -373,7 +373,7 @@ public class FlowField extends ParametrizedFilter {
         }
 
         GoldenRatio goldenRatio = new GoldenRatio(r, particleColor, colorRandomness);
-        final FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
+        FlowFieldMeta meta = new FlowFieldMeta(fieldWidth - 1, fieldHeight - 1, fieldDensity, bounds, tolerance, maximumVelocitySq, zFactor, zoom, turbulence, noise, multiplierNoise, initTheta, variantPI, forceMode, goldenRatio, fieldColors, imgWidth, sourcePixels);
 
         if (useColorField) {
             if (colorRandomness != 0) {
@@ -392,7 +392,7 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(gc, randomizeRadius ? strokes[
+            .setParticleCreator(() -> new FlowFieldParticle(graphicsCopies, randomizeRadius ? strokes[
                 r.nextInt(strokes.length)] : stroke, meta))
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)
@@ -400,11 +400,11 @@ public class FlowField extends ParametrizedFilter {
             .addUpdater(colorSource)
             .build();
 
-        final Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount);
+        Future<?>[] futures = particleSystem.iterate(iterationCount, groupCount);
         ThreadPool.waitFor(futures, pt);
         particleSystem.flush();
         pt.finished();
-        for (Graphics2D gcmn : gc) {
+        for (Graphics2D gcmn : graphicsCopies) {
             gcmn.dispose();
         }
         g2.dispose();
@@ -416,7 +416,7 @@ public class FlowField extends ParametrizedFilter {
 
     //<editor-fold defaultstate="collapsed" desc="UTILITIES TO MAKE STUFF A BIT MORE READABLE">
 
-    private void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, float zFactor, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variantPI, float initTheta, Vector2D[][] fieldAccelerations) {
+    private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, float zFactor, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variantPI, float initTheta, Vector2D[][] fieldAccelerations) {
         Vector2D position = new Vector2D();
         Vector2D forceDueToNoise = new Vector2D();
         Vector2D forceDueToSink = new Vector2D();
@@ -439,7 +439,7 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private List<Point2D> initializeSpawnPoints(int imgWidth, float fieldDensity, int[] sourcePixels) {
+    private static List<Point2D> initializeSpawnPoints(int imgWidth, float fieldDensity, int[] sourcePixels) {
         List<Point2D> spawns = new ArrayList<>();
         for (int i = 0; i < sourcePixels.length; i++) {
             if ((sourcePixels[i] & 0xFF000000) != 0) {
@@ -451,7 +451,7 @@ public class FlowField extends ParametrizedFilter {
         return spawns;
     }
 
-    public static <T> T getIf(boolean value, Supplier<T> supplier) {
+    private static <T> T getIf(boolean value, Supplier<T> supplier) {
         if (value) {
             return supplier.get();
         }
@@ -476,49 +476,41 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    public static int colorSourceInt(int index, boolean requiresColorField) {
-        index <<= 1;
-        if (requiresColorField) {
-            index |= 1;
-        }
-        return index;
-    }
-
-    public static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
+    private static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
         x /= fieldDensity;
         y /= fieldDensity;
         int i = toRange(0, sourcePixels.length, x + y * imgWidth);
         return new Color(sourcePixels[i], true);
     }
 
-    public static Color rgbColorFromAcceleration(Vector2D acc, Color particleColor) {
-        float ra = sigmoidFit(acc.x) / 255, rb = sigmoidFit(acc.y) / 255;
+    private static Color rgbColorFromAcceleration(Vector2D acc, Color particleColor) {
+        double ra = sigmoidFit(acc.x) / 255, rb = sigmoidFit(acc.y) / 255;
         return new Color(
-            ra * particleColor.getRed(),
-            rb * particleColor.getGreen(),
-            ra * particleColor.getBlue(),
-            particleColor.getAlpha() / 255f);
+            (float) ra * particleColor.getRed(),
+            (float) rb * particleColor.getGreen(),
+            (float) ra * particleColor.getBlue(),
+            (float) particleColor.getAlpha() / 255.0f);
     }
 
-    public static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float dividend) {
-        int hsbColor = Color.HSBtoRGB((acc.x + acc.y) / dividend, 0.8f, 1.0f);
+    private static Color hsbColorFromAcceleration(Vector2D acc, Color particleColor, float dividend) {
+        int hsbColor = Color.HSBtoRGB((float) (acc.x + acc.y) / dividend, 0.8f, 1.0f);
         int r = (hsbColor >> 16) & 0xFF;
         int g = (hsbColor >> 8) & 0xFF;
         int b = hsbColor & 0xFF;
         int a = particleColor.getAlpha();
         return new Color(
-            r * particleColor.getRed() / 65025f,
-            g * particleColor.getGreen() / 65025f,
-            b * particleColor.getBlue() / 65025f,
-            a / 255f);
+            r * particleColor.getRed() / 65025.0f,
+            g * particleColor.getGreen() / 65025.0f,
+            b * particleColor.getBlue() / 65025.0f,
+            a / 255.0f);
     }
 
-    public static float sigmoidFit(float v) {
+    private static double sigmoidFit(double v) {
         return (1 + sigmoid(v)) / 2;
     }
 
-    public static float sigmoid(float v) {
-        return (float) (1 / (1 + FastMath.exp(-v)));
+    private static double sigmoid(double v) {
+        return 1 / (1 + FastMath.exp(-v));
     }
 
     public interface Coord2DFunction<T> {
@@ -655,11 +647,12 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds, double tolerance,
-                                float maximumVelocitySq, double zFactor, double zoom, int turbulence,
-                                OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
-                                ForceMode forceMode, GoldenRatio goldenRatio,
-                                Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
+    private record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
+                                 double tolerance,
+                                 float maximumVelocitySq, double zFactor, double zoom, int turbulence,
+                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
+                                 ForceMode forceMode, GoldenRatio goldenRatio,
+                                 Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
 
     }
 

@@ -17,11 +17,9 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.AppContext;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.VoronoiFilter;
 import pixelitor.utils.Metric;
 import pixelitor.utils.ReseedSupport;
@@ -36,15 +34,16 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class Voronoi extends ParametrizedFilter {
     public static final String NAME = "Voronoi Diagram";
 
-    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 100, 2021);
-    private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
+    private final RangeParam distance = new RangeParam("Distance between Points", 10, 20, 400);
+    private final EnumParam<Metric> metric = new EnumParam<>("Distance", Metric.class);
     private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
-    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
+    private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", true, IGNORE_RANDOMIZE);
     private final IntChoiceParam antiAliasing = new IntChoiceParam("Anti-aliasing", new Item[]{
         new Item("None (Faster)", 0),
         new Item("2x2 (Better, slower)", 2),
         new Item("4x4 (Best, slowest)", 4),
     }, IGNORE_RANDOMIZE);
+    private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
 
     private VoronoiFilter filter;
 
@@ -52,12 +51,16 @@ public class Voronoi extends ParametrizedFilter {
         super(false);
 
         setParams(
-            numberOfPoints,
             distance,
+            metric,
             showPoints,
             useImageColors,
             antiAliasing
         ).withAction(ReseedSupport.createAction());
+
+        if (AppContext.isDevelopment()) {
+            paramSet.addParams(new FilterParam[]{debugGrid});
+        }
 
         helpURL = "https://en.wikipedia.org/wiki/Voronoi_diagram";
     }
@@ -68,8 +71,8 @@ public class Voronoi extends ParametrizedFilter {
             filter = new VoronoiFilter(NAME);
         }
 
-        filter.setNumPoints(numberOfPoints.getValue());
-        filter.setMetric(distance.getSelected());
+        filter.setDistanceBetweenPoints(distance.getValueAsDouble());
+        filter.setMetric(metric.getSelected());
         filter.setUseImageColors(useImageColors.isChecked());
 
         dest = filter.filter(src, dest);
@@ -84,7 +87,7 @@ public class Voronoi extends ParametrizedFilter {
             filter.showPoints(dest);
         }
 
-        if (false) {
+        if (debugGrid.isChecked()) {
             filter.debugGrid(dest);
         }
 
