@@ -45,7 +45,7 @@ public class MirrorFilter extends CenteredTransformFilter {
         if ((FastMath.abs(angle) % PI2) < PI4) {
 
             // y = mx + c    m-> slope
-            double slope = FastMath.tan(angle);
+            double slope = FastMath.tan(-angle);
 
             a = slope;
             b = 1;
@@ -53,7 +53,7 @@ public class MirrorFilter extends CenteredTransformFilter {
         } else {
 
             // y = mx + c    1/m-> oneBySlope
-            double oneBySlope = FastMath.tan(PI2 - angle);
+            double oneBySlope = FastMath.tan(PI2 + angle);
 
             a = 1;
             b = oneBySlope;
@@ -67,8 +67,8 @@ public class MirrorFilter extends CenteredTransformFilter {
         aa_bb = a * a + b * b;
 
         // Just a point (cx, cy-1) rotated about (cx, cy)
-        double gx = -FastMath.sin(-angle) + cx;
-        double gy = FastMath.cos(-angle) + cy;
+        double gx = -FastMath.sin(angle) + cx;
+        double gy = FastMath.cos(angle) + cy;
         base_put = FastMath.signum(a * gx + b * gy + c);
 
     }
