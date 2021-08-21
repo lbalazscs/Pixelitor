@@ -17,6 +17,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.TransformFilter;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -31,16 +32,9 @@ import java.awt.image.BufferedImage;
 public class Mirror extends ParametrizedFilter {
     public static final String NAME = GUIText.MIRROR;
 
-    //    private final AngleParam angle = new AngleParam("Angle", 0);
+    private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
-
-    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
-        new Item("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
-        new Item("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
-        new Item("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),
-        new Item("Top Over Bottom", MirrorFilter.TOP_OVER_BOTTOM),
-    });
 
     private MirrorFilter filter;
 
@@ -48,9 +42,8 @@ public class Mirror extends ParametrizedFilter {
         super(true);
 
         setParams(
-            type,
             center,
-//                angle,
+            angle,
             edgeAction
         );
     }
@@ -61,10 +54,10 @@ public class Mirror extends ParametrizedFilter {
             filter = new MirrorFilter();
         }
 
-        filter.setType(type.getValue());
         filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR);
+        filter.setAngle(angle.getValueInRadians());
 
         return filter.filter(src, dest);
     }
