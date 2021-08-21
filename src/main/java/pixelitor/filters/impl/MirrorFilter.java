@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,8 @@ import pixelitor.filters.Mirror;
  * The implementation of the {@link Mirror} filter.
  */
 public class MirrorFilter extends CenteredTransformFilter {
-
-    private static float PI4 = (float) (FastMath.PI / 4);
-    private static float PI2 = (float) (FastMath.PI / 2);
+    private static final float QUARTER_PI = (float) (Math.PI / 4);
+    private static final float HALF_PI = (float) (Math.PI / 2);
 
     // ax + by + c = 0
     private double a;
@@ -33,7 +32,8 @@ public class MirrorFilter extends CenteredTransformFilter {
     private double c;
     // a² + b²
     private double aa_bb;
-    // for a point present at an angle from cx, cy, this variable is the result if we put that point to the line above.
+    // for a point present at an angle from cx, cy, this variable is
+    // the result if we put that point to the line above.
     private double base_put;
 
     public MirrorFilter() {
@@ -41,23 +41,18 @@ public class MirrorFilter extends CenteredTransformFilter {
     }
 
     public void setAngle(double angle) {
-
-        if ((FastMath.abs(angle) % PI2) < PI4) {
-
+        if ((Math.abs(angle) % HALF_PI) < QUARTER_PI) {
             // y = mx + c    m-> slope
             double slope = FastMath.tan(-angle);
 
             a = slope;
             b = 1;
-
         } else {
-
             // y = mx + c    1/m-> oneBySlope
-            double oneBySlope = FastMath.tan(PI2 + angle);
+            double oneBySlope = FastMath.tan(HALF_PI + angle);
 
             a = 1;
             b = oneBySlope;
-
         }
 
         // for a line `a*x + b*y + c = 0` which satisfies (cx, cy)
@@ -70,13 +65,10 @@ public class MirrorFilter extends CenteredTransformFilter {
         double gx = -FastMath.sin(angle) + cx;
         double gy = FastMath.cos(angle) + cy;
         base_put = FastMath.signum(a * gx + b * gy + c);
-
     }
-
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-
         // x₂-x₁     y₂-y₁     -2 * (a*x₁ + b*y₁ + c)
         // -----  =  -----  =  ----------------------
         //   a         b               a² + b²
@@ -97,6 +89,5 @@ public class MirrorFilter extends CenteredTransformFilter {
 
         // y₂ = y₁ + b * rhs
         out[1] = (float) (y + b * rhs);
-
     }
 }

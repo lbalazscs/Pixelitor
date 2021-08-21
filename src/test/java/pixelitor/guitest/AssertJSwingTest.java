@@ -1748,7 +1748,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Oil Painting", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Random Spheres", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Spheres", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Smear", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Emboss", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Orton Effect", Randomize.YES, Reseed.NO, ShowOriginal.YES);

@@ -19,7 +19,6 @@ package pixelitor.particles;
 
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
-import pixelitor.filters.FlowField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 public class ParticleSystem<P extends Particle> {
-
     private final List<P> particles;
     private final List<Modifier<P>> modifiers;
     private final List<Modifier<P>> updaters;
@@ -37,7 +35,7 @@ public class ParticleSystem<P extends Particle> {
         return new ParticleSystemBuilder<>(particles);
     }
 
-    public ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> supplier) {
+    private ParticleSystem(int particleCount, List<Modifier<P>> modifiers, List<Modifier<P>> updaters, Supplier<P> supplier) {
         this.particles = new ArrayList<>(particleCount);
         this.modifiers = modifiers;
         this.updaters = updaters;
@@ -76,14 +74,13 @@ public class ParticleSystem<P extends Particle> {
     }
 
     public Future<?>[] iterate(int iterations, int groupCount) {
-
         Future<?>[] futures = new Future[groupCount];
         int s = particles.size();
-        int groupSize = (int) FastMath.ceil(s * 1d / groupCount);
+        int groupSize = (int) FastMath.ceil(s / (double) groupCount);
 
-        for (int i_itr = 0, k = 0; i_itr < s; i_itr += groupSize, k++) {
-            final int i_fin = i_itr;
-            futures[k] = ThreadPool.submit(() -> iterate(iterations, i_fin, i_fin + groupSize));
+        for (int i = 0, k = 0; i < s; i += groupSize, k++) {
+            int finalI = i;
+            futures[k] = ThreadPool.submit(() -> iterate(iterations, finalI, finalI + groupSize));
         }
 
         return futures;
@@ -95,25 +92,25 @@ public class ParticleSystem<P extends Particle> {
             initializeParticle(particle);
         }
         particle.iterationIndex = iterationIndex;
-        for (int i = 0, updatersSize = updaters.size(); i < updatersSize; i++) {
-            updaters.get(i).modify(particle);
+        for (Modifier<P> updater : updaters) {
+            updater.modify(particle);
         }
         particle.update();
     }
 
     public void flush() {
-        for (int i = 0, particlesSize = particles.size(); i < particlesSize; i++) {
-            particles.get(i).flush();
+        for (P particle : particles) {
+            particle.flush();
         }
     }
 
-    protected P newParticle() {
+    private P newParticle() {
         return supplier.get();
     }
 
-    protected void initializeParticle(P particle) {
-        for (int i = 0, modifiersSize = modifiers.size(); i < modifiersSize; i++) {
-            modifiers.get(i).modify(particle);
+    private void initializeParticle(P particle) {
+        for (Modifier<P> modifier : modifiers) {
+            modifier.modify(particle);
         }
         particle.reset();
     }
@@ -146,7 +143,5 @@ public class ParticleSystem<P extends Particle> {
         public ParticleSystem<P> build() {
             return new ParticleSystem<>(particles, modifiers, updaters, supplier);
         }
-
     }
-
 }
