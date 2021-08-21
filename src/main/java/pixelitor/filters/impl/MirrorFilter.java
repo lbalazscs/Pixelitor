@@ -16,64 +16,87 @@
  */
 package pixelitor.filters.impl;
 
+import net.jafama.FastMath;
 import pixelitor.filters.Mirror;
 
 /**
  * The implementation of the {@link Mirror} filter.
  */
 public class MirrorFilter extends CenteredTransformFilter {
-    public static final int LEFT_OVER_RIGHT = 0;
-    public static final int RIGHT_OVER_LEFT = 1;
-    public static final int BOTTOM_OVER_TOP = 2;
-    public static final int TOP_OVER_BOTTOM = 3;
 
-    private int type;
+    private static float PI4 = (float) (FastMath.PI / 4);
+    private static float PI2 = (float) (FastMath.PI / 2);
+
+    // ax + by + c = 0
+    private double a;
+    private double b;
+    private double c;
+    // a² + b²
+    private double aa_bb;
+    // for a point present at an angle from cx, cy, this variable is the result if we put that point to the line above.
+    private double base_put;
 
     public MirrorFilter() {
         super(Mirror.NAME);
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setAngle(double angle) {
+
+        if ((FastMath.abs(angle) % PI2) < PI4) {
+
+            // y = mx + c    m-> slope
+            double slope = FastMath.tan(angle);
+
+            a = slope;
+            b = 1;
+
+        } else {
+
+            // y = mx + c    1/m-> oneBySlope
+            double oneBySlope = FastMath.tan(PI2 - angle);
+
+            a = 1;
+            b = oneBySlope;
+
+        }
+
+        // for a line `a*x + b*y + c = 0` which satisfies (cx, cy)
+        // c = -(a*cx + b*cy)
+        c = -(a * cx + b * cy);
+
+        aa_bb = a * a + b * b;
+
+        // Just a point (cx, cy-1) rotated about (cx, cy)
+        double gx = -FastMath.sin(-angle) + cx;
+        double gy = FastMath.cos(-angle) + cy;
+        base_put = FastMath.signum(a * gx + b * gy + c);
+
     }
+
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        switch (type) {
-            case LEFT_OVER_RIGHT:
-                if (x < cx) {
-                    out[0] = x;
-                } else {
-                    out[0] = cx + cx - x;
-                }
-                out[1] = y;
-                break;
-            case RIGHT_OVER_LEFT:
-                if (x > cx) {
-                    out[0] = x;
-                } else {
-                    out[0] = cx + cx - x;
-                }
-                out[1] = y;
-                break;
-            case TOP_OVER_BOTTOM:
-                out[0] = x;
-                if (y < cy) {
-                    out[1] = y;
-                } else {
-                    out[1] = cy + cy - y;
-                }
-                break;
-            case BOTTOM_OVER_TOP:
-                out[0] = x;
-                if (y > cy) {
-                    out[1] = y;
-                } else {
-                    out[1] = cy + cy - y;
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected type: " + type);
-        } // end of switch
+
+        // x₂-x₁     y₂-y₁     -2 * (a*x₁ + b*y₁ + c)
+        // -----  =  -----  =  ----------------------
+        //   a         b               a² + b²
+
+        double put = a * x + b * y + c;
+
+        if (FastMath.signum(put) == base_put) {
+            out[0] = x;
+            out[1] = y;
+            return;
+        }
+
+        // -2 * (a*x₁ + b*y₁ + c)
+        double rhs = -2 * (put) / aa_bb;
+
+        // x₂ = x₁ + a * rhs
+        out[0] = (float) (x + a * rhs);
+
+        // y₂ = y₁ + b * rhs
+        out[1] = (float) (y + b * rhs);
+
     }
 }
