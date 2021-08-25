@@ -784,7 +784,7 @@ public class RandomGUITest {
         if (comp == null) {
             return false;
         }
-        return comp.hasActivePath() && comp.activeIsDrawable();
+        return comp.hasActivePath() && comp.activeAcceptsToolDrawing();
     }
 
     private static void randomRotateFlip() {

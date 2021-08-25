@@ -107,4 +107,9 @@ public class TestLayerUI implements LayerUI {
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
     }
+
+    @Override
+    public int getId() {
+        return 0; // not used in tests
+    }
 }

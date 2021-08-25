@@ -179,7 +179,8 @@ public class Navigator extends JComponent
             .noOKButton()
             .noCancelButton()
             .cancelAction(navigatorPanel::dispose) // when it is closed with X
-            .show();
+            .show()
+            .getDialog();
     }
 
     public static void setMouseZoomMethod(MouseZoomMethod newZoomMethod) {

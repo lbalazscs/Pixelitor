@@ -21,7 +21,7 @@ import pixelitor.layers.ImageLayer;
 import java.awt.image.BufferedImage;
 
 /**
- * A debugging node for an ImageLayer
+ * A debugging node for an {@link ImageLayer}
  */
 public class ImageLayerNode extends ContentLayerNode {
     public ImageLayerNode(ImageLayer layer) {

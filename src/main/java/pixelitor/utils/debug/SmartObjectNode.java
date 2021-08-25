@@ -16,23 +16,19 @@
  */
 package pixelitor.utils.debug;
 
-import pixelitor.layers.LayerMask;
+import pixelitor.layers.SmartObject;
 
 /**
- * A debugging node for a {@link LayerMask}
+ * A debugging node for a {@link SmartObject}
  */
-public class LayerMaskNode extends ImageLayerNode {
-    public LayerMaskNode(LayerMask mask) {
-        this("layer mask", mask);
+public class SmartObjectNode extends ImageLayerNode {
+    public SmartObjectNode(SmartObject layer) {
+        this("smart object", layer);
     }
 
-    public LayerMaskNode(String name, LayerMask mask) {
-        super(name, mask);
+    public SmartObjectNode(String name, SmartObject layer) {
+        super(name, layer);
 
-        boolean enabled = mask.getOwner().isMaskEnabled();
-        addBoolean("enabled", enabled);
-
-        boolean linked = mask.isLinked();
-        addBoolean("linked", linked);
+        // TODO
     }
 }

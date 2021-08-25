@@ -48,4 +48,6 @@ public interface LayerUI {
     void setSelected(boolean b);
 
     void changeLayer(Layer newLayer);
+
+    public int getId();
 }

@@ -18,102 +18,148 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.compactions.Flip;
-import pixelitor.history.ContentLayerMoveEdit;
-import pixelitor.utils.QuadrantAngle;
+import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.FilterState;
+import pixelitor.gui.utils.PAction;
+import pixelitor.history.History;
+import pixelitor.history.ReplaceLayerEdit;
+import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.LayerNode;
+import pixelitor.utils.debug.SmartObjectNode;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A "smart object" that contains an embedded composition
- *
- * Not fully implemented yet!
+ * A "smart object" that contains an embedded composition and allows "smart filters".
+ * The cached result image behaves like the image of a regular {@link ImageLayer}.
  */
-public class SmartObject extends ContentLayer {
-    private Composition content;
+public class SmartObject extends ImageLayer {
+    private final Composition content;
 
-    SmartObject(Composition comp, String name) {
-        super(comp, name);
+    /**
+     * Smart filters allow non-destructive editing, but unlike adjustment layers,
+     * they don't have to run every time some other layer is edited.
+     */
+    private final List<Filter> smartFilters = new ArrayList<>();
+
+    // the image shown before a smart filter was edited
+    private transient BufferedImage prevImage;
+
+    // the state of the edited smart filter, saved before editing
+    private transient FilterState lastFilterState;
+
+    private int indexOfLastSmartFilter = -1;
+
+    public SmartObject(ImageLayer imageLayer) {
+        super(imageLayer.getComp(), imageLayer.getName());
+
+        content = Composition.fromImage(imageLayer.getImage(), null, "smart object");
+        recalculateImage();
+
+        copyBlendingFrom(imageLayer);
     }
 
-    @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
-        return null;
+    // copy constructor
+    private SmartObject(SmartObject orig, String name) {
+        super(orig.comp, name);
+        content = orig.content.copy(false, true);
+        image = orig.image;
+        if (!orig.smartFilters.isEmpty()) {
+            // TODO copy the filters
+            smartFilters.add(orig.smartFilters.get(0));
+        }
+        lastFilterState = orig.lastFilterState;
+        prevImage = orig.prevImage;
+        indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
     }
 
-    @Override
-    public void flip(Flip.Direction direction) {
-
+    private void recalculateImage() {
+        image = content.getCompositeImage();
+        for (Filter filter : smartFilters) {
+            image = filter.transformImage(image);
+        }
     }
 
-    @Override
-    public void rotate(QuadrantAngle angle) {
-
-    }
-
-    @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
-
-    }
-
-    @Override
-    public Rectangle getContentBounds() {
-        return null;
+    public ImageLayer replaceWithRasterized() {
+        ImageLayer rasterized = new ImageLayer(comp, image, name);
+        rasterized.copyBlendingFrom(this);
+        History.add(new ReplaceLayerEdit(comp, this, rasterized, "Rasterize Smart Object"));
+        comp.replaceLayer(this, rasterized);
+        Messages.showInStatusBar(String.format(
+            "The smart object <b>\"%s\"</b> was rasterized.", getName()));
+        return rasterized;
     }
 
     @Override
     protected Layer createTypeSpecificDuplicate(String duplicateName) {
-        return new SmartObject(comp, duplicateName);
+        return new SmartObject(this, duplicateName);
     }
 
-    @Override
-    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        g.drawImage(content.getCompositeImage(), getTx(), getTy(), null);
+    void addSmartObjectSpecificItems(JPopupMenu popup) {
+        popup.add(new PAction("Rasterize") {
+            @Override
+            public void onClick() {
+                replaceWithRasterized();
+            }
+        });
+        if (!smartFilters.isEmpty()) {
+            JMenu filtersMenu = new JMenu("Smart Filters");
+            for (Filter smartFilter : smartFilters) {
+                filtersMenu.add(new PAction("Edit " + smartFilter.getName()) {
+                    @Override
+                    public void onClick() {
+                        editSmartFilter(smartFilter);
+                    }
+                });
+            }
+            popup.add(filtersMenu);
+        }
     }
 
-    @Override
-    protected BufferedImage applyOnImage(BufferedImage src) {
-        throw new UnsupportedOperationException();
+    public int getNumSmartFilters() {
+        return smartFilters.size();
     }
 
-    @Override
-    public CompletableFuture<Void> resize(Dimension newSize) {
-        return CompletableFuture.completedFuture(null);
+    public Filter getSmartFilter(int index) {
+        return smartFilters.get(index);
     }
 
-    @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
-        if (!deleteCroppedPixels) {
-            super.crop(cropRect, deleteCroppedPixels, allowGrowing);
+    public void addSmartFilter(Filter filter) {
+        smartFilters.add(filter);
+    }
+
+    private void editSmartFilter(Filter filter) {
+        indexOfLastSmartFilter = smartFilters.indexOf(filter);
+        prevImage = image;
+        if (filter instanceof ParametrizedFilter pf) {
+            lastFilterState = pf.getParamSet().copyState(false);
+        }
+        image = content.getCompositeImage();
+        if (filter.startOn(this, false)) {
+            // the filter dialog was accepted, these are no longer needed
+            prevImage.flush();
+            prevImage = null;
+            lastFilterState = null;
+        } else {
+            // filter cancelled: restore to the result of the previous run
+            image = prevImage;
+            prevImage = null;
+            // restore the previous filter state
+            Filter sf = smartFilters.get(indexOfLastSmartFilter);
+            if (sf instanceof ParametrizedFilter pf) {
+                pf.getParamSet().setState(lastFilterState, false);
+                lastFilterState = null;
+            }
         }
     }
 
     @Override
-    public Rectangle getEffectiveBoundingBox() {
-        // unknown, return empty
-        return new Rectangle();
-    }
-
-    @Override
-    public Rectangle getSnappingBoundingBox() {
-        // unknown, return empty
-        return new Rectangle();
-    }
-
-    @Override
-    public int getPixelAtPoint(Point p) {
-        // unknown
-        return 0x00000000;
-    }
-
-    @Override
-    public BufferedImage asImage(boolean applyMask) {
-        return null;
+    public DebugNode createDebugNode(String description) {
+        return new SmartObjectNode(LayerNode.descrToName(description, this), this);
     }
 }

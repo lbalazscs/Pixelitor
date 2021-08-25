@@ -112,7 +112,8 @@ public class CloneTool extends BlendingModeBrushTool {
             .okText(CLOSE_DIALOG)
             .noCancelButton()
             .parentComponent(showTransformDialogButton)
-            .show();
+            .show()
+            .getDialog();
     }
 
     private JPanel createTransformPanel() {

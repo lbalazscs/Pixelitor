@@ -207,9 +207,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public ImageLayer replaceWithRasterized() {
         var rasterizedImage = createRasterizedImage(false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
-        newImageLayer.setBlendingMode(getBlendingMode(), false);
-        newImageLayer.setOpacity(getOpacity(), false);
-        History.add(new TextLayerRasterizeEdit(comp, this, newImageLayer));
+        newImageLayer.copyBlendingFrom(this);
+        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize Text Layer"));
         comp.replaceLayer(this, newImageLayer);
         Messages.showInStatusBar(String.format(
             "The layer <b>\"%s\"</b> was rasterized.", getName()));

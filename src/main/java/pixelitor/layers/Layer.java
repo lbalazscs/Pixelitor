@@ -245,6 +245,11 @@ public abstract class Layer implements Serializable {
         }
     }
 
+    protected void copyBlendingFrom(Layer other) {
+        setBlendingMode(other.getBlendingMode(), false);
+        setOpacity(other.getOpacity(), false);
+    }
+
     public String getName() {
         return name;
     }
@@ -727,7 +732,7 @@ public abstract class Layer implements Serializable {
     }
 
     public DebugNode createDebugNode() {
-        return createDebugNode("layer");
+        return createDebugNode(getClass().getSimpleName());
     }
 
     @Override

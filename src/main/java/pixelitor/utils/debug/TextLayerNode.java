@@ -20,7 +20,7 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.layers.TextLayer;
 
 /**
- * A debugging node for a Layer
+ * A debugging node for a {@link TextLayer}
  */
 public class TextLayerNode extends ContentLayerNode {
     public TextLayerNode(TextLayer layer) {

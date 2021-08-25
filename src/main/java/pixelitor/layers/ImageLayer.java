@@ -18,11 +18,10 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.FilterContext;
-import pixelitor.ImageMode;
+import pixelitor.*;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
@@ -33,6 +32,7 @@ import pixelitor.utils.debug.ImageLayerNode;
 import pixelitor.utils.debug.LayerNode;
 import pixelitor.utils.test.Assertions;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -103,7 +103,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient boolean imageContentChanged = false;
 
-    private ImageLayer(Composition comp, String name) {
+    ImageLayer(Composition comp, String name) {
         super(comp, name);
     }
 
@@ -1202,16 +1202,46 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
+    public JPopupMenu createLayerIconPopupMenu() {
+        JPopupMenu popup = super.createLayerIconPopupMenu();
+        if (popup == null && AppContext.enableExperimentalFeatures) {
+            popup = new JPopupMenu();
+        }
+        if (AppContext.enableExperimentalFeatures) {
+            if (this instanceof SmartObject so) {
+                so.addSmartObjectSpecificItems(popup);
+            } else {
+                popup.add(new PAction("Convert to Smart Object") {
+                    @Override
+                    public void onClick() {
+                        replaceWithSmartObject();
+                    }
+                });
+            }
+        }
+
+        return popup;
+    }
+
+    private void replaceWithSmartObject() {
+        SmartObject so = new SmartObject(this);
+        History.add(new ReplaceLayerEdit(comp, this, so, "Convert to Smart Object"));
+        comp.replaceLayer(this, so);
+        Messages.showInStatusBar(format(
+            "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
+    }
+
+    @Override
     public DebugNode createDebugNode(String description) {
         return new ImageLayerNode(LayerNode.descrToName(description, this), this);
     }
 
     public String toDebugCanvasString() {
         return "{canvasWidth=" + comp.getCanvasWidth()
-            + ", canvasHeight=" + comp.getCanvasHeight()
-            + ", tx=" + getTx()
-            + ", ty=" + getTy()
-            + ", imgWidth=" + image.getWidth()
+               + ", canvasHeight=" + comp.getCanvasHeight()
+               + ", tx=" + getTx()
+               + ", ty=" + getTy()
+               + ", imgWidth=" + image.getWidth()
             + ", imgHeight=" + image.getHeight()
             + '}';
     }

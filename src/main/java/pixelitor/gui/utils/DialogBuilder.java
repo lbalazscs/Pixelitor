@@ -64,6 +64,9 @@ public class DialogBuilder {
     private Runnable cancelAction;
     private Predicate<JDialog> validator;
 
+    private JDialog dialog;
+    private boolean cancelled;
+
     // normally a dialog is validated only when OK is pressed,
     // but sometimes (for example if the OK button text is "Close",
     // and there is no Cancel button, but the dialog can still be
@@ -225,7 +228,7 @@ public class DialogBuilder {
     /**
      * Builds the dialog and also shows it.
      */
-    public JDialog show() {
+    public DialogBuilder show() {
         if (RandomGUITest.isRunning()) {
             return null; // avoid dialogs
         }
@@ -237,7 +240,7 @@ public class DialogBuilder {
             GUIUtils.showDialog(d, align);
         }
 
-        return d;
+        return this;
     }
 
     /**
@@ -247,28 +250,27 @@ public class DialogBuilder {
         assert content != null : "no content";
 
         setupDefaults();
+        createDialog();
 
-        JDialog d = createDialog();
-
-        d.setTitle(title);
-        d.setModal(modal);
+        dialog.setTitle(title);
+        dialog.setModal(modal);
         if (menuBar != null) {
-            d.setJMenuBar(menuBar);
+            dialog.setJMenuBar(menuBar);
         }
 
         if (name != null) {
-            d.setName(name);
+            dialog.setName(name);
         }
 
-        addContent(d);
-        addButtons(d);
+        addContent(dialog);
+        addButtons(dialog);
 
-        Runnable cancelTask = () -> dialogCancelled(d);
-        GUIUtils.setupCancelWhenTheDialogIsClosed(d, cancelTask);
-        GUIUtils.setupCancelWhenEscIsPressed(d, cancelTask);
+        Runnable cancelTask = () -> dialogCancelled(dialog);
+        GUIUtils.setupCancelWhenTheDialogIsClosed(dialog, cancelTask);
+        GUIUtils.setupCancelWhenEscIsPressed(dialog, cancelTask);
 
         if (enableCopyVisibleShortcut) {
-            JComponent contentPane = (JComponent) d.getContentPane();
+            JComponent contentPane = (JComponent) dialog.getContentPane();
             InputMap inputMap = contentPane.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             ActionMap actionMap = contentPane.getActionMap();
 
@@ -279,21 +281,25 @@ public class DialogBuilder {
             actionMap.put("copyvis", CopyAction.COPY_COMPOSITE);
         }
 
-        d.pack();
-        return d;
+        dialog.pack();
+        return dialog;
     }
 
-    private JDialog createDialog() {
-        JDialog d;
+    private void createDialog() {
         if (frameOwner != null) {
-            d = new BuiltDialog(frameOwner, modal);
+            dialog = new BuiltDialog(frameOwner, modal);
         } else if (dialogOwner != null) {
-            d = new BuiltDialog(dialogOwner, modal);
+            dialog = new BuiltDialog(dialogOwner, modal);
         } else {
             var pw = PixelitorWindow.get();
-            d = new BuiltDialog(pw, modal);
+            dialog = new BuiltDialog(pw, modal);
         }
-        return d;
+    }
+
+    public JDialog getDialog() {
+        assert !modal; // for modal dialogs it doesn't make sense to call this
+        assert dialog != null;
+        return dialog;
     }
 
     private void addContent(JDialog d) {
@@ -348,6 +354,7 @@ public class DialogBuilder {
         if (okAction != null) {
             okAction.run();
         }
+        cancelled = false;
     }
 
     // a dialog without a Cancel button can still be cancelled with Esc/X
@@ -360,6 +367,11 @@ public class DialogBuilder {
         if (cancelAction != null) {
             cancelAction.run();
         }
+        cancelled = true;
+    }
+
+    public boolean wasAccepted() {
+        return !cancelled;
     }
 
     private boolean dialogIsInvalid(JDialog d) {

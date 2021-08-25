@@ -18,6 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.FilterContext;
+import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
@@ -75,10 +77,13 @@ public abstract class Filter implements Serializable {
      * The normal starting point, used when called from the menu.
      * Overwritten for filters with GUI.
      * Filters that work normally without a dialog can still have a
-     * dialog when invoked from places like "Random Filter"
+     * dialog when invoked from places like "Random Filter".
+     *
+     * @return true if the filter was not cancelled
      */
-    public void startOn(Drawable dr, boolean reset) {
+    public boolean startOn(Drawable dr, boolean reset) {
         startOn(dr, FILTER_WITHOUT_DIALOG);
+        return true;
     }
 
     /**
@@ -179,7 +184,7 @@ public abstract class Filter implements Serializable {
         }
         // We cannot assume that a FilterAction always exists because the
         // filter can be created directly when it is not necessary
-        // to put it in a menu. Therefore return the class name.
+        // to put it in a menu. 
         return getClass().getSimpleName();
     }
 
@@ -193,5 +198,47 @@ public abstract class Filter implements Serializable {
 
     public String paramsAsString() {
         return "";
+    }
+
+    @Serial
+    protected Object writeReplace() {
+        return new SerializationProxy(this);
+    }
+
+    /**
+     * See the "Effective Java" book for the serialization proxy pattern.
+     */
+    private static class SerializationProxy implements Serializable {
+        private final Class<? extends Filter> filterClass;
+
+        // The serialized state of the filter in preset form
+        private String filterState;
+
+        public SerializationProxy(Filter filter) {
+            filterClass = filter.getClass();
+
+            if (filter instanceof ParametrizedFilter pf) {
+                UserPreset preset = pf.getParamSet().toUserPreset(filter.getName(), "ser");
+                filterState = preset.saveToString();
+            }
+
+        }
+
+        @Serial
+        protected Object readResolve() {
+            Filter filter = null;
+            try {
+                filter = filterClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                Messages.showException(e);
+            }
+            if (filter instanceof ParametrizedFilter pf && filterState != null) {
+                ParamSet paramSet = pf.getParamSet();
+                UserPreset preset = paramSet.toUserPreset(filter.getName(), "ser");
+                preset.loadFromString(filterState);
+                paramSet.loadPreset(preset);
+            }
+            return filter;
+        }
     }
 }

@@ -18,24 +18,21 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.Layer;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.ImageLayerNode;
-import pixelitor.utils.debug.TextLayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that represents the rasterization of a text layer
+ * Represents the replacement of a layer with another
  */
-public class TextLayerRasterizeEdit extends PixelitorEdit {
-    private TextLayer before;
-    private ImageLayer after;
+public class ReplaceLayerEdit extends PixelitorEdit {
+    private Layer before;
+    private Layer after;
 
-    public TextLayerRasterizeEdit(Composition comp, TextLayer before, ImageLayer after) {
-        super("Rasterize Text Layer", comp);
+    public ReplaceLayerEdit(Composition comp, Layer before, Layer after, String editName) {
+        super(editName, comp);
 
         this.before = before;
         this.after = after;
@@ -70,8 +67,8 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public DebugNode createDebugNode() {
         DebugNode node = super.createDebugNode();
 
-        node.add(new TextLayerNode(before));
-        node.add(new ImageLayerNode(after));
+        node.add(before.createDebugNode("before"));
+        node.add(after.createDebugNode("after"));
 
         return node;
     }

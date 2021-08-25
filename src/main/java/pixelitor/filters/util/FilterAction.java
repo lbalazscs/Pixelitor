@@ -24,26 +24,34 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.SmartObject;
 import pixelitor.menus.DrawableAction;
+import pixelitor.utils.Messages;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.util.function.Supplier;
 
 /**
- * An action that invokes a filter
+ * An action that runs a filter on the active Drawable.
  */
 public class FilterAction extends DrawableAction {
-    private final Supplier<Filter> filterSupplier;
-    private Filter filter;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public FilterAction(String name, Supplier<Filter> filterSupplier) {
-        this(name, true, filterSupplier);
+    private final Supplier<Filter> factory;
+    private transient Filter filter;
+
+    public FilterAction(String name, Supplier<Filter> factory) {
+        this(name, true, factory);
     }
 
-    public FilterAction(String name, boolean hasDialog, Supplier<Filter> filterSupplier) {
+    public FilterAction(String name, boolean hasDialog, Supplier<Filter> factory) {
         super(name, hasDialog);
 
-        assert filterSupplier != null;
-        this.filterSupplier = filterSupplier;
+        assert factory != null;
+        this.factory = factory;
 
         if (!name.equals(Fade.NAME)) {
             FilterUtils.addFilter(this);
@@ -59,14 +67,31 @@ public class FilterAction extends DrawableAction {
 
     @Override
     protected void process(Drawable dr) {
+        if (dr instanceof SmartObject so) {
+            if (so.getNumSmartFilters() > 0) {
+                Filter existingFilter = so.getSmartFilter(0);
+                String msg = String.format(
+                    "<html>The smart object <b>%s</> already has " +
+                    "a smart filter (<b>%s</b>). " +
+                    "<br>Currently a smart object can have only one smart filter.",
+                    so.getName(), existingFilter.getName());
+                Messages.showError("Second Smart Filter", msg);
+                return;
+            }
+            Filter newInstanceFilter = factory.get();
+            newInstanceFilter.setFilterAction(this);
+            if (newInstanceFilter.startOn(dr, false)) {
+                so.addSmartFilter(newInstanceFilter);
+            }
+            return;
+        }
         createFilter();
-
         filter.startOn(dr, true);
     }
 
     private void createFilter() {
         if (filter == null) {
-            filter = filterSupplier.get();
+            filter = factory.get();
             filter.setFilterAction(this);
         }
     }
@@ -127,6 +152,11 @@ public class FilterAction extends DrawableAction {
     @Override
     public int hashCode() {
         return getName().hashCode();
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
+        throw new IOException("should not be serialized");
     }
 
     @Override

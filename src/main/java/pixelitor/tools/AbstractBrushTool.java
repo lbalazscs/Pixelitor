@@ -187,7 +187,8 @@ public abstract class AbstractBrushTool extends Tool {
             .okText(CLOSE_DIALOG)
             .noCancelButton()
             .parentComponent(brushSettingsDialogButton)
-            .show();
+            .show()
+            .getDialog();
     }
 
     protected void addLazyMouseDialogButton() {
@@ -227,7 +228,8 @@ public abstract class AbstractBrushTool extends Tool {
             .okText(CLOSE_DIALOG)
             .noCancelButton()
             .parentComponent(showLazyMouseDialogButton)
-            .show();
+            .show()
+            .getDialog();
     }
 
     @Override

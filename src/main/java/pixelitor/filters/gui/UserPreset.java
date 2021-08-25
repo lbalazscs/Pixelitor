@@ -132,17 +132,29 @@ public class UserPreset {
         InputStream input = new FileInputStream(file);
         Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
         try (BufferedReader br = new BufferedReader(reader)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                int index = line.indexOf('=');
-                if (index > 0) {
-                    String key = line.substring(0, index).trim();
-                    String value = line.substring(index + 1).trim();
-                    content.put(key, value);
-                }
-            }
+            loadFrom(br);
         }
         loaded = true;
+    }
+
+    private void loadFrom(BufferedReader br) throws IOException {
+        String line;
+        while ((line = br.readLine()) != null) {
+            int index = line.indexOf('=');
+            if (index > 0) {
+                String key = line.substring(0, index).trim();
+                String value = line.substring(index + 1).trim();
+                content.put(key, value);
+            }
+        }
+    }
+
+    public void loadFromString(String s) {
+        try {
+            loadFrom(new BufferedReader(new StringReader(s)));
+        } catch (IOException e) {
+            Messages.showException(e);
+        }
     }
 
     public void save() {
@@ -151,14 +163,26 @@ public class UserPreset {
 
         File outFile = calcSaveFile(true);
         try (PrintWriter writer = new PrintWriter(outFile, StandardCharsets.UTF_8)) {
-            for (Map.Entry<String, String> entry : content.entrySet()) {
-                writer.println(entry.getKey() + "=" + entry.getValue());
-            }
+            saveTo(writer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
         Messages.showInStatusBar("Preset saved to <b>" + outFile.getAbsolutePath() + "</b>");
+    }
+
+    private void saveTo(PrintWriter writer) {
+        for (Map.Entry<String, String> entry : content.entrySet()) {
+            writer.println(entry.getKey() + "=" + entry.getValue());
+        }
+    }
+
+    public String saveToString() {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        saveTo(printWriter);
+        printWriter.flush();
+        return writer.toString();
     }
 
     public Action asAction(DialogMenuOwner owner) {

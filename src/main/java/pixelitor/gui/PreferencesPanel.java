@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.AppContext;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.utils.*;
@@ -56,6 +57,7 @@ public class PreferencesPanel extends JPanel {
     private JComboBox<MouseZoomMethod> zoomMethodCB;
     private JComboBox<PanMethod> panMethodCB;
     private JTextField magickDirTF;
+    private JCheckBox experimentalCB;
 
     // the panel is re-created every time, but the last selected tab
     // should be selected automatically the next time
@@ -91,6 +93,7 @@ public class PreferencesPanel extends JPanel {
         addUndoLevelsChooser(gbh);
         addThumbSizeChooser(gbh);
         addMagickDirField(gbh);
+        addExperimentalCB(gbh);
 
         generalPanel.setBorder(EMPTY_BORDER);
         return generalPanel;
@@ -177,6 +180,13 @@ public class PreferencesPanel extends JPanel {
         // don't let the textfield grow too large
         magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
+    }
+
+    private void addExperimentalCB(GridBagHelper gbh) {
+        experimentalCB = new JCheckBox("", AppContext.enableExperimentalFeatures);
+        experimentalCB.addActionListener(e ->
+            AppContext.enableExperimentalFeatures = experimentalCB.isSelected());
+        gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
     private static JPanel createGuidesPanel() {

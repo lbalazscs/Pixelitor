@@ -635,8 +635,8 @@ public class Composition implements Serializable {
         forEachDrawable(Drawable::updateIconImage);
     }
 
-    public boolean activeIsDrawable() {
-        if (activeLayer instanceof ImageLayer) {
+    public boolean activeAcceptsToolDrawing() {
+        if (activeLayer.getClass() == ImageLayer.class) { // but not smart objects
             return true;
         }
         if (activeLayer.isMaskEditing()) {
@@ -850,7 +850,7 @@ public class Composition implements Serializable {
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
 
-    public BufferedImage calculateCompositeImage() {
+    private BufferedImage calculateCompositeImage() {
         if (layerList.size() == 1) { // shortcut
             Layer firstLayer = layerList.get(0);
             if (firstLayer instanceof ImageLayer layer) {

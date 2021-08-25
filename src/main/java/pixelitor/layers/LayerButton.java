@@ -64,6 +64,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
     // and in unit tests the drag handler is not added at all.
     private boolean maskAddedBeforeDragHandler;
 
+    // for debugging only: each layer button has a different id
+    private static int idCounter = 0;
+    private final int id;
+
     /**
      * Represents the selection state of the layer and mask icons.
      */
@@ -172,6 +176,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         }
 
         wireSelectionWithLayerActivation();
+        id = idCounter++;
     }
 
     private void configureLayerIcon() {
@@ -420,11 +425,11 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel.setToolTipText("<html>" +
-            "<b>Click</b> activates mask editing,<br>" +
-            "<b>Shift-click</b> disables/enables the mask,<br>" +
-            "<b>Alt-click</b> toggles mask/layer view,<br>" +
-            "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
-            "<b>Right-click</b> shows more options");
+                                     "<b>Click</b> activates mask editing,<br>" +
+                                     "<b>Shift-click</b> disables/enables the mask,<br>" +
+                                     "<b>Alt-click</b> toggles mask/layer view,<br>" +
+                                     "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
+                                     "<b>Right-click</b> shows more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         maskIconLabel.setName("maskIcon");
@@ -559,10 +564,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
     public String toString() {
         return "LayerButton{" +
-            "name='" + getLayerName() + '\'' +
-            "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
-            '}';
+               "name='" + getLayerName() + '\'' +
+               "id='" + getId() + '\'' +
+               "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
+               '}';
     }
 }

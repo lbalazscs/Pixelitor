@@ -100,13 +100,13 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public void startOn(Drawable dr, boolean reset) {
+    public boolean startOn(Drawable dr, boolean reset) {
         dr.startPreviewing();
 
         Tools.editedObjectChanged(dr.getLayer());
 
         FilterGUI gui = createGUI(dr, reset);
-        new DialogBuilder()
+        return new DialogBuilder()
             .title(getName())
             .menuBar(getMenuBar())
             .name("filterDialog")
@@ -116,6 +116,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
             .enableCopyVisibleShortcut()
             .okAction(() -> dr.onFilterDialogAccepted(getName()))
             .cancelAction(dr::onFilterDialogCanceled)
-            .show();
+            .show()
+            .wasAccepted();
     }
 }

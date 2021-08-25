@@ -28,6 +28,7 @@ import pixelitor.filters.painters.TextSettings;
 import java.awt.Color;
 import java.awt.Font;
 
+import static pixelitor.Composition.UpdateActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.fromImage;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.*;
@@ -295,7 +296,8 @@ class LayerBlendingModesTest {
     }
 
     private Color getResultingColor() {
-        return new Color(comp.calculateCompositeImage().getRGB(0, 0));
+        comp.update(INVALIDATE_CACHE);
+        return new Color(comp.getCompositeImage().getRGB(0, 0));
     }
 
     private static Color invert(Color in) {

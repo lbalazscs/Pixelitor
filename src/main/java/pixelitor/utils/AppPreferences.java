@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import com.bric.util.JVM;
+import pixelitor.AppContext;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
@@ -98,6 +99,7 @@ public final class AppPreferences {
     private static GuideStyle cropGuideStyle;
 
     private static final String MAGICK_DIR_KEY = "magick_dir";
+    private static final String EXPERIMENTAL_KEY = "experimental";
 
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
@@ -369,6 +371,7 @@ public final class AppPreferences {
         saveMouseZoom();
         savePan();
         saveMagickDir();
+        saveExperimentalFeatures();
     }
 
     public static Color loadFgColor() {
@@ -497,5 +500,13 @@ public final class AppPreferences {
 
     private static void saveMagickDir() {
         mainNode.put(MAGICK_DIR_KEY, magickDirName);
+    }
+
+    public static boolean loadExperimentalFeatures() {
+        return mainNode.getBoolean(EXPERIMENTAL_KEY, false);
+    }
+
+    private static void saveExperimentalFeatures() {
+        mainNode.putBoolean(EXPERIMENTAL_KEY, AppContext.enableExperimentalFeatures);
     }
 }
