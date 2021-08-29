@@ -23,18 +23,17 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.utils.PAction;
-import pixelitor.history.History;
-import pixelitor.history.ReplaceLayerEdit;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.LayerNode;
-import pixelitor.utils.debug.SmartObjectNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,27 +57,26 @@ public class SmartObject extends ImageLayer {
      */
     private final List<Filter> smartFilters = new ArrayList<>();
 
-    // the image shown before a smart filter was edited
+    // The following two fields are used only during editing of smart filters
+    // to restore the image and filter state if the user cancels the dialog.
     private transient BufferedImage lastFilterOutput;
-
-    // the state of the edited smart filter, saved before editing
     private transient FilterState lastFilterState;
 
     private int indexOfLastSmartFilter = -1;
 
-    public SmartObject(ImageLayer imageLayer) {
-        super(imageLayer.getComp(), NAME_PREFIX + imageLayer.getName());
+    public SmartObject(Layer layer) {
+        super(layer.getComp(), NAME_PREFIX + layer.getName());
 
         content = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
-        Layer contentLayer = imageLayer.duplicate(true);
+        Layer contentLayer = layer.duplicate(true);
         contentLayer.setName("original content", false);
         contentLayer.setComp(content);
         content.addLayerInInitMode(contentLayer);
         content.setName(getName());
         content.setOwner(this);
-        recalculateImage();
+        copyBlendingFrom(layer);
 
-        copyBlendingFrom(imageLayer);
+        recalculateImage();
     }
 
     // copy constructor
@@ -95,10 +93,36 @@ public class SmartObject extends ImageLayer {
         indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
     }
 
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        recalculateImage();
+        lastFilterOutput = null;
+        lastFilterState = null;
+    }
+
+    @Override
+    boolean serializeImage() {
+        return false;
+    }
+
     private void recalculateImage() {
-        image = content.getCompositeImage();
+        resetImageFromContent();
         for (Filter filter : smartFilters) {
             image = filter.transformImage(image);
+        }
+    }
+
+    private void resetImageFromContent() {
+        image = content.getCompositeImage();
+        if (ImageUtils.isSubImage(image)) {
+            image = ImageUtils.copySubImage(image);
         }
     }
 
@@ -111,14 +135,14 @@ public class SmartObject extends ImageLayer {
         updateIconImage();
     }
 
-    public ImageLayer replaceWithRasterized() {
-        ImageLayer rasterized = new ImageLayer(comp, image, Utils.removePrefix(name, NAME_PREFIX));
-        rasterized.copyBlendingFrom(this);
-        History.add(new ReplaceLayerEdit(comp, this, rasterized, "Rasterize Smart Object"));
-        comp.replaceLayer(this, rasterized);
-        Messages.showInStatusBar(String.format(
-            "The smart object <b>\"%s\"</b> was rasterized.", getName()));
-        return rasterized;
+    @Override
+    public boolean isRasterizable() {
+        return true;
+    }
+
+    @Override
+    protected String getRasterizedName() {
+        return Utils.removePrefix(name, NAME_PREFIX);
     }
 
     @Override
@@ -127,16 +151,10 @@ public class SmartObject extends ImageLayer {
     }
 
     void addSmartObjectSpecificItems(JPopupMenu popup) {
-        popup.add(new PAction("Rasterize") {
-            @Override
-            public void onClick() {
-                replaceWithRasterized();
-            }
-        });
         popup.add(new PAction("Edit Contents") {
             @Override
             public void onClick() {
-                OpenImages.addAsNewComp(content);
+                edit();
             }
         });
         if (!smartFilters.isEmpty()) {
@@ -164,6 +182,11 @@ public class SmartObject extends ImageLayer {
         }
     }
 
+    @Override
+    public void edit() {
+        OpenImages.addAsNewComp(content);
+    }
+
     public boolean hasSmartFilters() {
         return !smartFilters.isEmpty();
     }
@@ -180,7 +203,7 @@ public class SmartObject extends ImageLayer {
         Filter prevFilter = smartFilters.get(0);
         lastFilterOutput = image;
         smartFilters.clear();
-        image = content.getCompositeImage();
+        resetImageFromContent();
         boolean filterDialogAccepted = newFilter.startOn(this, false);
         if (filterDialogAccepted) {
             lastFilterOutput.flush();
@@ -198,7 +221,7 @@ public class SmartObject extends ImageLayer {
         if (filter instanceof ParametrizedFilter pf) {
             lastFilterState = pf.getParamSet().copyState(false);
         }
-        image = content.getCompositeImage();
+        resetImageFromContent();
         boolean filterDialogAccepted = filter.startOn(this, false);
         if (filterDialogAccepted) {
             // these are no longer needed
@@ -220,7 +243,7 @@ public class SmartObject extends ImageLayer {
 
     private void deleteSmartFilter() {
         smartFilters.clear();
-        image = content.getCompositeImage();
+        resetImageFromContent();
         comp.update();
         updateIconImage();
     }
@@ -236,7 +259,21 @@ public class SmartObject extends ImageLayer {
     }
 
     @Override
-    public DebugNode createDebugNode(String description) {
-        return new SmartObjectNode(LayerNode.descrToName(description, this), this);
+    public String getTypeStringLC() {
+        return "smart object";
+    }
+
+    @Override
+    public String getTypeStringUC() {
+        return "Smart Object";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        node.add(new CompositionNode("content", content));
+
+        return node;
     }
 }

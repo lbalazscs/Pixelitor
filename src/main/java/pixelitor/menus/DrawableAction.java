@@ -108,14 +108,19 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
             } else {
                 process(imageLayer);
             }
-        } else if (layer instanceof TextLayer textLayer) {
+        } else if (layer.isRasterizable()) {
             if (RandomGUITest.isRunning()) {
+                return;
+            }
+
+            // special case: gradient tool is allowed on Gradient Fill Layers
+            if (layer.getClass() == GradientFillLayer.class && name.equals("Gradient Tool")) {
                 return;
             }
 
             boolean rasterize = showRasterizeDialog(layer);
             if (rasterize) {
-                ImageLayer newImageLayer = textLayer.replaceWithRasterized();
+                ImageLayer newImageLayer = layer.replaceWithRasterized();
                 process(newImageLayer);
             }
         } else if (layer instanceof AdjustmentLayer) {
@@ -131,29 +136,17 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
         String firstName = isNoun ? "The " + name : name;
         String secondName = isNoun ? "the " + name : name;
 
-        String msg;
-        String dialogTitle;
-        if (layer instanceof TextLayer) {
-            msg = format("<html>The active layer <i>\"%s\"</i> is a text layer.<br><br>" +
-                         "%s needs pixels and cannot be used on text layers.<br>" +
-                         "If you rasterize this text layer, you can use %s,<br>" +
-                         "but the text will no longer be editable.",
-                layer.getName(), firstName, secondName);
-            dialogTitle = "Text Layer";
-        } else if (layer instanceof SmartObject) {
-            msg = format("<html>The active layer <i>\"%s\"</i> is a smart object.<br><br>" +
-                         "%s cannot be used on smart objects.<br>" +
-                         "If you rasterize this smart object, you can use %s,<br>" +
-                         "but the layer will become a regular image layer.",
-                layer.getName(), firstName, secondName);
-            dialogTitle = "Smart Object";
-        } else {
-            throw new IllegalStateException("layer class = " + layer.getClass().getName());
-        }
+        String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
+                            "%s cannot be used on %ss.<br>" +
+                            "If you rasterize this %s, you can use %s,<br>" +
+                            "but the layer will become a regular image layer.",
+            layer.getName(), layer.getTypeStringLC(), firstName,
+            layer.getTypeStringLC(), layer.getTypeStringLC(), secondName);
 
         String[] options = {"Rasterize", GUIText.CANCEL};
 
-        boolean rasterize = Dialogs.showOKCancelWarningDialog(msg, dialogTitle, options, 1);
+        boolean rasterize = Dialogs.showOKCancelWarningDialog(msg,
+            layer.getTypeStringUC(), options, 1);
         return rasterize;
     }
 

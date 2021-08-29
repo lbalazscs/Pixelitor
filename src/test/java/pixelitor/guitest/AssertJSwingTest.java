@@ -635,7 +635,7 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        runMenuCommand("Rasterize");
+        runMenuCommand("Rasterize Text Layer");
         keyboard.undoRedoUndo("Rasterize Text Layer");
 
         checkConsistency();

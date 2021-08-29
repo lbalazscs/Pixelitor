@@ -18,8 +18,10 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.layers.Drawable;
+import pixelitor.layers.GradientFillLayer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
@@ -28,6 +30,7 @@ import pixelitor.tools.util.PMouseEvent;
  */
 public class DrawableCheckHandler extends ToolHandler {
     private final DrawableAction drawableAction;
+    private final Tool currentTool;
 
     public DrawableCheckHandler(Tool currentTool) {
         drawableAction = new DrawableAction(currentTool.getName() + " Tool") {
@@ -36,31 +39,43 @@ public class DrawableCheckHandler extends ToolHandler {
                 // do nothing
             }
         };
+        this.currentTool = currentTool;
     }
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (e.getComp().activeAcceptsToolDrawing()) {
-            // forwards the mouse event to the next handler
+        if (shouldForwardToNextHandler(e)) {
             return false;
         }
 
-        // as the action doesn't do anything, the only effects
-        // here are the dialogs and auto-rasterization
+        // If we are here, offer the auto-rasterization as last resort.
+        // The action itself does nothing, we call it only for the dialogs.
         drawableAction.actionPerformed(null);
 
-        // whatever happened, do not forward this event,
+        // Whatever happened, do not forward this event,
         // the user should click again in order to use the tool
         return true;
     }
 
     @Override
     boolean mouseDragged(PMouseEvent e) {
-        return !e.getComp().activeAcceptsToolDrawing();
+        return !shouldForwardToNextHandler(e);
     }
 
     @Override
     boolean mouseReleased(PMouseEvent e) {
-        return !e.getComp().activeAcceptsToolDrawing();
+        return !shouldForwardToNextHandler(e);
+    }
+
+    private boolean shouldForwardToNextHandler(PMouseEvent e) {
+        if (e.getComp().activeAcceptsToolDrawing()) {
+            return true;
+        }
+        if (currentTool == Tools.GRADIENT) {
+            if (e.getComp().getActiveLayer().getClass() == GradientFillLayer.class) {
+                return true;
+            }
+        }
+        return false;
     }
 }

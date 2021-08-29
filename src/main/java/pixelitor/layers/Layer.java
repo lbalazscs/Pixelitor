@@ -691,12 +691,24 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * Return a canvas-sized image representing this layer.
-     * This can be the temporarily rasterized image of a text layer.
+     * Returns a canvas-sized image corresponding to the contents of this layer.
+     * Returns null if no such image can be returned (adjustment layer).
      *
      * @param applyMask if false, then the mask is ignored
      */
-    public abstract BufferedImage asImage(boolean applyMask);
+    public BufferedImage asImage(boolean applyMask) {
+        BufferedImage img = comp.getCanvas().createTmpImage();
+        Graphics2D g = img.createGraphics();
+        if (applyMask) {
+            // the layer's blending mode will be ignored
+            // because firstVisibleLayer is set to true
+            applyLayer(g, img, true);
+        } else {
+            paintLayerOnGraphics(g, true);
+        }
+        g.dispose();
+        return img;
+    }
 
     public void addListener(LayerListener listener) {
         listeners.add(listener);
@@ -713,8 +725,9 @@ public abstract class Layer implements Serializable {
     }
 
     public JPopupMenu createLayerIconPopupMenu() {
+        JPopupMenu popup = null;
         if (comp.canMergeDown(this)) {
-            JPopupMenu popup = new JPopupMenu();
+            popup = new JPopupMenu();
             var mergeDownAction = new PAction(GUIText.MERGE_DOWN) {
                 @Override
                 public void onClick() {
@@ -723,28 +736,103 @@ public abstract class Layer implements Serializable {
             };
             mergeDownAction.setToolTip(GUIText.MERGE_DOWN_TT);
             popup.add(mergeDownAction);
-            return popup;
         }
+
+        if (AppContext.enableExperimentalFeatures) {
+            if (popup == null) {
+                popup = new JPopupMenu();
+            }
+
+            if (this instanceof SmartObject so) {
+                so.addSmartObjectSpecificItems(popup);
+            } else {
+                popup.add(new PAction("Convert to Smart Object") {
+                    @Override
+                    public void onClick() {
+                        replaceWithSmartObject();
+                    }
+                });
+            }
+        }
+
+        if (isRasterizable()) {
+            if (popup == null) {
+                popup = new JPopupMenu();
+            }
+            popup.add(new PAction("Rasterize") {
+                @Override
+                public void onClick() {
+                    replaceWithRasterized();
+                }
+            });
+        }
+
+        return popup;
+    }
+
+    private void replaceWithSmartObject() {
+        SmartObject so = new SmartObject(this);
+        History.add(new ReplaceLayerEdit(comp, this, so, "Convert to Smart Object"));
+        comp.replaceLayer(this, so);
+        Messages.showInStatusBar(format(
+            "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
+    }
+
+    public void updateIconImage() {
+        if (ui != null) {
+            ui.updateLayerIconImageAsync(this);
+        }
+    }
+
+    public BufferedImage createIconThumbnail() {
         return null;
     }
 
-    public DebugNode createDebugNode(String description) {
-        // convenience implementation that should be
-        // overridden in non-experimental layer types
-        return new LayerNode(LayerNode.descrToName(description, this), this);
+    public void edit() {
+        // by default does nothing, but overridden for non-image layers
     }
 
-    public DebugNode createDebugNode() {
-        return createDebugNode(getClass().getSimpleName());
+    public boolean isRasterizable() {
+        return true;
+    }
+
+    protected String getRasterizedName() {
+        return getName();
+    }
+
+    public ImageLayer replaceWithRasterized() {
+        assert isRasterizable();
+
+        var rasterizedImage = asImage(false);
+        var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
+        newImageLayer.copyBlendingFrom(this);
+        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize " + getTypeStringUC()));
+        comp.replaceLayer(this, newImageLayer);
+        Messages.showInStatusBar(format(
+            "The %s <b>\"%s\"</b> was rasterized.", getTypeStringLC(), getName()));
+
+        return newImageLayer;
+    }
+
+    public abstract String getTypeStringLC();
+
+    public abstract String getTypeStringUC();
+
+    public final DebugNode createDebugNode() {
+        return createDebugNode(getTypeStringLC());
+    }
+
+    public DebugNode createDebugNode(String description) {
+        return new LayerNode(description + " - " + getName(), this);
     }
 
     @Override
     public String toString() {
         return "{name='" + name + '\''
-            + ", visible=" + visible
-            + ", mask=" + mask
-            + ", maskEditing=" + maskEditing
-            + ", maskEnabled=" + maskEnabled
-            + ", isAdjustment=" + isAdjustment + '}';
+               + ", visible=" + visible
+               + ", mask=" + mask
+               + ", maskEditing=" + maskEditing
+               + ", maskEnabled=" + maskEnabled
+               + ", isAdjustment=" + isAdjustment + '}';
     }
 }

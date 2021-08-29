@@ -30,16 +30,12 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
-import pixelitor.utils.Messages;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.LayerNode;
-import pixelitor.utils.debug.TextLayerNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +122,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             comp, this, activeLayerBefore, oldViewMode));
     }
 
-    public void edit(PixelitorWindow pw) {
+    @Override
+    public void edit() {
         TextSettings oldSettings = getSettings();
         var settingsPanel = new TextSettingsPanel(this);
 
@@ -134,7 +131,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .title("Edit Text Layer")
             .menuBar(getMenuBar())
             .content(settingsPanel)
-            .owner(pw)
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() -> commitSettings(oldSettings))
@@ -202,34 +198,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             return 0xffffffff;
         }
         return 0x00000000;
-    }
-
-    public ImageLayer replaceWithRasterized() {
-        var rasterizedImage = createRasterizedImage(false);
-        var newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
-        newImageLayer.copyBlendingFrom(this);
-        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize Text Layer"));
-        comp.replaceLayer(this, newImageLayer);
-        Messages.showInStatusBar(String.format(
-            "The layer <b>\"%s\"</b> was rasterized.", getName()));
-        return newImageLayer;
-    }
-
-    /**
-     * Returns a canvas-sized image corresponding to the contents of this layer.
-     */
-    public BufferedImage createRasterizedImage(boolean applyMask) {
-        BufferedImage img = comp.getCanvas().createTmpImage();
-        Graphics2D g = img.createGraphics();
-        if (applyMask) {
-            // the layer's blending mode will be ignored
-            // because firstVisibleLayer is set to true
-            applyLayer(g, img, true);
-        } else {
-            paintLayerOnGraphics(g, true);
-        }
-        g.dispose();
-        return img;
     }
 
     @Override
@@ -356,11 +324,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask) {
-        return createRasterizedImage(applyMask);
-    }
-
-    @Override
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
         if (popup == null) {
@@ -368,16 +331,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
 
         var editMenuItem = new JMenuItem("Edit");
-        editMenuItem.addActionListener(e -> edit(PixelitorWindow.get()));
+        editMenuItem.addActionListener(e -> edit());
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
-
-        popup.add(new PAction("Rasterize") {
-            @Override
-            public void onClick() {
-                replaceWithRasterized();
-            }
-        });
 
         popup.add(new PAction("Selection from Text") {
             @Override
@@ -442,14 +398,32 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public DebugNode createDebugNode(String description) {
-        return new TextLayerNode(LayerNode.descrToName(description, this), this);
+    public String getTypeStringLC() {
+        return "text layer";
+    }
+
+    @Override
+    public String getTypeStringUC() {
+        return "Text Layer";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        if (settings == null) {
+            node.addString("text settings", "NO TEXT SETTINGS!");
+        } else {
+            node.add(settings.createDebugNode("text settings"));
+        }
+
+        return node;
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
-            + "{text=" + (settings == null ? "null settings" : settings.getText())
-            + ", super=" + super.toString() + '}';
+               + "{text=" + (settings == null ? "null settings" : settings.getText())
+               + ", super=" + super.toString() + '}';
     }
 }

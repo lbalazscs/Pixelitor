@@ -18,24 +18,25 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
-import java.awt.Paint;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 /**
  * This class describes a gradient with all the information
@@ -43,7 +44,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * Note that no pixel values are stored here, this is
  * all vector graphics.
  */
-public class Gradient {
+public class Gradient implements Serializable {
     private Drag drag;
     private final GradientType type;
     private final CycleMethod cycleMethod;
@@ -99,6 +100,14 @@ public class Gradient {
             drag = tmpDrawingLayer.translateDrag(drag);
         }
 
+        drawOnGraphics(g, comp, canvasWidth, canvasHeight, smallImage);
+
+        g.dispose();
+        dr.mergeTmpDrawingLayerDown();
+        dr.updateIconImage();
+    }
+
+    public void drawOnGraphics(Graphics2D g, Composition comp, int canvasWidth, int canvasHeight, boolean smallImage) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Paint paint = type.createPaint(drag, colors, cycleMethod);
         g.setPaint(paint);
@@ -108,10 +117,30 @@ public class Gradient {
         } else {
             g.fillRect(0, 0, canvasWidth, canvasHeight);
         }
+    }
 
-        g.dispose();
-        dr.mergeTmpDrawingLayerDown();
-        dr.updateIconImage();
+    public BufferedImage createIconThumbnail(Canvas canvas) {
+        Dimension thumbDim = ImageUtils.calcThumbDimensions(
+            canvas.getWidth(), canvas.getHeight(), thumbSize);
+
+        double scaling;
+        if (thumbDim.width > thumbDim.height) {
+            scaling = thumbDim.width / (double) canvas.getWidth();
+        } else {
+            scaling = thumbDim.height / (double) canvas.getHeight();
+        }
+
+        BufferedImage img = ImageUtils.createSysCompatibleImage(
+            thumbDim.width, thumbDim.height);
+        Graphics2D g2 = img.createGraphics();
+        g2.scale(scaling, scaling);
+
+        Paint paint = type.createPaint(drag, colors, cycleMethod);
+        g2.setPaint(paint);
+        g2.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        g2.dispose();
+        return img;
     }
 
     /**
@@ -120,8 +149,8 @@ public class Gradient {
      */
     public boolean fullyCovers() {
         return colorType != GradientColorType.FG_TO_TRANSPARENT
-            && blendingMode == BlendingMode.NORMAL
-            && opacity == 1.0f;
+               && blendingMode == BlendingMode.NORMAL
+               && opacity == 1.0f;
     }
 
     public GradientType getType() {

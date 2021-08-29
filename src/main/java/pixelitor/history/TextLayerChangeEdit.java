@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.TextLayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -81,7 +80,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode();
 
         node.add(backupSettings.createDebugNode("backup text settings"));
-        node.add(new TextLayerNode(layer));
+        node.add(layer.createDebugNode());
 
         return node;
     }

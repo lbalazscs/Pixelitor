@@ -87,13 +87,24 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName()
-            + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
-            + ", super=" + super.toString() + '}';
+    public String getTypeStringLC() {
+        return "adjustment layer";
     }
 
-    public void configure() {
+    @Override
+    public String getTypeStringUC() {
+        return "Adjustment Layer";
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+               + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
+               + ", super=" + super.toString() + '}';
+    }
+
+    @Override
+    public void edit() {
         System.out.println("AdjustmentLayer::configure: 1");
         if (!(filter instanceof FilterWithGUI)) {
             return;

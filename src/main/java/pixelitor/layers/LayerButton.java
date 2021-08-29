@@ -18,10 +18,8 @@
 package pixelitor.layers;
 
 import com.bric.util.JVM;
-import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.AppContext;
 import pixelitor.ThreadPool;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
@@ -36,8 +34,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import static javax.swing.BorderFactory.*;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -48,8 +44,6 @@ import static pixelitor.utils.Threads.threadInfo;
 public class LayerButton extends JToggleButton implements LayerUI {
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
-    private static final CheckerboardPainter checkerBoardPainter
-        = ImageUtils.createCheckerboardPainter();
 
     private static final String uiClassID = "LayerButtonUI";
 
@@ -226,11 +220,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activate(layer);
         } else {
-            if (layer instanceof TextLayer textLayer) {
-                textLayer.edit(PixelitorWindow.get());
-            } else if (layer instanceof AdjustmentLayer adjLayer) {
-                adjLayer.configure();
-            }
+            layer.edit();
         }
     }
 
@@ -381,30 +371,25 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImageAsync(ImageLayer layer) {
+    public void updateLayerIconImageAsync(Layer layer) {
         assert calledOnEDT() : threadInfo();
-
-        boolean isMask = layer instanceof LayerMask;
-
-        BufferedImage img = layer.getCanvasSizedSubImage();
+        if (layer.getClass() == TextLayer.class) { // TODO find a better way
+            return;
+        }
 
         Runnable notEDT = () -> {
-            CheckerboardPainter painter = null;
-            if (!isMask) {
-                painter = checkerBoardPainter;
+            BufferedImage thumb = layer.createIconThumbnail();
+            assert thumb != null;
+            if (thumb != null) {
+                SwingUtilities.invokeLater(() -> updateIconOnEDT(layer, thumb));
             }
-
-            BufferedImage thumb = createThumbnail(img, thumbSize, painter);
-
-            SwingUtilities.invokeLater(() ->
-                updateIconOnEDT(layer, isMask, thumb));
         };
         ThreadPool.submit(notEDT);
     }
 
-    private void updateIconOnEDT(ImageLayer layer, boolean isMask, BufferedImage thumb) {
+    private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
         assert calledOnEDT() : threadInfo();
-        if (isMask) {
+        if (layer instanceof LayerMask) {
             if (!hasMaskIcon()) {
                 return;
             }
@@ -540,9 +525,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         updateName();
         Icon icon = createLayerIcon(layer);
         layerIconLabel.setIcon(icon);
-        if (newLayer instanceof ImageLayer imageLayer) {
-            updateLayerIconImageAsync(imageLayer);
-        }
+        updateLayerIconImageAsync(layer);
 
         if (maskIconLabel != null) {
             removeMaskIcon();

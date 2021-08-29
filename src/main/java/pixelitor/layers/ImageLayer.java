@@ -17,22 +17,22 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
-import pixelitor.*;
+import pixelitor.Composition;
+import pixelitor.FilterContext;
+import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.ImageLayerNode;
-import pixelitor.utils.debug.LayerNode;
+import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -52,7 +52,9 @@ import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.*;
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
 import static pixelitor.utils.ImageUtils.copyImage;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -64,6 +66,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         PREVIEW, // a filter dialog is shown
         SHOW_ORIGINAL // a filter dialog is shown + "Show Original" is checked
     }
+
+    private static final CheckerboardPainter checkerBoardPainter
+        = ImageUtils.createCheckerboardPainter();
 
     @Serial
     private static final long serialVersionUID = 2L;
@@ -225,7 +230,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        PXCFormat.serializeImage(out, image);
+        if (serializeImage()) {
+            PXCFormat.serializeImage(out, image);
+        }
     }
 
     @Serial
@@ -239,8 +246,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
         trimmedBoundingBox = null;
 
         in.defaultReadObject();
-        setImage(PXCFormat.deserializeImage(in));
+        if (serializeImage()) {
+            setImage(PXCFormat.deserializeImage(in));
+        }
         imageContentChanged = false;
+    }
+
+    boolean serializeImage() {
+        return true;
     }
 
     public State getState() {
@@ -391,6 +404,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
         } else {
             return getCanvasSizedVisibleImage();
         }
+    }
+
+    @Override
+    public boolean isRasterizable() {
+        return false;
     }
 
     private void setPreviewWithSelection(BufferedImage newPreview) {
@@ -1155,10 +1173,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void updateIconImage() {
-        if (ui != null) {
-            ui.updateLayerIconImageAsync(this);
-        }
+    public BufferedImage createIconThumbnail() {
+        BufferedImage img = getCanvasSizedSubImage();
+        BufferedImage thumb = createThumbnail(img, thumbSize, checkerBoardPainter);
+        return thumb;
     }
 
     /**
@@ -1197,43 +1215,28 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
+    public String getTypeStringLC() {
+        return "image layer";
+    }
+
+    @Override
+    public String getTypeStringUC() {
+        return "Image Layer";
+    }
+
+    @Override
     public Layer getLayer() {
         return this;
     }
 
     @Override
-    public JPopupMenu createLayerIconPopupMenu() {
-        JPopupMenu popup = super.createLayerIconPopupMenu();
-        if (popup == null && AppContext.enableExperimentalFeatures) {
-            popup = new JPopupMenu();
-        }
-        if (AppContext.enableExperimentalFeatures) {
-            if (this instanceof SmartObject so) {
-                so.addSmartObjectSpecificItems(popup);
-            } else {
-                popup.add(new PAction("Convert to Smart Object") {
-                    @Override
-                    public void onClick() {
-                        replaceWithSmartObject();
-                    }
-                });
-            }
-        }
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
 
-        return popup;
-    }
+        node.addString("state", state.toString());
+        node.add(DebugNodes.createBufferedImageNode("image", image));
 
-    private void replaceWithSmartObject() {
-        SmartObject so = new SmartObject(this);
-        History.add(new ReplaceLayerEdit(comp, this, so, "Convert to Smart Object"));
-        comp.replaceLayer(this, so);
-        Messages.showInStatusBar(format(
-            "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
-    }
-
-    @Override
-    public DebugNode createDebugNode(String description) {
-        return new ImageLayerNode(LayerNode.descrToName(description, this), this);
+        return node;
     }
 
     public String toDebugCanvasString() {

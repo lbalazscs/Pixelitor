@@ -220,6 +220,8 @@ public class Pixelitor {
             return;
         }
 
+//        GradientFillLayer.createNew();
+
 //        SplashImageCreator.saveManySplashImages();
 
 //        Debug.keepSwitchingToolsRandomly();

@@ -48,6 +48,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
+import pixelitor.gui.utils.RestrictedLayerAction.Condition;
 import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -368,23 +369,14 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerMaskSubmenu(texts));
         layersMenu.add(createTextLayerSubmenu(pw, texts));
 
-        if (AppContext.enableExperimentalFeatures) {
-            layersMenu.add(new OpenImageEnabledAction("Edit Smart Filter") {
-                @Override
-                public void onClick() {
-                    Layer layer = getActiveLayer();
-                    if (layer.getClass() == SmartObject.class) {
-                        SmartObject so = (SmartObject) layer;
-                        if (so.hasSmartFilters()) {
-                            so.editSmartFilter(so.getSmartFilter(0));
-                        }
-                    }
-                }
-            }, CTRL_SHIFT_E);
-        }
-
         if (AppContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
+        }
+
+        if (AppContext.enableExperimentalFeatures) {
+            layersMenu.add(createSmartObjectSubmenu(pw, texts));
+            layersMenu.add(createColorFillLayerSubmenu(pw, texts));
+//            layersMenu.add(createGradientFillLayerSubmenu(pw, texts));
         }
 
         return layersMenu;
@@ -525,28 +517,30 @@ public class MenuBar extends JMenuBar {
     private static JMenu createTextLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("text_layer"));
 
-        sub.add(new OpenImageEnabledAction("New...") {
+        sub.add(new OpenImageEnabledAction("New Text Layer...") {
             @Override
             public void onClick() {
                 TextLayer.createNew();
             }
         }, T);
 
-        sub.add(new RestrictedLayerAction("Edit...", IS_TEXT_LAYER) {
+        Condition isTextLayer = new ClassCondition(TextLayer.class, "text layer");
+
+        sub.add(new RestrictedLayerAction("Edit Text Layer...", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
-                ((TextLayer) layer).edit(pw);
+                layer.edit();
             }
         }, CTRL_T);
 
-        sub.add(new RestrictedLayerAction("Rasterize", IS_TEXT_LAYER) {
+        sub.add(new RestrictedLayerAction("Rasterize Text Layer", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
                 ((TextLayer) layer).replaceWithRasterized();
             }
         });
 
-        sub.add(new RestrictedLayerAction("Selection from Text", IS_TEXT_LAYER) {
+        sub.add(new RestrictedLayerAction("Selection from Text", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
                 layer.getComp().createSelectionFromText();
@@ -564,6 +558,99 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 AddAdjLayerAction.INSTANCE.actionPerformed(null);
+            }
+        });
+
+        return sub;
+    }
+
+    private static JMenu createSmartObjectSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Smart Object");
+
+        Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
+
+        sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                ((SmartObject) layer).replaceWithRasterized();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Edit Contents", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                SmartObject so = (SmartObject) layer;
+                if (so.hasSmartFilters()) {
+                    so.editSmartFilter(so.getSmartFilter(0));
+                } else {
+                    Messages.showInfo("No Smart Filters",
+                        "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");
+                }
+            }
+        }, CTRL_SHIFT_E);
+
+        return sub;
+    }
+
+    private static JMenu createColorFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Color Fill Layer");
+
+        sub.add(new OpenImageEnabledAction("New Color Fill Layer...") {
+            @Override
+            public void onClick() {
+                ColorFillLayer.createNew();
+            }
+        });
+
+        Condition isColorFillLayer = new ClassCondition(ColorFillLayer.class, "color fill layer");
+
+        sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Rasterize Color Fill Layer", isColorFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.replaceWithRasterized();
+            }
+        });
+
+        return sub;
+    }
+
+    private static JMenu createGradientFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Gradient Fill Layer");
+
+        sub.add(new OpenImageEnabledAction("New Gradient Fill Layer...") {
+            @Override
+            public void onClick() {
+                GradientFillLayer.createNew();
+            }
+        });
+
+        Condition isGradientFillLayer = new ClassCondition(GradientFillLayer.class, "gradient fill layer");
+
+        sub.add(new RestrictedLayerAction("Edit Gradient Fill Layer...", isGradientFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.replaceWithRasterized();
             }
         });
 

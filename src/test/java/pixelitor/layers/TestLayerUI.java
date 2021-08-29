@@ -77,8 +77,8 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImageAsync(ImageLayer imageLayer) {
-        if (imageLayer instanceof LayerMask) {
+    public void updateLayerIconImageAsync(Layer layer) {
+        if (layer instanceof LayerMask) {
             numMaskIconUpdates++;
         } else {
             numLayerIconUpdates++;

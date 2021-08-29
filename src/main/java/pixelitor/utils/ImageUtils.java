@@ -665,6 +665,12 @@ public class ImageUtils {
         return copy;
     }
 
+    public static Boolean isSubImage(BufferedImage src) {
+        WritableRaster raster = src.getRaster();
+        return raster.getSampleModelTranslateX() != 0
+               || raster.getSampleModelTranslateY() != 0;
+    }
+
     // Can copy an image which was created by BufferedImage.getSubimage
     public static BufferedImage copySubImage(BufferedImage src) {
         BufferedImage copy = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());

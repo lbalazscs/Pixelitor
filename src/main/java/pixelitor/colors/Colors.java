@@ -272,11 +272,12 @@ public class Colors {
         selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
     }
 
-    public static void selectColorWithDialog(Window owner, String title,
-                                             Color selectedColor, boolean allowTransparency,
-                                             Consumer<Color> colorChangeListener) {
+    // returns true if the dialog was accepted
+    public static boolean selectColorWithDialog(Window owner, String title,
+                                                Color selectedColor, boolean allowTransparency,
+                                                Consumer<Color> colorChangeListener) {
         if (RandomGUITest.isRunning()) {
-            return;
+            return false;
         }
 
         Color prevColor = selectedColor;
@@ -287,6 +288,9 @@ public class Colors {
 
         if (color == null) {  // Cancel was pressed, reset the old color
             colorChangeListener.accept(prevColor);
+            return false;
+        } else {
+            return true;
         }
     }
 

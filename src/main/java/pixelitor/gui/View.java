@@ -736,9 +736,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             Layers.numLayersChanged(comp, comp.getNumLayers());
         }
 
-        if (newLayer instanceof ImageLayer imageLayer) {
-            imageLayer.updateIconImage();
-        }
+        newLayer.updateIconImage();
         if (newLayer.hasMask()) {
             newLayer.getMask().updateIconImage();
         }

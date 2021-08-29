@@ -18,7 +18,6 @@
 package pixelitor.utils.debug;
 
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
 
 public class LayerNode extends DebugNode {
     public LayerNode(Layer layer) {
@@ -36,8 +35,7 @@ public class LayerNode extends DebugNode {
             addString("has mask", "yes");
             addBoolean("mask enabled", layer.isMaskEnabled());
             addBoolean("mask editing", layer.isMaskEditing());
-            LayerMask mask = layer.getMask();
-            add(new LayerMaskNode(mask));
+            add(layer.getMask().createDebugNode());
         } else {
             addString("has mask", "no");
         }

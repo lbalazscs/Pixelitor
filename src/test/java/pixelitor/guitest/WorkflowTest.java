@@ -196,7 +196,7 @@ public class WorkflowTest {
     }
 
     private void setTextSize() {
-        app.runMenuCommand("Edit...");
+        app.runMenuCommand("Edit Text Layer...");
 
         var dialog = app.findDialogByTitle("Edit Text Layer");
         dialog.textBox("textTF").requireText("Wood");
@@ -210,7 +210,7 @@ public class WorkflowTest {
         EDT.assertActiveLayerTypeIs(TextLayer.class);
         EDT.assertNumLayersIs(2);
 
-        app.runMenuCommand("Rasterize");
+        app.runMenuCommand("Rasterize Text Layer");
 
         EDT.assertActiveLayerTypeIs(ImageLayer.class);
         EDT.assertNumLayersIs(2);
