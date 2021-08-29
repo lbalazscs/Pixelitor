@@ -286,7 +286,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private void initLayerNameEditor() {
         nameEditor = new LayerNameEditor(this);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
-        addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
+        addPropertyChangeListener("name", evt -> updateName());
     }
 
     private void wireSelectionWithLayerActivation() {
@@ -376,8 +376,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void setLayerName(String newName) {
-        nameEditor.setText(newName);
+    public void updateName() {
+        nameEditor.setText(layer.getName());
     }
 
     @Override
@@ -537,6 +537,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
+        updateName();
         Icon icon = createLayerIcon(layer);
         layerIconLabel.setIcon(icon);
         if (newLayer instanceof ImageLayer imageLayer) {

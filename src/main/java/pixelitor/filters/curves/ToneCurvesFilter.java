@@ -115,6 +115,8 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.getCurve(channel).setStateFrom(saveString);
         }
 
-        lastGUI.stateChanged();
+        if (lastGUI != null) { // it's null when loading a smart filter
+            lastGUI.stateChanged();
+        }
     }
 }

@@ -1634,8 +1634,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Channel Mixer", Randomize.YES,
             Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
             "R -> G -> B -> R", "R -> B -> G -> R",
-            "Average BW", "Luminosity BW", "Sepia",
-            "Normalize", "Randomize and Normalize");
+            "Average BW", "Luminosity BW", "Sepia");
         testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
@@ -1873,9 +1872,10 @@ public class AssertJSwingTest {
 
         Consumer<DialogFixture> extraButtonClicker = dialog -> {
             for (String buttonText : extraButtonsToClick) {
-                findButtonByText(dialog, buttonText)
-                    .requireEnabled()
-                    .click();
+                JButtonFixture button = findButtonByText(dialog, buttonText);
+                if (button.isEnabled()) { // channel mixer presets might not be enabled
+                    button.click();
+                }
             }
         };
 

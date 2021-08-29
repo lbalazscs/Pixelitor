@@ -23,6 +23,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
+import java.io.Serial;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
@@ -30,7 +31,10 @@ import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
  * A filter that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
-    protected String helpURL;
+    @Serial
+    private static final long serialVersionUID = -7575676579160980928L;
+
+    protected transient String helpURL;
 
     protected FilterWithGUI() {
     }

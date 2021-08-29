@@ -79,7 +79,7 @@ public class FilterAction extends DrawableAction {
                 return;
             }
             Filter newInstanceFilter = factory.get();
-            newInstanceFilter.setFilterAction(this);
+            newInstanceFilter.setName(name);
             if (newInstanceFilter.startOn(dr, false)) {
                 so.addSmartFilter(newInstanceFilter);
             }
@@ -92,7 +92,7 @@ public class FilterAction extends DrawableAction {
     private void createFilter() {
         if (filter == null) {
             filter = factory.get();
-            filter.setFilterAction(this);
+            filter.setName(name);
         }
     }
 

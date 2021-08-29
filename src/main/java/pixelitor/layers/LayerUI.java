@@ -23,7 +23,7 @@ import pixelitor.utils.VisibleForTesting;
  * The user interface of a {@link Layer}
  */
 public interface LayerUI {
-    void setLayerName(String newName);
+    void updateName();
 
     boolean hasMaskIcon();
 

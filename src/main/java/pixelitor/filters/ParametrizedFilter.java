@@ -23,6 +23,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * A filter that keeps its settings in a ParamSet object
@@ -30,15 +31,18 @@ import java.awt.image.BufferedImage;
  * they only specify their ParamSet, and the GUI is built automatically
  */
 public abstract class ParametrizedFilter extends FilterWithGUI {
-    protected ParamSet paramSet;
+    @Serial
+    private static final long serialVersionUID = 3796358314893014182L;
 
-    private BooleanParam showAffectedAreaParam = null;
-    private final boolean addShowOriginal;
-    private boolean hasAffectedAreaShapeParam;
+    protected transient ParamSet paramSet;
+
+    private transient BooleanParam showAffectedAreaParam = null;
+    private final transient boolean addShowOriginal;
+    private transient boolean hasAffectedAreaShapeParam;
 
     // not fully implemented - the idea is to show interactively
     // the area affected by a filter
-    private Shape[] affectedAreaShapes;
+    private transient Shape[] affectedAreaShapes;
 
     protected ParametrizedFilter(boolean addShowOriginal) {
         this.addShowOriginal = addShowOriginal;

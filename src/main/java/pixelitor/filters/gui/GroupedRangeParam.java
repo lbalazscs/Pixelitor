@@ -362,12 +362,13 @@ public class GroupedRangeParam extends AbstractFilterParam {
             .mapToDouble(RangeParam::getValue)
             .toArray();
 
-        return new GroupedRangeParamState(values);
+        return new GroupedRangeParamState(values, isLinked());
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         GroupedRangeParamState grState = (GroupedRangeParamState) state;
+        setLinked(grState.linked());
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
@@ -382,9 +383,25 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(String savedValue) {
         StringTokenizer st = new StringTokenizer(savedValue, ",");
-        for (RangeParam child : children) {
+
+        // the linked property was added later to the end of the save format,
+        // but it has to be set first, so first collect the values
+        double[] values = new double[children.length];
+        for (int i = 0; i < children.length; i++) {
             String s = st.nextToken();
-            child.setValueNoTrigger(Double.parseDouble(s));
+            values[i] = Double.parseDouble(s);
+        }
+
+        boolean linked = linkedByDefault;
+        if (st.hasMoreTokens()) {
+            String s = st.nextToken();
+            linked = Boolean.parseBoolean(s);
+        }
+        setLinked(linked);
+
+        // set the values only after the linked property was set
+        for (int i = 0; i < children.length; i++) {
+            children[i].setValueNoTrigger(values[i]);
         }
     }
 
@@ -406,7 +423,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
             .collect(toList());
     }
 
-    private record GroupedRangeParamState(double[] values) implements ParamState<GroupedRangeParamState> {
+    private record GroupedRangeParamState(double[] values,
+                                          boolean linked) implements ParamState<GroupedRangeParamState> {
         @Override
         public GroupedRangeParamState interpolate(GroupedRangeParamState endState, double progress) {
             double[] interpolatedValues = new double[values.length];
@@ -415,14 +433,14 @@ public class GroupedRangeParam extends AbstractFilterParam {
                     progress, values[i], endState.values[i]);
             }
 
-            return new GroupedRangeParamState(interpolatedValues);
+            return new GroupedRangeParamState(interpolatedValues, linked);
         }
 
         @Override
         public String toSaveString() {
             return DoubleStream.of(values)
-                .mapToObj("%.2f"::formatted)
-                .collect(joining(","));
+                       .mapToObj("%.2f"::formatted)
+                       .collect(joining(",")) + "," + linked;
         }
     }
 }

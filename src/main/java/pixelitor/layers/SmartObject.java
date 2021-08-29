@@ -24,13 +24,17 @@ import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
 import pixelitor.history.ReplaceLayerEdit;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.LayerNode;
 import pixelitor.utils.debug.SmartObjectNode;
 
 import javax.swing.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +43,11 @@ import java.util.List;
  * The cached result image behaves like the image of a regular {@link ImageLayer}.
  */
 public class SmartObject extends ImageLayer {
+    private static final String NAME_PREFIX = "smart ";
     private final Composition content;
+
+    @Serial
+    private static final long serialVersionUID = 8594248957749192719L;
 
     /**
      * Smart filters allow non-destructive editing, but unlike adjustment layers,
@@ -56,9 +64,10 @@ public class SmartObject extends ImageLayer {
     private int indexOfLastSmartFilter = -1;
 
     public SmartObject(ImageLayer imageLayer) {
-        super(imageLayer.getComp(), imageLayer.getName());
+        super(imageLayer.getComp(), NAME_PREFIX + imageLayer.getName());
 
-        content = Composition.fromImage(imageLayer.getImage(), null, "smart object");
+        content = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
+        content.addLayerInInitMode(imageLayer.duplicate(false));
         recalculateImage();
 
         copyBlendingFrom(imageLayer);
@@ -86,7 +95,7 @@ public class SmartObject extends ImageLayer {
     }
 
     public ImageLayer replaceWithRasterized() {
-        ImageLayer rasterized = new ImageLayer(comp, image, name);
+        ImageLayer rasterized = new ImageLayer(comp, image, Utils.removePrefix(name, NAME_PREFIX));
         rasterized.copyBlendingFrom(this);
         History.add(new ReplaceLayerEdit(comp, this, rasterized, "Rasterize Smart Object"));
         comp.replaceLayer(this, rasterized);
@@ -156,6 +165,16 @@ public class SmartObject extends ImageLayer {
                 lastFilterState = null;
             }
         }
+    }
+
+    @Override
+    public BufferedImage getCanvasSizedSubImage() {
+        // workaround for moved layers
+        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+        Graphics2D g = img.createGraphics();
+        applyLayer(g, null, true);
+        g.dispose();
+        return img;
     }
 
     @Override

@@ -263,7 +263,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        ui.setLayerName(newName);
+        ui.updateName();
 
         if (addToHistory) {
             History.add(new LayerRenameEdit(this, prevName, name));

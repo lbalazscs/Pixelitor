@@ -430,5 +430,12 @@ public final class Utils {
     public static double parseDouble(String s) throws ParseException {
         return NumberFormat.getInstance().parse(s).doubleValue();
     }
+
+    public static String removePrefix(String s, String prefix) {
+        if (s != null && prefix != null && s.startsWith(prefix)) {
+            return s.substring(prefix.length());
+        }
+        return s;
+    }
 }
 

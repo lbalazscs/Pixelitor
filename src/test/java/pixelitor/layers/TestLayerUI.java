@@ -37,8 +37,8 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void setLayerName(String newName) {
-        name = newName;
+    public void updateName() {
+        name = layer.getName();
     }
 
     @Override
@@ -106,6 +106,7 @@ public class TestLayerUI implements LayerUI {
     @Override
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
+        updateName();
     }
 
     @Override
