@@ -269,7 +269,8 @@ public class TextSettingsPanel extends FilterGUI
 
     private void createEffectsPanel(TextSettings settings) {
         AreaEffects effects = settings.getEffects();
-        effectsPanel = new EffectsPanel(this, effects);
+        effectsPanel = new EffectsPanel(effects);
+        effectsPanel.setAdjustmentListener(this);
         effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 

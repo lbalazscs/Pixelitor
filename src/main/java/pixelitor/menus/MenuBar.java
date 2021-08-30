@@ -368,6 +368,21 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerMaskSubmenu(texts));
         layersMenu.add(createTextLayerSubmenu(pw, texts));
 
+        if (AppContext.enableExperimentalFeatures) {
+            layersMenu.add(new OpenImageEnabledAction("Edit Smart Filter") {
+                @Override
+                public void onClick() {
+                    Layer layer = getActiveLayer();
+                    if (layer.getClass() == SmartObject.class) {
+                        SmartObject so = (SmartObject) layer;
+                        if (so.hasSmartFilters()) {
+                            so.editSmartFilter(so.getSmartFilter(0));
+                        }
+                    }
+                }
+            }, CTRL_SHIFT_E);
+        }
+
         if (AppContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
         }
@@ -768,7 +783,7 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("blur")
-            + "/" + texts.getString("sharpen"));
+                              + "/" + texts.getString("sharpen"));
 
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);

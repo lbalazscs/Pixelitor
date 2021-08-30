@@ -91,6 +91,9 @@ public class Composition implements Serializable {
     private Guides guides;
     private ImageMode mode;
 
+    // not null if this is the content of a smart object
+    private SmartObject owner;
+
     //
     // transient variables from here
     //
@@ -181,6 +184,7 @@ public class Composition implements Serializable {
 
         compCopy.newLayerCount = newLayerCount;
         compCopy.mode = mode;
+        compCopy.owner = owner;
 
         if (copySelection && selection != null) {
             compCopy.setSelectionRef(new Selection(selection, forUndo));
@@ -252,6 +256,21 @@ public class Composition implements Serializable {
                 paths.setView(view);
             }
         }
+    }
+
+    public void closed() {
+        setView(null);
+        if (owner != null) {
+            owner.contentClosed(this);
+        }
+    }
+
+    public void setOwner(SmartObject owner) {
+        this.owner = owner;
+    }
+
+    public boolean isEmbedded() {
+        return owner != null;
     }
 
     public Canvas getCanvas() {
@@ -427,13 +446,18 @@ public class Composition implements Serializable {
     public void addAllLayersToGUI() {
         assert checkInvariant();
 
-        // when adding layer buttons, the last layer gets active
-        // but here we don't want to change the selected layer
-        Layer previousActiveLayer = activeLayer;
+        Layer activeLayerBefore = activeLayer;
 
+        // this shouldn't change the active layer here,
+        // but sets the last button to selected
         layerList.forEach(this::addLayerToGUI);
+        assert activeLayer == activeLayerBefore;
 
-        setActiveLayer(previousActiveLayer);
+        // correct the selection
+        LayerButton ui = (LayerButton) activeLayer.getUI();
+        if (!ui.isSelected()) {
+            ui.setSelected(true);
+        }
     }
 
     private void addLayerToGUI(Layer layer) {
@@ -682,6 +706,15 @@ public class Composition implements Serializable {
                                             + activeLayer.getClass().getSimpleName());
         }
         return dr;
+    }
+
+    public boolean hasSmartObjects() {
+        for (Layer layer : layerList) {
+            if (layer.getClass() == SmartObject.class) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void startMovement(MoveMode mode, boolean duplicateLayer) {

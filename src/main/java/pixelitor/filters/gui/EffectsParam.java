@@ -87,17 +87,29 @@ public class EffectsParam extends AbstractFilterParam {
     private void ensureEffectsPanelIsCreated() {
         if (effectsPanel == null) {
             assert AppContext.isUnitTesting() || Threads.calledOnEDT();
-            effectsPanel = new EffectsPanel(adjustmentListener, null);
+            effectsPanel = new EffectsPanel(null);
+            if (adjustmentListener != null) { // the listener was set before this
+                effectsPanel.setAdjustmentListener(adjustmentListener);
+            }
         }
     }
 
     public void setEffects(AreaEffects effects) {
         if (effectsPanel == null) { // probably never true
-            effectsPanel = new EffectsPanel(adjustmentListener, effects);
+            ensureEffectsPanelIsCreated();
             return;
         }
 
         effectsPanel.setEffects(effects);
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+
+        if (effectsPanel != null) { // if the panel was initialized first
+            effectsPanel.setAdjustmentListener(listener);
+        }
     }
 
     @Override

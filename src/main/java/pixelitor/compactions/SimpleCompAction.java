@@ -56,6 +56,11 @@ public abstract class SimpleCompAction extends OpenImageEnabledAction implements
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
+        if (oldComp.hasSmartObjects()) {
+            Messages.showNotImplementedForSmartObjects(getText());
+            return CompletableFuture.completedFuture(oldComp);
+        }
+
         View view = oldComp.getView();
         Composition newComp = oldComp.copy(true, true);
         Canvas newCanvas = newComp.getCanvas();

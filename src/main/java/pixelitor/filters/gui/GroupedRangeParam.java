@@ -392,12 +392,14 @@ public class GroupedRangeParam extends AbstractFilterParam {
             values[i] = Double.parseDouble(s);
         }
 
-        boolean linked = linkedByDefault;
-        if (st.hasMoreTokens()) {
-            String s = st.nextToken();
-            linked = Boolean.parseBoolean(s);
+        if (linkable) {
+            boolean linked = linkedByDefault;
+            if (st.hasMoreTokens()) {
+                String s = st.nextToken();
+                linked = Boolean.parseBoolean(s);
+            }
+            setLinked(linked);
         }
-        setLinked(linked);
 
         // set the values only after the linked property was set
         for (int i = 0; i < children.length; i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
 
     private final JTabbedPane tabs;
 
-    public EffectsPanel(ParamAdjustmentListener listener, AreaEffects givenEffects) {
+    public EffectsPanel(AreaEffects givenEffects) {
         setLayout(new BorderLayout());
 
         setEffects(givenEffects);
@@ -56,12 +56,6 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         panels[1] = innerGlowPanel;
         panels[2] = neonBorderPanel;
         panels[3] = dropShadowPanel;
-
-        if (listener != null) {
-            for (BaseEffectPanel panel : panels) {
-                panel.setAdjustmentListener(listener);
-            }
-        }
 
         tabs = new JTabbedPane();
         tabs.setTabPlacement(SwingConstants.LEFT);
@@ -72,12 +66,19 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         addTab(NEON_BORDER_TAB_NAME, neonBorderPanel);
         addTab(DROP_SHADOW_TAB_NAME, dropShadowPanel);
 
-        makeSureFirstEnabledTabIsSelected();
+        selectFirstEnabledTab();
 
         add(tabs, CENTER);
     }
 
-    private void makeSureFirstEnabledTabIsSelected() {
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        assert listener != null;
+        for (BaseEffectPanel panel : panels) {
+            panel.setAdjustmentListener(listener);
+        }
+    }
+
+    private void selectFirstEnabledTab() {
         for (int i = 0; i < panels.length; i++) {
             BaseEffectPanel panel = panels[i];
             if (panel.isEffectEnabled()) {
@@ -94,7 +95,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         initDropShadowPanel(effects);
 
         if (tabs != null) {
-            makeSureFirstEnabledTabIsSelected();
+            selectFirstEnabledTab();
         }
     }
 

@@ -263,7 +263,10 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        ui.updateName();
+        // the ui could be null when setting the name of a smart object's content
+        if (ui != null) {
+            ui.updateName();
+        }
 
         if (addToHistory) {
             History.add(new LayerRenameEdit(this, prevName, name));

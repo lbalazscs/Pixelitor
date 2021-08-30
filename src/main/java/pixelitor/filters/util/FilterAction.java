@@ -22,11 +22,11 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.SmartObject;
 import pixelitor.menus.DrawableAction;
-import pixelitor.utils.Messages;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -68,28 +68,43 @@ public class FilterAction extends DrawableAction {
     @Override
     protected void process(Drawable dr) {
         if (dr instanceof SmartObject so) {
-            if (so.getNumSmartFilters() > 0) {
-                Filter existingFilter = so.getSmartFilter(0);
-                String msg = String.format(
-                    "<html>The smart object <b>%s</> already has " +
-                    "a smart filter (<b>%s</b>). " +
-                    "<br>Currently a smart object can have only one smart filter.",
-                    so.getName(), existingFilter.getName());
-                Messages.showError("Second Smart Filter", msg);
+            if (so.hasSmartFilters()) {
+                handleExistingSmartFilters(so);
                 return;
             }
-            Filter newInstanceFilter = factory.get();
-            newInstanceFilter.setName(name);
-            if (newInstanceFilter.startOn(dr, false)) {
-                so.addSmartFilter(newInstanceFilter);
+            Filter newFilter = createNewInstanceFilter();
+            if (newFilter.startOn(dr, false)) {
+                so.addSmartFilter(newFilter);
             }
             return;
         }
-        createFilter();
+        createCachedFilter();
         filter.startOn(dr, true);
     }
 
-    private void createFilter() {
+    private void handleExistingSmartFilters(SmartObject so) {
+        boolean replace;
+        String existingFilterName = so.getSmartFilter(0).getName();
+        String msg = String.format(
+            "<html>The smart object <b>%s</> already has " +
+            "a smart filter (<b>%s</b>). " +
+            "<br>Currently a smart object can have only one smart filter." +
+            "<br>Replace <b>%s</b> with <b>%s</b>?",
+            so.getName(), existingFilterName, existingFilterName, name);
+        replace = Dialogs.showYesNoQuestionDialog("Second Smart Filter", msg);
+        if (replace) {
+            Filter newFilter = createNewInstanceFilter();
+            so.replaceSmartFilter(newFilter);
+        }
+    }
+
+    private Filter createNewInstanceFilter() {
+        Filter newFilter = factory.get();
+        newFilter.setName(name);
+        return newFilter;
+    }
+
+    private void createCachedFilter() {
         if (filter == null) {
             filter = factory.get();
             filter.setName(name);
@@ -97,7 +112,7 @@ public class FilterAction extends DrawableAction {
     }
 
     public Filter getFilter() {
-        createFilter();
+        createCachedFilter();
         return filter;
     }
 
@@ -116,7 +131,7 @@ public class FilterAction extends DrawableAction {
             return false;
         }
 
-        createFilter();
+        createCachedFilter();
         if (!(filter instanceof ParametrizedFilter pf)) {
             return false;
         }

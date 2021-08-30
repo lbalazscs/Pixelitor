@@ -104,7 +104,7 @@ public class OpenImages {
     public static void imageClosed(View view) {
         Composition comp = view.getComp();
         History.compClosed(comp);
-        comp.setView(null);
+        comp.closed();
 
         views.remove(view);
         if (views.isEmpty()) {
@@ -327,7 +327,7 @@ public class OpenImages {
 
         try {
             var comp = view.getComp();
-            if (comp.isDirty()) {
+            if (comp.isDirty() && !comp.isEmbedded()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // "Save"

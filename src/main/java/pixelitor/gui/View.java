@@ -720,7 +720,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         assert calledOnEDT() : threadInfo();
 
-        // can be casted outside unit tests
+        // can be cast outside unit tests
         LayerButton layerButton = (LayerButton) newLayer.createUI();
 
         try {

@@ -42,6 +42,11 @@ public class Messages {
         msgHandler.showInfo(title, message, null);
     }
 
+    public static void showNotImplementedForSmartObjects(String what) {
+        msgHandler.showInfo("Not Supported Yet",
+            what + " is not implemented yet if one of the layers is a smart object.", null);
+    }
+
     public static void showInfo(String title, String message, Component parent) {
         msgHandler.showInfo(title, message, parent);
     }

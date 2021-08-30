@@ -30,6 +30,7 @@ public class LayerNode extends DebugNode {
 
         addQuotedString("name", layer.getName());
         addClass();
+        addBoolean("active", layer.isActive());
 
         if (layer.hasMask()) {
             addString("has mask", "yes");

@@ -204,6 +204,20 @@ public abstract class Filter implements Serializable {
         return new SerializationProxy(this);
     }
 
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    public Filter copy() {
+        if (canHaveUserPresets()) {
+            // the serialization proxy can also create duplicates
+            return (Filter) new SerializationProxy(this).readResolve();
+        }
+
+        // can be shared if there are no settings
+        return this;
+    }
+
     /**
      * See the "Effective Java" book for the serialization proxy pattern.
      */
