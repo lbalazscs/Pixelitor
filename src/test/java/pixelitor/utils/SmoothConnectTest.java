@@ -134,7 +134,7 @@ public class SmoothConnectTest extends JPanel {
 
     private class IndexedParticle extends Particle {
         private static int idx = 0;
-        public int index;
+        public final int index;
 
         public IndexedParticle() {
             pos = new Point2D.Float();

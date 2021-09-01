@@ -74,12 +74,8 @@ public class ToneCurve {
     }
 
     private static boolean isClose(Point2D p, Point2D q) {
-        if (Math.abs(p.getX() - q.getX()) < NEARBY_RADIUS) {
-            if (Math.abs(p.getY() - q.getY()) < NEARBY_RADIUS) {
-                return true;
-            }
-        }
-        return false;
+        return Math.abs(p.getX() - q.getX()) < NEARBY_RADIUS
+               && Math.abs(p.getY() - q.getY()) < NEARBY_RADIUS;
     }
 
     private static void clampPoint(Point.Float p) {

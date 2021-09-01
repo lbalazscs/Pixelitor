@@ -24,7 +24,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 public class DisplacementMap extends ParametrizedFilter {
-    public static String NAME = "Displacement Map";
+    public static final String NAME = "Displacement Map";
 
     private final SelectImageParam imageParam = new SelectImageParam("Displacement Map");
     private final BooleanParam tileParam = new BooleanParam("Tile", false);

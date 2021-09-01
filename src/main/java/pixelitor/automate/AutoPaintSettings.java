@@ -43,7 +43,7 @@ class AutoPaintSettings {
     public static final int ANGLE_TYPE_RADIAL = 1;
     public static final int ANGLE_TYPE_CIRCULAR = 2;
     public static final int ANGLE_TYPE_NOISE = 3;
-    private int angleType;
+    private final int angleType;
 
     AutoPaintSettings(Tool tool, int numStrokes, int strokeLength,
                       boolean randomColors, float lengthVariability,

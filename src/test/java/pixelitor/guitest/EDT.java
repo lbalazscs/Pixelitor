@@ -210,8 +210,8 @@ public class EDT {
         return call(() -> fun.apply(OpenImages.getActiveLayer()));
     }
 
-    public static void assertActiveLayerTypeIs(Class expected) {
-        Class actual = activeLayer((Function<Layer, Class>) Layer::getClass);
+    public static void assertActiveLayerTypeIs(Class<? extends Layer> expected) {
+        Class<? extends Layer> actual = activeLayer((Function<Layer, Class<? extends Layer>>) Layer::getClass);
         if (expected != actual) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }

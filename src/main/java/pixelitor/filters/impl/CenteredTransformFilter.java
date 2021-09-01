@@ -25,10 +25,6 @@ import java.awt.image.BufferedImage;
  * Abstract superclass for transform filters with a center
  */
 public abstract class CenteredTransformFilter extends TransformFilter {
-    // relative center coordinates between 0 and 1
-    private float relCX;
-    private float relCY;
-
     // actual center coordinates in pixels
     protected float cx;
     protected float cy;
@@ -38,12 +34,9 @@ public abstract class CenteredTransformFilter extends TransformFilter {
     }
 
     public void setCenter(float centerX, float centerY, BufferedImage src) {
-        relCX = centerX;
-        relCY = centerY;
-
         // has to be calculated here, because some filter use these
         // values in other setters, before the filtering begins
-        cx = relCX * src.getWidth();
-        cy = relCY * src.getHeight();
+        cx = centerX * src.getWidth();
+        cy = centerY * src.getHeight();
     }
 }

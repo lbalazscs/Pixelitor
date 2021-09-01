@@ -996,13 +996,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderShapesSubmenu() {
         PMenu sub = new PMenu("Shapes");
 
-        sub.addFilter("Flower of Life", FlowerOfLife::new);
-        sub.addFilter("Grid", Grid::new);
+        sub.addFilter(FlowerOfLife.NAME, FlowerOfLife::new);
+        sub.addFilter(Grid.NAME, Grid::new);
         sub.addFilter(Lissajous.NAME, Lissajous::new);
         sub.addFilter(MysticRose.NAME, MysticRose::new);
         sub.addFilter(SpiderWeb.NAME, SpiderWeb::new);
         sub.addFilter(Spiral.NAME, Spiral::new);
-        sub.addFilter("Spirograph", Spirograph::new);
+        sub.addFilter(Spirograph.NAME, Spirograph::new);
 
         return sub;
     }

@@ -31,6 +31,8 @@ import java.util.*;
  * "Flower of Life" shape filter
  */
 public class FlowerOfLife extends ShapeFilter {
+    public static final String NAME = "Flower of Life";
+
     private static final int GRID_TYPE_TRIANGULAR = 1;
     private static final int GRID_TYPE_SQUARE = 2;
     private static final int GRID_TYPE_SQUARE_2 = 3;

@@ -107,13 +107,8 @@ public class FileUtils {
     }
 
     private static boolean isSupportedOutputExt(String extension) {
-        if (SUPPORTED_SAVE_EXTENSIONS.contains(extension)) {
-            return true;
-        }
-        if (SUPPORTED_EXPORT_EXTENSIONS.contains(extension)) {
-            return true;
-        }
-        return false;
+        return SUPPORTED_SAVE_EXTENSIONS.contains(extension)
+               || SUPPORTED_EXPORT_EXTENSIONS.contains(extension);
     }
 
     public static String replaceExt(String fileName, String newExt) {

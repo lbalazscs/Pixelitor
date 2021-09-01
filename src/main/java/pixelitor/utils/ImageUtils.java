@@ -138,16 +138,12 @@ public class ImageUtils {
     public static CompletableFuture<BufferedImage> resizeAsync(BufferedImage img,
                                                                int targetWidth,
                                                                int targetHeight) {
-        boolean progressiveBilinear = false;
-        if (targetWidth < img.getWidth() / 2
-            || targetHeight < img.getHeight() / 2) {
-            progressiveBilinear = true;
-        }
+        boolean progressiveBilinear = targetWidth < img.getWidth() / 2
+                                      || targetHeight < img.getHeight() / 2;
 
-        boolean finalProgressive = progressiveBilinear;
         return CompletableFuture.supplyAsync(() ->
             getFasterScaledInstance(img, targetWidth, targetHeight,
-                VALUE_INTERPOLATION_BICUBIC, finalProgressive), onPool);
+                VALUE_INTERPOLATION_BICUBIC, progressiveBilinear), onPool);
     }
 
     // From the Filthy Rich Clients book

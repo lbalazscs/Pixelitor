@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,16 +56,11 @@ public class IOTasks {
         return executor;
     }
 
-    public static synchronized boolean isProcessing(String absolutePath) {
+    public static synchronized boolean isProcessing(String path) {
         assert calledOnEDT() : threadInfo();
 
-        if (currentReadPaths.contains(absolutePath)) {
-            return true;
-        }
-        if (currentWritePaths.contains(absolutePath)) {
-            return true;
-        }
-        return false;
+        return currentReadPaths.contains(path)
+               || currentWritePaths.contains(path);
     }
 
     public static synchronized void markReadProcessing(String path) {

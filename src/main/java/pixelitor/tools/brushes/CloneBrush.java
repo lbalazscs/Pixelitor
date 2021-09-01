@@ -68,22 +68,16 @@ public class CloneBrush extends CopyBrush {
      * Marks the point where the cloning was started.
      * Called at the beginning of a new cloning stroke
      */
-    public void setCloningDestPoint(PPoint p) {
-        double destX = p.getImX();
-        double destY = p.getImY();
-        boolean reinitializeDistance = false;
+    public void setCloningDestPoint(PPoint dest) {
         // aligned = forces the source point to follow the mouse,
         // even after a stroke is completed
         // unaligned = the cloning distance is reinitialized for each stroke
-        if (!aligned || newSourcePoint) {
-            reinitializeDistance = true;
+        boolean reinitializeDistance = !aligned || newSourcePoint;
+        if (reinitializeDistance) {
+            dx = dest.getImX() - origSrcX;
+            dy = dest.getImY() - origSrcY;
         }
         newSourcePoint = false;
-
-        if (reinitializeDistance) {
-            dx = destX - origSrcX;
-            dy = destY - origSrcY;
-        }
     }
 
     /**

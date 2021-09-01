@@ -73,9 +73,8 @@ class ParamStateTest {
     @DisplayName("interpolation test")
     @ParameterizedTest(name = "#{index}: interpolate between {0} and {1}")
     @MethodSource("instancesToTest")
-    @SuppressWarnings("unchecked")
-    void interpolate(ParamState start, ParamState<?> end) {
-        ParamState<?> interpolated = start.interpolate(end, 0.0);
+    <T extends ParamState<T>> void interpolate(T start, T end) {
+        ParamState<T> interpolated = start.interpolate(end, 0.0);
         assertThat(interpolated).isNotNull();
 
         interpolated = start.interpolate(end, 0.5);

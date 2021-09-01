@@ -23,8 +23,8 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.geom.AffineTransform;
 
 /**
- * Something that can be transformed with an {@link AffineTransform}
- * created by a {@link TransformBox}
+ * A callback interface that is passed to a {@link TransformBox} so that something
+ * can be automatically transformed with the {@link AffineTransform} created by the box.
  */
 public interface Transformable {
     /**

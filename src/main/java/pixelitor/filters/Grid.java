@@ -27,6 +27,8 @@ import java.awt.geom.Path2D;
  * The "Render/Shapes/Grid" filter
  */
 public class Grid extends ShapeFilter {
+    public static final String NAME = "Grid";
+
     private static final int TYPE_RECTANGLE = 0;
     private static final int TYPE_HEXAGON = 1;
     private static final int TYPE_TRIANGLE = 2;

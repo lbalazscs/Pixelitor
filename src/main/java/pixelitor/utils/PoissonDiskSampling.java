@@ -207,8 +207,4 @@ public class PoissonDiskSampling {
     public List<Point2D> getSamples() {
         return samples;
     }
-
-    public int[][] getGrid() {
-        return grid;
-    }
 }

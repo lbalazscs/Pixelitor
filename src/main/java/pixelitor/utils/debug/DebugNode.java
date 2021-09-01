@@ -24,8 +24,7 @@ import java.util.Enumeration;
 import static java.lang.String.format;
 
 /**
- * The superclass of all debugging nodes that appear
- * in the "Pixelitor Internal State" JTree
+ * The superclass of all the nodes that appear in the tree shown by "Help/Internal State".
  */
 public class DebugNode extends DefaultMutableTreeNode {
     private final String name;

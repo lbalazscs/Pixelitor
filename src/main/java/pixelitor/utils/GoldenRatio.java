@@ -28,7 +28,7 @@ public class GoldenRatio {
 
     private final Color root;
     private final float colorRandomness;
-    float[] hsbColors;
+    final float[] hsbColors;
 
     public GoldenRatio(Random random, Color root, float colorRandomness) {
         this.root = root;

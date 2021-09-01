@@ -220,26 +220,22 @@ public class Shapes {
         int height = rect.height;
 
         if (width >= 0) {
-            if (height >= 0) {
-                return rect;
-            } else {
+            if (height < 0) {
                 rect.y += height;
                 rect.height = -height;
-                return rect;
             }
         } else {
             if (height >= 0) {
                 rect.x += width;
                 rect.width = -width;
-                return rect;
             } else {
                 rect.x += width;
                 rect.y += height;
                 rect.width = -width;
                 rect.height = -height;
-                return rect;
             }
         }
+        return rect;
     }
 
     public static Point2D calcCenter(Point2D p1, Point2D p2) {

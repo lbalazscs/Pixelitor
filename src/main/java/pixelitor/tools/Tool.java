@@ -352,7 +352,7 @@ public abstract class Tool implements KeyListener {
     }
 
     protected abstract static class ToolIcon extends VectorIcon {
-        public ToolIcon() {
+        protected ToolIcon() {
             super(Color.BLACK, ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
         }
     }

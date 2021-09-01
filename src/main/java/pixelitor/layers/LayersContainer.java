@@ -36,6 +36,7 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * The part of the GUI that manages the layers of a composition.
@@ -47,7 +48,9 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     private static final LayersContainer INSTANCE = new LayersContainer();
 
     private LayersContainer() {
-        setLayout(new BorderLayout());
+        super(new BorderLayout());
+
+        assert calledOnEDT();
 
         add(LayerBlendingModePanel.get(), NORTH);
 

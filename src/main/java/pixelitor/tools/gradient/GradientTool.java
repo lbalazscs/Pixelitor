@@ -209,8 +209,7 @@ public class GradientTool extends DragTool {
             double y = e.getCoY();
             activePoint.mouseDragged(x, y, e.isShiftDown());
         } else {
-            // if we are dragging a new gradient from scratch,
-            // we don't want to show the old handles
+            // if a new gradient is created from scratch, hide the old handles
             handles = null;
         }
 

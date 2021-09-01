@@ -103,15 +103,13 @@ public class GlobalEvents {
     }
 
     private static void addHotKey(char key, Action action, boolean caseSensitive) {
-        if (caseSensitive) {
-            hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
-        } else {
+        if (!caseSensitive) {
             assert Character.isUpperCase(key);
 
             // see issue #31 for why key codes and not key characters are used here
             hotKeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_DOWN_MASK), action);
-            hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
         }
+        hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
     }
 
     public static void init() {

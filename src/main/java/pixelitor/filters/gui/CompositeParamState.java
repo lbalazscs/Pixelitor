@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,23 +52,17 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
         List<ParamState<?>> interpolatedStates = new ArrayList<>();
         for (int i = 0; i < states.size(); i++) {
             // each ParamState is interpolated independently
-
-            // if you know how to get rid of the raw
-            // types here, let me know...
-            @SuppressWarnings("rawtypes")
-            ParamState state = states.get(i);
-
-            ParamState<?> endParamState = endState.get(i);
-
-            @SuppressWarnings("unchecked")
-            ParamState<?> interpolated = state.interpolate(
-                endParamState,
-                progress);
-
-            assert interpolated != null;
-            interpolatedStates.add(interpolated);
+            interpolatedStates.add(interpolateOne(endState, progress, i));
         }
         return new CompositeParamState(interpolatedStates);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ParamState<T>> ParamState<T> interpolateOne(CompositeParamState endState, double progress, int i) {
+        // The cast works at runtime because start and end have the same concrete type
+        T start = (T) states.get(i);
+        T end = (T) endState.get(i);
+        return start.interpolate(end, progress);
     }
 
     public Iterator<ParamState<?>> iterator() {

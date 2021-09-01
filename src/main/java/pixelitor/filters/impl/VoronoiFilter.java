@@ -141,10 +141,7 @@ public class VoronoiFilter extends PointFilter {
         }
         int colorUp = allPixels[pixelIndex - width];
         int colorDown = allPixels[pixelIndex + width];
-        if (color != colorUp || color != colorDown) {
-            return true;
-        }
-        return false;
+        return color != colorUp || color != colorDown;
     }
 
     private static boolean tryIsEdge(int width, int[] pixelsCopy, int i) {

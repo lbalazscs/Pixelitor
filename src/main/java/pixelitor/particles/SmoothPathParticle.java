@@ -28,7 +28,7 @@ import java.util.List;
 public abstract class SmoothPathParticle extends Particle {
     private final List<Point2D> pathPoints;
     private Graphics2D g2 = null;
-    protected Graphics2D[] gc;
+    protected final Graphics2D[] gc;
 
     protected SmoothPathParticle(Graphics2D[] gc) {
         this.pathPoints = new ArrayList<>();

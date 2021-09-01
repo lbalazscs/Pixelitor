@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * It is also used for the built-in presets.
  */
 public class FilterState {
-    private final Map<String, ParamState> states;
+    private final Map<String, ParamState<?>> states;
     private String name; // used only for presets
 
     public FilterState(ParamSet paramSet, boolean animOnly) {
@@ -54,7 +54,7 @@ public class FilterState {
             Collectors.toMap(FilterSetting::getName, FilterParam::copyState));
     }
 
-    private FilterState(Map<String, ParamState> states) {
+    private FilterState(Map<String, ParamState<?>> states) {
         this.states = states;
     }
 
@@ -64,9 +64,9 @@ public class FilterState {
     }
 
     public FilterState interpolate(FilterState endState, double progress) {
-        Map<String, ParamState> interpolatedStates = new HashMap<>();
+        Map<String, ParamState<?>> interpolatedStates = new HashMap<>();
 
-        for (Map.Entry<String, ParamState> entry : states.entrySet()) {
+        for (Map.Entry<String, ParamState<?>> entry : states.entrySet()) {
             // each ParamState is interpolated independently
             String paramName = entry.getKey();
 
@@ -85,7 +85,7 @@ public class FilterState {
         return states.get(name);
     }
 
-    public FilterState with(FilterParam param, ParamState state) {
+    public FilterState with(FilterParam param, ParamState<?> state) {
         states.put(param.getName(), state);
         return this;
     }
