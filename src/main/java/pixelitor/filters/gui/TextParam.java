@@ -42,7 +42,7 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
         return gui;
     }
 

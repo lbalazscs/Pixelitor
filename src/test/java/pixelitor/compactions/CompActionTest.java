@@ -33,6 +33,7 @@ import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithSelection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.Tools;
+import pixelitor.utils.QuadrantAngle;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ import java.util.Collection;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.*;
+import static pixelitor.utils.QuadrantAngle.*;
 
 @RunWith(Parameterized.class)
 public class CompActionTest {
@@ -250,7 +251,7 @@ public class CompActionTest {
         testRotate(ANGLE_270, "Rotate 90° CCW");
     }
 
-    private void testRotate(Rotate.SpecialAngle angle, String editName) {
+    private void testRotate(QuadrantAngle angle, String editName) {
         checkOriginalState();
         Composition rotated = new Rotate(angle).process(view.getComp()).join();
         assert rotated != origComp;
@@ -268,7 +269,7 @@ public class CompActionTest {
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
-    private void checkStateAfterRotate(Rotate.SpecialAngle angle) {
+    private void checkStateAfterRotate(QuadrantAngle angle) {
         var newComp = view.getComp();
 
         if (angle == ANGLE_180) {

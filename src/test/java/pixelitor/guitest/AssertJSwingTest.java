@@ -33,11 +33,11 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.AutoPaint;
+import pixelitor.automate.AutoPaintPanel;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
@@ -77,6 +77,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -167,7 +168,7 @@ public class AssertJSwingTest {
             app.runSlowly();
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testShapesTool();
+            testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -188,13 +189,6 @@ public class AssertJSwingTest {
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in ",
             getCurrentTimeHM(), Utils.formatMillis(totalTimeMillis));
-        final int secondsToWait = 5;
-        int remainingSeconds = secondsToWait;
-        do {
-            System.out.print(remainingSeconds + "...");
-            GUIUtils.showTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
-            Utils.sleep(1, SECONDS);
-        } while (--remainingSeconds > 0);
 
         app.exit();
     }
@@ -641,7 +635,7 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        runMenuCommand("Rasterize");
+        runMenuCommand("Rasterize Text Layer");
         keyboard.undoRedoUndo("Rasterize Text Layer");
 
         checkConsistency();
@@ -1031,27 +1025,7 @@ public class AssertJSwingTest {
     private void testNewImage() {
         log(1, "new image");
 
-        runMenuCommand("New Image...");
-        var dialog = findDialogByTitle("New Image");
-        dialog.textBox("widthTF").deleteText().enterText("611");
-        dialog.textBox("heightTF").deleteText().enterText("e");
-
-        // try to accept the dialog
-        dialog.button("ok").click();
-
-        app.expectAndCloseErrorDialog();
-
-        // correct the error
-        dialog.textBox("heightTF").deleteText().enterText("411");
-
-        // try again
-        dialog.button("ok").click();
-
-        // this time the dialog should close
-        dialog.requireNotVisible();
-
-        String activeCompName = EDT.active(Composition::getName);
-        assertThat(activeCompName).startsWith("Untitled");
+        app.createNewImage(611, 411, null);
 
         runMenuCommand("Close");
     }
@@ -1072,7 +1046,7 @@ public class AssertJSwingTest {
         log(1, "save, ext = " + extension);
 
         // create a new image to be saved
-        String compName = createNewImage();
+        app.createNewImage(400, 400, null);
         maskMode.set(this);
 
         // the new image is unsaved => has no file
@@ -1088,6 +1062,8 @@ public class AssertJSwingTest {
         System.out.println("AssertJSwingTest::testSave: found file chooser, file = " + file);
 
         boolean fileExistsAlready = file.exists();
+
+        String compName = EDT.active(Composition::getName);
 
         saveDialog.setCurrentDirectory(baseTestingDir);
         saveDialog.fileNameTextBox()
@@ -1127,23 +1103,11 @@ public class AssertJSwingTest {
         runMenuCommand("Close");
 
         if (dirty) {
-            closeDoYouWantToSaveChangesDialog();
+            app.closeDoYouWantToSaveChangesDialog();
         }
 
         maskMode.set(this);
         checkConsistency();
-    }
-
-    private String createNewImage() {
-        runMenuCommand("New Image...");
-        findDialogByTitle("New Image").button("ok").click();
-
-        assert !EDT.active(Composition::isDirty);
-
-        String compName = EDT.active(Composition::getName);
-        assertThat(compName).startsWith("Untitled");
-
-        return compName;
     }
 
     private void testExportOptimizedJPEG() {
@@ -1229,7 +1193,7 @@ public class AssertJSwingTest {
 
         int numOpenImages = EDT.call(OpenImages::getNumOpenImages);
         if (numOpenImages == 1) {
-            createNewImage();
+            app.createNewImage(400, 400, null);
         }
 
         EDT.assertNumOpenImagesIs(2);
@@ -1239,17 +1203,13 @@ public class AssertJSwingTest {
         runMenuCommand("Close");
 
         if (dirty) {
-            closeDoYouWantToSaveChangesDialog();
+            app.closeDoYouWantToSaveChangesDialog();
         }
 
         EDT.assertNumOpenImagesIs(1);
 
         maskMode.set(this);
         checkConsistency();
-    }
-
-    private void closeDoYouWantToSaveChangesDialog() {
-        app.findJOptionPane().buttonWithText("Don't Save").click();
     }
 
     private void testCloseAll() {
@@ -1367,7 +1327,7 @@ public class AssertJSwingTest {
                 continue;
             }
             if (tool == Tools.BRUSH) {
-                for (String colorSetting : AutoPaint.ConfigPanel.COLOR_SETTINGS) {
+                for (String colorSetting : AutoPaintPanel.COLOR_CHOICES) {
                     EDT.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
                     testAutoPaintWithTool(tool, colorSetting);
                 }
@@ -1674,8 +1634,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Channel Mixer", Randomize.YES,
             Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
             "R -> G -> B -> R", "R -> B -> G -> R",
-            "Average BW", "Luminosity BW", "Sepia",
-            "Normalize", "Randomize and Normalize");
+            "Average BW", "Luminosity BW", "Sepia");
         testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
@@ -1729,6 +1688,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersDislocate() {
+        testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
@@ -1738,6 +1698,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersLight() {
+        testFilterWithDialog("Bump Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Flashlight", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Glint", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1759,6 +1720,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
@@ -1785,7 +1747,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Oil Painting", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Random Spheres", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Spheres", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Smear", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Emboss", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Orton Effect", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1907,7 +1869,17 @@ public class AssertJSwingTest {
         log(1, "filter " + name);
 
         boolean testPresets = !quick;
-        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonsToClick);
+
+        Consumer<DialogFixture> extraButtonClicker = dialog -> {
+            for (String buttonText : extraButtonsToClick) {
+                JButtonFixture button = findButtonByText(dialog, buttonText);
+                if (button.isEnabled()) { // channel mixer presets might not be enabled
+                    button.click();
+                }
+            }
+        };
+
+        app.runFilterWithDialog(name, randomize, reseed, showOriginal, testPresets, extraButtonClicker);
 
         afterFilterRunActions(name);
     }
@@ -2192,17 +2164,17 @@ public class AssertJSwingTest {
         EDT.assertActiveToolIs(Tools.PEN);
         assertThat(EDT.getPenToolPath()).isNotNull();
 
-        findButtonByText(pw, "Stroke with Current Smudge")
+        pw.button("traceWithSmudge")
             .requireEnabled()
             .click();
         keyboard.undoRedo("Smudge");
 
-        findButtonByText(pw, "Stroke with Current Eraser")
+        pw.button("traceWithEraser")
             .requireEnabled()
             .click();
         keyboard.undoRedo("Eraser");
 
-        findButtonByText(pw, "Stroke with Current Brush")
+        pw.button("traceWithBrush")
             .requireEnabled()
             .click();
         keyboard.undoRedo(GUIText.BRUSH);
@@ -2219,7 +2191,7 @@ public class AssertJSwingTest {
         mouse.moveToScreen(rot.x, rot.y);
         mouse.dragToScreen(rot.x + 100, rot.y + 100);
 
-        findButtonByText(pw, "Stroke with Current Brush")
+        pw.button("traceWithBrush")
             .requireEnabled()
             .click();
     }

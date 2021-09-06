@@ -69,7 +69,7 @@ public class JHSparkle extends ParametrizedFilter {
             filter = new SparkleFilter(NAME);
         }
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         filter.setLightOnly(lightOnly.isChecked());
         filter.setRelativeCentreX(center.getRelativeX());

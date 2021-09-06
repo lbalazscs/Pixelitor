@@ -37,8 +37,8 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void setLayerName(String newName) {
-        name = newName;
+    public void updateName() {
+        name = layer.getName();
     }
 
     @Override
@@ -77,8 +77,8 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImageAsync(ImageLayer imageLayer) {
-        if (imageLayer instanceof LayerMask) {
+    public void updateLayerIconImageAsync(Layer layer) {
+        if (layer instanceof LayerMask) {
             numMaskIconUpdates++;
         } else {
             numLayerIconUpdates++;
@@ -106,5 +106,11 @@ public class TestLayerUI implements LayerUI {
     @Override
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
+        updateName();
+    }
+
+    @Override
+    public int getId() {
+        return 0; // not used in tests
     }
 }

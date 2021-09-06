@@ -53,4 +53,8 @@ public enum StrokeJoin {
     public String toString() {
         return guiName;
     }
+
+    public String toSVG() {
+        return "stroke-linejoin=\"" + guiName.toLowerCase() + "\"";
+    }
 }

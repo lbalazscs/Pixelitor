@@ -19,9 +19,9 @@ package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +50,7 @@ public class DialogParam extends AbstractFilterParam {
 
         paramGUI = new ConfigureParamGUI(this::configureDialog, defaultButton);
 
-        setGUIEnabledState();
+        afterGUICreation();
         return (JComponent) paramGUI;
     }
 
@@ -73,9 +73,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void adaptToImageSize(Dimension size) {
+    public void updateOptions(Drawable dr) {
         for (FilterParam child : children) {
-            child.adaptToImageSize(size);
+            child.updateOptions(dr);
         }
     }
 
@@ -180,10 +180,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public Object getParamValue() {
-        List<Object> childValues = Stream.of(children)
+    public List<Object> getParamValue() {
+        return Stream.of(children)
             .map(FilterParam::getParamValue)
             .collect(toList());
-        return childValues;
     }
 }

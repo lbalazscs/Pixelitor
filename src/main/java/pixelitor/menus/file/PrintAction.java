@@ -19,7 +19,6 @@ package pixelitor.menus.file;
 
 import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.utils.Messages;
 
@@ -69,13 +68,7 @@ public class PrintAction extends OpenImageEnabledAction implements Printable {
         JPanel p = new JPanel(new BorderLayout());
         PrintPreviewPanel previewPanel = new PrintPreviewPanel(page, this);
         JButton setupPageButton = new JButton("Setup Page...");
-        setupPageButton.addActionListener(e -> {
-            PageFormat newPage = job.pageDialog(pageToAttributes(page));
-            if (newPage != null) { // null if the dialog is canceled
-                page = newPage;
-                previewPanel.updatePage(page);
-            }
-        });
+        setupPageButton.addActionListener(e -> setupPageClicked(job, previewPanel));
         JPanel northPanel = new JPanel();
         northPanel.add(setupPageButton);
         p.add(northPanel, BorderLayout.NORTH);
@@ -89,6 +82,14 @@ public class PrintAction extends OpenImageEnabledAction implements Printable {
             .show();
     }
 
+    private void setupPageClicked(PrinterJob job, PrintPreviewPanel previewPanel) {
+        PageFormat newPage = job.pageDialog(pageToAttributes(page));
+        if (newPage != null) { // null if the dialog is canceled
+            page = newPage;
+            previewPanel.updatePage(page);
+        }
+    }
+
     private static PageFormat createDefaultPage(PrinterJob job, BufferedImage img) {
         PageFormat page = job.defaultPage();
         if (img.getWidth() > img.getHeight()) {
@@ -99,10 +100,11 @@ public class PrintAction extends OpenImageEnabledAction implements Printable {
         Paper paper = page.getPaper();
 
         float marginInch = 0.25f;
-        float margin = marginInch * 72;
+        float margin = marginInch * DPI;
         paper.setImageableArea(margin, margin,
             paper.getWidth() - 2 * margin, paper.getHeight() - 2 * margin);
         page.setPaper(paper);
+
         return page;
     }
 
@@ -113,23 +115,11 @@ public class PrintAction extends OpenImageEnabledAction implements Printable {
 
         boolean doPrint = job.printDialog(attributes);
         if (doPrint) {
-            var progressHandler = Messages.startProgress("Printing", -1);
+            var progressHandler = Messages.startProgress(
+                "Printing " + compName, -1);
             CompletableFuture.runAsync(() -> startPrintJob(job), onIOThread)
                 .thenRunAsync(progressHandler::stopProgress, onEDT);
         }
-    }
-
-    private PrintRequestAttributeSet createDefaultSettings(PageFormat pageFormat) {
-        PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
-
-        float margin = 0.25f;
-        Paper paper = page.getPaper();
-        attributes.add(new MediaPrintableArea(margin, margin,
-            (float) (paper.getWidth() / 72.0 - 2.0f * margin),
-            (float) (paper.getHeight() / 72.0 - 2.0f * margin),
-            MediaPrintableArea.INCH));
-
-        return attributes;
     }
 
     // Converts a PageFormat into a PrintRequestAttributeSet
@@ -168,7 +158,7 @@ public class PrintAction extends OpenImageEnabledAction implements Printable {
             job.setPageable(book);
             job.print();
         } catch (PrinterException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
     }
 

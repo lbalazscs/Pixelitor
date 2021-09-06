@@ -24,6 +24,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.DragTool;
@@ -71,11 +72,13 @@ public class GradientTool extends DragTool {
     private Gradient lastGradient;
     private boolean ignoreRegenerate = false;
 
+    private GradientFillLayer gradientLayer;
+
     public GradientTool() {
         super("Gradient", 'G', "gradient_tool.png",
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
-                "<b>Shift-drag</b> to constrain the direction. " +
-                "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
+            "<b>Shift-drag</b> to constrain the direction. " +
+            "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
             Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
     }
@@ -147,8 +150,22 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        DrawableAction.run(editName,
-            dr -> regenerateOnDrawable(dr, true, editName));
+        if (editingGradientLayer()) {
+            View view = OpenImages.getActiveView();
+            if (view != null) {
+                Drag renderedDrag = handles.toDrag(view);
+                if (!renderedDrag.isImClick()) {
+                    gradientLayer.setGradient(createGradient(renderedDrag));
+                }
+            }
+        } else {
+            DrawableAction.run(editName,
+                dr -> regenerateOnDrawable(dr, true, editName));
+        }
+    }
+
+    private boolean editingGradientLayer() {
+        return gradientLayer != null;
     }
 
     private void regenerateOnDrawable(Drawable dr,
@@ -234,8 +251,13 @@ public class GradientTool extends DragTool {
         }
 
         var comp = e.getComp();
-        Drawable dr = comp.getActiveDrawableOrThrow();
-        drawGradient(dr, renderedDrag, true, null);
+
+        if (editingGradientLayer()) {
+            gradientLayer.setGradient(createGradient(renderedDrag));
+        } else {
+            Drawable dr = comp.getActiveDrawableOrThrow();
+            drawGradient(dr, renderedDrag, true, null);
+        }
     }
 
     @Override
@@ -301,8 +323,17 @@ public class GradientTool extends DragTool {
 
     @Override
     public void editedObjectChanged(Layer layer) {
-        if (handles != null) {
-            hideHandles(layer.getComp(), false);
+        if (layer instanceof GradientFillLayer gfl) {
+            gradientLayer = gfl;
+            Gradient gradient = gfl.getGradient();
+            if (gradient != null) {
+                loadSettingsFromGradient(gradient, gfl.getComp().getView());
+            }
+        } else {
+            if (handles != null) {
+                hideHandles(layer.getComp(), false);
+            }
+            gradientLayer = null;
         }
     }
 
@@ -343,19 +374,23 @@ public class GradientTool extends DragTool {
         assert view != null;
 
         handles.arrowKeyPressed(key, view);
+        Drag handleDrag = handles.toDrag(view);
 
-        var comp = view.getComp();
-        Drawable dr = comp.getActiveDrawable();
-        if (dr == null) {
-            // It shouldn't be possible to have handles without drawable,
-            // but if somehow it does happen, then just move the handles.
-            comp.repaint(); // make the arrow movement visible
-            return false;
+        if (editingGradientLayer()) {
+            gradientLayer.setGradient(createGradient(handleDrag));
+        } else {
+            var comp = view.getComp();
+            Drawable dr = comp.getActiveDrawable();
+            if (dr == null) {
+                // It shouldn't be possible to have handles without drawable,
+                // but if somehow it does happen, then just move the handles.
+                comp.repaint(); // make the arrow movement visible
+                return false;
+            }
+
+            String editName = key.isShiftDown() ? "Shift-nudge Gradient" : "Nudge Gradient";
+            drawGradient(dr, handleDrag, true, editName);
         }
-
-        Drag renderedDrag = handles.toDrag(view);
-        String editName = key.isShiftDown() ? "Shift-nudge Gradient" : "Nudge Gradient";
-        drawGradient(dr, renderedDrag, true, editName);
 
         return true;
     }
@@ -374,11 +409,7 @@ public class GradientTool extends DragTool {
 
     private void drawGradient(Drawable dr, Drag drag,
                               boolean addToHistory, String editName) {
-        Gradient gradient = new Gradient(drag,
-            getType(), getCycleType(), getGradientColorType(),
-            revertCB.isSelected(),
-            blendingModePanel.getBlendingMode(),
-            blendingModePanel.getOpacity());
+        Gradient gradient = createGradient(drag);
 
         if (addToHistory) {
             boolean isFirst = lastGradient == null;
@@ -392,6 +423,14 @@ public class GradientTool extends DragTool {
         gradient.drawOn(dr);
         dr.getComp().update();
         lastGradient = gradient;
+    }
+
+    private Gradient createGradient(Drag drag) {
+        return new Gradient(drag,
+            getType(), getCycleType(), getGradientColorType(),
+            revertCB.isSelected(),
+            blendingModePanel.getBlendingMode(),
+            blendingModePanel.getOpacity());
     }
 
     @Override
@@ -460,14 +499,24 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        assert gradient != null;
-
         View view = comp.getView();
-        handles = gradient.createHandles(view);
 
         // set the settings
         ignoreRegenerate = true;
 
+        loadSettingsFromGradient(gradient, view);
+
+        ignoreRegenerate = false;
+        if (regenerate) {
+            regenerateOnDrawable(dr, false, null);
+        }
+
+        lastGradient = gradient;
+        view.repaint();
+    }
+
+    private void loadSettingsFromGradient(Gradient gradient, View view) {
+        handles = gradient.createHandles(view);
         colorTypeCB.setSelectedItem(gradient.getColorType());
         typeCB.setSelectedItem(gradient.getType());
         cycleMethodCB.setSelectedItem(cycleMethodToString(gradient.getCycleMethod()));
@@ -477,14 +526,6 @@ public class GradientTool extends DragTool {
 
         setFGColor(gradient.getFgColor(), false);
         setBGColor(gradient.getBgColor(), false);
-
-        ignoreRegenerate = false;
-        if (regenerate) {
-            regenerateOnDrawable(dr, false, null);
-        }
-
-        lastGradient = gradient;
-        view.repaint();
     }
 
     @Override

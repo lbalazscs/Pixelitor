@@ -57,7 +57,7 @@ public class BooleanParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new BooleanParamGUI(this, addDefaultButton, action);
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
 
         if (itemListeners != null) {
             // The item listeners for the GUI were temporarily stored here.

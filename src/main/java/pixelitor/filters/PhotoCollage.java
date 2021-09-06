@@ -85,7 +85,7 @@ public class PhotoCollage extends ParametrizedFilter {
         int numImages = numImagesParam.getValue();
         var pt = new StatusBarProgressTracker(NAME, numImages);
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         int xSize = size.getValue(0);
         int ySize = size.getValue(1);

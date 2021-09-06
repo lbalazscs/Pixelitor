@@ -57,7 +57,7 @@ public class Colors {
     public static Color rgbInterpolate(Color startColor, Color endColor, float progress) {
         int interpolatedRGB = ImageMath.mixColors(progress,
             startColor.getRGB(), endColor.getRGB());
-        return new Color(interpolatedRGB);
+        return new Color(interpolatedRGB, true);
     }
 
     /**
@@ -230,6 +230,13 @@ public class Colors {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
     }
 
+    public static int HSBAtoARGB(float[] hsb_col, int alpha) {
+        int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
+        col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
+        col |= (alpha << 24); // Add the alpha specified by user.
+        return col;
+    }
+
     public static String toHTMLHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
             String argb = format("%08X", c.getRGB());
@@ -265,11 +272,12 @@ public class Colors {
         selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
     }
 
-    public static void selectColorWithDialog(Window owner, String title,
-                                             Color selectedColor, boolean allowTransparency,
-                                             Consumer<Color> colorChangeListener) {
+    // returns true if the dialog was accepted
+    public static boolean selectColorWithDialog(Window owner, String title,
+                                                Color selectedColor, boolean allowTransparency,
+                                                Consumer<Color> colorChangeListener) {
         if (RandomGUITest.isRunning()) {
-            return;
+            return false;
         }
 
         Color prevColor = selectedColor;
@@ -280,6 +288,9 @@ public class Colors {
 
         if (color == null) {  // Cancel was pressed, reset the old color
             colorChangeListener.accept(prevColor);
+            return false;
+        } else {
+            return true;
         }
     }
 

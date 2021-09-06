@@ -58,8 +58,13 @@ public class CustomConvolveGUI extends FilterGUI {
             reset(size);
         } else {
             // use the last values
-            setMatrix(filter.getKernelMatrix());
-            collectValuesAndRun(null);
+            float[] kernelMatrix = filter.getKernelMatrix();
+            if (kernelMatrix == null) {
+                reset(size);
+            } else {
+                setMatrix(kernelMatrix);
+                collectValuesAndRun(null);
+            }
         }
     }
 

@@ -19,7 +19,6 @@ package pixelitor.gui.utils;
 
 import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 
 import static java.lang.String.format;
@@ -31,61 +30,83 @@ public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
-    public enum Condition {
-        ALWAYS(null) {
+    public static interface Condition {
+        boolean isAllowed(Layer layer);
+
+        String getErrorMessage(Layer layer);
+
+        String getErrorTitle();
+
+        public default void showErrorMessage(Layer layer) {
+            Messages.showInfo(getErrorTitle(), getErrorMessage(layer));
+        }
+
+        public Condition ALWAYS = new Condition() {
             @Override
-            boolean isAllowed(Layer layer) {
+            public boolean isAllowed(Layer layer) {
                 return true;
             }
 
             @Override
-            String getErrorMessage(Layer layer) {
+            public String getErrorMessage(Layer layer) {
                 return null;
             }
-        }, HAS_LAYER_MASK("No layer mask") {
+
             @Override
-            boolean isAllowed(Layer layer) {
+            public String getErrorTitle() {
+                return null;
+            }
+        };
+
+        public Condition HAS_LAYER_MASK = new Condition() {
+            @Override
+            public boolean isAllowed(Layer layer) {
                 return layer.hasMask();
             }
 
             @Override
-            String getErrorMessage(Layer layer) {
+            public String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" has no layer mask.", layer.getName());
             }
-        }, NO_LAYER_MASK("Has layer mask") {
+
             @Override
-            boolean isAllowed(Layer layer) {
+            public String getErrorTitle() {
+                return "No layer mask";
+            }
+        };
+
+        public Condition NO_LAYER_MASK = new Condition() {
+            @Override
+            public boolean isAllowed(Layer layer) {
                 return !layer.hasMask();
             }
 
             @Override
-            String getErrorMessage(Layer layer) {
+            public String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" already has a layer mask.", layer.getName());
-            }
-        }, IS_TEXT_LAYER("Not a text layer") {
-            @Override
-            boolean isAllowed(Layer layer) {
-                return layer instanceof TextLayer;
             }
 
             @Override
-            String getErrorMessage(Layer layer) {
-                return format("The layer \"%s\" is not a text layer.", layer.getName());
+            public String getErrorTitle() {
+                return "Has layer mask";
             }
         };
 
-        private final String errorDialogTitle;
+        public record ClassCondition(Class<? extends Layer> clazz, String desc) implements Condition {
+            @Override
+            public boolean isAllowed(Layer layer) {
+                return layer.getClass() == clazz;
+            }
 
-        Condition(String errorDialogTitle) {
-            this.errorDialogTitle = errorDialogTitle;
-        }
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return format("<html>The layer <b>%s</b> is not a %s.", layer.getName(), desc);
+            }
 
-        abstract boolean isAllowed(Layer layer);
-
-        abstract String getErrorMessage(Layer layer);
-
-        public void showErrorMessage(Layer layer) {
-            Messages.showInfo(errorDialogTitle, getErrorMessage(layer));
+            @Override
+            public String getErrorTitle() {
+                return "Not a " + desc;
+            }
         }
     }
 

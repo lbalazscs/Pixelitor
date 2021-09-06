@@ -639,15 +639,21 @@ class CompositionTest {
     }
 
     @Test
-    void changeStackIndex() {
+    void changeLayerIndex() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.changeStackIndex(layer, 1);
+        comp.changeLayerIndex(layer, 1);
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")
             .invariantIsOK();
+
+        History.undo("Layer Reordering");
+        assertThat(comp).layerNamesAre("layer 1", "layer 2");
+
+        History.redo("Layer Reordering");
+        assertThat(comp).layerNamesAre("layer 2", "layer 1");
     }
 
     @Test

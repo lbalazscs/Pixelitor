@@ -26,17 +26,14 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.TestHelper;
-import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
-import pixelitor.tools.util.PPoint;
 
 import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static pixelitor.tools.Tools.*;
 
@@ -52,7 +49,6 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Drawable dr;
-    private View view;
 
     @BeforeClass
     public static void beforeAllTests() {
@@ -80,7 +76,6 @@ public class AbstractBrushToolTest {
     @Before
     public void beforeEachTest() {
         var comp = TestHelper.createComp(2, false);
-        view = comp.getView();
 
         dr = comp.getActiveDrawableOrThrow();
 

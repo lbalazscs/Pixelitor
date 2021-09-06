@@ -184,6 +184,10 @@ public class EDT {
         run(() -> OpenImages.assertNumOpenImagesIsAtLeast(expected));
     }
 
+    public static int getNumLayersInActiveComp() {
+        return call(OpenImages::getNumLayersInActiveComp);
+    }
+
     public static void assertNumLayersIs(int expected) {
         run(() -> OpenImages.assertNumLayersIs(expected));
     }

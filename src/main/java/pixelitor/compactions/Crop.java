@@ -68,6 +68,11 @@ public class Crop implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
+        if (oldComp.hasSmartObjects()) {
+            Messages.showNotImplementedForSmartObjects("Cropping");
+            return CompletableFuture.completedFuture(oldComp);
+        }
+
         Rectangle roundedImCropRect = Shapes.roundCropRect(imCropRect);
         Canvas oldCanvas = oldComp.getCanvas();
 

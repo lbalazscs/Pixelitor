@@ -73,8 +73,8 @@ import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.*;
 import static pixelitor.gui.ImageArea.Mode.TABS;
+import static pixelitor.utils.QuadrantAngle.*;
 
 /**
  * An automatic test using java.awt.Robot, which performs
@@ -784,7 +784,7 @@ public class RandomGUITest {
         if (comp == null) {
             return false;
         }
-        return comp.hasActivePath() && comp.activeIsDrawable();
+        return comp.hasActivePath() && comp.activeAcceptsToolDrawing();
     }
 
     private static void randomRotateFlip() {

@@ -51,15 +51,11 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
         }
 
         try {
-            onClick(ctrlPressed);
+            var comp = OpenImages.getActiveComp();
+            comp.addNewEmptyImageLayer(comp.generateNewLayerName(), ctrlPressed);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
-    }
-
-    private void onClick(boolean addBellowActive) {
-        var comp = OpenImages.getActiveComp();
-        comp.addNewEmptyImageLayer(comp.generateNewLayerName(), addBellowActive);
     }
 
     @Override

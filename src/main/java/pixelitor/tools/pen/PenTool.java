@@ -25,6 +25,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.io.IO;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
@@ -57,6 +58,7 @@ public class PenTool extends Tool {
         new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
     private final Action toSelectionAction;
+    private final Action exportSVGAction;
     private final Action dumpPathAction;
 
     private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
@@ -70,11 +72,11 @@ public class PenTool extends Tool {
     private boolean rubberBand = true;
 
     private static final Action traceWithBrushAction = new TraceAction(
-        "Stroke with Current Brush", Tools.BRUSH);
+        "Stroke with Brush", Tools.BRUSH);
     private static final Action traceWithEraserAction = new TraceAction(
-        "Stroke with Current Eraser", Tools.ERASER);
+        "Stroke with Eraser", Tools.ERASER);
     private static final Action traceWithSmudgeAction = new TraceAction(
-        "Stroke with Current Smudge", Tools.SMUDGE);
+        "Stroke with Smudge", Tools.SMUDGE);
 
     private static final Action deletePath = new PAction("Delete Path") {
         @Override
@@ -94,6 +96,14 @@ public class PenTool extends Tool {
                 convertToSelection();
             }
         };
+
+        exportSVGAction = new PAction("Export SVG...") {
+            @Override
+            public void onClick() {
+                exportSVG();
+            }
+        };
+
         dumpPathAction = new PAction("Dump") {
             @Override
             public void onClick() {
@@ -118,7 +128,10 @@ public class PenTool extends Tool {
         rubberBandCB.setName("rubberBandCB");
 
         settingsPanel.addButton(toSelectionAction, "toSelectionButton",
-            "Convert the active path to a selection");
+            "Convert the path to a selection");
+        settingsPanel.addButton(exportSVGAction, "exportSVGButton",
+            "Export the path to an SVG file");
+
 
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
@@ -253,6 +266,10 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
 
         Tools.SELECTION.activate();
+    }
+
+    private static void exportSVG() {
+        IO.saveSVG(path.toImageSpaceShape(), null);
     }
 
     @Override
@@ -441,9 +458,9 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
-    // TODO enable them while building, as soon as the path != null
     public void enableActions(boolean b) {
         toSelectionAction.setEnabled(b);
+        exportSVGAction.setEnabled(b);
 
         traceWithBrushAction.setEnabled(b);
         traceWithEraserAction.setEnabled(b);

@@ -169,7 +169,15 @@ public final class ConsistencyChecks {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean imageCoversCanvas(Composition comp) {
-        comp.forEachDrawable(ConsistencyChecks::imageCoversCanvas);
+        // doesn't call Composition.forEachDrawable in order to exclude smart objects
+        comp.forEachLayer(layer -> {
+            if (layer.getClass() == ImageLayer.class) {
+                imageCoversCanvas((ImageLayer) layer);
+            }
+            if (layer.hasMask()) {
+                imageCoversCanvas(layer.getMask());
+            }
+        });
         return true;
     }
 

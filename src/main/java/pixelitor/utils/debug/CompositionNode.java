@@ -19,9 +19,7 @@ package pixelitor.utils.debug;
 
 import pixelitor.Composition;
 import pixelitor.guides.Guides;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
 import pixelitor.tools.pen.Paths;
 
 import java.awt.image.BufferedImage;
@@ -40,7 +38,7 @@ public class CompositionNode extends DebugNode {
     public CompositionNode(String name, Composition comp) {
         super(name, comp);
 
-        comp.forEachLayer(this::addLayerNode);
+        comp.forEachLayer(layer -> add(layer.createDebugNode()));
 
         BufferedImage compositeImage = comp.getCompositeImage();
         add(createBufferedImageNode("composite image", compositeImage));
@@ -88,28 +86,6 @@ public class CompositionNode extends DebugNode {
         addInt("canvas im width", canvasWidth);
         int canvasHeight = comp.getCanvasHeight();
         addInt("canvas im height", canvasHeight);
-    }
-
-    private void addLayerNode(Layer layer) {
-        if (layer instanceof ImageLayer imageLayer) {
-            addImageLayerNode(imageLayer);
-        } else if (layer instanceof TextLayer textLayer) {
-            addTextLayerNode(textLayer);
-        } else {
-            addQuotedString("layer class", layer.getClass().getName());
-        }
-    }
-
-    private void addImageLayerNode(ImageLayer layer) {
-        String name = createNameForLayer(layer);
-
-        add(new ImageLayerNode(name, layer));
-    }
-
-    private void addTextLayerNode(TextLayer layer) {
-        String name = createNameForLayer(layer);
-
-        add(new TextLayerNode(name, layer));
     }
 
     private static String createNameForLayer(Layer layer) {

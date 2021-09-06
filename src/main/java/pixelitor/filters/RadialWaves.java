@@ -64,7 +64,7 @@ public class RadialWaves extends ParametrizedFilter {
             filter = new RadialWavesFilter();
         }
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setPhase(phase.getPercentageValF());

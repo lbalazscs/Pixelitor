@@ -19,10 +19,10 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -147,7 +147,7 @@ public class ParamSet {
     /**
      * Allows registering an action that will run before "reset all"
      */
-    public void setBeforeResetAction(Runnable beforeResetAction) {
+    public void setBeforeResetAllAction(Runnable beforeResetAction) {
         this.beforeResetAction = beforeResetAction;
     }
 
@@ -190,9 +190,9 @@ public class ParamSet {
         }
     }
 
-    public void adaptToImageSize(Dimension size) {
+    public void updateOptions(Drawable dr) {
         for (FilterParam param : paramList) {
-            param.adaptToImageSize(size);
+            param.updateOptions(dr);
         }
     }
 

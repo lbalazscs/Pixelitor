@@ -665,6 +665,12 @@ public class ImageUtils {
         return copy;
     }
 
+    public static Boolean isSubImage(BufferedImage src) {
+        WritableRaster raster = src.getRaster();
+        return raster.getSampleModelTranslateX() != 0
+               || raster.getSampleModelTranslateY() != 0;
+    }
+
     // Can copy an image which was created by BufferedImage.getSubimage
     public static BufferedImage copySubImage(BufferedImage src) {
         BufferedImage copy = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
@@ -945,25 +951,16 @@ public class ImageUtils {
                                         BufferedImage bumpImage,
                                         String filterName) {
         return bumpMap(src, bumpImage,
-            (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
+            (float) DEG_315_IN_RADIANS, 2.0f, filterName, false);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
                                         BufferedImage bumpImage,
-                                        float azimuth, float elevation, float bumpHeight,
-                                        String filterName) {
-        return bumpMap(src, bumpImage, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
-    }
-
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpImage, Composite composite,
-                                        float azimuth, float elevation, float bumpHeight,
-                                        String filterName) {
-        // TODO optimize it so that the bumpImage can be smaller, and an offset is given - useful for text effects
-        // tiling could be also an option
-
+                                        float azimuth, float bumpHeight,
+                                        String filterName, boolean tile) {
         var embossFilter = new EmbossFilter(filterName);
         embossFilter.setAzimuth(azimuth);
-        embossFilter.setElevation(elevation);
+        embossFilter.setElevation((float) (Math.PI / 6.0));
         embossFilter.setBumpHeight(bumpHeight);
 
         BufferedImage bumpMap = embossFilter.filter(bumpImage, null);
@@ -971,8 +968,25 @@ public class ImageUtils {
         BufferedImage dest = copyImage(src);
 
         Graphics2D g = dest.createGraphics();
-        g.setComposite(composite);
-        g.drawImage(bumpMap, 0, 0, null);
+        g.setComposite(BlendComposite.HardLight);
+        if (tile) {
+            // If 3 is not subtracted here, then for some reason
+            // there are 3 pixel wide gaps between the tiles.
+            int bumpMapWidth = Math.max(bumpMap.getWidth() - 3, 1);
+            int bumpMapHeight = Math.max(bumpMap.getHeight() - 3, 1);
+
+            int numHorTiles = dest.getWidth() / bumpMapWidth + 1;
+            int numVerTiles = dest.getHeight() / bumpMapHeight + 1;
+            for (int i = 0; i < numHorTiles; i++) {
+                for (int j = 0; j < numVerTiles; j++) {
+                    int x = i * bumpMapWidth;
+                    int y = j * bumpMapHeight;
+                    g.drawImage(bumpMap, x, y, null);
+                }
+            }
+        } else {
+            g.drawImage(bumpMap, 0, 0, null);
+        }
         g.dispose();
 
         return dest;
@@ -1150,7 +1164,8 @@ public class ImageUtils {
      * (anti-aliased) selection clipping, following ideas from
      * https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
      */
-    public static Graphics2D setupForSoftSelection(Image image, Shape selShape, int selStartX, int selStartY) {
+    public static Graphics2D setupForSoftSelection(Image image, Shape selShape,
+                                                   int selStartX, int selStartY) {
         Graphics2D tmpG = (Graphics2D) image.getGraphics();
 
         // fill with transparent pixels

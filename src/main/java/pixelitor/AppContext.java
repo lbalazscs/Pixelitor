@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Lazy;
 
 import static pixelitor.utils.Threads.calledOnEDT;
@@ -43,6 +44,7 @@ public enum AppContext {
     };
 
     // feature flags to avoid diverging branches
+    public static boolean enableExperimentalFeatures = AppPreferences.loadExperimentalFeatures();
     public static final boolean enableAdjLayers = false;
     public static final boolean enableImageMode = false;
 

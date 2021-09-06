@@ -86,6 +86,7 @@ public class TestHelper {
         var comp = mock(Composition.class);
         var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
+        when(comp.isOpen()).thenReturn(true);
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasBounds()).thenReturn(
             new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));

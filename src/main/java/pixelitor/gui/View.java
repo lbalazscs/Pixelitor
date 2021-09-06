@@ -562,7 +562,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
 
         setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
-        scrollRectToVisible(rect.getCo());
+        scrollRectToVisible(imageToComponentSpace(zoomRect));
     }
 
     public void increaseZoom() {
@@ -720,7 +720,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         assert calledOnEDT() : threadInfo();
 
-        // can be casted outside unit tests
+        // can be cast outside unit tests
         LayerButton layerButton = (LayerButton) newLayer.createUI();
 
         try {
@@ -736,9 +736,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             Layers.numLayersChanged(comp, comp.getNumLayers());
         }
 
-        if (newLayer instanceof ImageLayer imageLayer) {
-            imageLayer.updateIconImage();
-        }
+        newLayer.updateIconImage();
         if (newLayer.hasMask()) {
             newLayer.getMask().updateIconImage();
         }

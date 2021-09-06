@@ -18,14 +18,12 @@
 package pixelitor.filters;
 
 import pixelitor.colors.Colors;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Rnd;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
@@ -36,7 +34,6 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -81,7 +78,7 @@ public class Starburst extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         dest = ImageUtils.copyImage(src);
 

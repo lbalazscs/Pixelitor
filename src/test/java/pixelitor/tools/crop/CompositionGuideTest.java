@@ -22,6 +22,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatcher;
 import pixelitor.TestHelper;
 import pixelitor.guides.GuidesRenderer;
+import pixelitor.utils.Geometry;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -88,7 +89,7 @@ class CompositionGuideTest {
         compositionGuide.setType(GOLDEN_SECTIONS);
         compositionGuide.draw(rect, g2);
 
-        double phi = 1.618;
+        double phi = Geometry.GOLDEN_RATIO;
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
 

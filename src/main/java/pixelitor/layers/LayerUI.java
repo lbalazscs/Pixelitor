@@ -23,7 +23,7 @@ import pixelitor.utils.VisibleForTesting;
  * The user interface of a {@link Layer}
  */
 public interface LayerUI {
-    void setLayerName(String newName);
+    void updateName();
 
     boolean hasMaskIcon();
 
@@ -38,7 +38,7 @@ public interface LayerUI {
 
     void removeMaskIcon();
 
-    void updateLayerIconImageAsync(ImageLayer layer);
+    void updateLayerIconImageAsync(Layer layer);
 
     /**
      * Sets the border around the icon according to the selection state
@@ -48,4 +48,6 @@ public interface LayerUI {
     void setSelected(boolean b);
 
     void changeLayer(Layer newLayer);
+
+    public int getId();
 }

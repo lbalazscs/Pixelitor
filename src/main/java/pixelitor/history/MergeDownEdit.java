@@ -22,6 +22,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -35,11 +36,11 @@ public class MergeDownEdit extends PixelitorEdit {
     private final DeleteLayerEdit deleteLayerEdit;
     private final MaskViewMode maskViewMode;
     private final Layer layer;
-    private final ImageLayer imageLayer;
+    private final ImageLayer bellowLayer;
 
     public MergeDownEdit(Composition comp,
                          Layer layer,
-                         ImageLayer imageLayer,
+                         ImageLayer bellowLayer,
                          BufferedImage backupImage,
                          MaskViewMode maskViewMode,
                          int activeIndex) {
@@ -47,9 +48,9 @@ public class MergeDownEdit extends PixelitorEdit {
 
         this.layer = layer;
         this.maskViewMode = maskViewMode;
-        this.imageLayer = imageLayer;
+        this.bellowLayer = bellowLayer;
 
-        imageEdit = new ImageEdit("", comp, imageLayer, backupImage, true);
+        imageEdit = new ImageEdit("", comp, bellowLayer, backupImage, true);
         imageEdit.setEmbedded(true);
         deleteLayerEdit = new DeleteLayerEdit(comp, layer, activeIndex);
         deleteLayerEdit.setEmbedded(true);
@@ -62,7 +63,7 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.undo();
         deleteLayerEdit.undo();
 
-        imageLayer.updateIconImage();
+        bellowLayer.updateIconImage();
 
         // restore the original mask view mode of the merged layer
         if (layer.hasMask()) {
@@ -77,7 +78,7 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.redo();
         deleteLayerEdit.redo();
 
-        imageLayer.updateIconImage();
+        bellowLayer.updateIconImage();
     }
 
     @Override
@@ -86,5 +87,18 @@ public class MergeDownEdit extends PixelitorEdit {
 
         imageEdit.die();
         deleteLayerEdit.die();
+    }
+
+    @Override
+    public DebugNode createDebugNode() {
+        DebugNode node = super.createDebugNode();
+
+        node.add(layer.createDebugNode());
+        node.add(bellowLayer.createDebugNode());
+        node.addString("mask view mode", maskViewMode.toString());
+        node.add(imageEdit.createDebugNode());
+        node.add(deleteLayerEdit.createDebugNode());
+
+        return node;
     }
 }

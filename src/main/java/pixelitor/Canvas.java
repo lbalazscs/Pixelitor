@@ -19,12 +19,15 @@ package pixelitor;
 
 import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -168,6 +171,14 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
+    public Point2D getImCenter() {
+        return new Point2D.Double(width / 2.0, height / 2.0);
+    }
+
+    public double getAspectRatio() {
+        return width / (double) height;
+    }
+
     public Shape invertShape(Shape shape) {
         Area area = new Area(shape);
         Area fullArea = new Area(getBounds());
@@ -212,6 +223,10 @@ public class Canvas implements Serializable {
 
     public boolean hasDifferentSizeThan(BufferedImage img) {
         return width != img.getWidth() || height != img.getHeight();
+    }
+
+    public PPoint getRandomPoint(View view) {
+        return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
     }
 
     @Override

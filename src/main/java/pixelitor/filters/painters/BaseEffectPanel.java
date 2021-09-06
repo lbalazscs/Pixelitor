@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import pixelitor.utils.Rnd;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
 import java.util.Objects;
 
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -42,6 +43,8 @@ import static pixelitor.gui.GUIText.OPACITY;
  */
 public abstract class BaseEffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
+    private ActionListener enableCBActionListener;
+
     private final ColorSwatch colorSwatch;
 
     private final boolean defaultEnabled;
@@ -141,12 +144,14 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
     public abstract void setBrushWidth(double value);
 
     public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
-        if (this.adjustmentListener != null) {
-            throw new IllegalStateException("only one is allowed");
-        }
-
         this.adjustmentListener = adjustmentListener;
-        enabledCB.addActionListener(e -> adjustmentListener.paramAdjusted());
+
+        if (enableCBActionListener != null) {
+            // avoid accumulating action listeners on the checkbox
+            enabledCB.removeActionListener(enableCBActionListener);
+        }
+        enableCBActionListener = e -> adjustmentListener.paramAdjusted();
+        enabledCB.addActionListener(enableCBActionListener);
 
         opacityRange.setAdjustmentListener(adjustmentListener);
     }

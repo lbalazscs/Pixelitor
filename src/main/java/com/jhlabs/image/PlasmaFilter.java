@@ -17,7 +17,8 @@ limitations under the License.
 package com.jhlabs.image;
 
 import java.awt.Rectangle;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Date;
+import java.util.SplittableRandom;
 
 public class PlasmaFilter extends WholeImageFilter {
     private static final int DO_PLASMA_CALL_PER_UNIT = 200_000;
@@ -26,18 +27,27 @@ public class PlasmaFilter extends WholeImageFilter {
     public float turbulence = 1.0f;
     private float scaling = 0.0f;
     private Colormap colormap = new LinearColormap();
-    private ThreadLocalRandom random;
+    private SplittableRandom random;
+    private long seed = 567;
     private boolean useColormap = false;
 
     private boolean lessColors = false;
 
     public PlasmaFilter(String filterName) {
         super(filterName);
-        random = ThreadLocalRandom.current();
+        random = new SplittableRandom();
     }
 
     public void setLessColors(boolean lessColors) {
         this.lessColors = lessColors;
+    }
+
+    public void setSeed(int seed) {
+        this.seed = seed;
+    }
+
+    public int getSeed() {
+        return (int) seed;
     }
 
     /**
@@ -99,7 +109,7 @@ public class PlasmaFilter extends WholeImageFilter {
     }
 
     public void randomize() {
-        random = ThreadLocalRandom.current();
+        seed = new Date().getTime();
     }
 
     private int randomRGB() {
@@ -119,7 +129,7 @@ public class PlasmaFilter extends WholeImageFilter {
         int b = rgb & 0xff;
 
         if (lessColors) {
-            int d = (int) (amount * (random.nextFloat() - 0.5));
+            int d = (int) (amount * (random.nextDouble() - 0.5));
 
             int r1 = r + d;
             int g1 = g + d;
@@ -129,9 +139,9 @@ public class PlasmaFilter extends WholeImageFilter {
             g = PixelUtils.clamp(g1);
             b = PixelUtils.clamp(b1);
         } else {
-            int r1 = r + (int) (amount * (random.nextFloat() - 0.5));
-            int g1 = g + (int) (amount * (random.nextFloat() - 0.5));
-            int b1 = b + (int) (amount * (random.nextFloat() - 0.5));
+            int r1 = r + (int) (amount * (random.nextDouble() - 0.5));
+            int g1 = g + (int) (amount * (random.nextDouble() - 0.5));
+            int b1 = b + (int) (amount * (random.nextDouble() - 0.5));
 
             r = PixelUtils.clamp(r1);
             g = PixelUtils.clamp(g1);
@@ -250,7 +260,8 @@ public class PlasmaFilter extends WholeImageFilter {
             return outPixels;
         }
 
-//        random.setSeed(seed);
+        random = new SplittableRandom(seed);
+        //random.setSeed(seed);
 
         int w1 = width - 1;
         int h1 = height - 1;

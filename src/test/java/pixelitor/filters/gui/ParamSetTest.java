@@ -22,8 +22,6 @@ import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
-import java.awt.Dimension;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -49,7 +47,7 @@ class ParamSetTest {
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParamAtIndex(extraParam, 3);
-        params.adaptToImageSize(new Dimension(400, 800));
+        params.updateOptions(TestHelper.createEmptyImageLayer(TestHelper.createEmptyComp(), "layer"));
     }
 
     @Test

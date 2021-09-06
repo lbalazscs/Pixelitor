@@ -18,7 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.FilterContext;
-import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
@@ -48,7 +49,7 @@ public abstract class Filter implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private transient FilterAction filterAction;
+    private transient String name;
 
     // used for making sure that there are no
     // unnecessary filter executions triggered
@@ -75,10 +76,13 @@ public abstract class Filter implements Serializable {
      * The normal starting point, used when called from the menu.
      * Overwritten for filters with GUI.
      * Filters that work normally without a dialog can still have a
-     * dialog when invoked from places like "Random Filter"
+     * dialog when invoked from places like "Random Filter".
+     *
+     * @return true if the filter was not cancelled
      */
-    public void startOn(Drawable dr, boolean reset) {
+    public boolean startOn(Drawable dr, boolean reset) {
         startOn(dr, FILTER_WITHOUT_DIALOG);
+        return true;
     }
 
     /**
@@ -125,11 +129,11 @@ public abstract class Filter implements Serializable {
             }
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +
-                    "composition = '%s'%n" +
-                    "layer = '%s' (%s)%n" +
-                    "hasMask = '%s'%n" +
-                    "mask editing = '%b'%n" +
-                    "params = %s",
+                "composition = '%s'%n" +
+                "layer = '%s' (%s)%n" +
+                "hasMask = '%s'%n" +
+                "mask editing = '%b'%n" +
+                "params = %s",
                 getName(), layer.getComp().getName(),
                 layer.getName(), layer.getClass().getSimpleName(),
                 layer.hasMask(), layer.isMaskEditing(), paramsAsString());
@@ -169,17 +173,17 @@ public abstract class Filter implements Serializable {
         return dest;
     }
 
-    public void setFilterAction(FilterAction filterAction) {
-        this.filterAction = filterAction;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {
-        if (filterAction != null) {
-            return filterAction.getName();
+        if (name != null) {
+            return name;
         }
-        // We cannot assume that a FilterAction always exists because the
+        // We cannot assume that a name always exists because the
         // filter can be created directly when it is not necessary
-        // to put it in a menu. Therefore return the class name.
+        // to put it in a menu. 
         return getClass().getSimpleName();
     }
 
@@ -193,5 +197,65 @@ public abstract class Filter implements Serializable {
 
     public String paramsAsString() {
         return "";
+    }
+
+    @Serial
+    protected Object writeReplace() {
+        return new SerializationProxy(this);
+    }
+
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    public Filter copy() {
+        if (canHaveUserPresets()) {
+            // the serialization proxy can also create duplicates
+            return (Filter) new SerializationProxy(this).readResolve();
+        }
+
+        // can be shared if there are no settings
+        return this;
+    }
+
+    /**
+     * See the "Effective Java" book for the serialization proxy pattern.
+     */
+    private static class SerializationProxy implements Serializable {
+        @Serial
+        private static final long serialVersionUID = -1398273003180176188L;
+
+        private final Class<? extends Filter> filterClass;
+        private final String filterName;
+
+        // The serialized state of the filter in preset form
+        private String filterState;
+
+        public SerializationProxy(Filter filter) {
+            filterClass = filter.getClass();
+            filterName = filter.getName();
+
+            if (filter instanceof FilterWithGUI fwg && fwg.canHaveUserPresets()) {
+                filterState = fwg.createUserPreset("").saveToString();
+            }
+        }
+
+        @Serial
+        protected Object readResolve() {
+            Filter filter = null;
+            try {
+                filter = filterClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                System.out.println("SerializationProxy::readResolve: could not instantiate " + filterClass.getName());
+                Messages.showException(e);
+            }
+            filter.setName(filterName);
+            if (filter instanceof FilterWithGUI fwg && fwg.canHaveUserPresets() && filterState != null) {
+                UserPreset preset = new UserPreset("", null);
+                preset.loadFromString(filterState);
+                fwg.loadUserPreset(preset);
+            }
+            return filter;
+        }
     }
 }

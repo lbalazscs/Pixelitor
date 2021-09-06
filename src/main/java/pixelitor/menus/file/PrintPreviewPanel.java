@@ -17,7 +17,7 @@
 
 package pixelitor.menus.file;
 
-import pixelitor.gui.utils.Dialogs;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -89,7 +89,7 @@ public class PrintPreviewPanel extends JPanel {
         try {
             printable.print(g2, pageFormat, 0);
         } catch (PrinterException e) {
-            Dialogs.showExceptionDialog(e);
+            Messages.showException(e);
         }
         g2.setTransform(origTransform);
     }

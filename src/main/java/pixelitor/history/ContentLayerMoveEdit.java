@@ -19,7 +19,6 @@ package pixelitor.history;
 
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
-import pixelitor.utils.debug.ContentLayerNode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -101,7 +100,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         } else {
             node.addString("image edit", "null");
         }
-        node.add(new ContentLayerNode(layer));
+        node.add(layer.createDebugNode("layer"));
 
         return node;
     }

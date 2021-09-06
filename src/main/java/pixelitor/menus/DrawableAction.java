@@ -38,26 +38,27 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
+    private final boolean allowSmartObjects;
 
     private final boolean allowMasks;
 
     protected DrawableAction(String name) {
-        this(name, true, true);
+        this(name, true, false);
     }
 
     protected DrawableAction(String name, boolean hasDialog) {
         this(name, hasDialog, true);
     }
 
-    private DrawableAction(String name, boolean hasDialog, boolean allowMasks) {
+    private DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
         this.hasDialog = hasDialog;
+        this.allowSmartObjects = allowSmartObjects;
+        this.allowMasks = true;
         assert name != null;
 
         this.name = name;
         menuName = hasDialog ? name + "..." : name;
         setText(menuName);
-
-        this.allowMasks = allowMasks;
     }
 
     /**
@@ -98,26 +99,28 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
                     name + " cannot be applied to masks.");
             }
         } else if (layer instanceof ImageLayer imageLayer) {
-            process(imageLayer);
-        } else if (layer instanceof TextLayer textLayer) {
+            if (!allowSmartObjects && imageLayer instanceof SmartObject so) {
+                boolean rasterize = showRasterizeDialog(layer);
+                if (rasterize) {
+                    ImageLayer newImageLayer = so.replaceWithRasterized();
+                    process(newImageLayer);
+                }
+            } else {
+                process(imageLayer);
+            }
+        } else if (layer.isRasterizable()) {
             if (RandomGUITest.isRunning()) {
                 return;
             }
 
-            boolean isNoun = name.contains("Tool");
-            String firstName = isNoun ? "The " + name : name;
-            String secondName = isNoun ? "the " + name : name;
+            // special case: gradient tool is allowed on Gradient Fill Layers
+            if (layer.getClass() == GradientFillLayer.class && name.equals("Gradient Tool")) {
+                return;
+            }
 
-            String msg = format("<html>The active layer <i>\"%s\"</i> is a text layer.<br><br>" +
-                    "%s needs pixels and cannot be used on text layers.<br>" +
-                    "If you rasterize this text layer, you can use %s,<br>" +
-                    "but the text will no longer be editable.",
-                layer.getName(), firstName, secondName);
-
-            String[] options = {"Rasterize", GUIText.CANCEL};
-
-            if (Dialogs.showOKCancelWarningDialog(msg, "Text Layer", options, 1)) {
-                ImageLayer newImageLayer = textLayer.replaceWithRasterized();
+            boolean rasterize = showRasterizeDialog(layer);
+            if (rasterize) {
+                ImageLayer newImageLayer = layer.replaceWithRasterized();
                 process(newImageLayer);
             }
         } else if (layer instanceof AdjustmentLayer) {
@@ -126,6 +129,25 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }
+    }
+
+    private boolean showRasterizeDialog(Layer layer) {
+        boolean isNoun = name.contains("Tool");
+        String firstName = isNoun ? "The " + name : name;
+        String secondName = isNoun ? "the " + name : name;
+
+        String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
+                            "%s cannot be used on %ss.<br>" +
+                            "If you rasterize this %s, you can use %s,<br>" +
+                            "but the layer will become a regular image layer.",
+            layer.getName(), layer.getTypeStringLC(), firstName,
+            layer.getTypeStringLC(), layer.getTypeStringLC(), secondName);
+
+        String[] options = {"Rasterize", GUIText.CANCEL};
+
+        boolean rasterize = Dialogs.showOKCancelWarningDialog(msg,
+            layer.getTypeStringUC(), options, 1);
+        return rasterize;
     }
 
     public String getName() {

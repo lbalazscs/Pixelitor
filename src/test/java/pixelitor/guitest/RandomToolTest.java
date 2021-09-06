@@ -849,9 +849,9 @@ public class RandomToolTest {
         }
 
         String[] texts = {
-            "Stroke with Current Brush",
-            "Stroke with Current Eraser",
-            "Stroke with Current Smudge",
+            "Stroke with Brush",
+            "Stroke with Eraser",
+            "Stroke with Smudge",
             "Convert to Selection"
         };
         clickRandomToolButton(texts);

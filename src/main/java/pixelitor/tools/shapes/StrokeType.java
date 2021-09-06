@@ -26,6 +26,7 @@ import com.jhlabs.awt.WobbleStroke;
 import com.jhlabs.awt.ZigzagStroke;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.TaperingStroke;
 
 import java.awt.BasicStroke;
 import java.awt.Shape;
@@ -169,6 +170,27 @@ public enum StrokeType {
         @Override
         public void setShapeType(ShapeType shapeType) {
             this.shapeType = shapeType;
+        }
+
+        @Override
+        public int getExtraThickness(int specifiedWidth) {
+            return 0;
+        }
+    },
+    TAPERING("Tapering", false) {
+        @Override
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+            return new TaperingStroke(width);
+        }
+
+        @Override
+        public int getExtraThickness(int specifiedWidth) {
+            return 0;
+        }
+    }, TAPERING_REV("Reversed Tapering", false) {
+        @Override
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+            return new TaperingStroke(width, true);
         }
 
         @Override

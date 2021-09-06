@@ -23,6 +23,7 @@ import pixelitor.history.History;
 import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -33,6 +34,8 @@ import java.io.Serial;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**
  * A layer mask.
@@ -237,5 +240,33 @@ public class LayerMask extends ImageLayer {
     @Override
     public String getName() {
         return "mask of " + owner.getName();
+    }
+
+    @Override
+    public BufferedImage createIconThumbnail() {
+        // same as for the image layer, but without checkerboard painter
+        BufferedImage img = getCanvasSizedSubImage();
+        BufferedImage thumb = createThumbnail(img, thumbSize, null);
+        return thumb;
+    }
+
+    @Override
+    public String getTypeStringLC() {
+        return "layer mask";
+    }
+
+    @Override
+    public String getTypeStringUC() {
+        return "Layer Mask";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        node.addBoolean("enabled", getOwner().isMaskEnabled());
+        node.addBoolean("linked", isLinked());
+
+        return node;
     }
 }

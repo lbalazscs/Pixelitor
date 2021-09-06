@@ -55,7 +55,7 @@ public class FlowerOfLife extends ShapeFilter {
     }
 
     @Override
-    protected Shape createShape(int width, int height) {
+    protected Path2D createShape(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         double r = radius.getValueAsDouble();

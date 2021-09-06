@@ -60,7 +60,7 @@ public class Sphere3D extends ParametrizedFilter {
         filter.setBeta(beta.getPercentageValF());
         filter.setGamma(gamma.getPercentageValF());
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setInterpolation(interpolation.getValue());
         filter.setEdgeAction(TransformFilter.TRANSPARENT);
 

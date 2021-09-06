@@ -317,8 +317,15 @@ public class Selection {
     }
 
     public void moveWhileDragging(double relImX, double relImY) {
-        var at = AffineTransform.getTranslateInstance(relImX, relImY);
-        shape = at.createTransformedShape(moveStartShape);
+        if (moveStartShape instanceof Rectangle2D startRect) {
+            // preserve the type information
+            shape = new Rectangle2D.Double(
+                startRect.getX() + relImX, startRect.getY() + relImY,
+                startRect.getWidth(), startRect.getHeight());
+        } else {
+            var at = AffineTransform.getTranslateInstance(relImX, relImY);
+            shape = at.createTransformedShape(moveStartShape);
+        }
     }
 
     public PixelitorEdit endMovement() {
@@ -344,6 +351,7 @@ public class Selection {
         node.addBoolean("dead", dead);
         node.addBoolean("frozen", frozen);
         node.addBoolean("marching", isMarching());
+        node.addBoolean("rectangular", isRectangular());
 
         node.addString("shape class", shape.getClass().getName());
         node.addString("bounds", getShapeBounds().toString());

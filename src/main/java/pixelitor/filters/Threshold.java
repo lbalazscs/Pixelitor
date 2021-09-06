@@ -17,17 +17,14 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.Colors;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.lookup.LuminanceLookup;
-import pixelitor.filters.util.FilterUtils;
-import pixelitor.gui.GUIText;
+import pixelitor.filters.levels.Channel;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static com.jhlabs.image.ImageMath.clamp;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -37,132 +34,75 @@ public class Threshold extends ParametrizedFilter {
     private static final String THRESHOLD = i18n("threshold");
     public static final String NAME = THRESHOLD;
 
-    private static final int LUMINOSITY = 1;
-    private static final int RED = 2;
-    private static final int GREEN = 3;
-    private static final int BLUE = 4;
-    private static final int SATURATION = 5;
-
-    private final RangeParam threshold = new RangeParam(THRESHOLD, 0,
-        128, 255, false, BORDER);
-
-    private final IntChoiceParam criterion = new IntChoiceParam("Based on", new Item[]{
-        new Item("Luminosity", LUMINOSITY),
-        new Item("Red Channel", RED),
-        new Item("Green Channel", GREEN),
-        new Item("Blue Channel", BLUE),
-        new Item(GUIText.SATURATION, SATURATION),
-    });
+    private final EnumParam<Channel> channelParam = Channel.asParam();
+    private final RangeParam thresholdParam = new RangeParam(THRESHOLD, 0, 128, 255);
+    private final RangeParam dithering = new RangeParam("Dithering Amount (%)", 0, 0, 100);
 
     public Threshold() {
         super(true);
 
-        setParams(threshold, criterion);
+        setParams(channelParam, thresholdParam, dithering);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int basedOn = criterion.getValue();
-        RGBPixelOp pixelOp = rgbPixelOp(threshold.getValueAsDouble(), basedOn);
-        return FilterUtils.runRGBPixelOp(pixelOp, src, dest);
-    }
+        boolean dither = dithering.getValue() != 0;
+        double ditherStrength = dithering.getPercentageValD();
+        BufferedImage input;
+        if (dither) {
+            input = ImageUtils.copyImage(src);
+        } else {
+            input = src;
+        }
 
-    private static RGBPixelOp rgbPixelOp(double threshold, int basedOn) {
-        return switch (basedOn) {
-            case LUMINOSITY -> luminosityPixelOp(threshold);
-            case RED -> redPixelOp(threshold);
-            case GREEN -> greenPixelOp(threshold);
-            case BLUE -> bluePixelOp(threshold);
-            case SATURATION -> saturationPixelOp(threshold);
-            default -> throw new IllegalStateException("basedOn = " + basedOn);
-        };
-    }
+        double threshold = thresholdParam.getValueAsDouble();
+        Channel channel = channelParam.getSelected();
+        int[] inputData = ImageUtils.getPixelsAsArray(input);
+        int[] destData = ImageUtils.getPixelsAsArray(dest);
 
-    private static RGBPixelOp luminosityPixelOp(double threshold) {
-        return (a, r, g, b) -> {
-            double luminosity = LuminanceLookup.from(r, g, b);
-            if (luminosity > threshold) {
-                r = 255;
-                g = 255;
-                b = 255;
+        int width = src.getWidth();
+        int length = inputData.length;
+        for (int i = 0; i < length; i++) {
+            int rgb = inputData[i];
+
+            int r = (rgb >>> 16) & 0xFF;
+            int g = (rgb >>> 8) & 0xFF;
+            int b = rgb & 0xFF;
+            int out;
+
+            double value = channel.getValue(r, g, b);
+            if (value > threshold) {
+                out = 255;
             } else {
-                r = 0;
-                g = 0;
-                b = 0;
+                out = 0;
             }
 
-            return a << 24 | r << 16 | g << 8 | b;
-        };
-    }
-
-    private static RGBPixelOp redPixelOp(double threshold) {
-        return (a, r, g, b) -> {
-            if (r > threshold) {
-                r = 255;
-                g = 255;
-                b = 255;
-            } else {
-                r = 0;
-                g = 0;
-                b = 0;
-            }
-
-            return a << 24 | r << 16 | g << 8 | b;
-        };
-    }
-
-    private static RGBPixelOp greenPixelOp(double threshold) {
-        return (a, r, g, b) -> {
-            if (g > threshold) {
-                r = 255;
-                g = 255;
-                b = 255;
-            } else {
-                r = 0;
-                g = 0;
-                b = 0;
-            }
-
-            return a << 24 | r << 16 | g << 8 | b;
-        };
-    }
-
-    private static RGBPixelOp bluePixelOp(double threshold) {
-        return (a, r, g, b) -> {
-            if (b > threshold) {
-                r = 255;
-                g = 255;
-                b = 255;
-            } else {
-                r = 0;
-                g = 0;
-                b = 0;
-            }
-
-            return a << 24 | r << 16 | g << 8 | b;
-        };
-    }
-
-    private static RGBPixelOp saturationPixelOp(double threshold) {
-        return new RGBPixelOp() {
-            final float satThreshold = (float) (threshold / 255.0f);
-
-            @Override
-            public int changeRGB(int a, int r, int g, int b) {
-                float sat = Colors.calcSaturation(r, g, b);
-                if (sat > satThreshold) {
-                    r = 255;
-                    g = 255;
-                    b = 255;
-                } else {
-                    r = 0;
-                    g = 0;
-                    b = 0;
+            if (dither) {
+                double error = (value - out) * ditherStrength;
+                // Floyd–Steinberg dithering
+                if (i + 1 < length) {
+                    addError(inputData, i + 1, (int) (error * 7.0 / 16));
                 }
-
-                return a << 24 | r << 16 | g << 8 | b;
+                int bellowIndex = i + width;
+                if (bellowIndex + 1 < length) {
+                    addError(inputData, bellowIndex - 1, (int) (error * 3.0 / 16));
+                    addError(inputData, bellowIndex, (int) (error * 5.0 / 16));
+                    addError(inputData, bellowIndex + 1, (int) (error / 16));
+                }
             }
-        };
+
+            destData[i] = 0xFF << 24 | out << 16 | out << 8 | out;
+        }
+
+        return dest;
+    }
+
+    private static void addError(int[] pixels, int index, int value) {
+        int rgb = pixels[index];
+        int r = clamp(((rgb >>> 16) & 0xFF) + value, 0, 255);
+        int g = clamp(((rgb >>> 8) & 0xFF) + value, 0, 255);
+        int b = clamp((rgb & 0xFF) + value, 0, 255);
+        pixels[index] = r << 16 | g << 8 | b;
     }
 
     @Override

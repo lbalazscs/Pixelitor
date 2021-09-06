@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -58,8 +59,8 @@ public class StrokeParam extends AbstractFilterParam {
 
         strokeTypeParam.setupDisableOtherIf(dashedParam,
             strokeType -> strokeType != BASIC
-                && strokeType != ZIGZAG
-                && strokeType != SHAPE);
+                          && strokeType != ZIGZAG
+                          && strokeType != SHAPE);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class StrokeParam extends AbstractFilterParam {
         defaultButton = new DefaultButton(this);
         paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, defaultButton);
 
-        setGUIEnabledState();
+        afterGUICreation();
         return (JComponent) paramGUI;
     }
 
@@ -129,8 +130,23 @@ public class StrokeParam extends AbstractFilterParam {
             strokeWidth,
             strokeCapParam.getSelected().getValue(),
             strokeJoinParam.getSelected().getValue(),
-            dashFloats
-        );
+            dashFloats);
+    }
+
+    public Stroke createStrokeWithRandomWidth(Random random, float randomness) {
+        float strokeWidth = strokeWidthParam.getValueAsFloat();
+        strokeWidth += strokeWidth * randomness * random.nextFloat();
+
+        float[] dashFloats = null;
+        if (dashedParam.isChecked()) {
+            dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
+        }
+
+        return getStrokeType().createStroke(
+            strokeWidth,
+            strokeCapParam.getSelected().getValue(),
+            strokeJoinParam.getSelected().getValue(),
+            dashFloats);
     }
 
     @Override
@@ -279,10 +295,9 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public Object getParamValue() {
-        List<Object> childValues = Stream.of(allParams)
+    public List<Object> getParamValue() {
+        return Stream.of(allParams)
             .map(FilterParam::getParamValue)
             .collect(toList());
-        return childValues;
     }
 }

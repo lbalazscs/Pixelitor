@@ -173,7 +173,6 @@ public enum BrushType {
             settings.setTool(tool);
             settingsByTool.put(tool, settings);
         }
-        assert settings != null;
         return settings;
     }
 }

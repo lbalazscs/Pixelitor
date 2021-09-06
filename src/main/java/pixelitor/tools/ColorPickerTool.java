@@ -47,7 +47,7 @@ public class ColorPickerTool extends Tool {
     private static final String SAMPLE_LABEL_TEXT = "Sample Only the Active Layer/Mask";
     private static final String HELP_TEXT =
         "<b>click</b> to pick the foreground color, " +
-            "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
+        "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
 
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
@@ -96,10 +96,8 @@ public class ColorPickerTool extends Tool {
         } else {
             img = comp.getCompositeImage();
         }
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
 
-        if (x < imgWidth && y < imgHeight && x >= 0 && y >= 0) {
+        if (x < img.getWidth() && y < img.getHeight() && x >= 0 && y >= 0) {
             int rgb = img.getRGB(x, y);
 
             showColorInStatusBar(x, y, rgb, isGray);
@@ -124,9 +122,8 @@ public class ColorPickerTool extends Tool {
             msg += ", gray = " + r;
         } else {
             float[] hsbValues = Color.RGBtoHSB(r, g, b, null);
-
             msg += format(", alpha = %d, red = %d, green = %d, blue = %d, " +
-                    "hue = %.2f, saturation = %.2f, brightness = %.2f",
+                          "hue = %.2f, saturation = %.2f, brightness = %.2f",
                 a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 

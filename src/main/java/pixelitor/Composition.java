@@ -91,6 +91,9 @@ public class Composition implements Serializable {
     private Guides guides;
     private ImageMode mode;
 
+    // not null if this is the content of a smart object
+    private SmartObject owner;
+
     //
     // transient variables from here
     //
@@ -181,6 +184,7 @@ public class Composition implements Serializable {
 
         compCopy.newLayerCount = newLayerCount;
         compCopy.mode = mode;
+        compCopy.owner = owner;
 
         if (copySelection && selection != null) {
             compCopy.setSelectionRef(new Selection(selection, forUndo));
@@ -193,9 +197,9 @@ public class Composition implements Serializable {
             compCopy.file = file;
             compCopy.name = name;
             compCopy.view = view;
-            // the new guides are set in the action that needed the undo
+            // the new guides are set in the action that needed undo
         } else { // duplicate
-            compCopy.dirty = true;
+            compCopy.dirty = false;
             compCopy.file = null;
             compCopy.name = createCopyName(stripExtension(name));
             compCopy.view = null;
@@ -240,9 +244,9 @@ public class Composition implements Serializable {
             canvas.recalcCoSize(view, true);
         }
 
-        if (selection != null) { // can happen when duplicating
+        if (selection != null) {
             if (view == null) {
-                throw new IllegalStateException(); // should deselect first
+                selection.die();
             } else {
                 selection.setView(view);
             }
@@ -252,6 +256,21 @@ public class Composition implements Serializable {
                 paths.setView(view);
             }
         }
+    }
+
+    public void closed() {
+        setView(null);
+        if (owner != null) {
+            owner.contentClosed(this);
+        }
+    }
+
+    public void setOwner(SmartObject owner) {
+        this.owner = owner;
+    }
+
+    public boolean isEmbedded() {
+        return owner != null;
     }
 
     public Canvas getCanvas() {
@@ -274,12 +293,20 @@ public class Composition implements Serializable {
         return canvas.clip(shape);
     }
 
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
+    public PPoint getRandomPointInCanvas() {
+        return canvas.getRandomPoint(view);
     }
 
     public boolean isDirty() {
         return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public boolean isOpen() {
+        return view != null;
     }
 
     public String getName() {
@@ -419,13 +446,18 @@ public class Composition implements Serializable {
     public void addAllLayersToGUI() {
         assert checkInvariant();
 
-        // when adding layer buttons, the last layer gets active
-        // but here we don't want to change the selected layer
-        Layer previousActiveLayer = activeLayer;
+        Layer activeLayerBefore = activeLayer;
 
+        // this shouldn't change the active layer here,
+        // but sets the last button to selected
         layerList.forEach(this::addLayerToGUI);
+        assert activeLayer == activeLayerBefore;
 
-        setActiveLayer(previousActiveLayer);
+        // correct the selection
+        LayerButton ui = (LayerButton) activeLayer.getUI();
+        if (!ui.isSelected()) {
+            ui.setSelected(true);
+        }
     }
 
     private void addLayerToGUI(Layer layer) {
@@ -627,8 +659,8 @@ public class Composition implements Serializable {
         forEachDrawable(Drawable::updateIconImage);
     }
 
-    public boolean activeIsDrawable() {
-        if (activeLayer instanceof ImageLayer) {
+    public boolean activeAcceptsToolDrawing() {
+        if (activeLayer.getClass() == ImageLayer.class) { // but not smart objects
             return true;
         }
         if (activeLayer.isMaskEditing()) {
@@ -665,15 +697,24 @@ public class Composition implements Serializable {
 
     /**
      * Returns the active mask or image layer.
-     * Calling this method assumes that the active layer is a Drawable.
+     * Calling this method assumes that the active layer is a {@link Drawable}.
      */
     public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
-            throw new IllegalStateException("The active layer is not an image layer or a mask, it is "
-                + activeLayer.getClass().getSimpleName());
+            throw new IllegalStateException("not drawable: "
+                                            + activeLayer.getClass().getSimpleName());
         }
         return dr;
+    }
+
+    public boolean hasSmartObjects() {
+        for (Layer layer : layerList) {
+            if (layer.getClass() == SmartObject.class) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void startMovement(MoveMode mode, boolean duplicateLayer) {
@@ -692,8 +733,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void moveActiveContent(MoveMode mode,
-                                  double relImX, double relImY) {
+    public void moveActiveContent(MoveMode mode, double relImX, double relImY) {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
             layer.moveWhileDragging(relImX, relImY);
@@ -777,6 +817,8 @@ public class Composition implements Serializable {
         changeLayerOrder(oldIndex, newIndex, false, null);
     }
 
+    // Called when the layer order is changed by an action.
+    // The GUI has to be updated.
     public void changeLayerOrder(int oldIndex, int newIndex,
                                  boolean addToHistory, String editName) {
         if (newIndex < 0) {
@@ -800,6 +842,19 @@ public class Composition implements Serializable {
         if (addToHistory) {
             History.add(new LayerOrderChangeEdit(editName, this, oldIndex, newIndex));
         }
+    }
+
+    // Called when the layer order is changed by drag-reordering in the GUI.
+    // The GUI doesn't have to be updated.
+    public void changeLayerIndex(Layer layer, int newIndex) {
+        int oldIndex = layerList.indexOf(layer);
+
+        layerList.remove(layer);
+        layerList.add(newIndex, layer);
+        update();
+
+        History.add(new LayerOrderChangeEdit(
+            "Layer Reordering", this, oldIndex, newIndex));
     }
 
     public void raiseLayerSelection() {
@@ -828,7 +883,7 @@ public class Composition implements Serializable {
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
 
-    public BufferedImage calculateCompositeImage() {
+    private BufferedImage calculateCompositeImage() {
         if (layerList.size() == 1) { // shortcut
             Layer firstLayer = layerList.get(0);
             if (firstLayer instanceof ImageLayer layer) {
@@ -1241,12 +1296,6 @@ public class Composition implements Serializable {
         }
 
         enlargeCanvas.process(this);
-    }
-
-    public void changeStackIndex(Layer layer, int newIndex) {
-        layerList.remove(layer);
-        layerList.add(newIndex, layer);
-        update();
     }
 
     // called from assertions and unit tests

@@ -17,24 +17,20 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.FilterContext;
 import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
-import pixelitor.utils.ImageTrimUtil;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.ImageLayerNode;
-import pixelitor.utils.debug.LayerNode;
+import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.*;
@@ -56,7 +52,9 @@ import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.*;
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
 import static pixelitor.utils.ImageUtils.copyImage;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -68,6 +66,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         PREVIEW, // a filter dialog is shown
         SHOW_ORIGINAL // a filter dialog is shown + "Show Original" is checked
     }
+
+    private static final CheckerboardPainter checkerBoardPainter
+        = ImageUtils.createCheckerboardPainter();
 
     @Serial
     private static final long serialVersionUID = 2L;
@@ -107,7 +108,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient boolean imageContentChanged = false;
 
-    private ImageLayer(Composition comp, String name) {
+    ImageLayer(Composition comp, String name) {
         super(comp, name);
     }
 
@@ -229,7 +230,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        PXCFormat.serializeImage(out, image);
+        if (serializeImage()) {
+            PXCFormat.serializeImage(out, image);
+        }
     }
 
     @Serial
@@ -243,8 +246,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
         trimmedBoundingBox = null;
 
         in.defaultReadObject();
-        setImage(PXCFormat.deserializeImage(in));
+        if (serializeImage()) {
+            setImage(PXCFormat.deserializeImage(in));
+        }
         imageContentChanged = false;
+    }
+
+    boolean serializeImage() {
+        return true;
     }
 
     public State getState() {
@@ -397,8 +406,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    private void setPreviewWithSelection(BufferedImage newImage) {
-        previewImage = replaceSelectedRegion(previewImage, newImage, false);
+    @Override
+    public boolean isRasterizable() {
+        return false;
+    }
+
+    private void setPreviewWithSelection(BufferedImage newPreview) {
+        previewImage = replaceSelectedRegion(previewImage, newPreview, false);
 
         setState(PREVIEW);
         imageRefChanged();
@@ -437,14 +451,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g.dispose();
             return src;
         } else if (selection.isRectangular()) {
-            // rectangular selection, simple clipping is good,
-            // because there are no aliasing problems
+            // rectangular selection, simple selection shape clipping
+            // is enough, because there are no aliasing problems
             Graphics2D g = src.createGraphics();
             g.translate(-getTx(), -getTy());
+
+            // transparency comes from the new image
             g.setComposite(AlphaComposite.Src);
             Shape shape = selection.getShape();
             g.setClip(shape);
-            // add 1 for consistency with other code
             Rectangle bounds = selection.getShapeBounds();
             g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
@@ -458,6 +473,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g2.dispose();
 
             Graphics2D srcG = src.createGraphics();
+//            srcG.setComposite(AlphaComposite.Src);
             srcG.drawImage(tmpImg, bounds.x - getTx(), bounds.y - getTy(), null);
             srcG.dispose();
 
@@ -522,7 +538,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // from the real image after the previews
         imageRefChanged();
 
-        previewImage = null;
         comp.update();
     }
 
@@ -532,10 +547,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            var edit = new ImageEdit(filterName, comp, this,
-                getSelectedSubImage(true),
-                false);
-            History.add(edit);
+            History.add(new ImageEdit(filterName, comp, this,
+                getSelectedSubImage(true), false));
         }
 
         image = previewImage;
@@ -545,8 +558,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             updateIconImage();
             invalidateTrimCache();
         }
-
-        previewImage = null;
 
         boolean wasShowOriginal = state == SHOW_ORIGINAL;
         setState(NORMAL);
@@ -574,7 +585,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void changePreviewImage(BufferedImage img, String filterName, FilterContext context) {
+    public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
@@ -587,9 +598,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null :
             format("previewImage was null with %s, context = %s, class = %s",
                 filterName, context, getClass().getSimpleName());
-        assert img != null;
+        assert newPreview != null;
 
-        if (img == image) {
+        if (newPreview == image) {
             // this can happen if a filter with preview decides that no
             // change is necessary and returns the src
 
@@ -608,7 +619,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         } else {
             imageContentChanged = true; // history will be necessary
 
-            setPreviewWithSelection(img);
+            setPreviewWithSelection(newPreview);
         }
     }
 
@@ -726,8 +737,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private boolean imageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle imageBounds = getContentBounds();
-        boolean needsEnlarging = !imageBounds.contains(canvasBounds);
-        return needsEnlarging;
+        return !imageBounds.contains(canvasBounds);
     }
 
     /**
@@ -787,7 +797,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void rotate(Rotate.SpecialAngle angle) {
+    public void rotate(QuadrantAngle angle) {
         int tx = getTx();
         int ty = getTy();
         int txAbs = -tx;
@@ -1155,17 +1165,18 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    // called when the image variable points to a new reference
+    // called when the visible image's variable
+    // points to a new reference
     protected void imageRefChanged() {
         // empty here, but overridden in LayerMask
         // to update the transparency image
     }
 
     @Override
-    public void updateIconImage() {
-        if (ui != null) {
-            ui.updateLayerIconImageAsync(this);
-        }
+    public BufferedImage createIconThumbnail() {
+        BufferedImage img = getCanvasSizedSubImage();
+        BufferedImage thumb = createThumbnail(img, thumbSize, checkerBoardPainter);
+        return thumb;
     }
 
     /**
@@ -1173,9 +1184,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * to the transparency of the layer
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
-        // the image reference will not be replaced
         BufferedImage oldImage = copyImage(image);
-
         LayerMask oldMask = mask;
         MaskViewMode oldMode = comp.getView().getMaskViewMode();
 
@@ -1206,21 +1215,36 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
+    public String getTypeStringLC() {
+        return "image layer";
+    }
+
+    @Override
+    public String getTypeStringUC() {
+        return "Image Layer";
+    }
+
+    @Override
     public Layer getLayer() {
         return this;
     }
 
     @Override
-    public DebugNode createDebugNode(String description) {
-        return new ImageLayerNode(LayerNode.descrToName(description, this), this);
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        node.addString("state", state.toString());
+        node.add(DebugNodes.createBufferedImageNode("image", image));
+
+        return node;
     }
 
     public String toDebugCanvasString() {
         return "{canvasWidth=" + comp.getCanvasWidth()
-            + ", canvasHeight=" + comp.getCanvasHeight()
-            + ", tx=" + getTx()
-            + ", ty=" + getTy()
-            + ", imgWidth=" + image.getWidth()
+               + ", canvasHeight=" + comp.getCanvasHeight()
+               + ", tx=" + getTx()
+               + ", ty=" + getTy()
+               + ", imgWidth=" + image.getWidth()
             + ", imgHeight=" + image.getHeight()
             + '}';
     }

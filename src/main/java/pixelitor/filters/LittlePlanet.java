@@ -67,7 +67,7 @@ public class LittlePlanet extends ParametrizedFilter {
         filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
         filter.setInverted(invert.isChecked());
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

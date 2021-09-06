@@ -21,6 +21,7 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
@@ -98,7 +99,7 @@ public class Tools {
         currentTool = newTool;
     }
 
-    private static void startAndSelect(Tool newTool) {
+    public static void startAndSelect(Tool newTool) {
         start(newTool);
 
         // start doesn't select the button, because it is
@@ -174,6 +175,11 @@ public class Tools {
 
     public static void editedObjectChanged(Layer layer) {
         assert currentTool != null || AppContext.isUnitTesting();
+        if (layer.getClass() == GradientFillLayer.class) {
+            if (currentTool != GRADIENT) {
+                startAndSelect(GRADIENT);
+            }
+        }
         if (currentTool != null) {
             currentTool.editedObjectChanged(layer);
         }

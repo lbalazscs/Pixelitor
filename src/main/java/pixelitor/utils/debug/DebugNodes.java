@@ -110,6 +110,8 @@ public class DebugNodes {
         var node = new DebugNode("writable raster", raster);
 
         node.addClass();
+        node.addInt("sample model tx", raster.getSampleModelTranslateX());
+        node.addInt("sample model ty", raster.getSampleModelTranslateY());
         node.add(createSampleModelNode(raster.getSampleModel()));
         node.add(createDataBufferNode(raster.getDataBuffer()));
 

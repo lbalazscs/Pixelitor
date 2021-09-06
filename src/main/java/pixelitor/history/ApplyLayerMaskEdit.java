@@ -23,7 +23,6 @@ import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
-import pixelitor.utils.debug.LayerMaskNode;
 import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -89,7 +88,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode();
 
         node.add(new LayerNode(layer));
-        node.add(new LayerMaskNode("old mask", oldMask));
+        node.add(oldMask.createDebugNode("old mask"));
         node.add(DebugNodes.createBufferedImageNode("old image", oldImage));
         node.addString("old mode", oldMode.toString());
 

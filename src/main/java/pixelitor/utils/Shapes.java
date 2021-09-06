@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import net.jafama.FastMath;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
@@ -30,6 +31,7 @@ import java.util.List;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.geom.PathIterator.*;
+import static java.lang.String.format;
 
 /**
  * Static shape-related utility methods
@@ -247,6 +249,29 @@ public class Shapes {
         );
     }
 
+    public static String toSVGPath(Shape shape) {
+        StringBuilder sb = new StringBuilder();
+        PathIterator pathIterator = shape.getPathIterator(null);
+        double[] coords = new double[6];
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
+            sb.append(switch (type) {
+                case SEG_MOVETO -> format("M %.2f,%.2f ",
+                    coords[0], coords[1]);
+                case SEG_LINETO -> format("L %.2f,%.2f ",
+                    coords[0], coords[1]);
+                case SEG_QUADTO -> format("Q %.2f,%.2f,%.2f,%.2f ",
+                    coords[0], coords[1], coords[2], coords[3]);
+                case SEG_CUBICTO -> format("C %.2f,%.2f,%.2f,%.2f,%.2f,%.2f ",
+                    coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                case SEG_CLOSE -> "Z";
+                default -> throw new IllegalArgumentException("type = " + type);
+            });
+            pathIterator.next();
+        }
+        return sb.toString();
+    }
+
     public static void debugPathIterator(Shape shape) {
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
@@ -298,6 +323,10 @@ public class Shapes {
         }
 
         return it2.isDone();
+    }
+
+    public static Shape createCircle(Point2D center, double radius) {
+        return createCircle(center.getX(), center.getY(), radius);
     }
 
     /**
@@ -1407,5 +1436,216 @@ public class Shapes {
             height = 1;
         }
         return new Rectangle(x, y, width, height);
+    }
+
+    private static double distance(Point2D start, Point2D end) {
+        return FastMath.hypot(start.getX() - end.getX(), start.getY() - end.getY());
+    }
+
+    /**
+     * Connects the given points smoothly with cubic Bezier curves.
+     * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
+     */
+    public static Path2D smoothConnect(List<Point2D> points) {
+        int numPoints = points.size();
+        if (numPoints <= 2) {
+            throw new IllegalArgumentException("numPoints = " + numPoints);
+        }
+
+        // calculate arrays of centers and lengths to avoid repeated computing
+        Point2D[] centers = new Point2D[numPoints - 1];
+        double[] lengths = new double[numPoints - 1];
+        for (int i = 0; i < numPoints - 1; i++) {
+            Point2D start = points.get(i);
+            Point2D end = points.get(i + 1);
+            centers[i] = calcCenter(start, end);
+            lengths[i] = distance(start, end);
+        }
+
+        Path2D.Double path = new Path2D.Double();
+        Point2D first = points.get(0);
+        path.moveTo(first.getX(), first.getY());
+
+        for (int i = 1; i < numPoints; i++) {
+            Point2D start = points.get(i - 1);
+            Point2D end = points.get(i);
+
+            double x1 = start.getX();
+            double y1 = start.getY();
+            double x2 = end.getX();
+            double y2 = end.getY();
+
+            double len2 = lengths[i - 1];
+            Point2D center2 = centers[i - 1];
+
+            double len1;
+            Point2D center1;
+            if (i == 1) {
+                len1 = 0;
+                center1 = start;
+            } else {
+                len1 = lengths[i - 2];
+                center1 = centers[i - 2];
+            }
+
+            double len3;
+            Point2D center3;
+
+            if (i == numPoints - 1) {
+                len3 = 0;
+                center3 = end;
+            } else {
+                len3 = lengths[i];
+                center3 = centers[i];
+            }
+
+            double xc1 = center1.getX();
+            double yc1 = center1.getY();
+            double xc2 = center2.getX();
+            double yc2 = center2.getY();
+            double xc3 = center3.getX();
+            double yc3 = center3.getY();
+
+            double k1 = len1 / (len1 + len2);
+            double k2 = len2 / (len2 + len3);
+
+            double xm1 = xc1 + (xc2 - xc1) * k1;
+            double ym1 = yc1 + (yc2 - yc1) * k1;
+
+            double xm2 = xc2 + (xc3 - xc2) * k2;
+            double ym2 = yc2 + (yc3 - yc2) * k2;
+
+            double ctrl1X = xm1 + (xc2 - xm1) + x1 - xm1;
+            double ctrl1Y = ym1 + (yc2 - ym1) + y1 - ym1;
+
+            double ctrl2X = xm2 + (xc2 - xm2) + x2 - xm2;
+            double ctrl2Y = ym2 + (yc2 - ym2) + y2 - ym2;
+
+            path.curveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, end.getX(), end.getY());
+        }
+
+        return path;
+    }
+
+    /**
+     * Another version of the above method, which supports closed paths and
+     * has a smoothness parameter
+     */
+    public static Path2D smoothConnect(List<Point2D> points, float smoothness) {
+        int numPoints = points.size();
+        assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
+
+        // Given points must represent an open curve:1 or a closed curve:2
+        // 1: first point != last point
+        // 2: first point == last point
+        boolean isClosed = Geometry.areEqual(points.get(0), points.get(numPoints - 1));
+        int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
+
+        // Every two alternate points represent a side. There are numPoints - 1 sides.
+
+        // Mid points of all those sides.
+        var centers = new Point2D.Float[numPoints - 1];
+        // Length of all those sides.
+        float[] lengths = new float[numPoints - 1];
+
+        for (int i = 0; i < numPoints - 1; i++) {
+            Point2D A = points.get(i);
+            Point2D B = points.get(i + 1);
+            centers[i] = new Point2D.Float();
+            Geometry.midPoint(A, B, centers[i]);
+            lengths[i] = Geometry.distance(A, B);
+        }
+
+        // controlPoints[i] represents the 2 control points after and before points[i]
+        // If the path is closed, last point == first point, so we make a less control point.
+        var controlPoints = new Point2D.Float[lastPointIndex + 1][2];
+        for (int i = 0; i < controlPoints.length; i++) {
+            controlPoints[i][0] = new Point2D.Float();
+            controlPoints[i][1] = new Point2D.Float();
+        }
+
+        for (int i = 1; i < numPoints - 1; i++) {
+            Geometry.copy(controlPoints[i][0], centers[i - 1]);
+            Geometry.copy(controlPoints[i][1], centers[i]);
+            calculateControlPoint(points.get(i),
+                controlPoints[i][0], controlPoints[i][1],
+                lengths[i - 1], lengths[i], smoothness);
+        }
+
+        Path2D path = new Path2D.Float();
+        Point2D point = points.get(0);
+        Point2D lastPoint = points.get(lastPointIndex);
+
+        // for first point
+        if (isClosed) {
+            // first and last point's center
+            Geometry.copy(controlPoints[0][0], centers[centers.length - 1]);
+            // first and second's center
+            Geometry.copy(controlPoints[0][1], centers[0]);
+            calculateControlPoint(point,
+                controlPoints[0][0], controlPoints[0][1],
+                lengths[lengths.length - 1], lengths[0], smoothness);
+            path.moveTo(lastPoint.getX(), lastPoint.getY());
+        } else {
+            Geometry.copy(controlPoints[0][1], point);
+            Geometry.copy(controlPoints[lastPointIndex][0], lastPoint);
+
+            path.moveTo(point.getX(), point.getY());
+        }
+
+        // i = 0 tries to put the curve between first and last point.
+        // Therefore, if shape is open, we start putting the curve from i=1.
+        for (int i = isClosed ? 0 : 1; i < controlPoints.length; i++) {
+            Point2D A = points.get(i);
+            Point2D P = controlPoints[i][0];
+            Point2D oldQ = i == 0
+                ? controlPoints[controlPoints.length - 1][1]
+                : controlPoints[i - 1][1];
+
+            path.curveTo(oldQ.getX(), oldQ.getY(), P.getX(), P.getY(), A.getX(), A.getY());
+        }
+
+        return path;
+    }
+
+    private static void calculateControlPoint(Point2D B, Point2D P, Point2D Q,
+                                              float AB, float BC, float smoothness) {
+        // A temporary point T calculated such that
+        // * For A=points[i-1], B=points[i] and C = points[i+1]
+        //   * For midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
+        //     * It lies on the line joining P and Q
+        //     * PT / AB == TQ / BC       - (1)
+        //
+        // Mathematically, with the given data,
+        //
+        // * Using section formula (on Vectors)
+        //   * T = (P * n + Q * m) / (m + n)
+        //   * T = P * n / (m + n) + Q * m / (m + n)
+        //   * T = P * TQ / PQ + Q * PT / PQ
+        //
+        // * Using Componendo rule on (1)
+        //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
+        //   * T = (P * AB + Q * BC) / (AB + BC)
+        //
+        var T = new Point2D.Float();
+
+        Geometry.sectionFormula(P, Q, AB, BC, T);
+
+        // Converting point vectors P and Q to show relative displacement from T
+        // P = P - T, Q = Q - T
+        Geometry.subtract(P, T, P);
+        Geometry.subtract(Q, T, Q);
+
+        // Scaling the point vectors P and Q about origin
+        if (smoothness != 1) {
+            Geometry.scale(P, smoothness);
+            Geometry.scale(Q, smoothness);
+        }
+
+        // translating point vectors P and Q by B so that
+        // the relative position of original P and Q to T is same as
+        // the relative position of new P and Q to B.
+        Geometry.add(P, B, P);
+        Geometry.add(Q, B, Q);
     }
 }

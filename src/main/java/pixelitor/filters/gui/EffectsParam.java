@@ -17,11 +17,16 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.AppContext;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Threads;
 
 import javax.swing.*;
+import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -54,7 +59,7 @@ public class EffectsParam extends AbstractFilterParam {
                 this::configureDialog, defaultButton);
 
             paramGUI = configureParamGUI;
-            setGUIEnabledState();
+            afterGUICreation();
             return configureParamGUI;
         } else {
             effectsPanel.setBorder(createTitledBorder("Effects"));
@@ -81,13 +86,17 @@ public class EffectsParam extends AbstractFilterParam {
 
     private void ensureEffectsPanelIsCreated() {
         if (effectsPanel == null) {
-            effectsPanel = new EffectsPanel(adjustmentListener, null);
+            assert AppContext.isUnitTesting() || Threads.calledOnEDT();
+            effectsPanel = new EffectsPanel(null);
+            if (adjustmentListener != null) { // the listener was set before this
+                effectsPanel.setAdjustmentListener(adjustmentListener);
+            }
         }
     }
 
     public void setEffects(AreaEffects effects) {
         if (effectsPanel == null) { // probably never true
-            effectsPanel = new EffectsPanel(adjustmentListener, effects);
+            ensureEffectsPanelIsCreated();
             return;
         }
 
@@ -95,10 +104,17 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    protected void doRandomize() {
-        if (effectsPanel == null) { // happens in unit tests
-            effectsPanel = new EffectsPanel(adjustmentListener, null);
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+
+        if (effectsPanel != null) { // if the panel was initialized first
+            effectsPanel.setAdjustmentListener(listener);
         }
+    }
+
+    @Override
+    protected void doRandomize() {
+        ensureEffectsPanelIsCreated(); // can be necessary in unit tests
         effectsPanel.randomize();
     }
 
@@ -119,6 +135,19 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(UserPreset preset) {
+        if (effectsPanel == null) {
+            if (!EventQueue.isDispatchThread()) {
+                // happens while loading smart filters from pxc
+                try {
+                    EventQueue.invokeAndWait(this::ensureEffectsPanelIsCreated);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    Messages.showException(e);
+                }
+            } else {
+                // for safety
+                ensureEffectsPanelIsCreated();
+            }
+        }
         effectsPanel.loadStateFrom(preset);
     }
 

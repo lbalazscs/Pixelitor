@@ -30,6 +30,7 @@ import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
 import pixelitor.selection.SelectionModifyType;
@@ -43,6 +44,8 @@ import javax.swing.*;
 import java.io.File;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -170,10 +173,21 @@ public class AppRunner {
     }
 
     void exit() {
+        countDownBeforeExit();
         restoreNormalSettings();
         String exitMenuName = JVM.isMac ? "Quit" : "Exit";
         runMenuCommand(exitMenuName);
         findJOptionPane().yesButton().click();
+    }
+
+    private static void countDownBeforeExit() {
+        final int secondsToWait = 5;
+        int remainingSeconds = secondsToWait;
+        do {
+            System.out.print(remainingSeconds + "...");
+            GUIUtils.showTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
+            Utils.sleep(1, SECONDS);
+        } while (--remainingSeconds > 0);
     }
 
     public void testBrushSettings(BrushType brushType, Tool tool) {
@@ -235,6 +249,42 @@ public class AppRunner {
 
     public void randomizeColors() {
         pw.button(FgBgColorSelector.RANDOMIZE_BUTTON_NAME).click();
+    }
+
+    public void createNewImage(int width, int height, String title) {
+        runMenuCommand("New Image...");
+
+        var dialog = findDialogByTitle("New Image");
+        if (title != null) {
+            dialog.textBox("nameTF").deleteText().enterText(title);
+        }
+        dialog.textBox("widthTF").deleteText().enterText(String.valueOf(width));
+        dialog.textBox("heightTF").deleteText().enterText("e");
+
+        // try to accept the dialog
+        dialog.button("ok").click();
+        expectAndCloseErrorDialog();
+
+        // correct the error
+        dialog.textBox("heightTF").deleteText().enterText(String.valueOf(height));
+
+        // try again
+        dialog.button("ok").click();
+        Utils.sleep(1, TimeUnit.SECONDS);
+
+        // this time the dialog should close
+        dialog.requireNotVisible();
+
+        String activeCompName = EDT.active(Composition::getName);
+        if (title != null) {
+            assertThat(activeCompName).isEqualTo(title);
+        } else {
+            assertThat(activeCompName).startsWith("Untitled");
+        }
+        assert !EDT.active(Composition::isDirty);
+
+        mouse.recalcCanvasBounds();
+        checkNumLayersIs(1);
     }
 
     void runMenuCommand(String text) {
@@ -462,14 +512,11 @@ public class AppRunner {
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
                                     ShowOriginal showOriginal, boolean testPresets,
-                                    String... extraButtonsToClick) {
+                                    Consumer<DialogFixture> customizer) {
         runMenuCommand(name + "...");
         var dialog = findFilterDialog();
-
-        for (String buttonText : extraButtonsToClick) {
-            AJSUtils.findButtonByText(dialog, buttonText)
-                .requireEnabled()
-                .click();
+        if (customizer != null) {
+            customizer.accept(dialog);
         }
 
         if (randomize == Randomize.YES) {
@@ -503,7 +550,7 @@ public class AppRunner {
         dialog.requireNotVisible();
     }
 
-    private boolean hasPreset(DialogFixture dialog, String presetName) {
+    private static boolean hasPreset(DialogFixture dialog, String presetName) {
         JMenu presetsMenu = getPresetsMenu(dialog);
         if (presetsMenu != null) {
             int numItems = presetsMenu.getItemCount();
@@ -532,7 +579,7 @@ public class AppRunner {
         }
     }
 
-    private JMenu getPresetsMenu(DialogFixture dialog) {
+    private static JMenu getPresetsMenu(DialogFixture dialog) {
         JDialog realDialog = (JDialog) dialog.target();
         JMenuBar menuBar = realDialog.getJMenuBar();
         if (menuBar != null) {
@@ -562,6 +609,10 @@ public class AppRunner {
     private static void restoreNormalSettings() {
         Dirs.setLastOpen(startingOpenDir);
         Dirs.setLastSave(startingSaveDir);
+    }
+
+    void closeDoYouWantToSaveChangesDialog() {
+        findJOptionPane().buttonWithText("Don't Save").click();
     }
 
     public enum Randomize {YES, NO}

@@ -661,7 +661,8 @@ public class ShapesTool extends DragTool {
             .noCancelButton()
             .okText(GUIText.CLOSE_DIALOG)
             .parentComponent(showShapeSettingsButton)
-            .show();
+            .show()
+            .getDialog();
     }
 
     private void showEffectsDialog() {
@@ -674,7 +675,7 @@ public class ShapesTool extends DragTool {
             .parentComponent(showEffectsDialogButton)
             .notModal();
         effectsParam.configureDialog(builder);
-        effectsDialog = builder.show();
+        effectsDialog = builder.show().getDialog();
     }
 
     private void initAndShowStrokeSettingsDialog() {

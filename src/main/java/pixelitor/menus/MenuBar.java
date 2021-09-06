@@ -48,6 +48,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.OpenImageEnabledAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
+import pixelitor.gui.utils.RestrictedLayerAction.Condition;
 import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -88,7 +89,6 @@ import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.*;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
@@ -96,6 +96,7 @@ import static pixelitor.gui.utils.RestrictedLayerAction.Condition.*;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.utils.Keys.*;
+import static pixelitor.utils.QuadrantAngle.*;
 
 /**
  * The menu bar of the app
@@ -372,6 +373,12 @@ public class MenuBar extends JMenuBar {
             layersMenu.add(createAdjustmentLayersSubmenu());
         }
 
+        if (AppContext.enableExperimentalFeatures) {
+            layersMenu.add(createSmartObjectSubmenu(pw, texts));
+            layersMenu.add(createColorFillLayerSubmenu(pw, texts));
+//            layersMenu.add(createGradientFillLayerSubmenu(pw, texts));
+        }
+
         return layersMenu;
     }
 
@@ -510,28 +517,30 @@ public class MenuBar extends JMenuBar {
     private static JMenu createTextLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("text_layer"));
 
-        sub.add(new OpenImageEnabledAction("New...") {
+        sub.add(new OpenImageEnabledAction("New Text Layer...") {
             @Override
             public void onClick() {
                 TextLayer.createNew();
             }
         }, T);
 
-        sub.add(new RestrictedLayerAction("Edit...", IS_TEXT_LAYER) {
+        Condition isTextLayer = new ClassCondition(TextLayer.class, "text layer");
+
+        sub.add(new RestrictedLayerAction("Edit Text Layer...", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
-                ((TextLayer) layer).edit(pw);
+                layer.edit();
             }
         }, CTRL_T);
 
-        sub.add(new RestrictedLayerAction("Rasterize", IS_TEXT_LAYER) {
+        sub.add(new RestrictedLayerAction("Rasterize Text Layer", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
                 ((TextLayer) layer).replaceWithRasterized();
             }
         });
 
-        sub.add(new RestrictedLayerAction("Selection from Text", IS_TEXT_LAYER) {
+        sub.add(new RestrictedLayerAction("Selection from Text", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
                 layer.getComp().createSelectionFromText();
@@ -549,6 +558,99 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 AddAdjLayerAction.INSTANCE.actionPerformed(null);
+            }
+        });
+
+        return sub;
+    }
+
+    private static JMenu createSmartObjectSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Smart Object");
+
+        Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
+
+        sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                ((SmartObject) layer).replaceWithRasterized();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Edit Contents", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                SmartObject so = (SmartObject) layer;
+                if (so.hasSmartFilters()) {
+                    so.editSmartFilter(so.getSmartFilter(0));
+                } else {
+                    Messages.showInfo("No Smart Filters",
+                        "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");
+                }
+            }
+        }, CTRL_SHIFT_E);
+
+        return sub;
+    }
+
+    private static JMenu createColorFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Color Fill Layer");
+
+        sub.add(new OpenImageEnabledAction("New Color Fill Layer...") {
+            @Override
+            public void onClick() {
+                ColorFillLayer.createNew();
+            }
+        });
+
+        Condition isColorFillLayer = new ClassCondition(ColorFillLayer.class, "color fill layer");
+
+        sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Rasterize Color Fill Layer", isColorFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.replaceWithRasterized();
+            }
+        });
+
+        return sub;
+    }
+
+    private static JMenu createGradientFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu("Gradient Fill Layer");
+
+        sub.add(new OpenImageEnabledAction("New Gradient Fill Layer...") {
+            @Override
+            public void onClick() {
+                GradientFillLayer.createNew();
+            }
+        });
+
+        Condition isGradientFillLayer = new ClassCondition(GradientFillLayer.class, "gradient fill layer");
+
+        sub.add(new RestrictedLayerAction("Edit Gradient Fill Layer...", isGradientFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.edit();
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.replaceWithRasterized();
             }
         });
 
@@ -768,7 +870,7 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("blur")
-            + "/" + texts.getString("sharpen"));
+                              + "/" + texts.getString("sharpen"));
 
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);
@@ -822,6 +924,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDisplaceSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("displace"));
 
+        sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
         sub.addFilter(DrunkVision.NAME, DrunkVision::new);
         sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
         sub.addFilter(JHOffset.NAME, JHOffset::new);
@@ -835,6 +938,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLightSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("light"));
 
+        sub.addFilter(BumpMap.NAME, BumpMap::new);
         sub.addFilter(Flashlight.NAME, Flashlight::new);
         sub.addFilter(JHGlint.NAME, JHGlint::new);
         sub.addFilter(JHGlow.NAME, JHGlow::new);
@@ -875,6 +979,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
         sub.addFilter(JHCaustics.NAME, JHCaustics::new);
         sub.addFilter(JHCells.NAME, JHCells::new);
+        sub.addFilter(FlowField.NAME, FlowField::new);
         sub.addFilter(Marble.NAME, Marble::new);
         sub.addFilter(Voronoi.NAME, Voronoi::new);
         sub.addFilter(JHWood.NAME, JHWood::new);
@@ -918,6 +1023,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
+        sub.addFilter(Truchet.NAME, Truchet::new);
 
         return sub;
     }
@@ -931,8 +1037,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Orton.NAME, Orton::new);
         sub.addFilter(PhotoCollage.NAME, PhotoCollage::new);
         sub.addFilter(JHPointillize.NAME, JHPointillize::new);
-        sub.addFilter(RandomSpheres.NAME, RandomSpheres::new);
         sub.addFilter(JHSmear.NAME, JHSmear::new);
+        sub.addFilter(Spheres.NAME, Spheres::new);
         sub.addFilter(JHStamp.NAME, JHStamp::new);
         sub.addFilter(JHWeave.NAME, JHWeave::new);
 
@@ -1392,6 +1498,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
         sub.addFilter(XYZTest.NAME, XYZTest::new);
         sub.addFilter(Sphere3D.NAME, Sphere3D::new);
+        sub.addFilter(PoissonDiskTester.NAME, PoissonDiskTester::new);
 
         return sub;
     }

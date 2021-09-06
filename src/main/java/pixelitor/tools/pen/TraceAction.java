@@ -43,7 +43,7 @@ public class TraceAction extends PAction {
     }
 
     private void trace(Composition comp) {
-        if (!comp.activeIsDrawable()) {
+        if (!comp.activeAcceptsToolDrawing()) {
             Messages.showNotDrawableError(comp.getActiveLayer());
             return;
         }

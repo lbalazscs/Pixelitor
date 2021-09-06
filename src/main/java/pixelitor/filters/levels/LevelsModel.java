@@ -57,6 +57,10 @@ public class LevelsModel {
     }
 
     public void settingsChanged() {
+        if (lastGUI == null) {
+            return; // it's null when loading a smart filter
+        }
+
         GrayScaleLookup rgb = rgbModel.getLookup();
 
         GrayScaleLookup r = rModel.getLookup();

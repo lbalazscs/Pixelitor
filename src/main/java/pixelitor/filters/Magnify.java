@@ -79,13 +79,8 @@ public class Magnify extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setInvert(invert.isChecked());
-
-        // called twice (also in CenteredTransformFilter),
-        // but there is no better solution, because the center
-        // has to be calculated before the shape
-        filter.calcAbsoluteCenter(src);
 
         filter.setShape(shape.getValue());
 

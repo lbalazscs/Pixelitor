@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,20 +37,13 @@ public abstract class CenteredTransformFilter extends TransformFilter {
         super(filterName);
     }
 
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        calcAbsoluteCenter(src);
-
-        return super.filter(src, dst);
-    }
-
-    public void calcAbsoluteCenter(BufferedImage src) {
-        cx = relCX * src.getWidth();
-        cy = relCY * src.getHeight();
-    }
-
-    public void setRelCenter(float centerX, float centerY) {
+    public void setCenter(float centerX, float centerY, BufferedImage src) {
         relCX = centerX;
         relCY = centerY;
+
+        // has to be calculated here, because some filter use these
+        // values in other setters, before the filtering begins
+        cx = relCX * src.getWidth();
+        cy = relCY * src.getHeight();
     }
 }

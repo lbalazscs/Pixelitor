@@ -38,7 +38,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
     public static final String NAME = i18n("curves");
 
     private CurvesFilter filter;
-    private ToneCurves curves;
+    private final ToneCurves curves;
 
     private ToneCurvesGUI lastGUI;
 
@@ -115,6 +115,8 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.getCurve(channel).setStateFrom(saveString);
         }
 
-        lastGUI.stateChanged();
+        if (lastGUI != null) { // it's null when loading a smart filter
+            lastGUI.stateChanged();
+        }
     }
 }

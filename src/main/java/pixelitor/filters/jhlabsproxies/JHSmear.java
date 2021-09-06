@@ -75,7 +75,7 @@ public class JHSmear extends ParametrizedFilter {
             return src;
         }
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         if (filter == null) {
             filter = new SmearFilter(NAME);

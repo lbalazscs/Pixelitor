@@ -23,6 +23,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
+import java.io.Serial;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
@@ -30,7 +31,10 @@ import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
  * A filter that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
-    protected String helpURL;
+    @Serial
+    private static final long serialVersionUID = -7575676579160980928L;
+
+    protected transient String helpURL;
 
     protected FilterWithGUI() {
     }
@@ -100,13 +104,13 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public void startOn(Drawable dr, boolean reset) {
+    public boolean startOn(Drawable dr, boolean reset) {
         dr.startPreviewing();
 
         Tools.editedObjectChanged(dr.getLayer());
 
         FilterGUI gui = createGUI(dr, reset);
-        new DialogBuilder()
+        return new DialogBuilder()
             .title(getName())
             .menuBar(getMenuBar())
             .name("filterDialog")
@@ -116,6 +120,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
             .enableCopyVisibleShortcut()
             .okAction(() -> dr.onFilterDialogAccepted(getName()))
             .cancelAction(dr::onFilterDialogCanceled)
-            .show();
+            .show()
+            .wasAccepted();
     }
 }

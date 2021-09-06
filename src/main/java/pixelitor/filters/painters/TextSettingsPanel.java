@@ -136,15 +136,17 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addControl(rotationParam.createGUI());
 
         hAlignmentCB = new JComboBox<>(HorizontalAlignment.values());
+        hAlignmentCB.setName("hAlignmentCB");
         hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
-        gbh.addLabel("Horizontal Alignment:", 0, 2);
         hAlignmentCB.addActionListener(this);
+        gbh.addLabel("Horizontal Alignment:", 0, 2);
         gbh.addControl(hAlignmentCB);
 
         vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
+        vAlignmentCB.setName("vAlignmentCB");
         vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
-        gbh.addLabel("Vertical Alignment:", 0, 3);
         vAlignmentCB.addActionListener(this);
+        gbh.addLabel("Vertical Alignment:", 0, 3);
         gbh.addControl(vAlignmentCB);
 
         return textPanel;
@@ -267,7 +269,8 @@ public class TextSettingsPanel extends FilterGUI
 
     private void createEffectsPanel(TextSettings settings) {
         AreaEffects effects = settings.getEffects();
-        effectsPanel = new EffectsPanel(this, effects);
+        effectsPanel = new EffectsPanel(effects);
+        effectsPanel.setAdjustmentListener(this);
         effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 

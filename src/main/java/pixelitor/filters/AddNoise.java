@@ -27,7 +27,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.gui.GUIText.OPACITY;
@@ -64,7 +64,7 @@ public class AddNoise extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.reInitialize();
+        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
 
         if (src.getType() == TYPE_BYTE_GRAY) {
             return addNoiseToGray(src, dest, rand);
@@ -75,7 +75,7 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest,
-                                        boolean coverageAnim, Random rand) {
+                                        boolean coverageAnim, SplittableRandom rand) {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
         int numPixels = destData.length;
@@ -83,9 +83,9 @@ public class AddNoise extends ParametrizedFilter {
         boolean fullSaturation = saturationParam.getValue() == 100;
         boolean fullOpacity = opacityParam.getValue() == 100;
 
-        float opacityPercentage = opacityParam.getPercentageValF();
-        float saturationPercentage = saturationParam.getPercentageValF();
-        float coveragePercentage = coverageParam.getPercentageValF();
+        float opacity = opacityParam.getPercentageValF();
+        float saturation = saturationParam.getPercentageValF();
+        double coverage = coverageParam.getPercentageValD();
 
         int workUnit = 100_000;
         int counter = 0;
@@ -100,16 +100,14 @@ public class AddNoise extends ParametrizedFilter {
                 pt.unitDone();
             }
 
-            int srcRGB = srcData[i];
-
             int randomInt = 0;
             if (coverageAnim) {
                 // generate random numbers for the discarded pixels as well
                 randomInt = rand.nextInt();
             }
 
-            float rn = rand.nextFloat();
-            if (rn > coveragePercentage) {
+            int srcRGB = srcData[i];
+            if (rand.nextDouble() > coverage) {
                 destData[i] = srcRGB;
                 continue;
             }
@@ -132,12 +130,12 @@ public class AddNoise extends ParametrizedFilter {
 
                 if (fullOpacity) {
                     // if we have full saturation (the default), then we can
-                    // just use the random pixel as it is if the opacity is also 100...
+                    // just use the random pixel as it is - if the opacity is also 100.
                     destData[i] = randomInt;
                 } else {
                     // ...or mix the random pixel with the source according to
                     // the opacity
-                    destData[i] = ImageMath.mixColors(opacityPercentage, srcRGB, randomInt);
+                    destData[i] = ImageMath.mixColors(opacity, srcRGB, randomInt);
                 }
             } else { // desaturate the random pixel
                 int r = (randomInt >>> 16) & 0xFF;
@@ -145,7 +143,7 @@ public class AddNoise extends ParametrizedFilter {
                 int b = randomInt & 0xFF;
 
                 Color.RGBtoHSB(r, g, b, tmpHSV);
-                float newSaturation = ImageMath.lerp(saturationPercentage, 0.0f, tmpHSV[1]);
+                float newSaturation = ImageMath.lerp(saturation, 0.0f, tmpHSV[1]);
                 randomInt = Color.HSBtoRGB(tmpHSV[0], newSaturation, tmpHSV[2]);
 
                 // make the alpha channel the same as for the source
@@ -154,7 +152,7 @@ public class AddNoise extends ParametrizedFilter {
                 if (fullOpacity) {
                     destData[i] = randomInt;
                 } else {
-                    destData[i] = ImageMath.mixColors(opacityPercentage, srcRGB, randomInt);
+                    destData[i] = ImageMath.mixColors(opacity, srcRGB, randomInt);
                 }
             }
         }
@@ -164,7 +162,7 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     private BufferedImage addNoiseToGray(BufferedImage src, BufferedImage dest,
-                                         Random rand) {
+                                         SplittableRandom rand) {
         byte[] srcPixels = ImageUtils.getGrayPixelsAsByteArray(src);
         byte[] destPixels = ImageUtils.getGrayPixelsAsByteArray(dest);
 
@@ -173,7 +171,7 @@ public class AddNoise extends ParametrizedFilter {
 
         boolean fullOpacity = opacityParam.getValue() == 100;
         boolean fullCoverage = coverageParam.getValue() == 100;
-        float coveragePercentage = coverageParam.getPercentageValF();
+        double coveragePercentage = coverageParam.getPercentageValD();
 
         if (fullOpacity && fullCoverage) {
             return dest;
@@ -195,9 +193,8 @@ public class AddNoise extends ParametrizedFilter {
                 pt.unitDone();
             }
 
-            float rn = rand.nextFloat();
             byte srcPixel = srcPixels[i];
-            if (rn > coveragePercentage) {
+            if (rand.nextDouble() > coveragePercentage) {
                 destPixels[i] = srcPixel;
                 continue;
             }

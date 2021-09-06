@@ -17,9 +17,13 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.Rnd;
+
 import javax.swing.*;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -27,18 +31,120 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractMultipleChoiceParam<E>
     extends AbstractFilterParam implements ComboBoxModel<E> {
+    protected List<E> choices;
+    protected E defaultChoice;
+    protected E currentChoice;
+    private final EventListenerList listenerList = new EventListenerList();
 
     protected AbstractMultipleChoiceParam(String name,
+                                          E[] choices,
+                                          RandomizePolicy randomizePolicy) {
+        this(name, List.of(choices), choices[0], randomizePolicy);
+    }
+
+    protected AbstractMultipleChoiceParam(String name,
+                                          List<E> choices,
+                                          E defaultChoice,
                                           RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
+        this.choices = choices;
+        this.defaultChoice = defaultChoice;
+        currentChoice = defaultChoice;
     }
 
     @Override
     public JComponent createGUI() {
         var gui = new ComboBoxParamGUI<E>(this, action);
         paramGUI = gui;
-        setGUIEnabledState();
+        afterGUICreation();
         return gui;
+    }
+
+    @Override
+    public boolean isSetToDefault() {
+        return defaultChoice.equals(currentChoice);
+    }
+
+    @Override
+    public void reset(boolean trigger) {
+        setSelectedItem(defaultChoice, trigger);
+    }
+
+    @Override
+    protected void doRandomize() {
+        E choice = Rnd.chooseFrom(choices);
+        setCurrentChoice(choice, false);
+    }
+
+    private void setCurrentChoice(E currentChoice, boolean trigger) {
+        setSelectedItem(currentChoice, trigger);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setSelectedItem(Object item) {
+        setSelectedItem((E) item, true);
+    }
+
+    public void setSelectedItem(E item, boolean trigger) {
+        if (!currentChoice.equals(item)) {
+            currentChoice = item;
+            fireContentsChanged(this, -1, -1);
+            if (trigger) {
+                if (adjustmentListener != null) {  // it's null when called from randomize
+                    adjustmentListener.paramAdjusted();
+                }
+            }
+        }
+    }
+
+    @Override
+    public Object getSelectedItem() {
+        return currentChoice;
+    }
+
+    public E getSelected() {
+        return currentChoice;
+    }
+
+    @Override
+    public Object getParamValue() {
+        return currentChoice;
+    }
+
+    @Override
+    public int getSize() {
+        return choices.size();
+    }
+
+    @Override
+    public E getElementAt(int index) {
+        return choices.get(index);
+    }
+
+    @Override
+    public void addListDataListener(ListDataListener l) {
+        listenerList.add(ListDataListener.class, l);
+    }
+
+    @Override
+    public void removeListDataListener(ListDataListener l) {
+        listenerList.remove(ListDataListener.class, l);
+    }
+
+    private void fireContentsChanged(Object source, int index0, int index1) {
+        Object[] listeners = listenerList.getListenerList();
+        ListDataEvent e = null;
+
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if (listeners[i] == ListDataListener.class) {
+                if (e == null) {
+                    e = new ListDataEvent(source,
+                        ListDataEvent.CONTENTS_CHANGED, index0, index1);
+                }
+                ((ListDataListener) listeners[i + 1]).contentsChanged(e);
+            }
+        }
     }
 
     @Override
@@ -47,9 +153,14 @@ public abstract class AbstractMultipleChoiceParam<E>
     }
 
     @Override
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultChoice;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public ChoiceParamState<E> copyState() {
-        return new ChoiceParamState<>((E) getSelectedItem());
+        return new ChoiceParamState<>(getSelected());
     }
 
     @Override
@@ -70,8 +181,6 @@ public abstract class AbstractMultipleChoiceParam<E>
             }
         }
     }
-
-    public abstract void setSelectedItem(E value, boolean trigger);
 
     /**
      * Sets up the automatic enabling of another {@link FilterSetting}
@@ -112,6 +221,11 @@ public abstract class AbstractMultipleChoiceParam<E>
                 }
             }
         });
+    }
+
+    public String getDebugInfo() {
+        return String.format("choices = %s, default = %s, current = %s",
+            choices, defaultChoice, currentChoice);
     }
 
     public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {

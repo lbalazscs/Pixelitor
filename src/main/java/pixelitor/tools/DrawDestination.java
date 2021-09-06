@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public enum DrawDestination {
             return dr.getImage();
         }
     }, DIRECT {
-        private BufferedImage copyBeforeStart;
+        private BufferedImage backupImg;
 
         @Override
         public Graphics2D createGraphics(Drawable dr, Composite composite) {
@@ -69,22 +69,22 @@ public enum DrawDestination {
 
             assert Assertions.checkRasterMinimum(image);
 
-            copyBeforeStart = ImageUtils.copyImage(image);
+            backupImg = ImageUtils.copyImage(image);
         }
 
         @Override
         public void finishBrushStroke(Drawable dr) {
-            copyBeforeStart.flush();
-            copyBeforeStart = null;
+            backupImg.flush();
+            backupImg = null;
         }
 
         @Override
         public BufferedImage getOriginalImage(Drawable dr, AbstractBrushTool tool) {
-            if (copyBeforeStart == null) {
+            if (backupImg == null) {
                 throw new IllegalStateException("copyBeforeStart is null for " + tool.getName());
             }
 
-            return copyBeforeStart;
+            return backupImg;
         }
     };
 

@@ -18,10 +18,8 @@
 package pixelitor.layers;
 
 import com.bric.util.JVM;
-import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.AppContext;
 import pixelitor.ThreadPool;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
@@ -36,8 +34,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import static javax.swing.BorderFactory.*;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
-import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -48,8 +44,6 @@ import static pixelitor.utils.Threads.threadInfo;
 public class LayerButton extends JToggleButton implements LayerUI {
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
-    private static final CheckerboardPainter checkerBoardPainter
-        = ImageUtils.createCheckerboardPainter();
 
     private static final String uiClassID = "LayerButtonUI";
 
@@ -63,6 +57,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
     // pxc files, the mask might be added before the drag handler
     // and in unit tests the drag handler is not added at all.
     private boolean maskAddedBeforeDragHandler;
+
+    // for debugging only: each layer button has a different id
+    private static int idCounter = 0;
+    private final int id;
 
     /**
      * Represents the selection state of the layer and mask icons.
@@ -172,6 +170,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         }
 
         wireSelectionWithLayerActivation();
+        id = idCounter++;
     }
 
     private void configureLayerIcon() {
@@ -221,11 +220,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activate(layer);
         } else {
-            if (layer instanceof TextLayer textLayer) {
-                textLayer.edit(PixelitorWindow.get());
-            } else if (layer instanceof AdjustmentLayer adjLayer) {
-                adjLayer.configure();
-            }
+            layer.edit();
         }
     }
 
@@ -281,7 +276,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private void initLayerNameEditor() {
         nameEditor = new LayerNameEditor(this);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
-        addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
+        addPropertyChangeListener("name", evt -> updateName());
     }
 
     private void wireSelectionWithLayerActivation() {
@@ -371,35 +366,30 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void setLayerName(String newName) {
-        nameEditor.setText(newName);
+    public void updateName() {
+        nameEditor.setText(layer.getName());
     }
 
     @Override
-    public void updateLayerIconImageAsync(ImageLayer layer) {
+    public void updateLayerIconImageAsync(Layer layer) {
         assert calledOnEDT() : threadInfo();
-
-        boolean isMask = layer instanceof LayerMask;
-
-        BufferedImage img = layer.getCanvasSizedSubImage();
+        if (layer.getClass() == TextLayer.class) { // TODO find a better way
+            return;
+        }
 
         Runnable notEDT = () -> {
-            CheckerboardPainter painter = null;
-            if (!isMask) {
-                painter = checkerBoardPainter;
+            BufferedImage thumb = layer.createIconThumbnail();
+            assert thumb != null;
+            if (thumb != null) {
+                SwingUtilities.invokeLater(() -> updateIconOnEDT(layer, thumb));
             }
-
-            BufferedImage thumb = createThumbnail(img, thumbSize, painter);
-
-            SwingUtilities.invokeLater(() ->
-                updateIconOnEDT(layer, isMask, thumb));
         };
         ThreadPool.submit(notEDT);
     }
 
-    private void updateIconOnEDT(ImageLayer layer, boolean isMask, BufferedImage thumb) {
+    private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
         assert calledOnEDT() : threadInfo();
-        if (isMask) {
+        if (layer instanceof LayerMask) {
             if (!hasMaskIcon()) {
                 return;
             }
@@ -420,11 +410,11 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel.setToolTipText("<html>" +
-            "<b>Click</b> activates mask editing,<br>" +
-            "<b>Shift-click</b> disables/enables the mask,<br>" +
-            "<b>Alt-click</b> toggles mask/layer view,<br>" +
-            "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
-            "<b>Right-click</b> shows more options");
+                                     "<b>Click</b> activates mask editing,<br>" +
+                                     "<b>Shift-click</b> disables/enables the mask,<br>" +
+                                     "<b>Alt-click</b> toggles mask/layer view,<br>" +
+                                     "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
+                                     "<b>Right-click</b> shows more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         maskIconLabel.setName("maskIcon");
@@ -532,11 +522,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
+        updateName();
         Icon icon = createLayerIcon(layer);
         layerIconLabel.setIcon(icon);
-        if (newLayer instanceof ImageLayer imageLayer) {
-            updateLayerIconImageAsync(imageLayer);
-        }
+        updateLayerIconImageAsync(layer);
 
         if (maskIconLabel != null) {
             removeMaskIcon();
@@ -559,10 +548,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
     public String toString() {
         return "LayerButton{" +
-            "name='" + getLayerName() + '\'' +
-            "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
-            '}';
+               "name='" + getLayerName() + '\'' +
+               "id='" + getId() + '\'' +
+               "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
+               '}';
     }
 }

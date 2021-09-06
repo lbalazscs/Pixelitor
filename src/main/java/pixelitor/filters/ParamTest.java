@@ -53,7 +53,13 @@ public class ParamTest extends ParametrizedFilter {
         float[] defaultThumbPositions = {0.0f, 0.5f, 1.0f};
         Color[] defaultValues = {BLACK, BLUE, WHITE};
 
+        RangeParam a = new RangeParam("A", 0, 50, 100);
+        RangeParam b = new RangeParam("B", 0, 25, 100);
+        RangeParam c = new RangeParam("C", 0, 25, 100);
+
         return new FilterParam[]{
+            new GroupedRangeParam("Normalized Group", new RangeParam[]{
+                a, b, c}, false).autoNormalized(),
             new GradientParam("Colors", defaultThumbPositions, defaultValues),
             new RangeParam("RangeParam", 0, 50, 100),
             new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),

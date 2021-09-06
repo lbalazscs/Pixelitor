@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,8 @@ public class AJSUtils {
     }
 
     static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
-        var menuItemFixture = popupMenu.menuItem(
-            new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+        return popupMenu.menuItem(
+            new GenericTypeMatcher<>(JMenuItem.class) {
                 @Override
                 protected boolean isMatching(JMenuItem menuItem) {
                     if (!menuItem.isShowing()) {
@@ -57,8 +57,6 @@ public class AJSUtils {
                     return "[Popup menu item Matcher, text = " + text + "]";
                 }
             });
-
-        return menuItemFixture;
     }
 
     static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
@@ -85,7 +83,7 @@ public class AJSUtils {
     }
 
     static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
-        var buttonFixture = container.button(
+        return container.button(
             new GenericTypeMatcher<>(JButton.class) {
                 @Override
                 protected boolean isMatching(JButton button) {
@@ -104,8 +102,6 @@ public class AJSUtils {
                     return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
                 }
             });
-
-        return buttonFixture;
     }
 
     static void slideRandomly(JSliderFixture slider) {

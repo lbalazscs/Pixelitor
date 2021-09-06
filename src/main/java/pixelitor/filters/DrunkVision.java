@@ -65,7 +65,7 @@ public class DrunkVision extends ParametrizedFilter {
 
         Graphics2D g = dest.createGraphics();
 
-        Random rand = ReseedSupport.reInitialize();
+        Random rand = ReseedSupport.getLastSeedRandom();
 
         int maxDistance = (int) (drunkenness.getPercentageValD() * 0.2 * (src.getWidth() + src.getHeight()));
 

@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.AppContext;
+import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
 import pixelitor.layers.Drawable;
@@ -151,12 +152,7 @@ public class History {
             numUndoneEdits++;
             undoManager.undo();
         } catch (CannotUndoException e) {
-            if (RandomGUITest.isRunning()) {
-                throw new RuntimeException("No undo available", e);
-            } else {
-                Messages.showInfo("No undo available",
-                    "No undo available, probably because the undo image was discarded in order to save memory");
-            }
+            handleCannotException(e, "undo");
         }
     }
 
@@ -171,7 +167,34 @@ public class History {
             numUndoneEdits--; // after redo we should be fadeable again
             undoManager.redo();
         } catch (CannotRedoException e) {
-            Messages.showException(e);
+            handleCannotException(e, "redo");
+        }
+    }
+
+    private static void handleCannotException(RuntimeException e, String type) {
+        if (RandomGUITest.isRunning()) {
+            throw new RuntimeException("No " + type + " available", e);
+        } else {
+            Messages.showInfo("No " + type + " available",
+                "<html>No " + type + " is available, possible reasons are:<ul>" +
+                "<li>The edited image was closed" +
+                "<li>The " + type + " image was discarded by Pixelitor in order to save memory");
+            clear();
+        }
+    }
+
+    public static void compClosed(Composition closedComp) {
+        // Try to minimize the number "no undo/redo is available" dialogs
+        // by proactively discarding the edits if the next attempted edit
+        // would result in such a message.
+        PixelitorEdit nextUndo = undoManager.getEditToBeUndone();
+        if (nextUndo != null && nextUndo.getComp() == closedComp) {
+            clear();
+            return;
+        }
+        PixelitorEdit nextRedo = undoManager.getEditToBeRedone();
+        if (nextRedo != null && nextRedo.getComp() == closedComp) {
+            clear();
         }
     }
 
@@ -268,6 +291,9 @@ public class History {
     public static void clear() {
         undoManager.discardAllEdits();
         assertNumEditsIs(0);
+
+        UndoAction.INSTANCE.setEnabled(false);
+        RedoAction.INSTANCE.setEnabled(false);
     }
 
     @VisibleForTesting

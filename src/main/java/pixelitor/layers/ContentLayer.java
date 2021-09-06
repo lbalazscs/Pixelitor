@@ -19,10 +19,11 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.compactions.Flip;
-import pixelitor.compactions.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -156,14 +157,24 @@ public abstract class ContentLayer extends Layer {
 
     public abstract void flip(Flip.Direction direction);
 
-    public abstract void rotate(Rotate.SpecialAngle angle);
+    public abstract void rotate(QuadrantAngle angle);
 
     public abstract void enlargeCanvas(int north, int east, int south, int west);
 
     @Override
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        node.addInt("translation X", getTx());
+        node.addInt("translation Y", getTy());
+
+        return node;
+    }
+
+    @Override
     public String toString() {
         return "{tx=" + translationX
-            + ", ty=" + translationY
-            + ", super=" + super.toString() + '}';
+               + ", ty=" + translationY
+               + ", super=" + super.toString() + '}';
     }
 }

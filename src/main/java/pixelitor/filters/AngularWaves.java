@@ -65,7 +65,7 @@ public class AngularWaves extends ParametrizedFilter {
             filter = new AngularWavesFilter();
         }
 
-        filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
+        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

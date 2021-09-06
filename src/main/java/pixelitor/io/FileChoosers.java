@@ -68,6 +68,8 @@ public class FileChoosers {
         "TGA files", "tga");
     public static final FileNameExtensionFilter tiffFilter = new FileNameExtensionFilter(
         "TIFF files", "tiff", "tif");
+    public static final FileNameExtensionFilter svgFilter = new FileNameExtensionFilter(
+        "SVG files", "svg");
 
     // the difference is that all NetPBM files can be opened,
     // but only PAM and PPM can be saved

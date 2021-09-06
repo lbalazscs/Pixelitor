@@ -21,7 +21,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
-import java.awt.Shape;
 import java.awt.geom.Path2D;
 
 /**
@@ -51,7 +50,7 @@ public class Grid extends ShapeFilter {
     }
 
     @Override
-    protected Shape createShape(int width, int height) {
+    protected Path2D createShape(int width, int height) {
         return switch (type.getValue()) {
             case TYPE_RECTANGLE -> createRectangularGrid(width, height);
             case TYPE_HEXAGON -> createHexagonalGrid(width, height);
@@ -63,7 +62,7 @@ public class Grid extends ShapeFilter {
         };
     }
 
-    private Shape createTriangularGrid(int width, int height, boolean diamond) {
+    private Path2D createTriangularGrid(int width, int height, boolean diamond) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);
@@ -119,7 +118,7 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x + width, y);
     }
 
-    private Shape createRectangularGrid(int width, int height) {
+    private Path2D createRectangularGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         // Here one cell is defined as the smallest
@@ -162,7 +161,7 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x2, y2);
     }
 
-    private Shape createHexagonalGrid(int width, int height) {
+    private Path2D createHexagonalGrid(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);
@@ -206,7 +205,7 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x + width, y);
     }
 
-    private Shape createScalesGrid(int width, int height, boolean dragon) {
+    private Path2D createScalesGrid(int width, int height, boolean dragon) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);

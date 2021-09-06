@@ -31,7 +31,7 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -71,7 +71,7 @@ public class FractalTree extends ParametrizedFilter {
     }, IGNORE_RANDOMIZE);
 
     // precalculated objects for the various depths
-    private Stroke[] widthLookup;
+    private Stroke[] strokeLookup;
     private Color[] colorLookup;
     private Physics[] physicsLookup;
     private boolean doPhysics;
@@ -105,7 +105,8 @@ public class FractalTree extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.reInitialize();
+        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
+
         leftFirst = true;
 
         defaultLength = src.getHeight() * zoom.getPercentageValD() / 100.0;
@@ -120,7 +121,7 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         int maxDepth = iterations.getValue();
-        widthLookup = new Stroke[maxDepth + 1];
+        strokeLookup = new Stroke[maxDepth + 1];
         colorLookup = new Color[maxDepth + 1];
 
         int gravity = physics.getValue(0);
@@ -140,7 +141,7 @@ public class FractalTree extends ParametrizedFilter {
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);
             float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float) zoom.getDefaultValue();
-            widthLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
+            strokeLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
             // colors
             float where = ((float) depth) / iterations.getValue();
             int rgb = colors.getValue().getColor(1.0f - where);
@@ -173,7 +174,7 @@ public class FractalTree extends ParametrizedFilter {
     }
 
     private void drawTree(Graphics2D g, double x1, double y1,
-                          double angle, int depth, Random rand, float c) {
+                          double angle, int depth, SplittableRandom rand, float c) {
         if (depth == 0) {
             return;
         }
@@ -188,7 +189,7 @@ public class FractalTree extends ParametrizedFilter {
         double x2 = x1 + FastMath.cos(angleRad) * depth * genRandomLength(rand);
         double y2 = y1 + FastMath.sin(angleRad) * depth * genRandomLength(rand);
 
-        g.setStroke(widthLookup[depth]);
+        g.setStroke(strokeLookup[depth]);
         int nextDepth = depth - 1;
         if (quality.getValue() == QUALITY_BETTER) {
             if (depth == 1) {
@@ -266,18 +267,16 @@ public class FractalTree extends ParametrizedFilter {
             double cx = x1 + dx / 2.0;
             double cy = y1 + dy / 2.0;
 
-            // calculate only one Bezier control point,
-            // and use it for both.
             // The normal vector is -dy, dx.
             double ctrlX = cx - dy * c;
             double ctrlY = cy + dx * c;
 
-            path.curveTo(ctrlX, ctrlY, ctrlX, ctrlY, x2, y2);
+            path.quadTo(ctrlX, ctrlY, x2, y2);
             g.draw(path);
         }
     }
 
-    private double genAngleRandomness(Random rand) {
+    private double genAngleRandomness(SplittableRandom rand) {
         if (!hasRandomness) {
             return 0;
         }
@@ -285,7 +284,7 @@ public class FractalTree extends ParametrizedFilter {
         return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
-    private double genRandomLength(Random rand) {
+    private double genRandomLength(SplittableRandom rand) {
         if (!hasRandomness) {
             return defaultLength;
         }

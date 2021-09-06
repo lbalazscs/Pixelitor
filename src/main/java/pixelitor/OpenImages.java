@@ -102,6 +102,10 @@ public class OpenImages {
     }
 
     public static void imageClosed(View view) {
+        Composition comp = view.getComp();
+        History.compClosed(comp);
+        comp.closed();
+
         views.remove(view);
         if (views.isEmpty()) {
             onAllImagesClosed();
@@ -323,7 +327,7 @@ public class OpenImages {
 
         try {
             var comp = view.getComp();
-            if (comp.isDirty()) {
+            if (comp.isDirty() && !comp.isEmbedded()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // "Save"
@@ -478,15 +482,20 @@ public class OpenImages {
 
     @VisibleForTesting
     public static void assertNumLayersIs(int expected) {
+        int found = getNumLayersInActiveComp();
+        if (found != expected) {
+            throw new AssertionError("expected " + expected + ", found = " + found);
+        }
+    }
+
+    @VisibleForTesting
+    public static int getNumLayersInActiveComp() {
         var comp = getActiveComp();
         if (comp == null) {
             throw new AssertionError("no open images");
         }
 
-        int found = comp.getNumLayers();
-        if (found != expected) {
-            throw new AssertionError("expected " + expected + ", found = " + found);
-        }
+        return comp.getNumLayers();
     }
 
     public static Layer getActiveLayer() {

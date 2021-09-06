@@ -134,7 +134,7 @@ public class StyledShape implements Cloneable, Transformable {
             paintStroke(g);
         }
 
-        if (effects != null) {
+        if (effects.isNotEmpty()) {
             paintEffects(g);
         }
     }
@@ -431,7 +431,7 @@ public class StyledShape implements Cloneable, Transformable {
             extraStrokeThickness = strokeType.getExtraThickness(thickness);
             thickness += extraStrokeThickness;
         }
-        if (effects != null) {
+        if (effects.isNotEmpty()) {
             int effectThickness = effects.getMaxEffectThickness();
             // the extra stroke thickness must be added
             // because the effect can be on the stroke

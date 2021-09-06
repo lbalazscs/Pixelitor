@@ -18,12 +18,7 @@ package com.jhlabs.image;
 
 import pixelitor.utils.ProgressTracker;
 
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 
 /**
  * A filter which performs a box blur with a different blur radius at each pixel. The radius can either be specified by
@@ -93,34 +88,6 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
         finishProgressTracker();
 
         return dst;
-    }
-
-    @Override
-    public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {
-        if (dstCM == null) {
-            dstCM = src.getColorModel();
-        }
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
-                .isAlphaPremultiplied(), null);
-    }
-
-    @Override
-    public Rectangle2D getBounds2D(BufferedImage src) {
-        return new Rectangle(0, 0, src.getWidth(), src.getHeight());
-    }
-
-    @Override
-    public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
-        if (dstPt == null) {
-            dstPt = new Point2D.Double();
-        }
-        dstPt.setLocation(srcPt.getX(), srcPt.getY());
-        return dstPt;
-    }
-
-    @Override
-    public RenderingHints getRenderingHints() {
-        return null;
     }
 
     public void blur(int[] in, int[] out, int width, int height, float radius, int pass, ProgressTracker pt) {
