@@ -316,6 +316,10 @@ public class Selection {
         moveStartShape = shape;
     }
 
+    public void transformWhileDragging(AffineTransform at) {
+        shape = at.createTransformedShape(moveStartShape);
+    }
+
     public void moveWhileDragging(double relImX, double relImY) {
         if (moveStartShape instanceof Rectangle2D startRect) {
             // preserve the type information
