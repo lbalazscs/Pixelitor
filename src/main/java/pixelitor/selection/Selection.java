@@ -183,6 +183,7 @@ public class Selection {
     }
 
     public void setShape(Shape currentShape) {
+        assert currentShape != null;
         shape = currentShape;
     }
 
@@ -313,6 +314,7 @@ public class Selection {
     }
 
     public void startMovement() {
+        assert shape != null;
         moveStartShape = shape;
     }
 
@@ -332,7 +334,7 @@ public class Selection {
         }
     }
 
-    public PixelitorEdit endMovement() {
+    public PixelitorEdit endMovement(boolean keepStartShape) {
         var comp = view.getComp();
 
         shape = comp.clipToCanvasBounds(shape);
@@ -344,7 +346,9 @@ public class Selection {
 
         var edit = new SelectionShapeChangeEdit(
             MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, moveStartShape);
-        moveStartShape = null;
+        if (!keepStartShape) {
+            moveStartShape = null;
+        }
         return edit;
     }
 

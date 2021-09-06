@@ -49,12 +49,14 @@ import pixelitor.utils.VisibleForTesting;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -644,6 +646,46 @@ public class Composition implements Serializable {
         }
     }
 
+    public Layer findLayerAtPoint(Point2D p) {
+        Layer retVal = null;
+        Point pPixel = new Point((int) p.getX(), (int) p.getY());
+
+        // in edit mask mode - do not auto select other layers as they are invisible
+        // in this mode, active layer is mask layer
+        MaskViewMode viewMode = getView().getMaskViewMode();
+        if (viewMode.showMask()) {
+            ContentLayer contentLayer = (ContentLayer) getActiveLayer();
+            retVal = contentLayer;
+            return retVal;
+        }
+
+        // iterate in reverse order (we need to search layers from top to bottom)
+        List<Layer> layers = getLayers();
+        ListIterator<Layer> li = layers.listIterator(layers.size());
+        while (li.hasPrevious()) {
+            Layer layer = li.previous();
+            if (!(layer instanceof ContentLayer contentLayer)) {
+                continue;
+            }
+            if (!layer.isVisible()) {
+                continue;
+            }
+            if (layer.getOpacity() < 0.05f) {
+                continue;
+            }
+
+            int pixel = contentLayer.getPixelAtPoint(pPixel);
+
+            int pixelAlphaThreshold = 30;
+            if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
+                retVal = layer;
+                break;
+            }
+        }
+
+        return retVal;
+    }
+
     public void forEachDrawable(Consumer<Drawable> action) {
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer imageLayer) {
@@ -758,7 +800,7 @@ public class Composition implements Serializable {
         PixelitorEdit selectionEdit = null;
         if (mode.movesSelection()) {
             if (selection != null) {
-                selectionEdit = selection.endMovement();
+                selectionEdit = selection.endMovement(false);
             }
         }
 

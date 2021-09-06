@@ -26,12 +26,10 @@ import pixelitor.selection.Selection;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.transform.TransformBox;
-import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
-import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
@@ -72,6 +70,8 @@ public class MoveTool extends DragTool {
         if (AppContext.enableExperimentalFeatures) {
             settingsPanel.addWithLabel("Free Transform:",
                 freeTransformCheckBox, "freeTransformCheckBox");
+            freeTransformCheckBox.addActionListener(e ->
+                setFreeTransformMode(freeTransformCheckBox.isSelected()));
         }
     }
 
@@ -79,10 +79,9 @@ public class MoveTool extends DragTool {
     public void mouseMoved(MouseEvent e, View view) {
         super.mouseMoved(e, view);
 
-//        if (currentMode.movesLayer()) {
-//            setMoveCursor(view, e);
-//        }
-
+        if (currentMode.movesLayer()) {
+            setMoveCursor(view, e);
+        }
         if (transformBox != null) {
             transformBox.mouseMoved(e);
         }
@@ -91,9 +90,8 @@ public class MoveTool extends DragTool {
     private void setMoveCursor(View view, MouseEvent e) {
         if (useAutoSelect()) {
             Point2D p = view.componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
-
-            if (objectsSelection.isEmpty()) {
+            Layer movedLayer = view.getComp().findLayerAtPoint(p);
+            if (movedLayer == null) {
                 view.setCursor(Cursors.DEFAULT);
                 return;
             }
@@ -103,77 +101,34 @@ public class MoveTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
-
         if (currentMode.movesLayer() && useAutoSelect()) {
             Point2D p = e.asImPoint2D();
-            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
+            Layer movedLayer = e.getComp().findLayerAtPoint(p);
 
-            if (objectsSelection.isEmpty()) {
+            if (movedLayer == null) {
                 drag.cancel();
                 return;
             }
-            e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
-
-            transformBox = null;
-        }
-
-        if (freeTransformCheckBox.isSelected()) {
-
-            Selection selection = e.getComp().getSelection();
-
-            if (selection != null) {
-
-                selection.startMovement();
-                Rectangle bounds = e.getView().imageToComponentSpace(selection.getShapeBounds2D());
-
-                transformBox = new TransformBox(bounds, e.getView(), new Transformable() {
-                    @Override
-                    public void transform(AffineTransform transform) {
-                        e.getComp().getSelection().transformWhileDragging(transform);
-                    }
-
-                    @Override
-                    public void updateUI(View view) {
-                        view.repaint();
-                    }
-
-                    @Override
-                    public DebugNode createDebugNode() {
-                        return new DebugNode("Anonymous Transformable in MoveTool", this);
-                    }
-                });
-            }
-
-        } else {
-            e.getComp().startMovement(
-                currentMode, e.isAltDown() || e.isRight());
+            e.getComp().setActiveLayer(movedLayer);
         }
 
         if (transformBox != null) {
             if (transformBox.processMousePressed(e)) {
-                Selection selection = e.getComp().getSelection();
-                if (selection != null) {
-                    selection.startMovement();
-                }
-
-            } else {
-                transformBox = null;
+                return;
             }
+        } else {
+            e.getComp().startMovement(
+                currentMode, e.isAltDown() || e.isRight());
         }
-
     }
 
     @Override
     public void ongoingDrag(PMouseEvent e) {
-
         if (transformBox != null) {
             if (transformBox.processMouseDragged(e)) {
                 return;
             }
-        }
-
-        if (!freeTransformCheckBox.isSelected()) {
-
+        } else {
             double relX = drag.getDX();
             double relY = drag.getDY();
 
@@ -183,7 +138,6 @@ public class MoveTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
-
         if (transformBox != null) {
             transformBox.paint(g2);
             return;
@@ -209,12 +163,10 @@ public class MoveTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         if (transformBox != null) {
-
             if (transformBox.processMouseReleased(e)) {
-
                 Selection selection = e.getComp().getSelection();
                 if (selection != null) {
-                    selection.endMovement();
+                    selection.endMovement(true);
                 }
             }
 
@@ -224,7 +176,6 @@ public class MoveTool extends DragTool {
         if (!freeTransformCheckBox.isSelected()) {
             e.getComp().endMovement(currentMode);
         }
-
     }
 
     @Override
@@ -266,6 +217,40 @@ public class MoveTool extends DragTool {
         }
 
         return false;
+    }
+
+    private void setFreeTransformMode(boolean b) {
+        if (b) {
+            createTransformBox();
+        } else {
+            transformBox = null;
+        }
+    }
+
+    @Override
+    protected void toolStarted() {
+        super.toolStarted();
+        if (freeTransformCheckBox.isSelected()) {
+            createTransformBox();
+        }
+    }
+
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+        transformBox = null;
+    }
+
+    private void createTransformBox() {
+        View view = OpenImages.getActiveView();
+        Selection selection = view.getComp().getSelection();
+        if (selection != null && transformBox == null) {
+            selection.startMovement();
+            Rectangle boxSize = view.imageToComponentSpace(selection.getShapeBounds2D());
+            boxSize.grow(10, 10); // make sure the rectangular selections are visible
+            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(selection));
+            selection.startMovement();
+        }
     }
 
     private boolean useAutoSelect() {
@@ -325,4 +310,5 @@ public class MoveTool extends DragTool {
             g.fill(shape);
         }
     }
+
 }
