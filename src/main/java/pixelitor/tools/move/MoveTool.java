@@ -17,20 +17,27 @@
 
 package pixelitor.tools.move;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
+import pixelitor.selection.Selection;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.Tool;
+import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
@@ -42,12 +49,15 @@ public class MoveTool extends DragTool {
     private MoveMode currentMode = (MoveMode) modeSelector.getSelectedItem();
 
     private final JCheckBox autoSelectCheckBox = new JCheckBox();
+    private final JCheckBox freeTransformCheckBox = new JCheckBox();
+
+    private TransformBox transformBox;
 
     public MoveTool() {
         super("Move", 'V', "move_tool.png",
             "<b>drag</b> to move the active layer, " +
-                "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
-                "<b>Shift-drag</b> to constrain the movement.",
+            "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
+            "<b>Shift-drag</b> to constrain the movement.",
             Cursors.DEFAULT, true);
     }
 
@@ -59,14 +69,22 @@ public class MoveTool extends DragTool {
         settingsPanel.addSeparator();
         settingsPanel.addWithLabel("Auto Select Layer:",
             autoSelectCheckBox, "autoSelectCheckBox");
+        if (AppContext.enableExperimentalFeatures) {
+            settingsPanel.addWithLabel("Free Transform:",
+                freeTransformCheckBox, "freeTransformCheckBox");
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
         super.mouseMoved(e, view);
 
-        if (currentMode.movesLayer()) {
-            setMoveCursor(view, e);
+//        if (currentMode.movesLayer()) {
+//            setMoveCursor(view, e);
+//        }
+
+        if (transformBox != null) {
+            transformBox.mouseMoved(e);
         }
     }
 
@@ -85,6 +103,7 @@ public class MoveTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
+
         if (currentMode.movesLayer() && useAutoSelect()) {
             Point2D p = e.asImPoint2D();
             ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
@@ -94,21 +113,86 @@ public class MoveTool extends DragTool {
                 return;
             }
             e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
+
+            transformBox = null;
         }
-        e.getComp().startMovement(
-            currentMode, e.isAltDown() || e.isRight());
+
+        if (freeTransformCheckBox.isSelected()) {
+
+            Selection selection = e.getComp().getSelection();
+
+            if (selection != null) {
+
+                selection.startMovement();
+                Rectangle bounds = e.getView().imageToComponentSpace(selection.getShapeBounds2D());
+
+                transformBox = new TransformBox(bounds, e.getView(), new Transformable() {
+                    @Override
+                    public void transform(AffineTransform transform) {
+                        e.getComp().getSelection().transformWhileDragging(transform);
+                    }
+
+                    @Override
+                    public void updateUI(View view) {
+                        view.repaint();
+                    }
+
+                    @Override
+                    public DebugNode createDebugNode() {
+                        return new DebugNode("Anonymous Transformable in MoveTool", this);
+                    }
+                });
+            }
+
+        } else {
+            e.getComp().startMovement(
+                currentMode, e.isAltDown() || e.isRight());
+        }
+
+        if (transformBox != null) {
+            if (transformBox.processMousePressed(e)) {
+                Selection selection = e.getComp().getSelection();
+                if (selection != null) {
+                    selection.startMovement();
+                }
+
+            } else {
+                transformBox = null;
+            }
+        }
+
     }
 
     @Override
     public void ongoingDrag(PMouseEvent e) {
-        double relX = drag.getDX();
-        double relY = drag.getDY();
 
-        e.getComp().moveActiveContent(currentMode, relX, relY);
+        if (transformBox != null) {
+            if (transformBox.processMouseDragged(e)) {
+                return;
+            }
+        }
+
+        if (!freeTransformCheckBox.isSelected()) {
+
+            double relX = drag.getDX();
+            double relY = drag.getDY();
+
+            e.getComp().moveActiveContent(currentMode, relX, relY);
+        }
     }
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
+
+        if (transformBox != null) {
+            transformBox.paint(g2);
+            return;
+        }
+
+        if (freeTransformCheckBox.isSelected()) {
+            return;
+        }
+
         if (drag == null || !drag.isDragging()) {
             return;
         }
@@ -124,7 +208,37 @@ public class MoveTool extends DragTool {
 
     @Override
     public void dragFinished(PMouseEvent e) {
-        e.getComp().endMovement(currentMode);
+        if (transformBox != null) {
+
+            if (transformBox.processMouseReleased(e)) {
+
+                Selection selection = e.getComp().getSelection();
+                if (selection != null) {
+                    selection.endMovement();
+                }
+            }
+
+            return;
+        }
+
+        if (!freeTransformCheckBox.isSelected()) {
+            e.getComp().endMovement(currentMode);
+        }
+
+    }
+
+    @Override
+    public void coCoordsChanged(View view) {
+        if (transformBox != null) {
+            transformBox.coCoordsChanged(view);
+        }
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
+        if (transformBox != null) {
+            transformBox.imCoordsChanged(at, comp);
+        }
     }
 
     /**
@@ -138,11 +252,19 @@ public class MoveTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
+        if (transformBox != null) {
+            View view = OpenImages.getActiveView();
+            assert view != null;
+            transformBox.arrowKeyPressed(key, view);
+            return true;
+        }
+
         var comp = OpenImages.getActiveComp();
         if (comp != null) {
             move(comp, currentMode, key.getMoveX(), key.getMoveY());
             return true;
         }
+
         return false;
     }
 

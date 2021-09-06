@@ -316,6 +316,10 @@ public class Selection {
         moveStartShape = shape;
     }
 
+    public void transformWhileDragging(AffineTransform at) {
+        shape = at.createTransformedShape(moveStartShape);
+    }
+
     public void moveWhileDragging(double relImX, double relImY) {
         if (moveStartShape instanceof Rectangle2D startRect) {
             // preserve the type information
@@ -363,9 +367,9 @@ public class Selection {
     @Override
     public String toString() {
         return "Selection{" +
-            "composition=" + view.getComp().getName() +
-            ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
-            ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
-            '}';
+               "composition=" + view.getComp().getName() +
+               ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
+               ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
+               '}';
     }
 }
