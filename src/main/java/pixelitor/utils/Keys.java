@@ -40,6 +40,7 @@ public class Keys {
     public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);
     public static final KeyStroke CTRL_E = getKeyStroke('E', CTRL);
     public static final KeyStroke CTRL_F = getKeyStroke('F', CTRL);
+    public static final KeyStroke CTRL_G = getKeyStroke('G', CTRL);
     public static final KeyStroke CTRL_H = getKeyStroke('H', CTRL);
     public static final KeyStroke CTRL_I = getKeyStroke('I', CTRL);
     public static final KeyStroke CTRL_J = getKeyStroke('J', CTRL);

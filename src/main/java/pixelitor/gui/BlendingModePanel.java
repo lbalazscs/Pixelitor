@@ -105,6 +105,7 @@ public class BlendingModePanel extends JPanel {
 
     @Override
     public void setEnabled(boolean b) {
+        super.setEnabled(false);
         opacityLabel.setEnabled(b);
         opacityDDSlider.setEnabled(b);
         bmLabel.setEnabled(b);

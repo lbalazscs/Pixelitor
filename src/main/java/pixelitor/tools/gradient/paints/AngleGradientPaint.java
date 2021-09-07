@@ -41,13 +41,14 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
     public PaintContext createContext(ColorModel cm,
                                       Rectangle deviceBounds, Rectangle2D userBounds,
                                       AffineTransform xform, RenderingHints hints) {
-        int numComponents = cm.getNumComponents();
-
-        if (numComponents == 1) {
-            return new GrayAngleGradientPaintContext(drag, startColor, endColor, cm, cycleMethod);
+        Drag trDrag = drag.transformedCopy(xform);
+        if (cm.getNumComponents() == 1) {
+            return new GrayAngleGradientPaintContext(trDrag,
+                startColor, endColor, cm, cycleMethod);
+        } else {
+            return new AngleGradientPaintContext(trDrag,
+                startColor, endColor, cm, cycleMethod);
         }
-
-        return new AngleGradientPaintContext(drag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override

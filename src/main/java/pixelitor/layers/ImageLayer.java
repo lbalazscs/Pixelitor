@@ -699,11 +699,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             trimmedBoundingBox.width, trimmedBoundingBox.height);
     }
 
-    @Override
-    public Rectangle getSnappingBoundingBox() {
-        return getEffectiveBoundingBox();
-    }
-
     /**
      * Returns the image bounds relative to the canvas
      */

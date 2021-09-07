@@ -437,5 +437,14 @@ public final class Utils {
         }
         return s;
     }
+
+    // adds an "a" or "an" before the given word
+    public static String addArticle(String s) {
+        String article = switch (s.charAt(0)) {
+            case 'a', 'e', 'i', 'o', 'u', 'h' -> "an ";
+            default -> "a ";
+        };
+        return article + s;
+    }
 }
 

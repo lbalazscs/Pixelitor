@@ -209,11 +209,6 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public Rectangle getSnappingBoundingBox() {
-        return getContentBounds();
-    }
-
-    @Override
     protected Layer getLinked() {
         if (owner.isMaskEditing()) {
             if (isLinked()) {

@@ -376,7 +376,7 @@ public class MenuBar extends JMenuBar {
         if (AppContext.enableExperimentalFeatures) {
             layersMenu.add(createSmartObjectSubmenu(pw, texts));
             layersMenu.add(createColorFillLayerSubmenu(pw, texts));
-//            layersMenu.add(createGradientFillLayerSubmenu(pw, texts));
+            layersMenu.add(createGradientFillLayerSubmenu(pw, texts));
         }
 
         return layersMenu;
@@ -536,7 +536,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new RestrictedLayerAction("Rasterize Text Layer", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
-                ((TextLayer) layer).replaceWithRasterized();
+                layer.replaceWithRasterized();
             }
         });
 
@@ -572,7 +572,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
             @Override
             public void onActiveLayer(Layer layer) {
-                ((SmartObject) layer).replaceWithRasterized();
+                layer.replaceWithRasterized();
             }
         });
 
@@ -600,7 +600,7 @@ public class MenuBar extends JMenuBar {
     }
 
     private static JMenu createColorFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
-        PMenu sub = new PMenu("Color Fill Layer");
+        PMenu sub = new PMenu("Color Fill");
 
         sub.add(new OpenImageEnabledAction("New Color Fill Layer...") {
             @Override
@@ -629,23 +629,16 @@ public class MenuBar extends JMenuBar {
     }
 
     private static JMenu createGradientFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
-        PMenu sub = new PMenu("Gradient Fill Layer");
+        PMenu sub = new PMenu("Gradient Fill");
 
         sub.add(new OpenImageEnabledAction("New Gradient Fill Layer...") {
             @Override
             public void onClick() {
                 GradientFillLayer.createNew();
             }
-        });
+        }, CTRL_G);
 
         Condition isGradientFillLayer = new ClassCondition(GradientFillLayer.class, "gradient fill layer");
-
-        sub.add(new RestrictedLayerAction("Edit Gradient Fill Layer...", isGradientFillLayer) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.edit();
-            }
-        });
 
         sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
             @Override

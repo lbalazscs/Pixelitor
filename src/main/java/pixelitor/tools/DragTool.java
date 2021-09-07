@@ -77,7 +77,7 @@ public abstract class DragTool extends Tool {
 
         if (spaceDragStartPoint) {
             if (endPointInitialized && GlobalEvents.isSpaceDown()) {
-                drag.adjustStartForSpaceDownDrag();
+                drag.adjustStartForSpaceDownDrag(e.getView());
             }
 
             endPointInitialized = true;

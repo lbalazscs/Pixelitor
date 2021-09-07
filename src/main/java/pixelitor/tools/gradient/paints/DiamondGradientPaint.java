@@ -42,15 +42,14 @@ public record DiamondGradientPaint(Drag drag, Color startColor,
     public PaintContext createContext(ColorModel cm,
                                       Rectangle deviceBounds, Rectangle2D userBounds,
                                       AffineTransform xform, RenderingHints hints) {
-        int numComponents = cm.getNumComponents();
-
-        if (numComponents == 1) {
-            return new GrayDiamondGradientPaintContext(drag,
+        Drag trDrag = drag.transformedCopy(xform);
+        if (cm.getNumComponents() == 1) {
+            return new GrayDiamondGradientPaintContext(trDrag,
+                startColor, endColor, cm, cycleMethod);
+        } else {
+            return new DiamondGradientPaintContext(trDrag,
                 startColor, endColor, cm, cycleMethod);
         }
-
-        return new DiamondGradientPaintContext(drag,
-            startColor, endColor, cm, cycleMethod);
     }
 
     @Override

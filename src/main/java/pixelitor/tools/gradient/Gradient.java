@@ -28,9 +28,12 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -52,10 +55,15 @@ public class Gradient implements Serializable {
     private final boolean reverted;
     private final BlendingMode blendingMode;
     private final float opacity;
+
+    // the actual drawing colors
     private final Color[] colors;
 
+    // saved so that they can be restored
     private final Color fgColor;
     private final Color bgColor;
+
+    private transient Drag moveStartDrag;
 
     public Gradient(Drag drag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
@@ -69,54 +77,63 @@ public class Gradient implements Serializable {
         this.blendingMode = blendingMode;
         this.opacity = opacity;
 
+        fgColor = getFGColor();
+        bgColor = getBGColor();
+        colors = initColors(colorType, reverted);
+    }
+
+    private static Color[] initColors(GradientColorType colorType, boolean reverted) {
         Color startColor = colorType.getStartColor(reverted);
         Color endColor = colorType.getEndColor(reverted);
         assert startColor != null;
         assert endColor != null;
-        colors = new Color[]{startColor, endColor};
-
-        fgColor = getFGColor();
-        bgColor = getBGColor();
+        return new Color[]{startColor, endColor};
     }
 
     public void drawOn(Drawable dr) {
         Graphics2D g;
         var comp = dr.getComp();
         Canvas canvas = comp.getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        boolean smallImage; // the temporary image might be smaller than the canvas, if there is selection
+        int width, height;
         if (dr instanceof LayerMask) {
             BufferedImage subImage = dr.getCanvasSizedSubImage();
             g = subImage.createGraphics();
-            assert canvasWidth == subImage.getWidth();
-            assert canvasHeight == subImage.getHeight();
-            smallImage = false;
+            width = canvas.getWidth();
+            height = canvas.getHeight();
         } else {
             var composite = blendingMode.getComposite(opacity);
             var tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
-            smallImage = tmpDrawingLayer.hasSmallImage();
+
+            // the temporary image might be smaller than the canvas, if there is selection
+
+            boolean smallImage = tmpDrawingLayer.hasSmallImage();
+            if (smallImage) {
+                Rectangle bounds = comp.getSelection().getShapeBounds();
+                width = bounds.width;
+                height = bounds.height;
+            } else {
+                width = canvas.getWidth();
+                height = canvas.getHeight();
+            }
+
             drag = tmpDrawingLayer.translateDrag(drag);
         }
 
-        drawOnGraphics(g, comp, canvasWidth, canvasHeight, smallImage);
+        drawOnGraphics(g, comp, width, height);
 
         g.dispose();
         dr.mergeTmpDrawingLayerDown();
         dr.updateIconImage();
     }
 
-    public void drawOnGraphics(Graphics2D g, Composition comp, int canvasWidth, int canvasHeight, boolean smallImage) {
+    public void drawOnGraphics(Graphics2D g, Composition comp, int width, int height) {
+        // No composite is set in this method, because
+        // it's not needed for gradient fill layers.
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Paint paint = type.createPaint(drag, colors, cycleMethod);
         g.setPaint(paint);
-        if (smallImage) {
-            Rectangle bounds = comp.getSelection().getShapeBounds();
-            g.fillRect(0, 0, bounds.width, bounds.height);
-        } else {
-            g.fillRect(0, 0, canvasWidth, canvasHeight);
-        }
+        g.fillRect(0, 0, width, height);
     }
 
     public BufferedImage createIconThumbnail(Canvas canvas) {
@@ -190,5 +207,42 @@ public class Gradient implements Serializable {
         Point2D handleEnd = view.imageToComponentSpace(drag.getEndPoint());
 
         return new GradientHandles(handleStart, handleEnd, view);
+    }
+
+    public void crop(Rectangle2D cropRect) {
+        drag = drag.translatedCopy(-cropRect.getX(), -cropRect.getY());
+    }
+
+    public void enlargeCanvas(int north, int west) {
+        drag = drag.translatedCopy(west, north);
+    }
+
+    public void transform(AffineTransform at) {
+        drag = drag.transformedCopy(at);
+    }
+
+    public Gradient copy() {
+        return new Gradient(drag, type, cycleMethod, colorType, reverted, blendingMode, opacity);
+    }
+
+    public void startMovement() {
+        moveStartDrag = drag.copy();
+    }
+
+    public void moveWhileDragging(double x, double y) {
+        drag = moveStartDrag.translatedCopy(x, y);
+    }
+
+    public void endMovement() {
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Gradient.class.getSimpleName() + "[", "]")
+            .add("fgColor=" + fgColor)
+            .add("bgColor=" + bgColor)
+            .add("startColor=" + colors[0])
+            .add("endColor=" + colors[1])
+            .toString();
     }
 }

@@ -475,6 +475,7 @@ public class OpenImages {
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addNewView(view);
             setActiveView(view, false);
+            Tools.editedObjectChanged(comp.getActiveLayer());
         } catch (Exception e) {
             Messages.showException(e);
         }

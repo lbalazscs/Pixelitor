@@ -31,6 +31,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
+import java.io.Serializable;
 
 import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
@@ -40,15 +42,9 @@ import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
  * by the user while using a {@link DragTool}.
  * Only the start and end points are relevant.
  */
-public class Drag {
-    private boolean dragging;
-    private boolean canceled;
-
-    // The coordinates in the component (mouse) space.
-    private double coStartX;
-    private double coEndX;
-    private double coStartY;
-    private double coEndY;
+public class Drag implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // The coordinates in the image space.
     private double imStartX;
@@ -56,16 +52,23 @@ public class Drag {
     private double imEndX;
     private double imEndY;
 
-    private double prevCoEndX;
-    private double prevCoEndY;
+    // transient variables from here
 
-    private boolean startAdjusted = false;
+    // The coordinates in the component (mouse) space.
+    private transient double coStartX;
+    private transient double coEndX;
+    private transient double coStartY;
+    private transient double coEndY;
 
-    private View view;
+    private transient double prevCoEndX;
+    private transient double prevCoEndY;
 
-    private boolean constrained = false;
-    private boolean startFromCenter = false;
-    private boolean equallySized = false;
+    private transient boolean dragging;
+    private transient boolean canceled;
+    private transient boolean startAdjusted;
+    private transient boolean constrained;
+    private transient boolean startFromCenter;
+    private transient boolean equallySized;
 
     public Drag() {
     }
@@ -111,6 +114,10 @@ public class Drag {
         return drag;
     }
 
+    public Drag copy() {
+        return new Drag(imStartX, imStartY, imEndX, imEndY);
+    }
+
     public Drag transformedCopy(AffineTransform at) {
         Point2D start = new Point2D.Double(imStartX, imStartY);
         Point2D end = new Point2D.Double(imEndX, imEndY);
@@ -128,7 +135,7 @@ public class Drag {
     public void setStart(PPoint e) {
         assert e.getView() != null;
 
-        view = e.getView();
+        View view = e.getView();
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
@@ -137,12 +144,6 @@ public class Drag {
     }
 
     public void setEnd(PPoint e) {
-        if (view != e.getView()) {
-            // in some exceptional situations it can happen that the
-            // view changes without a mousePressed event, so simulate one
-            setStart(e);
-        }
-
         coEndX = e.getCoX();
         coEndY = e.getCoY();
 
@@ -166,6 +167,7 @@ public class Drag {
             }
         }
 
+        View view = e.getView();
         imEndX = view.componentXToImageSpace(coEndX);
         imEndY = view.componentYToImageSpace(coEndY);
 
@@ -274,7 +276,7 @@ public class Drag {
         prevCoEndY = coEndY;
     }
 
-    public void adjustStartForSpaceDownDrag() {
+    public void adjustStartForSpaceDownDrag(View view) {
         double dx = coEndX - prevCoEndX;
         double dy = coEndY - prevCoEndY;
 
@@ -363,7 +365,7 @@ public class Drag {
         return Shapes.toPositiveRect(toCoRect());
     }
 
-    public PRectangle toPosPRect() {
+    public PRectangle toPosPRect(View view) {
         return PRectangle.positiveFromCo(toCoRect(), view);
     }
 

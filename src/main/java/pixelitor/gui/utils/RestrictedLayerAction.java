@@ -20,6 +20,7 @@ package pixelitor.gui.utils;
 import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 
 import static java.lang.String.format;
 
@@ -100,7 +101,9 @@ public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
 
             @Override
             public String getErrorMessage(Layer layer) {
-                return format("<html>The layer <b>%s</b> is not a %s.", layer.getName(), desc);
+                String layerType = layer.getTypeStringLC();
+                return format("<html>The layer <b>%s</b> isn't a %s, it's %s.",
+                    layer.getName(), desc, Utils.addArticle(layerType));
             }
 
             @Override

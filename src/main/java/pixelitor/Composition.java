@@ -562,6 +562,7 @@ public class Composition implements Serializable {
         if (wasActive) {
             activeLayer = after;
         }
+        Tools.editedObjectChanged(activeLayer);
     }
 
     public void setActiveLayer(Layer newActiveLayer) {
@@ -817,7 +818,9 @@ public class Composition implements Serializable {
             Layer layer = getActiveMaskOrLayer();
             if (layer instanceof ContentLayer contentLayer) {
                 Rectangle imBounds = contentLayer.getContentBounds();
-                Shapes.drawVisibly(g, view.imageToComponentSpace(imBounds));
+                if (imBounds != null) {
+                    Shapes.drawVisibly(g, view.imageToComponentSpace(imBounds));
+                }
             }
         }
     }

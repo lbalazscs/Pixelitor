@@ -249,12 +249,10 @@ public class GradientTool extends DragTool {
                 drag.getCoEndX(), drag.getCoEndY(), e.getView());
         }
 
-        var comp = e.getComp();
-
         if (editingGradientLayer()) {
             gradientLayer.setGradient(createGradient(renderedDrag));
         } else {
-            Drawable dr = comp.getActiveDrawableOrThrow();
+            Drawable dr = e.getComp().getActiveDrawableOrThrow();
             drawGradient(dr, renderedDrag, true, null);
         }
     }
@@ -318,22 +316,12 @@ public class GradientTool extends DragTool {
         if (reloaded && handles != null) {
             hideHandles(newComp, false);
         }
+        handleNewActiveLayer(newComp.getActiveLayer());
     }
 
     @Override
     public void editedObjectChanged(Layer layer) {
-        if (layer instanceof GradientFillLayer gfl) {
-            gradientLayer = gfl;
-            Gradient gradient = gfl.getGradient();
-            if (gradient != null) {
-                loadSettingsFromGradient(gradient, gfl.getComp().getView());
-            }
-        } else {
-            if (handles != null) {
-                hideHandles(layer.getComp(), false);
-            }
-            gradientLayer = null;
-        }
+        handleNewActiveLayer(layer);
     }
 
     @Override
@@ -354,6 +342,10 @@ public class GradientTool extends DragTool {
     }
 
     private void hideHandles(Composition comp, boolean addHistory) {
+        if (editingGradientLayer()) {
+            return;
+        }
+
         if (addHistory) {
             History.add(new GradientHandlesHiddenEdit(comp, lastGradient));
         }
@@ -481,7 +473,32 @@ public class GradientTool extends DragTool {
 
         Layer activeLayer = OpenImages.getActiveLayer();
         if (activeLayer != null) {
-            setupMaskEditing(activeLayer.isMaskEditing());
+            handleNewActiveLayer(activeLayer);
+        }
+    }
+
+    private void handleNewActiveLayer(Layer layer) {
+        if (layer.isMaskEditing()) {
+            setupMaskEditing(true);
+            gradientLayer = null;
+        } else {
+            if (layer instanceof GradientFillLayer gfl) {
+                blendingModePanel.setEnabled(false);
+                gradientLayer = gfl;
+                Gradient gradient = gfl.getGradient();
+                if (gradient != null) {
+                    loadSettingsFromGradient(gradient, gfl.getComp().getView());
+
+                    // make the loaded handles visible
+                    layer.getComp().getView().repaint();
+                }
+            } else {
+                if (handles != null) {
+                    hideHandles(layer.getComp(), false);
+                }
+                gradientLayer = null;
+                blendingModePanel.setEnabled(true);
+            }
         }
     }
 
@@ -499,13 +516,7 @@ public class GradientTool extends DragTool {
         }
 
         View view = comp.getView();
-
-        // set the settings
-        ignoreRegenerate = true;
-
         loadSettingsFromGradient(gradient, view);
-
-        ignoreRegenerate = false;
         if (regenerate) {
             regenerateOnDrawable(dr, false, null);
         }
@@ -515,16 +526,22 @@ public class GradientTool extends DragTool {
     }
 
     private void loadSettingsFromGradient(Gradient gradient, View view) {
+        ignoreRegenerate = true;
+
         handles = gradient.createHandles(view);
         colorTypeCB.setSelectedItem(gradient.getColorType());
         typeCB.setSelectedItem(gradient.getType());
         cycleMethodCB.setSelectedItem(cycleMethodToString(gradient.getCycleMethod()));
         revertCB.setSelected(gradient.isReverted());
-        blendingModePanel.setBlendingMode(gradient.getBlendingMode());
-        blendingModePanel.setOpacity(gradient.getOpacity());
+        if (blendingModePanel.isEnabled()) {
+            blendingModePanel.setBlendingMode(gradient.getBlendingMode());
+            blendingModePanel.setOpacity(gradient.getOpacity());
+        }
 
         setFGColor(gradient.getFgColor(), false);
         setBGColor(gradient.getBgColor(), false);
+
+        ignoreRegenerate = false;
     }
 
     @Override

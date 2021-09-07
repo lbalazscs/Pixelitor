@@ -42,13 +42,14 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
     public PaintContext createContext(ColorModel cm,
                                       Rectangle deviceBounds, Rectangle2D userBounds,
                                       AffineTransform xform, RenderingHints hints) {
-        int numComponents = cm.getNumComponents();
-
-        if (numComponents == 1) {
-            return new GraySpiralGradientPaintContext(clockwise, drag, startColor, endColor, cm, cycleMethod);
+        Drag trDrag = drag.transformedCopy(xform);
+        if (cm.getNumComponents() == 1) {
+            return new GraySpiralGradientPaintContext(clockwise, trDrag,
+                startColor, endColor, cm, cycleMethod);
+        } else {
+            return new SpiralGradientPaintContext(clockwise, trDrag,
+                startColor, endColor, cm, cycleMethod);
         }
-
-        return new SpiralGradientPaintContext(clockwise, drag, startColor, endColor, cm, cycleMethod);
     }
 
     @Override

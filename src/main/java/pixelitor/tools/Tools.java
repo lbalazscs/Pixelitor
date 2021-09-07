@@ -173,6 +173,10 @@ public class Tools {
         currentTool.imCoordsChanged(at, comp);
     }
 
+    public static void compReplaced(Composition newComp, boolean reloaded) {
+        currentTool.compReplaced(newComp, reloaded);
+    }
+
     public static void editedObjectChanged(Layer layer) {
         assert currentTool != null || AppContext.isUnitTesting();
         if (layer.getClass() == GradientFillLayer.class) {

@@ -78,13 +78,6 @@ public abstract class ContentLayer extends Layer {
     public abstract Rectangle getEffectiveBoundingBox();
 
     /**
-     * Returns the bounding box relative to the canvas used for snapping.
-     * The returned rectangle can help with positioning the layer.
-     * It doesn't have to be the same as effective bounding box.
-     */
-    public abstract Rectangle getSnappingBoundingBox();
-
-    /**
      * Returns the rectangle representing the content, relative to the canvas.
      */
     public abstract Rectangle getContentBounds();

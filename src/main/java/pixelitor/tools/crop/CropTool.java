@@ -223,13 +223,12 @@ public class CropTool extends DragTool {
     }
 
     private void mouseDoubleClicked(PMouseEvent e) {
-        // if user double clicked inside selection then accept cropping
-
         if (state != TRANSFORM) {
             return;
         }
 
         if (!cropBox.getRect().containsCo(e.getPoint())) {
+            // only double-clicking inside the crop box will execute the crop
             return;
         }
 
@@ -240,14 +239,11 @@ public class CropTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
+        assert state != INITIAL_DRAG;
         if (state == NO_INTERACTION) {
             setState(INITIAL_DRAG);
             enableCropActions(true);
-        } else if (state == INITIAL_DRAG) {
-            throw new IllegalStateException();
-        }
-
-        if (state == TRANSFORM) {
+        } else if (state == TRANSFORM) {
             assert cropBox != null;
             cropBox.mousePressed(e);
             enableCropActions(true);
@@ -263,12 +259,12 @@ public class CropTool extends DragTool {
             drag.setEquallySized(e.isShiftDown());
         }
 
-        PRectangle cropRect = getCropRect();
+        PRectangle cropRect = getCropRect(e.getView());
         if (cropRect != null) {
             updateSizeSettings(cropRect);
         }
 
-        // in the USER_DRAG state this will also
+        // in the INITIAL_DRAG state this will also
         // cause the painting of the darkening overlay
         e.repaint();
     }
@@ -315,7 +311,7 @@ public class CropTool extends DragTool {
         if (state == NO_INTERACTION) {
             return;
         }
-        PRectangle cropRect = getCropRect();
+        PRectangle cropRect = getCropRect(comp.getView());
         if (cropRect == null) {
             return;
         }
@@ -381,9 +377,9 @@ public class CropTool extends DragTool {
     /**
      * Returns the crop rectangle
      */
-    public PRectangle getCropRect() {
+    public PRectangle getCropRect(View view) {
         if (state == INITIAL_DRAG) {
-            return drag.toPosPRect();
+            return drag.toPosPRect(view);
         } else if (state == TRANSFORM) {
             return cropBox.getRect();
         }
@@ -459,7 +455,7 @@ public class CropTool extends DragTool {
             return false;
         }
 
-        Rectangle2D cropRect = getCropRect().getIm();
+        Rectangle2D cropRect = getCropRect(OpenImages.getActiveView()).getIm();
         if (cropRect.isEmpty()) {
             return false;
         }
