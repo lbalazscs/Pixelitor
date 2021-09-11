@@ -19,6 +19,7 @@ public class ComicBook extends ParametrizedFilter {
     public static final String NAME = "Comic Book Effect";
 
     private final RangeParam stepsParam = new RangeParam("Steps", 1, 4, 20);
+    private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 66, 100);
 
     private final RangeParam dogRadius1Param = new RangeParam("DOG Radius 1", 0, 0, 20);
     private final RangeParam dogRadius2Param = new RangeParam("DOG Radius 2", 0, 10, 20);
@@ -34,6 +35,7 @@ public class ComicBook extends ParametrizedFilter {
         ArrayList<FilterParam> params = new ArrayList<>();
 
         params.add(stepsParam);
+        params.add(blurRadiusParam);
 
         if (AppContext.enableExperimentalFeatures) {
             params
@@ -49,7 +51,7 @@ public class ComicBook extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
-        BufferedImage blurredI = blur(src);
+        BufferedImage blurredI = blur(src, 30f - blurRadiusParam.getValue() / 100f * 30f);
         BufferedImage grayI = gray(blurredI);
         BufferedImage edgesI = edges(grayI, dogRadius1Param.getValueAsFloat(), dogRadius2Param.getValueAsFloat());
         BufferedImage scaledI = scale(edgesI, scalingBottomParam.getValue(), scalingTopParam.getValue());
@@ -59,8 +61,8 @@ public class ComicBook extends ParametrizedFilter {
         return finalI;
     }
 
-    public static BufferedImage blur(BufferedImage src) {
-        GaussianFilter blur = new GaussianFilter(10, NAME);
+    public static BufferedImage blur(BufferedImage src, float radius) {
+        GaussianFilter blur = new GaussianFilter(radius, NAME);
         blur.setPremultiplyAlpha(false);
         blur.setUseAlpha(false);
         return blur.filter(src, null);
