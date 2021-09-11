@@ -969,6 +969,10 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.addFilter(ComicBook.NAME, ComicBook::new);
+
+        sub.addSeparator();
+
         sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
         sub.addFilter(JHCaustics.NAME, JHCaustics::new);
         sub.addFilter(JHCells.NAME, JHCells::new);
