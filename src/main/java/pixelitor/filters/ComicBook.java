@@ -1,20 +1,15 @@
 package pixelitor.filters;
 
-import com.jhlabs.image.DoGFilter;
 import com.jhlabs.image.GaussianFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.ArrayList;
-
-import static java.awt.AlphaComposite.SRC_OVER;
 
 public class ComicBook extends ParametrizedFilter {
 
@@ -22,27 +17,21 @@ public class ComicBook extends ParametrizedFilter {
 
     private final RangeParam stepsParam = new RangeParam("Steps", 1, 4, 20);
     private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 66, 100);
+    private final RangeParam edgesParam = new RangeParam("Edge Amount", 0, 66, 100);
 
     private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 128, 256);
 
     public ComicBook() {
         super(true);
 
-        ArrayList<FilterParam> params = new ArrayList<>();
-
-        params.add(stepsParam);
-        params.add(blurRadiusParam);
-        params.add(thresholdParam);
-
-        setParams(params.toArray(FilterParam[]::new));
+        setParams(stepsParam, blurRadiusParam, edgesParam, thresholdParam);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
         BufferedImage blurredI = blur(src, 30f - blurRadiusParam.getValue() / 100f * 30f);
-//        BufferedImage edgesI = ImageUtils.getHighPassFilteredImage(blurredI, blur(blurredI, 30f - blurRadiusParam.getValue() / 100f * 30f));
-        BufferedImage edgesI = ImageUtils.getHighPassFilteredImage(src, blurredI);
+        BufferedImage edgesI = edges(blurredI, edgesParam.getValue());
         BufferedImage grayI = gray(edgesI);
         BufferedImage stairedI = stairs(blurredI, stepsParam.getValue());
         BufferedImage finalI = threshold(grayI, stairedI, thresholdParam.getValue());
@@ -55,6 +44,11 @@ public class ComicBook extends ParametrizedFilter {
         blur.setPremultiplyAlpha(false);
         blur.setUseAlpha(false);
         return blur.filter(src, null);
+    }
+
+    public static BufferedImage edges(BufferedImage src, float radius) {
+        BufferedImage blurredI = blur(src, radius);
+        return ImageUtils.getHighPassFilteredImage(src, blurredI);
     }
 
     public static BufferedImage gray(BufferedImage src) {
@@ -131,14 +125,12 @@ public class ComicBook extends ParametrizedFilter {
     public static class Stairs {
 
         private final float step_size;
-        private final float start;
-        private final float end;
         private final float[] points;
 
         public Stairs(int stairs) {
             this.step_size = 1f / stairs;
-            this.start = (step_size / 2);
-            this.end = 1 - this.start;
+            float start = (step_size / 2);
+//            float end = 1 - start;
             points = new float[stairs];
 
             int stepIndex = 0;
