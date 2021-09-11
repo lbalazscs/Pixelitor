@@ -969,10 +969,6 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addFilter(ComicBook.NAME, ComicBook::new);
-
-        sub.addSeparator();
-
         sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
         sub.addFilter(JHCaustics.NAME, JHCaustics::new);
         sub.addFilter(JHCells.NAME, JHCells::new);
@@ -1028,6 +1024,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createArtisticSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("artistic"));
 
+        sub.addFilter(ComicBook.NAME, ComicBook::new);
         sub.addFilter(JHCrystallize.NAME, JHCrystallize::new);
         sub.addFilter(JHEmboss.NAME, JHEmboss::new);
         sub.addFilter(JHOilPainting.NAME, JHOilPainting::new);

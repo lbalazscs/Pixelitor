@@ -540,7 +540,7 @@ public class ImageLayerTest {
 
     @Test
     public void duplicate() {
-        ImageLayer duplicate = (ImageLayer) layer.duplicate(false);
+        ImageLayer duplicate = (ImageLayer) layer.duplicate(false, true);
 
         assertThat(duplicate)
             .blendingModeIs(layer.getBlendingMode())

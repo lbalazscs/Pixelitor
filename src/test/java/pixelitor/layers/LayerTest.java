@@ -149,17 +149,17 @@ public class LayerTest {
 
     @Test
     public void duplicating() {
-        Layer copy = layer.duplicate(false);
+        Layer copy = layer.duplicate(false, true);
         checkCopy(copy, "layer 1 copy");
 
-        Layer copy2 = copy.duplicate(false);
+        Layer copy2 = copy.duplicate(false, true);
         checkCopy(copy2, "layer 1 copy 2");
 
-        Layer copy3 = copy2.duplicate(false);
+        Layer copy3 = copy2.duplicate(false, true);
         checkCopy(copy3, "layer 1 copy 3");
 
         // in this case the name shouldn't change
-        Layer exactCopy = layer.duplicate(true);
+        Layer exactCopy = layer.duplicate(true, true);
         checkCopy(exactCopy, "layer 1");
 
         iconUpdates.check(0, 0);

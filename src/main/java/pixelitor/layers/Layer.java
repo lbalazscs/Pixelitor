@@ -146,7 +146,7 @@ public abstract class Layer implements Serializable {
         ui.setSelected(true);
     }
 
-    public final Layer duplicate(boolean compCopy) {
+    public final Layer duplicate(boolean compCopy, boolean duplicateMask) {
         String duplicateName = compCopy ? this.name : Utils.createCopyName(name);
         Layer d = createTypeSpecificDuplicate(duplicateName);
 
@@ -154,7 +154,9 @@ public abstract class Layer implements Serializable {
         d.setBlendingMode(getBlendingMode(), false);
         d.setVisible(isVisible(), false);
 
-        duplicateMask(d, compCopy);
+        if (duplicateMask) {
+            duplicateMask(d, compCopy);
+        }
 
         return d;
     }
@@ -688,6 +690,13 @@ public abstract class Layer implements Serializable {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns true if asImage() returns non-null;
+     */
+    public boolean canExportImage() {
+        return getClass() != AdjustmentLayer.class;
     }
 
     /**

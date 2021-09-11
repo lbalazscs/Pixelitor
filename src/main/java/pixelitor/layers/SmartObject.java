@@ -68,7 +68,8 @@ public class SmartObject extends ImageLayer {
         super(layer.getComp(), NAME_PREFIX + layer.getName());
 
         content = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
-        Layer contentLayer = layer.duplicate(true);
+        // the mask stays outside the content, and will become the mask of the smart object
+        Layer contentLayer = layer.duplicate(true, false);
         contentLayer.setName("original content", false);
         contentLayer.setComp(content);
         content.addLayerInInitMode(contentLayer);
@@ -253,7 +254,11 @@ public class SmartObject extends ImageLayer {
         // workaround for moved layers
         BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
         Graphics2D g = img.createGraphics();
-        applyLayer(g, null, true);
+
+        // don't call applyLayer, because the mask should NOT be considered
+        setupDrawingComposite(g, true);
+        paintLayerOnGraphics(g, true);
+
         g.dispose();
         return img;
     }

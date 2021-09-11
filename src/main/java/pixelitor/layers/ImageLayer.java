@@ -1092,12 +1092,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 g.drawImage(visibleImage, getTx(), getTy(), null);
                 tmpDrawingLayer.paintOn(g, 0, 0);
             } else { // layer is not in normal mode
+                // the composite of the graphics is already set up, but
+                // the drawing layer still has to be considered
+
                 // first create a merged layer-brush image
                 BufferedImage mergedLayerBrushImg = copyImage(visibleImage);
                 // TODO a canvas-sized image would be enough?
                 Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
 
-                // draw the brush on the layer
+                // draw the drawing layer on the layer
                 tmpDrawingLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
                 mergedLayerBrushG.dispose();
 

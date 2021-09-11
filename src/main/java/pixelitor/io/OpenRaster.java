@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 import pixelitor.Composition;
 import pixelitor.ImageMode;
 import pixelitor.layers.BlendingMode;
+import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.*;
@@ -75,15 +76,15 @@ public class OpenRaster {
             """, comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
-        int numImageLayers = comp.getNumImageLayers() + 1; // +1 for the merged image
-        double workRatio = 1.0 / numImageLayers;
+        int numImages = comp.getNumExportableImages() + 1; // +1 for the merged image
+        double workRatio = 1.0 / numImages;
 
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
         for (int i = numLayers - 1; i >= 0; i--) {
             Layer layer = comp.getLayer(i);
-            if (layer instanceof ImageLayer imageLayer) {
+            if (layer.canExportImage()) {
                 var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
-                stackXML += writeLayer(imageLayer, i, zos, subTracker);
+                stackXML += writeLayer(layer, i, zos, subTracker);
             }
         }
 
@@ -110,24 +111,30 @@ public class OpenRaster {
         mainTracker.finished();
     }
 
-    private static String writeLayer(ImageLayer layer,
+    private static String writeLayer(Layer layer,
                                      int layerIndex,
                                      ZipOutputStream zos,
                                      ProgressTracker pt) throws IOException {
+        int tx = 0;
+        int ty = 0;
+        if (layer instanceof ContentLayer contentLayer) {
+            tx = contentLayer.getTx();
+            ty = contentLayer.getTy();
+        }
         String stackXML = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
-                "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+            "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
             layer.getName(),
             layer.getVisibilityAsORAString(),
             layer.getBlendingMode().toSVGName(),
             layer.getOpacity(),
             layerIndex,
-            layer.getTx(),
-            layer.getTy());
+            tx,
+            ty);
 
         var entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
-        BufferedImage image = layer.getImage();
+        BufferedImage image = layer.asImage(true);
 
         TrackedIO.writeToStream(image, zos, "PNG", pt);
 

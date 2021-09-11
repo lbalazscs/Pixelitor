@@ -175,7 +175,7 @@ public class Composition implements Serializable {
 
         // copy layers
         for (Layer layer : layerList) {
-            var layerCopy = layer.duplicate(true);
+            var layerCopy = layer.duplicate(true, true);
             layerCopy.setComp(compCopy);
 
             compCopy.layerList.add(layerCopy);
@@ -410,7 +410,7 @@ public class Composition implements Serializable {
     }
 
     public void duplicateActiveLayer() {
-        Layer duplicate = activeLayer.duplicate(false);
+        Layer duplicate = activeLayer.duplicate(false, true);
         if (duplicate == null) {
             // there was an out of memory error
             return;
@@ -631,8 +631,8 @@ public class Composition implements Serializable {
             .count();
     }
 
-    public int getNumImageLayers() {
-        return getNumLayers(layer -> layer instanceof ImageLayer);
+    public int getNumExportableImages() {
+        return getNumLayers(Layer::canExportImage);
     }
 
     public void forEachLayer(Consumer<Layer> action) {

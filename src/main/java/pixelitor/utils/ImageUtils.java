@@ -781,11 +781,12 @@ public class ImageUtils {
         g.dispose();
     }
 
+    // See https://graphicdesign.stackexchange.com/questions/89969/what-does-photoshops-high-pass-filter-actually-do-under-the-hood
     public static BufferedImage getHighPassFilteredImage(BufferedImage original, BufferedImage blurred) {
         assert original != null;
         assert blurred != null;
 
-        // the blurred image is the low-pass filtered version of the image
+        // The blurred image is the low-pass filtered version of the image
         // so we subtract it form the original by inverting it...
         blurred = Invert.invertImage(blurred);
         // ... and blending it at 50% with the original
@@ -798,25 +799,15 @@ public class ImageUtils {
     }
 
     public static BufferedImage getHighPassSharpenedImage(BufferedImage original, BufferedImage blurred) {
-        assert original != null;
-        assert blurred != null;
-
-        // the blurred image is the low-pass filtered version of the image
-        // so we subtract it form the original by inverting it...
-        blurred = Invert.invertImage(blurred);
-        // ... and blending it at 50% with the original
-        Graphics2D g = blurred.createGraphics();
-        g.setComposite(AlphaComposite.getInstance(SRC_OVER, 0.5f));
-        g.drawImage(original, 0, 0, null);
-        g.dispose();
+        BufferedImage highPass = getHighPassFilteredImage(original, blurred);
 
         // blend it with overlay to get a sharpening effect
-        Graphics2D g2 = blurred.createGraphics();
+        Graphics2D g2 = highPass.createGraphics();
         g2.setComposite(new OverlayComposite(1.0f));
         g2.drawImage(original, 0, 0, null);
         g2.dispose();
 
-        return blurred;
+        return highPass;
     }
 
     public static BufferedImage createRandomPointsTemplateBrush(int diameter, float density) {
