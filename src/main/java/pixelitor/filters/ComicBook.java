@@ -19,7 +19,9 @@ public class ComicBook extends ParametrizedFilter {
     private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 66, 100);
     private final RangeParam edgesParam = new RangeParam("Edge Amount", 0, 66, 100);
 
-    private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 128, 256);
+    // Essentially threshold is a value in the range [0-256]. For any value of bias below the threshold, the corresponding color will be set to Black.
+    // However, only values around [120-135] seems visually logical. Therefore this parameter focuses on picking fine values within that range.
+    private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 50, 100);
 
     public ComicBook() {
         super(true);
@@ -34,7 +36,7 @@ public class ComicBook extends ParametrizedFilter {
         BufferedImage edgesI = edges(blurredI, edgesParam.getValue());
         BufferedImage grayI = gray(edgesI);
         BufferedImage stairedI = stairs(blurredI, stepsParam.getValue());
-        BufferedImage finalI = threshold(grayI, stairedI, thresholdParam.getValue());
+        BufferedImage finalI = threshold(grayI, stairedI, (int) (120 + 15 * thresholdParam.getPercentageValF()));
 
         return finalI;
     }
@@ -52,7 +54,7 @@ public class ComicBook extends ParametrizedFilter {
     }
 
     public static BufferedImage gray(BufferedImage src) {
-        BufferedImage out = createCompatibleDestImage(src);
+        BufferedImage out = ImageUtils.createImageWithSameCM(src);
 
         int[] src_pixels = ImageUtils.getPixelsAsArray(src);
         int[] out_pixels = ImageUtils.getPixelsAsArray(out);
@@ -115,13 +117,6 @@ public class ComicBook extends ParametrizedFilter {
         return ((0xFF) << 24) | ((c & 0xFF) << 16) | ((c & 0xFF) << 8) | (c & 0xFF);
     }
 
-    // TODO: Wait What!? It Should be a static method!
-    public static BufferedImage createCompatibleDestImage(BufferedImage src) {
-        ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
-            .isAlphaPremultiplied(), null);
-    }
-
     public static class Stairs {
 
         private final float step_size;
@@ -130,7 +125,6 @@ public class ComicBook extends ParametrizedFilter {
         public Stairs(int stairs) {
             this.step_size = 1f / stairs;
             float start = (step_size / 2);
-//            float end = 1 - start;
             points = new float[stairs];
 
             int stepIndex = 0;
