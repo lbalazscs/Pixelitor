@@ -155,7 +155,7 @@ public class GradientTool extends DragTool {
             if (view != null) {
                 Drag renderedDrag = handles.toDrag(view);
                 if (!renderedDrag.isImClick()) {
-                    gradientLayer.setGradient(createGradient(renderedDrag));
+                    gradientLayer.setGradient(createGradient(renderedDrag), true);
                 }
             }
         } else {
@@ -250,7 +250,7 @@ public class GradientTool extends DragTool {
         }
 
         if (editingGradientLayer()) {
-            gradientLayer.setGradient(createGradient(renderedDrag));
+            gradientLayer.setGradient(createGradient(renderedDrag), true);
         } else {
             Drawable dr = e.getComp().getActiveDrawableOrThrow();
             drawGradient(dr, renderedDrag, true, null);
@@ -350,6 +350,10 @@ public class GradientTool extends DragTool {
             History.add(new GradientHandlesHiddenEdit(comp, lastGradient));
         }
 
+        hideHandlesUnchecked(comp);
+    }
+
+    private void hideHandlesUnchecked(Composition comp) {
         handles = null;
         activePoint = null;
         lastGradient = null;
@@ -368,7 +372,7 @@ public class GradientTool extends DragTool {
         Drag handleDrag = handles.toDrag(view);
 
         if (editingGradientLayer()) {
-            gradientLayer.setGradient(createGradient(handleDrag));
+            gradientLayer.setGradient(createGradient(handleDrag), true);
         } else {
             var comp = view.getComp();
             Drawable dr = comp.getActiveDrawable();
@@ -490,13 +494,16 @@ public class GradientTool extends DragTool {
                     loadSettingsFromGradient(gradient, gfl.getComp().getView());
 
                     // make the loaded handles visible
-                    layer.getComp().getView().repaint();
+                    layer.getComp().repaint();
+                } else {
+                    // can get here when undoing the first gradient
+                    hideHandlesUnchecked(gfl.getComp());
                 }
             } else {
+                gradientLayer = null;
                 if (handles != null) {
                     hideHandles(layer.getComp(), false);
                 }
-                gradientLayer = null;
                 blendingModePanel.setEnabled(true);
             }
         }

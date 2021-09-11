@@ -237,7 +237,7 @@ public class IO {
         int numSavedImages = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
             Layer layer = comp.getLayer(layerIndex);
-            BufferedImage image = layer.asImage(true);
+            BufferedImage image = layer.asImage(true, false);
             if (image != null) {
                 saveLayerImage(image, layer.getName(), layerIndex);
                 numSavedImages++;

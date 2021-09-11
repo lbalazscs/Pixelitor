@@ -134,7 +134,7 @@ public class OpenRaster {
 
         var entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
-        BufferedImage image = layer.asImage(true);
+        BufferedImage image = layer.asImage(true, false);
 
         TrackedIO.writeToStream(image, zos, "PNG", pt);
 

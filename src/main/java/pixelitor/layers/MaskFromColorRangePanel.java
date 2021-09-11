@@ -92,7 +92,7 @@ public class MaskFromColorRangePanel extends JPanel {
         this.layer = layer;
 
         // by default use the layer image
-        srcImage = layer.asImage(false);
+        srcImage = layer.asImage(false, false);
         srcIsLayer = true;
         imageSourceCB.addActionListener(e -> imageSourceChanged(comp));
 
@@ -108,7 +108,7 @@ public class MaskFromColorRangePanel extends JPanel {
         Object selectedSource = imageSourceCB.getSelectedItem();
         if (selectedSource.equals(IMG_SRC_LAYER) && !srcIsLayer) {
             // change to layer-based
-            srcImage = layer.asImage(false);
+            srcImage = layer.asImage(false, false);
             srcIsLayer = true;
             refreshColorPickerImage(true);
         } else if (srcIsLayer) {

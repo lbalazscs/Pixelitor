@@ -17,23 +17,21 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
-import pixelitor.layers.Layer;
-import pixelitor.utils.debug.DebugNode;
+import pixelitor.layers.ColorFillLayer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.awt.Color;
 
-/**
- * Represents the replacement of a layer with another
- */
-public class ReplaceLayerEdit extends PixelitorEdit {
-    private Layer before;
-    private Layer after;
+public class ColorFillLayerChangeEdit extends PixelitorEdit {
+    private final ColorFillLayer layer;
+    private final Color before;
+    private final Color after;
 
-    public ReplaceLayerEdit(Composition comp, Layer before, Layer after, String editName) {
-        super(editName, comp, true);
+    public ColorFillLayerChangeEdit(ColorFillLayer layer, Color before, Color after) {
+        super("Color Fill Layer Change", layer.getComp());
 
+        this.layer = layer;
         this.before = before;
         this.after = after;
     }
@@ -41,35 +39,12 @@ public class ReplaceLayerEdit extends PixelitorEdit {
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
-
-        comp.replaceLayer(after, before);
-
-        assert before.isActive();
-        assert before.hasUI();
+        layer.changeColor(before, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
-
-        comp.replaceLayer(before, after);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        before = null;
-        after = null;
-    }
-
-    @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
-
-        node.add(before.createDebugNode("before"));
-        node.add(after.createDebugNode("after"));
-
-        return node;
+        layer.changeColor(after, false);
     }
 }

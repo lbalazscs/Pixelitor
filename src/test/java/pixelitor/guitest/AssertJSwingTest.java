@@ -1743,6 +1743,7 @@ public class AssertJSwingTest {
     }
 
     private void testFiltersArtistic() {
+        testFilterWithDialog("Comic Book", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Crystallize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Stamp", Randomize.YES, Reseed.NO, ShowOriginal.YES);

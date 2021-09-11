@@ -50,7 +50,7 @@ public class LayerAnimation {
 
     private void addLayer(Composition comp, int layerIndex) {
         Layer layer = comp.getLayer(layerIndex);
-        BufferedImage image = layer.asImage(true);
+        BufferedImage image = layer.asImage(true, true);
         if (image == null) {
             return;
         }

@@ -24,7 +24,6 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.util.Drag;
-import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -39,7 +38,6 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 /**
  * This class describes a gradient with all the information
@@ -136,28 +134,19 @@ public class Gradient implements Serializable {
         g.fillRect(0, 0, width, height);
     }
 
-    public BufferedImage createIconThumbnail(Canvas canvas) {
-        Dimension thumbDim = ImageUtils.calcThumbDimensions(
-            canvas.getWidth(), canvas.getHeight(), thumbSize);
-
+    public void paintIconThumbnail(Graphics2D g2, Canvas canvas,
+                                   Dimension thumbSize) {
         double scaling;
-        if (thumbDim.width > thumbDim.height) {
-            scaling = thumbDim.width / (double) canvas.getWidth();
+        if (thumbSize.width > thumbSize.height) {
+            scaling = thumbSize.width / (double) canvas.getWidth();
         } else {
-            scaling = thumbDim.height / (double) canvas.getHeight();
+            scaling = thumbSize.height / (double) canvas.getHeight();
         }
-
-        BufferedImage img = ImageUtils.createSysCompatibleImage(
-            thumbDim.width, thumbDim.height);
-        Graphics2D g2 = img.createGraphics();
         g2.scale(scaling, scaling);
 
         Paint paint = type.createPaint(drag, colors, cycleMethod);
         g2.setPaint(paint);
         g2.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        g2.dispose();
-        return img;
     }
 
     /**
@@ -234,6 +223,10 @@ public class Gradient implements Serializable {
     }
 
     public void endMovement() {
+    }
+
+    public boolean hasTransparency() {
+        return colorType.hasTransparency();
     }
 
     @Override

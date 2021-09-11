@@ -17,23 +17,21 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
-import pixelitor.layers.Layer;
-import pixelitor.utils.debug.DebugNode;
+import pixelitor.layers.GradientFillLayer;
+import pixelitor.tools.gradient.Gradient;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-/**
- * Represents the replacement of a layer with another
- */
-public class ReplaceLayerEdit extends PixelitorEdit {
-    private Layer before;
-    private Layer after;
+public class GradientFillLayerChangeEdit extends PixelitorEdit {
+    private final GradientFillLayer layer;
+    private final Gradient before;
+    private final Gradient after;
 
-    public ReplaceLayerEdit(Composition comp, Layer before, Layer after, String editName) {
-        super(editName, comp, true);
+    public GradientFillLayerChangeEdit(GradientFillLayer layer, Gradient before, Gradient after) {
+        super("Gradient Fill Layer Change", layer.getComp());
 
+        this.layer = layer;
         this.before = before;
         this.after = after;
     }
@@ -42,34 +40,13 @@ public class ReplaceLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.replaceLayer(after, before);
-
-        assert before.isActive();
-        assert before.hasUI();
+        layer.setGradient(before, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.replaceLayer(before, after);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        before = null;
-        after = null;
-    }
-
-    @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
-
-        node.add(before.createDebugNode("before"));
-        node.add(after.createDebugNode("after"));
-
-        return node;
+        layer.setGradient(after, false);
     }
 }

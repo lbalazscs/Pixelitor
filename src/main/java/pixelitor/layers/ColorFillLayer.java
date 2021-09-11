@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.colors.Colors;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.history.ColorFillLayerChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.tools.Tools;
@@ -57,9 +58,9 @@ public class ColorFillLayer extends Layer {
 
         String title = "Add Color Fill Layer";
         Color defaultColor = Rnd.createRandomColor();
-        layer.changeColor(defaultColor);
+        layer.changeColor(defaultColor, false);
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
-            defaultColor, true, layer::changeColor)) {
+            defaultColor, true, c -> layer.changeColor(c, false))) {
             // dialog accepted, now it is safe to add it to the history
             History.add(new NewLayerEdit(title,
                 comp, layer, activeLayerBefore, oldViewMode));
@@ -72,16 +73,22 @@ public class ColorFillLayer extends Layer {
     @Override
     public void edit() {
         String title = "Edit Color Fill Layer";
+        Color oldColor = color;
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
-            color, true, this::changeColor)) {
-            // TODO add to history
+            color, true, c -> changeColor(c, false))) {
+            // adds an edit to the history only after the dialog is accepted
+            History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
         }
     }
 
-    private void changeColor(Color color) {
+    public void changeColor(Color color, boolean addHistory) {
+        Color oldColor = this.color;
         this.color = color;
         comp.update();
         updateIconImage();
+        if (addHistory) {
+            History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
+        }
     }
 
     @Override
@@ -106,7 +113,7 @@ public class ColorFillLayer extends Layer {
         }
 
         Colors.setupCopyColorPopupMenu(popup, () -> color);
-        Colors.setupPasteColorPopupMenu(popup, PixelitorWindow.get(), this::changeColor);
+        Colors.setupPasteColorPopupMenu(popup, PixelitorWindow.get(), c -> changeColor(c, true));
 
         return popup;
     }

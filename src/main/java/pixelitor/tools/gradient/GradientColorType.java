@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * The color option in the gradient tool
  */
 public enum GradientColorType {
-    FG_TO_BG("Foreground to Background") {
+    FG_TO_BG("Foreground to Background", false) {
         @Override
         protected Color getFirstColor() {
             return getFGColor();
@@ -37,7 +37,7 @@ public enum GradientColorType {
         protected Color getSecondColor() {
             return getBGColor();
         }
-    }, FG_TO_TRANSPARENT("Foreground to Transparent") {
+    }, FG_TO_TRANSPARENT("Foreground to Transparent", true) {
         private final Color transparentColor = new Color(0, 0, 0, 0);
 
         @Override
@@ -49,7 +49,7 @@ public enum GradientColorType {
         protected Color getSecondColor() {
             return transparentColor;
         }
-    }, BLACK_TO_WHITE("Black to White") {
+    }, BLACK_TO_WHITE("Black to White", false) {
         @Override
         protected Color getFirstColor() {
             return BLACK;
@@ -62,9 +62,11 @@ public enum GradientColorType {
     };
 
     private final String guiName;
+    private final boolean hasTransparency;
 
-    GradientColorType(String guiName) {
+    GradientColorType(String guiName, boolean hasTransparency) {
         this.guiName = guiName;
+        this.hasTransparency = hasTransparency;
     }
 
     protected abstract Color getFirstColor();
@@ -83,6 +85,10 @@ public enum GradientColorType {
             return getFirstColor();
         }
         return getSecondColor();
+    }
+
+    public boolean hasTransparency() {
+        return hasTransparency;
     }
 
     @Override

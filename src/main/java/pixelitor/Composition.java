@@ -930,12 +930,12 @@ public class Composition implements Serializable {
 
     private BufferedImage calculateCompositeImage() {
         if (layerList.size() == 1) { // shortcut
-            Layer firstLayer = layerList.get(0);
-            if (firstLayer instanceof ImageLayer layer) {
-                if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
-                    return layer.asImage(true);
-                }
+            Layer layer = layerList.get(0);
+//            if (firstLayer instanceof ImageLayer layer) {
+            if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
+                return layer.asImage(true, true);
             }
+//            }
         }
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());

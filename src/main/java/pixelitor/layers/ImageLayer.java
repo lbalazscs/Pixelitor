@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.FilterContext;
@@ -66,9 +65,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         PREVIEW, // a filter dialog is shown
         SHOW_ORIGINAL // a filter dialog is shown + "Show Original" is checked
     }
-
-    private static final CheckerboardPainter checkerBoardPainter
-        = ImageUtils.createCheckerboardPainter();
 
     @Serial
     private static final long serialVersionUID = 2L;
@@ -394,16 +390,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask) {
-        if (applyMask && hasMask() && isMaskEnabled()) {
-            BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-            Graphics2D g = img.createGraphics();
-            applyLayer(g, null, true);
-            g.dispose();
-            return img;
-        } else {
+    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
+        if (!usesMask() && getOpacity() == 1.0f) {
             return getCanvasSizedVisibleImage();
         }
+        return super.asImage(applyMask, applyTransparency);
     }
 
     @Override
@@ -1173,7 +1164,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public BufferedImage createIconThumbnail() {
         BufferedImage img = getCanvasSizedSubImage();
-        BufferedImage thumb = createThumbnail(img, thumbSize, checkerBoardPainter);
+        BufferedImage thumb = createThumbnail(img, thumbSize, thumbCheckerBoardPainter);
         return thumb;
     }
 

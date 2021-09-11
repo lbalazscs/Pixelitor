@@ -44,7 +44,7 @@ public class MergeDownEdit extends PixelitorEdit {
                          BufferedImage backupImage,
                          MaskViewMode maskViewMode,
                          int activeIndex) {
-        super(GUIText.MERGE_DOWN, comp);
+        super(GUIText.MERGE_DOWN, comp, true);
 
         this.layer = layer;
         this.maskViewMode = maskViewMode;

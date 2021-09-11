@@ -48,7 +48,7 @@ public enum CopySource {
             //   in other formats as well (as a string, as a serialized object)
             //   and pasting into Pixelitor should choose the serialized object
             //   There could be also an internal clipboard, to handle such cases
-            BufferedImage canvasSizedImage = layer.asImage(true);
+            BufferedImage canvasSizedImage = layer.asImage(true, false);
             if (canvasSizedImage == null) {
                 return Result.error("this layer cannot be copied");
             }

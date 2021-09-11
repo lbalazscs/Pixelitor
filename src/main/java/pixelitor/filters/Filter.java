@@ -26,7 +26,6 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
@@ -123,10 +122,7 @@ public abstract class Filter implements Serializable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) {
-            Layer layer = (Layer) dr;
-            if (layer instanceof LayerMask mask) {
-                layer = mask.getOwner();
-            }
+            Layer layer = dr.getLayer();
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +
                 "composition = '%s'%n" +

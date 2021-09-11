@@ -31,10 +31,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A global adjustment to all the layers that are bellow this layer
- *
- * (Not fully implemented and not enabled by default.
- * Most importantly the editing of filter parameters is missing)
+ * An adjustment layer is a filter that acts on the result of the layers bellow it.
  */
 public class AdjustmentLayer extends Layer {
     @Serial
@@ -82,8 +79,25 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask) {
+    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
         return null;
+    }
+
+    @Override
+    public void edit() {
+        if (filter instanceof FilterWithGUI fwg) {
+            System.out.println("AdjustmentLayer::edit: CALLED");
+        }
+    }
+
+    @Override
+    public boolean isRasterizable() {
+        return false;
+    }
+
+    @Override
+    public boolean canExportImage() {
+        return false;
     }
 
     @Override
@@ -101,14 +115,5 @@ public class AdjustmentLayer extends Layer {
         return getClass().getSimpleName()
                + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
                + ", super=" + super.toString() + '}';
-    }
-
-    @Override
-    public void edit() {
-        System.out.println("AdjustmentLayer::configure: 1");
-        if (!(filter instanceof FilterWithGUI)) {
-            return;
-        }
-        System.out.println("AdjustmentLayer::configure: 2");
     }
 }

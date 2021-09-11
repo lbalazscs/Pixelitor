@@ -49,7 +49,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public CompositionReplacedEdit(String name, View view,
                                    Composition oldComp, Composition newComp,
                                    AffineTransform canvasTransform, boolean reload) {
-        super(name, newComp);
+        super(name, newComp, true);
         this.reload = reload;
 
         assert oldComp != null;

@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Layers;
@@ -90,6 +91,9 @@ public abstract class Layer implements Serializable {
     // unit tests use a different LayerUI implementation
     // by assigning a different UI factory
     public static Function<Layer, LayerUI> uiFactory = LayerButton::new;
+
+    protected static final CheckerboardPainter thumbCheckerBoardPainter
+        = ImageUtils.createCheckerboardPainter();
 
     // can be called on any thread
     Layer(Composition comp, String name) {
@@ -501,7 +505,7 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    private boolean useMask() {
+    protected boolean usesMask() {
         return mask != null && maskEnabled;
     }
 
@@ -541,11 +545,11 @@ public abstract class Layer implements Serializable {
         if (isAdjustment) { // adjustment layer or watermarked text layer
             return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         } else {
-            if (!useMask()) {
-                setupDrawingComposite(g, firstVisibleLayer);
-                paintLayerOnGraphics(g, firstVisibleLayer);
-            } else {
+            setupDrawingComposite(g, firstVisibleLayer);
+            if (usesMask()) {
                 paintLayerOnGraphicsWithMask(g, firstVisibleLayer);
+            } else {
+                paintLayerOnGraphics(g, firstVisibleLayer);
             }
         }
         return null;
@@ -574,7 +578,6 @@ public abstract class Layer implements Serializable {
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
-        setupDrawingComposite(g, firstVisibleLayer);
         g.drawImage(maskedImage, 0, 0, null);
     }
 
@@ -587,10 +590,10 @@ public abstract class Layer implements Serializable {
             return imgSoFar; // there's nothing we can do
         }
         BufferedImage transformed = applyOnImage(imgSoFar);
-        if (useMask()) {
+        if (usesMask()) {
             mask.applyToImage(transformed);
         }
-        if (!useMask() && isNormalAndOpaque()) {
+        if (!usesMask() && isNormalAndOpaque()) {
             return transformed;
         } else {
             Graphics2D g = imgSoFar.createGraphics();
@@ -693,25 +696,31 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * Returns true if asImage() returns non-null;
+     * Returns true if asImage() returns non-null.
      */
     public boolean canExportImage() {
-        return getClass() != AdjustmentLayer.class;
+        return true;
     }
 
     /**
      * Returns a canvas-sized image corresponding to the contents of this layer.
      * Returns null if no such image can be returned (adjustment layer).
+     * The layer's blending mode is always ignored.
      *
-     * @param applyMask if false, then the mask is ignored
+     * @param applyMask         if false, then the mask is ignored
+     * @param applyTransparency if false, then the layer's transparency is ignored.
      */
-    public BufferedImage asImage(boolean applyMask) {
+    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
         BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
-        if (applyMask) {
+        if (applyTransparency) {
             // the layer's blending mode will be ignored
             // because firstVisibleLayer is set to true
-            applyLayer(g, img, true);
+            setupDrawingComposite(g, true);
+        }
+
+        if (applyMask && usesMask()) {
+            paintLayerOnGraphicsWithMask(g, true);
         } else {
             paintLayerOnGraphics(g, true);
         }
@@ -754,7 +763,7 @@ public abstract class Layer implements Serializable {
 
             if (this instanceof SmartObject so) {
                 so.addSmartObjectSpecificItems(popup);
-            } else {
+            } else if (canExportImage()) {
                 popup.add(new PAction("Convert to Smart Object") {
                     @Override
                     public void onClick() {
@@ -812,7 +821,7 @@ public abstract class Layer implements Serializable {
     public ImageLayer replaceWithRasterized() {
         assert isRasterizable();
 
-        var rasterizedImage = asImage(false);
+        var rasterizedImage = asImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.copyBlendingFrom(this);
         History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize " + getTypeStringUC()));

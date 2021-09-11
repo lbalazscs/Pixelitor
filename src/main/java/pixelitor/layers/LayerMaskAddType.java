@@ -119,7 +119,7 @@ public enum LayerMaskAddType {
     // the visible contents of the layer
     private static BufferedImage createMaskFromLayer(Layer layer,
                                                      boolean onlyTransparency) {
-        BufferedImage image = layer.asImage(false);
+        BufferedImage image = layer.asImage(false, false);
         if (image != null) {
             return createMaskFromImage(image, onlyTransparency);
         } else {

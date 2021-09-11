@@ -17,10 +17,13 @@
 
 package pixelitor.layers;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.compactions.Flip;
 import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.history.GradientFillLayerChangeEdit;
+import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
@@ -32,6 +35,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.CompletableFuture;
+
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 public class GradientFillLayer extends ContentLayer {
     private Gradient gradient;
@@ -94,10 +99,23 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        if (gradient != null) {
-            return gradient.createIconThumbnail(comp.getCanvas());
+        Canvas canvas = comp.getCanvas();
+        Dimension thumbDim = ImageUtils.calcThumbDimensions(
+            canvas.getWidth(), canvas.getHeight(), thumbSize);
+
+        BufferedImage img = ImageUtils.createSysCompatibleImage(
+            thumbDim.width, thumbDim.height);
+        Graphics2D g2 = img.createGraphics();
+
+        if (gradient == null || gradient.hasTransparency()) {
+            thumbCheckerBoardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
         }
-        return null;
+
+        if (gradient != null) {
+            gradient.paintIconThumbnail(g2, canvas, thumbDim);
+        }
+        g2.dispose();
+        return img;
     }
 
     @Override
@@ -147,13 +165,23 @@ public class GradientFillLayer extends ContentLayer {
         return gradient;
     }
 
-    public void setGradient(Gradient gradient) {
-        assert gradient != null;
+    public void setGradient(Gradient gradient, boolean addHistory) {
+        // the gradient can be null if this is called while undoing the first gradient
+        assert gradient != null || !addHistory;
+
+        Gradient oldGradient = this.gradient;
 
         this.gradient = gradient;
         cachedImage = null;
         comp.update();
         updateIconImage();
+
+        if (addHistory) {
+            History.add(new GradientFillLayerChangeEdit(this, oldGradient, gradient));
+        } else {
+            // called from the undo/redo
+            Tools.editedObjectChanged(this);
+        }
     }
 
     @Override

@@ -34,7 +34,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
     private final int layerIndex;
 
     public DeleteLayerEdit(Composition comp, Layer layer, int layerIndex) {
-        super("Delete Layer", comp);
+        super("Delete Layer", comp, true);
 
         this.layer = layer;
         this.layerIndex = layerIndex;

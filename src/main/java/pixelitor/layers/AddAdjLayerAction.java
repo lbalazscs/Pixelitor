@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
-import pixelitor.filters.Invert;
+import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Icons;
@@ -41,7 +41,7 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
     @Override
     public void onClick() {
         var comp = OpenImages.getActiveComp();
-        var adjustmentLayer = new AdjustmentLayer(comp, Invert.NAME, new Invert());
+        var adjustmentLayer = new AdjustmentLayer(comp, ToneCurvesFilter.NAME, new ToneCurvesFilter());
 
         new LayerAdder(comp)
             .withHistory("New Adjustment Layer")

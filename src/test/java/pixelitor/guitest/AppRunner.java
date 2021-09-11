@@ -533,7 +533,7 @@ public class AppRunner {
                     dialog.button("randomize").click();
                 }
 
-                savePreset(dialog, testPresetName);
+                savePreset(dialog, testPresetName, alreadyExists);
             }
         }
 
@@ -564,7 +564,7 @@ public class AppRunner {
         return false;
     }
 
-    private void savePreset(DialogFixture dialog, String presetName) {
+    private void savePreset(DialogFixture dialog, String presetName, boolean alreadyExists) {
         JMenu presetsMenu = getPresetsMenu(dialog);
         if (presetsMenu != null) {
             dialog.menuItem("savePreset").click();
@@ -573,9 +573,11 @@ public class AppRunner {
             pane.textBox().enterText(presetName);
             pane.okButton().click();
 
-            // expect a "preset already exists" Yes-No warning dialog
-            pane = findJOptionPane();
-            pane.yesButton().click();
+            if (alreadyExists) {
+                // expect a "preset already exists" Yes-No warning dialog
+                pane = findJOptionPane();
+                pane.yesButton().click();
+            }
         }
     }
 
