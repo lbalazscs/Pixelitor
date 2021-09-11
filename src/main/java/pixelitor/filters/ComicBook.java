@@ -1,27 +1,24 @@
 package pixelitor.filters;
 
-import com.jhlabs.image.GaussianFilter;
+import com.jhlabs.image.BoxBlurFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
-import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.util.ArrayList;
 
 public class ComicBook extends ParametrizedFilter {
 
     public static final String NAME = "Comic Book Effect";
 
     private final RangeParam stepsParam = new RangeParam("Steps", 1, 4, 20);
-    private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 66, 100);
-    private final RangeParam edgesParam = new RangeParam("Edge Amount", 0, 66, 100);
+    private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 90, 100);
+    private final RangeParam edgesParam = new RangeParam("Edge Amount", 0, 10, 100);
 
     // Essentially threshold is a value in the range [0-256]. For any value of bias below the threshold, the corresponding color will be set to Black.
-    // However, only values around [120-135] seems visually logical. Therefore this parameter focuses on picking fine values within that range.
-    private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 50, 100);
+    // However, only values around [100-130] seems visually logical. Therefore this parameter focuses on picking fine values within that range.
+    private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 85, 100);
 
     public ComicBook() {
         super(true);
@@ -36,15 +33,14 @@ public class ComicBook extends ParametrizedFilter {
         BufferedImage edgesI = edges(blurredI, edgesParam.getValue());
         BufferedImage grayI = gray(edgesI);
         BufferedImage stairedI = stairs(blurredI, stepsParam.getValue());
-        BufferedImage finalI = threshold(grayI, stairedI, (int) (120 + 15 * thresholdParam.getPercentageValF()));
+        BufferedImage finalI = threshold(grayI, stairedI, (int) (100 + 30 * thresholdParam.getPercentageValF()));
 
         return finalI;
     }
 
     public static BufferedImage blur(BufferedImage src, float radius) {
-        GaussianFilter blur = new GaussianFilter(radius, NAME);
+        BoxBlurFilter blur = new BoxBlurFilter(radius,radius,1, NAME);
         blur.setPremultiplyAlpha(false);
-        blur.setUseAlpha(false);
         return blur.filter(src, null);
     }
 
