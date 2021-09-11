@@ -781,6 +781,22 @@ public class ImageUtils {
         g.dispose();
     }
 
+    public static BufferedImage getHighPassFilteredImage(BufferedImage original, BufferedImage blurred) {
+        assert original != null;
+        assert blurred != null;
+
+        // the blurred image is the low-pass filtered version of the image
+        // so we subtract it form the original by inverting it...
+        blurred = Invert.invertImage(blurred);
+        // ... and blending it at 50% with the original
+        Graphics2D g = blurred.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(SRC_OVER, 0.5f));
+        g.drawImage(original, 0, 0, null);
+        g.dispose();
+
+        return blurred;
+    }
+
     public static BufferedImage getHighPassSharpenedImage(BufferedImage original, BufferedImage blurred) {
         assert original != null;
         assert blurred != null;

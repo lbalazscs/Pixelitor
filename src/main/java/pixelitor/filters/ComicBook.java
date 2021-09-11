@@ -3,16 +3,18 @@ package pixelitor.filters;
 import com.jhlabs.image.DoGFilter;
 import com.jhlabs.image.GaussianFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
-import pixelitor.AppContext;
 import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.ArrayList;
+
+import static java.awt.AlphaComposite.SRC_OVER;
 
 public class ComicBook extends ParametrizedFilter {
 
@@ -20,12 +22,6 @@ public class ComicBook extends ParametrizedFilter {
 
     private final RangeParam stepsParam = new RangeParam("Steps", 1, 4, 20);
     private final RangeParam blurRadiusParam = new RangeParam("Detail", 1, 66, 100);
-
-    private final RangeParam dogRadius1Param = new RangeParam("DOG Radius 1", 0, 0, 20);
-    private final RangeParam dogRadius2Param = new RangeParam("DOG Radius 2", 0, 10, 20);
-
-    private final RangeParam scalingBottomParam = new RangeParam("Scaling Bottom", 0, 128, 256);
-    private final RangeParam scalingTopParam = new RangeParam("Scaling Bottom", 0, 0, 256);
 
     private final RangeParam thresholdParam = new RangeParam("Threshold Cut Off", 0, 128, 256);
 
@@ -36,14 +32,7 @@ public class ComicBook extends ParametrizedFilter {
 
         params.add(stepsParam);
         params.add(blurRadiusParam);
-
-        if (AppContext.enableExperimentalFeatures) {
-            params
-                .add(new GroupedRangeParam("Difference Of Gaussian", new RangeParam[]{dogRadius1Param, dogRadius2Param}, false));
-            params
-                .add(new GroupedRangeParam("Mapping Image Values", new RangeParam[]{scalingBottomParam, scalingTopParam}, false));
-            params.add(thresholdParam);
-        }
+        params.add(thresholdParam);
 
         setParams(params.toArray(FilterParam[]::new));
     }
@@ -52,11 +41,11 @@ public class ComicBook extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
 
         BufferedImage blurredI = blur(src, 30f - blurRadiusParam.getValue() / 100f * 30f);
-        BufferedImage grayI = gray(blurredI);
-        BufferedImage edgesI = edges(grayI, dogRadius1Param.getValueAsFloat(), dogRadius2Param.getValueAsFloat());
-        BufferedImage scaledI = scale(edgesI, scalingBottomParam.getValue(), scalingTopParam.getValue());
+//        BufferedImage edgesI = ImageUtils.getHighPassFilteredImage(blurredI, blur(blurredI, 30f - blurRadiusParam.getValue() / 100f * 30f));
+        BufferedImage edgesI = ImageUtils.getHighPassFilteredImage(src, blurredI);
+        BufferedImage grayI = gray(edgesI);
         BufferedImage stairedI = stairs(blurredI, stepsParam.getValue());
-        BufferedImage finalI = threshold(scaledI, stairedI, thresholdParam.getValue());
+        BufferedImage finalI = threshold(grayI, stairedI, thresholdParam.getValue());
 
         return finalI;
     }
@@ -84,41 +73,6 @@ public class ComicBook extends ParametrizedFilter {
             out_pixels[i] = rgb;
         }
 
-        return out;
-    }
-
-    public static BufferedImage edges(BufferedImage src, float radius1, float radius2) {
-        DoGFilter dog = new DoGFilter(NAME);
-        dog.setRadius1(radius1);
-        dog.setRadius2(radius2);
-        return dog.filter(src, null);
-    }
-
-    public static BufferedImage scale(BufferedImage src, int bot, int top) {
-
-        /*if (top < bot) {
-            int t = top;
-            top = bot;
-            bot = t;
-        } else */
-        if (top == bot) {
-            return ImageUtils.copyImage(src);
-        }
-
-        BufferedImage out = ImageUtils.copyImage(src);
-        int[] pixels = ImageUtils.getPixelsAsArray(out);
-        for (int i = 0; i < pixels.length; i++) {
-            int rgb = pixels[i];
-            int r = (rgb >>> 16) & 0xFF;
-            r = mapColor(r, bot, top);
-//            if (r < param.getValue()) {
-//                rgb = 0;
-//            } else {
-//                rgb = 1;
-//            }
-            rgb = packSingleValue(r);
-            pixels[i] = rgb;
-        }
         return out;
     }
 
@@ -165,14 +119,6 @@ public class ComicBook extends ParametrizedFilter {
 
     public static int packSingleValue(int c) {
         return ((0xFF) << 24) | ((c & 0xFF) << 16) | ((c & 0xFF) << 8) | (c & 0xFF);
-    }
-
-    public static int mapColor(int i, float p, float q) {
-        return map(i, 0, 255, p, q);
-    }
-
-    public static int map(int i, float a, float b, float p, float q) {
-        return (int) ((i - a) * (q - p) / (b - a) + p);
     }
 
     // TODO: Wait What!? It Should be a static method!
