@@ -10,9 +10,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class TempUndoManagerTest {
+class TwoLimitsUndoManagerTest {
 
-    private TempUndoManager undoManager;
+    private TwoLimitsUndoManager undoManager;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -21,18 +21,13 @@ class TempUndoManagerTest {
 
     @BeforeEach
     void beforeEachTest() {
-        undoManager = new TempUndoManager(3, 8);
-
-//        undoManager.addEdit(createMockEdit(false));
-//        undoManager.addEdit(createMockEdit(true));
-//        undoManager.addEdit(createMockEdit(false));
+        undoManager = new TwoLimitsUndoManager(3, 8);
+//        undoManager = new PixelitorUndoManager();
 
         assertThat(undoManager.getHeavyEditLimit()).isEqualTo(3);
         assertThat(undoManager.getLightEditLimit()).isEqualTo(8);
         assertThat(undoManager.getLimit()).isEqualTo(3 + 8);
-//        assertThat(undoManager.getSelectedIndex()).isEqualTo(2);
     }
-
 
     @Test
     void fillingUpUndoManager() {

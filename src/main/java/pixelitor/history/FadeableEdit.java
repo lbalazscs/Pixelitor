@@ -31,7 +31,7 @@ public abstract class FadeableEdit extends PixelitorEdit {
     protected boolean fadeable = true;
 
     FadeableEdit(String name, Composition comp, Drawable fadingLayer) {
-        super(name, comp);
+        super(name, comp, true);
         this.fadingLayer = fadingLayer;
     }
 

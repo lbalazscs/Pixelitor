@@ -5,16 +5,16 @@ import javax.swing.undo.UndoableEdit;
 import java.util.Vector;
 
 
-public class TempUndoManager extends UndoManager {
+public class TwoLimitsUndoManager extends UndoManager {
 
-    private int heavyEditLimit = 64;
-    private int lightEditLimit = 256;
+    private int heavyEditLimit;
+    private int lightEditLimit;
 
-    public TempUndoManager() {
+    public TwoLimitsUndoManager() {
         this(64, 256);
     }
 
-    public TempUndoManager(int heavyEditLimit, int lightEditLimit) {
+    public TwoLimitsUndoManager(int heavyEditLimit, int lightEditLimit) {
         setHeavyEditLimit(heavyEditLimit);
         setLightEditLimit(lightEditLimit);
         int limit = getLimit();
@@ -37,7 +37,8 @@ public class TempUndoManager extends UndoManager {
 
     @Override
     public synchronized void setLimit(int lightEditLimit) {
-        setLightEditLimit(lightEditLimit);
+        setHeavyEditLimit(lightEditLimit);
+        super.setLimit(getLimit());
     }
 
     public synchronized void setHeavyEditLimit(int heavyEditLimit) {

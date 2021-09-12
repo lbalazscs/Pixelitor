@@ -29,7 +29,6 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 import java.util.List;
 
@@ -38,7 +37,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * The undo manager, and also the list model for the history GUI.
  */
-public class PixelitorUndoManager extends TempUndoManager implements ListModel<PixelitorEdit> {
+public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListModel<PixelitorEdit> {
     private final HistoryListSelectionModel selectionModel;
     private final EventListenerList listenerList = new EventListenerList();
     private JDialog historyDialog;
@@ -50,11 +49,6 @@ public class PixelitorUndoManager extends TempUndoManager implements ListModel<P
     private boolean userChangedSelection = true;
 
     public PixelitorUndoManager() {
-
-        // In order to test history easily, for now i have capped the history to such a short length
-        // If it passes the experiment - this line must be removed...
-        super(3, 5);
-
         selectionModel = new HistoryListSelectionModel();
         selectionModel.addListSelectionListener(e -> selectionChanged());
     }
