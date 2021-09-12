@@ -215,7 +215,7 @@ public class History {
     }
 
     public static int getUndoLevels() {
-        return undoManager.getLimit();
+        return undoManager.getHeavyEditLimit();
     }
 
     /**

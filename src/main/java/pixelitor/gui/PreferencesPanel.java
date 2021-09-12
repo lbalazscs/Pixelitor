@@ -50,7 +50,7 @@ import static pixelitor.utils.Texts.i18n;
 public class PreferencesPanel extends JPanel {
     private static final Border EMPTY_BORDER =
         BorderFactory.createEmptyBorder(0, 10, 5, 0);
-    private static final String UNDO_LEVELS_LABEL = "Undo/Redo Levels";
+    private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
     private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
     private JTextField undoLevelsTF;
     private JComboBox<Item> thumbSizeCB;
