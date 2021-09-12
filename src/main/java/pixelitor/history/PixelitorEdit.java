@@ -31,6 +31,7 @@ import javax.swing.undo.CannotUndoException;
 public abstract class PixelitorEdit extends AbstractUndoableEdit {
     protected Composition comp;
     private final String name;
+    private final boolean isHeavy;
     private final boolean wasDirty;
     private boolean cleanedByUndo = false;
 
@@ -39,11 +40,16 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     protected boolean embedded;
 
     protected PixelitorEdit(String name, Composition comp) {
+        this(name, comp, false);
+    }
+
+    protected PixelitorEdit(String name, Composition comp, boolean isHeavy) {
         assert comp != null;
         assert name != null;
 
         this.comp = comp;
         this.name = name;
+        this.isHeavy = isHeavy;
 
         wasDirty = comp.isDirty();
     }
@@ -143,6 +149,10 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
     public String getDebugName() {
         return getClass().getSimpleName() + "/" + name;
+    }
+
+    public boolean isHeavy() {
+        return isHeavy;
     }
 
     @Override
