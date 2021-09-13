@@ -31,6 +31,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.StringJoiner;
 
@@ -46,6 +47,9 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * all vector graphics.
  */
 public class Gradient implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -6574312118763734469L;
+
     private Drag drag;
     private final GradientType type;
     private final CycleMethod cycleMethod;
@@ -227,6 +231,17 @@ public class Gradient implements Serializable {
 
     public boolean hasTransparency() {
         return colorType.hasTransparency();
+    }
+
+    public boolean isCustomTransparency() {
+        return colorType.hasTransparency() && isCustom();
+    }
+
+    public boolean isCustom() {
+        return switch (type) {
+            case LINEAR, RADIAL -> false;
+            default -> true;
+        };
     }
 
     @Override

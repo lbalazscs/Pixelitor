@@ -258,6 +258,12 @@ public class Debug {
         }
     }
 
+    // Color's toString doesn't include the alpha
+    public static String debugColor(Color c) {
+        return String.format("r=%d,g=%d,b=%d,a=%d",
+            c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+    }
+
     private static void replaceImageInDebugComp(Composition comp, BufferedImage copy) {
         Canvas canvas = comp.getCanvas();
         comp.getActiveDrawableOrThrow().setImage(copy);

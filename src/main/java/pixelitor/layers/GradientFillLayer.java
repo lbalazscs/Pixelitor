@@ -76,11 +76,11 @@ public class GradientFillLayer extends ContentLayer {
         if (gradient != null) {
             int width = comp.getCanvasWidth();
             int height = comp.getCanvasHeight();
-            if (g.getComposite().getClass() == AlphaComposite.class) {
-                gradient.drawOnGraphics(g, comp, width, height);
-            } else {
-                // at the moment the custom blending modes don't
-                // work with gradients, so create an image
+            // the custom blending modes don't work with gradients
+            boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
+                                     // and custom gradients using transparency also have a problem
+                                     || gradient.isCustomTransparency();
+            if (useCachedImage) {
                 if (cachedImage == null) {
                     cachedImage = ImageUtils.createSysCompatibleImage(width, height);
                     Graphics2D imgG = cachedImage.createGraphics();
@@ -88,6 +88,8 @@ public class GradientFillLayer extends ContentLayer {
                     imgG.dispose();
                 }
                 g.drawImage(cachedImage, 0, 0, null);
+            } else {
+                gradient.drawOnGraphics(g, comp, width, height);
             }
         }
     }
@@ -110,10 +112,10 @@ public class GradientFillLayer extends ContentLayer {
         if (gradient == null || gradient.hasTransparency()) {
             thumbCheckerBoardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
         }
-
         if (gradient != null) {
             gradient.paintIconThumbnail(g2, canvas, thumbDim);
         }
+
         g2.dispose();
         return img;
     }

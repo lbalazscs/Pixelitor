@@ -38,8 +38,6 @@ public enum GradientColorType {
             return getBGColor();
         }
     }, FG_TO_TRANSPARENT("Foreground to Transparent", true) {
-        private final Color transparentColor = new Color(0, 0, 0, 0);
-
         @Override
         protected Color getFirstColor() {
             return getFGColor();
@@ -47,7 +45,9 @@ public enum GradientColorType {
 
         @Override
         protected Color getSecondColor() {
-            return transparentColor;
+            int fg = getFGColor().getRGB();
+            int fgTransparent = fg & 0x00_FF_FF_FF;
+            return new Color(fgTransparent, true);
         }
     }, BLACK_TO_WHITE("Black to White", false) {
         @Override
