@@ -17,6 +17,7 @@
 
 package pixelitor.tools.gradient;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.BlendingModePanel;
@@ -218,10 +219,11 @@ public class GradientTool extends DragTool {
 
     @Override
     public void dragFinished(PMouseEvent e) {
+        Composition comp = e.getComp();
         if (drag.isClick()) {
             if (activePoint == null) {
                 // clicked outside the handles
-                hideHandles(e.getComp(), true);
+                hideHandles(comp, true);
             }
             return;
         }
@@ -252,8 +254,22 @@ public class GradientTool extends DragTool {
         if (editingGradientLayer()) {
             gradientLayer.setGradient(createGradient(renderedDrag), true);
         } else {
-            Drawable dr = e.getComp().getActiveDrawableOrThrow();
-            drawGradient(dr, renderedDrag, true, null);
+            Drawable dr = comp.getActiveDrawable();
+            if (dr != null) {
+                drawGradient(dr, renderedDrag, true, null);
+            } else {
+                if (AppContext.isDevelopment()) {
+                    throw new IllegalStateException();
+                }
+                // error recovery
+                Layer layer = comp.getActiveLayer();
+                if (layer instanceof GradientFillLayer gfl) {
+                    // somehow a gradient layer got activated without the tool noticing it
+                    gradientLayer = gfl;
+                    gradientLayer.setGradient(createGradient(renderedDrag), true);
+                }
+                // else give up, do nothing
+            }
         }
     }
 

@@ -37,7 +37,6 @@ import javax.swing.undo.UndoableEditSupport;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -238,25 +237,25 @@ public class History {
      * If the last edit in the history is a FadeableEdit for the given
      * image layer, return it, otherwise return an empty Optional
      */
-    public static Optional<FadeableEdit> getPreviousEditForFade(Drawable dr) {
+    public static FadeableEdit getPreviousEditForFade(Drawable dr) {
         if (numUndoneEdits > 0 || dr == null) {
-            return Optional.empty();
+            return null;
         }
         PixelitorEdit lastEdit = undoManager.getLastEdit();
         if (lastEdit instanceof FadeableEdit fadeableEdit) {
             if (!fadeableEdit.isFadeable()) {
-                return Optional.empty();
+                return null;
             }
 
             Drawable lastLayer = fadeableEdit.getFadingLayer();
             if (dr != lastLayer) {
                 // this happens if the active image layer has changed
                 // since the last edit, for example by going to mask edit
-                return Optional.empty();
+                return null;
             }
-            return Optional.of(fadeableEdit);
+            return fadeableEdit;
         }
-        return Optional.empty();
+        return null;
     }
 
     public static boolean canFade() {
@@ -273,7 +272,7 @@ public class History {
     }
 
     public static boolean canFade(Drawable dr) {
-        return getPreviousEditForFade(dr).isPresent();
+        return getPreviousEditForFade(dr) != null;
     }
 
     public static void onAllImagesClosed() {

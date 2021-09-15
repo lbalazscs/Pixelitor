@@ -27,7 +27,6 @@ import pixelitor.utils.test.Events;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -69,10 +68,9 @@ public final class ConsistencyChecks {
         if (!History.canFade(dr)) {
             return true;
         }
-        Optional<FadeableEdit> edit = History.getPreviousEditForFade(dr);
-        if (edit.isPresent()) {
+        FadeableEdit fadeableEdit = History.getPreviousEditForFade(dr);
+        if (fadeableEdit != null) {
             var currentImg = dr.getSelectedSubImage(false);
-            var fadeableEdit = edit.get();
             var previousImg = fadeableEdit.getBackupImage();
             if (previousImg == null) {
                 // soft reference expired: fade wouldn't work, but not a bug

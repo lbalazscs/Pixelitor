@@ -172,6 +172,9 @@ public class OpenImages {
         }
 
         View oldView = activeView;
+        if (oldView != null) {
+            oldView.getComp().deactivated();
+        }
 
         var comp = view.getComp();
         setActiveView(view, false);
@@ -182,6 +185,7 @@ public class OpenImages {
         for (ViewActivationListener listener : activationListeners) {
             listener.viewActivated(oldView, view);
         }
+        Tools.editedObjectChanged(comp.getActiveLayer());
 
         Layers.activeCompChanged(comp, true);
         Tools.setupMaskEditing(comp.getActiveLayer().isMaskEditing());

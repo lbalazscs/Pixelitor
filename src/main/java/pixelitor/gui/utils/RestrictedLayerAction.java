@@ -101,9 +101,8 @@ public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
 
             @Override
             public String getErrorMessage(Layer layer) {
-                String layerType = layer.getTypeStringLC();
                 return format("<html>The layer <b>%s</b> isn't a %s, it's %s.",
-                    layer.getName(), desc, Utils.addArticle(layerType));
+                    layer.getName(), desc, Utils.addArticle(layer.getTypeStringLC()));
             }
 
             @Override

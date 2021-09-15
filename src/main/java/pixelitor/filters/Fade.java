@@ -17,11 +17,13 @@
 
 package pixelitor.filters;
 
-import pixelitor.Composition;
+import com.jhlabs.image.ImageMath;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
+import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
+import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -49,18 +51,20 @@ public class Fade extends ParametrizedFilter {
         // the fade menu item must be active only if History.canFade()
         assert History.canFade();
 
-        BufferedImage previous = OpenImages.getActiveCompOpt()
-            .flatMap(Composition::getActiveDrawableOpt)
-            .flatMap(History::getPreviousEditForFade)
-            .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
-            .getBackupImage();
+        Drawable dr = OpenImages.getActiveDrawable();
+        FadeableEdit edit = History.getPreviousEditForFade(dr);
+        BufferedImage previous = edit.getBackupImage();
 
         if (previous == null) {
             // soft reference expired
             return src;
         }
 
-        dest = fade(previous, src, dest, opacityParam);
+        if (ImageUtils.hasPackedIntArray(src)) {
+            dest = fadeRGB(previous, src, dest, opacityParam);
+        } else {
+            dest = fadeGray(previous, src, dest, opacityParam);
+        }
 
         return dest;
     }
@@ -69,8 +73,8 @@ public class Fade extends ParametrizedFilter {
         opacityParam.setValue(newOpacity);
     }
 
-    public static BufferedImage fade(BufferedImage before, BufferedImage after,
-                                     BufferedImage dest, RangeParam opacity) {
+    public static BufferedImage fadeRGB(BufferedImage before, BufferedImage after,
+                                        BufferedImage dest, RangeParam opacity) {
         if (opacity.getValue() == 100) {
             return after;
         }
@@ -105,8 +109,28 @@ public class Fade extends ParametrizedFilter {
         return dest;
     }
 
-    @Override
-    public boolean supportsGray() {
-        return false;
+    public static BufferedImage fadeGray(BufferedImage before, BufferedImage after,
+                                         BufferedImage dest, RangeParam opacity) {
+        if (opacity.getValue() == 100) {
+            return after;
+        }
+
+        float fadeFactor = opacity.getPercentageValF();
+        // A simple AlphaComposite would not handle semitransparent pixels correctly
+
+        byte[] srcData = ImageUtils.getGrayPixelsAsByteArray(after);
+        byte[] destData = ImageUtils.getGrayPixelsAsByteArray(dest);
+        byte[] prevData = ImageUtils.getGrayPixelsAsByteArray(before);
+
+        int length = srcData.length;
+        for (int i = 0; i < length; i++) {
+            int srcVal = Byte.toUnsignedInt(srcData[i]);
+            int prevVal = Byte.toUnsignedInt(prevData[i]);
+
+            int val = ImageMath.lerp(fadeFactor, prevVal, srcVal);
+
+            destData[i] = (byte) val;
+        }
+        return dest;
     }
 }

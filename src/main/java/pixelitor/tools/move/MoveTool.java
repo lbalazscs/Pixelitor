@@ -67,7 +67,7 @@ public class MoveTool extends DragTool {
         settingsPanel.addSeparator();
         settingsPanel.addWithLabel("Auto Select Layer:",
             autoSelectCheckBox, "autoSelectCheckBox");
-        if (AppContext.enableExperimentalFeatures) {
+        if (AppContext.enableFreeTransform) {
             settingsPanel.addWithLabel("Free Transform:",
                 freeTransformCheckBox, "freeTransformCheckBox");
             freeTransformCheckBox.addActionListener(e ->

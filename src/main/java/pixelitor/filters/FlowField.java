@@ -416,6 +416,11 @@ public class FlowField extends ParametrizedFilter {
         return dest;
     }
 
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
+
     private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variantPI, float initTheta, Vector2D[][] fieldAccelerations) {
         Vector2D position = new Vector2D();
         Vector2D forceDueToNoise = new Vector2D();

@@ -18,9 +18,9 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ColorSpaces;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
@@ -56,8 +56,8 @@ public class XYZTest extends ParametrizedFilter {
         dest = ImageUtils.copyImage(src);
         int[] pixels = ImageUtils.getPixelsAsArray(dest);
 
-        double[] rgb = {0.0f, 0.0f, 0.0f};
-        double[] xyz = {0.0f, 0.0f, 0.0f};
+        double[] rgb = {0.0, 0.0, 0.0};
+        double[] xyz = {0.0, 0.0, 0.0};
 
         float xVal = x.getPercentageValF();
         float yVal = y.getPercentageValF();
@@ -73,16 +73,22 @@ public class XYZTest extends ParametrizedFilter {
             int pixel = pixels[i];
             int a = (pixel >>> 24) & 0xFF;
 
-            rgb[0] = (pixel >>> 16) & 0xFF;
-            rgb[1] = (pixel >>> 8) & 0xFF;
-            rgb[2] = pixel & 0xFF;
+            int r = (pixel >>> 16) & 0xFF;
+            int g = (pixel >>> 8) & 0xFF;
+            int b = pixel & 0xFF;
 
-            rgb[0] /= 256.0f;
-            rgb[1] /= 256.0f;
-            rgb[2] /= 256.0f;
+            if (linearize) {
+                rgb[0] = ColorSpaces.SRGB_TO_LINEAR_LUT[r];
+                rgb[1] = ColorSpaces.SRGB_TO_LINEAR_LUT[g];
+                rgb[2] = ColorSpaces.SRGB_TO_LINEAR_LUT[b];
+            } else {
+                rgb[0] = r / 255.0;
+                rgb[1] = g / 255.0;
+                rgb[2] = b / 255.0;
+            }
 
             //float[] xyz = XYZ_CS.fromRGB(rgb);
-            rgb2xyz(rgb, xyz, linearize);
+            rgb2xyz(rgb, xyz);
 
             xyz[0] += xVal;
             xyz[1] += yVal;
@@ -93,11 +99,17 @@ public class XYZTest extends ParametrizedFilter {
             xyz[2] = Utils.clamp01(xyz[2]);
 
 //            rgb = XYZ_CS.toRGB(xyz);
-            xyz2rgb(xyz, rgb, linearize);
+            xyz2rgb(xyz, rgb);
 
-            int r = (int) (rgb[0] * 256);
-            int g = (int) (rgb[1] * 256);
-            int b = (int) (rgb[2] * 256);
+            if (linearize) {
+                r = ColorSpaces.linearToSRGBInt(rgb[0]);
+                g = ColorSpaces.linearToSRGBInt(rgb[1]);
+                b = ColorSpaces.linearToSRGBInt(rgb[2]);
+            } else {
+                r = (int) (rgb[0] * 255);
+                g = (int) (rgb[1] * 255);
+                b = (int) (rgb[2] * 255);
+            }
 
             r = PixelUtils.clamp(r);
             g = PixelUtils.clamp(g);
@@ -115,6 +127,11 @@ public class XYZTest extends ParametrizedFilter {
         pt.finished();
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 
     /**
@@ -137,47 +154,25 @@ public class XYZTest extends ParametrizedFilter {
         0.0719453, -0.2289914, 1.4052427
     };
 
-    public static double[] rgb2xyz(double[] rgb, double[] xyz, boolean linearize) {
+    public static double[] rgb2xyz(double[] rgb, double[] xyz) {
         double[] rgbLin = rgb;
-        if (linearize) {
-            // Remove sRGB companding to make RGB components linear
-            rgbLin = new double[3];
-            for (int i = 0; i < 3; i++) {
-                if (rgb[i] <= 0.04045) {
-                    rgbLin[i] = rgb[i] / 12.92;
-                } else {
-                    rgbLin[i] = FastMath.powQuick((rgb[i] + 0.055) / 1.055, 2.4);
-                }
-            }
-        }
 
         // Convert linear sRGB with D50 white point to CIE XYZ
         for (int i = 0; i < 3; i++) {
             xyz[i] = MATRIX_SRGB2XYZ_D50[i * 3 + 0] * rgbLin[0] +
-                MATRIX_SRGB2XYZ_D50[i * 3 + 1] * rgbLin[1] +
-                MATRIX_SRGB2XYZ_D50[i * 3 + 2] * rgbLin[2];
+                     MATRIX_SRGB2XYZ_D50[i * 3 + 1] * rgbLin[1] +
+                     MATRIX_SRGB2XYZ_D50[i * 3 + 2] * rgbLin[2];
         }
 
         return xyz;
     }
 
-    public static double[] xyz2rgb(double[] xyz, double[] rgb, boolean linearize) {
+    public static double[] xyz2rgb(double[] xyz, double[] rgb) {
         // XYZ to linear sRGB with D50 white point
         for (int i = 0; i < 3; i++) {
             rgb[i] = MATRIX_XYZ2SRGB_D50[i * 3 + 0] * xyz[0] +
-                MATRIX_XYZ2SRGB_D50[i * 3 + 1] * xyz[1] +
-                MATRIX_XYZ2SRGB_D50[i * 3 + 2] * xyz[2];
-        }
-
-        if (linearize) {
-            // Apply sRGB companding
-            for (int i = 0; i < 3; i++) {
-                if (rgb[i] <= 0.0031308) {
-                    rgb[i] = 12.92 * rgb[i];
-                } else {
-                    rgb[i] = 1.055 * FastMath.powQuick(rgb[i], 1.0 / 2.4) - 0.055;
-                }
-            }
+                     MATRIX_XYZ2SRGB_D50[i * 3 + 1] * xyz[1] +
+                     MATRIX_XYZ2SRGB_D50[i * 3 + 2] * xyz[2];
         }
 
         return rgb;

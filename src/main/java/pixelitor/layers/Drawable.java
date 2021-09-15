@@ -91,6 +91,9 @@ public interface Drawable {
 
     boolean isMaskEditing();
 
+    /**
+     * Return the current layer (the owner if this is a mask)
+     */
     Layer getLayer();
 
     String getName();

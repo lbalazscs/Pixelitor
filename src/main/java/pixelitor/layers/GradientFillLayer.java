@@ -34,11 +34,15 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 public class GradientFillLayer extends ContentLayer {
+    @Serial
+    private static final long serialVersionUID = 109261602799761359L;
+
     private Gradient gradient;
     private transient BufferedImage cachedImage;
 

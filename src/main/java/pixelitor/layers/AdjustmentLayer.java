@@ -84,6 +84,11 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
+    public void updateIconImage() {
+        // do nothing
+    }
+
+    @Override
     public void edit() {
         if (filter instanceof FilterWithGUI fwg) {
             System.out.println("AdjustmentLayer::edit: CALLED");

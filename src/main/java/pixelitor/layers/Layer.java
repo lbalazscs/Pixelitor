@@ -788,7 +788,28 @@ public abstract class Layer implements Serializable {
         return popup;
     }
 
-    private void replaceWithSmartObject() {
+    protected boolean isSmartObject() {
+        return false;
+    }
+
+    private boolean canBeSmartObject() {
+        return !isSmartObject() && canExportImage();
+    }
+
+    public void replaceWithSmartObject() {
+        if (!canBeSmartObject()) {
+            String msg;
+            if (isSmartObject()) {
+                msg = format("<html>The layer <b>%s</b> is already a smart object.",
+                    getName());
+            } else {
+                msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
+                    getName(), Utils.addArticle(getTypeStringLC()));
+            }
+            Messages.showInfo("Convert to Smart Object", msg);
+            return;
+        }
+
         SmartObject so = new SmartObject(this);
         History.add(new ReplaceLayerEdit(comp, this, so, "Convert to Smart Object"));
         comp.replaceLayer(this, so);

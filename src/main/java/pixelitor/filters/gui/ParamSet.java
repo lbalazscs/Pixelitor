@@ -293,6 +293,19 @@ public class ParamSet {
         return p;
     }
 
+    public void set(String paramName, String value) {
+        FilterParam modified = null;
+        for (FilterParam param : paramList) {
+            if (param.getName().equals(paramName)) {
+                modified = param;
+            }
+        }
+        if (modified == null) {
+            throw new IllegalStateException("No param called " + paramName);
+        }
+        modified.loadStateFrom(value);
+    }
+
     @Override
     public String toString() {
         return "ParamSet {" + paramList.toString() + "}";

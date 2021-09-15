@@ -567,6 +567,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createSmartObjectSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu sub = new PMenu("Smart Object");
 
+        sub.add(new OpenImageEnabledAction("Convert to Smart Object") {
+            @Override
+            public void onClick() {
+                getActiveLayer().replaceWithSmartObject();
+            }
+        });
+
         Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
 
         sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {

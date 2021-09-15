@@ -87,9 +87,9 @@ public class PreferencesPanel extends JPanel {
         var generalPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(generalPanel);
 
+        addUIChooser(gbh);
         addLanguageChooser(gbh);
 //        addThemeChooser(gbh);
-        addUIChooser(gbh);
         addUndoLevelsChooser(gbh);
         addThumbSizeChooser(gbh);
         addMagickDirField(gbh);

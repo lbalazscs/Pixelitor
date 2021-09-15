@@ -325,11 +325,16 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        assert state == INITIAL_DRAG : "state = " + state;
-
         if (drag.isClick()) {
             // cancel the shape started in dragStarted
             styledShape = null;
+            setState(NO_INTERACTION);
+            return;
+        }
+
+        if (styledShape == null) {
+            // this can happen when getting a fake mouse released event
+            // because the user started another tool via keyboard
             setState(NO_INTERACTION);
             return;
         }
@@ -354,9 +359,11 @@ public class ShapesTool extends DragTool {
     }
 
     private void updateStyledShapeFromDrag(PMouseEvent e) {
-        drag.setStartFromCenter(e.isAltDown());
-        drag.setEquallySized(e.isShiftDown());
-        styledShape.updateFromDrag(drag);
+        if (styledShape != null) {
+            drag.setStartFromCenter(e.isAltDown());
+            drag.setEquallySized(e.isShiftDown());
+            styledShape.updateFromDrag(drag);
+        }
     }
 
     @Override

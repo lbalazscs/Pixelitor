@@ -27,20 +27,27 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColorSelector;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogMenuBar;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
+import pixelitor.layers.ColorFillLayer;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Language;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.io.File;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -615,6 +623,177 @@ public class AppRunner {
 
     void closeDoYouWantToSaveChangesDialog() {
         findJOptionPane().buttonWithText("Don't Save").click();
+    }
+
+    public void addLayerMask() {
+        pw.button("addLayerMask")
+            .requireEnabled()
+            .click()
+            .requireDisabled();
+        assert EDT.activeLayerHasMask();
+    }
+
+    public void drawGradient(String gradientType) {
+        // draw a radial gradient
+        pw.toggleButton("Gradient Tool Button").click();
+        pw.comboBox("typeCB").selectItem(gradientType);
+        pw.checkBox("revertCB").check();
+
+        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
+            // otherwise location on screen can lead to crazy results
+            runMenuCommand("100%");
+        }
+
+        mouse.dragFromCanvasCenterToTheRight();
+        keyboard.pressEsc(); // hide the gradient handles
+    }
+
+    private void checkNewLayerHistory(int numLayersBefore, String editName) {
+        checkNumLayersIs(numLayersBefore + 1);
+
+        keyboard.undo(editName);
+        checkNumLayersIs(numLayersBefore);
+
+        keyboard.redo(editName);
+        checkNumLayersIs(numLayersBefore + 1);
+    }
+
+    public void mergeDown() {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+
+        runMenuCommand("Merge Down");
+        checkNumLayersIs(numLayersBefore - 1);
+
+        keyboard.undo("Merge Down");
+        checkNumLayersIs(numLayersBefore);
+
+        keyboard.redo("Merge Down");
+        checkNumLayersIs(numLayersBefore - 1);
+    }
+
+    public void addEmptyImageLayer(boolean bellow) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+
+        if (bellow) {
+            keyboard.pressCtrl();
+        }
+        pw.button("addLayer").click();
+        if (bellow) {
+            keyboard.releaseCtrl();
+        }
+
+        checkNewLayerHistory(numLayersBefore, "New Empty Layer");
+    }
+
+    public void addTextLayer(String text, Consumer<DialogFixture> customizer, String expectedText) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        pw.button("addTextLayer").click();
+
+        var dialog = findDialogByTitle("Create Text Layer");
+        dialog.textBox("textTF")
+            .requireText(expectedText)
+            .deleteText()
+            .enterText(text);
+
+        if (customizer != null) {
+            customizer.accept(dialog);
+        }
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        checkNewLayerHistory(numLayersBefore, "Add Text Layer");
+    }
+
+    public void editTextLayer(Consumer<DialogFixture> customizer) {
+        boolean useKeyboard = Math.random() > 0.5;
+        if (useKeyboard) {
+            // press Ctrl-T
+            pw.pressKey(VK_CONTROL).pressKey(VK_T);
+        } else {
+            runMenuCommand("Edit Text Layer...");
+        }
+
+        var dialog = findDialogByTitle("Edit Text Layer");
+
+        if (useKeyboard) {
+            // needs to be released on the dialog, otherwise ActionFailedException
+            dialog.releaseKey(VK_T).releaseKey(VK_CONTROL);
+        }
+
+        GlobalEvents.assertDialogNestingIs(1);
+
+        customizer.accept(dialog);
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+
+        keyboard.undoRedo("Edit Text Layer");
+    }
+
+    public void addColorFillLayer(Color c) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+
+        runMenuCommand("New Color Fill Layer...");
+        var colorSelector = findDialogByTitle("Add Color Fill Layer");
+        AJSUtils.findButtonByText(colorSelector, "OK").click();
+
+        EDT.run(() -> ((ColorFillLayer) OpenImages.getActiveLayer()).changeColor(c, true));
+
+        keyboard.undo("Color Fill Layer Change");
+        checkNewLayerHistory(numLayersBefore, "Add Color Fill Layer");
+        keyboard.redo("Color Fill Layer Change");
+    }
+
+    public void addGradientFillLayer(String gradientType) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+
+        keyboard.ctrlPress(VK_G);
+        keyboard.undoRedo("Add Gradient Fill Layer");
+
+        EDT.assertActiveToolIs(Tools.GRADIENT);
+        pw.comboBox("typeCB").selectItem(gradientType);
+        EDT.run(() -> FgBgColors.setFGColor(new Color(68, 152, 115)));
+        EDT.run(() -> FgBgColors.setBGColor(new Color(185, 56, 177)));
+        mouse.moveToCanvas(100, 100);
+        mouse.dragToCanvas(200, 200);
+
+        keyboard.undo("Gradient Fill Layer Change");
+
+        checkNewLayerHistory(numLayersBefore, "Add Gradient Fill Layer");
+
+        keyboard.redo("Gradient Fill Layer Change");
+    }
+
+    public void changeLayerBlendingMode(String blendingMode) {
+        if (blendingMode.equals("Normal")) {
+            return;
+        }
+        pw.comboBox("layerBM")
+            .requireSelection("Normal")
+            .selectItem(blendingMode);
+
+        keyboard.undo("Blending Mode Change");
+        pw.comboBox("layerBM").requireSelection("Normal");
+
+        keyboard.redo("Blending Mode Change");
+        pw.comboBox("layerBM").requireSelection(blendingMode);
+    }
+
+    public void changeLayerOpacity(float newValue) {
+        String newValueString = String.valueOf((int) (newValue * 100));
+        pw.textBox("layerOpacity")
+            .requireText("100")
+            .deleteText()
+            .enterText(newValueString)
+            .pressKey(VK_ENTER)
+            .releaseKey(VK_ENTER);
+
+        keyboard.undo("Layer Opacity Change");
+        pw.textBox("layerOpacity").requireText("100");
+
+        keyboard.redo("Layer Opacity Change");
+        pw.textBox("layerOpacity").requireText(newValueString);
     }
 
     public enum Randomize {YES, NO}

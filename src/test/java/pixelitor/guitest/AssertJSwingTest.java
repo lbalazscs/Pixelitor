@@ -369,33 +369,16 @@ public class AssertJSwingTest {
         layer2Button.requireSelected();
         maskMode.set(this);
 
-        addSomeContent(false);
+        app.drawGradient("CW Spiral");
     }
 
     private void testChangeLayerOpacityAndBM() {
         log(1, "change layer opacity and blending mode");
 
-        // test change opacity
-        pw.textBox("layerOpacity")
-            .requireText("100")
-            .deleteText()
-            .enterText("75")
-            .pressKey(VK_ENTER)
-            .releaseKey(VK_ENTER);
-        keyboard.undo("Layer Opacity Change");
-        pw.textBox("layerOpacity").requireText("100");
-        keyboard.redo("Layer Opacity Change");
-        pw.textBox("layerOpacity").requireText("75");
+        app.changeLayerOpacity(0.75f);
         checkConsistency();
 
-        // test change blending mode
-        pw.comboBox("layerBM")
-            .requireSelection(0)
-            .selectItem(2); // multiply
-        keyboard.undo("Blending Mode Change");
-        pw.comboBox("layerBM").requireSelection(0);
-        keyboard.redo("Blending Mode Change");
-        pw.comboBox("layerBM").requireSelection(2);
+        app.changeLayerBlendingMode("Multiply");
         checkConsistency();
     }
 
@@ -514,8 +497,7 @@ public class AssertJSwingTest {
         keyboard.undoRedo("New Layer from Visible");
         maskMode.set(this);
 
-        runMenuCommand("Merge Down");
-        keyboard.undoRedo("Merge Down");
+        app.mergeDown();
 
         runMenuCommand("Duplicate Layer");
         keyboard.undoRedo("Duplicate Layer");
@@ -616,22 +598,11 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        String text = addTextLayer();
+        String text = "some text";
+        app.addTextLayer(text, null, "Pixelitor");
         maskMode.set(this);
 
-        // press Ctrl-T
-        pw.pressKey(VK_CONTROL).pressKey(VK_T);
-        checkConsistency(1);
-
-        var dialog = findDialogByTitle("Edit Text Layer");
-        // needs to be released on the dialog, otherwise ActionFailedException
-        dialog.releaseKey(VK_T).releaseKey(VK_CONTROL);
-
-        testTextDialog(dialog, text);
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-        keyboard.undoRedo("Edit Text Layer");
+        app.editTextLayer(dialog -> testTextDialog(dialog, text));
 
         checkConsistency();
 
@@ -640,8 +611,7 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        runMenuCommand("Merge Down");
-        keyboard.undoRedoUndo("Merge Down");
+        app.mergeDown();
 
         maskMode.set(this);
         checkConsistency();
@@ -1770,7 +1740,7 @@ public class AssertJSwingTest {
     private void testFiltersOther() {
         testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testRandomFilter();
+//        testRandomFilter();
         testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
@@ -1869,7 +1839,7 @@ public class AssertJSwingTest {
         }
         log(1, "filter " + name);
 
-        boolean testPresets = !quick;
+        boolean testPresets = !quick && maskMode == NO_MASK;
 
         Consumer<DialogFixture> extraButtonClicker = dialog -> {
             for (String buttonText : extraButtonsToClick) {
@@ -2992,53 +2962,13 @@ public class AssertJSwingTest {
                 throw new IllegalStateException("already has mask");
             }
         } else {
-            pw.button("addLayerMask")
-                .requireEnabled()
-                .click()
-                .requireDisabled();
-            assert EDT.activeLayerHasMask();
-            addSomeContent(true);
+            app.addLayerMask();
+            app.drawGradient("Radial");
         }
-    }
-
-    private void addSomeContent(boolean forLayerMask) {
-        // draw a radial gradient
-        pw.toggleButton("Gradient Tool Button").click();
-        if (forLayerMask) {
-            pw.comboBox("typeCB").selectItem(GradientType.RADIAL.toString());
-        } else {
-            pw.comboBox("typeCB").selectItem(GradientType.SPIRAL_CW.toString());
-        }
-        pw.checkBox("revertCB").check();
-
-        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
-            // otherwise location on screen can lead to crazy results
-            runMenuCommand("100%");
-        }
-
-        mouse.dragFromCanvasCenterToTheRight();
-        keyboard.pressEsc(); // hide the gradient handles
     }
 
     void deleteLayerMask() {
         runMenuCommand("Delete");
-    }
-
-    private String addTextLayer() {
-        pw.button("addTextLayer").click();
-
-        var dialog = findDialogByTitle("Create Text Layer");
-
-        String text = "some text";
-        dialog.textBox("textTF").
-            requireText("Pixelitor")
-            .deleteText()
-            .enterText(text);
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        return text;
     }
 
     private void addAdjustmentLayer() {

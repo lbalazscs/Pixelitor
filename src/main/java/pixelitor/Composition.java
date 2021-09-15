@@ -262,8 +262,11 @@ public class Composition implements Serializable {
 
     public void closed() {
         setView(null);
+    }
+
+    public void deactivated() {
         if (owner != null) {
-            owner.contentClosed(this);
+            owner.contentDeactivated(this);
         }
     }
 
@@ -687,19 +690,8 @@ public class Composition implements Serializable {
         return retVal;
     }
 
-    public void forEachDrawable(Consumer<Drawable> action) {
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer imageLayer) {
-                action.accept(imageLayer);
-            }
-            if (layer.hasMask()) {
-                action.accept(layer.getMask());
-            }
-        }
-    }
-
     public void updateAllIconImages() {
-        forEachDrawable(Drawable::updateIconImage);
+        forEachLayer(Layer::updateIconImage);
     }
 
     public boolean activeAcceptsToolDrawing() {

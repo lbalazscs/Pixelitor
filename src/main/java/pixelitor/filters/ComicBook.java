@@ -59,6 +59,11 @@ public class ComicBook extends ParametrizedFilter {
         return finalImg;
     }
 
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
+
     public static BufferedImage blur(BufferedImage src, float radius) {
         BoxBlurFilter blur = new BoxBlurFilter(radius, radius, 1, NAME);
         blur.setPremultiplyAlpha(false);

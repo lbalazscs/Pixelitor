@@ -38,6 +38,7 @@ import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Utils;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.function.Consumer;
 
@@ -87,8 +88,13 @@ public class WorkflowTest {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
         addGuide();
         runFilterWithDialog("Wood", null);
-        addTextLayer("Wood", null);
-        setTextSize();
+        app.addTextLayer("Wood", null, "Pixelitor");
+
+        app.editTextLayer(dialog -> {
+            dialog.textBox("textTF").requireText("Wood");
+            dialog.slider("fontSize").slideTo(200);
+        });
+
         rasterizeThenUndo();
         selectionFromText();
         deleteTextLayer();
@@ -98,12 +104,12 @@ public class WorkflowTest {
         rotate270();
         drawTransparentZigzagRectangle();
         enlargeCanvas();
-        addLayerBellow();
+        app.addEmptyImageLayer(true);
         renderCaustics();
         selectWoodLayer();
         addHeartShapedHoleToTheWoodLayer();
         runFilterWithDialog("Drop Shadow", null);
-        mergeDown();
+        app.mergeDown();
         createEllipseSelection();
         expandSelection();
         selectionToPath();
@@ -128,20 +134,29 @@ public class WorkflowTest {
         runFilterWithDialog("Spider Web", null);
         app.runMenuCommand("Duplicate");
 
-        addTextLayer("Spider", dialog -> {
+        app.addTextLayer("Spider", dialog -> {
             dialog.comboBox("hAlignmentCB").selectItem("Left");
             dialog.comboBox("vAlignmentCB").selectItem("Top");
-        });
-        addTextLayer("Web", dialog -> {
+        }, "Pixelitor");
+        app.addTextLayer("Web", dialog -> {
             dialog.comboBox("hAlignmentCB").selectItem("Right");
             dialog.comboBox("vAlignmentCB").selectItem("Top");
-        });
+        }, "Pixelitor");
 
         // switch back to the main tab
         pw.tabbedPane().selectTab("wf test 2");
         int mainTabIndex = EDT.call(() -> ((TabsUI) ImageArea.getUI()).getSelectedIndex());
 
         runFilterWithDialog("Clouds", null);
+        app.addEmptyImageLayer(false);
+        runFilterWithDialog("Fractal Tree",
+            dialog -> dialog.slider("Age (Iterations)").slideTo(14));
+        app.changeLayerBlendingMode("Hard Light");
+        app.mergeDown();
+
+        app.addGradientFillLayer("CW Spiral");
+        app.changeLayerBlendingMode("Multiply");
+        app.mergeDown();
 
         Consumer<DialogFixture> customizer = dialog ->
             dialog.comboBox("Bump Map").selectItem("wf test 2 copy");
@@ -155,7 +170,32 @@ public class WorkflowTest {
         // now the main tab should be the active one
         pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
 
-        loadReferenceImage("wf2_reference.png");
+        app.addColorFillLayer(Color.BLUE);
+        app.changeLayerBlendingMode("Hue");
+        app.changeLayerOpacity(0.5f);
+
+        app.runMenuCommand("Rasterize Color Fill Layer");
+        keyboard.undoRedo("Rasterize Color Fill Layer");
+
+        app.mergeDown();
+
+        app.addTextLayer("TEXT", null, "Pixelitor");
+        app.runMenuCommand("Convert to Smart Object");
+        keyboard.undoRedo("Convert to Smart Object");
+
+        app.runMenuCommand("Edit Contents");
+        app.editTextLayer(dialog -> {
+            dialog.textBox("textTF")
+                .requireText("TEXT")
+                .deleteText()
+                .enterText("WARPED TEXT");
+        });
+
+        app.addLayerMask();
+        app.drawGradient("Radial");
+        app.runMenuCommand("Close");
+
+        loadReferenceImage("wf2_reference.pxc");
     }
 
     private void addGuide() {
@@ -173,37 +213,6 @@ public class WorkflowTest {
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
         app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
         keyboard.undoRedo(filterName);
-    }
-
-    private void addTextLayer(String text, Consumer<DialogFixture> customizer) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
-        pw.button("addTextLayer").click();
-
-        var dialog = app.findDialogByTitle("Create Text Layer");
-        dialog.textBox("textTF")
-            .requireText("Pixelitor")
-            .deleteText()
-            .enterText(text);
-
-        if (customizer != null) {
-            customizer.accept(dialog);
-        }
-
-        dialog.button("ok").click();
-
-        keyboard.undoRedo("Add Text Layer");
-        app.checkNumLayersIs(numLayersBefore + 1);
-    }
-
-    private void setTextSize() {
-        app.runMenuCommand("Edit Text Layer...");
-
-        var dialog = app.findDialogByTitle("Edit Text Layer");
-        dialog.textBox("textTF").requireText("Wood");
-        dialog.slider("fontSize").slideTo(200);
-        dialog.button("ok").click();
-
-        keyboard.undoRedo("Edit Text Layer");
     }
 
     private void rasterizeThenUndo() {
@@ -301,18 +310,6 @@ public class WorkflowTest {
         keyboard.undoRedo("Enlarge Canvas");
     }
 
-    private void addLayerBellow() {
-        app.checkNumLayersIs(1);
-        app.checkLayerNamesAre("layer 1");
-
-        keyboard.pressCtrl();
-        pw.button("addLayer").click();
-        keyboard.releaseCtrl();
-
-        app.checkNumLayersIs(2);
-        app.checkLayerNamesAre("layer 2", "layer 1");
-    }
-
     private void renderCaustics() {
         pw.pressKey(VK_F3);
 
@@ -346,7 +343,7 @@ public class WorkflowTest {
 
     private void addHeartShapedHoleToTheWoodLayer() {
         app.setDefaultColors();
-        pw.button("addLayerMask").requireEnabled().click();
+        app.addLayerMask();
         app.clickTool(Tools.SHAPES);
 
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.HEART.toString());
@@ -362,19 +359,6 @@ public class WorkflowTest {
 
         app.runMenuCommand("Apply");
         keyboard.undoRedo("Apply Layer Mask");
-    }
-
-    private void mergeDown() {
-        app.checkNumLayersIs(2);
-
-        app.runMenuCommand("Merge Down");
-        app.checkNumLayersIs(1);
-
-        keyboard.undo("Merge Down");
-        app.checkNumLayersIs(2);
-
-        keyboard.redo("Merge Down");
-        app.checkNumLayersIs(1);
     }
 
     private void createEllipseSelection() {

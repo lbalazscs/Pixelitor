@@ -64,4 +64,9 @@ public class JHGlow extends ParametrizedFilter {
 
         return filter.filter(src, dest);
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

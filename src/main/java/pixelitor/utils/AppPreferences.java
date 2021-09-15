@@ -293,7 +293,7 @@ public final class AppPreferences {
     public static int loadUndoLevels() {
         int retVal = mainNode.getInt(UNDO_LEVELS_KEY, -1);
         if (retVal == -1) {
-            return Math.min(5, getDefaultUndoLevels());
+            return Math.min(5, calcDefaultUndoLevels());
         }
         return retVal;
     }
@@ -400,7 +400,7 @@ public final class AppPreferences {
         return mainNode;
     }
 
-    private static int getDefaultUndoLevels() {
+    private static int calcDefaultUndoLevels() {
         int sizeInMegaBytes = Utils.getMaxHeapInMegabytes();
         int retVal = 1 + sizeInMegaBytes / 50;
 

@@ -239,6 +239,11 @@ public class CustomConvolveGUI extends FilterGUI {
             -1, 5, -1,
             0, -1, 0});
 
+        initPreset("Sharpen 2", new float[]{
+            -1, -1, -1,
+            -1, 9, -1,
+            -1, -1, -1});
+
         initPreset("Edge Detection", new float[]{
             0, -1, 0,
             -1, 4, -1,

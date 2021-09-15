@@ -127,13 +127,18 @@ public class SmartObject extends ImageLayer {
         }
     }
 
-    public void contentClosed(Composition content) {
+    public void contentDeactivated(Composition content) {
         // the reference might have been changed during editing
         this.content = content;
 
         recalculateImage();
         comp.update();
         updateIconImage();
+    }
+
+    @Override
+    protected boolean isSmartObject() {
+        return true;
     }
 
     @Override

@@ -338,22 +338,12 @@ public class ImageUtils {
 
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
-        } else if (src.getType() == TYPE_BYTE_GRAY) {
-            // TODO this does not seem to work - why?
-            int width = src.getWidth();
-            int height = src.getHeight();
-            pixels = src.getRGB(0, 0, width, height, null, 0, width);
         } else {
-            int width = src.getWidth();
-            int height = src.getHeight();
-            pixels = new int[width * height];
-            var grabber = new PixelGrabber(src, 0, 0, width, height, pixels, 0, width);
-
-            try {
-                grabber.grabPixels();
-            } catch (InterruptedException e) {
-                Messages.showException(e);
-            }
+            // if the image's pixels are not stored in an int array,
+            // a correct int array can still be retrieved with
+            // src.getRGB(0, 0, width, height, null, 0, width);
+            // but modifying that array won't have any effect on the image.
+            throw new UnsupportedOperationException();
         }
 
         return pixels;

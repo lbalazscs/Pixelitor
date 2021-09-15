@@ -35,11 +35,15 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 public class ColorFillLayer extends Layer {
+    @Serial
+    private static final long serialVersionUID = -5181774134094137901L;
+
     private Color color;
 
     private ColorFillLayer(Composition comp, String name, Color color) {

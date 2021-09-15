@@ -153,4 +153,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     public String paramsAsString() {
         return paramSet.toUserPreset(getName(), "Debug").toString();
     }
+
+    public void set(String paramName, String value) {
+        paramSet.set(paramName, value);
+    }
 }

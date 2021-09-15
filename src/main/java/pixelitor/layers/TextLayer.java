@@ -348,6 +348,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
     }
 
+    @Override
+    public void updateIconImage() {
+        // do nothing
+    }
+
     private JMenuBar getMenuBar() {
         return new DialogMenuBar(this, true);
     }

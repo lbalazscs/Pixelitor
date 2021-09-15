@@ -101,7 +101,6 @@ public class PaintBucketTool extends Tool {
         y -= ty;
 
         BufferedImage image = dr.getImage();
-
         int imgHeight = image.getHeight();
         int imgWidth = image.getWidth();
         if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
@@ -110,8 +109,16 @@ public class PaintBucketTool extends Tool {
 
         BufferedImage backupForUndo = ImageUtils.copyImage(image);
         boolean thereIsSelection = comp.hasSelection();
+
+        boolean grayScale = false;
+        if (image.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            grayScale = true;
+        }
+
         BufferedImage workingImage;
-        if (thereIsSelection) {
+        if (grayScale) {
+            workingImage = ImageUtils.toSysCompatibleImage(image);
+        } else if (thereIsSelection) {
             workingImage = ImageUtils.copyImage(image);
         } else {
             workingImage = image;
@@ -165,6 +172,8 @@ public class PaintBucketTool extends Tool {
                 g.drawImage(workingImage, 0, 0, null);
                 g.dispose();
                 workingImage.flush();
+            } else if (grayScale) {
+                dr.setImage(ImageUtils.convertToGrayScaleImage(workingImage));
             }
             comp.update();
             dr.updateIconImage();

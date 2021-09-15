@@ -221,6 +221,10 @@ public class ImageMath {
         return (input < 0.0f) ? 0.0f : (input > 1.0f) ? 1.0f : input;
     }
 
+    public static double clamp01(double input) {
+        return (input < 0.0) ? 0.0 : (input > 1.0) ? 1.0 : input;
+    }
+
     /**
      * Clamp a value to an interval.
      *

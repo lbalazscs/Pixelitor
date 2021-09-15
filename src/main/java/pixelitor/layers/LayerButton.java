@@ -373,9 +373,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     public void updateLayerIconImageAsync(Layer layer) {
         assert calledOnEDT() : threadInfo();
-        if (layer.getClass() == TextLayer.class) { // TODO find a better way
-            return;
-        }
+        assert layer.getClass() != TextLayer.class;
+        assert layer.getClass() != AdjustmentLayer.class;
 
         Runnable notEDT = () -> {
             BufferedImage thumb = layer.createIconThumbnail();
@@ -524,8 +523,11 @@ public class LayerButton extends JToggleButton implements LayerUI {
         this.layer = newLayer;
         updateName();
         Icon icon = createLayerIcon(layer);
-        layerIconLabel.setIcon(icon);
-        updateLayerIconImageAsync(layer);
+        if (icon != null) { // has fix icon
+            layerIconLabel.setIcon(icon);
+        } else {
+            updateLayerIconImageAsync(layer);
+        }
 
         if (maskIconLabel != null) {
             removeMaskIcon();
