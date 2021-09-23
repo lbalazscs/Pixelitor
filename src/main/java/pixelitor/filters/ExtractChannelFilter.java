@@ -46,6 +46,11 @@ public class ExtractChannelFilter extends Filter {
         return false;
     }
 
+    @Override
+    public boolean canBeSmart() {
+        return false;
+    }
+
     // static factory methods from here
 
     public static FilterAction getValueChannelFA() {

@@ -19,30 +19,33 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.MotionBlur;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
 /**
- * "Motion Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
+ * "Spin and Zoom Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
  */
-public class JHMotionBlur extends ParametrizedFilter {
-    public static final String NAME = "Motion Blur";
+public class JHSpinZoomBlur extends ParametrizedFilter {
+    public static final String NAME = "Spin and Zoom Blur";
 
-    private final AngleParam angle = new AngleParam("Direction", 0);
-    private final RangeParam distance = new RangeParam("Distance", 0, 0, 200);
-    private final EnumParam<MotionBlurQuality> quality = new EnumParam<>("Quality", MotionBlurQuality.class);
+    private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);
+    private final RangeParam zoom = new RangeParam("Zoom Blur Amount", 0, 0, 200);
+    private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
+    private final EnumParam<MotionBlurQuality> quality = new EnumParam<>("Quality", MotionBlurQuality.class);
 
-    public JHMotionBlur() {
+    public JHSpinZoomBlur() {
         super(true);
+
         setParams(
-            distance,
-            angle,
+            rotation,
+            zoom,
+            center,
             quality,
             hpSharpening
         );
@@ -50,15 +53,18 @@ public class JHMotionBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int distanceValue = distance.getValue();
-        if (distanceValue == 0) {
+        float zoomValue = zoom.getPercentageValF();
+        float rotationValue = rotation.getValueInRadians();
+        if (zoomValue == 0.0f && rotationValue == 0.0f) {
             return src;
         }
 
         MotionBlur filter = quality.getSelected().createFilter(NAME);
 
-        filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setDistance(distance.getValueAsFloat());
+        filter.setCentreX(center.getRelativeX());
+        filter.setCentreY(center.getRelativeY());
+        filter.setRotation(rotationValue);
+        filter.setZoom(zoomValue);
 
         dest = filter.filter(src, dest);
 

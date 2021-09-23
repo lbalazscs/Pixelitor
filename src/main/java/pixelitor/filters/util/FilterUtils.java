@@ -131,4 +131,22 @@ public class FilterUtils {
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
         System.out.printf("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'%n", estimatedSeconds);
     }
+
+    /**
+     * Test whether all the filters have a no-argument constructor
+     */
+    public static void testFilterConstructors() {
+        List<String> problems = new ArrayList<>();
+        for (FilterAction action : allFilters) {
+            Filter filter = action.getFilter();
+            if (filter.canBeSmart()) {
+                try {
+                    filter.getClass().getDeclaredConstructor().newInstance();
+                } catch (Exception e) {
+                    problems.add(filter.getName());
+                }
+            }
+        }
+        problems.forEach(System.out::println);
+    }
 }

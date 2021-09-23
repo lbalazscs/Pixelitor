@@ -89,8 +89,6 @@ import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
-import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.Condition.*;
 import static pixelitor.layers.LayerMaskAddType.*;
@@ -876,9 +874,9 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHFocus.NAME, JHFocus::new);
         sub.addFilter(JHGaussianBlur.NAME, JHGaussianBlur::new);
         sub.addFilter(JHLensBlur.NAME, JHLensBlur::new);
-        sub.add(MOTION_BLUR.createFilterAction());
+        sub.addFilter(JHMotionBlur.NAME, JHMotionBlur::new);
         sub.addFilter(JHSmartBlur.NAME, JHSmartBlur::new);
-        sub.add(SPIN_ZOOM_BLUR.createFilterAction());
+        sub.addFilter(JHSpinZoomBlur.NAME, JHSpinZoomBlur::new);
         sub.addSeparator();
         sub.addFilter(JHUnsharpMask.NAME, JHUnsharpMask::new);
 
@@ -1462,6 +1460,13 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 IO.saveCurrentImageInAllFormats();
+            }
+        });
+
+        sub.add(new OpenImageEnabledAction("Test Filter Constructors") {
+            @Override
+            public void onClick() {
+                FilterUtils.testFilterConstructors();
             }
         });
 

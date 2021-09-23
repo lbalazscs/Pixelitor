@@ -27,6 +27,7 @@ import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.SmartObject;
 import pixelitor.menus.DrawableAction;
+import pixelitor.utils.Messages;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -67,7 +68,14 @@ public class FilterAction extends DrawableAction {
 
     @Override
     protected void process(Drawable dr) {
+        createCachedFilter();
         if (dr instanceof SmartObject so) {
+            if (!filter.canBeSmart()) {
+                String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
+                Messages.showInfo("Dumb Filter", msg);
+                return;
+            }
+
             if (so.hasSmartFilters()) {
                 handleExistingSmartFilters(so);
                 return;
@@ -78,7 +86,6 @@ public class FilterAction extends DrawableAction {
             }
             return;
         }
-        createCachedFilter();
         filter.startOn(dr, true);
     }
 

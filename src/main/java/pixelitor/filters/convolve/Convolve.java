@@ -111,4 +111,9 @@ public class Convolve extends FilterWithGUI {
     private static String getFilterName(int width, int height) {
         return "Custom " + width + 'x' + height + " Convolution";
     }
+
+    @Override
+    public boolean canBeSmart() {
+        return false;
+    }
 }

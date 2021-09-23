@@ -49,4 +49,9 @@ public class SimpleForwardingFilter extends Filter {
     public boolean supportsGray() {
         return supportsGray;
     }
+
+    @Override
+    public boolean canBeSmart() {
+        return false;
+    }
 }

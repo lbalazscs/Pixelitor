@@ -270,6 +270,10 @@ public class Composition implements Serializable {
         }
     }
 
+    public SmartObject getOwner() {
+        return owner;
+    }
+
     public void setOwner(SmartObject owner) {
         this.owner = owner;
     }

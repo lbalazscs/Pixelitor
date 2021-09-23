@@ -191,6 +191,10 @@ public abstract class Filter implements Serializable {
         return true;
     }
 
+    public boolean canBeSmart() {
+        return true;
+    }
+
     public String paramsAsString() {
         return "";
     }
