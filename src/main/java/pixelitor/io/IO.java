@@ -21,7 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
-import pixelitor.filters.gui.StrokeSettings;
+import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
@@ -78,7 +78,7 @@ public class IO {
         return CompletableFuture
             .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
-                img, file.getName(), "Dropped Layer"),
+                    img, file.getName(), "Dropped Layer"),
                 onEDT)
             .whenComplete((v, e) -> checkForReadingProblems(e));
     }
@@ -226,7 +226,7 @@ public class IO {
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
             .thenAcceptAsync(numImg -> Messages.showInStatusBar(
-                "Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
+                    "Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
                 , onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -303,8 +303,19 @@ public class IO {
         comp.saveAsync(settings, true);
     }
 
-    public static void saveSVG(Shape shape, StrokeSettings strokeSettings) {
+    public static void saveSVG(Shape shape, StrokeParam strokeParam) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(svgFilter);
+
+        boolean exportFilled = false;
+        if (strokeParam != null) {
+            exportFilled = switch (strokeParam.getStrokeType()) {
+                case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV -> true;
+                default -> false;
+            };
+        }
+        if (exportFilled) {
+            shape = strokeParam.createStroke().createStrokedShape(shape);
+        }
         String svgPath = Shapes.toSVGPath(shape);
 
         String svgFillRule = "nonzero";
@@ -316,18 +327,27 @@ public class IO {
             };
         }
 
-        String strokeDescr = "";
-        if (strokeSettings != null) {
-            strokeDescr = strokeSettings.toSVGString();
-        }
-
         Canvas canvas = OpenImages.getActiveComp().getCanvas();
-        String svg = """
-            <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
-              <path d="%s" fill="none" stroke="black" fill-rule="%s" %s/>
-            </svg>
-            """.formatted(canvas.getWidth(), canvas.getHeight(),
-                    svgPath, svgFillRule, strokeDescr);
+        String svg;
+        if (exportFilled) {
+            svg = """
+                <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+                  <path d="%s" fill="black" stroke="none" fill-rule="%s"/>
+                </svg>
+                """.formatted(canvas.getWidth(), canvas.getHeight(),
+                svgPath, svgFillRule);
+        } else {
+            String strokeDescr = "";
+            if (strokeParam != null) {
+                strokeDescr = strokeParam.copyState().toSVGString();
+            }
+            svg = """
+                <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+                  <path d="%s" fill="none" stroke="black" fill-rule="%s" %s/>
+                </svg>
+                """.formatted(canvas.getWidth(), canvas.getHeight(),
+                svgPath, svgFillRule, strokeDescr);
+        }
 
         try (PrintWriter out = new PrintWriter(file)) {
             out.println(svg);

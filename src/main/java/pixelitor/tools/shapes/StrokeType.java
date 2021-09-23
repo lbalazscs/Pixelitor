@@ -25,6 +25,7 @@ import com.jhlabs.awt.ShapeStroke;
 import com.jhlabs.awt.WobbleStroke;
 import com.jhlabs.awt.ZigzagStroke;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.StrokeParam;
 import pixelitor.tools.util.Drag;
 import pixelitor.utils.TaperingStroke;
 
@@ -147,29 +148,23 @@ public enum StrokeType {
             return 0;
         }
     }, SHAPE("Shape", false) {
-        private ShapeType shapeType;
-
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+            // needs a full StrokeParam
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Stroke createStroke(StrokeParam param) {
+            int width = param.getStrokeWidth();
+            float[] dashFloats = param.getDashFloats(width);
             float advance = width * 1.2f;
             if (dashFloats != null) {
                 advance *= 2.0f; // simulate dashes
             }
-            int size = (int) width;
-            Shape shape = createShape(size);
+            ShapeType shapeType = param.getShapeType();
+            Shape shape = shapeType.createShape(new Drag(0, 0, width, width), null);
             return new ShapeStroke(shape, advance);
-        }
-
-        public Shape createShape(int size) {
-            if (shapeType == null) {
-                shapeType = ShapeType.KIWI;
-            }
-            return shapeType.createShape(new Drag(0, 0, size, size), null);
-        }
-
-        @Override
-        public void setShapeType(ShapeType shapeType) {
-            this.shapeType = shapeType;
         }
 
         @Override
@@ -219,11 +214,15 @@ public enum StrokeType {
         return null;
     }
 
-    public void setShapeType(ShapeType shapeType) {
-        // do nothing by default, overridden in SHAPE
-    }
-
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
+
+    public Stroke createStroke(StrokeParam param) {
+        int width = param.getStrokeWidth();
+        int cap = param.getStrokeCapParam().getSelected().getValue();
+        int join = param.getStrokeJoinParam().getSelected().getValue();
+        float[] dashFloats = param.getDashFloats(width);
+        return createStroke(width, cap, join, dashFloats);
+    }
 
     public boolean isSlow() {
         return slow;

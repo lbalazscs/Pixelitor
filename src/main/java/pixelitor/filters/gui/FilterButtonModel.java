@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,28 +40,44 @@ public class FilterButtonModel implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
+    private final boolean triggerFilter;
+
     public FilterButtonModel(String text, Runnable task, String toolTipText) {
-        this(text, task, null, toolTipText, null);
+        this(text, task, null, toolTipText, null, true);
     }
 
     public FilterButtonModel(String text, Runnable task, Icon icon,
                              String toolTipText, String lookupName) {
+        this(text, task, icon, toolTipText, lookupName, true);
+    }
+
+    public FilterButtonModel(String text, Runnable task, Icon icon,
+                             String toolTipText, String lookupName,
+                             boolean triggerFilter) {
         this.text = text;
         this.task = task;
         this.icon = icon;
         this.toolTipText = toolTipText;
         this.lookupName = lookupName;
+        this.triggerFilter = triggerFilter;
     }
 
     @Override
     public JComponent createGUI() {
         button = new JButton(text, icon);
-        button.addActionListener(e -> {
-            // first run the given task...
-            task.run();
-            // ... and then trigger the filter preview
-            adjustmentListener.paramAdjusted();
-        });
+        if (triggerFilter) {
+            button.addActionListener(e -> {
+                // first run the given task...
+                task.run();
+                // ... and then trigger the filter preview
+                adjustmentListener.paramAdjusted();
+            });
+        } else {
+            button.addActionListener(e -> {
+                // just the given task
+                task.run();
+            });
+        }
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);
         }

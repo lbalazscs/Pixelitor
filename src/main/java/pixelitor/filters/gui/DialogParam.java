@@ -22,7 +22,6 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -116,6 +115,7 @@ public class DialogParam extends AbstractFilterParam {
                 child.loadStateFrom(savedString);
             }
         }
+        updateDefaultButtonState();
     }
 
     @Override
@@ -140,8 +140,12 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        return Arrays.stream(children)
-            .allMatch(Resettable::isSetToDefault);
+        for (FilterParam child : children) {
+            if (!child.isSetToDefault()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -59,9 +59,8 @@ public class AngleParam extends AbstractFilterParam {
         return (JComponent) paramGUI;
     }
 
-    public void setValueInDegrees(double d, boolean trigger) {
-        double degrees = d;
-        if (degrees < 0) {
+    public void setValueInDegrees(double degrees, boolean trigger) {
+        if (degrees <= 0) {
             degrees = -degrees;
         } else {
             degrees = 360 - degrees;

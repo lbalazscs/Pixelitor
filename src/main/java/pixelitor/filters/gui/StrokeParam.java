@@ -54,6 +54,8 @@ public class StrokeParam extends AbstractFilterParam {
     public StrokeParam(String name) {
         super(name, ALLOW_RANDOMIZE);
 
+        shapeTypeParam.withDefault(ShapeType.KIWI);
+
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
             strokeType -> strokeType == SHAPE);
 
@@ -88,16 +90,12 @@ public class StrokeParam extends AbstractFilterParam {
         strokeTypeParam.setAdjustmentListener(decoratedListener);
         strokeCapParam.setAdjustmentListener(decoratedListener);
         strokeJoinParam.setAdjustmentListener(decoratedListener);
-
-        // decorated twice
-        shapeTypeParam.setAdjustmentListener(() -> {
-            ShapeType selectedItem = shapeTypeParam.getSelected();
-            StrokeType.SHAPE.setShapeType(selectedItem);
-            // it is important to call this only after the previous setup!
-            decoratedListener.paramAdjusted();
-        });
-
+        shapeTypeParam.setAdjustmentListener(decoratedListener);
         dashedParam.setAdjustmentListener(decoratedListener);
+    }
+
+    public ShapeType getShapeType() {
+        return shapeTypeParam.getSelected();
     }
 
     public int getStrokeWidth() {
@@ -119,34 +117,30 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public Stroke createStroke() {
-        float strokeWidth = strokeWidthParam.getValueAsFloat();
+        return getStrokeType().createStroke(this);
+    }
 
+    public float[] getDashFloats(float strokeWidth) {
         float[] dashFloats = null;
-        if (dashedParam.isChecked()) {
+        if (hasDashes()) {
             dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
         }
+        return dashFloats;
+    }
 
-        return getStrokeType().createStroke(
-            strokeWidth,
-            strokeCapParam.getSelected().getValue(),
-            strokeJoinParam.getSelected().getValue(),
-            dashFloats);
+    public boolean hasDashes() {
+        return dashedParam.isChecked();
     }
 
     public Stroke createStrokeWithRandomWidth(Random random, float randomness) {
         float strokeWidth = strokeWidthParam.getValueAsFloat();
         strokeWidth += strokeWidth * randomness * random.nextFloat();
 
-        float[] dashFloats = null;
-        if (dashedParam.isChecked()) {
-            dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
-        }
-
         return getStrokeType().createStroke(
             strokeWidth,
             strokeCapParam.getSelected().getValue(),
             strokeJoinParam.getSelected().getValue(),
-            dashFloats);
+            getDashFloats(strokeWidth));
     }
 
     @Override
@@ -202,6 +196,7 @@ public class StrokeParam extends AbstractFilterParam {
                 param.loadStateFrom(savedString);
             }
         }
+        updateDefaultButtonState();
     }
 
     @Override
@@ -289,7 +284,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeNode.addString("join", strokeJoinParam.getSelected().toString());
         strokeNode.addString("type", strokeTypeParam.getSelected().toString());
         strokeNode.addString("shape type", shapeTypeParam.getSelected().toString());
-        strokeNode.addBoolean("dashed", dashedParam.isChecked());
+        strokeNode.addBoolean("dashed", hasDashes());
 
         node.add(strokeNode);
     }

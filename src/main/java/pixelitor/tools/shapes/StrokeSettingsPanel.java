@@ -31,7 +31,6 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.tools.shapes.ShapeType.KIWI;
 
 /**
  * Stroke configuration used by the shapes tool and by
@@ -98,8 +97,7 @@ public class StrokeSettingsPanel extends JPanel {
     private static JPanel createStrokeTypePanel(StrokeParam sp) {
         EnumParam<StrokeType> strokeTypeParam = sp.getStrokeTypeParam();
         BooleanParam dashedParam = sp.getDashedParam();
-        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam()
-            .withDefault(KIWI);
+        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
 
         var p = new JPanel();
         p.setBorder(createTitledBorder("Stroke Type"));

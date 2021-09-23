@@ -93,7 +93,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             strokeParam,
             effectsParam
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
-            "Export the current shape to an SVG file"));
+            null, "Export the current shape to an SVG file",
+            null, false));
 
         // disable foreground and background if watermarking is selected
         waterMark.setupDisableOtherIfChecked(foreground);
@@ -158,8 +159,6 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             shape = at.createTransformedShape(shape);
         }
 
-        // The shape might be further transformed, but it should
-        // be exported in the current state
         exportedShape = shape;
 
         AreaEffects effects = effectsParam.getEffects();
@@ -276,6 +275,6 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     }
 
     private void exportSVG() {
-        IO.saveSVG(exportedShape, strokeParam.copyState());
+        IO.saveSVG(exportedShape, strokeParam);
     }
 }
