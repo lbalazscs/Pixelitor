@@ -28,6 +28,7 @@ import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
 import pixelitor.io.FileFormat;
+import pixelitor.io.FileUtils;
 import pixelitor.io.IOTasks;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.*;
@@ -320,6 +321,14 @@ public class Composition implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getFileNameWithExt(String ext) {
+        if (file == null) {
+            return name + "." + ext;
+        } else {
+            return FileUtils.replaceExt(file.getName(), ext);
+        }
     }
 
     public String calcTitle() {

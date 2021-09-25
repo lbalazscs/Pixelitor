@@ -31,6 +31,7 @@ import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
+import pixelitor.io.FileChoosers;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -66,6 +67,7 @@ public final class AppPreferences {
     private static Dimension newImageSize = null;
 
     private static final String UI_KEY = "ui";
+    private static final String NATIVE_CHOOSERS_KEY = "native_choosers";
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
@@ -372,6 +374,7 @@ public final class AppPreferences {
         savePan();
         saveMagickDir();
         saveExperimentalFeatures();
+        saveNativeChoosers();
     }
 
     public static Color loadFgColor() {
@@ -508,5 +511,13 @@ public final class AppPreferences {
 
     private static void saveExperimentalFeatures() {
         mainNode.putBoolean(EXPERIMENTAL_KEY, AppContext.enableExperimentalFeatures);
+    }
+
+    public static boolean loadNativeChoosers() {
+        return mainNode.getBoolean(NATIVE_CHOOSERS_KEY, false);
+    }
+
+    private static void saveNativeChoosers() {
+        mainNode.putBoolean(NATIVE_CHOOSERS_KEY, FileChoosers.useNativeDialogs());
     }
 }

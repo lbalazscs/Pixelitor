@@ -57,7 +57,8 @@ public class LayerAnimExport {
     }
 
     private static void export(Composition comp, int delayMillis, boolean pingPong) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
+        File file = FileChoosers.selectSaveFileForSpecificFormat(comp,
+            comp.getFileNameWithExt("gif"), gifFilter);
         if (file != null) {
             new LayerAnimation(comp, delayMillis, pingPong)
                 .saveToFile(file);

@@ -281,7 +281,7 @@ public class IO {
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
             var comp = OpenImages.getActiveComp();
-            FileChoosers.showSaveChooserAndSaveComp(comp, jpegInfo);
+            FileChoosers.showSaveChooserAndSaveComp(comp, comp.getFileNameWithExt("jpg"), jpegInfo);
         } finally {
             FileChoosers.setDefaultSaveExtensions();
         }
@@ -304,7 +304,7 @@ public class IO {
     }
 
     public static void saveSVG(Shape shape, StrokeParam strokeParam) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(svgFilter);
+        File file = FileChoosers.selectSaveFileForSpecificFormat(null, "shape.svg", svgFilter);
 
         boolean exportFilled = false;
         if (strokeParam != null) {

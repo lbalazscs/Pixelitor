@@ -106,7 +106,7 @@ public class FileUtils {
             .isPresent();
     }
 
-    private static boolean isSupportedOutputExt(String extension) {
+    public static boolean isSupportedOutputExt(String extension) {
         return SUPPORTED_SAVE_EXTENSIONS.contains(extension)
                || SUPPORTED_EXPORT_EXTENSIONS.contains(extension);
     }

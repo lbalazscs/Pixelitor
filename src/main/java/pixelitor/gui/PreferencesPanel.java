@@ -26,6 +26,7 @@ import pixelitor.gui.utils.*;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
+import pixelitor.io.FileChoosers;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Cursors;
@@ -57,6 +58,7 @@ public class PreferencesPanel extends JPanel {
     private JComboBox<MouseZoomMethod> zoomMethodCB;
     private JComboBox<PanMethod> panMethodCB;
     private JTextField magickDirTF;
+    private JCheckBox nativeChoosersCB;
     private JCheckBox experimentalCB;
 
     // the panel is re-created every time, but the last selected tab
@@ -93,11 +95,13 @@ public class PreferencesPanel extends JPanel {
         addUndoLevelsChooser(gbh);
         addThumbSizeChooser(gbh);
         addMagickDirField(gbh);
+        addNativeChoosersCB(gbh);
         addExperimentalCB(gbh);
 
         generalPanel.setBorder(EMPTY_BORDER);
         return generalPanel;
     }
+
 
     private void addLanguageChooser(GridBagHelper gbh) {
         var languages = new EnumComboBoxModel<>(Language.class);
@@ -180,6 +184,12 @@ public class PreferencesPanel extends JPanel {
         // don't let the textfield grow too large
         magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
+    }
+
+    private void addNativeChoosersCB(GridBagHelper gbh) {
+        nativeChoosersCB = new JCheckBox("", FileChoosers.useNativeDialogs());
+        // no action listener, set only when OK is pressed
+        gbh.addLabelAndControl("Use System File Choosers:", nativeChoosersCB);
     }
 
     private void addExperimentalCB(GridBagHelper gbh) {
@@ -310,6 +320,7 @@ public class PreferencesPanel extends JPanel {
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         AppPreferences.magickDirName = magickDirName;
+        FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
 
         return true;
     }
