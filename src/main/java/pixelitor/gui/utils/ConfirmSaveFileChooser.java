@@ -49,11 +49,7 @@ public class ConfirmSaveFileChooser extends JFileChooser {
             // this can happen when exporting with an "all files"
             // file filter, because then getSelectedFile() won't
             // automatically add an extension based on the file filter.
-            String msg = """
-                The file name has no extension.
-                An extension (such as ".png") must be added at the end,
-                because the file format depends on it.""";
-            JOptionPane.showMessageDialog(this, msg, "No File Extension", JOptionPane.ERROR_MESSAGE);
+            Dialogs.showNoExtensionDialog(this);
             return;
         }
 
@@ -73,7 +69,7 @@ public class ConfirmSaveFileChooser extends JFileChooser {
         super.approveSelection();
     }
 
-    // an incomplete check but it should cover the most common cases
+    // an incomplete check, but it should cover the most common cases
     private boolean invalidFileName(String fileName) {
         for (char ch : INVALID_CHARACTERS) {
             if (fileName.indexOf(ch) != -1) {

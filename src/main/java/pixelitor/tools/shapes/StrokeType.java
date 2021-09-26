@@ -48,7 +48,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, ZIGZAG("Zigzag", false) {
@@ -66,7 +66,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return specifiedWidth / 2;
         }
     }, WOBBLE("Wobble", true) {
@@ -97,7 +97,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
     }, CHARCOAL("Charcoal (can be slow!)", true) {
@@ -107,7 +107,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, BRISTLE("Bristle (can be slow!)", true) {
@@ -117,7 +117,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, OUTLINE("Outline", false) {
@@ -134,7 +134,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, CALLIGRAPHY("Calligraphy", false) {
@@ -144,7 +144,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, SHAPE("Shape", false) {
@@ -155,8 +155,7 @@ public enum StrokeType {
         }
 
         @Override
-        public Stroke createStroke(StrokeParam param) {
-            int width = param.getStrokeWidth();
+        public Stroke createStroke(StrokeParam param, float width) {
             float[] dashFloats = param.getDashFloats(width);
             float advance = width * 1.2f;
             if (dashFloats != null) {
@@ -168,7 +167,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     },
@@ -179,7 +178,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     }, TAPERING_REV("Reversed Tapering", false) {
@@ -189,7 +188,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraThickness(int specifiedWidth) {
+        public float getExtraThickness(float specifiedWidth) {
             return 0;
         }
     };
@@ -216,8 +215,7 @@ public enum StrokeType {
 
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
 
-    public Stroke createStroke(StrokeParam param) {
-        int width = param.getStrokeWidth();
+    public Stroke createStroke(StrokeParam param, float width) {
         int cap = param.getStrokeCapParam().getSelected().getValue();
         int join = param.getStrokeJoinParam().getSelected().getValue();
         float[] dashFloats = param.getDashFloats(width);
@@ -232,7 +230,7 @@ public enum StrokeType {
      * Return the real thickness (for the undo), which can be bigger
      * than the specified width.
      */
-    public abstract int getExtraThickness(int specifiedWidth);
+    public abstract float getExtraThickness(float specifiedWidth);
 
     public static EnumParam<StrokeType> asParam() {
         return new EnumParam<>(NAME, StrokeType.class);

@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.tools.shapes.*;
 import pixelitor.utils.debug.DebugNode;
@@ -98,8 +99,9 @@ public class StrokeParam extends AbstractFilterParam {
         return shapeTypeParam.getSelected();
     }
 
-    public int getStrokeWidth() {
-        return strokeWidthParam.getValue();
+    public float getStrokeWidth() {
+        float paramValue = strokeWidthParam.getValueAsFloat();
+        return paramValue;
     }
 
     public StrokeType getStrokeType() {
@@ -117,7 +119,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public Stroke createStroke() {
-        return getStrokeType().createStroke(this);
+        return getStrokeType().createStroke(this, getStrokeWidth());
     }
 
     public float[] getDashFloats(float strokeWidth) {
@@ -133,14 +135,15 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public Stroke createStrokeWithRandomWidth(Random random, float randomness) {
-        float strokeWidth = strokeWidthParam.getValueAsFloat();
-        strokeWidth += strokeWidth * randomness * random.nextFloat();
+        assert randomness != 0.0f;
 
-        return getStrokeType().createStroke(
-            strokeWidth,
-            strokeCapParam.getSelected().getValue(),
-            strokeJoinParam.getSelected().getValue(),
-            getDashFloats(strokeWidth));
+        float origStrokeWidth = strokeWidthParam.getValueAsFloat();
+        // the value of the effective stroke width should be
+        // between 50% and 150% of the gui setting
+        float randomStrokeWidth = origStrokeWidth / 2.0f + origStrokeWidth * random.nextFloat();
+        float strokeWidth = ImageMath.lerp(randomness, origStrokeWidth, randomStrokeWidth);
+
+        return getStrokeType().createStroke(this, strokeWidth);
     }
 
     @Override

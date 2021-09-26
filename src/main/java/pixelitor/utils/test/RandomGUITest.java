@@ -73,6 +73,7 @@ import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.utils.QuadrantAngle.*;
 
@@ -157,6 +158,7 @@ public class RandomGUITest {
             public void onClick() {
                 System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                     EXIT_KEY_CHAR);
+                // no need to reset the GUI here, because preferences won't be saved
                 System.exit(1);
             }
         });
@@ -327,9 +329,14 @@ public class RandomGUITest {
     }
 
     private static void finishRunning() {
-        WorkSpace.resetDefaults(PixelitorWindow.get());
-        PixelitorWindow.get().setAlwaysOnTop(false);
+        resetGUI();
         running = false;
+    }
+
+    private static void resetGUI() {
+        WorkSpace.resetDefaults(PixelitorWindow.get());
+        resetTabsUI();
+        PixelitorWindow.get().setAlwaysOnTop(false);
     }
 
     private static void log(String msg) {
@@ -1150,6 +1157,12 @@ public class RandomGUITest {
         var pw = PixelitorWindow.get();
         pw.dispatchEvent(new KeyEvent(pw, KEY_PRESSED,
             System.currentTimeMillis(), mask, keyCode, keyChar));
+    }
+
+    private static void resetTabsUI() {
+        if (ImageArea.currentModeIs(FRAMES)) {
+            ImageArea.changeUI();
+        }
     }
 
     private static void setupWeightedCaller(Robot r) {

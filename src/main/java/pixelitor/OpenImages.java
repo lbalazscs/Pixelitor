@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenImageEnabledAction;
@@ -188,7 +189,10 @@ public class OpenImages {
         Tools.editedObjectChanged(comp.getActiveLayer());
 
         Layers.activeCompChanged(comp, true);
-        Tools.setupMaskEditing(comp.getActiveLayer().isMaskEditing());
+
+        boolean maskEditing = view.getMaskViewMode().editMask();
+        Tools.setupMaskEditing(maskEditing);
+        FgBgColors.setLayerMaskEditing(maskEditing);
 
         ZoomMenu.zoomChanged(view.getZoomLevel());
 

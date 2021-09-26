@@ -260,7 +260,7 @@ public class Shapes {
                     coords[0], coords[1], coords[2], coords[3]);
                 case SEG_CUBICTO -> format("C %.2f,%.2f,%.2f,%.2f,%.2f,%.2f ",
                     coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-                case SEG_CLOSE -> "Z";
+                case SEG_CLOSE -> "Z ";
                 default -> throw new IllegalArgumentException("type = " + type);
             });
             pathIterator.next();

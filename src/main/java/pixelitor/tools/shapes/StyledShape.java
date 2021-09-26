@@ -262,8 +262,14 @@ public class StyledShape implements Cloneable, Transformable {
         this.effects = effects;
     }
 
-    private void changeTypeInBox(ShapesTool tool) {
+    private void changeTypeInBox(ShapesTool tool, String editName) {
         assert insideBox;
+
+        if (origDrag == null) {
+            throw new IllegalStateException("no origDrag, insideBox = " + insideBox
+                                            + ", edit = " + editName);
+        }
+
         ShapeType selectedType = tool.getSelectedType();
         setType(selectedType, tool);
 
@@ -367,7 +373,7 @@ public class StyledShape implements Cloneable, Transformable {
         Drawable dr = comp.getActiveDrawable();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
-            int thickness = calcThickness(tool);
+            int thickness = 1 + (int) calcThickness(tool);
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
@@ -419,9 +425,9 @@ public class StyledShape implements Cloneable, Transformable {
     /**
      * Calculate the extra thickness around the shape for the undo area
      */
-    private int calcThickness(ShapesTool tool) {
-        int thickness = 0;
-        int extraStrokeThickness = 0;
+    private float calcThickness(ShapesTool tool) {
+        float thickness = 0;
+        float extraStrokeThickness = 0;
         if (hasStroke()) {
             StrokeParam strokeParam = tool.getStrokeParam();
 
@@ -461,8 +467,10 @@ public class StyledShape implements Cloneable, Transformable {
         // calculate the new transformed shape
         switch (editName) {
             case ShapesTool.CHANGE_SHAPE_TYPE -> {
-                changeTypeInBox(tool);
-                box.applyTransform();
+                if (box != null) {
+                    changeTypeInBox(tool, editName);
+                    box.applyTransform();
+                }
             }
             case ShapesTool.CHANGE_SHAPE_FILL -> setFillPaintType(tool.getSelectedFillPaint());
             case ShapesTool.CHANGE_SHAPE_STROKE -> setStrokePaintType(tool.getSelectedStrokePaint());

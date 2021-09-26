@@ -362,8 +362,21 @@ public class Dialogs {
     public static void showFileNotReadableError(Component parent, File f) {
         showErrorDialog(parent, "File not readable",
             "<html>The file <b>" + f.getAbsolutePath()
-                + " </b> isn't readable. " +
-                "<br>Change the file's permissions and try again."
+            + " </b> isn't readable. " +
+            "<br>Change the file's permissions and try again."
         );
+    }
+
+    public static void showNoExtensionDialog(JComponent parent) {
+        String title = "No File Extension";
+        String msg = """
+            The file name has no extension.
+            An extension (such as ".png") must be added at the end,
+            because the file format depends on it.""";
+        if (parent == null) {
+            showMessageDialog(getMainWindow(), msg, title, ERROR_MESSAGE);
+        } else {
+            showMessageDialog(parent, msg, title, ERROR_MESSAGE);
+        }
     }
 }

@@ -22,10 +22,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.io.DecodingException;
-import pixelitor.io.FileChoosers;
-import pixelitor.io.FileUtils;
-import pixelitor.io.IO;
+import pixelitor.io.*;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 
@@ -35,7 +32,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.OpenImages.getActiveComp;
@@ -64,7 +60,7 @@ public class ImageMagick {
 
         Composition comp = getActiveComp();
         BufferedImage image = comp.getCompositeImage();
-        File file = FileChoosers.getAnySaveFile(comp);
+        File file = FileChoosers.showSaveDialog(FileChooserInfo.forMagickExport(comp));
         if (file == null) { // canceled
             return;
         }
@@ -96,11 +92,11 @@ public class ImageMagick {
     }
 
     private static ExportSettings settingsFromExtension(File file) {
-        Optional<String> ext = FileUtils.findExtension(file.getName());
-        if (ext.isEmpty()) {
+        String ext = FileUtils.calcExtension(file.getName());
+        if (ext == null) {
             return ExportSettings.DEFAULTS;
         }
-        return switch (ext.get().toLowerCase()) {
+        return switch (ext.toLowerCase()) {
             case "png" -> PNGExportSettingsPanel.INSTANCE;
             case "webp" -> WebpExportSettingsPanel.INSTANCE;
             default -> ExportSettings.DEFAULTS;

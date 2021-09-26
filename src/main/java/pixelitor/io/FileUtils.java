@@ -41,12 +41,16 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static Optional<String> findExtension(String fileName) {
+    public static String calcExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(fileName.substring(lastIndex + 1));
+        return fileName.substring(lastIndex + 1);
+    }
+
+    public static Optional<String> findExtension(String fileName) {
+        return Optional.ofNullable(calcExtension(fileName));
     }
 
     public static boolean hasExtension(String fileName) {

@@ -448,8 +448,7 @@ public class ShapesTool extends DragTool {
 
     private void regenerateShape(String editName) {
         if (styledShape != null) {
-            assert transformBox != null;
-
+            // the transform box still can be null!
             DrawableAction.run(editName,
                 dr -> styledShape.regenerate(transformBox, this, editName));
         }

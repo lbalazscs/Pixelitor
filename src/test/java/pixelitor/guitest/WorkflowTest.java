@@ -195,6 +195,9 @@ public class WorkflowTest {
         app.drawGradient("Radial");
         app.runMenuCommand("Close");
 
+        app.runFilterWithDialog("Magnify",
+            Randomize.NO, Reseed.NO, ShowOriginal.NO, false, null);
+
         loadReferenceImage("wf2_reference.pxc");
     }
 

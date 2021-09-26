@@ -276,15 +276,9 @@ public class IO {
     }
 
     public static void saveJpegWithQuality(JpegInfo jpegInfo) {
-        try {
-            FileChoosers.initSaveChooser();
-            FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
-
-            var comp = OpenImages.getActiveComp();
-            FileChoosers.showSaveChooserAndSaveComp(comp, comp.getFileNameWithExt("jpg"), jpegInfo);
-        } finally {
-            FileChoosers.setDefaultSaveExtensions();
-        }
+        var comp = OpenImages.getActiveComp();
+        FileChoosers.saveWithSingleAllowedExtension(comp,
+            comp.getFileNameWithExt("jpg"), jpegInfo, FileChoosers.jpegFilter);
     }
 
     static void saveToChosenFile(Composition comp, File file,
@@ -303,8 +297,11 @@ public class IO {
         comp.saveAsync(settings, true);
     }
 
-    public static void saveSVG(Shape shape, StrokeParam strokeParam) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(null, "shape.svg", svgFilter);
+    public static void saveSVG(Shape shape, StrokeParam strokeParam, String suggestedFileName) {
+        File file = FileChoosers.selectSaveFileForSpecificFormat(suggestedFileName, svgFilter);
+        if (file == null) { // save file dialog cancelled
+            return;
+        }
 
         boolean exportFilled = false;
         if (strokeParam != null) {
@@ -354,5 +351,6 @@ public class IO {
         } catch (FileNotFoundException e) {
             Messages.showException(e);
         }
+        Messages.showFileSavedMessage(file);
     }
 }

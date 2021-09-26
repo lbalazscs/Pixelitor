@@ -275,6 +275,6 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     }
 
     private void exportSVG() {
-        IO.saveSVG(exportedShape, strokeParam);
+        IO.saveSVG(exportedShape, strokeParam, getName() + ".svg");
     }
 }

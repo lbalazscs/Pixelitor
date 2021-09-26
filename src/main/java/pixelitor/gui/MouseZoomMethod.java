@@ -40,8 +40,8 @@ public enum MouseZoomMethod {
         }
 
         @Override
-        public void installOnJComponent(JComponent navigator, View view) {
-            navigator.addMouseWheelListener(e -> {
+        public void installOnJComponent(JComponent component, View view) {
+            component.addMouseWheelListener(e -> {
                 if (e.getWheelRotation() < 0) { // up, away from the user
                     // this.view will be always the active image...
                     if (view != null) { // ...and it is null if all images are closed
@@ -101,7 +101,7 @@ public enum MouseZoomMethod {
 
     public abstract void installOnView(View view);
 
-    public abstract void installOnJComponent(JComponent navigator, View view);
+    public abstract void installOnJComponent(JComponent component, View view);
 
     private static void removeExistingListeners(JComponent c) {
         var existingListeners = c.getMouseWheelListeners();

@@ -92,9 +92,8 @@ public class Navigator extends JComponent
         OpenImages.addActivationListener(this);
 
         addNavigatorResizedListener();
-        addMouseWheelZoomingSupport();
+        addZoomingSupport();
 
-        ZoomMenu.setupZoomKeys(this);
         addPopupMenu();
     }
 
@@ -159,8 +158,9 @@ public class Navigator extends JComponent
         });
     }
 
-    private void addMouseWheelZoomingSupport() {
+    private void addZoomingSupport() {
         MouseZoomMethod.CURRENT.installOnJComponent(this, view);
+        ZoomMenu.setupZoomKeys(this);
     }
 
     public static void showInDialog() {

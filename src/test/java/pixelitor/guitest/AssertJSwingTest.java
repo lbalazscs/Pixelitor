@@ -43,10 +43,7 @@ import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.history.History;
-import pixelitor.io.Dirs;
-import pixelitor.io.FileFormat;
-import pixelitor.io.FileUtils;
-import pixelitor.io.IOTasks;
+import pixelitor.io.*;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
@@ -163,6 +160,11 @@ public class AssertJSwingTest {
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
 
+        if (EDT.call(FileChoosers::useNativeDialogs)) {
+            System.out.println("AssertJSwingTest::AssertJSwingTest: native dialogs, exiting");
+            System.exit(0);
+        }
+
         boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
             app.runSlowly();
@@ -173,8 +175,8 @@ public class AssertJSwingTest {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
             System.out.println("Quick = " + quick
-                + ", target = " + target
-                + ", mask modes = " + Arrays.toString(maskModes));
+                               + ", target = " + target
+                               + ", mask modes = " + Arrays.toString(maskModes));
 
             for (int i = 0; i < maskModes.length; i++) {
                 MaskMode mode = maskModes[i];
@@ -229,7 +231,7 @@ public class AssertJSwingTest {
             target = TestTarget.valueOf(targetProp.toUpperCase());
         } catch (IllegalArgumentException e) {
             String msg = "Target " + targetProp.toUpperCase() + " not found.\n" +
-                "Available targets: " + Arrays.toString(TestTarget.values());
+                         "Available targets: " + Arrays.toString(TestTarget.values());
             System.err.println(msg);
             System.exit(1);
         }
@@ -249,7 +251,7 @@ public class AssertJSwingTest {
                 mode = MaskMode.valueOf(maskMode.toUpperCase());
             } catch (IllegalArgumentException e) {
                 String msg = "Mask mode " + maskMode.toUpperCase() + " not found.\n" +
-                    "Available mask modes: " + Arrays.toString(MaskMode.values());
+                             "Available mask modes: " + Arrays.toString(MaskMode.values());
                 System.err.println(msg);
                 System.exit(1);
             }
@@ -1198,7 +1200,7 @@ public class AssertJSwingTest {
 
         runMenuCommand("Show Metadata...");
         var dialog = findDialogByTitle("Metadata for "
-            + EDT.active(Composition::getName));
+                                       + EDT.active(Composition::getName));
 
         dialog.button("expandButton").click();
         dialog.button("collapseButton").click();
@@ -3005,7 +3007,7 @@ public class AssertJSwingTest {
             cleanerScriptExt = ".sh";
         }
         cleanerScript = new File(baseTestingDir + File.separator
-            + "0000_clean_outputs" + cleanerScriptExt);
+                                 + "0000_clean_outputs" + cleanerScriptExt);
 
         if (!cleanerScript.exists()) {
             System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
@@ -3070,8 +3072,8 @@ public class AssertJSwingTest {
             System.out.print("    ");
         }
         System.out.println(getCurrentTimeHM() + ": " + msg
-            + " (" + maskMode + ", "
-            + ImageArea.getMode() + ")");
+                           + " (" + maskMode + ", "
+                           + ImageArea.getMode() + ")");
     }
 
     private DialogFixture findDialogByTitle(String title) {

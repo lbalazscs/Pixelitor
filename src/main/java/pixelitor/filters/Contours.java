@@ -62,4 +62,9 @@ public class Contours extends ParametrizedFilter {
 
         return dest;
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

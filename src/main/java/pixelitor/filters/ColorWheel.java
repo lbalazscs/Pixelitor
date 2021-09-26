@@ -27,7 +27,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
@@ -45,10 +45,9 @@ public class ColorWheel extends ParametrizedFilter {
             }
         },
         HSL {
-            final int[] buffer = new int[3];
-
             @Override
             int toRGB(float a, float b, float c) {
+                int[] buffer = new int[3];
                 ColorUtilities.HSLtoRGB((a - (float) Math.floor(a)), b, c, buffer);
                 return 0xff000000 | (buffer[0] << 16) | (buffer[1] << 8) | (buffer[2]);
             }

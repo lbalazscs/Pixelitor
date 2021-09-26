@@ -30,7 +30,6 @@ public abstract class RotatedEffectFilter extends TransformFilter {
     private double sin = 0;
     private double cos = 1;
 
-
     protected RotatedEffectFilter(String filterName) {
         super(filterName);
     }
@@ -82,15 +81,9 @@ public abstract class RotatedEffectFilter extends TransformFilter {
 
     protected abstract void transformInverseUnRotated(double x, double y, double[] out);
 
-//    protected abstract double transformX(double ii, double jj);
-//
-//    protected abstract double transformY(double ii, double jj);
-
     public void setAngle(double angle) {
         this.angle = angle;
-        if (angle != 0) {
-            cos = FastMath.cos(angle);
-            sin = FastMath.sin(angle);
-        }
+        cos = FastMath.cos(angle);
+        sin = FastMath.sin(angle);
     }
 }
