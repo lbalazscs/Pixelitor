@@ -19,6 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.RippleFilter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 
@@ -33,6 +34,7 @@ public class JHWaves extends ParametrizedFilter {
     private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 20, 200);
     private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 10, 200);
     private final GroupedRangeParam phaseParam = new GroupedRangeParam("Phase (Time)", 0, 0, 100, false);
+    private final AngleParam angleParam = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
@@ -47,6 +49,7 @@ public class JHWaves extends ParametrizedFilter {
             wavelengthParam.withAdjustedRange(0.2).withDecimalPlaces(1),
             amplitudeParam.withAdjustedRange(0.2),
             phaseParam,
+            angleParam,
             edgeAction,
             interpolation
         );
@@ -72,6 +75,7 @@ public class JHWaves extends ParametrizedFilter {
         filter.setXWavelength(xWavelength);
         filter.setYAmplitude(yAmplitude);
         filter.setYWavelength(yWavelength);
+        filter.setAngle(angleParam.getValueInIntuitiveRadians());
         filter.setWaveType(waveType.getValue());
         filter.setPhaseX(phaseParam.getValueAsPercentage(0));
         filter.setPhaseY(phaseParam.getValueAsPercentage(1));

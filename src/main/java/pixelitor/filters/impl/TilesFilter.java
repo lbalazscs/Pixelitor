@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,13 +54,9 @@ public class TilesFilter extends RotatedEffectFilter {
     }
 
     @Override
-    protected double transformX(double ii, double jj) {
-        return ii + curvatureX * tan(ii * sizeX - shiftX / (double) sizeX);
-    }
-
-    @Override
-    protected double transformY(double ii, double jj) {
-        return jj + curvatureY * tan(jj * sizeY - shiftY / (double) sizeY);
+    protected void transformInverseUnRotated(double x, double y, double[] out) {
+        out[0] = x + curvatureX * tan(x * sizeX - shiftX / (double) sizeX);
+        out[1] = y + curvatureY * tan(y * sizeY - shiftY / (double) sizeY);
     }
 
     public void setShiftX(float shiftX) {

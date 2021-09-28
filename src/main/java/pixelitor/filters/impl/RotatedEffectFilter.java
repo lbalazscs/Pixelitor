@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ public abstract class RotatedEffectFilter extends TransformFilter {
     private double sin = 0;
     private double cos = 1;
 
+
     protected RotatedEffectFilter(String filterName) {
         super(filterName);
     }
@@ -57,8 +58,12 @@ public abstract class RotatedEffectFilter extends TransformFilter {
             jj = j;
         }
 
-        double sampleX = transformX(ii, jj);
-        double sampleY = transformY(ii, jj);
+        // not a field, because this is multithreaded
+        double[] twoDoubles = new double[2];
+
+        transformInverseUnRotated(ii, jj, twoDoubles);
+        double sampleX = twoDoubles[0];
+        double sampleY = twoDoubles[1];
 
         // So far we have rotated both the effect and the background.
         // Now rotate the background back.
@@ -75,9 +80,11 @@ public abstract class RotatedEffectFilter extends TransformFilter {
         out[1] = (float) (halfHeight + sampleYY);
     }
 
-    protected abstract double transformX(double ii, double jj);
+    protected abstract void transformInverseUnRotated(double x, double y, double[] out);
 
-    protected abstract double transformY(double ii, double jj);
+//    protected abstract double transformX(double ii, double jj);
+//
+//    protected abstract double transformY(double ii, double jj);
 
     public void setAngle(double angle) {
         this.angle = angle;

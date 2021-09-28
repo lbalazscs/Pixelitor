@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,13 +33,9 @@ public class SliceFilter extends RotatedEffectFilter {
     }
 
     @Override
-    protected double transformX(double ii, double jj) {
-        return (float) (ii + calcShift(jj, shiftVertical));
-    }
-
-    @Override
-    protected double transformY(double ii, double jj) {
-        return jj + calcShift(ii, shiftHorizontal);
+    protected void transformInverseUnRotated(double x, double y, double[] out) {
+        out[0] = x + calcShift(y, shiftVertical);
+        out[1] = y + calcShift(x, shiftHorizontal);
     }
 
     private double calcShift(double coord, double shift) {

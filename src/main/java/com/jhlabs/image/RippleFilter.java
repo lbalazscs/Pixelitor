@@ -18,6 +18,7 @@ package com.jhlabs.image;
 
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
+import pixelitor.filters.impl.RotatedEffectFilter;
 
 import java.awt.Rectangle;
 
@@ -26,7 +27,7 @@ import java.awt.Rectangle;
  * The amplitude and wavelength of rippling can be specified as well as whether
  * pixels going off the edges are wrapped or not.
  */
-public class RippleFilter extends TransformFilter {
+public class RippleFilter extends RotatedEffectFilter {
     private float xAmplitude, yAmplitude;
     private float xWavelength, yWavelength;
     private int waveType;
@@ -157,10 +158,10 @@ public class RippleFilter extends TransformFilter {
     }
 
     @Override
-    protected void transformInverse(int x, int y, float[] out) {
-        float nx = y / xWavelength;
-        float ny = x / yWavelength;
-        float fx, fy;
+    protected void transformInverseUnRotated(double x, double y, double[] out) {
+        double nx = y / xWavelength;
+        double ny = x / yWavelength;
+        double fx, fy;
         switch (waveType) {
             case WaveType.SINE:
             default:
@@ -176,8 +177,8 @@ public class RippleFilter extends TransformFilter {
                 fy = ImageMath.sinLikeTriangle(ny - phaseX);
                 break;
             case WaveType.NOISE:
-                fx = Noise.sinLikeNoise1(nx - phaseY);
-                fy = Noise.sinLikeNoise1(ny - phaseX);
+                fx = Noise.sinLikeNoise1((float) (nx - phaseY));
+                fy = Noise.sinLikeNoise1((float) (ny - phaseX));
                 break;
         }
         out[0] = x + xAmplitude * fx;
