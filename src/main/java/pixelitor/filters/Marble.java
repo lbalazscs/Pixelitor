@@ -50,6 +50,7 @@ public class Marble extends ParametrizedFilter {
     private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Lines", Impl.TYPE_LINES),
         new Item("Rings", Impl.TYPE_RINGS),
+        new Item("Spiral", Impl.TYPE_SPIRAL),
         new Item("Grid", Impl.TYPE_GRID),
         new Item("Star", Impl.TYPE_STAR),
     });
@@ -117,10 +118,11 @@ public class Marble extends ParametrizedFilter {
         private static final int TYPE_LINES = 1;
         private static final int TYPE_GRID = 2;
         private static final int TYPE_RINGS = 3;
-        private static final int TYPE_STAR = 4;
+        private static final int TYPE_SPIRAL = 4;
+        private static final int TYPE_STAR = 5;
 
         private float m00, m01, m10, m11;
-        private float rotAngle;
+        private double rotAngle;
 
         private float zoom = 200;
         private float detailsStrength;
@@ -161,7 +163,7 @@ public class Marble extends ParametrizedFilter {
             this.waveType = waveType;
         }
 
-        public void setAngle(float angle) {
+        public void setAngle(double angle) {
             rotAngle = angle;
             float cos = (float) cos(angle);
             float sin = (float) sin(angle);
@@ -203,6 +205,7 @@ public class Marble extends ParametrizedFilter {
                 case TYPE_LINES -> calcLinesColor(nx, f);
                 case TYPE_GRID -> calcGridColor(nx, ny, f);
                 case TYPE_RINGS -> calcRingsColor(dy, dx, f);
+                case TYPE_SPIRAL -> calcSpiralColor(dy, dx, f);
                 case TYPE_STAR -> calcStarColor(dy, dx, f);
                 default -> throw new IllegalStateException();
             };
@@ -232,9 +235,17 @@ public class Marble extends ParametrizedFilter {
             return (float) wave01(f, waveType);
         }
 
+        private float calcSpiralColor(double dy, double dx, float f) {
+            float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
+            double pixelAngle = atan2(dy, dx);
+            f += (dist + pixelAngle - rotAngle);
+
+            return (float) wave01(f, waveType);
+        }
+
         private float calcStarColor(double dy, double dx, float f) {
-            float pixelAngle = (float) atan2(dy, dx);
-            f += (pixelAngle - rotAngle) * 10.0f;
+            double pixelAngle = atan2(dy, dx);
+            f += ((pixelAngle - rotAngle) * 10.0);
             return (float) ((1 + wave(f, waveType)) / 2);
         }
 
