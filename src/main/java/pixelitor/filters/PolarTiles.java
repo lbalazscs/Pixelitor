@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
@@ -30,6 +31,11 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 public class PolarTiles extends ParametrizedFilter {
     public static final String NAME = "Polar Glass Tiles";
 
+    private final IntChoiceParam modeParam = new IntChoiceParam("Type", new Item[]{
+        new Item("Concentric", PolarTilesFilter.MODE_CONCENTRIC),
+        new Item("Spiral", PolarTilesFilter.MODE_SPIRAL),
+        new Item("Vortex", PolarTilesFilter.MODE_VORTEX),
+    });
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam numAngDivisions = new RangeParam("Angular Divisions", 0, 7, 100);
     private final RangeParam numRadDivisions = new RangeParam("Radial Divisions", 0, 7, 50);
@@ -51,6 +57,7 @@ public class PolarTiles extends ParametrizedFilter {
         var reseedRandomness = reseedNoise("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
         setParams(
+            modeParam,
             center,
             numAngDivisions,
             numRadDivisions,
@@ -69,12 +76,13 @@ public class PolarTiles extends ParametrizedFilter {
             filter = new PolarTilesFilter();
         }
 
+        filter.setMode(modeParam.getValue());
         filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());
         filter.setZoom(zoom.getPercentageValF());
-        filter.setT(rotateEffect.getPercentageValF());
+        filter.setRotateEffect(rotateEffect.getPercentageValF());
         filter.setNumADivisions(numAngDivisions.getValue());
         filter.setNumRDivisions(numRadDivisions.getValue());
         filter.setCurvature(curvature.getValueAsDouble());

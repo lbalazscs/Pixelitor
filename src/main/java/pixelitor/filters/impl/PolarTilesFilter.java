@@ -27,10 +27,15 @@ public class PolarTilesFilter extends CenteredTransformFilter {
     private float zoom;
     private double rotateResult;
     private float curvature;
-    private double t;
+    private double rotateEffect;
     private int numADivisions;
     private int numRDivisions;
     private float randomness;
+
+    public static final int MODE_CONCENTRIC = 0;
+    public static final int MODE_SPIRAL = 1;
+    public static final int MODE_VORTEX = 2;
+    private int mode = MODE_CONCENTRIC;
 
     public PolarTilesFilter() {
         super(PolarTiles.NAME);
@@ -48,14 +53,23 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         }
 
         double r = Math.sqrt(dx * dx + dy * dy);
+        double rr = r;
+        if (mode != MODE_CONCENTRIC) {
+            double spiralCorr = srcWidth * (Math.PI + angle + rotateEffect) / (4 * Math.PI);
+            if (mode == MODE_SPIRAL) {
+                spiralCorr /= numRDivisions;
+            }
+            rr += spiralCorr;
+        }
+
         if (numADivisions > 0) {
-            double tan = FastMath.tan(randomShift + t + angle * numADivisions / 2);
+            double tan = FastMath.tan(randomShift + rotateEffect + angle * numADivisions / 2);
             double angleShift = tan * curvature * (numADivisions / 4.0) / r;
             angle += angleShift;
         }
 
         if (numRDivisions > 0) {
-            double tan = FastMath.tan(3 * randomShift + r / srcWidth * 2 * Math.PI * numRDivisions);
+            double tan = FastMath.tan(3 * randomShift + rr / srcWidth * 2 * Math.PI * numRDivisions);
             double rShift = tan * numRDivisions * curvature / 2;
             r += rShift;
         }
@@ -78,8 +92,8 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         this.rotateResult = rotateResult;
     }
 
-    public void setT(double t) {
-        this.t = Math.PI * t;
+    public void setRotateEffect(double rotateEffect) {
+        this.rotateEffect = Math.PI * rotateEffect;
     }
 
     public void setNumADivisions(int numADivisions) {
@@ -96,5 +110,9 @@ public class PolarTilesFilter extends CenteredTransformFilter {
 
     public void setRandomness(float randomness) {
         this.randomness = (float) (randomness * Math.PI);
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 }
