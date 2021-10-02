@@ -1443,6 +1443,16 @@ public class Shapes {
      * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
      */
     public static Path2D smoothConnect(List<Point2D> points) {
+        Path2D.Double path = new Path2D.Double();
+
+        Point2D first = points.get(0);
+        path.moveTo(first.getX(), first.getY());
+
+        smoothConnect(points, path);
+        return path;
+    }
+
+    public static void smoothConnect(List<Point2D> points, Path2D.Double path) {
         int numPoints = points.size();
         if (numPoints <= 2) {
             throw new IllegalArgumentException("numPoints = " + numPoints);
@@ -1457,10 +1467,6 @@ public class Shapes {
             centers[i] = calcCenter(start, end);
             lengths[i] = distance(start, end);
         }
-
-        Path2D.Double path = new Path2D.Double();
-        Point2D first = points.get(0);
-        path.moveTo(first.getX(), first.getY());
 
         for (int i = 1; i < numPoints; i++) {
             Point2D start = points.get(i - 1);
@@ -1519,8 +1525,6 @@ public class Shapes {
 
             path.curveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, end.getX(), end.getY());
         }
-
-        return path;
     }
 
     /**

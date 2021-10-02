@@ -22,11 +22,16 @@ import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Shapes;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -42,15 +47,15 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class Starburst extends ParametrizedFilter {
     public static final String NAME = "Starburst";
+    private static final int SPIRAL_RESOLUTION = 100;
 
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
-
     private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final BooleanParam randomColors = new BooleanParam("Random Ray Colors", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
+    private final RangeParam spiralParam = new RangeParam("Spiral", -200, 0, 200);
 
     public Starburst() {
         super(false);
@@ -64,7 +69,8 @@ public class Starburst extends ParametrizedFilter {
             raysColor,
             randomColors.withAction(reseedColorsAction),
             center,
-            rotate
+            rotate,
+            spiralParam
         );
 
         // enable the "Reseed Colors" button only if
@@ -105,35 +111,48 @@ public class Starburst extends ParametrizedFilter {
 
         int numberOfRays = numberOfRaysParam.getValue();
 
-        double averageRayAngle = Math.PI / numberOfRays;
-        double angle = rotate.getValueInRadians();
+        double sliceWidthAngle = Math.PI / numberOfRays;
+        double sliceAngle = rotate.getValueInRadians();
 
         double radius = width + height; // should be enough even if the center is outside the image
+        double spiral = spiralParam.getPercentageValD();
 
         for (int i = 0; i < numberOfRays; i++) {
-            var triangle = new GeneralPath();
-            triangle.moveTo(cx, cy);
+            var slice = new Path2D.Double();
+            slice.moveTo(cx, cy);
 
-            double p1x = cx + radius * Math.cos(angle);
-            double p1y = cy + radius * Math.sin(angle);
+            if (spiral == 0) {
+                double p1x = cx + radius * Math.cos(sliceAngle);
+                double p1y = cy + radius * Math.sin(sliceAngle);
+                slice.lineTo(p1x, p1y);
+            } else {
+                List<Point2D> points = calcSpiralPathPoints(cx, cy,
+                    sliceAngle, radius, SPIRAL_RESOLUTION, spiral);
+                Shapes.smoothConnect(points, slice);
+            }
 
-            triangle.lineTo(p1x, p1y);
+            sliceAngle += sliceWidthAngle; // move to the slice's other side
 
-            angle += averageRayAngle;
-
-            double p2x = cx + radius * Math.cos(angle);
-            double p2y = cy + radius * Math.sin(angle);
-
-            angle += averageRayAngle; // increment again to leave out
-
-            triangle.lineTo(p2x, p2y);
-            triangle.closePath();
+            if (spiral == 0) {
+                double p2x = cx + radius * Math.cos(sliceAngle);
+                double p2y = cy + radius * Math.sin(sliceAngle);
+                slice.lineTo(p2x, p2y);
+            } else {
+                List<Point2D> points = calcSpiralPathPoints(cx, cy,
+                    sliceAngle, radius, SPIRAL_RESOLUTION, spiral);
+                Collections.reverse(points);
+                Point2D first = points.get(0);
+                slice.lineTo(first.getX(), first.getY());
+                Shapes.smoothConnect(points, slice);
+            }
+            slice.closePath();
 
             if (useRandomColors) {
                 g.setColor(Rnd.createRandomColor(rand, false));
             }
+            g.fill(slice);
 
-            g.fill(triangle);
+            sliceAngle += sliceWidthAngle; // leave out a slice
         }
 
         g.dispose();
@@ -143,5 +162,20 @@ public class Starburst extends ParametrizedFilter {
     @Override
     protected boolean createDefaultDestImg() {
         return false;
+    }
+
+    private static List<Point2D> calcSpiralPathPoints(double cx, double cy,
+                                                      double startAngle, double radius,
+                                                      int resolution, double spiral) {
+        List<Point2D> points = new ArrayList<>();
+        points.add(new Point2D.Double(cx, cy));
+        for (int j = 1; j <= resolution; j++) {
+            double r = j * radius / resolution;
+            double a = spiral * j / SPIRAL_RESOLUTION;
+            double x = cx + r * Math.cos(startAngle + a);
+            double y = cy + r * Math.sin(startAngle + a);
+            points.add(new Point2D.Double(x, y));
+        }
+        return points;
     }
 }
