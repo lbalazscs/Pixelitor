@@ -18,8 +18,10 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
+import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
+import pixelitor.menus.view.ZoomMenu;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
@@ -110,6 +112,10 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
         Tools.editedObjectChanged(dr.getLayer());
 
         FilterGUI gui = createGUI(dr, reset);
+
+        MouseZoomMethod.CURRENT.installOnJComponent(gui, dr.getComp().getView());
+        ZoomMenu.setupZoomKeys(gui);
+
         return new DialogBuilder()
             .title(getName())
             .menuBar(getMenuBar())

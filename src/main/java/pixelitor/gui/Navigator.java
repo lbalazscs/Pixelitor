@@ -160,7 +160,7 @@ public class Navigator extends JComponent
     }
 
     private void addMouseWheelZoomingSupport() {
-        MouseZoomMethod.CURRENT.installOnNavigator(this, view);
+        MouseZoomMethod.CURRENT.installOnJComponent(this, view);
     }
 
     public static void showInDialog() {
@@ -189,7 +189,7 @@ public class Navigator extends JComponent
         }
         assert navigatorPanel != null;
         assert navigatorPanel.view != null;
-        newZoomMethod.installOnNavigator(navigatorPanel, navigatorPanel.view);
+        newZoomMethod.installOnJComponent(navigatorPanel, navigatorPanel.view);
     }
 
     public void recalculateSize(View view,
@@ -324,7 +324,6 @@ public class Navigator extends JComponent
         if (targetBoxRect != null) {
             Shapes.drawVisibly(g2, targetBoxRect);
         }
-
     }
 
     @Override

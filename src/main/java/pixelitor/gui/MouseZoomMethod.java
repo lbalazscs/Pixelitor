@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public enum MouseZoomMethod {
         }
 
         @Override
-        public void installOnNavigator(JComponent navigator, View view) {
+        public void installOnJComponent(JComponent navigator, View view) {
             navigator.addMouseWheelListener(e -> {
                 if (e.getWheelRotation() < 0) { // up, away from the user
                     // this.view will be always the active image...
@@ -71,8 +71,8 @@ public enum MouseZoomMethod {
         }
 
         @Override
-        public void installOnNavigator(JComponent navigator, View view) {
-            navigator.addMouseWheelListener(e -> {
+        public void installOnJComponent(JComponent component, View view) {
+            component.addMouseWheelListener(e -> {
                 if (e.isControlDown()) {
                     if (e.getWheelRotation() < 0) { // up, away from the user
                         // this.view will be always the active image...
@@ -101,7 +101,7 @@ public enum MouseZoomMethod {
 
     public abstract void installOnView(View view);
 
-    public abstract void installOnNavigator(JComponent navigator, View view);
+    public abstract void installOnJComponent(JComponent navigator, View view);
 
     private static void removeExistingListeners(JComponent c) {
         var existingListeners = c.getMouseWheelListeners();
