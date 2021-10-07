@@ -30,6 +30,7 @@ import java.awt.geom.Path2D;
  */
 public class Spiral extends ShapeFilter {
     public static final String NAME = "Spiral";
+    private static final double LOG_PHI = 0.1;
 
     private static final int NUM_STEPS_PER_SPIN = 100;
     private static final int TYPE_CIRCULAR = 0;
@@ -41,8 +42,9 @@ public class Spiral extends ShapeFilter {
         new Item("Circular", TYPE_CIRCULAR),
         new Item("Polygon", TYPE_POLYGON)
     });
-    private final RangeParam sidesParam = new RangeParam("Sides", 3, 4, 10);
+    private final RangeParam sidesParam = new RangeParam("Polygon Sides", 3, 4, 10);
     private final BooleanParam symmetry = new BooleanParam("Symmetric", false);
+    private final BooleanParam log = new BooleanParam("Logarithmic", false);
     private final BooleanParam scale = new BooleanParam("Scale", true);
 
     public Spiral() {
@@ -51,6 +53,7 @@ public class Spiral extends ShapeFilter {
             typeParam,
             sidesParam,
             symmetry,
+            log,
             scale
         );
 
@@ -83,19 +86,38 @@ public class Spiral extends ShapeFilter {
             default -> throw new IllegalStateException("Unexpected value: " + typeParam.getValue());
         };
 
+        boolean logarithmic = log.isChecked();
         double a = 1.0 / maxAngle;
+        double maxCorr = 1;
+        if (logarithmic) {
+            maxCorr = FastMath.pow(Math.E, maxAngle * LOG_PHI);
+        }
 
         shape.moveTo(cx, cy);
         for (double t = dt; t < maxAngle; t += dt) {
-            double x = w * a * t * FastMath.cos(t) + cx;
-            double y = h * a * t * FastMath.sin(t) + cy;
+            double x, y;
+            if (logarithmic) {
+                double logCorr = FastMath.pow(Math.E, t * LOG_PHI) / maxCorr;
+                x = w * a * t * FastMath.cos(t) * logCorr + cx;
+                y = h * a * t * FastMath.sin(t) * logCorr + cy;
+            } else {
+                x = w * a * t * FastMath.cos(t) + cx;
+                y = h * a * t * FastMath.sin(t) + cy;
+            }
             shape.lineTo(x, y);
         }
         if (symmetry.isChecked()) {
             shape.moveTo(cx, cy);
             for (double t = dt; t < maxAngle; t += dt) {
-                double x = -w * a * t * FastMath.cos(t) + cx;
-                double y = -h * a * t * FastMath.sin(t) + cy;
+                double x, y;
+                if (logarithmic) {
+                    double logCorr = FastMath.pow(Math.E, t * LOG_PHI) / maxCorr;
+                    x = -w * a * t * FastMath.cos(t) * logCorr + cx;
+                    y = -h * a * t * FastMath.sin(t) * logCorr + cy;
+                } else {
+                    x = -w * a * t * FastMath.cos(t) + cx;
+                    y = -h * a * t * FastMath.sin(t) + cy;
+                }
                 shape.lineTo(x, y);
             }
         }
