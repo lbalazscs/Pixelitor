@@ -100,6 +100,9 @@ import static pixelitor.tools.DragToolState.TRANSFORM;
  * An automated GUI test which uses AssertJ-Swing.
  * This is not a unit test: the app as a whole is tested from the user
  * perspective, and depending on the configuration, it could run for hours.
+ * <p>
+ * Assertj-Swing requires using the following VM option:
+ * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class AssertJSwingTest {
     private static boolean quick = false;

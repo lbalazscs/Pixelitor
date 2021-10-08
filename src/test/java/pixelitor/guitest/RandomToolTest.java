@@ -70,6 +70,9 @@ import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 /**
  * A standalone program which tests the tools with randomly
  * generated assertj-swing GUI actions. Not a unit test.
+ * <p>
+ * Assertj-Swing requires using the following VM option:
+ * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class RandomToolTest {
     private File inputDir;

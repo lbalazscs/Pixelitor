@@ -26,7 +26,7 @@ import java.util.function.Function;
  * @param <V> the type of the successful result
  * @param <E> the type of the error details
  */
-public interface Result<V, E> {
+public sealed interface Result<V, E> {
     boolean isOK();
 
     V get();

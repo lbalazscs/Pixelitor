@@ -55,6 +55,9 @@ import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
  * image is created from scratch using a longer workflow, and then
  * it is visually compared to a reference image saved earlier.
  * It's not a unit test.
+ * <p>
+ * Assertj-Swing requires using the following VM option:
+ * --add-opens java.base/java.util=ALL-UNNAMED
  */
 public class WorkflowTest {
     private final AppRunner app;

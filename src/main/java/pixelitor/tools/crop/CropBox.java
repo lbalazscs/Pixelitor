@@ -26,7 +26,6 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
 
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -34,6 +33,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+
+import static java.awt.Cursor.*;
 
 /**
  * The cropping rectangle
@@ -55,7 +56,7 @@ public class CropBox implements ToolWidget {
     private final List<CropHandle> handles;
 
     private final PRectangle rect;
-    private int dragStartCursorType;
+    private int dragStartCursor;
     private Rectangle dragStartRect;
     private Point dragStart;
 
@@ -68,14 +69,14 @@ public class CropBox implements ToolWidget {
     public CropBox(PRectangle rect, View view) {
         this.rect = rect;
 
-        upperLeft = new CropHandle("NW", Cursor.NW_RESIZE_CURSOR, view);
-        upper = new CropHandle("N", Cursor.N_RESIZE_CURSOR, view);
-        upperRight = new CropHandle("NE", Cursor.NE_RESIZE_CURSOR, view);
-        right = new CropHandle("E", Cursor.E_RESIZE_CURSOR, view);
-        left = new CropHandle("W", Cursor.W_RESIZE_CURSOR, view);
-        lowerLeft = new CropHandle("SW", Cursor.SW_RESIZE_CURSOR, view);
-        lower = new CropHandle("S", Cursor.S_RESIZE_CURSOR, view);
-        lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, view);
+        upperLeft = new CropHandle("NW", NW_RESIZE_CURSOR, view);
+        upper = new CropHandle("N", N_RESIZE_CURSOR, view);
+        upperRight = new CropHandle("NE", NE_RESIZE_CURSOR, view);
+        right = new CropHandle("E", E_RESIZE_CURSOR, view);
+        left = new CropHandle("W", W_RESIZE_CURSOR, view);
+        lowerLeft = new CropHandle("SW", SW_RESIZE_CURSOR, view);
+        lower = new CropHandle("S", S_RESIZE_CURSOR, view);
+        lowerRight = new CropHandle("SE", SE_RESIZE_CURSOR, view);
 
         handles = List.of(upperLeft, upperRight, lowerRight, lowerLeft,
             right, upper, lower, left);
@@ -154,10 +155,10 @@ public class CropBox implements ToolWidget {
         View view = e.getView();
         dragStart = e.getPoint();
         dragStartRect = new Rectangle(rect.getCo());
-        dragStartCursorType = view.getCursor().getType();
+        dragStartCursor = view.getCursor().getType();
         aspectRatio = calcAspectRatio(rect.getCo());
 
-        if (isResizeMode(dragStartCursorType)) {
+        if (isResizeMode(dragStartCursor)) {
             // if user clicked on the handle allow resize it
             transformMode = MODE_RESIZE;
         } else if (rect.containsCo(e.getPoint())) {
@@ -179,10 +180,10 @@ public class CropBox implements ToolWidget {
             (int) (e.getCoY() - dragStart.y));
 
         if (transformMode == MODE_RESIZE) {
-            resize(rect.getCo(), dragStartCursorType, mouseOffset);
+            resize(rect.getCo(), dragStartCursor, mouseOffset);
 
             if (e.isShiftDown() && aspectRatio > 0) {
-                keepAspectRatio(rect.getCo(), dragStartCursorType, aspectRatio);
+                keepAspectRatio(rect.getCo(), dragStartCursor, aspectRatio);
             }
         } else if (transformMode == MODE_MOVE) {
             rect.getCo().translate(mouseOffset.x, mouseOffset.y);
@@ -282,60 +283,54 @@ public class CropBox implements ToolWidget {
         }
     }
 
-    private static boolean isResizeMode(int cursorType) {
-        switch (cursorType) {
-            case Cursor.NW_RESIZE_CURSOR:
-            case Cursor.SE_RESIZE_CURSOR:
-            case Cursor.SW_RESIZE_CURSOR:
-            case Cursor.NE_RESIZE_CURSOR:
-            case Cursor.N_RESIZE_CURSOR:
-            case Cursor.S_RESIZE_CURSOR:
-            case Cursor.E_RESIZE_CURSOR:
-            case Cursor.W_RESIZE_CURSOR:
-                return true;
-        }
-
-        return false;
+    private static boolean isResizeMode(int cursor) {
+        return switch (cursor) {
+            case NW_RESIZE_CURSOR, SE_RESIZE_CURSOR,
+                SW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
+                N_RESIZE_CURSOR, S_RESIZE_CURSOR,
+                E_RESIZE_CURSOR, W_RESIZE_CURSOR -> true;
+            default -> false;
+        };
     }
 
     /**
      * Recalculates the box position and size, according to the mouse offset and direction
      *
      * @param rect       rectangle to adjust
-     * @param cursorType user modification direction (N,S,W,E,NW,NE,SE,SW)
+     * @param cursor     user modification direction (N,S,W,E,NW,NE,SE,SW)
      * @param moveOffset the offset calculated as: mousePos - mouseStartPos
      */
-    public static void resize(Rectangle rect, int cursorType, Point moveOffset) {
+    public static void resize(Rectangle rect, int cursor, Point moveOffset) {
         int offsetX = moveOffset.x;
         int offsetY = moveOffset.y;
-        switch (cursorType) {
-            case Cursor.NW_RESIZE_CURSOR -> {
+        switch (cursor) {
+            case NW_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.height -= offsetY;
                 rect.x += offsetX;
                 rect.y += offsetY;
             }
-            case Cursor.SE_RESIZE_CURSOR -> {
+            case SE_RESIZE_CURSOR -> {
                 rect.width += offsetX;
                 rect.height += offsetY;
             }
-            case Cursor.SW_RESIZE_CURSOR -> {
+            case SW_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.height += offsetY;
                 rect.x += offsetX;
             }
-            case Cursor.NE_RESIZE_CURSOR -> {
+            case NE_RESIZE_CURSOR -> {
                 rect.width += offsetX;
                 rect.height -= offsetY;
                 rect.y += offsetY;
             }
-            case Cursor.N_RESIZE_CURSOR -> {
+            case N_RESIZE_CURSOR -> {
                 rect.height -= offsetY;
                 rect.y += offsetY;
             }
-            case Cursor.S_RESIZE_CURSOR -> rect.height += offsetY;
-            case Cursor.E_RESIZE_CURSOR -> rect.width += offsetX;
-            case Cursor.W_RESIZE_CURSOR -> {
+            case S_RESIZE_CURSOR -> rect.height += offsetY;
+            case E_RESIZE_CURSOR -> rect.width += offsetX;
+            case W_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.x += offsetX;
             }
@@ -347,50 +342,44 @@ public class CropBox implements ToolWidget {
      * Recalculates the x,y according to the drag direction.
      *
      * @param rect        rectangle to adjust
-     * @param cursorType  user modification direction (N,S,W,E,NW,NE,SE,SW)
+     * @param cursor      user modification direction (N,S,W,E,NW,NE,SE,SW)
      * @param aspectRatio aspect ratio of original rectangle. Required > 0
      */
-    public static void keepAspectRatio(Rectangle rect, int cursorType, double aspectRatio) {
-        switch (cursorType) {
-            case Cursor.NW_RESIZE_CURSOR:
-            case Cursor.NE_RESIZE_CURSOR:
-            case Cursor.SE_RESIZE_CURSOR:
-            case Cursor.SW_RESIZE_CURSOR:
+    public static void keepAspectRatio(Rectangle rect, int cursor, double aspectRatio) {
+        switch (cursor) {
+            case NW_RESIZE_CURSOR, NE_RESIZE_CURSOR,
+                SE_RESIZE_CURSOR, SW_RESIZE_CURSOR -> {
                 // To find out whether to adjust the width
                 // or the height, compare the rectangle ratios.
                 double aspectRatioNew = calcAspectRatio(rect);
                 if (aspectRatioNew > aspectRatio) {
                     int height = (int) (rect.width / aspectRatio);
-                    if (cursorType == Cursor.NW_RESIZE_CURSOR ||
-                        cursorType == Cursor.NE_RESIZE_CURSOR) {
+                    if (cursor == NW_RESIZE_CURSOR || cursor == NE_RESIZE_CURSOR) {
                         rect.y -= (height - rect.height);
                     }
 
                     rect.height = height;
                 } else {
                     int width = (int) (rect.height * aspectRatio);
-                    if (cursorType == Cursor.NW_RESIZE_CURSOR ||
-                        cursorType == Cursor.SW_RESIZE_CURSOR) {
+                    if (cursor == NW_RESIZE_CURSOR || cursor == SW_RESIZE_CURSOR) {
                         rect.x -= (width - rect.width);
                     }
 
                     rect.width = width;
                 }
-                break;
-            case Cursor.N_RESIZE_CURSOR:
-            case Cursor.S_RESIZE_CURSOR:
+            }
+            case N_RESIZE_CURSOR, S_RESIZE_CURSOR -> {
                 // adjust width and center horizontally
                 int width = (int) (rect.height * aspectRatio);
                 rect.x -= (width - rect.width) / 2;
                 rect.width = width;
-                break;
-            case Cursor.E_RESIZE_CURSOR:
-            case Cursor.W_RESIZE_CURSOR:
+            }
+            case E_RESIZE_CURSOR, W_RESIZE_CURSOR -> {
                 // adjust height and center vertically
                 int height = (int) (rect.width / aspectRatio);
                 rect.y -= (height - rect.height) / 2;
                 rect.height = height;
-                break;
+            }
         }
     }
 

@@ -23,6 +23,7 @@ import pixelitor.gui.ImageArea;
 import pixelitor.utils.Rnd;
 
 import java.awt.Dimension;
+import java.text.DecimalFormat;
 
 /**
  * The available zoom levels
@@ -107,11 +108,13 @@ public class ZoomLevel {
         this.percent = percent;
         this.scale = percent / 100.0;
         this.sliderValue = sliderValue;
+        DecimalFormat format;
         if (percent < 100) {
-            this.guiName = String.format("%.2f%%", percent);
+            format = new DecimalFormat("0.##");
         } else {
-            this.guiName = String.format("%.1f%%", percent);
+            format = new DecimalFormat("0.#");
         }
+        this.guiName = format.format(percent) + "%";
     }
 
     public boolean isSpecial() {

@@ -7,12 +7,12 @@ Contributions are welcome!
 
 ## Starting Pixelitor in an IDE
 
-Pixelitor requires Java 16+ to compile. When you start the program from an IDE, use **pixelitor.Pixelitor** as the main
+Pixelitor requires Java 17+ to compile. When you start the program from an IDE, use **pixelitor.Pixelitor** as the main
 class.
 
 ## Building the Pixelitor jar file from the command line
 
-1. OpenJDK 16+ has to be installed, and the environment variable JAVA_HOME must point to the OpenJDK installation
+1. OpenJDK 17+ has to be installed, and the environment variable JAVA_HOME must point to the OpenJDK installation
    directory.
 2. Install [Maven](https://maven.apache.org/install.html)
 3. Check the Maven installation with `mvn --version`
