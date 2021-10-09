@@ -84,6 +84,11 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
+    public boolean hasIconThumbnail() {
+        return false;
+    }
+
+    @Override
     public void updateIconImage() {
         // do nothing
     }

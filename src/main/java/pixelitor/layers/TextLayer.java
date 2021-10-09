@@ -320,6 +320,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
+    public boolean hasIconThumbnail() {
+        return false;
+    }
+
+    @Override
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
         if (popup == null) {

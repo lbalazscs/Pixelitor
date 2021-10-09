@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,10 @@ import pixelitor.OpenImages;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
 
 /**
  * The layout manager for a {@link LayerButton}
@@ -33,7 +36,7 @@ public class LayerButtonLayout implements LayoutManager {
     private JLabel layerLabel;
     private JLabel maskLabel;
 
-    private final boolean isImageLayer;
+    private final boolean layerIconShowsThumbnail;
 
     public static final String CHECKBOX = "CHECKBOX";
     public static final String LAYER = "LAYER";
@@ -56,7 +59,7 @@ public class LayerButtonLayout implements LayoutManager {
     }
 
     public LayerButtonLayout(Layer layer) {
-        isImageLayer = layer instanceof ImageLayer;
+        layerIconShowsThumbnail = layer.hasIconThumbnail();
     }
 
     @Override
@@ -107,7 +110,7 @@ public class LayerButtonLayout implements LayoutManager {
 
             // lay out the layer icon
             int labelStartY = GAP - LayerButton.BORDER_WIDTH;
-            if (isImageLayer) {
+            if (layerIconShowsThumbnail) {
                 layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
                 startX += labelSize;
             } else {

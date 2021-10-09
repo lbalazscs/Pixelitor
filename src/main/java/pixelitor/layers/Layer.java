@@ -818,11 +818,22 @@ public abstract class Layer implements Serializable {
     }
 
     public void updateIconImage() {
+        assert hasIconThumbnail();
         if (ui != null) {
             ui.updateLayerIconImageAsync(this);
         }
     }
 
+    /**
+     * Whether this layer has a custom thumbnail.
+     */
+    public boolean hasIconThumbnail() {
+        return true;
+    }
+
+    /**
+     * Returns non-null if hasIconThumbnail() returns true.
+     */
     public BufferedImage createIconThumbnail() {
         return null;
     }
@@ -856,8 +867,6 @@ public abstract class Layer implements Serializable {
     public final String getTypeStringLC() {
         return getTypeString().toLowerCase();
     }
-
-    ;
 
     public abstract String getTypeString();
 
