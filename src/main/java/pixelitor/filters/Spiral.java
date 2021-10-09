@@ -79,11 +79,17 @@ public class Spiral extends ShapeFilter {
         }
 
         double maxAngle = 2 * Math.PI * numSpins;
+        int type = typeParam.getValue();
+        if (type == TYPE_POLYGON) {
+            // compensate rounding errors - otherwise
+            // the last polygon segment might not be drawn
+            maxAngle += 0.001;
+        }
 
-        double dt = switch (typeParam.getValue()) {
+        double dt = switch (type) {
             case TYPE_CIRCULAR -> maxAngle / (NUM_STEPS_PER_SPIN * numSpins);
             case TYPE_POLYGON -> (2 * Math.PI) / sidesParam.getValue();
-            default -> throw new IllegalStateException("Unexpected value: " + typeParam.getValue());
+            default -> throw new IllegalStateException("Unexpected value: " + type);
         };
 
         boolean logarithmic = log.isChecked();
@@ -94,7 +100,7 @@ public class Spiral extends ShapeFilter {
         }
 
         shape.moveTo(cx, cy);
-        for (double t = dt; t < maxAngle; t += dt) {
+        for (double t = dt; t <= maxAngle; t += dt) {
             double x, y;
             if (logarithmic) {
                 double logCorr = FastMath.pow(Math.E, t * LOG_PHI) / maxCorr;
@@ -108,7 +114,7 @@ public class Spiral extends ShapeFilter {
         }
         if (symmetry.isChecked()) {
             shape.moveTo(cx, cy);
-            for (double t = dt; t < maxAngle; t += dt) {
+            for (double t = dt; t <= maxAngle; t += dt) {
                 double x, y;
                 if (logarithmic) {
                     double logCorr = FastMath.pow(Math.E, t * LOG_PHI) / maxCorr;

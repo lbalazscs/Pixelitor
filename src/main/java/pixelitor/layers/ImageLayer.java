@@ -1204,12 +1204,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "image layer";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Image Layer";
     }
 

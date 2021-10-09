@@ -845,7 +845,7 @@ public abstract class Layer implements Serializable {
         var rasterizedImage = asImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.copyBlendingFrom(this);
-        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize " + getTypeStringUC()));
+        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize " + getTypeString()));
         comp.replaceLayer(this, newImageLayer);
         Messages.showInStatusBar(format(
             "The %s <b>\"%s\"</b> was rasterized.", getTypeStringLC(), getName()));
@@ -853,9 +853,13 @@ public abstract class Layer implements Serializable {
         return newImageLayer;
     }
 
-    public abstract String getTypeStringLC();
+    public final String getTypeStringLC() {
+        return getTypeString().toLowerCase();
+    }
 
-    public abstract String getTypeStringUC();
+    ;
+
+    public abstract String getTypeString();
 
     public final DebugNode createDebugNode() {
         return createDebugNode(getTypeStringLC());

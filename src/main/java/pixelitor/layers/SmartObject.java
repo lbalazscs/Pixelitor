@@ -269,12 +269,7 @@ public class SmartObject extends ImageLayer {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "smart object";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Smart Object";
     }
 

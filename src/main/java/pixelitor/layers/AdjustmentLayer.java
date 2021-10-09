@@ -106,12 +106,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "adjustment layer";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Adjustment Layer";
     }
 

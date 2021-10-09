@@ -49,6 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.utils.Keys.CTRL_T;
 
@@ -99,7 +100,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
-        new LayerAdder(comp).add(textLayer);
+        new LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(textLayer);
 
         var settingsPanel = new TextSettingsPanel(textLayer);
         new DialogBuilder()
@@ -398,12 +399,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "text layer";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Text Layer";
     }
 

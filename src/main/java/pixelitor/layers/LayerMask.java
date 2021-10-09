@@ -246,12 +246,7 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "layer mask";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Layer Mask";
     }
 

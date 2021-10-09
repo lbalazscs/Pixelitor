@@ -79,7 +79,7 @@ public class PasteAction extends PAction implements ViewActivationListener {
             Messages.showInfo("Paste", "The clipboard content is not an image.");
             return Optional.empty();
         }
-        return Optional.of(pastedImage);
+        return Optional.ofNullable(pastedImage);
     }
 
     @Override

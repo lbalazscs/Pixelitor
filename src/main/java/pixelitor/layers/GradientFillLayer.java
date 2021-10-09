@@ -37,6 +37,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 public class GradientFillLayer extends ContentLayer {
@@ -54,6 +55,7 @@ public class GradientFillLayer extends ContentLayer {
         var comp = OpenImages.getActiveComp();
         var layer = new GradientFillLayer(comp, "gradient fill");
         new Composition.LayerAdder(comp)
+            .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Gradient Fill Layer")
             .add(layer);
         Tools.startAndSelect(Tools.GRADIENT);
@@ -238,12 +240,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "gradient fill layer";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Gradient Fill Layer";
     }
 }

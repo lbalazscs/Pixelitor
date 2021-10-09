@@ -136,17 +136,18 @@ public abstract class DrawableAction extends OpenImageEnabledAction {
         String firstName = isNoun ? "The " + name : name;
         String secondName = isNoun ? "the " + name : name;
 
+        String typeStringLC = layer.getTypeStringLC();
         String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
                             "%s cannot be used on %ss.<br>" +
                             "If you rasterize this %s, you can use %s,<br>" +
                             "but the layer will become a regular image layer.",
-            layer.getName(), layer.getTypeStringLC(), firstName,
-            layer.getTypeStringLC(), layer.getTypeStringLC(), secondName);
+            layer.getName(), typeStringLC, firstName,
+            typeStringLC, typeStringLC, secondName);
 
         String[] options = {"Rasterize", GUIText.CANCEL};
 
         boolean rasterize = Dialogs.showOKCancelWarningDialog(msg,
-            layer.getTypeStringUC(), options, 1);
+            layer.getTypeString(), options, 1);
         return rasterize;
     }
 

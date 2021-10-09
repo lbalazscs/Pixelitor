@@ -110,10 +110,7 @@ public class PaintBucketTool extends Tool {
         BufferedImage backupForUndo = ImageUtils.copyImage(image);
         boolean thereIsSelection = comp.hasSelection();
 
-        boolean grayScale = false;
-        if (image.getType() == BufferedImage.TYPE_BYTE_GRAY) {
-            grayScale = true;
-        }
+        boolean grayScale = image.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
         BufferedImage workingImage;
         if (grayScale) {

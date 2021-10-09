@@ -100,8 +100,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public float getStrokeWidth() {
-        float paramValue = strokeWidthParam.getValueAsFloat();
-        return paramValue;
+        return strokeWidthParam.getValueAsFloat();
     }
 
     public StrokeType getStrokeType() {

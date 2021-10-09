@@ -125,8 +125,6 @@ public class TrackedIO {
                 throw DecodingException.normal(file, null);
             }
             return image;
-        } catch (IOException e) {
-            throw DecodingException.normal(file, e);
         } catch (ArrayIndexOutOfBoundsException e) {
             boolean isGif = FileUtils.hasGIFExtension(file.getName());
             if (isGif) {
@@ -155,7 +153,7 @@ public class TrackedIO {
         return img;
     }
 
-    public static BufferedImage read(File file) throws IOException {
+    public static BufferedImage read(File file) {
         var tracker = new StatusBarProgressTracker(
             "Reading " + file.getName(), 100);
 

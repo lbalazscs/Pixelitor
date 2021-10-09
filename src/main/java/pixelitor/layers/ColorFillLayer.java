@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerButtonLayout.thumbSize;
 
 public class ColorFillLayer extends Layer {
@@ -58,7 +59,7 @@ public class ColorFillLayer extends Layer {
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
-        new Composition.LayerAdder(comp).add(layer);
+        new Composition.LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(layer);
 
         String title = "Add Color Fill Layer";
         Color defaultColor = Rnd.createRandomColor();
@@ -151,12 +152,7 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public String getTypeStringLC() {
-        return "color fill layer";
-    }
-
-    @Override
-    public String getTypeStringUC() {
+    public String getTypeString() {
         return "Color Fill Layer";
     }
 }
