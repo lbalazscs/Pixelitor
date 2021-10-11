@@ -101,6 +101,10 @@ public class LayerButtonLayout implements LayoutManager {
             synchronized (c.getTreeLock()) {
                 sfLabel = null;
             }
+        } else if (c == sfCheckBox) {
+            synchronized (c.getTreeLock()) {
+                sfCheckBox = null;
+            }
         } else {
             throw new IllegalStateException();
         }

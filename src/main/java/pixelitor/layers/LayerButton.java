@@ -581,6 +581,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
             addMaskIcon();
         }
         selectionState.show(layerIconLabel, maskIconLabel);
+        updateSmartFilterPanel();
     }
 
     @Override

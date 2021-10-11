@@ -48,7 +48,7 @@ import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 public class SmartObject extends ImageLayer {
     private static final String NAME_PREFIX = "smart ";
     private Composition content;
-    private boolean smartFilterIsVisible;
+    private boolean smartFilterIsVisible = true;
 
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
@@ -94,6 +94,7 @@ public class SmartObject extends ImageLayer {
         lastFilterState = orig.lastFilterState;
         lastFilterOutput = orig.lastFilterOutput;
         indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
+        smartFilterIsVisible = orig.smartFilterIsVisible;
     }
 
     @Serial
@@ -105,6 +106,7 @@ public class SmartObject extends ImageLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        smartFilterIsVisible = true;
         recalculateImage();
         lastFilterOutput = null;
         lastFilterState = null;
