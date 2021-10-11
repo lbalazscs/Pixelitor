@@ -95,12 +95,14 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public void updateSelectionState() {
+    }
 
+    @Override
+    public void updateSmartFilterPanel() {
     }
 
     @Override
     public void setSelected(boolean b) {
-
     }
 
     @Override

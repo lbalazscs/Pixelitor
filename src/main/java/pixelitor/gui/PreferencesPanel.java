@@ -331,7 +331,7 @@ public class PreferencesPanel extends JPanel {
 
     private void updateThumbSize() {
         int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
-        LayerButtonLayout.setThumbSize(newSize);
+        LayerButtonLayout.setStaticThumbSize(newSize);
     }
 
     public static void showInDialog() {

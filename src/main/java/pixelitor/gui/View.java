@@ -262,6 +262,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         layersPanel.removeLayerButton((LayerButton) ui);
     }
 
+    public void thumbSizeChanged(int newThumbSize) {
+        layersPanel.thumbSizeChanged(newThumbSize);
+        comp.updateAllIconImages();
+    }
+
     public Composition getComp() {
         return comp;
     }

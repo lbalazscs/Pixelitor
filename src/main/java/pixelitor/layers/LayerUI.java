@@ -45,6 +45,8 @@ public interface LayerUI {
      */
     void updateSelectionState();
 
+    public void updateSmartFilterPanel();
+
     void setSelected(boolean b);
 
     void changeLayer(Layer newLayer);

@@ -101,15 +101,12 @@ public class LayersPanel extends JLayeredPane {
     @Override
     public void doLayout() {
         int parentHeight = getHeight();
-
-        // assumes that all buttons have the same height
-        int buttonHeight = layerButtons.get(0).getPreferredSize().height;
-
         int numButtons = layerButtons.size();
-
+        int y = parentHeight;
         for (int i = 0; i < numButtons; i++) {
             LayerButton button = layerButtons.get(i);
-            int y = parentHeight - (i + 1) * buttonHeight;
+            int buttonHeight = button.getPreferredHeight();
+            y -= buttonHeight;
             if (button != draggedButton) {
                 button.setSize(getWidth(), buttonHeight);
                 button.setLocation(0, y);
@@ -124,21 +121,26 @@ public class LayersPanel extends JLayeredPane {
     private void swapIfNecessary(int dragY) {
         int staticY = draggedButton.getStaticY();
         int deltaY = dragY - staticY;
-        int buttonHeight = draggedButton.getPreferredSize().height; // all buttons have the same height
-        int halfHeight = buttonHeight / 2;
+        int draggedIndex = layerButtons.indexOf(draggedButton);
         if (deltaY > 0) {  // dragging downwards
-            if (deltaY >= halfHeight) {
-                int draggedIndex = layerButtons.indexOf(draggedButton);
+            int indexBellow = draggedIndex - 1;
+            if (indexBellow < 0) {
+                return;
+            }
+            int swapDistance = layerButtons.get(indexBellow).getPreferredHeight() / 2;
+            if (deltaY >= swapDistance) {
                 if (draggedIndex > 0) {
-                    int indexBellow = draggedIndex - 1;
                     Collections.swap(layerButtons, indexBellow, draggedIndex);
                 }
             }
         } else { // dragging upwards
-            if (deltaY <= -halfHeight) {
-                int draggedIndex = layerButtons.indexOf(draggedButton);
+            int indexAbove = draggedIndex + 1;
+            if (indexAbove >= layerButtons.size()) {
+                return;
+            }
+            int swapDistance = layerButtons.get(indexAbove).getPreferredHeight() / 2;
+            if (deltaY <= -swapDistance) {
                 if (draggedIndex < layerButtons.size() - 1) {
-                    int indexAbove = draggedIndex + 1;
                     Collections.swap(layerButtons, indexAbove, draggedIndex);
                 }
             }
@@ -164,11 +166,11 @@ public class LayersPanel extends JLayeredPane {
 
     @Override
     public Dimension getPreferredSize() {
-        // assumes that all buttons have the same height
-        int buttonHeight = layerButtons.get(0).getPreferredSize().height;
-        int numButtons = layerButtons.size();
-        int allButtonsHeight = numButtons * buttonHeight;
-        return new Dimension(10, allButtonsHeight);
+        int totalButtonHeight = 0;
+        for (LayerButton button : layerButtons) {
+            totalButtonHeight += button.getPreferredHeight();
+        }
+        return new Dimension(10, totalButtonHeight);
     }
 
     @VisibleForTesting
@@ -181,5 +183,11 @@ public class LayersPanel extends JLayeredPane {
         return layerButtons.stream()
             .map(LayerButton::getLayerName)
             .collect(toList());
+    }
+
+    public void thumbSizeChanged(int newThumbSize) {
+        for (LayerButton button : layerButtons) {
+            button.thumbSizeChanged(newThumbSize);
+        }
     }
 }

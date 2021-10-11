@@ -35,6 +35,8 @@ public class LayerButtonLayout implements LayoutManager {
     private JCheckBox checkBox;
     private JLabel layerLabel;
     private JLabel maskLabel;
+    private JLabel sfLabel;
+    private JCheckBox sfCheckBox;
 
     private final boolean layerIconShowsThumbnail;
 
@@ -42,6 +44,8 @@ public class LayerButtonLayout implements LayoutManager {
     public static final String LAYER = "LAYER";
     public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
+    public static final String SMART_FILTER_LABEL = "SF_LABEL";
+    public static final String SMART_FILTER_CHECKBOX = "SF_CHECKBOX";
 
     public static final int SMALL_THUMB_SIZE = 24;
     private static final int GAP = 7;
@@ -50,46 +54,70 @@ public class LayerButtonLayout implements LayoutManager {
 
     // The labels will appear to have thumbSize, but in reality
     // they must be larger in order to leave space to the borders
-    private static int labelSize;
+    private int labelSize;
 
-    private static int height;
+    private int height;
 
     static {
-        setThumbSize(AppPreferences.loadThumbSize());
+        setStaticThumbSize(AppPreferences.loadThumbSize());
     }
 
     public LayerButtonLayout(Layer layer) {
         layerIconShowsThumbnail = layer.hasIconThumbnail();
+        thumbSizeChanged(thumbSize);
+    }
+
+    public void thumbSizeChanged(int newThumbSize) {
+        if (layerIconShowsThumbnail) {
+            height = newThumbSize + 2 * GAP;
+        } else {
+            height = SMALL_THUMB_SIZE + 2 * GAP;
+        }
+        labelSize = newThumbSize + 2 * LayerButton.BORDER_WIDTH;
     }
 
     @Override
-    public void addLayoutComponent(String name, Component comp) {
-        synchronized (comp.getTreeLock()) {
+    public void addLayoutComponent(String name, Component c) {
+        synchronized (c.getTreeLock()) {
             switch (name) {
-                case CHECKBOX -> checkBox = (JCheckBox) comp;
-                case LAYER -> layerLabel = (JLabel) comp;
-                case MASK -> maskLabel = (JLabel) comp;
-                case NAME_EDITOR -> nameEditor = comp;
+                case CHECKBOX -> checkBox = (JCheckBox) c;
+                case LAYER -> layerLabel = (JLabel) c;
+                case MASK -> maskLabel = (JLabel) c;
+                case NAME_EDITOR -> nameEditor = c;
+                case SMART_FILTER_LABEL -> sfLabel = (JLabel) c;
+                case SMART_FILTER_CHECKBOX -> sfCheckBox = (JCheckBox) c;
                 default -> throw new IllegalStateException();
             }
         }
     }
 
     @Override
-    public void removeLayoutComponent(Component comp) {
-        if (comp == maskLabel) {
-            synchronized (comp.getTreeLock()) {
+    public void removeLayoutComponent(Component c) {
+        if (c == maskLabel) {
+            synchronized (c.getTreeLock()) {
                 maskLabel = null;
+            }
+        } else if (c == sfLabel) {
+            synchronized (c.getTreeLock()) {
+                sfLabel = null;
             }
         } else {
             throw new IllegalStateException();
         }
     }
 
+    public int getPreferredHeight() {
+        if (sfLabel == null) {
+            return height;
+        } else {
+            return height + 26;
+        }
+    }
+
     @Override
     public Dimension preferredLayoutSize(Container parent) {
         synchronized (parent.getTreeLock()) {
-            return new Dimension(100, height);
+            return new Dimension(100, getPreferredHeight());
         }
     }
 
@@ -109,6 +137,7 @@ public class LayerButtonLayout implements LayoutManager {
             startX += (cbSize.width + GAP - LayerButton.BORDER_WIDTH);
 
             // lay out the layer icon
+            int layerIconStartX = startX;
             int labelStartY = GAP - LayerButton.BORDER_WIDTH;
             if (layerIconShowsThumbnail) {
                 layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
@@ -133,6 +162,13 @@ public class LayerButtonLayout implements LayoutManager {
             int remainingWidth = parent.getWidth() - startX;
             int adjustment = 2; // the textfield in Nimbus has two invisible pixels around it
             nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - 3, editorHeight);
+
+            if (sfLabel != null) {
+                sfCheckBox.setBounds(layerIconStartX - adjustment, height, cbSize.width, cbSize.height);
+                int fullCBSize = cbSize.width + GAP;
+                remainingWidth = parent.getWidth() - layerIconStartX - fullCBSize;
+                sfLabel.setBounds(layerIconStartX + fullCBSize, height, remainingWidth, cbSize.height);
+            }
         }
     }
 
@@ -140,20 +176,13 @@ public class LayerButtonLayout implements LayoutManager {
         return thumbSize;
     }
 
-    public static void setThumbSize(int newThumbSize) {
+    public static void setStaticThumbSize(int newThumbSize) {
         if (thumbSize == newThumbSize) {
             return;
         }
 
         thumbSize = newThumbSize;
 
-        labelSize = newThumbSize + 2 * LayerButton.BORDER_WIDTH;
-
-        height = newThumbSize + 2 * GAP;
-
-        OpenImages.onActiveView(view -> {
-            //LayersContainer.showLayersFor(view);
-            view.getComp().updateAllIconImages();
-        });
+        OpenImages.thumbSizeChanged(newThumbSize);
     }
 }

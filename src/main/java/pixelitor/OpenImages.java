@@ -621,4 +621,12 @@ public class OpenImages {
         }
         return null;
     }
+
+    public static void thumbSizeChanged(int newThumbSize) {
+        // since the layer buttons are cached, all views have
+        // to be notified to update their buttons
+        for (View view : views) {
+            view.thumbSizeChanged(newThumbSize);
+        }
+    }
 }

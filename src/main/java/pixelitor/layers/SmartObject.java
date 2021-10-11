@@ -29,6 +29,7 @@ import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -47,6 +48,7 @@ import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 public class SmartObject extends ImageLayer {
     private static final String NAME_PREFIX = "smart ";
     private Composition content;
+    private boolean smartFilterIsVisible;
 
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
@@ -115,8 +117,10 @@ public class SmartObject extends ImageLayer {
 
     private void recalculateImage() {
         resetImageFromContent();
-        for (Filter filter : smartFilters) {
-            image = filter.transformImage(image);
+        if (smartFilterIsVisible) {
+            for (Filter filter : smartFilters) {
+                image = filter.transformImage(image);
+            }
         }
     }
 
@@ -197,12 +201,28 @@ public class SmartObject extends ImageLayer {
         return !smartFilters.isEmpty();
     }
 
+    public boolean smartFilterIsVisible() {
+        return smartFilterIsVisible;
+    }
+
+    public void setSmartFilterVisibility(boolean b) {
+        boolean changed = smartFilterIsVisible != b;
+        smartFilterIsVisible = b;
+        if (changed) {
+            recalculateImage();
+            comp.update();
+            updateIconImage();
+        }
+    }
+
     public Filter getSmartFilter(int index) {
         return smartFilters.get(index);
     }
 
     public void addSmartFilter(Filter filter) {
         smartFilters.add(filter);
+        smartFilterIsVisible = true;
+        updateSmartFilterUI();
     }
 
     public void replaceSmartFilter(Filter newFilter) {
@@ -245,6 +265,7 @@ public class SmartObject extends ImageLayer {
                 lastFilterState = null;
             }
         }
+        updateSmartFilterUI();
     }
 
     private void deleteSmartFilter() {
@@ -252,6 +273,13 @@ public class SmartObject extends ImageLayer {
         resetImageFromContent();
         comp.update();
         updateIconImage();
+        updateSmartFilterUI();
+    }
+
+    private void updateSmartFilterUI() {
+        ui.updateSmartFilterPanel();
+        EventQueue.invokeLater(() ->
+            comp.getView().getLayersPanel().revalidate());
     }
 
     @Override

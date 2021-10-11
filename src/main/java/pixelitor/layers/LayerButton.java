@@ -141,12 +141,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private SelectionState selectionState;
 
     private Layer layer;
+    private final LayerButtonLayout layout;
     private boolean userInteraction = true;
 
     private JCheckBox visibilityCB;
     private LayerNameEditor nameEditor;
     private JLabel layerIconLabel;
     private JLabel maskIconLabel;
+
+    private JCheckBox smartFilterCB;
+    private JLabel smartFilterLabel;
 
     /**
      * The Y coordinate in the parent when it is not dragging
@@ -159,10 +163,13 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         this.layer = layer;
 
-        setLayout(new LayerButtonLayout(layer));
+        layout = new LayerButtonLayout(layer);
+        setLayout(layout);
 
-        initVisibilityControl();
+        initLayerVisibilityCB();
         initLayerNameEditor();
+        updateSmartFilterPanel();
+
         configureLayerIcon();
 
         if (layer.hasMask()) {
@@ -171,6 +178,40 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         wireSelectionWithLayerActivation();
         id = idCounter++;
+    }
+
+    @Override
+    public void updateSmartFilterPanel() {
+        boolean removeSFLabel = false;
+        if (layer.isSmartObject()) {
+            SmartObject so = (SmartObject) layer;
+            if (so.hasSmartFilters()) {
+                String filterName = so.getSmartFilter(0).getName();
+                if (smartFilterLabel == null) {
+                    smartFilterLabel = new JLabel(filterName);
+                    smartFilterCB = createVisibilityCheckBox();
+                    smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
+                    smartFilterCB.setSelected(so.smartFilterIsVisible());
+                    smartFilterCB.addItemListener(e ->
+                        so.setSmartFilterVisibility(smartFilterCB.isSelected()));
+
+                    add(smartFilterLabel, LayerButtonLayout.SMART_FILTER_LABEL);
+                    add(smartFilterCB, LayerButtonLayout.SMART_FILTER_CHECKBOX);
+                } else {
+                    smartFilterCB.setSelected(so.smartFilterIsVisible());
+                    smartFilterLabel.setText(filterName);
+                }
+            } else {
+                removeSFLabel = true;
+            }
+        } else {
+            removeSFLabel = true;
+        }
+        if (removeSFLabel && smartFilterLabel != null) {
+            remove(smartFilterLabel);
+            remove(smartFilterCB);
+            smartFilterLabel = null;
+        }
     }
 
     private void configureLayerIcon() {
@@ -258,19 +299,23 @@ public class LayerButton extends JToggleButton implements LayerUI {
         layerButton.setSelected(true);
     }
 
-    private void initVisibilityControl() {
-        visibilityCB = new JCheckBox(CLOSED_EYE_ICON);
-        visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
+    private void initLayerVisibilityCB() {
+        visibilityCB = createVisibilityCheckBox();
 
         // when loading pxc files, the layer might not be visible
         visibilityCB.setSelected(layer.isVisible());
-
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.");
-        visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
         visibilityCB.addItemListener(e ->
             layer.setVisible(visibilityCB.isSelected(), true));
+    }
+
+    private JCheckBox createVisibilityCheckBox() {
+        JCheckBox cb = new JCheckBox(CLOSED_EYE_ICON);
+        cb.setRolloverIcon(CLOSED_EYE_ICON);
+        cb.setSelectedIcon(OPEN_EYE_ICON);
+        return cb;
     }
 
     private void initLayerNameEditor() {
@@ -551,6 +596,14 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     public int getId() {
         return id;
+    }
+
+    public int getPreferredHeight() {
+        return layout.getPreferredHeight();
+    }
+
+    public void thumbSizeChanged(int newThumbSize) {
+        layout.thumbSizeChanged(newThumbSize);
     }
 
     @Override
