@@ -411,6 +411,7 @@ public class Composition implements Serializable {
         var newLayer = ImageLayer.fromExternalImage(image, this, layerName);
         new LayerAdder(this)
             .withHistory(editName)
+            .atPosition(ABOVE_ACTIVE)
             .add(newLayer);
     }
 
@@ -433,6 +434,7 @@ public class Composition implements Serializable {
         }
         new LayerAdder(this)
             .withHistory("Duplicate Layer")
+            .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
         assert checkInvariant();
     }

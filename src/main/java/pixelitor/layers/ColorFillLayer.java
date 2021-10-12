@@ -21,13 +21,13 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.colors.Colors;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.ColorFillLayerChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -62,7 +62,7 @@ public class ColorFillLayer extends Layer {
         new Composition.LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(layer);
 
         String title = "Add Color Fill Layer";
-        Color defaultColor = Rnd.createRandomColor();
+        Color defaultColor = FgBgColors.getFGColor();
         layer.changeColor(defaultColor, false);
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
             defaultColor, true, c -> layer.changeColor(c, false))) {

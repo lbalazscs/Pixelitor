@@ -20,7 +20,9 @@ package pixelitor.layers;
 import com.bric.util.JVM;
 import pixelitor.AppContext;
 import pixelitor.ThreadPool;
+import pixelitor.filters.Filter;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 
@@ -30,7 +32,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import static javax.swing.BorderFactory.*;
@@ -186,9 +187,18 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (layer.isSmartObject()) {
             SmartObject so = (SmartObject) layer;
             if (so.hasSmartFilters()) {
-                String filterName = so.getSmartFilter(0).getName();
+                Filter smartFilter = so.getSmartFilter(0);
+                String filterName = smartFilter.getName();
                 if (smartFilterLabel == null) {
                     smartFilterLabel = new JLabel(filterName);
+                    smartFilterLabel.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            if (e.getClickCount() >= 2) {
+                                so.editSmartFilter(smartFilter);
+                            }
+                        }
+                    });
                     smartFilterCB = createVisibilityCheckBox();
                     smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
                     smartFilterCB.setSelected(so.smartFilterIsVisible());
@@ -210,7 +220,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (removeSFLabel && smartFilterLabel != null) {
             remove(smartFilterLabel);
             remove(smartFilterCB);
+            GUIUtils.removeAllMouseListeners(smartFilterLabel);
             smartFilterLabel = null;
+            smartFilterCB = null;
         }
     }
 
@@ -529,10 +541,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         }
 
         // remove the left-click and right-click mouse listeners
-        MouseListener[] mouseListeners = maskIconLabel.getMouseListeners();
-        for (MouseListener mouseListener : mouseListeners) {
-            maskIconLabel.removeMouseListener(mouseListener);
-        }
+        GUIUtils.removeAllMouseListeners(maskIconLabel);
 
         remove(maskIconLabel);
         revalidate();

@@ -50,6 +50,9 @@ public class SmartObject extends ImageLayer {
     private Composition content;
     private boolean smartFilterIsVisible = true;
 
+    // only used for deserialization
+    private boolean newVersion = true;
+
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
 
@@ -106,7 +109,11 @@ public class SmartObject extends ImageLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        smartFilterIsVisible = true;
+        if (!newVersion) {
+            // if the pxc was saved with an old version,
+            // then assume smart filter visibility
+            smartFilterIsVisible = true;
+        }
         recalculateImage();
         lastFilterOutput = null;
         lastFilterState = null;

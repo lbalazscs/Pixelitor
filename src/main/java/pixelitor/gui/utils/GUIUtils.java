@@ -402,4 +402,11 @@ public final class GUIUtils {
         }
         return new Font(family, style, size);
     }
+
+    public static void removeAllMouseListeners(JComponent c) {
+        MouseListener[] mouseListeners = c.getMouseListeners();
+        for (MouseListener mouseListener : mouseListeners) {
+            c.removeMouseListener(mouseListener);
+        }
+    }
 }
