@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,14 +44,17 @@ public class DropDownSlider extends JComponent {
     private final JPopupMenu popupMenu;
     private boolean dropDownEnabled = true;
     private final JSlider slider;
+    private boolean addDropdown = Themes.getCurrent().isNimbus();
 
     public DropDownSlider(int minValue, int value, int maxValue, boolean limitRange) {
         setLayout(new FlowLayout(LEFT, 0, 0));
         textField = new IntTextField(value, minValue, maxValue, limitRange, 4);
         add(textField);
 
-        initDropDownButton();
-        textField.add(dropDownButton);
+        if (addDropdown) {
+            initDropDownButton();
+            textField.add(dropDownButton);
+        }
 
         slider = new JSlider(HORIZONTAL, minValue, maxValue, value);
         popupMenu = new JPopupMenu();
@@ -145,8 +148,10 @@ public class DropDownSlider extends JComponent {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         textField.setEnabled(enabled);
-        dropDownButton.setEnabled(enabled);
-        dropDownEnabled = enabled;
+        if (addDropdown) {
+            dropDownButton.setEnabled(enabled);
+            dropDownEnabled = enabled;
+        }
     }
 
     private void dropDown() {
@@ -165,5 +170,28 @@ public class DropDownSlider extends JComponent {
 
     public void setTFName(String name) {
         textField.setName(name);
+    }
+
+    @Override
+    public void updateUI() {
+        addDropdown = Themes.getCurrent().isNimbus();
+
+        if (addDropdown) {
+            if (dropDownButton == null) {
+                // switching to Nimbus
+                // (For some reason despite the following code
+                // the dropdown button is added only after a restart)
+                initDropDownButton();
+                textField.add(dropDownButton);
+            }
+        } else {
+            if (dropDownButton != null) {
+                // switching from Nimbus to something else
+                textField.remove(dropDownButton);
+                GUIUtils.removeAllMouseListeners(dropDownButton);
+                dropDownButton = null;
+            }
+        }
+        super.updateUI();
     }
 }

@@ -91,7 +91,9 @@ public class PreferencesPanel extends JPanel {
 
         addUIChooser(gbh);
         addLanguageChooser(gbh);
-//        addThemeChooser(gbh);
+        if (AppContext.enableExperimentalFeatures) {
+            addThemeChooser(gbh);
+        }
         addUndoLevelsChooser(gbh);
         addThumbSizeChooser(gbh);
         addMagickDirField(gbh);

@@ -18,6 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.OpenImages;
+import pixelitor.gui.utils.Theme;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
@@ -47,8 +49,14 @@ public class LayerButtonLayout implements LayoutManager {
     public static final String SMART_FILTER_LABEL = "SF_LABEL";
     public static final String SMART_FILTER_CHECKBOX = "SF_CHECKBOX";
 
+    // the size of the icon
+    private static final int CHECKBOX_WIDTH = 24;
+    private static final int CHECKBOX_HEIGHT = 24;
+
     public static final int SMALL_THUMB_SIZE = 24;
     private static final int GAP = 7;
+
+    private static boolean isNimbus = Themes.getCurrent().isNimbus();
 
     public static int thumbSize;
 
@@ -136,9 +144,12 @@ public class LayerButtonLayout implements LayoutManager {
             int startX = GAP;
 
             // lay out the checkbox
-            Dimension cbSize = checkBox.getPreferredSize();
-            checkBox.setBounds(startX, (height - cbSize.height) / 2, cbSize.width, cbSize.height);
-            startX += (cbSize.width + GAP - LayerButton.BORDER_WIDTH);
+            Dimension preferred = checkBox.getPreferredSize();
+            if (preferred.width != CHECKBOX_WIDTH || preferred.height != CHECKBOX_HEIGHT) {
+                throw new IllegalStateException("width = " + preferred.width + ", height = " + preferred.height);
+            }
+            checkBox.setBounds(startX, (height - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
+            startX += (CHECKBOX_WIDTH + GAP - LayerButton.BORDER_WIDTH);
 
             // lay out the layer icon
             int layerIconStartX = startX;
@@ -164,14 +175,15 @@ public class LayerButtonLayout implements LayoutManager {
             int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
 
             int remainingWidth = parent.getWidth() - startX;
-            int adjustment = 2; // the textfield in Nimbus has two invisible pixels around it
-            nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - 3, editorHeight);
+            // the textfield in Nimbus has two invisible pixels around it
+            int adjustment = isNimbus ? 2 : 0;
+            nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
 
             if (sfLabel != null) {
-                sfCheckBox.setBounds(layerIconStartX - adjustment, height, cbSize.width, cbSize.height);
-                int fullCBSize = cbSize.width + GAP;
+                sfCheckBox.setBounds(layerIconStartX - adjustment, height, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
+                int fullCBSize = CHECKBOX_WIDTH + GAP;
                 remainingWidth = parent.getWidth() - layerIconStartX - fullCBSize;
-                sfLabel.setBounds(layerIconStartX + fullCBSize, height, remainingWidth, cbSize.height);
+                sfLabel.setBounds(layerIconStartX + fullCBSize, height, remainingWidth, CHECKBOX_HEIGHT);
             }
         }
     }
@@ -188,5 +200,9 @@ public class LayerButtonLayout implements LayoutManager {
         thumbSize = newThumbSize;
 
         OpenImages.thumbSizeChanged(newThumbSize);
+    }
+
+    public static void themeChanged(Theme theme) {
+        isNimbus = theme.isNimbus();
     }
 }

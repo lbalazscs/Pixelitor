@@ -28,6 +28,7 @@ import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.ButtonUI;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
@@ -194,11 +195,14 @@ public class LayerButton extends JToggleButton implements LayerUI {
                     smartFilterLabel.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
+                            setSelected(true);
                             if (e.getClickCount() >= 2) {
                                 so.editSmartFilter(smartFilter);
                             }
                         }
                     });
+                    dragReorderHandler.attachTo(smartFilterLabel);
+
                     smartFilterCB = createVisibilityCheckBox();
                     smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
                     smartFilterCB.setSelected(so.smartFilterIsVisible());
@@ -221,6 +225,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
             remove(smartFilterLabel);
             remove(smartFilterCB);
             GUIUtils.removeAllMouseListeners(smartFilterLabel);
+            dragReorderHandler.detachFrom(smartFilterLabel);
             smartFilterLabel = null;
             smartFilterCB = null;
         }
@@ -324,9 +329,22 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private JCheckBox createVisibilityCheckBox() {
-        JCheckBox cb = new JCheckBox(CLOSED_EYE_ICON);
+        JCheckBox cb = new JCheckBox(CLOSED_EYE_ICON) {
+            @Override
+            public void setUI(ButtonUI ui) {
+                super.setUI(ui);
+                // after an LF change, it's necessary to reset the border to null
+                setBorder(null);
+            }
+        };
         cb.setRolloverIcon(CLOSED_EYE_ICON);
         cb.setSelectedIcon(OPEN_EYE_ICON);
+        cb.setFocusPainted(false);
+        cb.setIconTextGap(0);
+        cb.setBorder(null);
+        cb.setBorderPainted(false);
+//        cb.setMargin(new Insets(0, 0, 0, 0));
+
         return cb;
     }
 
