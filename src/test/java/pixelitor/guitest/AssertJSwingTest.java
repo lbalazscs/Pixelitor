@@ -88,6 +88,7 @@ import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 import static pixelitor.guitest.MaskMode.NO_MASK;
+import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.selection.ShapeCombination.ADD;
@@ -1472,14 +1473,6 @@ public class AssertJSwingTest {
         runMenuCommand("Fit Width");
         runMenuCommand("Fit Height");
 
-        ZoomLevel[] values = ZoomLevel.values();
-        for (ZoomLevel zoomLevel : values) {
-            if (!skipThis()) {
-                runMenuCommand(zoomLevel.toString());
-                EDT.assertZoomOfActiveIs(zoomLevel);
-            }
-        }
-
         runMenuCommand("Actual Pixels");
         EDT.assertZoomOfActiveIs(ZoomLevel.Z100);
     }
@@ -2717,7 +2710,6 @@ public class AssertJSwingTest {
 
     private void testZoomControlAndNavigatorZooming() {
         var slider = findZoomControlSlider();
-        ZoomLevel[] zoomLevels = ZoomLevel.values();
 
         slider.slideToMinimum();
         EDT.assertZoomOfActiveIs(zoomLevels[0]);

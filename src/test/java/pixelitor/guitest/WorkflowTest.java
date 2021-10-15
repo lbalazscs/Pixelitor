@@ -282,7 +282,7 @@ public class WorkflowTest {
     private void drawTransparentZigzagRectangle() {
         app.clickTool(Tools.SHAPES);
 
-        app.runMenuCommand("100%");
+        app.runMenuCommand("Actual Pixels");
         mouse.recalcCanvasBounds();
 
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.RECTANGLE.toString());

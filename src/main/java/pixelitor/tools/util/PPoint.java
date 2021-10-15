@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -88,6 +89,10 @@ public abstract class PPoint {
      */
     public Point2D asImPoint2D() {
         return new Point2D.Double(getImX(), getImY());
+    }
+
+    public Point asImPoint() {
+        return new Point((int) getImX(), (int) getImY());
     }
 
     /**

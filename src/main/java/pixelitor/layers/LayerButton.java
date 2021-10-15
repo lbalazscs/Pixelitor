@@ -55,10 +55,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
 
-    // Most often false, but when opening serialized
-    // pxc files, the mask might be added before the drag handler
+    // Most often false, but when opening serialized pxc files,
+    // the mask/smart filter label might be added before the drag handler
     // and in unit tests the drag handler is not added at all.
-    private boolean maskAddedBeforeDragHandler;
+    private boolean lateDragHandler;
 
     // for debugging only: each layer button has a different id
     private static int idCounter = 0;
@@ -201,7 +201,13 @@ public class LayerButton extends JToggleButton implements LayerUI {
                             }
                         }
                     });
-                    dragReorderHandler.attachTo(smartFilterLabel);
+                    if (dragReorderHandler != null) {
+                        // can be null for freshly loaded pxc files
+                        dragReorderHandler.attachTo(smartFilterLabel);
+                        lateDragHandler = false;
+                    } else {
+                        lateDragHandler = true;
+                    }
 
                     smartFilterCB = createVisibilityCheckBox();
                     smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
@@ -394,9 +400,13 @@ public class LayerButton extends JToggleButton implements LayerUI {
         handler.attachTo(nameEditor);
         handler.attachTo(layerIconLabel);
 
-        if (maskAddedBeforeDragHandler) {
-            assert hasMaskIcon() : "no mask in " + layer.getName();
-            handler.attachTo(maskIconLabel);
+        if (lateDragHandler) {
+            if (maskIconLabel != null) {
+                handler.attachTo(maskIconLabel);
+            }
+            if (smartFilterLabel != null) {
+                handler.attachTo(smartFilterLabel);
+            }
         }
     }
 
@@ -503,9 +513,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         if (dragReorderHandler != null) {
             dragReorderHandler.attachTo(maskIconLabel);
-            maskAddedBeforeDragHandler = false;
+            lateDragHandler = false;
         } else {
-            maskAddedBeforeDragHandler = true;
+            lateDragHandler = true;
         }
 
         layer.getMask().updateIconImage();
@@ -566,7 +576,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         repaint();
         maskIconLabel = null;
 
-        maskAddedBeforeDragHandler = false;
+        lateDragHandler = false;
     }
 
     @Override

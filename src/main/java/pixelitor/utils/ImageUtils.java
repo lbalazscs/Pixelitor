@@ -29,6 +29,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
+import pixelitor.utils.debug.Debug;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -343,7 +344,8 @@ public class ImageUtils {
             // a correct int array can still be retrieved with
             // src.getRGB(0, 0, width, height, null, 0, width);
             // but modifying that array won't have any effect on the image.
-            throw new UnsupportedOperationException();
+            String msg = "type is " + Debug.bufferedImageTypeAsString(src.getType());
+            throw new UnsupportedOperationException(msg);
         }
 
         return pixels;

@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
@@ -56,16 +55,6 @@ public class ZoomTool extends DragTool {
     @Override
     public void initSettingsPanel() {
         settingsPanel.addAutoZoomButtons();
-
-        if (AppContext.isDevelopment()) {
-            settingsPanel.add(new JButton("Dump State") {{
-                addActionListener(e -> {
-                    System.out.println("ZoomTool::actionPerformed: canvas = " + OpenImages.getActiveView().getCanvas());
-                    System.out.println("ZoomTool::initSettingsPanel: state = " + state);
-                    System.out.println("ZoomTool::initSettingsPanel: dumpBox = " + box);
-                });
-            }});
-        }
     }
 
     @Override

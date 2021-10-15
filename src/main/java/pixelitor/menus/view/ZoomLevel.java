@@ -20,7 +20,6 @@ package pixelitor.menus.view;
 import pixelitor.Canvas;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.ImageArea;
-import pixelitor.utils.Lazy;
 import pixelitor.utils.Rnd;
 
 import java.awt.Dimension;
@@ -28,360 +27,136 @@ import java.awt.Dimension;
 /**
  * The available zoom levels
  */
-public enum ZoomLevel {
-    Z6("6.25%") {
-        @Override
-        public double asPercent() {
-            return 6.25;
-        }
+public class ZoomLevel {
+    public static final ZoomLevel[] zoomLevels;
+    private static final double[] percentValues = {
+        6.25,
+        7.43254446876700658464,
+        8.838834764831844,
+        10.5112051906714309979,
+        12.5,
+        14.8650889375340131693,
+        17.67766952966369, // 12.5 * sqrt(2)
+        21.0224103813428619958,
+        25.0,
+        29.7301778750680263386,
+        35.35533905932738,
+        42.0448207626857239916,
+        50.0,
+        59.4603557501360526771,
+        70.71067811865476,
+        84.0896415253714479832,
+        100,
+        118.920711500272105354,
+        141.4213562373095,
+        168.179283050742895966,
+        200.0,
+        237.841423000544210709,
+        282.842712474619,
+        336.358566101485791933,
+        400.0,
+        475.682846001088421417,
+        565.685424949238,
+        672.717132202971583865,
+        800.0,
+        951.365692002176842834,
+        1131.370849898476,
+        1345.43426440594316773,
+        1600.0,
+        1902.73138400435368567,
+        2262.741699796952,
+        2690.86852881188633546,
+        3200.0,
+        3805.46276800870737134,
+        4525.483399593904,
+        5381.73705762377267092,
+        6400.0};
 
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z8;
+    static {
+        zoomLevels = new ZoomLevel[percentValues.length];
+        for (int i = 0; i < zoomLevels.length; i++) {
+            zoomLevels[i] = new ZoomLevel(percentValues[i], i);
         }
+        for (int i = 0; i < zoomLevels.length; i++) {
+            if (i == 0) {
+                zoomLevels[i].setOut(zoomLevels[0]);
+                zoomLevels[i].setIn(zoomLevels[i + 1]);
+            } else if (i == zoomLevels.length - 1) {
+                zoomLevels[i].setOut(zoomLevels[i - 1]);
+                zoomLevels[i].setIn(zoomLevels[i]);
+            } else {
+                zoomLevels[i].setOut(zoomLevels[i - 1]);
+                zoomLevels[i].setIn(zoomLevels[i + 1]);
+            }
+        }
+    }
 
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z6;
-        }
-    }, Z8("8,84%") {
-        @Override
-        public double asPercent () {
-            return 8.838834764831844;
-        }
+    public static ZoomLevel Z100 = zoomLevels[16];
+    public static ZoomLevel Z50 = zoomLevels[12];
+    public static ZoomLevel Z25 = zoomLevels[8];
+    public static ZoomLevel Z12 = zoomLevels[4];
 
-        @Override
-        public ZoomLevel zoomIn () {
-            return Z12;
-        }
-
-        @Override
-        public ZoomLevel zoomOut () {
-            return Z6;
-        }
-    }, Z12("12.5%") {
-        @Override
-        public double asPercent() {
-            return 12.5;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z18;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z8;
-        }
-    }, Z18("17.7%") { // 12.5 * sqrt(2)
-        @Override
-        public double asPercent() {
-            return 17.67766952966369;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z25;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z12;
-        }
-    }, Z25("25%") {
-        @Override
-        public double asPercent() {
-            return 25;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z35;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z18;
-        }
-    }, Z35("35.3%") {
-        @Override
-        public double asPercent() {
-            return 35.35533905932738;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z50;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z25;
-        }
-    }, Z50("50%") {
-        @Override
-        public double asPercent() {
-            return 50;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z71;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z35;
-        }
-    }, Z71("70.7%") {
-        @Override
-        public double asPercent() {
-            return 70.71067811865476;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z100;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z50;
-        }
-    }, Z100("100%") {
-        @Override
-        public double asPercent() {
-            return 100;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z141;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z71;
-        }
-    }, Z141("141.4%") {
-        @Override
-        public double asPercent() {
-            return 141.4213562373095;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z200;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z100;
-        }
-    }, Z200("200%") {
-        @Override
-        public double asPercent() {
-            return 200;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z283;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z141;
-        }
-    }, Z283("282.8%") {
-        @Override
-        public double asPercent() {
-            return 282.842712474619;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z400;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z200;
-        }
-    }, Z400("400%") {
-        @Override
-        public double asPercent() {
-            return 400;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z566;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z283;
-        }
-    }, Z566("565.7%") {
-        @Override
-        public double asPercent() {
-            return 565.685424949238;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z800;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z400;
-        }
-    }, Z800("800%") {
-        @Override
-        public double asPercent() {
-            return 800;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z1131;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z566;
-        }
-    }, Z1131("1131.4%") {
-        @Override
-        public double asPercent() {
-            return 1131.370849898476;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z1600;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z800;
-        }
-    }, Z1600("1600%") {
-        @Override
-        public double asPercent() {
-            return 1600;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z2263;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z1131;
-        }
-    }, Z2263("2262.7%") {
-        @Override
-        public double asPercent() {
-            return 2262.741699796952;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z3200;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z1600;
-        }
-    }, Z3200("3200%") {
-        @Override
-        public double asPercent() {
-            return 3200;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z4525;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z2263;
-        }
-    }, Z4525("4525.5%") {
-        @Override
-        public double asPercent() {
-            return 4525.483399593904;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z6400;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z3200;
-        }
-    }, Z6400("6400%") {
-        @Override
-        public double asPercent() {
-            return 6400;
-        }
-
-        @Override
-        public ZoomLevel zoomIn() {
-            return Z6400;
-        }
-
-        @Override
-        public ZoomLevel zoomOut() {
-            return Z4525;
-        }
-    };
-
+    private ZoomLevel in;
+    private ZoomLevel out;
+    private final double percent;
     private final String guiName;
+    private final double scale;
+    private final int sliderValue;
 
-    ZoomLevel(String guiName) {
-        this.guiName = guiName;
+    public ZoomLevel(double percent, int sliderValue) {
+        this.percent = percent;
+        this.scale = percent / 100.0;
+        this.sliderValue = sliderValue;
+        if (percent < 100) {
+            this.guiName = String.format("%.2f%%", percent);
+        } else {
+            this.guiName = String.format("%.1f%%", percent);
+        }
     }
 
-    // The menuItem must be initialized only after the enum constructor
-    // in order to make sure that it has a name
-    private final Lazy<ZoomMenuItem> menuItem = Lazy.of(
-        () -> new ZoomMenuItem(this));
-
-    @Override
-    public String toString() {
-        return guiName;
+    public boolean isSpecial() {
+        return sliderValue % 4 == 0;
     }
 
-    public ZoomMenuItem getMenuItem() {
-        return menuItem.get();
+    public void setIn(ZoomLevel in) {
+        this.in = in;
     }
 
-    public abstract double asPercent();
+    public void setOut(ZoomLevel out) {
+        this.out = out;
+    }
 
-    public abstract ZoomLevel zoomIn();
+    public ZoomLevel zoomIn() {
+        return in;
+    }
 
-    public abstract ZoomLevel zoomOut();
+    public ZoomLevel zoomOut() {
+        return out;
+    }
+
+    public double asPercent() {
+        return percent;
+    }
 
     public static ZoomLevel getRandomZoomLevel() {
-        return Rnd.chooseFrom(values());
+        return Rnd.chooseFrom(zoomLevels);
     }
 
     public double getViewScale() {
-        return asPercent() / 100.0;
+        return scale;
+    }
+
+    public int getSliderValue() {
+        return sliderValue;
     }
 
     public boolean allowPixelGrid() {
         return asPercent() > 1500;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
     }
 
     /**
@@ -401,7 +176,6 @@ public enum ZoomLevel {
 
         double idealZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
 
-        ZoomLevel[] zoomLevels = values();
         ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
         if (maximallyZoomedOut.asPercent() > idealZoomPercent) {

@@ -525,7 +525,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         if (isActive()) {
             ZoomControl.get().changeZoom(zoomLevel);
-            zoomLevel.getMenuItem().setSelected(true);
         }
     }
 

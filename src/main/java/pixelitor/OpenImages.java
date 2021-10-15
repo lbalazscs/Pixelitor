@@ -27,7 +27,6 @@ import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
-import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
@@ -193,8 +192,6 @@ public class OpenImages {
         boolean maskEditing = view.getMaskViewMode().editMask();
         Tools.setupMaskEditing(maskEditing);
         FgBgColors.setLayerMaskEditing(maskEditing);
-
-        ZoomMenu.zoomChanged(view.getZoomLevel());
 
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);

@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Lazy;
 
@@ -82,5 +83,21 @@ public enum AppContext {
 
     public static void setUnitTestingMode() {
         CURRENT = UNIT_TESTS;
+    }
+
+    public static void enableExperimental(boolean newValue) {
+        if (enableExperimentalFeatures != newValue) {
+            enableExperimentalFeatures = newValue;
+            if (newValue) {
+                String msg = "<html>The following experimental features have been enabled:<ul>" +
+                             "<li>Smart objects</li>" +
+                             "<li>Gradient fill layers</li>" +
+                             "<li>Color fill layers</li>" +
+                             "<li>Theme chooser in Preferences</li>" +
+                             "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental smart objects.<br>" +
+                             "Some experimental features will be fully activated<br>only after restarting Pixelitor.";
+                Dialogs.showWarningDialog("Experimental Features", msg);
+            }
+        }
     }
 }

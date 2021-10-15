@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
 import static pixelitor.gui.GUIText.ZOOM;
+import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 import static pixelitor.menus.view.ZoomMenu.ACTUAL_PIXELS_TOOLTIP;
 import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
 
@@ -47,7 +48,6 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     private final JButton actualPixelsButton;
 
     private boolean enabled = true;
-    private final ZoomLevel[] zoomLevels = ZoomLevel.values();
 
     private ZoomControl() {
         super(new FlowLayout(LEFT, 0, 0));
@@ -128,7 +128,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     public void changeZoom(ZoomLevel newZoom) {
         setEnabled(true);
 
-        zoomSlider.setValue(newZoom.ordinal());
+        zoomSlider.setValue(newZoom.getSliderValue());
         setZoomText(newZoom);
     }
 

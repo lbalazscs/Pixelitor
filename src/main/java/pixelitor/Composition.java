@@ -900,6 +900,9 @@ public class Composition implements Serializable {
     // The GUI doesn't have to be updated.
     public void changeLayerIndex(Layer layer, int newIndex) {
         int oldIndex = layerList.indexOf(layer);
+        if (oldIndex == newIndex) {
+            return;
+        }
 
         layerList.remove(layer);
         layerList.add(newIndex, layer);

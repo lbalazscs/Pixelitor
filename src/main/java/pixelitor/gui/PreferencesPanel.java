@@ -196,8 +196,6 @@ public class PreferencesPanel extends JPanel {
 
     private void addExperimentalCB(GridBagHelper gbh) {
         experimentalCB = new JCheckBox("", AppContext.enableExperimentalFeatures);
-        experimentalCB.addActionListener(e ->
-            AppContext.enableExperimentalFeatures = experimentalCB.isSelected());
         gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
@@ -323,6 +321,7 @@ public class PreferencesPanel extends JPanel {
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         AppPreferences.magickDirName = magickDirName;
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
+        AppContext.enableExperimental(experimentalCB.isSelected());
 
         return true;
     }

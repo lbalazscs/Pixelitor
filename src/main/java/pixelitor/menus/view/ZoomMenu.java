@@ -78,18 +78,6 @@ public class ZoomMenu extends PMenu {
         add(FIT_SPACE_ACTION, FIT_SPACE_KEY);
         add(FIT_WIDTH_ACTION);
         add(FIT_HEIGHT_ACTION);
-
-        addSeparator();
-
-        ZoomLevel[] zoomLevels = ZoomLevel.values();
-        for (ZoomLevel level : zoomLevels) {
-            ZoomMenuItem menuItem = level.getMenuItem();
-            if (level == ZoomLevel.Z100) {
-                menuItem.setSelected(true);
-            }
-            add(menuItem);
-            radioGroup.add(menuItem);
-        }
     }
 
     public static void setupZoomKeys(JComponent c) {
@@ -108,12 +96,5 @@ public class ZoomMenu extends PMenu {
         // ctrl + alt + numpad 0 = fit screen
         inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SPACE);
         actionMap.put(ACTION_MAP_KEY_FIT_SPACE, FIT_SPACE_ACTION);
-    }
-
-    /**
-     * Called when the active image has changed
-     */
-    public static void zoomChanged(ZoomLevel zoomLevel) {
-        zoomLevel.getMenuItem().setSelected(true);
     }
 }
