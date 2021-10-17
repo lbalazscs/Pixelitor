@@ -31,7 +31,7 @@ enum MotionBlurQuality {
         @Override
         public MotionBlur createFilter(String filterName) {
             var filter = new MotionBlurFilter(filterName);
-            filter.setPremultiplyAlpha(false);
+            filter.setPremultiplyAlpha(true);
             filter.setWrapEdges(false);
             return filter;
         }

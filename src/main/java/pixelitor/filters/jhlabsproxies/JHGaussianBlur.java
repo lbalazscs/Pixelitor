@@ -58,7 +58,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
         }
 
         filter.setRadius(radius.getValueAsFloat());
-        filter.setPremultiplyAlpha(false);
+        filter.setPremultiplyAlpha(true);
         filter.setUseAlpha(!keepAlpha.isChecked());
 
         dest = filter.filter(src, dest);

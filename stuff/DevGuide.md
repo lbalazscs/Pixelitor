@@ -6,14 +6,14 @@ This work-in-progress document contains information that could be useful for Pix
 
 There are many good online tutorials for Swing and for the Java 2D API, but there isn't much about the internals of BufferedImage, therefore I wrote the following overview.
 
-A [```BufferedImage```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/BufferedImage.html) consists of a [```Raster```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/Raster.html) and a [```ColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/ColorModel.html).   
-The ```Raster``` contains the pixels, and the ```ColorModel``` knows how to interpret the pixels as colors (more exactly ```ColorModel``` interprets the pixels as color components, and its [```ColorSpace```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/color/ColorSpace.html) interprets the color components as actual colors).
+A [```BufferedImage```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BufferedImage.html) consists of a [```Raster```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/Raster.html) and a [```ColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/ColorModel.html).   
+The ```Raster``` contains the samples (pixel values), and the ```ColorModel``` knows how to interpret the samples as colors (more exactly ```ColorModel``` interprets the samples as color components, and its [```ColorSpace```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/color/ColorSpace.html) interprets the color components as actual colors).
 
 ## Color Models
 
-It's important to understand that the pixel values in a ```Raster``` are not necessarily colors, [indexed-color](https://en.wikipedia.org/wiki/Indexed_color) images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
+It's important to understand that the pixel values in a ```Raster``` are not necessarily colors, [indexed-color](https://en.wikipedia.org/wiki/Indexed_color) images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
 
-[```PackedColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/PackedColorModel.html) means that the colors are packed inside the pixel values. "Packed" always means that multiple values are packed into a larger Java primitive, and they can be retrieved by bit-shifting. For example four 8-bit values could be packed in a single 32-bit int in ARGB order, and they could be retrieved like this:
+[```PackedColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/PackedColorModel.html) means that the colors are packed inside the pixel values. "Packed" always means that multiple values are packed into a larger Java primitive, and they can be retrieved by bit-shifting. For example four 8-bit values could be packed in a single 32-bit int in ARGB order, and they could be retrieved like this:
 
 ```java
     int packed = ...
@@ -23,27 +23,36 @@ It's important to understand that the pixel values in a ```Raster``` are not nec
     int blue = packed & 0xFF;
 ```
 
-```PackedColorModel``` has a subclass specialized for RGB, called [```DirectColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/DirectColorModel.html).
+```PackedColorModel``` has a subclass specialized for RGB, called [```DirectColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DirectColorModel.html).
 
-[```ComponentColorModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/ComponentColorModel.html) means that the colors are not indexed, but also not packed, there is a 1:1 correspondence between the color components and array elements. This works with ```ComponentSampleModel``` (see bellow).
+[```ComponentColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/ComponentColorModel.html) means that the colors are not indexed, but also not packed, there is a 1:1 correspondence between the color components and array elements. This works with ```ComponentSampleModel``` (see bellow).
 
 ## Rasters
 
-A ```Raster``` consists of a [```SampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/SampleModel.html) and a [```DataBuffer```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/DataBuffer.html).
+A ```Raster``` consists of a [```SampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/SampleModel.html) and a [```DataBuffer```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DataBuffer.html).
 
 ### Data Buffers
 
-A ```DataBuffer``` stores the image data at the lowest level, as Java arrays. These arrays are called banks (not to be confused with bands - a band usually corresponds to a color channel, for example all the red values within an RGB image). For example [```DataBufferInt```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/DataBufferInt.html) stores the data in int arrays.
+A ```DataBuffer``` stores the image data at the lowest level, as Java arrays. For example [```DataBufferInt```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DataBufferInt.html) stores the data in int arrays.
+
+A ```DataBuffer```contains one or more *banks*. The banks don't have to be different arrays, each bank can be part of the same array. Banks should not to be confused with *bands* - a band is a group of pixel samples of the same kind, usually is corresponds to a color channel, for example all the red values within an RGB image. 
+
+
+A *data element* is one entry in a bank/array. A ```DataBuffer``` can set the individual data elements in its banks. 
 
 ### Sample Models
 
-Each pixel consists of a number of samples, which (together with the color model and its color space) will determine the color of the pixels. ```SampleModel``` knows how to get pixel samples from a data buffer's array(s). Sample models are about converting raw Java arrays to pixel data, which may or may not be the same as the color data (depending on the color model).
+Each pixel consists of a number of [samples](https://en.wikipedia.org/wiki/Sample_(graphics)), which (together with the color model and its color space) will determine the color of the pixels. For example the R, G, B values can be the samples of an RGB pixel, C, M, Y, K can be the sample of an CMKY pixel. In the case of indexed-color images, a sample is just an integer index in the palette. Sample Models are "color blind", the same sample model could be used for CMKY and for ARGB images, the color interpretation is done by the color models.
 
-A common sample model is [```SinglePixelPackedSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/SinglePixelPackedSampleModel.html), which says that every pixel value is packed in an array element. ```SinglePixelPackedSampleModel``` works well with ```PackedColorModel```.
+The subclasses of ```SampleModel``` know how to get pixel samples from a data buffer's array(s). Sample models convert raw Java arrays to pixel data, which may or may not be the same as the color data (depending on the color model).
 
-[```MultiPixelPackedSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/MultiPixelPackedSampleModel.html) can be used for single channel images, where multiple pixels are packed in a single array element, for example four 8-bit grayscale pixels are packed into a 32-bit Java int.
+A common sample model is [```SinglePixelPackedSampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/SinglePixelPackedSampleModel.html), which packs all samples of a pixel into a single array element. ```SinglePixelPackedSampleModel``` works well with ```PackedColorModel```.
 
-[```ComponentSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/ComponentSampleModel.html) says that a pixel is stored in multiple array elements, for example the [```BandedSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/BandedSampleModel.html) subclass could mean that all red pixels are stored in one array (band=channel), and there are different green and blue arrays. The [```PixelInterleavedSampleModel```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/PixelInterleavedSampleModel.html) subclass means that the channels are interleaved in a single array, like for example [R, G, B, R, G, B, ...]. ```ComponentSampleModel``` works well with ```ComponentColorModel```.
+[```MultiPixelPackedSampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/MultiPixelPackedSampleModel.html) can be used for single channel images, where multiple pixels are packed in a single array element, for example four 8-bit grayscale pixels are packed into a 32-bit Java int.
+
+A [```ComponentSampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/ComponentSampleModel.html) stores pixel samples in separate data elements in the banks/arrays. The [```BandedSampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BandedSampleModel.html) subclass stores different pixels samples in separate data banks, for example an array could contain all the red values, then all the green values, and finally the blue values (3 different banks in the same array): [R, R, R, ..., G, G, G, ..., B, B, B...]. The [```PixelInterleavedSampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/PixelInterleavedSampleModel.html) subclass stores the pixels interleaved in a single array, like for example [R, G, B, R, G, B, ...]. 
+
+```ComponentSampleModel``` works well with ```ComponentColorModel```.
 
 ## The Rules of the Game
 
@@ -58,9 +67,9 @@ Different ```ColorModel```, ```SampleModel``` and ```DataBuffer``` subclasses ca
 
 # Understanding ```BufferedImageOp``` and the JH Labs filters
 
-There are two ways to change a buffered image. You can call ```createGraphics()``` on it to create a [```Graphics2D```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/Graphics2D.html). This allows you to draw on the image, but what you draw will not depend on the existing pixels values. If you do this, don't forget to call ```dispose()``` on the Graphics2D object when you are done.
+There are two ways to change a buffered image. You can call ```createGraphics()``` on it to create a [```Graphics2D```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/Graphics2D.html). This allows you to draw on the image, but what you draw will not depend on the existing pixels values. If you do this, don't forget to call ```dispose()``` on the Graphics2D object when you are done.
 
-The more powerful way to change a buffered image is  [```BufferedImageOp```](https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/java/awt/image/BufferedImageOp.html), which can create a new image based on the existing pixels. Most filters in Pixelitor either use the [JH Labs filters](http://www.jhlabs.com/ip/filters/) directly or extend its base classes. Note that Pixelitor uses an improved version of the original JH Labs filters, with added multithreading, progress tracking, bugfixes, and other improvements.
+The more powerful way to change a buffered image is  [```BufferedImageOp```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BufferedImageOp.html), which can create a new image based on the existing pixels. Most filters in Pixelitor either use the [JH Labs filters](http://www.jhlabs.com/ip/filters/) directly or extend its base classes. Note that Pixelitor uses an improved version of the original JH Labs filters, with added multithreading, progress tracking, bugfixes, and other improvements.
 
 The ```BufferedImageOp``` implementations in the JDK are not very useful for Pixelitor, but ```com.jhlabs.image.AbstractBufferedImageOp``` is a good base class for image filters. ```org.jdesktop.swingx.image.AbstractFilter``` is a similar idea, but its subclasses are less powerful. The most important subclasses of ```AbstractBufferedImageOp``` are the following:
 

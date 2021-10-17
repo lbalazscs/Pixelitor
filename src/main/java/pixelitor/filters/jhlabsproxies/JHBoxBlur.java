@@ -68,7 +68,7 @@ public class JHBoxBlur extends ParametrizedFilter {
         filter.setHRadius(hRadius);
         filter.setVRadius(vRadius);
         filter.setIterations(numberOfIterations.getValue());
-        filter.setPremultiplyAlpha(false);
+        filter.setPremultiplyAlpha(true);
 
         dest = filter.filter(src, dest);
 
