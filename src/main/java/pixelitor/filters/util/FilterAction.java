@@ -70,6 +70,8 @@ public class FilterAction extends DrawableAction {
     protected void process(Drawable dr) {
         createCachedFilter();
         if (dr instanceof SmartObject so) {
+            // this logic is here and not in Filter because for
+            // smart objects a new Filter instance is created
             if (!filter.canBeSmart()) {
                 String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
                 Messages.showInfo("Dumb Filter", msg);
@@ -81,7 +83,7 @@ public class FilterAction extends DrawableAction {
                 return;
             }
             Filter newFilter = createNewInstanceFilter();
-            if (newFilter.startOn(dr, false)) {
+            if (newFilter.startOn(dr, true)) {
                 so.addSmartFilter(newFilter);
             }
             return;

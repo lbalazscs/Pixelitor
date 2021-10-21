@@ -19,8 +19,10 @@ package pixelitor.utils;
 
 import com.jhlabs.composite.OverlayComposite;
 import com.jhlabs.composite.ScreenComposite;
+import com.jhlabs.image.AbstractBufferedImageOp;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
+import com.jhlabs.image.ImageMath;
 import com.twelvemonkeys.image.ImageUtil;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
@@ -322,7 +324,7 @@ public class ImageUtils {
         assert image != null;
 
         int type = image.getType();
-        return (type == TYPE_INT_ARGB_PRE || type == TYPE_INT_RGB || type == TYPE_INT_ARGB);
+        return (type == TYPE_INT_ARGB_PRE || type == TYPE_INT_ARGB || type == TYPE_INT_RGB);
     }
 
     /**
@@ -1200,5 +1202,34 @@ public class ImageUtils {
             throw new UnsupportedOperationException("img class is " + img.getClass().getName());
         }
         return copy;
+    }
+
+    public static void unpremultiply(BufferedImage dest) {
+        int[] pixels = getPixelsAsArray(dest);
+        ImageMath.unpremultiply(pixels);
+    }
+
+    public static void premultiply(BufferedImage src) {
+        int[] pixels = getPixelsAsArray(src);
+        ImageMath.premultiply(pixels);
+    }
+
+    public static BufferedImage filterPremultiplied(BufferedImage src,
+                                                    BufferedImage dest,
+                                                    AbstractBufferedImageOp filter) {
+        BufferedImage filterSrc = src;
+
+        boolean premultiply = !src.isAlphaPremultiplied() && hasPackedIntArray(src);
+        if (premultiply) {
+            filterSrc = copyImage(src);
+            premultiply(filterSrc);
+        }
+
+        dest = filter.filter(filterSrc, dest);
+
+        if (premultiply) {
+            unpremultiply(dest);
+        }
+        return dest;
     }
 }

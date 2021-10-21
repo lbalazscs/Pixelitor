@@ -854,6 +854,10 @@ public class ImageMath {
         }
     }
 
+    public static void premultiply(int[] p) {
+        premultiply(p, 0, p.length);
+    }
+
     /**
      * Premultiply a block of pixels
      */
@@ -871,6 +875,10 @@ public class ImageMath {
             b = (int) (b * f);
             p[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
+    }
+
+    public static void unpremultiply(int[] p) {
+        unpremultiply(p, 0, p.length);
     }
 
     /**

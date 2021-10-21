@@ -99,7 +99,7 @@ public class JHFocus extends ParametrizedFilter {
         filter.setVRadius(blurRadius.getValueAsFloat(1));
 
         filter.setIterations(numberOfIterations.getValue());
-        filter.setPremultiplyAlpha(true);
+        filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
         filter.setShape(shape.getValue());
 
         dest = filter.filter(src, dest);

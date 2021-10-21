@@ -178,11 +178,13 @@ public class SmartObject extends ImageLayer {
         });
         if (!smartFilters.isEmpty()) {
             JMenu filtersMenu = new JMenu("Smart Filters");
-            for (Filter smartFilter : smartFilters) {
+            for (int i = 0; i < smartFilters.size(); i++) {
+                int finalI = i;
+                Filter smartFilter = smartFilters.get(i);
                 PAction editAction = new PAction("Edit " + smartFilter.getName()) {
                     @Override
                     public void onClick() {
-                        editSmartFilter(smartFilter);
+                        editSmartFilter(finalI);
                     }
                 };
 
@@ -250,8 +252,9 @@ public class SmartObject extends ImageLayer {
         }
     }
 
-    public void editSmartFilter(Filter filter) {
-        indexOfLastSmartFilter = smartFilters.indexOf(filter);
+    public void editSmartFilter(int index) {
+        indexOfLastSmartFilter = index;
+        Filter filter = smartFilters.get(index);
         lastFilterOutput = image;
         if (filter instanceof ParametrizedFilter pf) {
             lastFilterState = pf.getParamSet().copyState(false);

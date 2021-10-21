@@ -593,7 +593,7 @@ public class MenuBar extends JMenuBar {
             public void onActiveLayer(Layer layer) {
                 SmartObject so = (SmartObject) layer;
                 if (so.hasSmartFilters()) {
-                    so.editSmartFilter(so.getSmartFilter(0));
+                    so.editSmartFilter(0);
                 } else {
                     Messages.showInfo("No Smart Filters",
                         "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");

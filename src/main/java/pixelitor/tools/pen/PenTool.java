@@ -59,7 +59,6 @@ public class PenTool extends Tool {
 
     private final Action toSelectionAction;
     private final Action exportSVGAction;
-    private final Action dumpPathAction;
 
     private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
@@ -104,13 +103,6 @@ public class PenTool extends Tool {
             }
         };
 
-        dumpPathAction = new PAction("Dump") {
-            @Override
-            public void onClick() {
-                assert hasPath();
-                path.dump();
-            }
-        };
         enableActions(false);
     }
 
@@ -132,7 +124,6 @@ public class PenTool extends Tool {
         settingsPanel.addButton(exportSVGAction, "exportSVGButton",
             "Export the path to an SVG file");
 
-
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
 
@@ -144,10 +135,6 @@ public class PenTool extends Tool {
             "Stroke the path using the current settings of the Smudge Tool");
         settingsPanel.addButton(deletePath, "deletePath",
             "Delete the path");
-
-        if (AppContext.isDevelopment()) {
-            settingsPanel.addButton(dumpPathAction, "dumpPathAction", "");
-        }
     }
 
     public void setModeChooserCombo(PenToolMode mode) {
@@ -468,7 +455,6 @@ public class PenTool extends Tool {
 //        traceAction.setEnabled(b);
 
         deletePath.setEnabled(b);
-        dumpPathAction.setEnabled(b);
     }
 
     @VisibleForTesting

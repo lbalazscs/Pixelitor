@@ -91,8 +91,8 @@ public class UnsharpFilter extends GaussianFilter {
 
         int[] outPixels = new int[width * height];
         if (radius > 0) {
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES, pt);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, CLAMP_EDGES, pt);
         }
 
         // src.getRGB(0, 0, width, height, outPixels, 0, width);

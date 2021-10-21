@@ -59,7 +59,7 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
             return src;
         }
 
-        MotionBlur filter = quality.getSelected().createFilter(NAME);
+        MotionBlur filter = quality.getSelected().createFilter(NAME, src);
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());

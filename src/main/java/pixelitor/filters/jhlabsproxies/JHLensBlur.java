@@ -62,7 +62,7 @@ public class JHLensBlur extends ParametrizedFilter {
         filter.setBloom(bloomFactor.getValueAsFloat());
         filter.setBloomThreshold(bloomThreshold.getValueAsFloat());
 
-        dest = filter.filter(src, dest);
+        dest = ImageUtils.filterPremultiplied(src, dest, filter);
 
         if (hpSharpening.isChecked()) {
             dest = ImageUtils.getHighPassSharpenedImage(src, dest);

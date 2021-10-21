@@ -41,7 +41,14 @@ public class RepeatLast extends DrawableAction {
     private final boolean showDialog;
 
     private RepeatLast(boolean showDialog) {
-        super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME);
+        // TODO This should be available for smart objects, however some technical
+        // problems prevent it at the moment: smart objects are handled in
+        // FilterAction (because it might need to create a new filter instance),
+        // however here we have a Filter which is not guaranteed to have
+        // an action (deserialized smart filter). Perhaps an action could be searched
+        // by the filter name.
+        super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
+            showDialog, false);
         this.showDialog = showDialog;
         setEnabled(false);
     }
@@ -77,7 +84,7 @@ public class RepeatLast extends DrawableAction {
         REPEAT_LAST_ACTION.setEnabled(true);
 
         if (lastFilter instanceof FilterWithGUI) {
-            SHOW_LAST_ACTION.setText("Show " + lastFilter.getName());
+            SHOW_LAST_ACTION.setText("Show " + lastFilter.getName() + "...");
             SHOW_LAST_ACTION.setEnabled(true);
         } else {
             SHOW_LAST_ACTION.setText(REPEAT_LAST_DEFAULT_NAME);

@@ -65,7 +65,7 @@ public class JHSmartBlur extends ParametrizedFilter {
 
         filter.setThreshold(threshold.getValue());
 
-        dest = filter.filter(src, dest);
+        dest = ImageUtils.filterPremultiplied(src, dest, filter);
 
         if (hpSharpening.isChecked()) {
             dest = ImageUtils.getHighPassSharpenedImage(src, dest);

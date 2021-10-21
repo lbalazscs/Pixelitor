@@ -36,11 +36,6 @@ public class GaussianFilter extends ConvolveFilter {
     protected float radius;
 
     /**
-     * Whether to convolve alpha.
-     */
-    protected boolean alpha = true;
-
-    /**
      * Construct a Gaussian filter.
      */
     public GaussianFilter(String filterName) {
@@ -55,26 +50,6 @@ public class GaussianFilter extends ConvolveFilter {
     public GaussianFilter(float radius, String filterName) {
         super(filterName);
         setRadius(radius);
-    }
-
-    /**
-     * Set whether to convolve the alpha channel.
-     *
-     * @param useAlpha true to convolve the alpha
-     * @see #getUseAlpha
-     */
-    public void setUseAlpha(boolean useAlpha) {
-        alpha = useAlpha;
-    }
-
-    /**
-     * Get whether to convolve the alpha channel.
-     *
-     * @return true to convolve the alpha
-     * @see #setUseAlpha
-     */
-    public boolean getUseAlpha() {
-        return alpha;
     }
 
     /**
@@ -119,8 +94,8 @@ public class GaussianFilter extends ConvolveFilter {
 
         if (radius > 0) {
             int[] outPixels = new int[width * height];
-            convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES, pt);
-            convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, inPixels, outPixels, width, height, premultiplyAlpha, false, CLAMP_EDGES, pt);
+            convolveAndTranspose(kernel, outPixels, inPixels, height, width, false, premultiplyAlpha, CLAMP_EDGES, pt);
         }
 
 //        dst.setRGB(0, 0, width, height, inPixels, 0, width);
@@ -142,7 +117,8 @@ public class GaussianFilter extends ConvolveFilter {
      * @param alpha      whether to blur the alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolveAndTranspose(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply,
+    public static void convolveAndTranspose(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height,
+                                            boolean premultiply, boolean unpremultiply,
                                             int edgeAction, ProgressTracker pt) {
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
@@ -151,20 +127,17 @@ public class GaussianFilter extends ConvolveFilter {
         Future<?>[] resultLines = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> convolveAndTransposeLine(inPixels, outPixels, width, height, alpha, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
+            Runnable lineTask = () -> convolveAndTransposeLine(inPixels, outPixels, width, height, premultiply, unpremultiply, edgeAction, matrix, cols2, finalY);
             resultLines[y] = ThreadPool.submit(lineTask);
         }
 
         ThreadPool.waitFor(resultLines, pt);
     }
 
-    private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
+    private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
         int index = y;
         int ioffset = y * width;
         for (int x = 0; x < width; x++) {
-            int origPacked = inPixels[ioffset + x];
-            int origAlpha = (origPacked >> 24) & 0xff;
-
             float r = 0, g = 0, b = 0, a = 0;
             int moffset = cols2;
             for (int col = -cols2; col <= cols2; col++) {
@@ -212,12 +185,8 @@ public class GaussianFilter extends ConvolveFilter {
             int ir = PixelUtils.clamp((int) (r + 0.5));
             int ig = PixelUtils.clamp((int) (g + 0.5));
             int ib = PixelUtils.clamp((int) (b + 0.5));
-            if (alpha) {
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
-                outPixels[index] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
-            } else {
-                outPixels[index] = (origAlpha << 24) | (ir << 16) | (ig << 8) | ib;
-            }
+            int ia = PixelUtils.clamp((int) (a + 0.5));
+            outPixels[index] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
 
             index += height;
         }

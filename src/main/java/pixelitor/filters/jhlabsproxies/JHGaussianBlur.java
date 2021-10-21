@@ -34,7 +34,6 @@ public class JHGaussianBlur extends ParametrizedFilter {
     public static final String NAME = "Gaussian Blur";
 
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 2, 101);
-    private final BooleanParam keepAlpha = new BooleanParam("Keep Transparency", true);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private GaussianFilter filter;
@@ -44,7 +43,6 @@ public class JHGaussianBlur extends ParametrizedFilter {
 
         setParams(
             radius.withDecimalPlaces(1),
-            keepAlpha,
             hpSharpening
         );
 
@@ -58,10 +56,9 @@ public class JHGaussianBlur extends ParametrizedFilter {
         }
 
         filter.setRadius(radius.getValueAsFloat());
-        filter.setPremultiplyAlpha(true);
-        filter.setUseAlpha(!keepAlpha.isChecked());
+        filter.setPremultiplyAlpha(false);
 
-        dest = filter.filter(src, dest);
+        dest = ImageUtils.filterPremultiplied(src, dest, filter);
 
         if (hpSharpening.isChecked()) {
             dest = ImageUtils.getHighPassSharpenedImage(src, dest);

@@ -197,7 +197,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
                         public void mouseClicked(MouseEvent e) {
                             setSelected(true);
                             if (e.getClickCount() >= 2) {
-                                so.editSmartFilter(smartFilter);
+                                so.editSmartFilter(0);
                             }
                         }
                     });

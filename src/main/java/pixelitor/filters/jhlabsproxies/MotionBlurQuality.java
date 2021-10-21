@@ -20,18 +20,21 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MotionBlur;
 import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
+import pixelitor.utils.ImageUtils;
+
+import java.awt.image.BufferedImage;
 
 enum MotionBlurQuality {
     FASTER("Faster") {
         @Override
-        public MotionBlur createFilter(String filterName) {
+        public MotionBlur createFilter(String filterName, BufferedImage src) {
             return new MotionBlurOp(filterName);
         }
     }, BETTER("High Quality (slower)") {
         @Override
-        public MotionBlur createFilter(String filterName) {
+        public MotionBlur createFilter(String filterName, BufferedImage src) {
             var filter = new MotionBlurFilter(filterName);
-            filter.setPremultiplyAlpha(true);
+            filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
             filter.setWrapEdges(false);
             return filter;
         }
@@ -43,7 +46,7 @@ enum MotionBlurQuality {
         this.guiName = guiName;
     }
 
-    public abstract MotionBlur createFilter(String filterName);
+    public abstract MotionBlur createFilter(String filterName, BufferedImage src);
 
     @Override
     public String toString() {
