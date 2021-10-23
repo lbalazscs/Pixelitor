@@ -18,10 +18,7 @@
 package pixelitor;
 
 import pixelitor.compactions.EnlargeCanvas;
-import pixelitor.gui.GUIText;
-import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.View;
+import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.guides.Guides;
@@ -333,6 +330,17 @@ public class Composition implements Serializable {
 
     public String calcTitle() {
         return name + " (" + canvas.getSizeString() + ")";
+    }
+
+    public void rename(TabViewContainer owner) {
+        String oldName = getName();
+        String newName = JOptionPane.showInputDialog(owner,
+            "New Name:", (Object) oldName);
+        if (oldName.equals(newName)) {
+            return;
+        }
+        setName(newName);
+        History.add(new CompRenamedEdit(this, oldName, newName));
     }
 
     public void setName(String name) {

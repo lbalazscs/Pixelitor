@@ -22,6 +22,7 @@ import pixelitor.OpenImages;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
@@ -144,9 +145,16 @@ public class SmartObject extends ImageLayer {
         // the reference might have been changed during editing
         this.content = content;
 
+        if (!content.isDirty()) {
+            return;
+        }
+
         recalculateImage();
         comp.update();
         updateIconImage();
+
+        // as long as there is no undo, it's necessary to manually set this
+        comp.setDirty(true);
     }
 
     @Override
@@ -205,7 +213,13 @@ public class SmartObject extends ImageLayer {
 
     @Override
     public void edit() {
-        OpenImages.addAsNewComp(content);
+        View contentView = content.getView();
+        if (contentView == null) {
+            OpenImages.addAsNewComp(content);
+            content.setDirty(false);
+        } else {
+            OpenImages.setActiveView(contentView, true);
+        }
     }
 
     public boolean hasSmartFilters() {

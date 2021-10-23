@@ -105,6 +105,15 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private void showPopup(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
 
+        popup.add(new PAction("Rename...") {
+            @Override
+            public void onClick() {
+                view.getComp().rename(TabViewContainer.this);
+            }
+        });
+
+        popup.addSeparator();
+
         // close the clicked one, even if it is not the active!
         popup.add(new PAction(i18n("close")) {
             @Override
