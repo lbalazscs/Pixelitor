@@ -411,25 +411,25 @@ public final class AppPreferences {
         return ((retVal + 4) / 5) * 5;
     }
 
-    public static ImageAreaSavedInfo loadDesktopMode() {
+    public static ImageAreaConfig loadDesktopMode() {
         String value = mainNode.get(UI_KEY, "TabsN");
         if (value.startsWith("Tabs")) {
             return loadSavedTabsInfo(value);
         } else {
             // return TOP tab placement so that if the user
             // changes the UI via preferences, this will be set
-            return new ImageAreaSavedInfo(FRAMES, TOP);
+            return new ImageAreaConfig(FRAMES, TOP);
         }
     }
 
-    private static ImageAreaSavedInfo loadSavedTabsInfo(String value) {
+    private static ImageAreaConfig loadSavedTabsInfo(String value) {
         int tabPlacement = switch (value) {
             case "TabsL" -> LEFT;
             case "TabsR" -> RIGHT;
             case "TabsB" -> BOTTOM;
             default -> TOP;
         };
-        return new ImageAreaSavedInfo(TABS, tabPlacement);
+        return new ImageAreaConfig(TABS, tabPlacement);
     }
 
     private static void saveDesktopMode() {

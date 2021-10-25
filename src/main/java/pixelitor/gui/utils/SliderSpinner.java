@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 
@@ -42,13 +45,14 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
     private final TextPosition textPosition;
     private final int orientation;
+    private JPanel spinnerPanel;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
     }
 
     public static final int HORIZONTAL = JSlider.HORIZONTAL;
-    public static final int VERTICAL   = JSlider.VERTICAL;
+    public static final int VERTICAL = JSlider.VERTICAL;
 
     private final JSlider slider;
     private final JSpinner spinner;
@@ -121,15 +125,15 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             label = null;
         }
 
-        var p = new JPanel(new FlowLayout(LEFT));
+        spinnerPanel = new JPanel(new FlowLayout(LEFT));
         add(slider, CENTER);
-        p.add(spinner);
+        spinnerPanel.add(spinner);
 
         if (addDefaultButton) {
             createDefaultButton(model);
-            p.add(defaultButton);
+            spinnerPanel.add(defaultButton);
         }
-        add(p, orientation==HORIZONTAL?EAST:SOUTH);
+        add(spinnerPanel, orientation == HORIZONTAL ? EAST : SOUTH);
 
 //        showTicksAsFloat();
     }
@@ -158,16 +162,16 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 throw new IllegalStateException();
             }
             spinnerModel = new SpinnerNumberModel(
-                    model.getValueAsDouble(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    stepSize);
+                model.getValueAsDouble(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                stepSize);
         } else {
             spinnerModel = new SpinnerNumberModel(
-                    model.getValue(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    1);
+                model.getValue(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                1);
         }
         JSpinner s = new JSpinner(spinnerModel);
 
@@ -189,6 +193,11 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (colorsUsed) {
             defaultButton.setBackground(GRAY);
         }
+    }
+
+    public void addExplicitDefaultButton(DefaultButton defaultButton) {
+        this.defaultButton = defaultButton;
+        spinnerPanel.add(defaultButton);
     }
 
     public void setupTicks() {

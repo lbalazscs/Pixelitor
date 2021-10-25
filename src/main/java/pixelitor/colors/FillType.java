@@ -22,7 +22,7 @@ import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 
-import static pixelitor.colors.Colors.TRANSPARENT_COLOR;
+import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.utils.Texts.i18n;
@@ -44,7 +44,7 @@ public enum FillType {
     }, TRANSPARENT("Transparent") {
         @Override
         public Color getColor() {
-            return TRANSPARENT_COLOR;
+            return TRANSPARENT_BLACK;
         }
     }, FOREGROUND(GUIText.FG_COLOR) {
         @Override

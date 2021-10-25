@@ -42,6 +42,8 @@ public class Orton extends ParametrizedFilter {
             blurRadius.withAdjustedRange(0.01),
             amount
         );
+
+        helpURL = "https://en.wikipedia.org/wiki/Orton_(photography)";
     }
 
     @Override

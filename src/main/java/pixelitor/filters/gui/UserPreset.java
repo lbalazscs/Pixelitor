@@ -83,6 +83,11 @@ public class UserPreset {
     public String get(String key) {
         String value = content.get(key);
         if (value == null) {
+            // oct 2021: temporary hack for compatible color list upgrade of starburst
+            if ("Ray Colors".equals(key)) {
+                value = content.get("Ray Color");
+            }
+
             System.out.println("UserPreset::get: no value found for the key " + key);
         }
         return value;

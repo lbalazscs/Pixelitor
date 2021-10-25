@@ -32,7 +32,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.*;
-import static pixelitor.colors.Colors.TRANSPARENT_COLOR;
+import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
@@ -41,7 +41,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
 public class TransformLayer extends ParametrizedFilter {
     private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
-    private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_COLOR, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, USER_ONLY_TRANSPARENCY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 501);
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 

@@ -20,27 +20,23 @@ package pixelitor.filters;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ReseedSupport;
-import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 
-import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Fill with Starburst filter
@@ -49,43 +45,33 @@ public class Starburst extends ParametrizedFilter {
     public static final String NAME = "Starburst";
     private static final int SPIRAL_RESOLUTION = 100;
 
-    private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
+    @Serial
+    private static final long serialVersionUID = 1337459373010709379L;
+
+    private final RangeParam numRaysParam = new RangeParam("Number of Rays", 2, 12, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
-    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, USER_ONLY_TRANSPARENCY);
-    private final BooleanParam randomColors = new BooleanParam("Random Ray Colors", false, IGNORE_RANDOMIZE);
+    private final ColorListParam rayColorsParam = new ColorListParam("Ray Colors",
+        1, WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
+        Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final RangeParam spiralParam = new RangeParam("Spiral", -200, 0, 200);
 
     public Starburst() {
         super(false);
 
-        var reseedColorsAction = ReseedSupport.createAction(
-            "Reseed", "Changes the random colors");
-
         setParams(
-            numberOfRaysParam,
+            numRaysParam,
             bgColor,
-            raysColor,
-            randomColors.withAction(reseedColorsAction),
+            rayColorsParam,
             center,
             rotate,
             spiralParam
         );
-
-        // enable the "Reseed Colors" button only if
-        // the "Random Ray Colors" checkbox is checked
-        randomColors.setupEnableOtherIfChecked(reseedColorsAction);
-
-        // enable the "Ray Color" color selector only if
-        // the "Random Ray Colors" checkbox is *not* checked
-        randomColors.setupDisableOtherIfChecked(raysColor);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.getLastSeedRandom();
-
         dest = ImageUtils.copyImage(src);
 
         int width = dest.getWidth();
@@ -93,23 +79,12 @@ public class Starburst extends ParametrizedFilter {
 
         Graphics2D g = dest.createGraphics();
         Colors.fillWith(bgColor.getColor(), g, width, height);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         float cx = width * center.getRelativeX();
         float cy = height * center.getRelativeY();
-        boolean useRandomColors = randomColors.isChecked();
 
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        if (useRandomColors) {
-            // still use the alpha of the selected color
-            int alpha = raysColor.getColor().getAlpha();
-            if (alpha != 255) {
-                g.setComposite(AlphaComposite.getInstance(SRC_OVER, alpha / 255.0f));
-            }
-        } else {
-            g.setColor(raysColor.getColor());
-        }
-
-        int numberOfRays = numberOfRaysParam.getValue();
+        int numberOfRays = numRaysParam.getValue();
 
         double sliceWidthAngle = Math.PI / numberOfRays;
         double sliceAngle = rotate.getValueInRadians();
@@ -117,6 +92,8 @@ public class Starburst extends ParametrizedFilter {
         double radius = width + height; // should be enough even if the center is outside the image
         double spiral = spiralParam.getPercentageValD();
 
+        Color[] rayColors = rayColorsParam.getColors();
+        int numRayColors = rayColors.length;
         for (int i = 0; i < numberOfRays; i++) {
             var slice = new Path2D.Double();
             slice.moveTo(cx, cy);
@@ -147,9 +124,7 @@ public class Starburst extends ParametrizedFilter {
             }
             slice.closePath();
 
-            if (useRandomColors) {
-                g.setColor(Rnd.createRandomColor(rand, false));
-            }
+            g.setColor(rayColors[i % numRayColors]);
             g.fill(slice);
 
             sliceAngle += sliceWidthAngle; // leave out a slice

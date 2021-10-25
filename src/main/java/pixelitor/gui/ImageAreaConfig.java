@@ -20,5 +20,5 @@ package pixelitor.gui;
 /**
  * Represents the information that is saved about an {@link ImageArea}.
  */
-public record ImageAreaSavedInfo(ImageArea.Mode mode, int tabPlacement) {
+public record ImageAreaConfig(ImageArea.Mode mode, int tabPlacement) {
 }

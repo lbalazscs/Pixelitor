@@ -48,7 +48,17 @@ import static java.lang.String.format;
  * Color-related static utility methods.
  */
 public class Colors {
-    public static final Color TRANSPARENT_COLOR = new Color(0, true);
+    public static final Color TRANSPARENT_BLACK = new Color(0, true);
+
+    // "color wheel" colors
+    public static final Color CW_RED = new Color(233, 28, 35);
+    public static final Color CW_GREEN = new Color(58, 180, 67);
+    public static final Color CW_BLUE = new Color(43, 115, 191);
+    public static final Color CW_ORANGE = new Color(248, 175, 62);
+    public static final Color CW_TEAL = new Color(40, 167, 158);
+    public static final Color CW_VIOLET = new Color(145, 37, 144);
+    public static final Color CW_YELLOW = new Color(251, 240, 2);
+
 
     private Colors() {
     }
