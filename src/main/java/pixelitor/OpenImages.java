@@ -365,7 +365,7 @@ public class OpenImages {
         warnAndCloseAllIf(view -> view != selected);
     }
 
-    public static void warnAndCloseUnmodified() {
+    private static void warnAndCloseUnmodified() {
         warnAndCloseAllIf(view -> !view.getComp().isDirty());
     }
 
@@ -447,9 +447,9 @@ public class OpenImages {
         assert activeView != null;
 
         Composition activeComp = activeView.getComp();
-        Composition newComp = activeComp.copy(false, true);
+        Composition duplicate = activeComp.copy(false, true);
 
-        addAsNewComp(newComp);
+        addAsNewComp(duplicate);
     }
 
     public static Composition addJustLoadedComp(Composition comp) {

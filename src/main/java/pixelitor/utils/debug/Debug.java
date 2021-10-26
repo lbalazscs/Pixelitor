@@ -46,7 +46,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.util.Arrays;
+import java.lang.StackWalker.StackFrame;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.BorderLayout.CENTER;
@@ -192,14 +193,7 @@ public class Debug {
         return msg.toString();
     }
 
-    public static void debugCall(String... args) {
-        debugCall(false, args);
-    }
-
-    public static void debugCall(boolean printCaller, String... args) {
-        StackTraceElement[] fullTrace = new Throwable().getStackTrace();
-        StackTraceElement me = fullTrace[2];
-
+    public static void debugCall(String msg, int depth) {
         String threadName;
         if (Threads.calledOnEDT()) {
             threadName = "EDT";
@@ -207,30 +201,13 @@ public class Debug {
             threadName = Threads.threadName();
         }
 
-        String argsAsOneString;
-        if (args.length == 0) {
-            argsAsOneString = "";
-        } else if (args.length == 1) {
-            argsAsOneString = args[0];
-        } else {
-            argsAsOneString = Arrays.toString(args);
-        }
-
-        String className = me.getClassName();
-        // strip the package name
-        className = className.substring(className.lastIndexOf('.') + 1);
-
-        if (printCaller) {
-            StackTraceElement caller = fullTrace[3];
-            String callerClassName = caller.getClassName();
-            callerClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
-
-            System.out.printf("%s.%s(%s) on %s by %s.%s%n", className,
-                me.getMethodName(), Ansi.yellow(argsAsOneString),
-                threadName, callerClassName, caller.getMethodName());
-        } else {
-            System.out.printf("%s.%s(%s) on %s%n", className,
-                me.getMethodName(), Ansi.yellow(argsAsOneString), threadName);
+        System.out.printf("%s on %s%n", Ansi.yellow(msg), threadName);
+        if (depth > 0) {
+            List<StackFrame> callStack = StackWalker.getInstance().walk(s ->
+                s.skip(1).limit(depth).toList());
+            for (StackFrame frame : callStack) {
+                System.out.println("\tat " + frame);
+            }
         }
     }
 

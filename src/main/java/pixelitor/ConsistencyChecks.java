@@ -267,21 +267,21 @@ public final class ConsistencyChecks {
         }
         if (layer.hasMask()) {
             if (addMaskEnabled) {
-                throw new IllegalStateException("The layer " + layer.getName()
-                    + " has mask, but the add mask action is enabled");
+                throw new IllegalStateException("The layer '" + layer.getName()
+                                                + "' has mask, but the add mask action is enabled");
             }
             if (!ui.hasMaskIcon()) {
-                throw new IllegalStateException("The layer " + layer.getName()
-                    + " has mask, but no mask icon");
+                throw new IllegalStateException("The layer '" + layer.getName()
+                                                + "' has mask, but no mask icon");
             }
         } else { // no mask
             if (!addMaskEnabled) {
-                throw new IllegalStateException("The layer " + layer.getName()
-                    + " has no mask, but the add mask action is not enabled");
+                throw new IllegalStateException("The layer '" + layer.getName()
+                                                + "' has no mask, but the add mask action is not enabled");
             }
             if (ui.hasMaskIcon()) {
-                throw new IllegalStateException("The layer " + layer.getName()
-                    + " has no mask, but it has mask icon");
+                throw new IllegalStateException("The layer '" + layer.getName()
+                                                + "' has no mask, but it has mask icon");
             }
         }
 

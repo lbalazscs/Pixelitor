@@ -70,6 +70,8 @@ public class SmartObject extends ImageLayer {
 
     private int indexOfLastSmartFilter = -1;
 
+    private transient boolean imageNeedsRefresh = false;
+
     public SmartObject(Layer layer) {
         super(layer.getComp(), NAME_PREFIX + layer.getName());
 
@@ -83,7 +85,7 @@ public class SmartObject extends ImageLayer {
         content.setOwner(this);
         copyBlendingFrom(layer);
 
-        recalculateImage();
+        recalculateImage(false);
     }
 
     // copy constructor
@@ -115,7 +117,8 @@ public class SmartObject extends ImageLayer {
             // then assume smart filter visibility
             smartFilterIsVisible = true;
         }
-        recalculateImage();
+        imageNeedsRefresh = true;
+        recalculateImage(false);
         lastFilterOutput = null;
         lastFilterState = null;
     }
@@ -125,13 +128,17 @@ public class SmartObject extends ImageLayer {
         return false;
     }
 
-    private void recalculateImage() {
+    private void recalculateImage(boolean updateIcon) {
         resetImageFromContent();
         if (smartFilterIsVisible) {
             for (Filter filter : smartFilters) {
                 image = filter.transformImage(image);
             }
         }
+        if (updateIcon) {
+            updateIconImage();
+        }
+        imageNeedsRefresh = false;
     }
 
     private void resetImageFromContent() {
@@ -139,6 +146,10 @@ public class SmartObject extends ImageLayer {
         if (ImageUtils.isSubImage(image)) {
             image = ImageUtils.copySubImage(image);
         }
+    }
+
+    public void invalidateImageCache() {
+        imageNeedsRefresh = true;
     }
 
     public void contentDeactivated(Composition content) {
@@ -149,12 +160,19 @@ public class SmartObject extends ImageLayer {
             return;
         }
 
-        recalculateImage();
-        comp.update();
-        updateIconImage();
+        invalidateImageCache();
+        comp.smartObjectChanged();
 
         // as long as there is no undo, it's necessary to manually set this
         comp.setDirty(true);
+    }
+
+    @Override
+    public BufferedImage getVisibleImage() {
+        if (imageNeedsRefresh) {
+            recalculateImage(true);
+        }
+        return super.getVisibleImage();
     }
 
     @Override
@@ -234,9 +252,8 @@ public class SmartObject extends ImageLayer {
         boolean changed = smartFilterIsVisible != b;
         smartFilterIsVisible = b;
         if (changed) {
-            recalculateImage();
+            recalculateImage(true);
             comp.update();
-            updateIconImage();
         }
     }
 

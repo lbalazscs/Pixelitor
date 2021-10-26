@@ -45,7 +45,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static pixelitor.Composition.UpdateActions.INVALIDATE_CACHE;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.TestHelper.createEmptyImageLayer;
@@ -127,7 +126,7 @@ public class ImageLayerTest {
         if (withMask.isTrue() && withTranslation.isTrue()) {
             expectedImageChangedCalls++;
         }
-        verify(comp, times(expectedImageChangedCalls)).update(INVALIDATE_CACHE);
+        verify(comp, times(expectedImageChangedCalls)).invalidateCompositeCache();
 
         BufferedImage image = layer.getImage();
         assertThat(image).isNotNull();
@@ -136,7 +135,7 @@ public class ImageLayerTest {
         layer.setImage(testImage);
 
         // called one more time
-        verify(comp, times(expectedImageChangedCalls + 1)).update(INVALIDATE_CACHE);
+        verify(comp, times(expectedImageChangedCalls + 1)).invalidateCompositeCache();
 
         // actually setImage should not update the icon image
         iconUpdates.check(0, 0);

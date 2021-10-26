@@ -45,7 +45,6 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static pixelitor.Composition.UpdateActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
@@ -414,7 +413,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         image = replaceSelectedRegion(image, newImage, isUndoRedo);
         imageRefChanged();
 
-        comp.update(INVALIDATE_CACHE);
+        comp.invalidateCompositeCache();
     }
 
     /**
@@ -480,7 +479,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         assert Assertions.checkRasterMinimum(newImage);
 
-        comp.update(INVALIDATE_CACHE);
+        comp.invalidateCompositeCache();
         invalidateTrimCache();
 
         if (oldRef != null && oldRef != image) {

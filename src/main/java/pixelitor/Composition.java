@@ -775,6 +775,19 @@ public class Composition implements Serializable {
         return false;
     }
 
+    public void smartObjectChanged() {
+        invalidateCompositeCache();
+
+        // recursively invalidate the image caches in the smart
+        // objects and compositions until the top composition
+        if (owner != null) {
+            owner.invalidateImageCache();
+
+            Composition parent = owner.getComp();
+            parent.smartObjectChanged();
+        }
+    }
+
     public void startMovement(MoveMode mode, boolean duplicateLayer) {
         if (mode.movesLayer()) {
             if (duplicateLayer) {
@@ -949,14 +962,10 @@ public class Composition implements Serializable {
     private BufferedImage calculateCompositeImage() {
         if (layerList.size() == 1) { // shortcut
             Layer layer = layerList.get(0);
-//            if (firstLayer instanceof ImageLayer layer) {
             if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
                 return layer.asImage(true, true);
             }
-//            }
         }
-
-//        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
         var imageSoFar = new BufferedImage(
             canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
@@ -1283,7 +1292,8 @@ public class Composition implements Serializable {
      * Forces the recalculation of the composite image
      * the next time when getCompositeImage() is called.
      */
-    private void invalidateCompositeCache() {
+    public void invalidateCompositeCache() {
+//        Debug.debugCall(getName() + " cache invalidated", 1);
         if (compositeImage != null) {
             compositeImage.flush();
         }
@@ -1511,8 +1521,7 @@ public class Composition implements Serializable {
     }
 
     public enum UpdateActions {
-        INVALIDATE_CACHE(false, false) {
-        }, REPAINT(true, false) {
+        REPAINT(true, false) {
         }, HISTOGRAM(false, true) {
         }, FULL(true, true) {
         };

@@ -1001,6 +1001,7 @@ public class RandomGUITest {
         var comp = OpenImages.getActiveComp();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.randomizeSettings();
+        textLayer.updateLayerName();
         log("new text layer: " + textLayer.getSettings().getText());
         new LayerAdder(comp)
             .withHistory("New Random Text Layer")

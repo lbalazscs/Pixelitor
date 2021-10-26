@@ -28,7 +28,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -124,12 +123,8 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
 
     private void showColorDialog(int index) {
         Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(index), false, new Consumer<Color>() {
-                @Override
-                public void accept(Color color) {
-                    updateColor(color, index);
-                }
-            });
+            model.getColor(index), false,
+            color -> updateColor(color, index));
     }
 
     private void updateColor(Color color, int index) {
