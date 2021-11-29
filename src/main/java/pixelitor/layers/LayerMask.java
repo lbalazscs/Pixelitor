@@ -240,9 +240,8 @@ public class LayerMask extends ImageLayer {
     @Override
     public BufferedImage createIconThumbnail() {
         // same as for the image layer, but without checkerboard painter
-        BufferedImage img = getCanvasSizedSubImage();
-        BufferedImage thumb = createThumbnail(img, thumbSize, null);
-        return thumb;
+        BufferedImage bigImg = getCanvasSizedSubImage();
+        return createThumbnail(bigImg, thumbSize, null);
     }
 
     @Override

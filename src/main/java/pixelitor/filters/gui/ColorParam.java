@@ -53,7 +53,7 @@ public class ColorParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new ColorParamGUI(this, action, true);
         paramGUI = gui;
-        afterGUICreation();
+        guiCreated();
 
         return gui;
     }

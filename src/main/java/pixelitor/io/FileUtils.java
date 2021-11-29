@@ -119,8 +119,7 @@ public class FileUtils {
         if (findExtension(fileName).isEmpty()) {
             return fileName + '.' + newExt;
         }
-        String woExt = stripExtension(fileName);
-        return woExt + '.' + newExt;
+        return stripExtension(fileName) + '.' + newExt;
     }
 
     public static List<File> listSupportedInputFilesIn(File dir) {

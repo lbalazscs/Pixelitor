@@ -87,6 +87,7 @@ public class TestHelper {
         var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
         when(comp.isOpen()).thenReturn(true);
+        when(comp.classInvariant()).thenReturn(true); // for assertions
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasBounds()).thenReturn(
             new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
@@ -130,7 +131,7 @@ public class TestHelper {
             assert layer == comp.getLayer(i);
         }
         assert comp.getNumLayers() == numLayers;
-        assert comp.checkInvariant();
+        assert comp.classInvariant();
 
         comp.setDirty(false);
 
@@ -329,13 +330,9 @@ public class TestHelper {
         int modifiers = 0;
         modifiers = keys.modify(modifiers);
         modifiers = mouseButton.modify(modifiers);
-        boolean popupTrigger = false;
-        if (mouseButton == MouseButton.RIGHT) {
-            popupTrigger = true;
-        }
         //noinspection MagicConstant
         return new MouseEvent(view, id, System.currentTimeMillis(),
-            modifiers, x, y, 1, popupTrigger);
+            modifiers, x, y, 1, mouseButton == MouseButton.RIGHT);
     }
 
     public static void press(int x, int y, View view) {

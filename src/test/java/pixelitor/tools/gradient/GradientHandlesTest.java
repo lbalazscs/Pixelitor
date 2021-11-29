@@ -69,8 +69,8 @@ class GradientHandlesTest {
     }
 
     @Test
-    @DisplayName("dragging the center handle moves the other two")
-    void centerMovesTheOtherTwo() {
+    @DisplayName("dragging the center handle moves the start and end handles")
+    void centerMovesStartEnd() {
         int dragStartX = MIDDLE_X_INIT - 1;
         int dragStartY = MIDDLE_Y_INIT + 1;
         int dx = -5;
@@ -93,8 +93,8 @@ class GradientHandlesTest {
     }
 
     @Test
-    @DisplayName("dragging the end handle moves the center")
-    void endMovesTheCenter() {
+    @DisplayName("dragging the end handle moves the center handle")
+    void endMovesCenter() {
         int dragStartX = END_X_INIT + 1;
         int dragStartY = END_Y_INIT + 2;
         int dx = 20;
@@ -117,7 +117,7 @@ class GradientHandlesTest {
     }
 
     @Test
-    @DisplayName("translate handles")
+    @DisplayName("translate handles after image coordinates change")
     void imCoordsChanged_translate() {
         int dx = 10;
         int dy = 20;
@@ -136,7 +136,7 @@ class GradientHandlesTest {
     }
 
     @Test
-    @DisplayName("zoom handles")
+    @DisplayName("zoom handles after image coordinates change")
     void imCoordsChanged_scale() {
         var at = AffineTransform.getScaleInstance(0.5, 0.5);
         handles.imCoordsChanged(at, view.getComp());

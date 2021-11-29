@@ -166,11 +166,7 @@ public class ToneCurve {
             return false;
         }
 
-        if (p.x > curve.x[index + 1] + 0.02F || p.x < curve.x[index - 1] - 0.02F) {
-            return true;
-        }
-
-        return false;
+        return p.x > curve.x[index + 1] + 0.02f || p.x < curve.x[index - 1] - 0.02f;
     }
 
     /**
@@ -184,11 +180,7 @@ public class ToneCurve {
             return false;
         }
 
-        if (p.x < curve.x[index] && p.x > curve.x[index - 1]) {
-            return true;
-        }
-
-        return false;
+        return p.x < curve.x[index] && p.x > curve.x[index - 1];
     }
 
     private static boolean isOver(Point.Float p, Point.Float q) {

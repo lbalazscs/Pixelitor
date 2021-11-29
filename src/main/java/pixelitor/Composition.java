@@ -55,10 +55,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
@@ -209,7 +207,7 @@ public class Composition implements Serializable {
         }
         compCopy.createDebugName();
 
-        assert compCopy.checkInvariant();
+        assert compCopy.classInvariant();
 
         return compCopy;
     }
@@ -335,7 +333,7 @@ public class Composition implements Serializable {
     public void rename(TabViewContainer owner) {
         String oldName = getName();
         String newName = JOptionPane.showInputDialog(owner,
-            "New Name:", (Object) oldName);
+            "New Name:", oldName);
         if (oldName.equals(newName)) {
             return;
         }
@@ -444,7 +442,7 @@ public class Composition implements Serializable {
             .withHistory("Duplicate Layer")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
-        assert checkInvariant();
+        assert classInvariant();
     }
 
     public void flattenImage() {
@@ -472,13 +470,13 @@ public class Composition implements Serializable {
     }
 
     public void addAllLayersToGUI() {
-        assert checkInvariant();
+        assert classInvariant();
 
         Layer activeLayerBefore = activeLayer;
 
         // this shouldn't change the active layer here,
         // but sets the last button to selected
-        layerList.forEach(this::addLayerToGUI);
+        forEachLayer(this::addLayerToGUI);
         assert activeLayer == activeLayerBefore;
 
         // correct the selection
@@ -503,7 +501,7 @@ public class Composition implements Serializable {
     }
 
     public void mergeActiveLayerDown() {
-        assert checkInvariant();
+        assert classInvariant();
 
         if (canMergeDown(activeLayer)) {
             mergeDown(activeLayer);
@@ -620,7 +618,7 @@ public class Composition implements Serializable {
             Tools.editedObjectChanged(activeLayer);
         }
 
-        assert checkInvariant();
+        assert classInvariant();
     }
 
     public boolean isActive(Layer layer) {
@@ -651,14 +649,10 @@ public class Composition implements Serializable {
         return layerList.size();
     }
 
-    public int getNumLayers(Predicate<Layer> condition) {
-        return (int) layerList.stream()
-            .filter(condition)
-            .count();
-    }
-
     public int getNumExportableImages() {
-        return getNumLayers(Layer::canExportImage);
+        return (int) layerList.stream()
+            .filter(Layer::canExportImage)
+            .count();
     }
 
     public void forEachLayer(Consumer<Layer> action) {
@@ -674,17 +668,14 @@ public class Composition implements Serializable {
     }
 
     public Layer findLayerAtPoint(Point2D p) {
-        Layer retVal = null;
-        Point pPixel = new Point((int) p.getX(), (int) p.getY());
-
         // in edit mask mode - do not auto select other layers as they are invisible
         // in this mode, active layer is mask layer
         MaskViewMode viewMode = getView().getMaskViewMode();
         if (viewMode.showMask()) {
-            ContentLayer contentLayer = (ContentLayer) getActiveLayer();
-            retVal = contentLayer;
-            return retVal;
+            return getActiveLayer();
         }
+
+        Point pixelLoc = new Point((int) p.getX(), (int) p.getY());
 
         // iterate in reverse order (we need to search layers from top to bottom)
         List<Layer> layers = getLayers();
@@ -701,16 +692,15 @@ public class Composition implements Serializable {
                 continue;
             }
 
-            int pixel = contentLayer.getPixelAtPoint(pPixel);
+            int pixel = contentLayer.getPixelAtPoint(pixelLoc);
 
             int pixelAlphaThreshold = 30;
             if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
-                retVal = layer;
-                break;
+                return layer;
             }
         }
 
-        return retVal;
+        return null;
     }
 
     public void updateAllIconImages() {
@@ -739,7 +729,7 @@ public class Composition implements Serializable {
      * Returns the active mask or image layer or null
      */
     public Drawable getActiveDrawable() {
-        assert checkInvariant();
+        assert classInvariant();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -747,10 +737,6 @@ public class Composition implements Serializable {
             return (ImageLayer) activeLayer;
         }
         return null;
-    }
-
-    public Optional<Drawable> getActiveDrawableOpt() {
-        return Optional.ofNullable(getActiveDrawable());
     }
 
     /**
@@ -854,7 +840,7 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayerUp() {
-        assert checkInvariant();
+        assert classInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex + 1,
@@ -862,7 +848,7 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayerDown() {
-        assert checkInvariant();
+        assert classInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex - 1,
@@ -870,7 +856,7 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayerToTop() {
-        assert checkInvariant();
+        assert classInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
@@ -879,7 +865,7 @@ public class Composition implements Serializable {
     }
 
     public void moveActiveLayerToBottom() {
-        assert checkInvariant();
+        assert classInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, 0,
@@ -1373,7 +1359,7 @@ public class Composition implements Serializable {
 
     // called from assertions and unit tests
     @SuppressWarnings("SameReturnValue")
-    public boolean checkInvariant() {
+    public boolean classInvariant() {
         if (layerList.isEmpty()) {
             if (AppContext.isUnitTesting()) {
                 return true;
@@ -1661,7 +1647,7 @@ public class Composition implements Serializable {
                 History.add(new NewLayerEdit(editName,
                     comp, newLayer, activeLayerBefore, oldViewMode));
             }
-            assert comp.checkInvariant();
+            assert comp.classInvariant();
         }
 
         private boolean needsHistory() {

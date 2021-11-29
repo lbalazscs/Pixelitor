@@ -56,7 +56,7 @@ public abstract class AbstractMultipleChoiceParam<E>
     public JComponent createGUI() {
         var gui = new ComboBoxParamGUI<E>(this, action);
         paramGUI = gui;
-        afterGUICreation();
+        guiCreated();
         return gui;
     }
 
@@ -158,7 +158,6 @@ public abstract class AbstractMultipleChoiceParam<E>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ChoiceParamState<E> copyState() {
         return new ChoiceParamState<>(getSelected());
     }

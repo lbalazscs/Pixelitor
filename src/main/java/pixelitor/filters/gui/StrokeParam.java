@@ -71,7 +71,7 @@ public class StrokeParam extends AbstractFilterParam {
         defaultButton = new DefaultButton(this);
         paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, defaultButton);
 
-        afterGUICreation();
+        guiCreated();
         return (JComponent) paramGUI;
     }
 

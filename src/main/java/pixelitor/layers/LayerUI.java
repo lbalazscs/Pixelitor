@@ -45,11 +45,11 @@ public interface LayerUI {
      */
     void updateSelectionState();
 
-    public void updateSmartFilterPanel();
+    void updateSmartFilterPanel();
 
     void setSelected(boolean b);
 
     void changeLayer(Layer newLayer);
 
-    public int getId();
+    int getId();
 }

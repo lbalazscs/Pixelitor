@@ -52,7 +52,7 @@ public class SmartObject extends ImageLayer {
     private boolean smartFilterIsVisible = true;
 
     // only used for deserialization
-    private boolean newVersion = true;
+    private final boolean newVersion = true;
 
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;

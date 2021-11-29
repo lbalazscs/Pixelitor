@@ -87,7 +87,7 @@ public class CompActionTest {
             {WithTranslation.YES, WithSelection.NO, WithMask.NO, NumLayers.ONE},
             {WithTranslation.YES, WithSelection.YES, WithMask.NO, NumLayers.ONE},
             {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.ONE},
-            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.MORE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.TWO},
         });
     }
 
@@ -489,7 +489,7 @@ public class CompActionTest {
     }
 
     private void checkTranslationOfNonActiveLayer() {
-        if (numLayers == NumLayers.MORE) {
+        if (numLayers == NumLayers.TWO) {
             var activeComp = view.getComp();
 
             var layer2 = (ImageLayer) activeComp.getLayer(1);

@@ -40,7 +40,7 @@ public class RangeWithColorsParam extends RangeParam {
     public JComponent createGUI() {
         var sliderSpinner = new SliderSpinner(this, leftColor, rightColor);
         paramGUI = sliderSpinner;
-        afterGUICreation();
+        guiCreated();
         return sliderSpinner;
     }
 }

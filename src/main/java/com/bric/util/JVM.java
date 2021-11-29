@@ -19,8 +19,6 @@
  */
 package com.bric.util;
 
-import java.security.AccessControlException;
-
 /**
  * Static methods relating to the JVM environment.
  * <P>Instead of burying a constant like "isQuartz" in its most
@@ -44,18 +42,12 @@ public class JVM {
      */
     public static String getProfile() {
         String sb = "OS = " + System.getProperty("os.name")
-                + " (" + System.getProperty("os.version")
-                + "), " + System.getProperty("os.arch") + "\n"
-                + "Java Version = " + System.getProperty("java.version")
-                + "\n";
+                    + " (" + System.getProperty("os.version")
+                    + "), " + System.getProperty("os.arch") + "\n"
+                    + "Java Version = " + System.getProperty("java.version")
+                    + "\n";
         return sb;
     }
-
-    /**
-     * The major Java version being used (1.4, 1.5, 1.6, etc.), or
-     * -1 if this value couldn't be correctly determined.
-     */
-    public static final float javaVersion = getMajorJavaVersion(true);
 
     private static final String osName = (System.getProperty("os.name").toLowerCase());
 
@@ -84,64 +76,8 @@ public class JVM {
     public static final boolean usingQuartz = isUsingQuartz();
 
     private static boolean isUsingQuartz() {
-        try {
-            return isMac && ((javaVersion > 0 && javaVersion < 1.4f) || (System
-                    .getProperty("apple.awt.graphics.UseQuartz") != null && System
-                    .getProperty("apple.awt.graphics.UseQuartz").equals("true")));
-        } catch (AccessControlException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * This converts the system property "java.version" to a float value.
-     * This drops rightmost digits until a legitimate float can be parsed.
-     * <BR>For example, this converts "1.6.0_05" to "1.6".
-     * <BR>This value is cached as the system property "java.major.version".  Although
-     * technically this value is a String, it will always be parseable as a float.
-     *
-     * @throws AccessControlException this may be thrown in unsigned applets!  Beware!
-     */
-    public static float getMajorJavaVersion() throws AccessControlException {
-        String majorVersion = null;
-        try {
-            System.getProperty("java.major.version");
-        } catch (java.security.AccessControlException e) {
-            return -1;
-        }
-        if (majorVersion == null) {
-            String s = System.getProperty("java.version");
-            float f = -1;
-            int i = s.length();
-            while (f < 0 && i > 0) {
-                try {
-                    f = Float.parseFloat(s.substring(0, i));
-                } catch (Exception e) {
-                }
-                i--;
-            }
-            majorVersion = Float.toString(f);
-            System.setProperty("java.major.version", majorVersion);
-        }
-        return Float.parseFloat(majorVersion);
-    }
-
-    /**
-     * @param catchSecurityException if true and an exception occurs,
-     *                               then -1 is returned.
-     * @return the major java version, or -1 if this can't be determined/
-     */
-    public static float getMajorJavaVersion(boolean catchSecurityException) {
-        try {
-            return getMajorJavaVersion();
-        } catch (RuntimeException t) {
-            if (catchSecurityException) {
-                System.err.println("this exception was ignored without incident, but it means we can't determine the major java version:");
-                t.printStackTrace();
-                return -1;
-            }
-            throw t;
-        }
+        return isMac
+               && ((System.getProperty("apple.awt.graphics.UseQuartz") != null
+                    && System.getProperty("apple.awt.graphics.UseQuartz").equals("true")));
     }
 }

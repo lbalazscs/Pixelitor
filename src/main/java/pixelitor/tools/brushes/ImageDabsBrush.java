@@ -70,7 +70,7 @@ public class ImageDabsBrush extends DabsBrush {
         Color currColor = targetG.getColor();
 
         if (!currColor.equals(lastColor)) {
-            colorizeBrushImage(currColor);
+            createColoredBrushImage(currColor);
             lastColor = currColor;
             recreateBrushImage(diameter, true);
         } else {
@@ -78,7 +78,10 @@ public class ImageDabsBrush extends DabsBrush {
         }
     }
 
-    private void recreateBrushImage(double newSize, boolean colorChanged) {
+    private void recreateBrushImage(double diameter, boolean colorChanged) {
+        int newSize = (int) diameter;
+        assert newSize > 0 : "newSize = " + newSize;
+
         if (!colorChanged && brushImageHasSize(newSize)) {
             return;
         }
@@ -88,23 +91,21 @@ public class ImageDabsBrush extends DabsBrush {
             finalScaledImg.flush();
         }
 
-        int newSizeInt = (int) newSize;
-        assert newSizeInt > 0 : "newSize = " + newSize;
-        finalScaledImg = new BufferedImage(newSizeInt, newSizeInt, TYPE_INT_ARGB);
+        finalScaledImg = new BufferedImage(newSize, newSize, TYPE_INT_ARGB);
         Graphics2D g = finalScaledImg.createGraphics();
-        g.drawImage(coloredBrushImg, 0, 0, newSizeInt, newSizeInt, null);
+        g.drawImage(coloredBrushImg, 0, 0, newSize, newSize, null);
         g.dispose();
     }
 
-    private boolean brushImageHasSize(double newSize) {
-        return finalScaledImg != null && finalScaledImg.getWidth() == newSize;
+    private boolean brushImageHasSize(double size) {
+        return finalScaledImg != null && finalScaledImg.getWidth() == size;
     }
 
     /**
      * Creates a colorized brush image from the template image
      * according to the given color.
      */
-    private void colorizeBrushImage(Color color) {
+    private void createColoredBrushImage(Color color) {
         coloredBrushImg = new BufferedImage(
             templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
         int[] srcPixels = ImageUtils.getPixelsAsArray(templateImg);
@@ -135,15 +136,18 @@ public class ImageDabsBrush extends DabsBrush {
         double y = p.getImY();
         int drawStartX = (int) (x - radius);
         int drawStartY = (int) (y - radius);
+
         if (!settings.isAngleAware() || theta == 0) {
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
+            // draw rotated image
             var oldTransform = targetG.getTransform();
             targetG.rotate(theta, x, y);
             targetG.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
             targetG.setTransform(oldTransform);
         }
+
         repaintComp(p);
     }
 }

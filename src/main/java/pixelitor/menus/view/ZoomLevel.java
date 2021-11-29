@@ -92,10 +92,10 @@ public class ZoomLevel {
         }
     }
 
-    public static ZoomLevel Z100 = zoomLevels[16];
-    public static ZoomLevel Z50 = zoomLevels[12];
-    public static ZoomLevel Z25 = zoomLevels[8];
-    public static ZoomLevel Z12 = zoomLevels[4];
+    public static final ZoomLevel Z100 = zoomLevels[16];
+    public static final ZoomLevel Z50 = zoomLevels[12];
+    public static final ZoomLevel Z25 = zoomLevels[8];
+    public static final ZoomLevel Z12 = zoomLevels[4];
 
     private ZoomLevel in;
     private ZoomLevel out;

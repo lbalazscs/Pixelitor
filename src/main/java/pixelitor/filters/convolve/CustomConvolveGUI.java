@@ -39,28 +39,27 @@ public class CustomConvolveGUI extends FilterGUI {
     private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
 
     private JTextField[] textFields;
-
-    private JPanel textFieldsP;
+    private JPanel matrixPanel;
     private JButton normalizeButton;
     private Box presetsBox;
-    private final int size;
+    private final int matrixOrder;
 
     public CustomConvolveGUI(Convolve filter, Drawable dr, boolean reset) {
         super(filter, dr);
         setLayout(new BoxLayout(this, X_AXIS));
 
-        size = filter.getSize();
+        matrixOrder = filter.getMatrixOrder();
 
         initLeftVerticalBox();
         initPresetBox();
 
         if (reset) {
-            reset(size);
+            reset(matrixOrder);
         } else {
             // use the last values
             float[] kernelMatrix = filter.getKernelMatrix();
             if (kernelMatrix == null) {
-                reset(size);
+                reset(matrixOrder);
             } else {
                 setMatrix(kernelMatrix);
                 collectValuesAndRun(null);
@@ -84,23 +83,23 @@ public class CustomConvolveGUI extends FilterGUI {
     }
 
     private void addTextFieldsPanel(Box leftVerticalBox) {
-        textFieldsP = new JPanel();
-        textFields = new JTextField[size * size];
+        matrixPanel = new JPanel();
+        textFields = new JTextField[matrixOrder * matrixOrder];
         for (int i = 0; i < textFields.length; i++) {
             textFields[i] = new JTextField();
         }
-        textFieldsP.setLayout(new GridLayout(size, size));
+        matrixPanel.setLayout(new GridLayout(matrixOrder, matrixOrder));
         for (var textField : textFields) {
             setupTextField(textField);
         }
-        textFieldsP.setBorder(createTitledBorder("Kernel"));
-        textFieldsP.setAlignmentX(LEFT_ALIGNMENT);
-        leftVerticalBox.add(textFieldsP);
+        matrixPanel.setBorder(createTitledBorder("Kernel"));
+        matrixPanel.setAlignmentX(LEFT_ALIGNMENT);
+        leftVerticalBox.add(matrixPanel);
 
         // this must come after adding the textFieldsP to the box
-        var minimumSize = textFieldsP.getMinimumSize();
-        textFieldsP.setPreferredSize(new Dimension(
-            size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+        var minimumSize = matrixPanel.getMinimumSize();
+        matrixPanel.setPreferredSize(new Dimension(
+            matrixOrder * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
     }
 
     private void addNormalizeButton(Box leftVerticalBox) {
@@ -121,26 +120,26 @@ public class CustomConvolveGUI extends FilterGUI {
         presetsBox = Box.createVerticalBox();
         presetsBox.setBorder(createTitledBorder(DialogMenuBar.PRESETS));
 
-        if (size == 3) {
+        if (matrixOrder == 3) {
             init3x3Presets();
-        } else if (size == 5) {
+        } else if (matrixOrder == 5) {
             init5x5Presets();
         } else {
-            throw new IllegalStateException("size = " + size);
+            throw new IllegalStateException("matrixOrder = " + matrixOrder);
         }
 
         presetsBox.add(Box.createVerticalStrut(20));
 
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
-            setMatrix(Convolve.createRandomKernelMatrix(size));
+            setMatrix(Convolve.createRandomKernelMatrix(matrixOrder));
             collectValuesAndRun(e);
         });
         presetsBox.add(randomizeButton);
 
         JButton doNothingButton = new JButton("Do Nothing");
         doNothingButton.addActionListener(e -> {
-            reset(size);
+            reset(matrixOrder);
             collectValuesAndRun(e);
         });
         presetsBox.add(doNothingButton);
@@ -288,13 +287,13 @@ public class CustomConvolveGUI extends FilterGUI {
     }
 
     private void setupTextField(JTextField textField) {
-        textFieldsP.add(textField);
+        matrixPanel.add(textField);
         textField.addActionListener(this::collectValuesAndRun);
     }
 
     private void collectValuesAndRun(ActionEvent e) {
         float sum = 0;
-        float[] values = new float[size * size];
+        float[] values = new float[matrixOrder * matrixOrder];
         for (int i = 0; i < values.length; i++) {
             String s = textFields[i].getText();
             try {
@@ -321,7 +320,7 @@ public class CustomConvolveGUI extends FilterGUI {
     }
 
     public void setMatrix(float[] values) {
-        assert values.length == size * size;
+        assert values.length == matrixOrder * matrixOrder;
 
         float sum = 0;
         for (int i = 0; i < textFields.length; i++) {

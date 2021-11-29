@@ -46,7 +46,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     /**
      * Called by the subclasses only, after the GUI is initialized
      */
-    protected void afterGUICreation() {
+    protected void guiCreated() {
         setGUIEnabledState();
         if (toolTip != null) {
             paramGUI.setToolTip(toolTip);

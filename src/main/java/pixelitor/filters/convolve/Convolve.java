@@ -37,16 +37,16 @@ public class Convolve extends FilterWithGUI {
     private final String filterName;
 
     private float[] kernelMatrix;
-    private final int size;
+    private final int matrixOrder;
 
-    private Convolve(int size, String filterName) {
-        this.size = size;
+    private Convolve(int matrixOrder, String filterName) {
+        this.matrixOrder = matrixOrder;
         this.filterName = filterName;
     }
 
     public void setKernelMatrix(float[] kernelMatrix) {
-        if (kernelMatrix.length != size * size) {
-            throw new IllegalArgumentException("kernelMatrix.length = " + kernelMatrix.length + ", size = " + size);
+        if (kernelMatrix.length != matrixOrder * matrixOrder) {
+            throw new IllegalArgumentException("kernelMatrix.length = " + kernelMatrix.length + ", size = " + matrixOrder);
         }
         this.kernelMatrix = kernelMatrix;
     }
@@ -57,7 +57,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        Kernel kernel = new Kernel(size, size, kernelMatrix);
+        Kernel kernel = new Kernel(matrixOrder, matrixOrder, kernelMatrix);
         BufferedImageOp convolveOp = createConvolveOp(kernel);
         try {
             convolveOp.filter(src, dest);
@@ -75,7 +75,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public void randomizeSettings() {
-        kernelMatrix = createRandomKernelMatrix(size);
+        kernelMatrix = createRandomKernelMatrix(matrixOrder);
     }
 
     private BufferedImageOp createConvolveOp(Kernel kernel) {
@@ -99,8 +99,8 @@ public class Convolve extends FilterWithGUI {
         return retVal;
     }
 
-    public int getSize() {
-        return size;
+    public int getMatrixOrder() {
+        return matrixOrder;
     }
 
     public static FilterAction createFilterAction(int size) {

@@ -28,27 +28,27 @@ import java.util.List;
  * Renderer for both the crop composition guides and the normal guides.
  */
 public class GuidesRenderer {
-    private final GuideStyle guideStyle;
+    private final GuideStyle style;
 
     public static final Lazy<GuidesRenderer> CROP_GUIDES_INSTANCE = Lazy.of(
         () -> new GuidesRenderer(AppPreferences.getCropGuideStyle()));
     public static final Lazy<GuidesRenderer> GUIDES_INSTANCE = Lazy.of(
         () -> new GuidesRenderer(AppPreferences.getGuideStyle()));
 
-    public GuidesRenderer(GuideStyle guideStyle) {
-        this.guideStyle = guideStyle;
+    public GuidesRenderer(GuideStyle style) {
+        this.style = style;
     }
 
     public void draw(Graphics2D g2, List<? extends Shape> shapes) {
-        g2.setStroke(guideStyle.getStrokeA());
-        g2.setColor(guideStyle.getColorA());
+        g2.setStroke(style.getStrokeA());
+        g2.setColor(style.getColorA());
         for (Shape shape : shapes) {
             g2.draw(shape);
         }
 
-        if (guideStyle.getStrokeB() != null) {
-            g2.setStroke(guideStyle.getStrokeB());
-            g2.setColor(guideStyle.getColorB());
+        if (style.getStrokeB() != null) {
+            g2.setStroke(style.getStrokeB());
+            g2.setColor(style.getColorB());
             for (Shape shape : shapes) {
                 g2.draw(shape);
             }

@@ -32,24 +32,22 @@ import static java.util.stream.Collectors.joining;
  * A filter parameter for selecting a list of colors
  */
 public class ColorListParam extends AbstractFilterParam {
-    private final Color[] candidateColors;
-    private final int numDefShown; // number of colors shown/used by default
     private Color[] colors;
+    private final Color[] candidateColors;
     private final Color[] defaultColors;
 
-    public ColorListParam(String name, int numDefShown, Color... candidateColors) {
+    public ColorListParam(String name, int defaultNumColors, Color... candidateColors) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
-        this.numDefShown = numDefShown;
         this.candidateColors = candidateColors;
-        this.colors = Arrays.copyOf(candidateColors, numDefShown);
-        this.defaultColors = Arrays.copyOf(candidateColors, numDefShown);
+        this.colors = Arrays.copyOf(candidateColors, defaultNumColors);
+        this.defaultColors = Arrays.copyOf(candidateColors, defaultNumColors);
     }
 
     @Override
     public JComponent createGUI() {
         var gui = new ColorListParamGUI(this, candidateColors);
         paramGUI = gui;
-        afterGUICreation();
+        guiCreated();
 
         return gui;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public enum NumLayers {
             // delete one layer so that we have one left
             comp.deleteLayer(comp.getActiveLayer(), true);
         }
-    }, MORE() {
+    }, TWO() {
         @Override
         public void setupFor(Composition comp) {
 

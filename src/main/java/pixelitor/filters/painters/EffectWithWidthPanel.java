@@ -78,9 +78,4 @@ public class EffectWithWidthPanel extends BaseEffectPanel {
         }
         return enable;
     }
-
-    @Override
-    public String getResetToolTip() {
-        return "Reset the default effect settings";
-    }
 }

@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.utils.AngleUnit;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = new AngleParamGUI(this);
-        afterGUICreation();
+        guiCreated();
         return (JComponent) paramGUI;
     }
 
@@ -139,7 +140,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        double random = Math.random();
+        double random = Rnd.nextDouble();
         setValue(random * 2 * Math.PI - Math.PI, false);
     }
 
@@ -154,8 +155,9 @@ public class AngleParam extends AbstractFilterParam {
     public RangeParam createRangeParam() {
         // At this point the actual value can already be different from the
         // default one => make sure the returned param has the same default.
-        double defaultAsDegrees = Utils.toIntuitiveDegrees(defaultVal);
-        RangeParam rangeParam = new RangeParam(getName(), 0, defaultAsDegrees, getMaxAngleInDegrees());
+        double defaultInDegrees = Utils.toIntuitiveDegrees(defaultVal);
+        RangeParam rangeParam = new RangeParam(getName(),
+            0, defaultInDegrees, getMaxAngleInDegrees());
         rangeParam.setValueNoTrigger(getValueInDegrees());
         return rangeParam;
     }

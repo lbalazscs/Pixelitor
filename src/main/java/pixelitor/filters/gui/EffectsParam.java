@@ -59,7 +59,7 @@ public class EffectsParam extends AbstractFilterParam {
                 this::configureDialog, defaultButton);
 
             paramGUI = configureParamGUI;
-            afterGUICreation();
+            guiCreated();
             return configureParamGUI;
         } else {
             effectsPanel.setBorder(createTitledBorder("Effects"));

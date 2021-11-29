@@ -43,7 +43,7 @@ import static pixelitor.gui.GUIText.OPACITY;
  */
 public abstract class BaseEffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
-    private ActionListener enableCBActionListener;
+    private ActionListener enabledCBListener;
 
     private final ColorSwatch colorSwatch;
 
@@ -135,7 +135,7 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         opacityRange.setValueNoTrigger(100 * opacity);
     }
 
-    public void setOpacityAsInt(int opacity) {
+    private void setOpacityAsInt(int opacity) {
         opacityRange.setValueNoTrigger(opacity);
     }
 
@@ -146,12 +146,12 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
     public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
         this.adjustmentListener = adjustmentListener;
 
-        if (enableCBActionListener != null) {
+        if (enabledCBListener != null) {
             // avoid accumulating action listeners on the checkbox
-            enabledCB.removeActionListener(enableCBActionListener);
+            enabledCB.removeActionListener(enabledCBListener);
         }
-        enableCBActionListener = e -> adjustmentListener.paramAdjusted();
-        enabledCB.addActionListener(enableCBActionListener);
+        enabledCBListener = e -> adjustmentListener.paramAdjusted();
+        enabledCB.addActionListener(enabledCBListener);
 
         opacityRange.setAdjustmentListener(adjustmentListener);
     }
@@ -167,11 +167,9 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
 
     @Override
     public boolean isSetToDefault() {
-        boolean enabled = enabledCB.isSelected();
-
-        return enabled == defaultEnabled
-            && Objects.equals(color, defaultColor)
-            && opacityRange.isSetToDefault();
+        return enabledCB.isSelected() == defaultEnabled
+               && Objects.equals(color, defaultColor)
+               && opacityRange.isSetToDefault();
     }
 
     @Override
@@ -200,5 +198,10 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         if (defaultButton != null) {
             defaultButton.updateIcon();
         }
+    }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
     }
 }

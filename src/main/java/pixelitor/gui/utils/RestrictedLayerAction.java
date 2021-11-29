@@ -38,7 +38,7 @@ public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
 
         String getErrorTitle();
 
-        public default void showErrorMessage(Layer layer) {
+        default void showErrorMessage(Layer layer) {
             Messages.showInfo(getErrorTitle(), getErrorMessage(layer));
         }
 

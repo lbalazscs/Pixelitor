@@ -45,7 +45,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
     private final TextPosition textPosition;
     private final int orientation;
-    private JPanel spinnerPanel;
+    private final JPanel spinnerPanel;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE

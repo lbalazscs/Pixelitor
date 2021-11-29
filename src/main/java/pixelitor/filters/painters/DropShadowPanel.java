@@ -111,9 +111,4 @@ public class DropShadowPanel extends BaseEffectPanel {
             adjustmentListener.paramAdjusted();
         }
     }
-
-    @Override
-    public String getResetToolTip() {
-        return "Reset the default effect settings";
-    }
 }

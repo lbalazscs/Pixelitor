@@ -1162,9 +1162,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        BufferedImage img = getCanvasSizedSubImage();
-        BufferedImage thumb = createThumbnail(img, thumbSize, thumbCheckerBoardPainter);
-        return thumb;
+        BufferedImage bigImg = getCanvasSizedSubImage();
+        return createThumbnail(bigImg, thumbSize, thumbCheckerBoardPainter);
     }
 
     /**

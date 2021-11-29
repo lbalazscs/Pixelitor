@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class CompositionAssert extends AbstractAssert<CompositionAssert, Composition> {
     public CompositionAssert(Composition actual) {
         super(actual, CompositionAssert.class);
-        actual.checkInvariant();
+        assert actual.classInvariant();
     }
 
     public CompositionAssert isEmpty() {
@@ -285,7 +285,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert invariantIsOK() {
         isNotNull();
 
-        actual.checkInvariant();
+        assert actual.classInvariant();
 
         return this;
     }
