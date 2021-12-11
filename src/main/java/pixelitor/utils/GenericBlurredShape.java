@@ -19,7 +19,6 @@ package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.colors.Colors;
-import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.Drag;
 
 import java.awt.Color;
@@ -28,6 +27,7 @@ import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
+import java.util.function.Function;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
@@ -39,7 +39,7 @@ public class GenericBlurredShape implements BlurredShape {
     private double imgTy;
     private final int imgWidth, imgHeight;
 
-    private final ShapeType shapeType;
+    private final Function<Drag, Shape> shapeCreator;
     private final double innerRadiusX;
     private final double innerRadiusY;
     private final double outerRadiusX;
@@ -48,12 +48,12 @@ public class GenericBlurredShape implements BlurredShape {
 
     private static WeakReference<GenericBlurredShape> lastRef;
 
-    public static GenericBlurredShape of(ShapeType shapeType,
+    public static GenericBlurredShape of(Function<Drag, Shape> shapeCreator,
                                          Point2D center,
                                          double innerRadiusX, double innerRadiusY,
                                          double outerRadiusX, double outerRadiusY) {
         if (lastRef == null) {
-            GenericBlurredShape last = new GenericBlurredShape(shapeType,
+            GenericBlurredShape last = new GenericBlurredShape(shapeCreator,
                 center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
@@ -63,7 +63,7 @@ public class GenericBlurredShape implements BlurredShape {
 
         GenericBlurredShape last = lastRef.get();
         if (last != null
-            && shapeType == last.shapeType
+            && shapeCreator == last.shapeCreator
             && innerRadiusX == last.innerRadiusX
             && innerRadiusY == last.innerRadiusY
             && outerRadiusX == last.outerRadiusX
@@ -75,18 +75,18 @@ public class GenericBlurredShape implements BlurredShape {
         }
 
         // there was a radius or softness change
-        last = new GenericBlurredShape(shapeType, center,
+        last = new GenericBlurredShape(shapeCreator, center,
             innerRadiusX, innerRadiusY,
             outerRadiusX, outerRadiusY);
         lastRef = new WeakReference<>(last);
         return last;
     }
 
-    private GenericBlurredShape(ShapeType shapeType,
+    private GenericBlurredShape(Function<Drag, Shape> shapeCreator,
                                 Point2D center,
                                 double innerRadiusX, double innerRadiusY,
                                 double outerRadiusX, double outerRadiusY) {
-        this.shapeType = shapeType;
+        this.shapeCreator = shapeCreator;
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
         this.outerRadiusX = outerRadiusX;
@@ -106,8 +106,8 @@ public class GenericBlurredShape implements BlurredShape {
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeType.createShape(
-            new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY), null);
+        Shape shape = shapeCreator.apply(
+            new Drag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
         g2.dispose();

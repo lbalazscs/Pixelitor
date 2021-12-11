@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,13 +27,19 @@ import java.util.List;
 /**
  * The settings for a line.
  */
-class StarSettings extends ShapeTypeSettings {
+public class StarSettings extends ShapeTypeSettings {
     private final RangeParam numBranches;
     private final RangeParam radiusRatio;
 
     public StarSettings() {
-        numBranches = new RangeParam("Number of Branches", 3, 7, 12);
-        radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)", 1, 50, 99);
+        this(7, 50);
+    }
+
+    public StarSettings(int defNumBranches, int defRadiusRatio) {
+        numBranches = new RangeParam("Number of Branches",
+            3, defNumBranches, 12);
+        radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)",
+            1, defRadiusRatio, 100);
     }
 
     private StarSettings(RangeParam numBranches, RangeParam radiusRatio) {

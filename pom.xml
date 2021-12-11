@@ -74,6 +74,7 @@
                                         <exclude>org/jdesktop/swingx/painter/effects/**</exclude>
                                         <exclude>org/jdesktop/swingx/JXTipOfTheDay*</exclude>
                                         <exclude>org/jdesktop/swingx/plaf/basic/BasicTipOfTheDayUI*</exclude>
+                                        <exclude>org/jdesktop/swingx/geom/Star2D.class</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>

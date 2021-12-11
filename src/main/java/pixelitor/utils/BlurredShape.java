@@ -20,6 +20,7 @@ package pixelitor.utils;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StarSettings;
 
 import java.awt.geom.Point2D;
 
@@ -44,6 +45,8 @@ public interface BlurredShape {
     int TYPE_RECTANGLE2 = 10;
     int TYPE_HEART = 2;
     int TYPE_DIAMOND = 3;
+    int TYPE_HEXAGON = 4;
+    int TYPE_OCTAGON = 5;
 
     static IntChoiceParam getChoices() {
         return new IntChoiceParam("Shape", new Item[]{
@@ -52,6 +55,8 @@ public interface BlurredShape {
             new Item("Rectangle", TYPE_RECTANGLE2),
             new Item("Heart", TYPE_HEART),
             new Item("Diamond", TYPE_DIAMOND),
+            new Item("Hexagon", TYPE_HEXAGON),
+            new Item("Octagon", TYPE_OCTAGON),
         });
     }
 
@@ -66,19 +71,27 @@ public interface BlurredShape {
             case TYPE_ELLIPSE -> new BlurredEllipse(center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
-            case TYPE_RECTANGLE -> new BlurredRectangle(center,
-                innerRadiusX, innerRadiusY,
-                outerRadiusX, outerRadiusY);
+//            case TYPE_RECTANGLE -> new BlurredRectangle(center,
+//                innerRadiusX, innerRadiusY,
+//                outerRadiusX, outerRadiusY);
             case TYPE_RECTANGLE2 -> GenericBlurredShape.of(
-                ShapeType.RECTANGLE, center,
+                drag -> ShapeType.RECTANGLE.createShape(drag, null), center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
             case TYPE_HEART -> GenericBlurredShape.of(
-                ShapeType.HEART, center,
+                drag -> ShapeType.HEART.createShape(drag, null), center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
             case TYPE_DIAMOND -> GenericBlurredShape.of(
-                ShapeType.DIAMOND, center,
+                drag -> ShapeType.DIAMOND.createShape(drag, null), center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_HEXAGON -> GenericBlurredShape.of(
+                drag -> ShapeType.STAR.createShape(drag, new StarSettings(3, 100)), center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_OCTAGON -> GenericBlurredShape.of(
+                drag -> ShapeType.STAR.createShape(drag, new StarSettings(4, 100)), center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
             default -> throw new IllegalStateException();
