@@ -425,9 +425,9 @@ public class StyledShape implements Cloneable, Transformable {
     /**
      * Calculate the extra thickness around the shape for the undo area
      */
-    private float calcThickness(ShapesTool tool) {
-        float thickness = 0;
-        float extraStrokeThickness = 0;
+    private double calcThickness(ShapesTool tool) {
+        double thickness = 0;
+        double extraStrokeThickness = 0;
         if (hasStroke()) {
             StrokeParam strokeParam = tool.getStrokeParam();
 
@@ -438,7 +438,7 @@ public class StyledShape implements Cloneable, Transformable {
             thickness += extraStrokeThickness;
         }
         if (effects.isNotEmpty()) {
-            int effectThickness = effects.getMaxEffectThickness();
+            double effectThickness = effects.getMaxEffectThickness();
             // the extra stroke thickness must be added
             // because the effect can be on the stroke
             effectThickness += extraStrokeThickness;

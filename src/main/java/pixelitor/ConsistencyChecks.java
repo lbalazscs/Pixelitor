@@ -206,11 +206,11 @@ public final class ConsistencyChecks {
         var img = dr.getImage();
 
         String msg = format("canvas width = %d, canvas height = %d, " +
-                "image width = %d, image height = %d, " +
-                "tx = %d, ty = %d, class = %s",
+                            "image width = %d, image height = %d, " +
+                            "tx = %d, ty = %d, class = %s, dr = %s",
             canvas.getWidth(), canvas.getHeight(),
             img.getWidth(), img.getHeight(),
-            dr.getTx(), dr.getTy(), dr.getClass().getSimpleName());
+            dr.getTx(), dr.getTy(), dr.getClass().getSimpleName(), dr.getName());
 
         throw new IllegalStateException(msg);
     }

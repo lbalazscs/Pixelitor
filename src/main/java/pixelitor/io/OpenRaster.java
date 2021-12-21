@@ -26,7 +26,6 @@ import org.xml.sax.SAXException;
 import pixelitor.Composition;
 import pixelitor.ImageMode;
 import pixelitor.layers.BlendingMode;
-import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.*;
@@ -115,12 +114,8 @@ public class OpenRaster {
                                      int layerIndex,
                                      ZipOutputStream zos,
                                      ProgressTracker pt) throws IOException {
-        int tx = 0;
-        int ty = 0;
-        if (layer instanceof ContentLayer contentLayer) {
-            tx = contentLayer.getTx();
-            ty = contentLayer.getTy();
-        }
+        ExportInfo exportInfo = layer.getExportInfo();
+
         String stackXML = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
             "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
@@ -129,14 +124,13 @@ public class OpenRaster {
             layer.getBlendingMode().toSVGName(),
             layer.getOpacity(),
             layerIndex,
-            tx,
-            ty);
+            exportInfo.tx(),
+            exportInfo.ty());
 
         var entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
-        BufferedImage image = layer.asImage(true, false);
 
-        TrackedIO.writeToStream(image, zos, "PNG", pt);
+        TrackedIO.writeToStream(exportInfo.img(), zos, "PNG", pt);
 
         zos.closeEntry();
         return stackXML;
@@ -215,7 +209,17 @@ public class OpenRaster {
 
             int tx = Utils.parseInt(layerX, 0);
             int ty = Utils.parseInt(layerY, 0);
-            ImageLayer layer = new ImageLayer(comp, image, layerName, tx, ty);
+
+            ImageLayer layer = new ImageLayer(comp, image, layerName, 0, 0);
+            if (tx > 0 || ty > 0) {
+                // Pixelitor doesn't support > 0 translations for image layers
+                // (i.e. image layers where the image doesn't fully cover the canvas)
+                // therefore the image must be enlarged
+                layer.forceTranslation(tx, ty);
+                layer.enlargeCanvas(0, 0, 0, 0);
+            } else {
+                layer.setTranslation(tx, ty);
+            }
 
             layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);

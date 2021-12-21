@@ -38,33 +38,31 @@ public class TransformedTextPainter extends TextPainter {
 
     private int translationX = 0;
     private int translationY = 0;
+    private double rotation = 0;
 
     private transient RotatedRectangle rotatedRect;
-    private double rotation = 0;
-    private Rectangle boundingBox = new Rectangle();
+    private transient Rectangle boundingBox;
+    private transient Shape transformedShape;
 
     /**
-     * Return last painted bounding box for rendered text.
-     * Note that this is not pixel perfect rectangle.
-     * If text was not rendered yet, returned rectangle is empty.
+     * Return the last painted bounding box for the rendered text.
+     * Note that this is not a pixel perfect rectangle.
      */
     public Rectangle getBoundingBox() {
         return rotatedRect != null ? rotatedRect.getBoundingBox() : boundingBox;
     }
 
     /**
-     * Return last painted bounding shape for rendered text (rect or rotated rect).
-     * Note that this is not pixel perfect shape.
-     * If text was not rendered yet, returned shape is empty.
+     * Return last painted shape of the rendered text's bounding box.
      */
     public Shape getBoundingShape() {
         return rotatedRect != null ? rotatedRect.asShape() : boundingBox;
     }
 
     @Override
-    protected Rectangle calculateLayout(int textWidth, int textHeight, int canvasWidth, int canvasHeight) {
+    protected Rectangle calculateLayout(int textWidth, int textHeight, int width, int height) {
         if (rotation == 0) {
-            Rectangle layout = super.calculateLayout(textWidth, textHeight, canvasWidth, canvasHeight);
+            Rectangle layout = super.calculateLayout(textWidth, textHeight, width, height);
             rotatedRect = null;
 
             // support the Move tool
@@ -78,26 +76,33 @@ public class TransformedTextPainter extends TextPainter {
         Rectangle rotatedBounds = rotatedRect.getBoundingBox();
 
         // use the rotated bounds to calculate the correct layout
-        Rectangle layout = super.calculateLayout(rotatedBounds.width, rotatedBounds.height, canvasWidth, canvasHeight);
-
-        // Also correct the rotatedRect, because it will be useful later.
-        // Do this before translating the layout!
-        int dx = layout.x - rotatedBounds.x;
-        int dy = layout.y - rotatedBounds.y;
-        rotatedRect.translate(dx + translationX, dy + translationY);
+        Rectangle layout = super.calculateLayout(rotatedBounds.width, rotatedBounds.height, width, height);
 
         // support the Move tool
         layout.translate(translationX, translationY);
+
+        // Also correct the rotatedRect, because it will be useful later.
+        int dx = layout.x - rotatedBounds.x;
+        int dy = layout.y - rotatedBounds.y;
+        rotatedRect.translate(dx, dy);
 
         return layout;
     }
 
     @Override
     protected void doPaint(Graphics2D g, Object component, int canvasWidth, int canvasHeight) {
+        paintText(g, component, canvasWidth, canvasHeight, true);
+    }
+
+    private void paintText(Graphics2D g, Object component, int width, int height, boolean updateLayout) {
         var origTransform = g.getTransform();
         String text = getText();
 
-        FontMetrics metrics = setupGraphics(g, canvasWidth, canvasHeight, text);
+        FontMetrics metrics = g.getFontMetrics(font);
+        if (updateLayout) {
+            updateLayout(width, height, text, metrics);
+        }
+        setupGraphics(g);
 
         Paint paint = getFillPaint();
         if (paint != null) {
@@ -106,7 +111,7 @@ public class TransformedTextPainter extends TextPainter {
 
         g.drawString(text, 0, (float) metrics.getAscent());
 
-        // paint the effects on an explicitly transformed shape
+        // paint the effects of an explicitly transformed shape
         // instead of simply painting them on the transformed graphics
         // so that the direction of the drop shadow effect does not rotate
         var tx = g.getTransform();
@@ -114,56 +119,70 @@ public class TransformedTextPainter extends TextPainter {
 
         AreaEffect[] effects = getAreaEffects();
         if (effects.length != 0) {
-            // provideShape must be called on an untransformed shape
-            Shape shape = provideShape(g, component, canvasWidth, canvasHeight);
-            Shape transformedShape = tx.createTransformedShape(shape);
+            if (updateLayout) {
+                //provideShape must be called with untransformed Graphics
+                Shape shape = provideShape(g, component, width, height);
+                transformedShape = tx.createTransformedShape(shape);
+            }
             for (AreaEffect ef : effects) {
-                ef.apply(g, transformedShape, canvasWidth, canvasHeight);
+                ef.apply(g, transformedShape, width, height);
             }
         }
     }
 
-    // sets up the given Graphics2D so that it is usable
-    // from both doPaint and getTextShape
-    private FontMetrics setupGraphics(Graphics2D g, int canvasWidth, int canvasHeight, String text) {
+    /**
+     * Renders a possibly off-canvas image, without recalculating the layout.
+     * (Recalculating the layout can cause rounding errors in the ORA export)
+     */
+    public BufferedImage renderRectangle(Rectangle bounds) {
+        BufferedImage img = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.translate(-bounds.x, -bounds.y);
+        paintText(g2, null, bounds.width, bounds.height, false);
+        g2.dispose();
+        return img;
+    }
+
+    /**
+     * Sets up the given Graphics2D so that it is usable from both doPaint and
+     * getTextShape. This method assumes that the text's location is already calculated.
+     */
+    private void setupGraphics(Graphics2D g) {
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
 
         assert font != null;
         g.setFont(font);
 
-        FontMetrics metrics = g.getFontMetrics(font);
-
-        int textWidth = metrics.stringWidth(text);
-        int textHeight = metrics.getHeight();
-        boundingBox = calculateLayout(textWidth, textHeight, canvasWidth, canvasHeight);
-
-        if (rotation != 0) {
+        if (rotation == 0) {
+            assert rotatedRect == null;
+            g.translate(boundingBox.x, boundingBox.y);
+        } else {
             assert rotatedRect != null;
 
             double topLeftX = rotatedRect.getTopLeftX();
             double topLeftY = rotatedRect.getTopLeftY();
             g.translate(topLeftX, topLeftY);
             g.rotate(rotation, 0, 0);
-        } else {
-            assert rotatedRect == null;
-            g.translate(boundingBox.x, boundingBox.y);
         }
-        return metrics;
+    }
+
+    private void updateLayout(int width, int height, String text, FontMetrics metrics) {
+        int textWidth = metrics.stringWidth(text);
+        int textHeight = metrics.getHeight();
+        boundingBox = calculateLayout(textWidth, textHeight, width, height);
     }
 
     public Shape getTextShape(Canvas canvas) {
-        // create this image just to get a Graphics2D somehow...
+        // This image is created just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = tmp.createGraphics();
         var imgOrigTransform = g2.getTransform();
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        setupGraphics(g2, canvasWidth, canvasHeight, getText());
+        setupGraphics(g2);
         var at = g2.getTransform();
         g2.setTransform(imgOrigTransform); // provideShape must be called with untransformed Graphics
-        Shape shape = provideShape(g2, null, canvasWidth, canvasHeight);
+        Shape shape = provideShape(g2, null, canvas.getWidth(), canvas.getHeight());
 
         g2.dispose();
         tmp.flush();

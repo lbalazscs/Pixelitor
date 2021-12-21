@@ -27,6 +27,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.history.*;
+import pixelitor.io.ExportInfo;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -702,18 +703,23 @@ public abstract class Layer implements Serializable {
         return true;
     }
 
+    public ExportInfo getExportInfo() {
+        // the default implementation is good for color and gradient fill layers
+        return new ExportInfo(asImage(true, false), 0, 0);
+    }
+
     /**
      * Returns a canvas-sized image corresponding to the contents of this layer.
      * Returns null if no such image can be returned (adjustment layer).
      * The layer's blending mode is always ignored.
      *
-     * @param applyMask         if false, then the mask is ignored
-     * @param applyTransparency if false, then the layer's transparency is ignored.
+     * @param applyMask    if false, then the mask is ignored
+     * @param applyOpacity if false, then the layer's opacity is ignored.
      */
-    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
+    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
         BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
-        if (applyTransparency) {
+        if (applyOpacity) {
             // the layer's blending mode will be ignored
             // because firstVisibleLayer is set to true
             setupDrawingComposite(g, true);

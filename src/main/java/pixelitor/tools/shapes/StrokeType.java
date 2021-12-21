@@ -48,7 +48,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, ZIGZAG("Zigzag", false) {
@@ -66,7 +66,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return specifiedWidth / 2;
         }
     }, WOBBLE("Wobble", true) {
@@ -97,8 +97,8 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
-            return (int) (specifiedWidth * 1.5);
+        public double getExtraThickness(double specifiedWidth) {
+            return specifiedWidth * 1.5;
         }
     }, CHARCOAL("Charcoal (can be slow!)", true) {
         @Override
@@ -107,7 +107,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, BRISTLE("Bristle (can be slow!)", true) {
@@ -117,7 +117,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, OUTLINE("Outline", false) {
@@ -134,7 +134,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, CALLIGRAPHY("Calligraphy", false) {
@@ -144,7 +144,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, SHAPE("Shape", false) {
@@ -167,7 +167,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     },
@@ -178,7 +178,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     }, TAPERING_REV("Reversed Tapering", false) {
@@ -188,7 +188,7 @@ public enum StrokeType {
         }
 
         @Override
-        public float getExtraThickness(float specifiedWidth) {
+        public double getExtraThickness(double specifiedWidth) {
             return 0;
         }
     };
@@ -230,7 +230,7 @@ public enum StrokeType {
      * Return the real thickness (for the undo), which can be bigger
      * than the specified width.
      */
-    public abstract float getExtraThickness(float specifiedWidth);
+    public abstract double getExtraThickness(double specifiedWidth);
 
     public static EnumParam<StrokeType> asParam() {
         return new EnumParam<>(NAME, StrokeType.class);

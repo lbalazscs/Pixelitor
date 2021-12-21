@@ -96,33 +96,33 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     /**
      * Returns the extra thickness caused by the effect
      */
-    public int getMaxEffectThickness() {
+    public double getMaxEffectThickness() {
         // the inner glow is not considered here,
         // because it doesn't add extra thickness
-        int max = 0;
+        double max = 0;
         if (glowEffect != null) {
-            int effectWidth = glowEffect.getEffectWidthInt();
+            double effectWidth = glowEffect.getEffectWidth();
             if (effectWidth > max) {
                 max = effectWidth;
             }
         }
         if (neonBorderEffect != null) {
-            int effectWidth = neonBorderEffect.getEffectWidthInt();
+            double effectWidth = neonBorderEffect.getEffectWidth();
             if (effectWidth > max) {
                 max = effectWidth;
             }
         }
         if (dropShadowEffect != null) {
             double safetyFactor = 2.0;
-            int effectWidth = 3 + (int) (dropShadowEffect.getEffectWidth() * safetyFactor);
+            double effectWidth = 3 + dropShadowEffect.getEffectWidth() * safetyFactor;
 
             Point2D offset = dropShadowEffect.getOffset();
 
-            int xGap = effectWidth + (int) Math.abs(offset.getX() * safetyFactor);
+            double xGap = effectWidth + Math.abs(offset.getX() * safetyFactor);
             if (xGap > max) {
                 max = xGap;
             }
-            int yGap = effectWidth + (int) Math.abs(offset.getY() * safetyFactor);
+            double yGap = effectWidth + Math.abs(offset.getY() * safetyFactor);
             if (yGap > max) {
                 max = yGap;
             }

@@ -24,6 +24,7 @@ import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
+import pixelitor.io.ExportInfo;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
 import pixelitor.utils.*;
@@ -389,11 +390,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
+    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
         if (!usesMask() && getOpacity() == 1.0f) {
             return getCanvasSizedVisibleImage();
         }
-        return super.asImage(applyMask, applyTransparency);
+        return super.asImage(applyMask, applyOpacity);
+    }
+
+    @Override
+    public ExportInfo getExportInfo() {
+        return new ExportInfo(image, getTx(), getTy());
     }
 
     @Override
@@ -828,10 +834,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void setTranslation(int x, int y) {
-        // don't allow positive translations for for image layers
+        // don't allow positive translations for image layers
         if (x > 0 || y > 0) {
-            throw new IllegalArgumentException("x = " + x + ", y = " + y);
+            throw new IllegalArgumentException("x = " + x + ", y = " + y + ", this = " + this);
         }
+        super.setTranslation(x, y);
+    }
+
+    public void forceTranslation(int x, int y) {
+        // skips the range check
         super.setTranslation(x, y);
     }
 

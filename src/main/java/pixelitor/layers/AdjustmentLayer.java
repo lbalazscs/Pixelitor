@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.io.ExportInfo;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -79,7 +80,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public BufferedImage asImage(boolean applyMask, boolean applyTransparency) {
+    public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
         return null;
     }
 
@@ -108,6 +109,11 @@ public class AdjustmentLayer extends Layer {
     @Override
     public boolean canExportImage() {
         return false;
+    }
+
+    @Override
+    public ExportInfo getExportInfo() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
