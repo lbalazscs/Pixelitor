@@ -53,7 +53,10 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         ParamSet paramSet = filter.getParamSet();
         if (reset) {
             paramSet.reset();
-            paramSet.updateOptions(dr);
+
+            // if the filter is not reset, then the ranges should
+            // not be updated, even if the canvas size changed
+            paramSet.updateOptions(dr, true);
         }
 
         paramSet.setAdjustmentListener(this);

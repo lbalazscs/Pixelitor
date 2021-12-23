@@ -39,7 +39,7 @@ public interface FilterParam extends FilterSetting, Resettable {
      * Can be used to adapt the offered ranges/choices to the current
      * drawable, composition or the list of open compositions.
      */
-    default void updateOptions(Drawable dr) {
+    default void updateOptions(Drawable dr, boolean changeValue) {
         // by default does nothing, as most controls are unaffected
     }
 

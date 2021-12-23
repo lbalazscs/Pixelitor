@@ -308,9 +308,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void updateOptions(Drawable dr) {
+    public void updateOptions(Drawable dr, boolean changeValue) {
         for (RangeParam child : children) {
-            child.updateOptions(dr);
+            child.updateOptions(dr, changeValue);
         }
     }
 

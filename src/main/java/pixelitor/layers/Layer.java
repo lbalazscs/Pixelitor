@@ -755,7 +755,11 @@ public abstract class Layer implements Serializable {
             var mergeDownAction = new PAction(GUIText.MERGE_DOWN) {
                 @Override
                 public void onClick() {
-                    comp.mergeDown(Layer.this);
+                    // check again to be sure that the layer bellow
+                    // this didn't change in the meantime
+                    if (comp.canMergeDown(Layer.this)) {
+                        comp.mergeDown(Layer.this);
+                    }
                 }
             };
             mergeDownAction.setToolTip(GUIText.MERGE_DOWN_TT);

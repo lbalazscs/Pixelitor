@@ -268,11 +268,16 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setValue(double v, boolean trigger) {
-        if (v > maxValue) {
-            v = maxValue;
-        }
-        if (v < minValue) {
-            v = minValue;
+        if (paramGUI != null) {
+            // while loading a smart filter, it can happen that
+            // the value is out of range (if the range is adjusted
+            // to the canvas size, but this adjustment didn't happen yet)
+            if (v > maxValue) {
+                v = maxValue;
+            }
+            if (v < minValue) {
+                v = minValue;
+            }
         }
 
         if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
@@ -353,7 +358,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void updateOptions(Drawable dr) {
+    public void updateOptions(Drawable dr, boolean changeValue) {
         if (adjustMaxAccordingToImage) {
             Dimension size = dr.getComp().getCanvas().getSize();
             double defaultToMaxRatio = defaultValue / maxValue;
@@ -372,7 +377,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             if (defaultValue < minValue) {
                 defaultValue = minValue;
             }
-            value = defaultValue;
+            if (changeValue) {
+                value = defaultValue;
+            }
         }
     }
 

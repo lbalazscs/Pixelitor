@@ -64,6 +64,11 @@ public class ConnectBrushHistory {
     public static void drawConnectingLines(Graphics2D targetG,
                                            ConnectBrushSettings settings,
                                            PPoint p, double diamSq) {
+        if (history.isEmpty()) {
+            indexOfNextAdd = 0;
+            return;
+        }
+
         HistoryPoint last = new HistoryPoint(p.getImX(), p.getImY());
         lastStroke.add(last);
         numPoints++;
@@ -88,9 +93,9 @@ public class ConnectBrushHistory {
                     if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
                         int alpha = (int) Math.min(255.0, 10000 / distSq);
 
-                        int rgbWithAlpha = alpha << 24 | currentColorZeroAlpha;
+                        int lineColor = alpha << 24 | currentColorZeroAlpha;
 
-                        targetG.setColor(new Color(rgbWithAlpha, true));
+                        targetG.setColor(new Color(lineColor, true));
                         double xOffset = dx * offSet;
                         double yOffset = dy * offSet;
                         line.setLine(last.x - xOffset, last.y - yOffset,

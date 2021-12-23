@@ -45,7 +45,7 @@ public class SelectImageParam extends AbstractMultipleChoiceParam<NamedImage> {
     }
 
     @Override
-    public void updateOptions(Drawable dr) {
+    public void updateOptions(Drawable dr, boolean changeValue) {
         this.choices = openImageInfos();
         NamedImage activeImage = findActiveNamedImage(choices, dr);
         // if there is more than one open image,

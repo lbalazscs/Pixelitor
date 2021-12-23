@@ -70,6 +70,9 @@ public class Layers {
 
     public static void layerActivated(Layer newActiveLayer, boolean viewChanged) {
         assert newActiveLayer != null;
+        assert newActiveLayer.isActive();
+        assert newActiveLayer.getComp().isActive();
+
         for (var listener : compListeners) {
             listener.layerActivated(newActiveLayer);
         }

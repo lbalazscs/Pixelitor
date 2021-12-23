@@ -190,9 +190,9 @@ public class ParamSet {
         }
     }
 
-    public void updateOptions(Drawable dr) {
+    public void updateOptions(Drawable dr, boolean changeValue) {
         for (FilterParam param : paramList) {
-            param.updateOptions(dr);
+            param.updateOptions(dr, changeValue);
         }
     }
 

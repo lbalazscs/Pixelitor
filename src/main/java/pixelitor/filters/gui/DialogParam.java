@@ -72,9 +72,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void updateOptions(Drawable dr) {
+    public void updateOptions(Drawable dr, boolean changeValue) {
         for (FilterParam child : children) {
-            child.updateOptions(dr);
+            child.updateOptions(dr, changeValue);
         }
     }
 

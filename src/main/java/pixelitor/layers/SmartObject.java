@@ -123,6 +123,14 @@ public class SmartObject extends ImageLayer {
         lastFilterState = null;
     }
 
+    public void afterDeserialization() {
+        for (Filter filter : smartFilters) {
+            if (filter instanceof ParametrizedFilter pf) {
+                pf.getParamSet().updateOptions(this, false);
+            }
+        }
+    }
+
     @Override
     boolean serializeImage() {
         return false;
@@ -272,6 +280,8 @@ public class SmartObject extends ImageLayer {
         lastFilterOutput = image;
         smartFilters.clear();
         resetImageFromContent();
+
+        // since this is a new filter instance, there is no need to reset it
         boolean filterDialogAccepted = newFilter.startOn(this, false);
         if (filterDialogAccepted) {
             lastFilterOutput.flush();

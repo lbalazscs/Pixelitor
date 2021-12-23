@@ -443,7 +443,9 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                !(filter instanceof RandomFilter));
+                (!(filter instanceof RandomFilter)
+                 && !(filter instanceof FlowField))
+            );
         } else {
             f = preferredFilter;
         }

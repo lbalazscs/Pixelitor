@@ -230,6 +230,13 @@ public class Composition implements Serializable {
         builtSelection = null;
 
         in.defaultReadObject();
+
+        for (Layer layer : layerList) {
+            if (layer instanceof SmartObject so) {
+                // things that need a full canvas
+                so.afterDeserialization();
+            }
+        }
     }
 
     public View getView() {
