@@ -25,6 +25,7 @@ import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -35,10 +36,7 @@ import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serial;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +53,9 @@ public class SmartObject extends ImageLayer {
 
     // only used for deserialization
     private final boolean newVersion = true;
+
+    // null if the content is not linked
+    private File linkedContentFile;
 
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
@@ -103,16 +104,40 @@ public class SmartObject extends ImageLayer {
         lastFilterOutput = orig.lastFilterOutput;
         indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
         smartFilterIsVisible = orig.smartFilterIsVisible;
+        linkedContentFile = orig.linkedContentFile;
     }
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
+        Composition tmp = content;
+        if (hasLinkedContent()) {
+            // if the content is linked, then don't write it
+            content = null;
+        }
+
         out.defaultWriteObject();
+
+        content = tmp;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+
+        if (hasLinkedContent()) {
+            if (!linkedContentFile.exists()) {
+                content = Composition.createTransparent(100, 100); // no canvas at this point
+                EventQueue.invokeLater(() ->
+                    Messages.showError(linkedContentFile.getName() + " not found.",
+                        "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
+                );
+            } else {
+                // also read the content
+                assert content == null;
+                content = IO.loadCompSync(linkedContentFile);
+                content.setOwner(this);
+            }
+        }
 
         if (!newVersion) {
             // if the pxc was saved with an old version,
@@ -162,11 +187,11 @@ public class SmartObject extends ImageLayer {
         imageNeedsRefresh = true;
     }
 
-    public void contentDeactivated(Composition content) {
+    public void propagateChanges(Composition content, boolean force) {
         // the reference might have been changed during editing
         this.content = content;
 
-        if (!content.isDirty()) {
+        if (!content.isDirty() && !force) {
             return;
         }
 
@@ -361,6 +386,14 @@ public class SmartObject extends ImageLayer {
     public PixelitorEdit endMovement() {
         // do nothing, see startMovement()
         return null;
+    }
+
+    public boolean hasLinkedContent() {
+        return linkedContentFile != null;
+    }
+
+    public void setLinkedContentFile(File file) {
+        this.linkedContentFile = file;
     }
 
     @Override

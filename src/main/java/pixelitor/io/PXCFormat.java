@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import static pixelitor.utils.ImageUtils.getPixelsAsArray;
 public class PXCFormat {
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
 
-    // tracks the reading-writing of the whole file
+    // tracks the writing of the whole file
     private static ProgressTracker mainPT;
 
     private static double workRatioForOneImage;
@@ -49,11 +49,11 @@ public class PXCFormat {
 
     public static Composition read(File file) throws BadPxcFormatException {
         long fileSize = file.length();
-        mainPT = new StatusBarProgressTracker(
+        ProgressTracker pt = new StatusBarProgressTracker(
             "Reading " + file.getName(), (int) fileSize);
         Composition comp = null;
         try (InputStream is = new ProgressTrackingInputStream(
-            new FileInputStream(file), mainPT)) {
+            new FileInputStream(file), pt)) {
 
             int firstByte = is.read();
             int secondByte = is.read();
@@ -61,7 +61,7 @@ public class PXCFormat {
                 // identification bytes OK
             } else {
                 throw new BadPxcFormatException(file.getName()
-                    + " is not in the pxc format.");
+                                                + " is not in the pxc format.");
             }
             int versionByte = is.read();
             if (versionByte == 0) {
@@ -87,8 +87,7 @@ public class PXCFormat {
             try (GZIPInputStream gs = new GZIPInputStream(is)) {
                 try (ObjectInput ois = new ObjectInputStream(gs)) {
                     comp = (Composition) ois.readObject();
-                    mainPT.finished();
-                    mainPT = null;
+                    pt.finished();
 
                     // file is transient in Composition because the pxc file can be renamed
                     comp.setFile(file);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@ package pixelitor.io;
 
 import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.filechooser.FileFilter;
@@ -44,7 +45,17 @@ public enum FileFormat {
         }
 
         @Override
-        public CompletableFuture<Composition> readFrom(File file) {
+        public Composition readSync(File file) {
+            try {
+                return OpenRaster.read(file);
+            } catch (Exception e) {
+                Messages.showException(e);
+                return null;
+            }
+        }
+
+        @Override
+        public CompletableFuture<Composition> readAsync(File file) {
             return CompletableFuture.supplyAsync(
                 Utils.toSupplier(() -> OpenRaster.read(file)), onIOThread);
         }
@@ -58,7 +69,17 @@ public enum FileFormat {
         }
 
         @Override
-        public CompletableFuture<Composition> readFrom(File file) {
+        public Composition readSync(File file) {
+            try {
+                return PXCFormat.read(file);
+            } catch (BadPxcFormatException e) {
+                Messages.showException(e);
+                return null;
+            }
+        }
+
+        @Override
+        public CompletableFuture<Composition> readAsync(File file) {
             return CompletableFuture.supplyAsync(
                 Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
         }
@@ -82,15 +103,25 @@ public enum FileFormat {
         return () -> saveSingleLayered(comp, settings);
     }
 
-    public CompletableFuture<Composition> readFrom(File file) {
+    public Composition readSync(File file) {
         // overwritten for multi-layered formats
-        return readSimpleFrom(file);
+        return readSimpleSync(file);
+    }
+
+    public Composition readSimpleSync(File file) {
+        BufferedImage img = TrackedIO.uncheckedRead(file);
+        return Composition.fromImage(img, file, null);
+    }
+
+    public CompletableFuture<Composition> readAsync(File file) {
+        // overwritten for multi-layered formats
+        return readSimpleAsync(file);
     }
 
     /**
      * Loads a composition from a file with a single-layer image format
      */
-    private static CompletableFuture<Composition> readSimpleFrom(File file) {
+    private static CompletableFuture<Composition> readSimpleAsync(File file) {
         return CompletableFuture.supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }

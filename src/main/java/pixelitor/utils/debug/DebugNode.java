@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.util.Enumeration;
 import static java.lang.String.format;
 
 /**
- * The superclass of all the nodes that appear in the tree shown by "Help/Internal State".
+ * A node that appears in the tree shown by "Help/Internal State".
  */
 public class DebugNode extends DefaultMutableTreeNode {
     private final String name;

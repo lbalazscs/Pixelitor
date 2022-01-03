@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -885,7 +884,26 @@ public abstract class Layer implements Serializable {
     }
 
     public DebugNode createDebugNode(String description) {
-        return new LayerNode(description + " - " + getName(), this);
+        DebugNode node = new DebugNode(description + " - " + getName(), this);
+
+        node.addQuotedString("name", getName());
+        node.addClass();
+        node.addBoolean("active", isActive());
+
+        if (hasMask()) {
+            node.addString("has mask", "yes");
+            node.addBoolean("mask enabled", isMaskEnabled());
+            node.addBoolean("mask editing", isMaskEditing());
+            node.add(getMask().createDebugNode());
+        } else {
+            node.addString("has mask", "no");
+        }
+
+        node.addBoolean("visible", isVisible());
+        node.addFloat("opacity", getOpacity());
+        node.addQuotedString("blending mode", getBlendingMode().toString());
+
+        return node;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,6 +115,10 @@ public class Messages {
 
     public static void showNotDrawableError(Layer layer) {
         msgHandler.showNotDrawableError(layer);
+    }
+
+    public static boolean showYesNoQuestion(String title, String msg) {
+        return msgHandler.showYesNoQuestion(title, msg);
     }
 
     public static void showPerformanceMessage(String filterName, long totalTime) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,12 @@ public class IO {
         // if the file format is not recognized, this will still try to
         // read it in a single-layered format, which doesn't have to be JPG
         FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
-        return format.readFrom(file);
+        return format.readAsync(file);
+    }
+
+    public static Composition loadCompSync(File file) {
+        FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
+        return format.readSync(file);
     }
 
     public static CompletableFuture<Void> loadToNewImageLayerAsync(File file,

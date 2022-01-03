@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,5 +67,10 @@ public class TestMessageHandler implements MessageHandler {
     public void showExceptionOnEDT(Throwable e) {
         // still on this thread
         throw new AssertionError(e);
+    }
+
+    @Override
+    public boolean showYesNoQuestion(String title, String msg) {
+        return true;
     }
 }

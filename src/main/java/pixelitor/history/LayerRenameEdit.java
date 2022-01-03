@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.history;
 
 import pixelitor.layers.Layer;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.LayerNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -67,7 +66,7 @@ public class LayerRenameEdit extends PixelitorEdit {
     public DebugNode createDebugNode() {
         DebugNode node = super.createDebugNode();
 
-        node.add(new LayerNode(layer));
+        node.add(layer.createDebugNode());
         node.addQuotedString("name before", nameBefore);
         node.addQuotedString("name after", nameAfter);
 

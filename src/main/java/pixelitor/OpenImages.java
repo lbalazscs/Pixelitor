@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -332,7 +332,7 @@ public class OpenImages {
 
         try {
             var comp = view.getComp();
-            if (comp.isDirty() && !comp.isEmbedded()) {
+            if (comp.isDirty() && !comp.isSmartObjectContent()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // "Save"

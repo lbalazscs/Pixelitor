@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -163,6 +163,14 @@ public class Composition implements Serializable {
     }
 
     /**
+     * Creates a composition with one transparent image layer.
+     */
+    public static Composition createTransparent(int width, int height) {
+        BufferedImage img = ImageUtils.createSysCompatibleImage(width, height);
+        return fromImage(img, null, "");
+    }
+
+    /**
      * Creates and returns a deep copy of this composition.
      */
     public Composition copy(boolean forUndo, boolean copySelection) {
@@ -268,8 +276,8 @@ public class Composition implements Serializable {
     }
 
     public void deactivated() {
-        if (owner != null) {
-            owner.contentDeactivated(this);
+        if (isSmartObjectContent()) {
+            owner.propagateChanges(this, false);
         }
     }
 
@@ -281,7 +289,7 @@ public class Composition implements Serializable {
         this.owner = owner;
     }
 
-    public boolean isEmbedded() {
+    public boolean isSmartObjectContent() {
         return owner != null;
     }
 
@@ -773,7 +781,7 @@ public class Composition implements Serializable {
 
         // recursively invalidate the image caches in the smart
         // objects and compositions until the top composition
-        if (owner != null) {
+        if (isSmartObjectContent()) {
             owner.invalidateImageCache();
 
             Composition parent = owner.getComp();
@@ -1442,6 +1450,21 @@ public class Composition implements Serializable {
         }
         ImagePreviewPanel.removeThumbFromCache(file);
         Messages.showFileSavedMessage(file);
+
+        if (isSmartObjectContent()) {
+            // otherwise the changes might not be propagated when deactivating,
+            // because this is not dirty after saving even if it's changed
+            owner.propagateChanges(this, true);
+
+            if (!owner.hasLinkedContent()) {
+                boolean link = Messages.showYesNoQuestion("Link Smart Object to File",
+                    format("<html>Set <b>%s</b> as the linked contents of the smart object <b>%s</b>?",
+                        file.getName(), owner.getName()));
+                if (link) {
+                    owner.setLinkedContentFile(file);
+                }
+            }
+        }
     }
 
     public Paths getPaths() {
