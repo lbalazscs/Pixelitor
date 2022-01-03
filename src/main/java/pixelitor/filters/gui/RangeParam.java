@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double value;
 
     private boolean adjusting;
-    private final boolean addDefaultButton;
+    private final boolean addResetButton;
     private final SliderSpinner.TextPosition textPosition;
 
     private ChangeEvent changeEvent = null;
@@ -62,12 +62,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, double def, int max, boolean addDefaultButton,
+    public RangeParam(String name, int min, double def, int max, boolean addResetButton,
                       SliderSpinner.TextPosition position) {
-        this(name, min, def, max, addDefaultButton, position, ALLOW_RANDOMIZE);
+        this(name, min, def, max, addResetButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int min, double def, int max, boolean addDefaultButton,
+    public RangeParam(String name, int min, double def, int max, boolean addResetButton,
                       SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
@@ -79,13 +79,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         maxValue = max;
         defaultValue = def;
         value = def;
-        this.addDefaultButton = addDefaultButton;
+        this.addResetButton = addResetButton;
         textPosition = position;
     }
 
     @Override
     public JComponent createGUI() {
-        var sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
+        var sliderSpinner = new SliderSpinner(this, textPosition, addResetButton);
         paramGUI = sliderSpinner;
         guiCreated();
 
@@ -440,7 +440,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam copy() {
-        RangeParam copy = new RangeParam(getName(), minValue, defaultValue, maxValue, addDefaultButton, textPosition, randomizePolicy);
+        RangeParam copy = new RangeParam(getName(), minValue, defaultValue, maxValue, addResetButton, textPosition, randomizePolicy);
         // set the value separately in order to make
         // sure that the default value is copied
         copy.setValueNoTrigger(value);
@@ -470,7 +470,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         private int min;
         private double def;
         private int max;
-        private boolean addDefaultButton = true;
+        private boolean addResetButton = true;
         private int decimalPlaces = 0;
         private SliderSpinner.TextPosition textPosition = BORDER;
         private RandomizePolicy randomizePolicy = ALLOW_RANDOMIZE;
@@ -499,8 +499,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             return this;
         }
 
-        public Builder addDefaultButton(boolean addDefaultButton) {
-            this.addDefaultButton = addDefaultButton;
+        public Builder addResetButton(boolean addResetButton) {
+            this.addResetButton = addResetButton;
             return this;
         }
 
@@ -516,7 +516,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         public RangeParam build() {
             RangeParam rp = new RangeParam(name, min, def, max,
-                addDefaultButton, textPosition, randomizePolicy);
+                addResetButton, textPosition, randomizePolicy);
             rp.setDecimalPlaces(decimalPlaces);
             return rp;
         }

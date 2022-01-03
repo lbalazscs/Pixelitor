@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,11 +40,11 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
     public static final String DROP_SHADOW_TAB_NAME = "Drop Shadow";
 
-    private BaseEffectPanel glowPanel;
-    private BaseEffectPanel innerGlowPanel;
+    private EffectPanel glowPanel;
+    private EffectPanel innerGlowPanel;
     private NeonBorderPanel neonBorderPanel;
     private DropShadowPanel dropShadowPanel;
-    private final BaseEffectPanel[] panels = new BaseEffectPanel[4];
+    private final EffectPanel[] panels = new EffectPanel[4];
 
     private final JTabbedPane tabs;
 
@@ -73,14 +73,14 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
 
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         assert listener != null;
-        for (BaseEffectPanel panel : panels) {
+        for (EffectPanel panel : panels) {
             panel.setAdjustmentListener(listener);
         }
     }
 
     private void selectFirstEnabledTab() {
         for (int i = 0; i < panels.length; i++) {
-            BaseEffectPanel panel = panels[i];
+            EffectPanel panel = panels[i];
             if (panel.isEffectEnabled()) {
                 tabs.setSelectedIndex(i);
                 break;
@@ -261,7 +261,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         effects.setDropShadow(dropShadowEffect);
     }
 
-    private void addTab(String name, BaseEffectPanel configurator) {
+    private void addTab(String name, EffectPanel configurator) {
         JPanel tabPanel = new JPanel(new FlowLayout(LEFT));
         JCheckBox tabCB = new JCheckBox();
         tabCB.setModel(configurator.getEnabledModel());
@@ -300,7 +300,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
 
     @Override
     public boolean isSetToDefault() {
-        for (BaseEffectPanel panel : panels) {
+        for (EffectPanel panel : panels) {
             if (!panel.isSetToDefault()) {
                 return false;
             }
@@ -317,14 +317,14 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     public void randomize() {
-        for (BaseEffectPanel panel : panels) {
+        for (EffectPanel panel : panels) {
             panel.randomize();
         }
     }
 
-    public void setDefaultButton(DefaultButton button) {
-        for (BaseEffectPanel panel : panels) {
-            panel.setDefaultButton(button);
+    public void setResetButton(ResetButton button) {
+        for (EffectPanel panel : panels) {
+            panel.setResetButton(button);
         }
     }
 

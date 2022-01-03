@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -99,7 +99,7 @@ public class GradientParam extends AbstractFilterParam {
     private void sliderPropertyChanged(PropertyChangeEvent evt) {
         if (shouldStartFilter(evt)) {
             if (gui != null) {
-                gui.updateDefaultButtonIcon();
+                gui.updateResetButtonIcon();
             }
             adjustmentListener.paramAdjusted();
         }
@@ -143,7 +143,7 @@ public class GradientParam extends AbstractFilterParam {
 
         setValuesNoTrigger(defaultThumbPositions, randomColors);
         if (gui != null) {
-            gui.updateDefaultButtonIcon();
+            gui.updateResetButtonIcon();
         }
     }
 
@@ -187,7 +187,7 @@ public class GradientParam extends AbstractFilterParam {
             setValuesNoTrigger(defaultThumbPositions, defaultColors);
         }
         if (gui != null) {
-            gui.updateDefaultButtonIcon();
+            gui.updateResetButtonIcon();
         }
     }
 
@@ -298,14 +298,14 @@ public class GradientParam extends AbstractFilterParam {
 
     static class GUI extends JPanel implements ParamGUI {
         private final GradientSlider slider;
-        private final DefaultButton defaultButton;
+        private final ResetButton resetButton;
 
         public GUI(GradientSlider slider, GradientParam gradientParam) {
             super(new FlowLayout());
             this.slider = slider;
             add(slider);
-            defaultButton = new DefaultButton(gradientParam);
-            add(defaultButton);
+            resetButton = new ResetButton(gradientParam);
+            add(resetButton);
         }
 
         @Override
@@ -328,8 +328,8 @@ public class GradientParam extends AbstractFilterParam {
             return slider.isEnabled();
         }
 
-        public void updateDefaultButtonIcon() {
-            defaultButton.updateIcon();
+        public void updateResetButtonIcon() {
+            resetButton.updateIcon();
         }
 
         @Override

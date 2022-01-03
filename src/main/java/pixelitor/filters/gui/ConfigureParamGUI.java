@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,16 +34,16 @@ import static java.awt.BorderLayout.EAST;
  */
 public class ConfigureParamGUI extends JPanel implements ParamGUI {
     private final JButton configureButton;
-    private final DefaultButton defaultButton;
+    private final ResetButton resetButton;
 
     public ConfigureParamGUI(Consumer<DialogBuilder> dialogConfig,
-                             DefaultButton defaultButton) {
+                             ResetButton resetButton) {
         super(new BorderLayout());
 
-        this.defaultButton = defaultButton;
+        this.resetButton = resetButton;
         configureButton = new JButton("Configure...");
         add(configureButton, CENTER);
-        add(defaultButton, EAST);
+        add(resetButton, EAST);
         configureButton.addActionListener(e -> createAndShowDialog(dialogConfig));
     }
 
@@ -73,7 +73,7 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
     @Override
     public void setEnabled(boolean enabled) {
         configureButton.setEnabled(enabled);
-        defaultButton.setEnabled(enabled);
+        resetButton.setEnabled(enabled);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
  */
 public class DialogParam extends AbstractFilterParam {
     private final FilterParam[] children;
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
 
     public DialogParam(String name, FilterParam... children) {
         super(name, ALLOW_RANDOMIZE);
@@ -45,9 +45,9 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        defaultButton = new DefaultButton(this);
+        resetButton = new ResetButton(this);
 
-        paramGUI = new ConfigureParamGUI(this::configureDialog, defaultButton);
+        paramGUI = new ConfigureParamGUI(this::configureDialog, resetButton);
 
         guiCreated();
         return (JComponent) paramGUI;
@@ -68,7 +68,7 @@ public class DialogParam extends AbstractFilterParam {
         for (FilterParam child : children) {
             child.randomize();
         }
-        updateDefaultButtonState();
+        updateResetButtonState();
     }
 
     @Override
@@ -115,7 +115,7 @@ public class DialogParam extends AbstractFilterParam {
                 child.loadStateFrom(savedString);
             }
         }
-        updateDefaultButtonState();
+        updateResetButtonState();
     }
 
     @Override
@@ -159,20 +159,20 @@ public class DialogParam extends AbstractFilterParam {
             // this class updates the default button state
             // simply by putting a decorator on the adjustment
             // listeners, no this needs to be called here manually
-            updateDefaultButtonState();
+            updateResetButtonState();
         }
     }
 
-    private void updateDefaultButtonState() {
-        if (defaultButton != null) {
-            defaultButton.updateIcon();
+    private void updateResetButtonState() {
+        if (resetButton != null) {
+            resetButton.updateIcon();
         }
     }
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         ParamAdjustmentListener decoratedListener = () -> {
-            updateDefaultButtonState();
+            updateResetButtonState();
             listener.paramAdjusted();
         };
 

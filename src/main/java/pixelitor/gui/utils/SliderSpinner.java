@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ResetButton;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -56,7 +56,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     private final JSlider slider;
     private final JSpinner spinner;
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
     private final RangeParam model;
 
     private Color leftColor;
@@ -66,12 +66,12 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private boolean sliderMoved = false;
     private boolean spinnerMoved = false;
 
-    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton) {
-        this(model, position, addDefaultButton, HORIZONTAL);
+    public SliderSpinner(RangeParam model, TextPosition position, boolean addResetButton) {
+        this(model, position, addResetButton, HORIZONTAL);
     }
 
-    public SliderSpinner(RangeParam model, TextPosition position, boolean addDefaultButton, int orientation) {
-        this(model, null, null, position, addDefaultButton, orientation);
+    public SliderSpinner(RangeParam model, TextPosition position, boolean addResetButton, int orientation) {
+        this(model, null, null, position, addResetButton, orientation);
     }
 
     public SliderSpinner(RangeParam model, Color leftColor, Color rightColor, int orientation) {
@@ -85,7 +85,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private SliderSpinner(RangeParam model,
                           Color leftColor, Color rightColor,
                           TextPosition textPosition,
-                          boolean addDefaultButton,
+                          boolean addResetButton,
                           int orientation) {
         this.textPosition = textPosition;
         this.orientation = orientation;
@@ -129,9 +129,9 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         add(slider, CENTER);
         spinnerPanel.add(spinner);
 
-        if (addDefaultButton) {
-            createDefaultButton(model);
-            spinnerPanel.add(defaultButton);
+        if (addResetButton) {
+            createResetButton(model);
+            spinnerPanel.add(resetButton);
         }
         add(spinnerPanel, orientation == HORIZONTAL ? EAST : SOUTH);
 
@@ -188,16 +188,16 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         return s;
     }
 
-    private void createDefaultButton(RangeParam model) {
-        defaultButton = new DefaultButton(model);
+    private void createResetButton(RangeParam model) {
+        resetButton = new ResetButton(model);
         if (colorsUsed) {
-            defaultButton.setBackground(GRAY);
+            resetButton.setBackground(GRAY);
         }
     }
 
-    public void addExplicitDefaultButton(DefaultButton defaultButton) {
-        this.defaultButton = defaultButton;
-        spinnerPanel.add(defaultButton);
+    public void addExplicitResetButton(ResetButton resetButton) {
+        this.resetButton = resetButton;
+        spinnerPanel.add(resetButton);
     }
 
     public void setupTicks() {
@@ -303,22 +303,22 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             spinnerMoved = false;
         }
 
-        if (defaultButton != null) {
+        if (resetButton != null) {
             if (colorsUsed) {
-                setBgColorOfDefaultButton();
+                setResetButtonBgColor();
             }
-            defaultButton.updateIcon();
+            resetButton.updateIcon();
         }
     }
 
-    private void setBgColorOfDefaultButton() {
+    private void setResetButtonBgColor() {
         if (model.isSetToDefault()) {
-            defaultButton.setBackground(GRAY);
+            resetButton.setBackground(GRAY);
         } else {
             if (model.getValue() > model.getDefaultValue()) {
-                defaultButton.setBackground(rightColor);
+                resetButton.setBackground(rightColor);
             } else {
-                defaultButton.setBackground(leftColor);
+                resetButton.setBackground(leftColor);
             }
         }
     }
@@ -365,8 +365,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (label != null) {
             label.setEnabled(enabled);
         }
-        if (defaultButton != null) {
-            defaultButton.setEnabled(enabled);
+        if (resetButton != null) {
+            resetButton.setEnabled(enabled);
         }
     }
 

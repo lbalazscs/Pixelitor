@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,9 +31,9 @@ import static java.awt.FlowLayout.LEFT;
 public class BooleanParamGUI extends JPanel implements ParamGUI {
     private final BooleanParam model;
     private final JCheckBox checkBox;
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
 
-    public BooleanParamGUI(BooleanParam model, boolean addDefaultButton, FilterButtonModel extraAction) {
+    public BooleanParamGUI(BooleanParam model, boolean addResetButton, FilterButtonModel extraAction) {
         this.model = model;
         setLayout(new FlowLayout(LEFT));
         checkBox = new JCheckBox();
@@ -42,10 +42,10 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
 
         checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
 
-        if (addDefaultButton) {
+        if (addResetButton) {
             add(Box.createHorizontalStrut(50));
-            defaultButton = new DefaultButton(model);
-            add(defaultButton);
+            resetButton = new ResetButton(model);
+            add(resetButton);
 
             // It is important to add here a change listener and not an
             // action listener because we want to trigger this when the
@@ -53,7 +53,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             // Swing is not consistent: in the case of JComboBox, action
             // listeners are called when the component is changed indirectly,
             // but not in the case of JCheckBox
-            checkBox.addChangeListener(e -> defaultButton.updateIcon());
+            checkBox.addChangeListener(e -> resetButton.updateIcon());
         }
 
         if (extraAction != null) {

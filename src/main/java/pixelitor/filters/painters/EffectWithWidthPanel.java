@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,10 @@ import pixelitor.gui.utils.SliderSpinner;
 import java.awt.Color;
 
 /**
- * An {@link BaseEffectPanel} that has a width parameter.
+ * An {@link EffectPanel} that has a width parameter.
  * Most effect panels use this as the superclass.
  */
-public class EffectWithWidthPanel extends BaseEffectPanel {
+public class EffectWithWidthPanel extends EffectPanel {
     private final RangeParam widthRange;
 
     public EffectWithWidthPanel(String effectName, boolean selected,
@@ -39,7 +39,7 @@ public class EffectWithWidthPanel extends BaseEffectPanel {
 
         gbh.addLabelAndControl("Width:", widthSlider);
 
-        widthRange.addChangeListener(e -> updateDefaultButtonIcon());
+        widthRange.addChangeListener(e -> updateResetButtonIcon());
     }
 
     @Override

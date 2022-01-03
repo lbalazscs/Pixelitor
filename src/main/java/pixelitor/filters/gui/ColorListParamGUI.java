@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
 
     private static final int BUTTON_SIZE = 30;
     private final SliderSpinner numColorsSlider;
-    private final DefaultButton defaultButton;
+    private final ResetButton resetButton;
     private final JPanel colorsPanel;
 
     private boolean sliderMovedByUser = true;
@@ -64,13 +64,13 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
             createAndAddColorSwatch(colors[i], i);
         }
 
-        defaultButton = new DefaultButton(model);
+        resetButton = new ResetButton(model);
 
         RangeParam numColorsModel = new RangeParam("Number",
             1, numVisibleSwatches, candidateColors.length);
         numColorsSlider = new SliderSpinner(numColorsModel, NONE, false);
         numColorsSlider.setupTicks(1, 0);
-        numColorsSlider.addExplicitDefaultButton(defaultButton);
+        numColorsSlider.addExplicitResetButton(resetButton);
         add(numColorsSlider);
         add(colorsPanel);
 
@@ -154,8 +154,8 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         numColorsSlider.setValue(numColors);
         sliderMovedByUser = true;
 
-        if (defaultButton != null) {
-            defaultButton.updateIcon();
+        if (resetButton != null) {
+            resetButton.updateIcon();
         }
     }
 

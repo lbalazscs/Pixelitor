@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.filters.painters;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
 import pixelitor.colors.Colors;
-import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ResetButton;
 import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -41,7 +41,7 @@ import static pixelitor.gui.GUIText.OPACITY;
 /**
  * A GUI for configuring an area effect
  */
-public abstract class BaseEffectPanel extends JPanel implements Resettable {
+public abstract class EffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
     private ActionListener enabledCBListener;
 
@@ -55,14 +55,14 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
     static final int BUTTON_SIZE = 20;
     ParamAdjustmentListener adjustmentListener;
 
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
 
     private final RangeParam opacityRange;
 
     protected final GridBagHelper gbh;
 
-    BaseEffectPanel(String effectName, boolean defaultEnabled,
-                    Color defaultColor, float defaultOpacity) {
+    EffectPanel(String effectName, boolean defaultEnabled,
+                Color defaultColor, float defaultOpacity) {
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
         this.defaultOpacityInt = (int) (100 * defaultOpacity);
@@ -75,7 +75,7 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
         setTabEnabled(defaultEnabled);
-        enabledCB.addActionListener(e -> updateDefaultButtonIcon());
+        enabledCB.addActionListener(e -> updateResetButtonIcon());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
@@ -108,7 +108,7 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
-        updateDefaultButtonIcon();
+        updateResetButtonIcon();
 
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
@@ -190,13 +190,13 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         return enable;
     }
 
-    public void setDefaultButton(DefaultButton defaultButton) {
-        this.defaultButton = defaultButton;
+    public void setResetButton(ResetButton resetButton) {
+        this.resetButton = resetButton;
     }
 
-    protected void updateDefaultButtonIcon() {
-        if (defaultButton != null) {
-            defaultButton.updateIcon();
+    protected void updateResetButtonIcon() {
+        if (resetButton != null) {
+            resetButton.updateIcon();
         }
     }
 

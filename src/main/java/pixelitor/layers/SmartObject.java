@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,9 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.DebugNode;
@@ -347,6 +349,18 @@ public class SmartObject extends ImageLayer {
 
         g.dispose();
         return img;
+    }
+
+    @Override
+    public void startMovement() {
+        Messages.showInfo("Not Supported Yet",
+            "Moving a smart object is not implemented yet.", null);
+    }
+
+    @Override
+    public PixelitorEdit endMovement() {
+        // do nothing, see startMovement()
+        return null;
     }
 
     @Override

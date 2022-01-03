@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,13 +32,13 @@ import static javax.swing.BoxLayout.X_AXIS;
  */
 public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;
-    private final DefaultButton defaultButton;
+    private final ResetButton resetButton;
 
     public ComboBoxParamGUI(ComboBoxModel<E> model, FilterButtonModel action) {
         assert model instanceof Resettable;
 
-        defaultButton = new DefaultButton((Resettable) model);
-        comboBox = GUIUtils.createComboBox(model, e -> defaultButton.updateIcon());
+        resetButton = new ResetButton((Resettable) model);
+        comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateIcon());
 
         // workaround for nimbus bug
         var origPS = comboBox.getPreferredSize();
@@ -49,7 +49,7 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));
             left.add(comboBox);
-            left.add(defaultButton);
+            left.add(resetButton);
 
             setLayout(new BoxLayout(this, X_AXIS));
             add(left);
@@ -58,7 +58,7 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
         } else {
             setLayout(new FlowLayout(LEFT));
             add(comboBox);
-            add(defaultButton);
+            add(resetButton);
         }
     }
 
@@ -70,7 +70,7 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     @Override
     public void setEnabled(boolean enabled) {
         comboBox.setEnabled(enabled);
-        defaultButton.setEnabled(enabled);
+        resetButton.setEnabled(enabled);
         super.setEnabled(enabled);
     }
 

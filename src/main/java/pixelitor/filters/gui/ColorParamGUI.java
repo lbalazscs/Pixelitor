@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,9 +37,9 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private final ColorSwatch colorSwatch;
 
     private static final int BUTTON_SIZE = 30;
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
 
-    public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addDefaultButton) {
+    public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addResetButton) {
         this.model = model;
         setLayout(new FlowLayout(LEFT));
 
@@ -56,9 +56,9 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
             add(action.createGUI());
         }
 
-        if (addDefaultButton) {
-            defaultButton = new DefaultButton(model);
-            add(defaultButton);
+        if (addResetButton) {
+            resetButton = new ResetButton(model);
+            add(resetButton);
         }
     }
 
@@ -81,8 +81,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 //        button.setBackground(model.getColor());
 
         colorSwatch.setForeground(model.getColor());
-        if (defaultButton != null) {
-            defaultButton.updateIcon();
+        if (resetButton != null) {
+            resetButton.updateIcon();
         }
     }
 

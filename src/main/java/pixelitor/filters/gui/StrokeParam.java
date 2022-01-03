@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
     private final BooleanParam dashedParam = new BooleanParam("Dashed", false);
-    private DefaultButton defaultButton;
+    private ResetButton resetButton;
     private JComponent previewer;
 
     private final FilterParam[] allParams = {
@@ -68,8 +68,8 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        defaultButton = new DefaultButton(this);
-        paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, defaultButton);
+        resetButton = new ResetButton(this);
+        paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, resetButton);
 
         guiCreated();
         return (JComponent) paramGUI;
@@ -78,7 +78,7 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         ParamAdjustmentListener decoratedListener = () -> {
-            updateDefaultButtonState();
+            updateResetButtonState();
             if (previewer != null) {
                 previewer.repaint();
             }
@@ -159,7 +159,7 @@ public class StrokeParam extends AbstractFilterParam {
         shapeTypeParam.doRandomize();
         dashedParam.doRandomize();
 
-        updateDefaultButtonState();
+        updateResetButtonState();
     }
 
     @Override
@@ -198,7 +198,7 @@ public class StrokeParam extends AbstractFilterParam {
                 param.loadStateFrom(savedString);
             }
         }
-        updateDefaultButtonState();
+        updateResetButtonState();
     }
 
     @Override
@@ -240,13 +240,13 @@ public class StrokeParam extends AbstractFilterParam {
             // the default button state is updated
             // in the decorated adjustment listener
         } else {
-            updateDefaultButtonState();
+            updateResetButtonState();
         }
     }
 
-    private void updateDefaultButtonState() {
-        if (defaultButton != null) {
-            defaultButton.updateIcon();
+    private void updateResetButtonState() {
+        if (resetButton != null) {
+            resetButton.updateIcon();
         }
     }
 

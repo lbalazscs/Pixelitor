@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
-    private final boolean addDefaultButton;
+    private final boolean addResetButton;
     private List<ItemListener> itemListeners;
 
     public BooleanParam(String name, boolean defaultV) {
@@ -46,16 +46,16 @@ public class BooleanParam extends AbstractFilterParam {
         this(name, defaultV, randomizePolicy, false);
     }
 
-    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy, boolean addDefaultButton) {
+    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy, boolean addResetButton) {
         super(name, randomizePolicy);
         defaultValue = defaultV;
         currentValue = defaultV;
-        this.addDefaultButton = addDefaultButton;
+        this.addResetButton = addResetButton;
     }
 
     @Override
     public JComponent createGUI() {
-        var gui = new BooleanParamGUI(this, addDefaultButton, action);
+        var gui = new BooleanParamGUI(this, addResetButton, action);
         paramGUI = gui;
         guiCreated();
 

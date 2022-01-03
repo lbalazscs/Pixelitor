@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.geom.Point2D;
 /**
  * A GUI for configuring the "drop shadow" shape effect
  */
-public class DropShadowPanel extends BaseEffectPanel {
+public class DropShadowPanel extends EffectPanel {
     private final AngleParam angleParam;
     private final RangeParam distanceParam;
     private final RangeParam spreadParam;
@@ -53,7 +53,7 @@ public class DropShadowPanel extends BaseEffectPanel {
         var spreadSlider = SliderSpinner.from(spreadParam);
         gbh.addLabelAndControl("Spread:", spreadSlider);
 
-        ChangeListener changeListener = e -> updateDefaultButtonIcon();
+        ChangeListener changeListener = e -> updateResetButtonIcon();
         distanceParam.addChangeListener(changeListener);
         angleParam.addChangeListener(changeListener);
         spreadParam.addChangeListener(changeListener);
