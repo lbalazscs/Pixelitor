@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class SwingFilePicker implements FilePicker {
     private SaveFileChooser saveChooser;
 
     @Override
-    public File showOpenDialog() {
+    public File getSupportedOpenFile() {
         initOpenChooser();
         GlobalEvents.dialogOpened("Open");
         int result = openChooser.showOpenDialog(PixelitorWindow.get());
@@ -218,7 +218,7 @@ public class SwingFilePicker implements FilePicker {
             initOpenChooser();
             openChooser.setAcceptAllFileFilterUsed(true);
             setOnlyOneOpenExtension(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
-            return showOpenDialog();
+            return getSupportedOpenFile();
         } catch (Exception e) {
             Messages.showException(e);
             return null;

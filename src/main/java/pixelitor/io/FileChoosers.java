@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,8 +71,16 @@ public class FileChoosers {
     private FileChoosers() {
     }
 
+    public static File getAnyOpenFile() {
+        return picker.getAnyOpenFile();
+    }
+
+    public static File getSupportedOpenFile() {
+        return picker.getSupportedOpenFile();
+    }
+
     public static void openAsync() {
-        File selectedFile = picker.showOpenDialog();
+        File selectedFile = picker.getSupportedOpenFile();
         if (selectedFile != null) {
             String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
@@ -92,10 +100,6 @@ public class FileChoosers {
             msg += "files of type <b>" + extension + "</b> are not supported.";
         }
         Messages.showError("Error", msg);
-    }
-
-    public static File getAnyOpenFile() {
-        return picker.getAnyOpenFile();
     }
 
     public static boolean saveWithSingleAllowedExtension(Composition comp,
@@ -157,5 +161,4 @@ public class FileChoosers {
             }
         }
     }
-
 }

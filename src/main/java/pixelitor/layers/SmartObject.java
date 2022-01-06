@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.Filter;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
+import static pixelitor.utils.Threads.onEDT;
 
 /**
  * A "smart object" that contains an embedded composition and allows "smart filters".
@@ -91,6 +93,13 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
+    public SmartObject(File file, Composition parent, Composition content) {
+        super(parent, file.getName());
+        linkedContentFile = file;
+        this.content = content;
+        recalculateImage(false);
+    }
+
     // copy constructor
     private SmartObject(SmartObject orig, String name) {
         super(orig.comp, name);
@@ -124,9 +133,27 @@ public class SmartObject extends ImageLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        if (!newVersion) {
+            // if the pxc was saved with an old version,
+            // then assume smart filter visibility
+            smartFilterIsVisible = true;
+        }
+        imageNeedsRefresh = true;
+        lastFilterOutput = null;
+        lastFilterState = null;
+    }
+
+    public void afterDeserialization() {
+        for (Filter filter : smartFilters) {
+            if (filter instanceof ParametrizedFilter pf) {
+                pf.getParamSet().updateOptions(this, false);
+            }
+        }
+
         if (hasLinkedContent()) {
             if (!linkedContentFile.exists()) {
-                content = Composition.createTransparent(100, 100); // no canvas at this point
+                Canvas canvas = comp.getCanvas();
+                content = Composition.createTransparent(canvas.getWidth(), canvas.getHeight());
                 EventQueue.invokeLater(() ->
                     Messages.showError(linkedContentFile.getName() + " not found.",
                         "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
@@ -139,23 +166,7 @@ public class SmartObject extends ImageLayer {
             }
         }
 
-        if (!newVersion) {
-            // if the pxc was saved with an old version,
-            // then assume smart filter visibility
-            smartFilterIsVisible = true;
-        }
-        imageNeedsRefresh = true;
         recalculateImage(false);
-        lastFilterOutput = null;
-        lastFilterState = null;
-    }
-
-    public void afterDeserialization() {
-        for (Filter filter : smartFilters) {
-            if (filter instanceof ParametrizedFilter pf) {
-                pf.getParamSet().updateOptions(this, false);
-            }
-        }
     }
 
     @Override
@@ -237,6 +248,20 @@ public class SmartObject extends ImageLayer {
                 edit();
             }
         });
+        if (hasLinkedContent()) {
+            popup.add(new PAction("Embed Contents") {
+                @Override
+                public void onClick() {
+                    embedLinkedContent();
+                }
+            });
+            popup.add(new PAction("Reload Contents") {
+                @Override
+                public void onClick() {
+                    reloadLinkedContent();
+                }
+            });
+        }
         if (!smartFilters.isEmpty()) {
             JMenu filtersMenu = new JMenu("Smart Filters");
             for (int i = 0; i < smartFilters.size(); i++) {
@@ -273,6 +298,23 @@ public class SmartObject extends ImageLayer {
         } else {
             OpenImages.setActiveView(contentView, true);
         }
+    }
+
+    private void embedLinkedContent() {
+        String path = linkedContentFile.getAbsolutePath();
+        linkedContentFile = null;
+        Messages.showInfo("Embedded Content",
+            "<html>The file <b>" + path + "</b> isn't used anymore.");
+    }
+
+    private void reloadLinkedContent() {
+        IO.loadCompAsync(linkedContentFile)
+            .thenAcceptAsync(loaded -> {
+                this.content = loaded;
+                recalculateImage(true);
+                comp.update();
+            }, onEDT)
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public boolean hasSmartFilters() {
@@ -405,6 +447,8 @@ public class SmartObject extends ImageLayer {
     public DebugNode createDebugNode(String descr) {
         DebugNode node = super.createDebugNode(descr);
 
+        node.addBoolean("linked", hasLinkedContent());
+        node.addString("link file", linkedContentFile.getAbsolutePath());
         node.add(new CompositionNode("content", content));
 
         return node;

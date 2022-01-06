@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -84,6 +84,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
@@ -600,6 +601,21 @@ public class MenuBar extends JMenuBar {
                 }
             }
         }, CTRL_SHIFT_E);
+
+        sub.add(new OpenImageEnabledAction("Add Linked") {
+            @Override
+            public void onClick() {
+                Composition comp = getActiveComp();
+                File file = FileChoosers.getSupportedOpenFile();
+
+                IO.loadCompAsync(file)
+                    .thenAcceptAsync(content -> {
+                        SmartObject so = new SmartObject(file, comp, content);
+                        new Composition.LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(so);
+                    }, Threads.onEDT)
+                    .exceptionally(Messages::showExceptionOnEDT);
+            }
+        });
 
         return sub;
     }

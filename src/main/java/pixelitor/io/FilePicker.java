@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.io;
 import java.io.File;
 
 public interface FilePicker {
-    File showOpenDialog();
+    File getSupportedOpenFile();
 
     File showSaveDialog(FileChooserInfo chooserInfo);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class AWTFilePicker implements FilePicker {
     private FileDialog saveDialog;
 
     @Override
-    public File showOpenDialog() {
+    public File getSupportedOpenFile() {
         initOpenPicker();
         GlobalEvents.dialogOpened("Open");
         openDialog.setVisible(true);
@@ -122,6 +122,6 @@ public class AWTFilePicker implements FilePicker {
 
     @Override
     public File getAnyOpenFile() {
-        return showOpenDialog();
+        return getSupportedOpenFile();
     }
 }
