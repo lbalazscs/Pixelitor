@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -198,8 +198,11 @@ public class WorkflowTest {
         app.drawGradient("Radial");
         app.runMenuCommand("Close");
 
-        app.runFilterWithDialog("Magnify",
-            Randomize.NO, Reseed.NO, ShowOriginal.NO, false, null);
+        runFilterWithDialog("Magnify",
+            dialog -> {
+                dialog.slider("Magnification (%)").slideTo(250);
+                dialog.slider("Horizontal").slideTo(250);
+            });
 
         loadReferenceImage("wf2_reference.pxc");
     }

@@ -89,17 +89,21 @@ public class Composition implements Serializable {
     private Guides guides;
     private ImageMode mode;
 
-    // not null if this is the content of a smart object
-    private SmartObject owner;
-
     //
     // transient variables from here
     //
+
+    // Not null if this is the content of a smart object.
+    // Transient because the parent composition should not be written out.
+    private transient SmartObject owner;
 
     // useful for distinguishing between versions with the same name
     private transient String debugName;
 
     private transient File file;
+    // the last modified time of the file in millis since the epoch
+    private transient long fileTime;
+
     private transient boolean dirty = false;
 
     private transient BufferedImage compositeImage;
@@ -201,12 +205,14 @@ public class Composition implements Serializable {
         if (forUndo) {
             compCopy.dirty = dirty;
             compCopy.file = file;
+            compCopy.fileTime = fileTime;
             compCopy.name = name;
             compCopy.view = view;
             // the new guides are set in the action that needed undo
         } else { // duplicate
             compCopy.dirty = false;
             compCopy.file = null;
+            compCopy.fileTime = 0;
             compCopy.name = createCopyName(stripExtension(name));
             compCopy.view = null;
             if (guides != null) {
@@ -231,6 +237,7 @@ public class Composition implements Serializable {
         // init transient variables
         compositeImage = null; // will be set when needed
         file = null; // will be set later
+        fileTime = 0;
         debugName = null; // will be set later
         dirty = false;
         view = null; // will be set later
@@ -286,6 +293,7 @@ public class Composition implements Serializable {
     }
 
     public void setOwner(SmartObject owner) {
+        assert owner != null;
         this.owner = owner;
     }
 
@@ -327,6 +335,18 @@ public class Composition implements Serializable {
 
     public boolean isOpen() {
         return view != null;
+    }
+
+    public View getParentView() {
+        if (isOpen()) {
+            return view;
+        }
+        if (isSmartObjectContent()) {
+            // recursively search for the top view
+            return owner.getParentView();
+        }
+
+        throw new IllegalStateException("no view for top-level comp " + getName());
     }
 
     public String getName() {
@@ -382,7 +402,9 @@ public class Composition implements Serializable {
     }
 
     public void setFile(File file) {
+        assert file != null;
         this.file = file;
+        this.fileTime = file.lastModified();
         setName(file.getName());
     }
 
@@ -1128,7 +1150,7 @@ public class Composition implements Serializable {
         if (selection != null) {
             int answer = Dialogs.showYesNoCancelDialog(view, "Existing Selection",
                 "<html>There is already a selection on " + getName() +
-                    ".<br>How do you want to combine new selection with the existing one?",
+                ".<br>How do you want to combine new selection with the existing one?",
                 new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
                 JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
@@ -1456,7 +1478,7 @@ public class Composition implements Serializable {
             // because this is not dirty after saving even if it's changed
             owner.propagateChanges(this, true);
 
-            if (!owner.hasLinkedContent()) {
+            if (!owner.isContentLinked()) {
                 boolean link = Messages.showYesNoQuestion("Link Smart Object to File",
                     format("<html>Set <b>%s</b> as the linked contents of the smart object <b>%s</b>?",
                         file.getName(), owner.getName()));
@@ -1486,7 +1508,7 @@ public class Composition implements Serializable {
         if (path != null && path.getComp() != this) {
             throw new IllegalArgumentException(
                 "path belongs to other comp, this = " + toPathDebugString() +
-                    ", path.comp = " + path.getComp().toPathDebugString());
+                ", path.comp = " + path.getComp().toPathDebugString());
         }
 
         if (paths == null) {
@@ -1536,6 +1558,41 @@ public class Composition implements Serializable {
         return mode;
     }
 
+    public void appActivated() {
+        // Reload only open compositions here.
+        if (file != null && isOpen()) {
+            long newFileTime = file.lastModified();
+            if (newFileTime > fileTime) { // a newer version is on the disk
+                fileTime = newFileTime;
+                OpenImages.activate(getParentView());
+                boolean reload = Messages.reloadFileQuestion(file);
+                if (reload) {
+                    reloadOpen();
+                }
+            }
+        }
+        // Nested and unopened compositions are handled inside their smart object.
+        for (Layer layer : layerList) {
+            if (layer instanceof SmartObject so) {
+                if (!so.isContentOpen()) { // open contents were already handled
+                    so.appActivated();
+                }
+            }
+        }
+    }
+
+    private void reloadOpen() {
+        if (isSmartObjectContent()) {
+            OpenImages.reloadAsync(view, comp -> {
+                    owner.propagateChanges(comp, true);
+                    return comp;
+                }
+            );
+        } else {
+            OpenImages.reloadAsync(view, null);
+        }
+    }
+
     public enum UpdateActions {
         REPAINT(true, false) {
         }, HISTOGRAM(false, true) {
@@ -1561,22 +1618,22 @@ public class Composition implements Serializable {
 
     public String toPathDebugString() {
         return "Composition{name='" + name + '\''
-            + ", active = " + isActive()
-            + ", path = " + getActivePath()
-            + '}';
+               + ", active = " + isActive()
+               + ", path = " + getActivePath()
+               + '}';
     }
 
     @Override
     public String toString() {
         return "Composition{name='" + name + '\''
-            + ", active = " + isActive()
-            + ", path = " + getActivePath()
-            + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
-            + ", layerList=" + layerList
-            + ", canvas=" + canvas
-            + ", selection=" + selection
-            + ", dirty=" + dirty
-            + '}';
+               + ", active = " + isActive()
+               + ", path = " + getActivePath()
+               + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
+               + ", layerList=" + layerList
+               + ", canvas=" + canvas
+               + ", selection=" + selection
+               + ", dirty=" + dirty
+               + '}';
     }
 
     public static class LayerAdder {

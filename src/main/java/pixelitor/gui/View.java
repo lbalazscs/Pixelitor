@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         addListeners();
     }
 
-    public void replaceJustReloadedComp(Composition newComp) {
+    public Composition replaceJustReloadedComp(Composition newComp) {
         assert calledOnEDT() : threadInfo();
         assert newComp != comp;
         assert !newComp.hasSelection();
@@ -117,6 +117,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         String msg = format("The image <b>%s</b> was reloaded from the file <b>%s</b>.",
             newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
+
+        return newComp;
     }
 
     // the simple form of replacing, used by multi-layer edits

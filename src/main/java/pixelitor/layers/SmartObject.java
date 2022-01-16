@@ -57,7 +57,9 @@ public class SmartObject extends ImageLayer {
     private final boolean newVersion = true;
 
     // null if the content is not linked
+    // this is the same the content's file, but this one is not transient
     private File linkedContentFile;
+    private transient long linkedContentFileTime;
 
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
@@ -93,9 +95,11 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
+    // constructor called for "Add Linked"
     public SmartObject(File file, Composition parent, Composition content) {
         super(parent, file.getName());
         linkedContentFile = file;
+        updateLinkedContentTime();
         this.content = content;
         recalculateImage(false);
     }
@@ -114,12 +118,13 @@ public class SmartObject extends ImageLayer {
         indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
         smartFilterIsVisible = orig.smartFilterIsVisible;
         linkedContentFile = orig.linkedContentFile;
+        linkedContentFileTime = orig.linkedContentFileTime;
     }
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         Composition tmp = content;
-        if (hasLinkedContent()) {
+        if (isContentLinked()) {
             // if the content is linked, then don't write it
             content = null;
         }
@@ -150,19 +155,20 @@ public class SmartObject extends ImageLayer {
             }
         }
 
-        if (hasLinkedContent()) {
-            if (!linkedContentFile.exists()) {
+        if (isContentLinked()) {
+            if (linkedContentFile.exists()) {
+                updateLinkedContentTime();
+                // also read the content
+                assert content == null;
+                content = IO.loadCompSync(linkedContentFile);
+                content.setOwner(this);
+            } else { // linked file not found
                 Canvas canvas = comp.getCanvas();
                 content = Composition.createTransparent(canvas.getWidth(), canvas.getHeight());
                 EventQueue.invokeLater(() ->
                     Messages.showError(linkedContentFile.getName() + " not found.",
                         "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
                 );
-            } else {
-                // also read the content
-                assert content == null;
-                content = IO.loadCompSync(linkedContentFile);
-                content.setOwner(this);
             }
         }
 
@@ -198,6 +204,10 @@ public class SmartObject extends ImageLayer {
         imageNeedsRefresh = true;
     }
 
+    /**
+     * Ensures that all parents will reflect the changes in this
+     * smart object when they are repainted.
+     */
     public void propagateChanges(Composition content, boolean force) {
         // the reference might have been changed during editing
         this.content = content;
@@ -248,7 +258,7 @@ public class SmartObject extends ImageLayer {
                 edit();
             }
         });
-        if (hasLinkedContent()) {
+        if (isContentLinked()) {
             popup.add(new PAction("Embed Contents") {
                 @Override
                 public void onClick() {
@@ -296,7 +306,7 @@ public class SmartObject extends ImageLayer {
             OpenImages.addAsNewComp(content);
             content.setDirty(false);
         } else {
-            OpenImages.setActiveView(contentView, true);
+            OpenImages.activate(contentView);
         }
     }
 
@@ -308,11 +318,18 @@ public class SmartObject extends ImageLayer {
     }
 
     private void reloadLinkedContent() {
-        IO.loadCompAsync(linkedContentFile)
+        reloadContent(linkedContentFile);
+    }
+
+    private void reloadContent(File file) {
+        IO.loadCompAsync(file)
             .thenAcceptAsync(loaded -> {
                 this.content = loaded;
                 recalculateImage(true);
-                comp.update();
+
+                // only a grandparent composition might be opened
+                propagateChanges(loaded, true);
+                getParentView().repaint();
             }, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -430,12 +447,49 @@ public class SmartObject extends ImageLayer {
         return null;
     }
 
-    public boolean hasLinkedContent() {
+    public boolean isContentLinked() {
         return linkedContentFile != null;
     }
 
     public void setLinkedContentFile(File file) {
         this.linkedContentFile = file;
+        updateLinkedContentTime();
+    }
+
+    public View getParentView() {
+        if (isContentOpen()) {
+            return content.getView();
+        }
+        return comp.getParentView();
+    }
+
+    public void appActivated() {
+        assert !isContentOpen();
+        if (isContentLinked()) {
+            long newLinkedContentFileTime = linkedContentFile.lastModified();
+            if (newLinkedContentFileTime > linkedContentFileTime) {
+                linkedContentFileTime = newLinkedContentFileTime;
+
+                OpenImages.activate(getParentView());
+                boolean reload = Messages.reloadFileQuestion(linkedContentFile);
+                if (reload) {
+                    reloadLinkedContent();
+                }
+            }
+        } else {
+            // could also check for unlinked, closed, but saved contents,
+            // but it's tricky and probably not important
+        }
+        // recursively check the smart objects inside the content
+        content.appActivated();
+    }
+
+    public boolean isContentOpen() {
+        return content.isOpen();
+    }
+
+    private void updateLinkedContentTime() {
+        linkedContentFileTime = linkedContentFile.lastModified();
     }
 
     @Override
@@ -447,8 +501,11 @@ public class SmartObject extends ImageLayer {
     public DebugNode createDebugNode(String descr) {
         DebugNode node = super.createDebugNode(descr);
 
-        node.addBoolean("linked", hasLinkedContent());
-        node.addString("link file", linkedContentFile.getAbsolutePath());
+        boolean linked = isContentLinked();
+        node.addBoolean("linked", linked);
+        if (linked) {
+            node.addString("link file", linkedContentFile.getAbsolutePath());
+        }
         node.add(new CompositionNode("content", content));
 
         return node;

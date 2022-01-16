@@ -131,4 +131,12 @@ public class Messages {
         }
         showPlainInStatusBar(msg);
     }
+
+    public static boolean reloadFileQuestion(File file) {
+        String title = "Reload " + file.getName() + "?";
+        String msg = "<html>The file <b>" + file.getAbsolutePath()
+                     + "</b><br> has been modified by another program." +
+                     "<br><br>Do you want to reload it?";
+        return showYesNoQuestion(title, msg);
+    }
 }

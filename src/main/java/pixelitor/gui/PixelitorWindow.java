@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class PixelitorWindow extends JFrame {
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
-        setupWindowClosing();
+        setupWindowEvents();
 
         addMenus();
         addImagesArea();
@@ -89,13 +89,21 @@ public class PixelitorWindow extends JFrame {
         setVisible(true);
     }
 
-    private void setupWindowClosing() {
+    private void setupWindowEvents() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent we) {
                     Pixelitor.exitApp(PixelitorWindow.this);
+                }
+
+                @Override
+                public void windowActivated(WindowEvent e) {
+                    // ignore activation events from closed dialogs
+                    if (e.getOppositeWindow() == null) {
+                        OpenImages.appActivated();
+                    }
                 }
             }
         );

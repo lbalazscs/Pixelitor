@@ -184,7 +184,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.add(new OpenImageEnabledAction(texts.getString("reload")) {
             @Override
             public void onClick() {
-                reloadActiveFromFileAsync();
+                reloadActiveAsync();
             }
         }, F12);
 

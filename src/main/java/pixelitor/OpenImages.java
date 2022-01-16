@@ -44,9 +44,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -128,9 +130,13 @@ public class OpenImages {
                 .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
-                setActiveView(views.get(0), true);
+                activate(views.get(0));
             }
         }
+    }
+
+    public static void activate(View view) {
+        setActiveView(view, true);
     }
 
     public static void setActiveView(View view, boolean activate) {
@@ -223,10 +229,12 @@ public class OpenImages {
         }
     }
 
-    public static void reloadActiveFromFileAsync() {
-        // save a reference to the active view, because this will take
-        // a while and another view might become active in the meantime
-        View view = activeView;
+    public static void reloadActiveAsync() {
+        reloadAsync(activeView, null);
+    }
+
+    public static void reloadAsync(View view, UnaryOperator<Composition> extraTask) {
+        assert view == activeView;
 
         var comp = view.getComp();
         File file = comp.getFile();
@@ -256,10 +264,15 @@ public class OpenImages {
         }
         IOTasks.markReadProcessing(path);
 
-        IO.loadCompAsync(file)
-            .thenAcceptAsync(view::replaceJustReloadedComp, onEDT)
-            .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.checkForReadingProblems(e));
+        CompletableFuture<Composition> cf = IO.loadCompAsync(file)
+            .thenApplyAsync(view::replaceJustReloadedComp, onEDT);
+        if (extraTask != null) {
+            // at this point we still have a reference to the new comp
+            cf = cf.thenApplyAsync(extraTask, onEDT);
+        }
+        cf.whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
+            .whenComplete((v, e) -> IO.checkForReadingProblems(e))
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public static void onActiveView(Consumer<View> action) {
@@ -277,7 +290,7 @@ public class OpenImages {
     public static View activateRandomView() {
         View view = Rnd.chooseFrom(views);
         if (view != activeView) {
-            setActiveView(view, true);
+            activate(view);
             return view;
         }
         return null;
@@ -599,7 +612,7 @@ public class OpenImages {
         if (view == null) {
             return true;
         }
-        setActiveView(view, true);
+        activate(view);
         String title = "File already opened";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
             + "</b> is already opened.";
@@ -624,6 +637,12 @@ public class OpenImages {
         // to be notified to update their buttons
         for (View view : views) {
             view.thumbSizeChanged(newThumbSize);
+        }
+    }
+
+    public static void appActivated() {
+        for (View view : views) {
+            view.getComp().appActivated();
         }
     }
 }

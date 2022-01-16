@@ -18,7 +18,6 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.layers.SmartObject;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -101,11 +100,6 @@ public class PXCFormat {
     }
 
     public static void write(Composition comp, File file) {
-        // If this is a composition embedded in a smart object, then make sure
-        // that the owner is not written by temporarily setting it to null.
-        SmartObject owner = comp.getOwner();
-        comp.setOwner(null);
-
         mainPT = new StatusBarProgressTracker(
             "Writing " + file.getName(), 100);
         int numImages = comp.calcNumImages();
@@ -126,7 +120,6 @@ public class PXCFormat {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        comp.setOwner(owner); // restore the original owner
         mainPT.finished();
         mainPT = null;
     }
