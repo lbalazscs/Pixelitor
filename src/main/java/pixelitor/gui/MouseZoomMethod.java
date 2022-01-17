@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
@@ -127,7 +127,7 @@ public enum MouseZoomMethod {
             return;
         }
         CURRENT = newMethod;
-        OpenImages.forEachView(newMethod::installOnView);
+        Views.forEachView(newMethod::installOnView);
         Navigator.setMouseZoomMethod(newMethod);
     }
 

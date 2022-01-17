@@ -696,12 +696,20 @@ public class Composition implements Serializable {
         layerList.forEach(action);
     }
 
-    public void forEachContentLayer(Consumer<ContentLayer> action) {
+    @SuppressWarnings("unchecked")
+    public <T extends Layer> void forEachLayer(Class<T> clazz, Consumer<T> action) {
         for (Layer layer : layerList) {
-            if (layer instanceof ContentLayer contentLayer) {
-                action.accept(contentLayer);
+            if (clazz.isAssignableFrom(layer.getClass())) {
+                action.accept((T) layer);
             }
         }
+    }
+
+    /**
+     * Recursively applies the given action to all nested smart objects.
+     */
+    public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
+        forEachLayer(SmartObject.class, so -> so.forAllNestedSmartObjects(action));
     }
 
     public Layer findLayerAtPoint(Point2D p) {
@@ -783,7 +791,7 @@ public class Composition implements Serializable {
     public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
-            throw new IllegalStateException("not drawable: "
+            throw new IllegalStateException("not drawable in '" + getName() + "':"
                                             + activeLayer.getClass().getSimpleName());
         }
         return dr;
@@ -1351,7 +1359,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActive() {
-        return OpenImages.activeCompIs(this);
+        return Views.activeCompIs(this);
     }
 
     /**
@@ -1564,7 +1572,7 @@ public class Composition implements Serializable {
             long newFileTime = file.lastModified();
             if (newFileTime > fileTime) { // a newer version is on the disk
                 fileTime = newFileTime;
-                OpenImages.activate(getParentView());
+                Views.activate(getParentView());
                 boolean reload = Messages.reloadFileQuestion(file);
                 if (reload) {
                     reloadOpen();
@@ -1583,13 +1591,13 @@ public class Composition implements Serializable {
 
     private void reloadOpen() {
         if (isSmartObjectContent()) {
-            OpenImages.reloadAsync(view, comp -> {
+            Views.reloadAsync(view, comp -> {
                     owner.propagateChanges(comp, true);
                     return comp;
                 }
             );
         } else {
-            OpenImages.reloadAsync(view, null);
+            Views.reloadAsync(view, null);
         }
     }
 

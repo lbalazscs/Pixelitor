@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,8 +26,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.TestHelper;
+import pixelitor.Views;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.PenTool;
@@ -108,7 +108,7 @@ public class ToolTest {
     @After
     public void afterEachTest() {
         tool.toolEnded();
-        OpenImages.setActiveView(null, false);
+        Views.setActiveView(null, false);
     }
 
     @Test

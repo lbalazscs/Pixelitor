@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,10 @@
 
 package pixelitor.guitest;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.layers.MaskViewMode;
 
-import static pixelitor.layers.MaskViewMode.EDIT_MASK;
-import static pixelitor.layers.MaskViewMode.NORMAL;
-import static pixelitor.layers.MaskViewMode.RUBYLITH;
-import static pixelitor.layers.MaskViewMode.SHOW_MASK;
+import static pixelitor.layers.MaskViewMode.*;
 
 /**
  * What mask state is tested in an {@link AssertJSwingTest}
@@ -162,7 +159,7 @@ enum MaskMode {
     }
 
     protected static void assertMaskViewModeIs(MaskViewMode expected) {
-        MaskViewMode actual = OpenImages.getActiveView().getMaskViewMode();
+        MaskViewMode actual = Views.getActive().getMaskViewMode();
         if (actual != expected) {
             throw new AssertionError("expected mask view mode " + expected
                     + ", found " + actual);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ViewActivationListener;
 
@@ -93,7 +93,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         boolean isLogarithmicNow = newType.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            OpenImages.onActiveComp(this::update);
+            Views.onActiveComp(this::update);
         }
     }
 
@@ -111,7 +111,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
     }
 
     public static void updateFromActiveComp() {
-        OpenImages.onActiveComp(INSTANCE::update);
+        Views.onActiveComp(INSTANCE::update);
     }
 
     public static void updateFrom(Composition comp) {

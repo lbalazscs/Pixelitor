@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.compactions;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.ImageUtils;
@@ -58,7 +58,7 @@ class EnlargeCanvasGUI extends JPanel {
     EnlargeCanvasGUI() {
         setLayout(new GridBagLayout());
 
-        Canvas c = OpenImages.getActiveComp().getCanvas();
+        Canvas c = Views.getActiveComp().getCanvas();
         northRangePixels = new RangeParam("North", 0, 0, c.getHeight());
         eastRangePixels = new RangeParam("East", 0, 0, c.getWidth());
         southRangePixels = new RangeParam("South", 0, 0, c.getHeight());
@@ -217,7 +217,7 @@ class EnlargeCanvasGUI extends JPanel {
         }
 
         public void createTheThumb() {
-            Composition comp = OpenImages.getActiveComp();
+            Composition comp = Views.getActiveComp();
             if (comp != null) {
                 BufferedImage actualImage = comp.getCompositeImage();
                 thumb = ImageUtils.createThumbnail(actualImage, getWidth() / 2, null);
@@ -228,7 +228,7 @@ class EnlargeCanvasGUI extends JPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            Canvas canvas = OpenImages.getActiveComp().getCanvas();
+            Canvas canvas = Views.getActiveComp().getCanvas();
 
             // Actual canvas Width and Height.
             float canvasW = canvas.getWidth(), canvasH = canvas.getHeight();

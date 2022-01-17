@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends OpenImageEnabledAction
+public class LayerMoveAction extends OpenViewEnabledAction
     implements ActiveCompositionListener {
 
     // menu and history names (also for selection movements)
@@ -58,7 +58,7 @@ public class LayerMoveAction extends OpenImageEnabledAction
 
     @Override
     public void onClick() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         if (up) {
             comp.moveActiveLayerUp();
         } else {

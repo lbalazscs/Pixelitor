@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 import static pixelitor.utils.Threads.onEDT;
@@ -303,11 +304,16 @@ public class SmartObject extends ImageLayer {
     public void edit() {
         View contentView = content.getView();
         if (contentView == null) {
-            OpenImages.addAsNewComp(content);
+            Views.addAsNewComp(content);
             content.setDirty(false);
         } else {
-            OpenImages.activate(contentView);
+            Views.activate(contentView);
         }
+    }
+
+    public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
+        action.accept(this);
+        content.forAllNestedSmartObjects(action);
     }
 
     private void embedLinkedContent() {
@@ -470,7 +476,7 @@ public class SmartObject extends ImageLayer {
             if (newLinkedContentFileTime > linkedContentFileTime) {
                 linkedContentFileTime = newLinkedContentFileTime;
 
-                OpenImages.activate(getParentView());
+                Views.activate(getParentView());
                 boolean reload = Messages.reloadFileQuestion(linkedContentFile);
                 if (reload) {
                     reloadLinkedContent();

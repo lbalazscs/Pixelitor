@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
@@ -89,7 +89,7 @@ public class Navigator extends JComponent
 
         addMouseListener(this);
         addMouseMotionListener(this);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
 
         addNavigatorResizedListener();
         addZoomingSupport();
@@ -169,7 +169,7 @@ public class Navigator extends JComponent
             dialog.dispose();
         }
 
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         navigatorPanel = new Navigator(view);
 
         dialog = new DialogBuilder()
@@ -495,7 +495,7 @@ public class Navigator extends JComponent
     }
 
     private void dispose() {
-        OpenImages.removeActivationListener(this);
+        Views.removeActivationListener(this);
     }
 
     @Override

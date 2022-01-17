@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.utils.ViewActivationListener;
 
@@ -64,7 +64,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-            OpenImages.onActiveView(this::zoomAccordingToTheSlider));
+            Views.onActiveView(this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  " + ZOOM + ": ");
 
@@ -79,7 +79,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
             ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     private void zoomAccordingToTheSlider(View view) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.selection.*;
@@ -241,14 +241,14 @@ public class SelectionTool extends DragTool {
     @Override
     public void escPressed() {
         // pressing Esc should work the same as clicking outside the selection
-        OpenImages.onActiveComp(this::cancelSelection);
+        Views.onActiveComp(this::cancelSelection);
     }
 
     @Override
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(true);
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             selectionBuilder.updateBuiltSelection(drag, comp);
         }
         altDown = true;
@@ -258,7 +258,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(false);
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             selectionBuilder.updateBuiltSelection(drag, comp);
         }
         altDown = false;
@@ -266,7 +266,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             var comp = view.getComp();
             var selection = comp.getSelection();
@@ -325,7 +325,7 @@ public class SelectionTool extends DragTool {
 
     private void stopBuildingSelection() {
         if (selectionBuilder != null) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             selectionBuilder.cancelIfNotFinished(comp);
             selectionBuilder = null;
         }

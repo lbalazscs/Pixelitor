@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.Utils;
 
@@ -366,7 +366,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     public static void resizeActiveImage() {
-        var comp = OpenImages.getActiveCompOpt()
+        var comp = Views.getActiveCompOpt()
             .orElseThrow(() -> new IllegalStateException("no active image"));
         showInDialog(comp);
     }

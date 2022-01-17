@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.utils.VisibleForTesting;
 
@@ -158,7 +158,7 @@ public class LayersPanel extends JLayeredPane {
         doLayout();
 
         // notify the raise/lower layer menu items
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         MOVE_LAYER_UP.enableDisable(comp);
         MOVE_LAYER_DOWN.enableDisable(comp);
     }

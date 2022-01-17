@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.utils.test;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Ansi;
@@ -57,7 +57,7 @@ public class PixelitorEvent {
 
         if (comp == null) {
             assert layer == null;
-            Composition activeComp = OpenImages.getActiveComp();
+            Composition activeComp = Views.getActiveComp();
             if (activeComp != null) {
                 this.comp = activeComp;
                 this.layer = activeComp.getActiveLayer();

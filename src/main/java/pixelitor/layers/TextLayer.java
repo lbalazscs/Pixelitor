@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
@@ -88,7 +88,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     public static void createNew() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         if (comp == null) {
             // It is possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77

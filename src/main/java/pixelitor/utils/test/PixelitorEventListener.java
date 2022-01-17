@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils.test;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.ActiveCompositionListener;
 import pixelitor.layers.ActiveMaskListener;
@@ -45,7 +45,7 @@ public class PixelitorEventListener implements ActiveCompositionListener,
     public void register() {
         Layers.addCompositionListener(this);
         Layers.addMaskListener(this);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     @Override

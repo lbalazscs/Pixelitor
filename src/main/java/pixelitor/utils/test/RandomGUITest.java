@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
@@ -241,7 +241,7 @@ public class RandomGUITest {
             GUIUtils.invokeAndWait(() -> {
                 try {
                     weightedCaller.callRandomAction();
-                    var comp = OpenImages.getActiveCompOpt().orElseThrow(() ->
+                    var comp = Views.getActiveCompOpt().orElseThrow(() ->
                         new IllegalStateException("no active composition"));
                     ConsistencyChecks.checkAll(comp, true);
                 } catch (Throwable e) {
@@ -435,7 +435,7 @@ public class RandomGUITest {
     }
 
     private static void randomFilter() {
-        Drawable dr = OpenImages.getActiveDrawable();
+        Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
             return;
         }
@@ -503,7 +503,7 @@ public class RandomGUITest {
     }
 
     private static void randomTween() {
-        Drawable dr = OpenImages.getActiveDrawable();
+        Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
             return;
         }
@@ -562,16 +562,16 @@ public class RandomGUITest {
         double r = Math.random();
         if (r > 0.75) {
             log("fit active to space");
-            OpenImages.fitActive(AutoZoom.FIT_SPACE);
+            Views.fitActive(AutoZoom.FIT_SPACE);
         } else if (r > 0.5) {
             log("fit active to width");
-            OpenImages.fitActive(AutoZoom.FIT_WIDTH);
+            Views.fitActive(AutoZoom.FIT_WIDTH);
         } else if (r > 0.25) {
             log("fit active to height");
-            OpenImages.fitActive(AutoZoom.FIT_HEIGHT);
+            Views.fitActive(AutoZoom.FIT_HEIGHT);
         } else {
             log("fit active to actual pixels");
-            OpenImages.fitActive(AutoZoom.ACTUAL_PIXELS);
+            Views.fitActive(AutoZoom.ACTUAL_PIXELS);
         }
     }
 
@@ -623,7 +623,7 @@ public class RandomGUITest {
     }
 
     private static void randomZoom() {
-        OpenImages.onActiveView(RandomGUITest::setRandomZoom);
+        Views.onActiveView(RandomGUITest::setRandomZoom);
     }
 
     private static void setRandomZoom(View view) {
@@ -662,7 +662,7 @@ public class RandomGUITest {
     }
 
     private static void randomZoomOut() {
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             log("zoom out " + view.getName());
             ZoomLevel newZoom = view.getZoomLevel().zoomOut();
@@ -720,7 +720,7 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        Drawable dr = OpenImages.getActiveDrawableOrThrow();
+        Drawable dr = Views.getActiveDrawableOrThrow();
         fade.startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
@@ -761,7 +761,7 @@ public class RandomGUITest {
 
     private static void layerToCanvasSize() {
         log("layer to canvas size");
-        OpenImages.onActiveComp(Composition::activeLayerToCanvasSize);
+        Views.onActiveComp(Composition::activeLayerToCanvasSize);
     }
 
     private static void invertSelection() {
@@ -789,7 +789,7 @@ public class RandomGUITest {
     }
 
     private static boolean canTrace() {
-        Composition comp = OpenImages.getActiveComp();
+        Composition comp = Views.getActiveComp();
         if (comp == null) {
             return false;
         }
@@ -809,14 +809,14 @@ public class RandomGUITest {
     }
 
     private static void activateRandomView() {
-        View view = OpenImages.activateRandomView();
+        View view = Views.activateRandomView();
         if (view != null) {
             log("activated random view " + view.getName());
         }
     }
 
     private static void layerOrderChange() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         int r = rand.nextInt(6);
         switch (r) {
             case 0 -> moveActiveLayerToTop(comp);
@@ -860,7 +860,7 @@ public class RandomGUITest {
     }
 
     private static void layerMerge() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
 
         if (rand.nextBoolean()) {
             Layer layer = comp.getActiveLayer();
@@ -938,7 +938,7 @@ public class RandomGUITest {
     }
 
     private static void randomChangeLayerOpacityOrBlending() {
-        Layer layer = OpenImages.getActiveLayer();
+        Layer layer = Views.getActiveLayer();
         if (rand.nextBoolean()) {
             float opacity = layer.getOpacity();
             float f = rand.nextFloat();
@@ -959,7 +959,7 @@ public class RandomGUITest {
     }
 
     private static void randomChangeLayerVisibility() {
-        Layer layer = OpenImages.getActiveLayer();
+        Layer layer = Views.getActiveLayer();
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
@@ -1000,7 +1000,7 @@ public class RandomGUITest {
     }
 
     private static void randomNewTextLayer() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.randomizeSettings();
         textLayer.updateLayerName();
@@ -1013,7 +1013,7 @@ public class RandomGUITest {
     }
 
     private static void randomTextLayerRasterize() {
-        Layer layer = OpenImages.getActiveLayer();
+        Layer layer = Views.getActiveLayer();
         if (layer instanceof TextLayer textLayer) {
             log("rasterize text layer " + layer.getName());
 
@@ -1023,7 +1023,7 @@ public class RandomGUITest {
 
     private static void randomNewAdjustmentLayer() {
         log("new adj layer");
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         new LayerAdder(comp)
             .withHistory("New Random Adj Layer")
@@ -1032,7 +1032,7 @@ public class RandomGUITest {
     }
 
     private static void randomSetLayerMaskEditMode() {
-        Layer layer = OpenImages.getActiveLayer();
+        Layer layer = Views.getActiveLayer();
         if (!layer.hasMask()) {
             return;
         }
@@ -1058,7 +1058,7 @@ public class RandomGUITest {
 
     // (add, delete, apply, link)
     private static void randomLayerMaskAction() {
-        Layer layer = OpenImages.getActiveLayer();
+        Layer layer = Views.getActiveLayer();
         if (!layer.hasMask()) {
             assert AddLayerMaskAction.INSTANCE.isEnabled();
             runAction(AddLayerMaskAction.INSTANCE);
@@ -1107,12 +1107,12 @@ public class RandomGUITest {
         int west = rand.nextInt(3);
         log(format("enlarge canvas north = %d, east = %d, south = %d, west = %d",
             north, east, south, west));
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
 
     private static void randomGuides() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         float v = rand.nextFloat();
         if (v < 0.2) {
             log("clear guides");
@@ -1135,7 +1135,7 @@ public class RandomGUITest {
 
     private static void reload(Robot r) {
         if (rand.nextFloat() < 0.1) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             if (comp.getFile() != null) {
                 log("f12 reload");
                 pressKey(r, VK_F12);
@@ -1146,7 +1146,7 @@ public class RandomGUITest {
     // to prevent paths growing too large
     private static void setPathsToNull() {
         log("set paths to null");
-        OpenImages.forEachView(view -> {
+        Views.forEachView(view -> {
             // don't touch the active, as its path might be edited just now
             if (!view.isActive()) {
                 view.getComp().setActivePath(null);

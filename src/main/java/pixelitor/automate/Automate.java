@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.automate;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.compactions.CompAction;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -151,7 +151,7 @@ public class Automate {
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    OpenImages.warnAndClose(view);
+                    Views.warnAndClose(view);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
                 default:
@@ -161,7 +161,7 @@ public class Automate {
             view.paintImmediately();
             retVal = comp.saveAsync(saveSettings, false);
         }
-        OpenImages.warnAndClose(view);
+        Views.warnAndClose(view);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;

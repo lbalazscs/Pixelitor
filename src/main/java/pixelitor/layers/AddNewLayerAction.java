@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
@@ -40,7 +40,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
         setToolTip("<html>Adds a new transparent image layer." +
             "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
         }
 
         try {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             comp.addNewEmptyImageLayer(comp.generateNewLayerName(), ctrlPressed);
         } catch (Exception ex) {
             Messages.showException(ex);

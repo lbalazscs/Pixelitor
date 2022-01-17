@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         var comp = createNewComposition(bg, width, height, title);
-        OpenImages.addAsNewComp(comp);
+        Views.addAsNewComp(comp);
         return comp;
     }
 

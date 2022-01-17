@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
@@ -90,7 +90,7 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private Point2D calcCenterShift(BufferedImage src) {
-        Drawable dr = OpenImages.getActiveDrawableOrThrow();
+        Drawable dr = Views.getActiveDrawableOrThrow();
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();
         double centerShiftX = (-dr.getTx() + src.getWidth()) * relativeX;
@@ -122,5 +122,11 @@ public class TransformLayer extends ParametrizedFilter {
             transform.shear(shearX / 100.0, shearY / 100.0);
             transform.translate(-centerShift.getX(), -centerShift.getY());
         }
+    }
+
+    @Override
+    public boolean canBeSmart() {
+        // can't be smart because of the Views.getActiveDrawableOrThrow call
+        return false;
     }
 }

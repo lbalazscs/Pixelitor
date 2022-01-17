@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Canvas;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -66,7 +66,7 @@ public class ImageFrame extends JInternalFrame
         // We can get here as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
-        OpenImages.viewActivated(view);
+        Views.viewActivated(view);
     }
 
     @Override
@@ -75,12 +75,12 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
-        OpenImages.warnAndClose(view);
+        Views.warnAndClose(view);
     }
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e) {
-        OpenImages.imageClosed(view);
+        Views.viewClosed(view);
     }
 
     @Override

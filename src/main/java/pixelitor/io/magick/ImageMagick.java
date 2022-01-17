@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.io.magick;
 
 import com.bric.util.JVM;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.OpenImages.getActiveComp;
+import static pixelitor.Views.getActiveComp;
 import static pixelitor.utils.AppPreferences.magickDirName;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -120,7 +120,7 @@ public class ImageMagick {
             return;
         }
 
-        if (checkAlreadyOpen && !OpenImages.warnIfAlreadyOpen(file)) {
+        if (checkAlreadyOpen && !Views.warnIfAlreadyOpen(file)) {
             return;
         }
 
@@ -130,7 +130,7 @@ public class ImageMagick {
                 // called if there were no exceptions while importing
                 Composition comp = Composition.fromImage(img, file, null);
                 progressHandler.stopProgress();
-                OpenImages.addJustLoadedComp(comp);
+                Views.addJustLoadedComp(comp);
             }, onEDT)
             .whenComplete((v, e) -> {
                 // always called

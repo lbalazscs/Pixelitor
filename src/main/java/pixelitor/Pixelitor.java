@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.Debug;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
@@ -186,7 +187,7 @@ public class Pixelitor {
             }
         }
 
-        var unsavedComps = OpenImages.getUnsavedComps();
+        var unsavedComps = Views.getUnsavedComps();
         if (!unsavedComps.isEmpty()) {
             String msg;
             if (unsavedComps.size() == 1) {
@@ -249,5 +250,7 @@ public class Pixelitor {
 //        Debug.dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
 
 //        Debug.addNewImageWithMask();
+        Debug.openAllNestedSmartObjects();
     }
+
 }

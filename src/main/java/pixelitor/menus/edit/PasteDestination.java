@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -41,7 +41,7 @@ public enum PasteDestination {
 
         @Override
         void paste(BufferedImage pastedImage) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             comp.addExternalImageAsNewLayer(pastedImage,
                 "Pasted Layer", "New Pasted Layer");
         }
@@ -56,7 +56,7 @@ public enum PasteDestination {
         @Override
         void paste(BufferedImage pastedImage) {
             String title = "Pasted Image " + pastedCount;
-            OpenImages.addAsNewComp(pastedImage, null, title);
+            Views.addAsNewComp(pastedImage, null, title);
             pastedCount++;
         }
     }, MASK(true) {
@@ -67,7 +67,7 @@ public enum PasteDestination {
 
         @Override
         void paste(BufferedImage pastedImage) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             Canvas canvas = comp.getCanvas();
             int canvasWidth = canvas.getWidth();
             int canvasHeight = canvas.getHeight();
@@ -104,16 +104,16 @@ public enum PasteDestination {
         }
     };
 
-    private final boolean requiresOpenImage;
+    private final boolean requiresOpenView;
 
-    PasteDestination(boolean requiresOpenImage) {
-        this.requiresOpenImage = requiresOpenImage;
+    PasteDestination(boolean requiresOpenView) {
+        this.requiresOpenView = requiresOpenView;
     }
 
     abstract void paste(BufferedImage pastedImage);
 
-    public boolean requiresOpenImage() {
-        return requiresOpenImage;
+    public boolean requiresOpenView() {
+        return requiresOpenView;
     }
 
     abstract String getResourceKey();

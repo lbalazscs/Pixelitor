@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Result;
 
@@ -35,7 +35,7 @@ import static pixelitor.utils.Texts.i18n;
  * Copies the image given by the {@link CopySource}
  * to the system clipboard
  */
-public class CopyAction extends OpenImageEnabledAction {
+public class CopyAction extends OpenViewEnabledAction {
     public static final CopyAction COPY_LAYER = new CopyAction(CopySource.LAYER_OR_MASK);
     public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
 
@@ -48,7 +48,7 @@ public class CopyAction extends OpenImageEnabledAction {
 
     @Override
     public void onClick() {
-        OpenImages.onActiveComp(this::copyToClipboard);
+        Views.onActiveComp(this::copyToClipboard);
     }
 
     private void copyToClipboard(Composition comp) {

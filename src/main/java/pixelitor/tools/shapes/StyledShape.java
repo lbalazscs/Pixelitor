@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.shapes;
 import com.jhlabs.awt.WobbleStroke;
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
@@ -487,7 +487,7 @@ public class StyledShape implements Cloneable, Transformable {
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
         comp.update();
     }

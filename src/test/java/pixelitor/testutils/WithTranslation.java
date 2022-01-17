@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public enum WithTranslation {
     }, YES(-4, -4) {
         @Override
         public void setupFor(Composition comp) {
-            comp.forEachContentLayer(contentLayer ->
+            comp.forEachLayer(ContentLayer.class, contentLayer ->
                 TestHelper.setTranslation(comp, contentLayer, this));
         }
 

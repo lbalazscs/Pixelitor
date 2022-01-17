@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.GradientFillLayerChangeEdit;
@@ -52,7 +52,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     public static void createNew() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         var layer = new GradientFillLayer(comp, "gradient fill");
         new Composition.LayerAdder(comp)
             .atPosition(ABOVE_ACTIVE)

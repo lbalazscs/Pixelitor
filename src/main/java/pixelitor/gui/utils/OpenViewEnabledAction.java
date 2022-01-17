@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,33 +17,33 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 
 /**
- * An Action that is enabled only if at least one image is opened.
+ * An Action that is enabled only if at least one view is opened.
  */
-public abstract class OpenImageEnabledAction extends PAction implements ViewActivationListener {
-    public OpenImageEnabledAction() {
+public abstract class OpenViewEnabledAction extends PAction implements ViewActivationListener {
+    public OpenViewEnabledAction() {
         init();
     }
 
-    public OpenImageEnabledAction(String name) {
+    public OpenViewEnabledAction(String name) {
         super(name);
         init();
     }
 
-    public OpenImageEnabledAction(String name, Icon icon) {
+    public OpenViewEnabledAction(String name, Icon icon) {
         super(name, icon);
         init();
     }
 
     private void init() {
         setEnabled(false);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -322,7 +322,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     public static void showInDialog() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         var layer = comp.getActiveLayer();
         var panel = new MaskFromColorRangePanel(comp, layer);
 

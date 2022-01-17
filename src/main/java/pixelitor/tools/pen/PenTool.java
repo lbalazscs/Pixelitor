@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
@@ -146,8 +146,8 @@ public class PenTool extends Tool {
             return;
         }
 
-        assert OpenImages.activePathIs(path) :
-            "path = " + path + ", active path = " + OpenImages.getActivePath();
+        assert Views.activePathIs(path) :
+            "path = " + path + ", active path = " + Views.getActivePath();
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -165,7 +165,7 @@ public class PenTool extends Tool {
         }
         changeMode(BUILD);
         enableActions(hasPath());
-        OpenImages.repaintActive();
+        Views.repaintActive();
 
         assert checkPathConsistency();
     }
@@ -201,7 +201,7 @@ public class PenTool extends Tool {
 
         changeMode(mode);
         enableActions(true);
-        OpenImages.repaintActive();
+        Views.repaintActive();
 
         assert checkPathConsistency();
     }
@@ -237,7 +237,7 @@ public class PenTool extends Tool {
         Path oldPath = path;
 
         Shape shape = path.toImageSpaceShape();
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
@@ -291,7 +291,7 @@ public class PenTool extends Tool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view == null) {
             return false;
         }
@@ -330,7 +330,7 @@ public class PenTool extends Tool {
         super.viewActivated(oldCV, newCV);
         path = newCV.getComp().getActivePath();
 
-        assert OpenImages.getActiveView() == newCV;
+        assert Views.getActive() == newCV;
         assert checkPathConsistency();
     }
 
@@ -345,7 +345,7 @@ public class PenTool extends Tool {
 
     @Override
     public void resetInitialState() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         setPathFromComp(comp);
 
         assert checkPathConsistency();
@@ -355,7 +355,7 @@ public class PenTool extends Tool {
     protected void toolStarted() {
         super.toolStarted();
 
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             setPathFromComp(view.getComp());
 
@@ -373,17 +373,17 @@ public class PenTool extends Tool {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
-        assert OpenImages.activePathIs(path) :
-            "path = " + path + ", active path = " + OpenImages.getActivePath();
+        assert Views.activePathIs(path) :
+            "path = " + path + ", active path = " + Views.getActivePath();
 
-        Composition activeComp = OpenImages.getActiveComp();
+        Composition activeComp = Views.getActiveComp();
         if (activeComp == null) {
             return true;
         }
         if (hasPath() && path.getComp() != activeComp) {
             throw new IllegalStateException("foreign path " + path
-                + ", path comp = " + path.getComp().toPathDebugString()
-                + ", active comp = " + activeComp.toPathDebugString());
+                                            + ", path comp = " + path.getComp().toPathDebugString()
+                                            + ", active comp = " + activeComp.toPathDebugString());
         }
         if (hasPath()) {
             path.checkConsistency();
@@ -432,7 +432,7 @@ public class PenTool extends Tool {
     }
 
     public void removePath() {
-        OpenImages.setActivePath(null);
+        Views.setActivePath(null);
         setNullPath();
         enableActions(false);
     }

@@ -167,7 +167,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public boolean isActive() {
-        return OpenImages.getActiveView() == this;
+        return Views.getActive() == this;
     }
 
     @Override
@@ -230,7 +230,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public void close() {
         if (viewContainer != null) {
-            // this will also cause the calling of OpenImages.imageClosed via
+            // this will also cause the calling of Views.imageClosed via
             // ImageFrame.internalFrameClosed
             viewContainer.close();
         }
@@ -391,7 +391,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (newValue) {
             ImageArea.pixelGridEnabled();
         } else {
-            OpenImages.repaintVisible();
+            Views.repaintVisible();
         }
     }
 

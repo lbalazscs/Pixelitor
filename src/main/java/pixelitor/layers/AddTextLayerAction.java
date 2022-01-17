@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Icons;
@@ -35,7 +35,7 @@ public class AddTextLayerAction extends PAction implements ViewActivationListene
         super("Add Text Layer", Icons.load("add_text_layer.png"));
         setToolTip("Adds a new text layer.");
         setEnabled(false);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogMenuBar;
@@ -738,7 +738,7 @@ public class AppRunner {
         var colorSelector = findDialogByTitle("Add Color Fill Layer");
         AJSUtils.findButtonByText(colorSelector, "OK").click();
 
-        EDT.run(() -> ((ColorFillLayer) OpenImages.getActiveLayer()).changeColor(c, true));
+        EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).changeColor(c, true));
 
         keyboard.undo("Color Fill Layer Change");
         checkNewLayerHistory(numLayersBefore, "Add Color Fill Layer");

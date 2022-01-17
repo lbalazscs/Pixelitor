@@ -20,8 +20,8 @@ package pixelitor.gui;
 import com.bric.util.JVM;
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
+import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
@@ -102,7 +102,7 @@ public class PixelitorWindow extends JFrame {
                 public void windowActivated(WindowEvent e) {
                     // ignore activation events from closed dialogs
                     if (e.getOppositeWindow() == null) {
-                        OpenImages.appActivated();
+                        Views.appActivated();
                     }
                 }
             }
@@ -141,7 +141,7 @@ public class PixelitorWindow extends JFrame {
     private void addLayersAndHistograms() {
         eastPanel = Box.createVerticalBox();
         HistogramsPanel histogramsPanel = HistogramsPanel.get();
-        OpenImages.addActivationListener(histogramsPanel);
+        Views.addActivationListener(histogramsPanel);
 
         if (WorkSpace.getHistogramsVisibility()) {
             eastPanel.add(histogramsPanel);

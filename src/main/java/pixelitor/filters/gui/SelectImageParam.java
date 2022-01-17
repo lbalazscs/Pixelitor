@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 
@@ -36,7 +36,7 @@ public class SelectImageParam extends AbstractMultipleChoiceParam<NamedImage> {
     public SelectImageParam(String name) {
         super(name,
             openImageInfos(),
-            new NamedImage(OpenImages.getActiveComp()),
+            new NamedImage(Views.getActiveComp()),
             RandomizePolicy.IGNORE_RANDOMIZE);
     }
 
@@ -69,7 +69,7 @@ public class SelectImageParam extends AbstractMultipleChoiceParam<NamedImage> {
     }
 
     private static List<NamedImage> openImageInfos() {
-        return OpenImages.getViews().stream()
+        return Views.getAll().stream()
             .map(View::getComp)
             .map(NamedImage::new)
             .toList();

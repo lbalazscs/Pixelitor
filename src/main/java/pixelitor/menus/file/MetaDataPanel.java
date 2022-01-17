@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
@@ -196,7 +196,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
     }
 
     public static void showInDialog() {
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         var comp = view.getComp();
         File file = comp.getFile();
         if (file == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
@@ -63,26 +63,26 @@ public class EDT {
     }
 
     public static View getActiveView() {
-        return call(OpenImages::getActiveView);
+        return call(Views::getActive);
     }
 
     public static Composition getComp() {
-        return call(OpenImages::getActiveComp);
+        return call(Views::getActiveComp);
     }
 
     public static Canvas getCanvas() {
-        return call(() -> OpenImages.getActiveComp().getCanvas());
+        return call(() -> Views.getActiveComp().getCanvas());
     }
 
     /**
      * Returns the given property of the active composition
      */
     public static <T> T active(Function<Composition, ? extends T> fun) {
-        return call(() -> fun.apply(OpenImages.getActiveComp()));
+        return call(() -> fun.apply(Views.getActiveComp()));
     }
 
     public static Selection getActiveSelection() {
-        return call(OpenImages::getActiveSelection);
+        return call(Views::getActiveSelection);
     }
 
     public static Guides getGuides() {
@@ -90,7 +90,7 @@ public class EDT {
     }
 
     public static Layer getActiveLayer() {
-        return call(OpenImages::getActiveLayer);
+        return call(Views::getActiveLayer);
     }
 
     public static void assertThereIsSelection() {
@@ -161,35 +161,35 @@ public class EDT {
     }
 
     public static void increaseZoom() {
-        run(() -> OpenImages.getActiveView().increaseZoom());
+        run(() -> Views.getActive().increaseZoom());
     }
 
     public static void decreaseZoom() {
-        run(() -> OpenImages.getActiveView().decreaseZoom());
+        run(() -> Views.getActive().decreaseZoom());
     }
 
     public static ZoomLevel getZoomLevelOfActive() {
-        return call(() -> OpenImages.getActiveView().getZoomLevel());
+        return call(() -> Views.getActive().getZoomLevel());
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        run(() -> OpenImages.assertZoomOfActiveIs(expected));
+        run(() -> Views.assertZoomOfActiveIs(expected));
     }
 
     public static void assertNumOpenImagesIs(int expected) {
-        run(() -> OpenImages.assertNumOpenImagesIs(expected));
+        run(() -> Views.assertNumViewsIs(expected));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int expected) {
-        run(() -> OpenImages.assertNumOpenImagesIsAtLeast(expected));
+        run(() -> Views.assertNumViewsIsAtLeast(expected));
     }
 
     public static int getNumLayersInActiveComp() {
-        return call(OpenImages::getNumLayersInActiveComp);
+        return call(Views::getNumLayersInActiveComp);
     }
 
     public static void assertNumLayersIs(int expected) {
-        run(() -> OpenImages.assertNumLayersIs(expected));
+        run(() -> Views.assertNumLayersIs(expected));
     }
 
     public static void assertShapesToolStateIs(DragToolState expected) {
@@ -200,14 +200,14 @@ public class EDT {
     }
 
     public static void activate(View view) {
-        run(() -> OpenImages.setActiveView(view, true));
+        run(() -> Views.setActiveView(view, true));
     }
 
     /**
      * Returns the given property of the active layer.
      */
     public static <T> T activeLayer(Function<Layer, T> fun) {
-        return call(() -> fun.apply(OpenImages.getActiveLayer()));
+        return call(() -> fun.apply(Views.getActiveLayer()));
     }
 
     public static void assertActiveLayerTypeIs(Class<? extends Layer> expected) {

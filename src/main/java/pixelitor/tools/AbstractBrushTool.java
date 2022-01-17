@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -464,7 +464,7 @@ public abstract class AbstractBrushTool extends Tool {
         outlinePainter.setRadius(newRadius);
         if (paintBrushOutline) {
             // changing the brush via keyboard shortcut
-            repaintOutline(OpenImages.getActiveView());
+            repaintOutline(Views.getActive());
         }
     }
 
@@ -473,7 +473,7 @@ public abstract class AbstractBrushTool extends Tool {
         super.toolStarted();
         resetInitialState();
 
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             outlinePainter.setView(view);
 
@@ -487,7 +487,7 @@ public abstract class AbstractBrushTool extends Tool {
     protected void toolEnded() {
         super.toolEnded();
 
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             stopOutlinePainting(view);
         }
@@ -528,7 +528,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void firstModalDialogShown() {
         // the outline has to be hidden, because there is no mouseExited event
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             stopOutlinePainting(view);
         }
@@ -537,7 +537,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void firstModalDialogHidden() {
         // the outline has to be shown again, because there is no mouseEntered event
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             startOutlinePainting(view);
         }

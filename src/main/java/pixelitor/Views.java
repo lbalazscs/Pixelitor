@@ -20,7 +20,7 @@ package pixelitor;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
@@ -59,66 +59,66 @@ import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * Static methods related to the list of opened images
+ * Static methods related to the list of open views.
  */
-public class OpenImages {
+public class Views {
     private static final List<View> views = new ArrayList<>();
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final Action CLOSE_ALL_ACTION = new OpenImageEnabledAction(i18n("close_all")) {
+    public static final Action CLOSE_ALL_ACTION = new OpenViewEnabledAction(i18n("close_all")) {
         @Override
         public void onClick() {
             warnAndCloseAll();
         }
     };
 
-    public static final Action CLOSE_ACTIVE_ACTION = new OpenImageEnabledAction(i18n("close")) {
+    public static final Action CLOSE_ACTIVE_ACTION = new OpenViewEnabledAction(i18n("close")) {
         @Override
         public void onClick() {
             warnAndCloseActive();
         }
     };
 
-    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenImageEnabledAction("Close Unmodified") {
+    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction("Close Unmodified") {
         @Override
         public void onClick() {
             warnAndCloseUnmodified();
         }
     };
 
-    private OpenImages() {
+    private Views() {
     }
 
-    public static List<View> getViews() {
+    public static List<View> getAll() {
         return views;
     }
 
-    public static View getActiveView() {
+    public static View getActive() {
         return activeView;
     }
 
-    public static int getNumOpenImages() {
+    public static int getNumViews() {
         return views.size();
     }
 
-    public static void imageClosed(View view) {
+    public static void viewClosed(View view) {
         Composition comp = view.getComp();
         History.compClosed(comp);
         comp.closed();
 
         views.remove(view);
         if (views.isEmpty()) {
-            onAllImagesClosed();
+            onAllViewsClosed();
         }
         activateAViewIfNoneIs();
     }
 
-    private static void onAllImagesClosed() {
+    private static void onAllViewsClosed() {
         setActiveView(null, false);
         activationListeners.forEach(ViewActivationListener::allViewsClosed);
-        History.onAllImagesClosed();
+        History.onAllViewsClosed();
         SelectionActions.update(null);
         PixelitorWindow.get().updateTitle(null);
         FramesUI.resetCascadeIndex();
@@ -156,7 +156,7 @@ public class OpenImages {
     }
 
     /**
-     * Changes the cursor for all images
+     * Changes the cursor for all views
      */
     public static void setCursorForAll(Cursor cursor) {
         for (View view : views) {
@@ -296,30 +296,30 @@ public class OpenImages {
         return null;
     }
 
-    public static void assertNumOpenImagesIs(int expected) {
-        int numOpenImages = getNumOpenImages();
-        if (numOpenImages == expected) {
+    public static void assertNumViewsIs(int expected) {
+        int numViews = getNumViews();
+        if (numViews == expected) {
             return;
         }
 
         throw new AssertionError(format(
-            "Expected %d images, found %d (%s)",
-            expected, numOpenImages, getOpenImageNamesAsString()));
+            "Expected %d views, found %d (%s)",
+            expected, numViews, getOpenCompNamesAsString()));
     }
 
-    public static void assertNumOpenImagesIsAtLeast(int minimum) {
-        int numOpenImages = getNumOpenImages();
-        if (numOpenImages >= minimum) {
+    public static void assertNumViewsIsAtLeast(int minimum) {
+        int numViews = getNumViews();
+        if (numViews >= minimum) {
             return;
         }
         throw new AssertionError(format(
-            "Expected at least %d images, found %d (%s)",
-            minimum, numOpenImages, getOpenImageNamesAsString()));
+            "Expected at least %d views, found %d (%s)",
+            minimum, numViews, getOpenCompNamesAsString()));
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
         if (activeView == null) {
-            throw new AssertionError("no active image");
+            throw new AssertionError("no active view");
         }
         ZoomLevel actual = activeView.getZoomLevel();
         if (actual != expected) {
@@ -328,7 +328,7 @@ public class OpenImages {
         }
     }
 
-    private static String getOpenImageNamesAsString() {
+    private static String getOpenCompNamesAsString() {
         return views.stream()
             .map(View::getName)
             .collect(joining(", ", "[", "]"));
@@ -405,7 +405,7 @@ public class OpenImages {
         if (activeView != null) {
             return activeView.getComp() == comp;
         }
-        // there is no open image
+        // there is no open view
         return comp == null;
     }
 
@@ -414,7 +414,7 @@ public class OpenImages {
             return activeView.getComp();
         }
 
-        // there is no open image
+        // there is no open view
         return null;
     }
 
@@ -434,7 +434,7 @@ public class OpenImages {
             return function.apply(activeView.getComp());
         }
 
-        // there is no open image
+        // there is no open view
         return null;
     }
 
@@ -560,7 +560,7 @@ public class OpenImages {
             return activeView.getComp().getActiveDrawableOrThrow();
         }
 
-        throw new IllegalStateException("no active image");
+        throw new IllegalStateException("no active view");
     }
 
     public static void onActiveDrawable(Consumer<Drawable> action) {
@@ -575,7 +575,7 @@ public class OpenImages {
             return activeView.getComp().getSelection();
         }
 
-        // there is no open image
+        // there is no open view
         return null;
     }
 
@@ -584,7 +584,7 @@ public class OpenImages {
             return activeView.getComp().getActivePath();
         }
 
-        // there is no open image
+        // there is no open view
         return null;
     }
 
@@ -594,7 +594,7 @@ public class OpenImages {
             return activePath == path;
         }
 
-        // no open image
+        // there is no open view
         return path == null;
     }
 

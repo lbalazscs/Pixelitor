@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -27,7 +27,7 @@ import static java.lang.String.format;
 /**
  * An action that can run only when the active layer has a specific type
  */
-public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
+public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
@@ -121,7 +121,7 @@ public abstract class RestrictedLayerAction extends OpenImageEnabledAction {
 
     @Override
     public void onClick() {
-        Layer activeLayer = OpenImages.getActiveLayer();
+        Layer activeLayer = Views.getActiveLayer();
         if (layerType.isAllowed(activeLayer)) {
             onActiveLayer(activeLayer);
         } else {

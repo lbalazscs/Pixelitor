@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.layers.TextLayer;
@@ -207,7 +207,7 @@ public class TextSettings implements Serializable {
     }
 
     private static int calcDefaultFontSize() {
-        Composition comp = OpenImages.getActiveComp();
+        Composition comp = Views.getActiveComp();
         if (comp != null) {
             int canvasHeight = comp.getCanvasHeight();
             int size = (int) (canvasHeight * 0.2);

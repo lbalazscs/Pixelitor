@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
@@ -162,7 +162,7 @@ public class Crop implements CompAction {
                                            boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
         try {
-            OpenImages.onActiveComp(comp ->
+            Views.onActiveComp(comp ->
                 new Crop(cropRect, false, allowGrowing,
                     deleteCroppedPixels, false).process(comp));
         } catch (Exception ex) {
@@ -175,7 +175,7 @@ public class Crop implements CompAction {
      */
     public static void selectionCropActiveImage() {
         try {
-            OpenImages.onActiveComp(Crop::selectionCrop);
+            Views.onActiveComp(Crop::selectionCrop);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

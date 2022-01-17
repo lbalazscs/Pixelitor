@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -134,7 +134,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             super(text);
             addActionListener(e -> {
                 if (trigger) {
-                    OpenImages.getActiveDrawableOrThrow().setShowOriginal(isSelected());
+                    Views.getActiveDrawableOrThrow().setShowOriginal(isSelected());
                 }
             });
             setName("show original");

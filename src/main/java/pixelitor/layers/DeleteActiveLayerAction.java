@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Icons;
@@ -42,13 +42,13 @@ public class DeleteActiveLayerAction extends PAction
         super(i18n("delete_layer"), Icons.load("delete_layer.gif"));
         setToolTip("Deletes the active layer.");
         setEnabled(false);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
         Layers.addCompositionListener(this);
     }
 
     @Override
     public void onClick() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         comp.deleteActiveLayer(true);
     }
 

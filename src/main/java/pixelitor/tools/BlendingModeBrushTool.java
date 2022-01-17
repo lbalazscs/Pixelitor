@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
@@ -71,7 +71,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void toolStarted() {
         super.toolStarted();
 
-        var activeLayer = OpenImages.getActiveLayer();
+        var activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
             setupMaskEditing(activeLayer.isMaskEditing());
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
@@ -642,7 +642,7 @@ public class RandomToolTest {
         log("layers to canvas size");
         Utils.sleep(200, MILLISECONDS);
 
-        EDT.run(() -> OpenImages.onActiveComp(
+        EDT.run(() -> Views.onActiveComp(
             Composition::allImageLayersToCanvasSize));
     }
 

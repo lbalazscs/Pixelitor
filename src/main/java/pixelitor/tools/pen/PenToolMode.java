@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
@@ -67,13 +67,13 @@ public interface PenToolMode {
         if (prevMode == TRANSFORM) {
             // in rare cases the transform boxes can
             // leave their cursor even after a mode change
-            OpenImages.setCursorForAll(Tools.PEN.getStartingCursor());
+            Views.setCursorForAll(Tools.PEN.getStartingCursor());
         }
     }
 
     default void modeEnded() {
         if (PenTool.hasPath()) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
@@ -95,7 +95,7 @@ public interface PenToolMode {
                 comp.repaint();
             }
         } else { // no path in the pen tool
-            assert OpenImages.activePathIs(null);
+            assert Views.activePathIs(null);
         }
         DraggablePoint.lastActive = null;
     }

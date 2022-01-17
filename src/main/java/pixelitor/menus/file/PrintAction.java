@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.menus.file;
 
 import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Messages;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -35,11 +35,11 @@ import java.awt.print.*;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.OpenImages.getActiveComp;
+import static pixelitor.Views.getActiveComp;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
-public class PrintAction extends OpenImageEnabledAction implements Printable {
+public class PrintAction extends OpenViewEnabledAction implements Printable {
     private static final float DPI = 72.0f;
 
     private BufferedImage img;

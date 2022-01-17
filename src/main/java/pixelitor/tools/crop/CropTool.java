@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.crop;
 import pixelitor.AppContext;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
@@ -117,7 +117,7 @@ public class CropTool extends DragTool {
         if (AppContext.isDevelopment()) {
             JButton b = new JButton("Dump State");
             b.addActionListener(e -> {
-                View view = OpenImages.getActiveView();
+                View view = Views.getActive();
                 Canvas canvas = view.getCanvas();
                 System.out.println("CropTool::actionPerformed: canvas = " + canvas);
                 System.out.println("CropTool::initSettingsPanel: state = " + state);
@@ -147,15 +147,15 @@ public class CropTool extends DragTool {
             maskOpacity.setValue(100);
         }
         maskComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-        OpenImages.repaintActive();
+        Views.repaintActive();
     }
 
     private void addGuidesSelector() {
         guidesCB = GUIUtils.createComboBox(CompositionGuideType.values());
         guidesCB.setToolTipText("<html>Composition guides." +
-            "<br><br>Press <b>O</b> to select the next guide." +
-            "<br>Press <b>Shift-O</b> to change the orientation.");
-        guidesCB.addActionListener(e -> OpenImages.repaintActive());
+                                "<br><br>Press <b>O</b> to select the next guide." +
+                                "<br>Press <b>Shift-O</b> to change the orientation.");
+        guidesCB.addActionListener(e -> Views.repaintActive());
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }
 
@@ -165,7 +165,7 @@ public class CropTool extends DragTool {
                 cropBox.setImSize(
                     (int) widthSpinner.getValue(),
                     (int) heightSpinner.getValue(),
-                    OpenImages.getActiveView()
+                    Views.getActive()
                 );
             }
         };
@@ -403,8 +403,8 @@ public class CropTool extends DragTool {
         heightSpinner.setValue(0);
         widthSpinner.setValue(0);
 
-        OpenImages.repaintActive();
-        OpenImages.setCursorForAll(Cursors.DEFAULT);
+        Views.repaintActive();
+        Views.setCursorForAll(Cursors.DEFAULT);
     }
 
     private void setState(DragToolState newState) {
@@ -435,7 +435,7 @@ public class CropTool extends DragTool {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            View view = OpenImages.getActiveView();
+            View view = Views.getActive();
             if (view != null) {
                 cropBox.arrowKeyPressed(key, view);
                 return true;
@@ -455,7 +455,7 @@ public class CropTool extends DragTool {
             return false;
         }
 
-        Rectangle2D cropRect = getCropRect(OpenImages.getActiveView()).getIm();
+        Rectangle2D cropRect = getCropRect(Views.getActive()).getIm();
         if (cropRect.isEmpty()) {
             return false;
         }
@@ -495,7 +495,7 @@ public class CropTool extends DragTool {
                 if (state == TRANSFORM) {
                     int o = compositionGuide.getOrientation();
                     compositionGuide.setOrientation(o + 1);
-                    OpenImages.repaintActive();
+                    Views.repaintActive();
                     e.consume();
                 }
             } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.PixelitorWindow;
@@ -54,7 +54,7 @@ public class ColorFillLayer extends Layer {
 
     public static void createNew() {
         Tools.forceFinish();
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         ColorFillLayer layer = new ColorFillLayer(comp, "color fill", null);
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
@@ -65,7 +65,7 @@ public class Tools {
     public static Tool currentTool;
 
     static {
-        OpenImages.addActivationListener(new ViewActivationListener() {
+        Views.addActivationListener(new ViewActivationListener() {
             @Override
             public void viewActivated(View oldView, View newView) {
                 currentTool.viewActivated(oldView, newView);

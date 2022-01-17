@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
@@ -43,8 +43,8 @@ public class PasteAction extends PAction implements ViewActivationListener {
         super(i18n(destination.getResourceKey()));
 
         this.destination = destination;
-        if (destination.requiresOpenImage()) {
-            OpenImages.addActivationListener(this);
+        if (destination.requiresOpenView()) {
+            Views.addActivationListener(this);
             setEnabled(false);
         }
     }
@@ -84,13 +84,13 @@ public class PasteAction extends PAction implements ViewActivationListener {
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        assert destination.requiresOpenImage();
+        assert destination.requiresOpenView();
         setEnabled(true);
     }
 
     @Override
     public void allViewsClosed() {
-        assert destination.requiresOpenImage();
+        assert destination.requiresOpenView();
         setEnabled(false);
     }
 }

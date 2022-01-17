@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
@@ -111,7 +111,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     public static Action getAction() {
-        return new OpenImageEnabledAction("Enlarge Canvas...") {
+        return new OpenViewEnabledAction("Enlarge Canvas...") {
             @Override
             public void onClick() {
                 showInDialog();
@@ -125,7 +125,7 @@ public class EnlargeCanvas extends SimpleCompAction {
             .title(NAME)
             .content(p)
             .okAction(() -> {
-                var comp = OpenImages.getActiveComp();
+                var comp = Views.getActiveComp();
                 p.getCompAction(comp.getCanvas()).process(comp);
             })
             .show();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.AppContext;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
@@ -55,7 +55,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         if (AppContext.isUnitTesting()) {
             return;
         }
-        Drawable dr = OpenImages.getActiveDrawable();
+        Drawable dr = Views.getActiveDrawable();
         BufferedImage actualImage = dr.getImageForFilterDialogs();
         thumb = ImageUtils.createThumbnail(actualImage, size, null);
         setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));

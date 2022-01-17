@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition.LayerAdder;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
@@ -35,12 +35,12 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
         super("Add Adjustment Layer", Icons.load("add_adj_layer.png"));
         setToolTip("Adds a new adjustment layer.");
         setEnabled(false);
-        OpenImages.addActivationListener(this);
+        Views.addActivationListener(this);
     }
 
     @Override
     public void onClick() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, ToneCurvesFilter.NAME, new ToneCurvesFilter());
 
         new LayerAdder(comp)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import org.assertj.swing.core.Robot;
 import org.assertj.swing.driver.WindowDriver;
 import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Threads;
@@ -138,7 +138,7 @@ public class Keyboard {
             robot.waitForIdle();
         } else {
             // runMenuCommand("Deselect");
-            EDT.run(() -> OpenImages.getActiveComp().deselect(true));
+            EDT.run(() -> Views.getActiveComp().deselect(true));
         }
     }
 

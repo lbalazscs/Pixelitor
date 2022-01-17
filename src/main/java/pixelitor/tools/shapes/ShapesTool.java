@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
@@ -381,7 +381,7 @@ public class ShapesTool extends DragTool {
             assert styledShape != null;
             styledShape.updateFromDrag(drag);
 
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             comp.update(REPAINT);
         }
         altDown = true;
@@ -395,7 +395,7 @@ public class ShapesTool extends DragTool {
             assert styledShape != null;
             styledShape.updateFromDrag(drag);
 
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             comp.update(REPAINT);
         }
         altDown = false;
@@ -407,14 +407,14 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM) {
-            OpenImages.onActiveComp(this::rasterizeShape);
+            Views.onActiveComp(this::rasterizeShape);
         }
     }
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (transformBox != null) {
-            View view = OpenImages.getActiveView();
+            View view = Views.getActive();
             assert view != null;
 
             transformBox.arrowKeyPressed(key, view);
@@ -507,7 +507,7 @@ public class ShapesTool extends DragTool {
 
         Shape shape = styledShape.getShapeForSelection();
 
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
@@ -551,7 +551,7 @@ public class ShapesTool extends DragTool {
         styledShape = null;
         setState(NO_INTERACTION);
 
-        OpenImages.onActiveComp(comp -> {
+        Views.onActiveComp(comp -> {
             if (hadShape) {
                 comp.update();
             } else {
@@ -577,7 +577,7 @@ public class ShapesTool extends DragTool {
         styledShape = shape;
         transformBox = box;
         setState(TRANSFORM);
-        OpenImages.getActiveComp().update();
+        Views.getActiveComp().update();
     }
 
     public StyledShape getStyledShape() {
@@ -630,7 +630,7 @@ public class ShapesTool extends DragTool {
 
     private void finalizeBox() {
         if (transformBox != null) {
-            Composition comp = OpenImages.getActiveComp();
+            Composition comp = Views.getActiveComp();
             finalizeBox(comp);
         }
     }

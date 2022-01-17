@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
@@ -64,7 +64,7 @@ public class DropListener extends DropTargetAdapter {
         NEW_LAYERS {
             @Override
             public void handleDrop(List<File> files, Component target) {
-                var comp = OpenImages.getActiveComp();
+                var comp = Views.getActiveComp();
                 if (comp == null) {
                     // if there is no active composition,
                     // fall back to opening the files as new images

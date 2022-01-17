@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -139,8 +139,8 @@ public class ZoomTool extends DragTool {
         box = null;
         setState(NO_INTERACTION);
 
-        OpenImages.repaintActive();
-        OpenImages.setCursorForAll(Cursors.HAND);
+        Views.repaintActive();
+        Views.setCursorForAll(Cursors.HAND);
     }
 
     private void setState(DragToolState newState) {

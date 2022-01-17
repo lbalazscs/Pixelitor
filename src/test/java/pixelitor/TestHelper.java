@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -221,7 +221,7 @@ public class TestHelper {
 
         // set it to active only after the comp is set
         // because the active view should return non-null in view.getComp()
-        OpenImages.setActiveView(view, false);
+        Views.setActiveView(view, false);
 
         return view;
     }

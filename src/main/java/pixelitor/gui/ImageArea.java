@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
@@ -131,7 +131,7 @@ public class ImageArea {
             // in the top-left corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        OpenImages.forEachView(ImageArea::addNewView);
+        Views.forEachView(ImageArea::addNewView);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -183,13 +183,13 @@ public class ImageArea {
     public static void pixelGridEnabled() {
         // the global pixel grid switch was turned on
         if (currentModeIs(FRAMES)) {
-            if (OpenImages.isAnyPixelGridAllowed()) {
-                OpenImages.repaintAll();
+            if (Views.isAnyPixelGridAllowed()) {
+                Views.repaintAll();
             } else {
                 showNoPixelGridMsg();
             }
         } else { // Tabs: check only the current view
-            View view = OpenImages.getActiveView();
+            View view = Views.getActive();
             if (view != null) {
                 if (view.allowPixelGrid()) {
                     view.repaint();

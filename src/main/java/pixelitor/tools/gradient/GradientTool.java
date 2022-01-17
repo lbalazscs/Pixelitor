@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.gradient;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -152,7 +152,7 @@ public class GradientTool extends DragTool {
         }
 
         if (editingGradientLayer()) {
-            View view = OpenImages.getActiveView();
+            View view = Views.getActive();
             if (view != null) {
                 Drag renderedDrag = handles.toDrag(view);
                 if (!renderedDrag.isImClick()) {
@@ -176,7 +176,7 @@ public class GradientTool extends DragTool {
         if (handles == null) {
             return;
         }
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         if (view != null) {
             Drag renderedDrag = handles.toDrag(view);
             if (!renderedDrag.isImClick()) {
@@ -324,7 +324,7 @@ public class GradientTool extends DragTool {
         handles = null;
         activePoint = null;
         lastGradient = null;
-        OpenImages.repaintActive();
+        Views.repaintActive();
     }
 
     @Override
@@ -352,7 +352,7 @@ public class GradientTool extends DragTool {
 
     private void hideHandles(boolean addHistory) {
         if (handles != null) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             hideHandles(comp, addHistory);
         }
     }
@@ -381,7 +381,7 @@ public class GradientTool extends DragTool {
         if (handles == null) {
             return false;
         }
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         assert view != null;
 
         handles.arrowKeyPressed(key, view);
@@ -491,7 +491,7 @@ public class GradientTool extends DragTool {
     protected void toolStarted() {
         super.toolStarted();
 
-        Layer activeLayer = OpenImages.getActiveLayer();
+        Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
             handleNewActiveLayer(activeLayer);
         }

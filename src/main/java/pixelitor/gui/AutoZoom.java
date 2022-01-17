@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.Views;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.menus.view.ZoomMenu;
 
 import javax.swing.*;
@@ -69,10 +69,10 @@ public enum AutoZoom {
     public abstract double selectRatio(double hor, double ver);
 
     private Action asAction() {
-        var action = new OpenImageEnabledAction(guiName) {
+        var action = new OpenViewEnabledAction(guiName) {
             @Override
             public void onClick() {
-                OpenImages.fitActive(AutoZoom.this);
+                Views.fitActive(AutoZoom.this);
             }
         };
         action.setToolTip(toolTip);

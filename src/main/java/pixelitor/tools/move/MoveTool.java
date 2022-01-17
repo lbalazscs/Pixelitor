@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.move;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -204,13 +204,13 @@ public class MoveTool extends DragTool {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (transformBox != null) {
-            View view = OpenImages.getActiveView();
+            View view = Views.getActive();
             assert view != null;
             transformBox.arrowKeyPressed(key, view);
             return true;
         }
 
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         if (comp != null) {
             move(comp, currentMode, key.getMoveX(), key.getMoveY());
             return true;
@@ -242,7 +242,7 @@ public class MoveTool extends DragTool {
     }
 
     private void createTransformBox() {
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         Selection selection = view.getComp().getSelection();
         if (selection != null && transformBox == null) {
             selection.startMovement();

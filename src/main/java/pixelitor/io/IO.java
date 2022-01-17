@@ -19,7 +19,7 @@ package pixelitor.io;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.GUIText;
@@ -58,11 +58,11 @@ public class IO {
 
     public static CompletableFuture<Composition> openFileAsync(File file,
                                                                boolean checkAlreadyOpen) {
-        if (checkAlreadyOpen && !OpenImages.warnIfAlreadyOpen(file)) {
+        if (checkAlreadyOpen && !Views.warnIfAlreadyOpen(file)) {
             return CompletableFuture.completedFuture(null);
         }
         return loadCompAsync(file)
-            .thenApplyAsync(OpenImages::addJustLoadedComp, onEDT)
+            .thenApplyAsync(Views::addJustLoadedComp, onEDT)
             .whenComplete((comp, e) -> checkForReadingProblems(e));
     }
 
@@ -129,7 +129,7 @@ public class IO {
     }
 
     public static void save(boolean saveAs) {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         save(comp, saveAs);
     }
 
@@ -226,7 +226,7 @@ public class IO {
             return;
         }
 
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
 
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
@@ -270,7 +270,7 @@ public class IO {
         }
         File saveDir = Dirs.getLastSave();
         if (saveDir != null) {
-            var comp = OpenImages.getActiveComp();
+            var comp = Views.getActiveComp();
             FileFormat[] fileFormats = FileFormat.values();
             for (FileFormat format : fileFormats) {
                 File f = new File(saveDir, "all_formats." + format);
@@ -281,7 +281,7 @@ public class IO {
     }
 
     public static void saveJpegWithQuality(JpegInfo jpegInfo) {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         FileChoosers.saveWithSingleAllowedExtension(comp,
             comp.getFileNameWithExt("jpg"), jpegInfo, FileChoosers.jpegFilter);
     }
@@ -329,7 +329,7 @@ public class IO {
             };
         }
 
-        Canvas canvas = OpenImages.getActiveComp().getCanvas();
+        Canvas canvas = Views.getActiveComp().getCanvas();
         String svg;
         if (exportFilled) {
             svg = """

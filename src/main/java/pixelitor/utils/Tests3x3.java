@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -132,7 +132,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
             layer.addConfiguredMask(mask);
         }
-        OpenImages.addAsNewComp(comp);
+        Views.addAsNewComp(comp);
         comp.getView().setZoom(ZoomLevel.Z100);
     }
 
@@ -162,7 +162,7 @@ public class Tests3x3 {
     }
 
     public static void dumpCompositeOfActive() {
-        BufferedImage img = OpenImages.getActiveCompositeImage();
+        BufferedImage img = Views.getActiveCompositeImage();
         String actual = getExpectedFromActual(img);
         System.out.printf("Tests3x3::dumpCompositeOfActive: \n%s\n%n", actual);
     }

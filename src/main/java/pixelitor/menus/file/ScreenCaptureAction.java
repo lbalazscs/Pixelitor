@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
@@ -111,6 +111,6 @@ public class ScreenCaptureAction extends PAction {
         String name = "Screen Capture " + captureCount++;
         var comp = Composition.fromImage(screenCapture, null, name);
         comp.setDirty(true);
-        OpenImages.addAsNewComp(comp);
+        Views.addAsNewComp(comp);
     }
 }

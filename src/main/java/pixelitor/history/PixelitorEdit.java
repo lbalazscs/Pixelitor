@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.AbstractUndoableEdit;
@@ -123,7 +123,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     }
 
     private void activateComp() {
-        OpenImages.activate(comp.getView());
+        Views.activate(comp.getView());
     }
 
     public Composition getComp() {

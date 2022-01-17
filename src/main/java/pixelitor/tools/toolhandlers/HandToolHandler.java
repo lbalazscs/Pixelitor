@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.PanMethod;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -91,7 +91,7 @@ public class HandToolHandler extends ToolHandler {
         }
         if (!panning) { // this is called all the time while the space is held down
             if (handToolForwarding) {
-                OpenImages.setCursorForAll(Tools.HAND.getStartingCursor());
+                Views.setCursorForAll(Tools.HAND.getStartingCursor());
             }
         }
         panning = true;
@@ -103,7 +103,7 @@ public class HandToolHandler extends ToolHandler {
         }
         panning = false;
         if (!handToolForwarding) {
-            OpenImages.setCursorForAll(cursor);
+            Views.setCursorForAll(cursor);
         }
     }
 }

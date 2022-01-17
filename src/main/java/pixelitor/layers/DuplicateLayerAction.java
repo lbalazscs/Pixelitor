@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.OpenImages;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.Views;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Icons;
 
 import static pixelitor.utils.Texts.i18n;
@@ -26,7 +26,7 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * An Action that duplicates the active layer of the active composition
  */
-public class DuplicateLayerAction extends OpenImageEnabledAction {
+public class DuplicateLayerAction extends OpenViewEnabledAction {
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
     private DuplicateLayerAction() {
@@ -36,7 +36,7 @@ public class DuplicateLayerAction extends OpenImageEnabledAction {
 
     @Override
     public void onClick() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         comp.duplicateActiveLayer();
     }
 }

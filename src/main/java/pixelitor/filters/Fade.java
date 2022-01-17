@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.history.FadeableEdit;
@@ -51,7 +51,7 @@ public class Fade extends ParametrizedFilter {
         // the fade menu item must be active only if History.canFade()
         assert History.canFade();
 
-        Drawable dr = OpenImages.getActiveDrawable();
+        Drawable dr = Views.getActiveDrawable();
         FadeableEdit edit = History.getPreviousEditForFade(dr);
         BufferedImage previous = edit.getBackupImage();
 

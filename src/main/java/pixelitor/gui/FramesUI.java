@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
@@ -74,12 +74,12 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void cascadeWindows() {
-        if (OpenImages.getNumOpenImages() == 0) {
+        if (Views.getNumViews() == 0) {
             Dialogs.showInfoDialog(this, "No open windows",
                 "There are no open internal windows to cascade.");
             return;
         }
-        List<View> views = OpenImages.getViews();
+        List<View> views = Views.getAll();
         int locX = 0;
         int locY = 0;
         for (View view : views) {
@@ -105,7 +105,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void tileWindows() {
-        int numWindows = OpenImages.getNumOpenImages();
+        int numWindows = Views.getNumViews();
         if (numWindows == 0) {
             Dialogs.showInfoDialog(this, "No open windows",
                 "There are no open internal windows to tile.");
@@ -121,7 +121,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int currRow = 0;
         int currCol = 0;
 
-        List<View> views = OpenImages.getViews();
+        List<View> views = Views.getAll();
         for (View view : views) {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
             ensureNormalDisplay(frame);

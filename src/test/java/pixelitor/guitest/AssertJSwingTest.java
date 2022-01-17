@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import org.fest.util.Files;
 import pixelitor.AppContext;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.AutoPaintPanel;
 import pixelitor.colors.FgBgColorSelector;
@@ -200,7 +200,7 @@ public class AssertJSwingTest {
     }
 
     private void resetState() {
-        if (EDT.call(OpenImages::getNumOpenImages) > 0) {
+        if (EDT.call(Views::getNumViews) > 0) {
             app.closeAll();
         }
         openFileWithDialog(inputDir, "a.jpg");
@@ -1167,7 +1167,7 @@ public class AssertJSwingTest {
     private void closeOneOfTwo() {
         log(1, "testing close one of two");
 
-        int numOpenImages = EDT.call(OpenImages::getNumOpenImages);
+        int numOpenImages = EDT.call(Views::getNumViews);
         if (numOpenImages == 1) {
             app.createNewImage(400, 400, null);
         }

@@ -20,7 +20,7 @@ package pixelitor.utils.debug;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.NewImage;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
@@ -55,8 +55,8 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.OpenImages.addAsNewComp;
-import static pixelitor.OpenImages.findCompByName;
+import static pixelitor.Views.addAsNewComp;
+import static pixelitor.Views.findCompByName;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
@@ -224,14 +224,14 @@ public class Debug {
 
         BufferedImage copy = ImageUtils.copyToBufferedImage(img);
 
-        View previousView = OpenImages.getActiveView();
+        View previousView = Views.getActive();
 
         findCompByName(name).ifPresentOrElse(
             comp -> replaceImageInDebugComp(comp, copy),
             () -> addAsNewComp(copy, null, name));
 
         if (previousView != null) {
-            OpenImages.activate(previousView);
+            Views.activate(previousView);
         }
     }
 
@@ -339,7 +339,7 @@ public class Debug {
     public static void addTestPath() {
         var shape = new Rectangle2D.Double(100, 100, 300, 100);
 
-        Path path = Shapes.shapeToPath(shape, OpenImages.getActiveView());
+        Path path = Shapes.shapeToPath(shape, Views.getActive());
 
         Tools.PEN.setPath(path);
         Tools.PEN.startRestrictedMode(EDIT, false);
@@ -352,18 +352,18 @@ public class Debug {
 
     public static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
-        View view = OpenImages.getActiveView();
+        View view = Views.getActive();
         Layer layer = view.getComp().getActiveLayer();
         MaskViewMode.SHOW_MASK.activate(view, layer);
     }
 
     public static void startFilter(Filter filter) {
-        filter.startOn(OpenImages.getActiveDrawableOrThrow(), true);
+        filter.startOn(Views.getActiveDrawableOrThrow(), true);
     }
 
     public static void addNewImageWithMask() {
         NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-        OpenImages.getActiveLayer().addMask(LayerMaskAddType.PATTERN);
+        Views.getActiveLayer().addMask(LayerMaskAddType.PATTERN);
     }
 
     public static void showInternalState() {
@@ -402,5 +402,9 @@ public class Debug {
             paper.getWidth(), paper.getHeight(),
             paper.getImageableX(), paper.getImageableY(),
             paper.getImageableWidth(), paper.getImageableHeight());
+    }
+
+    public static void openAllNestedSmartObjects() {
+        Views.getActiveComp().forAllNestedSmartObjects(SmartObject::edit);
     }
 }

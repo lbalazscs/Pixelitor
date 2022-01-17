@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.OpenImageEnabledAction;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
@@ -49,17 +49,17 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
-    private static final Action ZOOM_IN_ACTION = new OpenImageEnabledAction(i18n("zoom_in")) {
+    private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(i18n("zoom_in")) {
         @Override
         public void onClick() {
-            OpenImages.onActiveView(View::increaseZoom);
+            Views.onActiveView(View::increaseZoom);
         }
     };
 
-    private static final Action ZOOM_OUT_ACTION = new OpenImageEnabledAction(i18n("zoom_out")) {
+    private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(i18n("zoom_out")) {
         @Override
         public void onClick() {
-            OpenImages.onActiveView(View::decreaseZoom);
+            Views.onActiveView(View::decreaseZoom);
         }
     };
 

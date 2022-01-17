@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.history;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
@@ -259,7 +259,7 @@ public class History {
     }
 
     public static boolean canFade() {
-        var comp = OpenImages.getActiveComp();
+        var comp = Views.getActiveComp();
         if (comp == null) {
             return false;
         }
@@ -275,7 +275,7 @@ public class History {
         return getPreviousEditForFade(dr) != null;
     }
 
-    public static void onAllImagesClosed() {
+    public static void onAllViewsClosed() {
         numUndoneEdits = 0;
 
         undoManager.discardAllEdits();

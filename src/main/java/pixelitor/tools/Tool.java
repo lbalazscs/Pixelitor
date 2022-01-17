@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -128,7 +128,7 @@ public abstract class Tool implements KeyListener {
 
     protected void toolStarted() {
         GlobalEvents.setKeyListener(this);
-        OpenImages.setCursorForAll(cursor);
+        Views.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
@@ -217,7 +217,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altPressed() {
         if (!altDown && hasColorPickerForwarding()) {
-            OpenImages.setCursorForAll(
+            Views.setCursorForAll(
                 Tools.COLOR_PICKER.getStartingCursor());
         }
         altDown = true;
@@ -226,7 +226,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altReleased() {
         if (hasColorPickerForwarding()) {
-            OpenImages.setCursorForAll(cursor);
+            Views.setCursorForAll(cursor);
         }
         altDown = false;
     }

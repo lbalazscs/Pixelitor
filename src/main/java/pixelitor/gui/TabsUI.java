@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Lazy;
 
@@ -82,13 +82,13 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     public static void warnAndCloseTab(TabViewContainer tab) {
         // this will call closeTab
-        OpenImages.warnAndClose(tab.getView());
+        Views.warnAndClose(tab.getView());
     }
 
     public void closeTab(TabViewContainer tab) {
         remove(indexOfComponent(tab));
         View view = tab.getView();
-        OpenImages.imageClosed(view);
+        Views.viewClosed(view);
     }
 
     public void selectTab(TabViewContainer tab) {

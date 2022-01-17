@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.OpenImages;
+import pixelitor.Views;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
 
@@ -78,7 +78,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     }
 
     public void activated() {
-        OpenImages.viewActivated(view);
+        Views.viewActivated(view);
     }
 
     public View getView() {
@@ -118,17 +118,17 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         popup.add(new PAction(i18n("close")) {
             @Override
             public void onClick() {
-                OpenImages.warnAndClose(view);
+                Views.warnAndClose(view);
             }
         });
         popup.add(new PAction("Close Others") {
             @Override
             public void onClick() {
-                OpenImages.warnAndCloseAllBut(view);
+                Views.warnAndCloseAllBut(view);
             }
         });
-        popup.add(OpenImages.CLOSE_UNMODIFIED_ACTION);
-        popup.add(OpenImages.CLOSE_ALL_ACTION);
+        popup.add(Views.CLOSE_UNMODIFIED_ACTION);
+        popup.add(Views.CLOSE_ALL_ACTION);
 
         if (Desktop.isDesktopSupported()) {
             var comp = view.getComp();
