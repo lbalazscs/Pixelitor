@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,12 +63,13 @@ public class Keys {
     public static final KeyStroke CTRL_3 = getKeyStroke('3', CTRL);
     public static final KeyStroke CTRL_4 = getKeyStroke('4', CTRL);
 
+    public static final KeyStroke CTRL_ALT_D = getKeyStroke('D', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_E = getKeyStroke('E', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_F = getKeyStroke('F', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_O = getKeyStroke('O', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL | ALT);
-    public static final KeyStroke CTRL_ALT_T = getKeyStroke('T', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
 

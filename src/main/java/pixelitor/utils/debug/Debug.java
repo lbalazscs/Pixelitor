@@ -404,7 +404,8 @@ public class Debug {
             paper.getImageableWidth(), paper.getImageableHeight());
     }
 
-    public static void openAllNestedSmartObjects() {
-        Views.getActiveComp().forAllNestedSmartObjects(SmartObject::edit);
+    public static void debugSmartObjects() {
+        Views.forEachView(view ->
+            System.out.println(view.getComp().debugSmartObjects()));
     }
 }

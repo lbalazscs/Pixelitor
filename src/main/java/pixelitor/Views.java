@@ -23,7 +23,6 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
-import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
@@ -48,7 +47,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -56,7 +54,6 @@ import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.utils.Texts.i18n;
-import static pixelitor.utils.Threads.onEDT;
 
 /**
  * Static methods related to the list of open views.
@@ -230,49 +227,7 @@ public class Views {
     }
 
     public static void reloadActiveAsync() {
-        reloadAsync(activeView, null);
-    }
-
-    public static void reloadAsync(View view, UnaryOperator<Composition> extraTask) {
-        assert view == activeView;
-
-        var comp = view.getComp();
-        File file = comp.getFile();
-        if (file == null) {
-            String msg = format(
-                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
-                comp.getName());
-            Messages.showError("No file", msg);
-            return;
-        }
-
-        String path = file.getAbsolutePath();
-        if (!file.exists()) {
-            String msg = format(
-                "<html>The image <b>%s</b> can't be reloaded because the file" +
-                    "<br><b>%s</b>" +
-                    "<br>doesn't exist anymore.",
-                comp.getName(), path);
-            Messages.showError("File not found", msg, view);
-            return;
-        }
-
-        // prevent starting a new reload on the EDT while an asynchronous
-        // reload is already scheduled or running on the IO thread
-        if (IOTasks.isProcessing(path)) {
-            return;
-        }
-        IOTasks.markReadProcessing(path);
-
-        CompletableFuture<Composition> cf = IO.loadCompAsync(file)
-            .thenApplyAsync(view::replaceJustReloadedComp, onEDT);
-        if (extraTask != null) {
-            // at this point we still have a reference to the new comp
-            cf = cf.thenApplyAsync(extraTask, onEDT);
-        }
-        cf.whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.checkForReadingProblems(e))
-            .exceptionally(Messages::showExceptionOnEDT);
+        activeView.reloadAsync();
     }
 
     public static void onActiveView(Consumer<View> action) {
@@ -641,8 +596,11 @@ public class Views {
     }
 
     public static void appActivated() {
+        CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
         for (View view : views) {
-            view.getComp().appActivated();
+            // make sure that the next reload is not started
+            // before the previous one is finished
+            cf = cf.thenCompose(comp -> view.checkForAutoReload());
         }
     }
 }

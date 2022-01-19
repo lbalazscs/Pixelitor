@@ -174,6 +174,31 @@ public class Composition implements Serializable {
         return fromImage(img, null, "");
     }
 
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // init transient variables
+        compositeImage = null; // will be set when needed
+        file = null; // will be set later
+        fileTime = 0;
+        debugName = null; // will be set later
+        dirty = false;
+        view = null; // will be set later
+        selection = null; // the selection is not saved
+        builtSelection = null;
+
+        in.defaultReadObject();
+
+        for (Layer layer : layerList) {
+            if (layer instanceof SmartObject so) {
+                // things that need a full canvas and also
+                // (re)load the contents of linked smart objects
+                so.afterDeserialization();
+            }
+        }
+
+        createDebugName();
+    }
+
     /**
      * Creates and returns a deep copy of this composition.
      */
@@ -226,34 +251,6 @@ public class Composition implements Serializable {
         return compCopy;
     }
 
-    public void createLayerUIs() {
-        for (Layer layer : layerList) {
-            layer.createUI();
-        }
-    }
-
-    @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // init transient variables
-        compositeImage = null; // will be set when needed
-        file = null; // will be set later
-        fileTime = 0;
-        debugName = null; // will be set later
-        dirty = false;
-        view = null; // will be set later
-        selection = null; // the selection is not saved
-        builtSelection = null;
-
-        in.defaultReadObject();
-
-        for (Layer layer : layerList) {
-            if (layer instanceof SmartObject so) {
-                // things that need a full canvas
-                so.afterDeserialization();
-            }
-        }
-    }
-
     public View getView() {
         return view;
     }
@@ -298,6 +295,8 @@ public class Composition implements Serializable {
     }
 
     public boolean isSmartObjectContent() {
+        // if a content file is open independently of its parent,
+        // then this will  return false, even for pxc files!
         return owner != null;
     }
 
@@ -337,16 +336,25 @@ public class Composition implements Serializable {
         return view != null;
     }
 
+    public void close() {
+        if (isOpen()) {
+            view.close();
+        }
+    }
+
+    /**
+     * Returns the first open view in the hierarchy of parents
+     */
     public View getParentView() {
         if (isOpen()) {
             return view;
         }
         if (isSmartObjectContent()) {
-            // recursively search for the top view
+            // recursively search in the hierarchy of parents
             return owner.getParentView();
         }
 
-        throw new IllegalStateException("no view for top-level comp " + getName());
+        throw new IllegalStateException("no view for top-level comp " + getDebugName());
     }
 
     public String getName() {
@@ -636,7 +644,9 @@ public class Composition implements Serializable {
         }
         assert layerList.contains(newActiveLayer)
             : format("new active layer '%s' (%s) not in the layer list of '%s'",
-            newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
+            newActiveLayer.getName(),
+            System.identityHashCode(newActiveLayer),
+            getDebugName());
 
         Layer oldLayer = activeLayer;
         activeLayer = newActiveLayer;
@@ -791,7 +801,7 @@ public class Composition implements Serializable {
     public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
-            throw new IllegalStateException("not drawable in '" + getName() + "':"
+            throw new IllegalStateException("not drawable in '" + getName() + "': "
                                             + activeLayer.getClass().getSimpleName());
         }
         return dr;
@@ -806,6 +816,10 @@ public class Composition implements Serializable {
         return false;
     }
 
+    /**
+     * Called when the contents of one of the smart objects
+     * belonging to this composition have changed
+     */
     public void smartObjectChanged() {
         invalidateCompositeCache();
 
@@ -988,6 +1002,12 @@ public class Composition implements Serializable {
             LayerMoveAction.LOWER_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
+    }
+
+    public void createLayerUIs() {
+        for (Layer layer : layerList) {
+            layer.createUI();
+        }
     }
 
     private BufferedImage calculateCompositeImage() {
@@ -1566,39 +1586,47 @@ public class Composition implements Serializable {
         return mode;
     }
 
-    public void appActivated() {
-        // Reload only open compositions here.
+    public CompletableFuture<Composition> checkForAutoReload() {
+        // check only the open compositions here
         if (file != null && isOpen()) {
             long newFileTime = file.lastModified();
             if (newFileTime > fileTime) { // a newer version is on the disk
                 fileTime = newFileTime;
-                Views.activate(getParentView());
+                Views.activate(view);
                 boolean reload = Messages.reloadFileQuestion(file);
                 if (reload) {
-                    reloadOpen();
+                    return view.reloadAsync();
                 }
             }
         }
-        // Nested and unopened compositions are handled inside their smart object.
+        // also check in the smart objects
+        CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
         for (Layer layer : layerList) {
             if (layer instanceof SmartObject so) {
-                if (!so.isContentOpen()) { // open contents were already handled
-                    so.appActivated();
+                // open contents are checked directly via the view
+                if (!so.isContentOpen()) {
+                    cf = cf.thenCompose(comp -> so.checkForAutoReload());
                 }
             }
         }
+        return cf;
     }
 
-    private void reloadOpen() {
-        if (isSmartObjectContent()) {
-            Views.reloadAsync(view, comp -> {
-                    owner.propagateChanges(comp, true);
-                    return comp;
-                }
-            );
-        } else {
-            Views.reloadAsync(view, null);
-        }
+    public void closeAllNestedComps() {
+        forAllNestedSmartObjects(so -> so.getContent().close());
+    }
+
+    public String debugSmartObjects() {
+        forAllNestedSmartObjects(so -> {
+            if (!so.getContent().isSmartObjectContent()) {
+                throw new IllegalStateException("content of %s (%s) is broken"
+                    .formatted(so.getName(), so.getContent().getDebugName()));
+            }
+        });
+
+        return "Composition::debugSmartObjects: "
+               + getDebugName() + ": owner = "
+               + ((owner == null) ? "null" : owner.getName());
     }
 
     public enum UpdateActions {

@@ -33,7 +33,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
-import pixelitor.utils.debug.Debug;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
@@ -222,35 +221,6 @@ public class Pixelitor {
         }
 
 //        GradientFillLayer.createNew();
-
-//        SplashImageCreator.saveManySplashImages();
-
-//        Debug.keepSwitchingToolsRandomly();
 //        Debug.startFilter(new Marble());
-
-//        Navigator.showInDialog(pw);
-
-//        Tools.PEN.activate();
-//        Debug.addTestPath();
-//        Tools.PEN.startRestrictedMode(PenToolMode.TRANSFORM, false);
-//        Debug.addMaskAndShowIt();
-
-//        Debug.showAddTextLayerDialog();
-
-//        AutoPaint.showDialog();
-
-//        Tests3x3.addStandardImage(false);
-
-//        ImageComponents.getActiveCV().setZoom(ZoomLevel.Z6400, true);
-
-//        GlobalKeyboardWatch.registerDebugMouseWatching(false);
-
-//        new TweenWizard().start(pw);
-
-//        Debug.dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
-
-//        Debug.addNewImageWithMask();
-        Debug.openAllNestedSmartObjects();
     }
-
 }

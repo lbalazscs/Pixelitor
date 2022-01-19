@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
@@ -83,14 +84,13 @@ public class SmartObject extends ImageLayer {
     public SmartObject(Layer layer) {
         super(layer.getComp(), NAME_PREFIX + layer.getName());
 
-        content = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
+        setContent(Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode()));
         // the mask stays outside the content, and will become the mask of the smart object
         Layer contentLayer = layer.duplicate(true, false);
         contentLayer.setName("original content", false);
         contentLayer.setComp(content);
         content.addLayerInInitMode(contentLayer);
         content.setName(getName());
-        content.setOwner(this);
         copyBlendingFrom(layer);
 
         recalculateImage(false);
@@ -101,15 +101,14 @@ public class SmartObject extends ImageLayer {
         super(parent, file.getName());
         linkedContentFile = file;
         updateLinkedContentTime();
-        this.content = content;
+        setContent(content);
         recalculateImage(false);
     }
 
     // copy constructor
     private SmartObject(SmartObject orig, String name) {
         super(orig.comp, name);
-        content = orig.content.copy(false, true);
-        content.setOwner(this);
+        setContent(content.copy(false, true));
         image = orig.image;
         if (!orig.smartFilters.isEmpty()) {
             smartFilters.add(orig.smartFilters.get(0).copy());
@@ -161,11 +160,11 @@ public class SmartObject extends ImageLayer {
                 updateLinkedContentTime();
                 // also read the content
                 assert content == null;
-                content = IO.loadCompSync(linkedContentFile);
-                content.setOwner(this);
+                setContent(IO.loadCompSync(linkedContentFile));
             } else { // linked file not found
                 Canvas canvas = comp.getCanvas();
-                content = Composition.createTransparent(canvas.getWidth(), canvas.getHeight());
+                setContent(
+                    Composition.createTransparent(canvas.getWidth(), canvas.getHeight()));
                 EventQueue.invokeLater(() ->
                     Messages.showError(linkedContentFile.getName() + " not found.",
                         "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
@@ -211,7 +210,7 @@ public class SmartObject extends ImageLayer {
      */
     public void propagateChanges(Composition content, boolean force) {
         // the reference might have been changed during editing
-        this.content = content;
+        setContent(content);
 
         if (!content.isDirty() && !force) {
             return;
@@ -323,19 +322,20 @@ public class SmartObject extends ImageLayer {
             "<html>The file <b>" + path + "</b> isn't used anymore.");
     }
 
-    private void reloadLinkedContent() {
-        reloadContent(linkedContentFile);
+    private CompletableFuture<Composition> reloadLinkedContent() {
+        return reloadContent(linkedContentFile);
     }
 
-    private void reloadContent(File file) {
-        IO.loadCompAsync(file)
-            .thenAcceptAsync(loaded -> {
-                this.content = loaded;
+    private CompletableFuture<Composition> reloadContent(File file) {
+        return IO.loadCompAsync(file)
+            .thenApplyAsync(loaded -> {
+                setContent(loaded);
                 recalculateImage(true);
 
                 // only a grandparent composition might be opened
                 propagateChanges(loaded, true);
                 getParentView().repaint();
+                return loaded;
             }, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -469,7 +469,7 @@ public class SmartObject extends ImageLayer {
         return comp.getParentView();
     }
 
-    public void appActivated() {
+    public CompletableFuture<Composition> checkForAutoReload() {
         assert !isContentOpen();
         if (isContentLinked()) {
             long newLinkedContentFileTime = linkedContentFile.lastModified();
@@ -479,15 +479,23 @@ public class SmartObject extends ImageLayer {
                 Views.activate(getParentView());
                 boolean reload = Messages.reloadFileQuestion(linkedContentFile);
                 if (reload) {
-                    reloadLinkedContent();
+                    // if this content is reloaded, then return because
+                    // the nested smart objects don't have to be checked
+                    return reloadLinkedContent();
                 }
             }
-        } else {
-            // could also check for unlinked, closed, but saved contents,
-            // but it's tricky and probably not important
         }
-        // recursively check the smart objects inside the content
-        content.appActivated();
+        // also check recursively deeper
+        return content.checkForAutoReload();
+    }
+
+    public Composition getContent() {
+        return content;
+    }
+
+    public void setContent(Composition content) {
+        this.content = content;
+        content.setOwner(this);
     }
 
     public boolean isContentOpen() {

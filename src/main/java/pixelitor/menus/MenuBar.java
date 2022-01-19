@@ -589,6 +589,14 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        sub.add(new OpenViewEnabledAction("Edit All Nested Contents") {
+            @Override
+            public void onClick() {
+                Composition comp = getActiveComp();
+                comp.forAllNestedSmartObjects(SmartObject::edit);
+            }
+        }, CTRL_ALT_O);
+
         sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
             @Override
             public void onActiveLayer(Layer layer) {
@@ -1304,6 +1312,13 @@ public class MenuBar extends JMenuBar {
                 Events.dumpAll();
             }
         });
+
+        developMenu.add(new OpenViewEnabledAction("Debug Smart Objects") {
+            @Override
+            public void onClick() {
+                Debug.debugSmartObjects();
+            }
+        }, CTRL_ALT_D);
 
         developMenu.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
             @Override

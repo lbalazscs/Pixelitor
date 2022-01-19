@@ -23,6 +23,8 @@ import pixelitor.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
+import pixelitor.io.IO;
+import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
@@ -45,12 +47,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.lang.String.format;
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
+import static pixelitor.utils.Threads.*;
 
 /**
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
@@ -97,10 +100,58 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         addListeners();
     }
 
-    public Composition replaceJustReloadedComp(Composition newComp) {
+    public CompletableFuture<Composition> checkForAutoReload() {
+        return comp.checkForAutoReload();
+    }
+
+    public CompletableFuture<Composition> reloadAsync() {
+        assert isActive();
+
+        File file = comp.getFile();
+        if (file == null) {
+            String msg = format(
+                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
+                comp.getName());
+            Messages.showError("No file", msg);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        String path = file.getAbsolutePath();
+        if (!file.exists()) {
+            String msg = format(
+                "<html>The image <b>%s</b> can't be reloaded because the file" +
+                "<br><b>%s</b>" +
+                "<br>doesn't exist anymore.",
+                comp.getName(), path);
+            Messages.showError("File not found", msg, this);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        // prevent starting a new reload on the EDT while an asynchronous
+        // reload is already scheduled or running on the IO thread
+        if (IOTasks.isProcessing(path)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        IOTasks.markReadProcessing(path);
+
+        return IO.loadCompAsync(file)
+            .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
+            .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
+            .whenComplete((v, e) -> IO.checkForReadingProblems(e))
+            .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    private Composition replaceJustReloadedComp(Composition newComp) {
         assert calledOnEDT() : threadInfo();
         assert newComp != comp;
         assert !newComp.hasSelection();
+
+        if (comp.isSmartObjectContent()) {
+            // owner is a transient field in Composition,
+            // so it must be set even when reloading from pxc
+            comp.getOwner().setContent(newComp);
+        }
+        comp.closeAllNestedComps();
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
@@ -153,6 +204,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         Tools.compReplaced(newComp, reloaded);
+        if (newComp.isSmartObjectContent()) {
+            SmartObject so = newComp.getOwner();
+            so.propagateChanges(newComp, true);
+        }
 
         revalidate(); // update the scrollbars if the new comp has a different size
         canvasCoSizeChanged();

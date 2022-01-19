@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.AppContext;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.AngleParam;
@@ -90,11 +91,19 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private Point2D calcCenterShift(BufferedImage src) {
-        Drawable dr = Views.getActiveDrawableOrThrow();
+        int tx = 0;
+        int ty = 0;
+        // if this can run as a smart filter, then it shouldn't assume
+        // that the active layer is the owner of the image
+        if (!AppContext.enableExperimentalFeatures) {
+            Drawable dr = Views.getActiveDrawableOrThrow();
+            tx = -dr.getTx();
+            ty = -dr.getTy();
+        }
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();
-        double centerShiftX = (-dr.getTx() + src.getWidth()) * relativeX;
-        double centerShiftY = (-dr.getTy() + src.getHeight()) * relativeY;
+        double centerShiftX = (tx + src.getWidth()) * relativeX;
+        double centerShiftY = (ty + src.getHeight()) * relativeY;
         return new Point2D.Double(centerShiftX, centerShiftY);
     }
 
@@ -122,11 +131,5 @@ public class TransformLayer extends ParametrizedFilter {
             transform.shear(shearX / 100.0, shearY / 100.0);
             transform.translate(-centerShift.getX(), -centerShift.getY());
         }
-    }
-
-    @Override
-    public boolean canBeSmart() {
-        // can't be smart because of the Views.getActiveDrawableOrThrow call
-        return false;
     }
 }
