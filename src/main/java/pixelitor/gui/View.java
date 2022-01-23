@@ -205,8 +205,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         Tools.compReplaced(newComp, reloaded);
         if (newComp.isSmartObjectContent()) {
-            SmartObject so = newComp.getOwner();
-            so.propagateChanges(newComp, true);
+            newComp.getOwner().propagateChanges(newComp, true);
         }
 
         revalidate(); // update the scrollbars if the new comp has a different size

@@ -300,7 +300,7 @@ public class Views {
 
         try {
             var comp = view.getComp();
-            if (comp.isDirty() && !comp.isSmartObjectContent()) {
+            if (comp.isUnsaved()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // "Save"
@@ -407,7 +407,7 @@ public class Views {
     public static List<Composition> getUnsavedComps() {
         return views.stream()
             .map(View::getComp)
-            .filter(Composition::isDirty)
+            .filter(Composition::isUnsaved)
             .collect(toList());
     }
 

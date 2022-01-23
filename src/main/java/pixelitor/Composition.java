@@ -55,8 +55,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
@@ -197,6 +199,7 @@ public class Composition implements Serializable {
         }
 
         createDebugName();
+        assert checkSOInvariants();
     }
 
     /**
@@ -300,6 +303,11 @@ public class Composition implements Serializable {
         return owner != null;
     }
 
+    public Stream<Composition> getOwners() {
+        return Stream.iterate(this, Objects::nonNull, comp ->
+            comp.isSmartObjectContent() ? comp.getOwner().getComp() : null);
+    }
+
     public Canvas getCanvas() {
         return canvas;
     }
@@ -328,8 +336,33 @@ public class Composition implements Serializable {
         return dirty;
     }
 
+    public boolean isUnsaved() {
+        if (dirty) {
+            // if this is the contents of a smart object,
+            // then the dirty flag matters only if it's linked,
+            // otherwise the parent composition saves it.
+            if (isSmartObjectContent()) {
+                return owner.isContentLinked();
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
+    }
+
+    public void clearAllDirtyFlagsAfterSave() {
+        setDirty(false);
+
+        forAllNestedSmartObjects(so -> {
+            if (so.getSavingComp() == this) {
+                so.getContent().setDirty(false);
+            }
+        });
     }
 
     public boolean isOpen() {
@@ -820,8 +853,11 @@ public class Composition implements Serializable {
      * Called when the contents of one of the smart objects
      * belonging to this composition have changed
      */
-    public void smartObjectChanged() {
+    public void smartObjectChanged(boolean linked) {
         invalidateCompositeCache();
+        if (!linked) {
+            setDirty(true);
+        }
 
         // recursively invalidate the image caches in the smart
         // objects and compositions until the top composition
@@ -829,7 +865,7 @@ public class Composition implements Serializable {
             owner.invalidateImageCache();
 
             Composition parent = owner.getComp();
-            parent.smartObjectChanged();
+            parent.smartObjectChanged(owner.isContentLinked());
         }
     }
 
@@ -1475,7 +1511,7 @@ public class Composition implements Serializable {
         // set to not dirty already at the beginning of the saving process,
         // so that subsequent closing does not trigger another, parallel save
         boolean wasDirty = isDirty();
-        setDirty(false);
+        clearAllDirtyFlagsAfterSave();
 
         return CompletableFuture
             .runAsync(saveTask, onIOThread)
@@ -1617,16 +1653,16 @@ public class Composition implements Serializable {
     }
 
     public String debugSmartObjects() {
-        forAllNestedSmartObjects(so -> {
-            if (!so.getContent().isSmartObjectContent()) {
-                throw new IllegalStateException("content of %s (%s) is broken"
-                    .formatted(so.getName(), so.getContent().getDebugName()));
-            }
-        });
+        checkSOInvariants();
 
         return "Composition::debugSmartObjects: "
                + getDebugName() + ": owner = "
                + ((owner == null) ? "null" : owner.getName());
+    }
+
+    public boolean checkSOInvariants() {
+        forAllNestedSmartObjects(SmartObject::checkInvariant);
+        return true;
     }
 
     public enum UpdateActions {

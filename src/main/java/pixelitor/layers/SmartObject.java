@@ -40,8 +40,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 import static pixelitor.utils.Threads.onEDT;
@@ -170,6 +172,9 @@ public class SmartObject extends ImageLayer {
                         "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
                 );
             }
+        } else {
+            assert content != null;
+            content.setOwner(this);
         }
 
         recalculateImage(false);
@@ -217,10 +222,7 @@ public class SmartObject extends ImageLayer {
         }
 
         invalidateImageCache();
-        comp.smartObjectChanged();
-
-        // as long as there is no undo, it's necessary to manually set this
-        comp.setDirty(true);
+        comp.smartObjectChanged(isContentLinked());
     }
 
     @Override
@@ -311,6 +313,8 @@ public class SmartObject extends ImageLayer {
     }
 
     public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
+        assert checkInvariant();
+
         action.accept(this);
         content.forAllNestedSmartObjects(action);
     }
@@ -471,6 +475,8 @@ public class SmartObject extends ImageLayer {
 
     public CompletableFuture<Composition> checkForAutoReload() {
         assert !isContentOpen();
+        assert checkInvariant();
+
         if (isContentLinked()) {
             long newLinkedContentFileTime = linkedContentFile.lastModified();
             if (newLinkedContentFileTime > linkedContentFileTime) {
@@ -490,6 +496,7 @@ public class SmartObject extends ImageLayer {
     }
 
     public Composition getContent() {
+        assert checkInvariant();
         return content;
     }
 
@@ -523,5 +530,35 @@ public class SmartObject extends ImageLayer {
         node.add(new CompositionNode("content", content));
 
         return node;
+    }
+
+    public Stream<SmartObject> getParents() {
+        return Stream.iterate(this, Objects::nonNull, so -> so.getComp().getOwner());
+    }
+
+    /**
+     * Returns the composition that saves the contents of this smart object to its file
+     */
+    public Composition getSavingComp() {
+        SmartObject so = this;
+        while (true) {
+            if (so.isContentLinked()) {
+                return so.getContent();
+            }
+            Composition parent = so.getComp();
+            if (parent.isSmartObjectContent()) {
+                so = parent.getOwner();
+            } else {
+                return parent;
+            }
+        }
+    }
+
+    public boolean checkInvariant() {
+        if (!content.isSmartObjectContent()) {
+            throw new IllegalStateException("content of %s (%s) is broken"
+                .formatted(getName(), content.getDebugName()));
+        }
+        return true;
     }
 }
