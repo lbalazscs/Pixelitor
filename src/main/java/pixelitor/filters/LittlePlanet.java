@@ -34,7 +34,7 @@ public class LittlePlanet extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 90, CCW_DEGREES);
-    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 301);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 170);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);

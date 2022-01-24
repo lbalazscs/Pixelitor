@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,8 +81,8 @@ public class AboutDialog {
         addLabel(p, "<html><b><font size=+1>Pixelitor</font></b></html>");
         addLabel(p, "Version " + Pixelitor.VERSION_NUMBER);
         p.add(Box.createRigidArea(new Dimension(10, 20)));
-        addLabel(p, "<html><center> Copyright \u00A9 2009-2021 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
-            "<br>and Contributors<br><br>");
+        addLabel(p, "<html><center> Copyright \u00A9 2009-2022 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
+                    "<br>and Contributors<br><br>");
         addLabel(p, "lbalazscs\u0040gmail.com");
 
         p.add(createLinkButton(p));

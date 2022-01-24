@@ -17,10 +17,8 @@
 
 package pixelitor.utils.debug;
 
+import pixelitor.*;
 import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.NewImage;
-import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
@@ -46,6 +44,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
+import java.io.IOException;
 import java.lang.StackWalker.StackFrame;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -380,7 +379,7 @@ public class Debug {
         form.add(explainLabel, NORTH);
         form.add(new JScrollPane(tree), CENTER);
 
-        String text = node.toDetailedString();
+        String text = node.toJSON();
         String title = "Internal State";
         GUIUtils.showCopyTextToClipboardDialog(form, text, title);
     }
@@ -407,5 +406,23 @@ public class Debug {
     public static void debugSmartObjects() {
         Views.forEachView(view ->
             System.out.println(view.getComp().debugSmartObjects()));
+    }
+
+    public static void throwTestException() {
+        if (AppContext.isDevelopment()) {
+            throw new IllegalStateException("Test");
+        }
+    }
+
+    public static void throwTestIOException() throws IOException {
+        if (AppContext.isDevelopment()) {
+            throw new IOException("Test");
+        }
+    }
+
+    public static void throwTestError() {
+        if (AppContext.isDevelopment()) {
+            throw new AssertionError("Test");
+        }
     }
 }

@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import static java.lang.String.format;
-import static pixelitor.utils.Utils.BYTES_IN_1_MEGABYTE;
+import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
 
 public class MemoryInfo {
     private final long freeMemoryMB;
@@ -34,10 +34,10 @@ public class MemoryInfo {
         long usedMemory = totalMemory - freeMemory;
         long maxMemory = runtime.maxMemory();
 
-        freeMemoryMB = freeMemory / BYTES_IN_1_MEGABYTE;
-        totalMemoryMB = totalMemory / BYTES_IN_1_MEGABYTE;
-        usedMemoryMB = usedMemory / BYTES_IN_1_MEGABYTE;
-        maxMemoryMB = maxMemory / BYTES_IN_1_MEGABYTE;
+        freeMemoryMB = freeMemory / NUM_BYTES_IN_MEGABYTE;
+        totalMemoryMB = totalMemory / NUM_BYTES_IN_MEGABYTE;
+        usedMemoryMB = usedMemory / NUM_BYTES_IN_MEGABYTE;
+        maxMemoryMB = maxMemory / NUM_BYTES_IN_MEGABYTE;
     }
 
     public String getFreeMemory() {

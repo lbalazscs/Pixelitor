@@ -39,9 +39,12 @@ public class DebugNode extends DefaultMutableTreeNode {
         return name;
     }
 
-    public String toDetailedString() {
+    /**
+     * Returns a JSON-ish text representation of the tree.
+     */
+    public String toJSON() {
         if (userObject == null) {
-            return name + " = null";
+            return "\"" + name + "\": null,";
         }
 
         @SuppressWarnings("unchecked")
@@ -50,54 +53,67 @@ public class DebugNode extends DefaultMutableTreeNode {
         StringBuilder sb = new StringBuilder();
 
         indent(sb, getLevel());
-        sb.append(name).append(" {");
+        if (isRoot()) {
+            sb.append("{");
+        } else {
+            sb.append('"').append(name).append("\": {");
+        }
 
         while (childrenEnum.hasMoreElements()) {
             indent(sb, getLevel() + 1);
 
-            TreeNode t = childrenEnum.nextElement();
+            TreeNode child = childrenEnum.nextElement();
 
-            String info;
-            if (t instanceof DebugNode dn) {
-                info = dn.toDetailedString();
+            String text;
+            if (child instanceof DebugNode dn) {
+                text = dn.toJSON();
             } else {
-                info = t.toString();
+                text = child.toString();
             }
-            sb.append(info);
+            sb.append(text);
         }
 
         indent(sb, getLevel());
-        sb.append('}');
+
+        if (isRoot()) {
+            sb.append('}');
+        } else {
+            sb.append("},");
+        }
 
         return sb.toString();
     }
 
     public void addString(String name, String s) {
-        add(new DefaultMutableTreeNode(name + " = " + s));
+        addNode("\"" + name + "\": " + s + ",");
     }
 
     public void addQuotedString(String name, String s) {
-        add(new DefaultMutableTreeNode(format("%s = \"%s\"", name, s)));
+        addNode(format("\"%s\": \"%s\",", name, s));
     }
 
     public void addInt(String name, int i) {
-        add(new DefaultMutableTreeNode(name + " = " + i));
+        addNode("\"" + name + "\": " + i + ",");
     }
 
     public void addFloat(String name, float f) {
-        add(new DefaultMutableTreeNode(format("%s = %.2f", name, f)));
+        addNode(format("\"%s\": %.2f,", name, f));
     }
 
     public void addDouble(String name, double f) {
-        add(new DefaultMutableTreeNode(format("%s = %.2f", name, f)));
+        addNode(format("\"%s\": %.2f,", name, f));
     }
 
     public void addBoolean(String name, boolean b) {
-        add(new DefaultMutableTreeNode(name + " = " + b));
+        addNode("\"" + name + "\": " + b + ",");
     }
 
     public void addClass() {
-        add(new DefaultMutableTreeNode("class = " + userObject.getClass().getSimpleName()));
+        addNode("\"class\": " + userObject.getClass().getSimpleName() + ",");
+    }
+
+    private void addNode(String userObject) {
+        add(new DefaultMutableTreeNode(userObject));
     }
 
     private static void indent(StringBuilder sb, int indentLevel) {

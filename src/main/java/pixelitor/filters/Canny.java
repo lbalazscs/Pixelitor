@@ -27,7 +27,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.utils.Utils.BYTES_IN_1_MEGABYTE;
+import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
 
 /**
  * Canny edge detector - see http://en.wikipedia.org/wiki/Canny_edge_detector
@@ -95,7 +95,6 @@ public class Canny extends ParametrizedFilter {
         detector.setGaussianKernelWidth(gaussianKernelWidth.getValue());
 
         detector.setSourceImage(src);
-
         detector.process();
         dest = detector.getEdgesImage();
 
@@ -121,7 +120,7 @@ public class Canny extends ParametrizedFilter {
         int height = src.getHeight();
         long numPixels = (long) width * height;
         // 6 arrays with 4-byte data type
-        long estimatedMemoryMB = 6 * numPixels * 4 / BYTES_IN_1_MEGABYTE;
+        long estimatedMemoryMB = 6 * numPixels * 4 / NUM_BYTES_IN_MEGABYTE;
         // 1.8 was found experimentally, this is still needed to prevent OutOfMemory errors
         estimatedMemoryMB = (long) (estimatedMemoryMB * 1.8);
         return estimatedMemoryMB;

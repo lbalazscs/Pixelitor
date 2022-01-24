@@ -46,8 +46,8 @@ import static java.lang.String.format;
  * Utility class with static methods
  */
 public final class Utils {
-    private static final int BYTES_IN_1_KILOBYTE = 1_024;
-    public static final int BYTES_IN_1_MEGABYTE = 1_048_576;
+    private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
+    public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
 
     private Utils() {
@@ -90,44 +90,26 @@ public final class Utils {
         return number.floatValue();
     }
 
-    public static void throwTestException() {
-        if (AppContext.isDevelopment()) {
-            throw new IllegalStateException("Test");
-        }
-    }
-
-    public static void throwTestIOException() throws IOException {
-        if (AppContext.isDevelopment()) {
-            throw new IOException("Test");
-        }
-    }
-
-    public static void throwTestError() {
-        if (AppContext.isDevelopment()) {
-            throw new AssertionError("Test");
-        }
-    }
-
     public static String bytesToString(int bytes) {
-        if (bytes < BYTES_IN_1_KILOBYTE) {
+        if (bytes < NUM_BYTES_IN_KILOBYTE) {
             return bytes + " bytes";
-        } else if (bytes < BYTES_IN_1_MEGABYTE) {
-            float kiloBytes = ((float) bytes) / BYTES_IN_1_KILOBYTE;
+        } else if (bytes < NUM_BYTES_IN_MEGABYTE) {
+            float kiloBytes = ((float) bytes) / NUM_BYTES_IN_KILOBYTE;
             return format("%.2f kilobytes", kiloBytes);
         } else {
-            float megaBytes = ((float) bytes) / BYTES_IN_1_MEGABYTE;
+            float megaBytes = ((float) bytes) / NUM_BYTES_IN_MEGABYTE;
             return format("%.2f megabytes", megaBytes);
         }
     }
 
-    public static int getMaxHeapInMegabytes() {
+    public static int getMaxHeapMb() {
         long heapMaxSize = Runtime.getRuntime().maxMemory();
-        return (int) (heapMaxSize / BYTES_IN_1_MEGABYTE);
+        return (int) (heapMaxSize / NUM_BYTES_IN_MEGABYTE);
     }
 
-    public static int getUsedMemoryInMegabytes() {
+    public static int getUsedMemoryMb() {
         long usedMemory = Runtime.getRuntime().totalMemory();
-        return (int) (usedMemory / BYTES_IN_1_MEGABYTE);
+        return (int) (usedMemory / NUM_BYTES_IN_MEGABYTE);
     }
 
     public static void copyStringToClipboard(String text) {

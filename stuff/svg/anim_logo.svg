@@ -1,0 +1,17 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    circle { mix-blend-mode: lighten; }
+  </style>
+  <g>
+  <circle cx="40" cy="80" r="30" fill="#00ff00"/>
+  <circle cx="80" cy="80" r="30" fill="#0000ff"/>
+  <circle cx="60" cy="40" r="30" fill="#ff0000"/>
+  <animateTransform attributeName="transform"
+             type="rotate"
+             from="0 60 60"
+             to="360 60 60"
+             begin="0s"
+             dur="60s"
+             repeatCount="indefinite"/>
+  </g>
+</svg>

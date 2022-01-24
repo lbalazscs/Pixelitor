@@ -861,6 +861,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     @Override
     public String toString() {
         var node = DebugNodes.createViewNode("view", this);
-        return node.toDetailedString();
+        return node.toJSON();
     }
 }

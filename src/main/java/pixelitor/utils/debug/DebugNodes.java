@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class DebugNodes {
 
         node.addString("Java version", System.getProperty("java.version"));
         node.addString("Java vendor", System.getProperty("java.vendor"));
-        node.addString("OS name", System.getProperty("os.name"));
+        node.addQuotedString("OS name", System.getProperty("os.name"));
 
         var displayMode = device.getDisplayMode();
         node.addInt("display width", displayMode.getWidth());
@@ -58,8 +58,8 @@ public class DebugNodes {
         node.addInt("app window width", pw.getWidth());
         node.addInt("app window height", pw.getHeight());
 
-        node.addString("max memory", Utils.getMaxHeapInMegabytes() + " Mb");
-        node.addString("used memory", Utils.getUsedMemoryInMegabytes() + " Mb");
+        node.addQuotedString("max memory", Utils.getMaxHeapMb() + " Mb");
+        node.addQuotedString("used memory", Utils.getUsedMemoryMb() + " Mb");
 
         node.add(createColorModelNode("default color model",
             device.getDefaultConfiguration().getColorModel()));
@@ -85,7 +85,7 @@ public class DebugNodes {
             node.addInt("frame height", frame.getHeight());
         }
 
-        node.addString("zoom level", view.getZoomLevel().toString());
+        node.addQuotedString("zoom level", view.getZoomLevel().toString());
         Canvas canvas = view.getCanvas();
         node.addInt("zoomed canvas width", canvas.getCoWidth());
         node.addInt("zoomed canvas height", canvas.getCoHeight());

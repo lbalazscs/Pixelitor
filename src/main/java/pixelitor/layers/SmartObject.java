@@ -124,19 +124,6 @@ public class SmartObject extends ImageLayer {
     }
 
     @Serial
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        Composition tmp = content;
-        if (isContentLinked()) {
-            // if the content is linked, then don't write it
-            content = null;
-        }
-
-        out.defaultWriteObject();
-
-        content = tmp;
-    }
-
-    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
@@ -148,6 +135,19 @@ public class SmartObject extends ImageLayer {
         imageNeedsRefresh = true;
         lastFilterOutput = null;
         lastFilterState = null;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        Composition tmp = content;
+        if (isContentLinked()) {
+            // if the content is linked, then don't write it
+            content = null;
+        }
+
+        out.defaultWriteObject();
+
+        content = tmp;
     }
 
     public void afterDeserialization() {
@@ -319,31 +319,6 @@ public class SmartObject extends ImageLayer {
         content.forAllNestedSmartObjects(action);
     }
 
-    private void embedLinkedContent() {
-        String path = linkedContentFile.getAbsolutePath();
-        linkedContentFile = null;
-        Messages.showInfo("Embedded Content",
-            "<html>The file <b>" + path + "</b> isn't used anymore.");
-    }
-
-    private CompletableFuture<Composition> reloadLinkedContent() {
-        return reloadContent(linkedContentFile);
-    }
-
-    private CompletableFuture<Composition> reloadContent(File file) {
-        return IO.loadCompAsync(file)
-            .thenApplyAsync(loaded -> {
-                setContent(loaded);
-                recalculateImage(true);
-
-                // only a grandparent composition might be opened
-                propagateChanges(loaded, true);
-                getParentView().repaint();
-                return loaded;
-            }, onEDT)
-            .exceptionally(Messages::showExceptionOnEDT);
-    }
-
     public boolean hasSmartFilters() {
         return !smartFilters.isEmpty();
     }
@@ -457,15 +432,6 @@ public class SmartObject extends ImageLayer {
         return null;
     }
 
-    public boolean isContentLinked() {
-        return linkedContentFile != null;
-    }
-
-    public void setLinkedContentFile(File file) {
-        this.linkedContentFile = file;
-        updateLinkedContentTime();
-    }
-
     public View getParentView() {
         if (isContentOpen()) {
             return content.getView();
@@ -495,6 +461,24 @@ public class SmartObject extends ImageLayer {
         return content.checkForAutoReload();
     }
 
+    private CompletableFuture<Composition> reloadLinkedContent() {
+        return reloadContent(linkedContentFile);
+    }
+
+    private CompletableFuture<Composition> reloadContent(File file) {
+        return IO.loadCompAsync(file)
+            .thenApplyAsync(loaded -> {
+                setContent(loaded);
+                recalculateImage(true);
+
+                // only a grandparent composition might be opened
+                propagateChanges(loaded, true);
+                getParentView().repaint();
+                return loaded;
+            }, onEDT)
+            .exceptionally(Messages::showExceptionOnEDT);
+    }
+
     public Composition getContent() {
         assert checkInvariant();
         return content;
@@ -509,27 +493,24 @@ public class SmartObject extends ImageLayer {
         return content.isOpen();
     }
 
+    public boolean isContentLinked() {
+        return linkedContentFile != null;
+    }
+
+    public void setLinkedContentFile(File file) {
+        this.linkedContentFile = file;
+        updateLinkedContentTime();
+    }
+
     private void updateLinkedContentTime() {
         linkedContentFileTime = linkedContentFile.lastModified();
     }
 
-    @Override
-    public String getTypeString() {
-        return "Smart Object";
-    }
-
-    @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
-
-        boolean linked = isContentLinked();
-        node.addBoolean("linked", linked);
-        if (linked) {
-            node.addString("link file", linkedContentFile.getAbsolutePath());
-        }
-        node.add(new CompositionNode("content", content));
-
-        return node;
+    private void embedLinkedContent() {
+        String path = linkedContentFile.getAbsolutePath();
+        linkedContentFile = null;
+        Messages.showInfo("Embedded Content",
+            "<html>The file <b>" + path + "</b> isn't used anymore.");
     }
 
     public Stream<SmartObject> getParents() {
@@ -560,5 +541,24 @@ public class SmartObject extends ImageLayer {
                 .formatted(getName(), content.getDebugName()));
         }
         return true;
+    }
+
+    @Override
+    public String getTypeString() {
+        return "Smart Object";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String descr) {
+        DebugNode node = super.createDebugNode(descr);
+
+        boolean linked = isContentLinked();
+        node.addBoolean("linked", linked);
+        if (linked) {
+            node.addString("link file", linkedContentFile.getAbsolutePath());
+        }
+        node.add(new CompositionNode("content", content));
+
+        return node;
     }
 }
