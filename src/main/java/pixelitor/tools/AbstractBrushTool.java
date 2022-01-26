@@ -56,7 +56,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
  */
 public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
-    public static final int MAX_BRUSH_RADIUS = 100;
+    public static final int MAX_BRUSH_RADIUS = 500;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
 
     private JComboBox<BrushType> typeCB;
