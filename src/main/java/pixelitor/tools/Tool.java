@@ -20,6 +20,8 @@ package pixelitor.tools;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.PresetOwner;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -50,8 +52,9 @@ import java.awt.geom.AffineTransform;
  * A tool defines the interaction between the
  * mouse and key events and a {@link Composition}
  */
-public abstract class Tool implements KeyListener {
+public abstract class Tool implements KeyListener, PresetOwner {
     private final String name;
+    private final String shortName;
     private final String iconFileName;
     private final String toolMessage;
     private final char activationKey;
@@ -70,7 +73,8 @@ public abstract class Tool implements KeyListener {
         this.activationKey = activationKey;
         assert Character.isUpperCase(activationKey);
 
-        this.name = name;
+        this.shortName = name;
+        this.name = name + " Tool";
         this.iconFileName = iconFileName;
         this.toolMessage = toolMessage;
         this.cursor = cursor;
@@ -93,7 +97,7 @@ public abstract class Tool implements KeyListener {
     }
 
     public String getStatusBarMessage() {
-        return name + " Tool: " + toolMessage;
+        return name + ": " + toolMessage;
     }
 
     public void mouseClicked(PMouseEvent e) {
@@ -112,6 +116,10 @@ public abstract class Tool implements KeyListener {
 
     public String getName() {
         return name;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 
     /**
@@ -333,6 +341,26 @@ public abstract class Tool implements KeyListener {
      */
     public boolean isDirectDrawing() {
         return true;
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return getName();
     }
 
     // used for debugging

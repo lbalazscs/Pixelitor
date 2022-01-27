@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public class ToolSettingsPanelContainer extends JPanel {
             var p = new ToolSettingsPanel();
             tool.setSettingsPanel(p);
             tool.initSettingsPanel();
-            add(p, tool.getName());
+            add(p, tool.getShortName());
         }
     }
 
@@ -56,7 +56,7 @@ public class ToolSettingsPanelContainer extends JPanel {
 
     public void showSettingsFor(Tool tool) {
         CardLayout cl = (CardLayout) getLayout();
-        cl.show(this, tool.getName());
+        cl.show(this, tool.getShortName());
     }
 
     public void randomizeToolSettings() {

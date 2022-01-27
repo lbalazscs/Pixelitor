@@ -83,7 +83,7 @@ public class Tools {
 
         boolean found = false;
         for (Tool tool : allTools) {
-            if (tool.getName().equals(lastToolName)) {
+            if (tool.getShortName().equals(lastToolName)) {
                 found = true;
                 startAndSelect(tool);
                 break;

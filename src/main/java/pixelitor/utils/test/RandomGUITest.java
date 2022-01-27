@@ -366,13 +366,13 @@ public class RandomGUITest {
             stateInfo = " (" + stateInfo + ")";
         }
         String modifiers = doWithModifiers(r, () -> r.mouseMove(x, y));
-        log(tool.getName() + " Tool" + stateInfo + " " + modifiers
+        log(tool.getName() + stateInfo + " " + modifiers
             + "drag to (" + x + ", " + y + ')');
     }
 
     private static void randomClick(Robot r) {
         String modifiers = doWithModifiers(r, null);
-        String msg = Tools.getCurrent().getName() + " Tool " + modifiers + "click";
+        String msg = Tools.getCurrent().getName() + " " + modifiers + "click";
         log(msg);
     }
 

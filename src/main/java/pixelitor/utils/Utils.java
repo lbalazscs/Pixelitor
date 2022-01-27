@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
-import pixelitor.AppContext;
 
 import javax.swing.*;
 import java.awt.GraphicsEnvironment;
@@ -427,6 +426,19 @@ public final class Utils {
             default -> "a ";
         };
         return article + s;
+    }
+
+    /**
+     * A way to get an enum constant from a string if toString is overwritten.
+     */
+    public static <T extends Enum<T>> T fromString(String s, Class<T> clazz) {
+        T[] enumConstants = clazz.getEnumConstants();
+        for (T constant : enumConstants) {
+            if (constant.toString().equals(s)) {
+                return constant;
+            }
+        }
+        return null;
     }
 }
 

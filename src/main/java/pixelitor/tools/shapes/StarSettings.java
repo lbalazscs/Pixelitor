@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,13 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The settings for a line.
@@ -61,9 +62,9 @@ public class StarSettings extends ShapeTypeSettings {
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        numBranches.setAdjustmentListener(listener);
-        radiusRatio.setAdjustmentListener(listener);
+    public void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(numBranches);
+        consumer.accept(radiusRatio);
     }
 
     @Override

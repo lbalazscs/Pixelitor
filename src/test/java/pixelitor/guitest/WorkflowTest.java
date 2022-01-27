@@ -23,7 +23,6 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
-import pixelitor.gui.GUIText;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.Randomize;
@@ -412,7 +411,7 @@ public class WorkflowTest {
         pw.button("traceWithBrush")
             .requireEnabled()
             .click();
-        keyboard.undoRedo(GUIText.BRUSH);
+        keyboard.undoRedo("Brush Tool");
     }
 
     private void pathToSelection() {

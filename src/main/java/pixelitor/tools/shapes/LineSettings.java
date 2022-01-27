@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.shapes;
 
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GUIUtils;
 
@@ -26,6 +26,7 @@ import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The settings for a line.
@@ -56,9 +57,9 @@ class LineSettings extends ShapeTypeSettings {
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        width.setAdjustmentListener(listener);
-        cap.setAdjustmentListener(listener);
+    public void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(width);
+        consumer.accept(cap);
     }
 
     @Override

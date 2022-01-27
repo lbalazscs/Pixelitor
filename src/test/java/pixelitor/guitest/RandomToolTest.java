@@ -586,7 +586,7 @@ public class RandomToolTest {
         checkControlVariables();
 
         Tool tool = EDT.call(Tools::getCurrent);
-        String toolInfo = tool.getName();
+        String toolInfo = tool.getShortName();
 
         String stateInfo = EDT.call(tool::getStateInfo);
         if (stateInfo != null) {

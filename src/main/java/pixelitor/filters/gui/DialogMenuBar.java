@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,20 +19,15 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.GUIText;
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.PAction;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import static pixelitor.filters.gui.UserPreset.*;
+import static pixelitor.filters.gui.UserPreset.loadPresets;
 
 /**
  * The menu bar of the filters that have one.
@@ -69,6 +64,7 @@ public class DialogMenuBar extends JMenuBar {
             JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
             FilterState[] presets = owner.getBuiltinPresets();
 
+            // only filters have built-in presets
             ParametrizedFilter pf = (ParametrizedFilter) owner;
             ParamSet paramSet = pf.getParamSet();
 
@@ -82,20 +78,9 @@ public class DialogMenuBar extends JMenuBar {
             if (owner.hasBuiltinPresets()) {
                 presetsMenu.addSeparator();
             }
-            Action savePresetAction = new PAction("Save Preset...") {
-                @Override
-                public void onClick() {
-                    String presetName = Dialogs.showInputDialog(
-                        presetsMenu, "Preset Name", "Preset Name:");
-                    if (presetName == null || presetName.isBlank()) {
-                        return;
-                    }
-
-                    presetName = Utils.toFileName(presetName);
-                    UserPreset preset = owner.createUserPreset(presetName);
-                    addNewUserPreset(preset, owner);
-                }
-            };
+            Action savePresetAction = owner.createSavePresetAction(presetsMenu,
+                preset -> addNewUserPreset(preset, owner),
+                this::removeOldPreset);
             JMenuItem savePresetMI = new JMenuItem(savePresetAction);
             savePresetMI.setName("savePreset");
             presetsMenu.add(savePresetMI);
@@ -118,47 +103,31 @@ public class DialogMenuBar extends JMenuBar {
         if (!CAN_USE_FILE_MANAGER) {
             return;
         }
-        presetsMenu.add(new PAction("Manage Presets...") {
-            @Override
-            public void onClick() {
-                try {
-                    String dirPath = PRESETS_DIR + FILE_SEPARATOR + owner.getPresetDirName();
-                    Desktop.getDesktop().open(new File(dirPath));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+        presetsMenu.add(owner.createManagePresetsAction());
     }
 
-    private void addNewUserPreset(UserPreset preset, DialogMenuOwner owner) {
+    private void addNewUserPreset(UserPreset preset, PresetOwner owner) {
         if (numUserPresets == 0) {
             addManagePresetsMenu();
             presetsMenu.addSeparator();
-        } else if (preset.fileExists()) {
-            String title = "Preset exists";
-            String msg = String.format("The preset \"%s\" already exists. Overwrite?",
-                preset.getName());
-            int msgType = JOptionPane.WARNING_MESSAGE;
-            if (!Dialogs.showYesNoDialog(presetsMenu, title, msg, msgType)) {
-                return;
-            }
-            // "yes" was pressed, remove the old preset from the menu
-            Component[] menuComponents = presetsMenu.getMenuComponents();
-            for (Component item : menuComponents) {
-                if (item instanceof JMenuItem menuItem) {
-                    if (menuItem.getText().equals(preset.getName())) {
-                        presetsMenu.remove(menuItem);
-                        break;
-                    }
+        }
+        JMenuItem presetMI = new JMenuItem(preset.asAction(owner));
+        presetMI.setName(preset.getName());
+        presetsMenu.add(presetMI);
+        numUserPresets++;
+    }
+
+    private void removeOldPreset(UserPreset preset) {
+        // "yes" was pressed, remove the old preset from the menu
+        Component[] menuComponents = presetsMenu.getMenuComponents();
+        for (Component item : menuComponents) {
+            if (item instanceof JMenuItem menuItem) {
+                if (menuItem.getText().equals(preset.getName())) {
+                    presetsMenu.remove(menuItem);
+                    numUserPresets--;
+                    break;
                 }
             }
         }
-        Action presetAction = preset.asAction(owner);
-        JMenuItem presetMI = new JMenuItem(presetAction);
-        presetMI.setName(preset.getName());
-        presetsMenu.add(presetMI);
-        preset.save();
-        numUserPresets++;
     }
 }

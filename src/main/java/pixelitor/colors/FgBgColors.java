@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.colors;
+
+import pixelitor.filters.gui.UserPreset;
 
 import java.awt.Color;
 
@@ -81,5 +83,15 @@ public class FgBgColors {
 
     public static void setLayerMaskEditing(boolean b) {
         selector.setLayerMaskEditing(b);
+    }
+
+    public static void saveTo(UserPreset preset) {
+        preset.putColor("FG", getFGColor());
+        preset.putColor("BG", getBGColor());
+    }
+
+    public static void loadFrom(UserPreset preset) {
+        setFGColor(preset.getColor("FG"));
+        setBGColor(preset.getColor("BG"));
     }
 }

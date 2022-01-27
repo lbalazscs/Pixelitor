@@ -18,11 +18,14 @@
 package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
@@ -47,6 +50,7 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Lazy;
+import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -182,6 +186,7 @@ public class ShapesTool extends DragTool {
         if (regenerateShape) {
             regenerateShape(editName);
         }
+
         updateStrokeEnabledState();
         if (editName.equals(CHANGE_SHAPE_TYPE)) {
             boolean hasSettings = getSelectedType().hasSettings();
@@ -650,14 +655,7 @@ public class ShapesTool extends DragTool {
         }
 
         ShapeType selectedType = getSelectedType();
-        ShapeTypeSettings settings;
-        if (styledShape != null) {
-            // if there is an active shape, then configure it
-            settings = styledShape.getShapeTypeSettings();
-        } else {
-            // else configure and store the tool's default
-            settings = getDefaultSettingsFor(selectedType);
-        }
+        ShapeTypeSettings settings = getActiveShapeTypeSettings(selectedType);
         JPanel configPanel = settings.getConfigPanel();
         shapeSettingsDialog = new DialogBuilder()
             .title("Settings for " + selectedType)
@@ -669,6 +667,18 @@ public class ShapesTool extends DragTool {
             .parentComponent(showShapeSettingsButton)
             .show()
             .getDialog();
+    }
+
+    private ShapeTypeSettings getActiveShapeTypeSettings(ShapeType selectedType) {
+        ShapeTypeSettings settings;
+        if (styledShape != null && styledShape.getShapeType() == selectedType) {
+            // if there is an active shape, then return it
+            settings = styledShape.getShapeTypeSettings();
+        } else {
+            // else store and return the tool's default
+            settings = getDefaultSettingsFor(selectedType);
+        }
+        return settings;
     }
 
     private void showEffectsDialog() {
@@ -728,11 +738,64 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
+    public boolean canHaveUserPresets() {
+        return AppContext.enableExperimentalFeatures;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, getPresetDirName());
+        ShapeType type = getSelectedType();
+        preset.put(ShapeType.PRESET_KEY, type.toString());
+
+        if (type.hasSettings()) {
+            getActiveShapeTypeSettings(type).saveStateTo(preset);
+        }
+
+        preset.put("Fill", getSelectedFillPaint().toString());
+        preset.put("Stroke", getSelectedStrokePaint().toString());
+
+        strokeParam.saveStateTo(preset);
+        effectsParam.saveStateTo(preset);
+
+        FgBgColors.saveTo(preset);
+
+        System.out.println("ShapesTool::createUserPreset: preset = " + preset);
+
+        return preset;
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        System.out.println("ShapesTool::loadUserPreset: preset = " + preset);
+        ShapeType type = Utils.fromString(preset.get(ShapeType.PRESET_KEY), ShapeType.class);
+        typeModel.setSelectedItem(type);
+
+        if (type.hasSettings()) {
+            getActiveShapeTypeSettings(type).loadStateFrom(preset);
+        }
+
+        fillPaintModel.setSelectedItem(
+            Utils.fromString(preset.get("Fill"), TwoPointPaintType.class));
+        strokePaintModel.setSelectedItem(
+            Utils.fromString(preset.get("Stroke"), TwoPointPaintType.class));
+
+        strokeParam.loadStateFrom(preset);
+        effectsParam.loadStateFrom(preset);
+
+        FgBgColors.loadFrom(preset);
+
+        if (styledShape != null) {
+            styledShape.regenerateAll(transformBox, this);
+        }
+    }
+
+    @Override
     public String getStateInfo() {
         return getSelectedType()
-            + ", fp=" + getSelectedFillPaint()
-            + ", sp=" + getSelectedStrokePaint()
-            + ", state=" + state;
+               + ", fp=" + getSelectedFillPaint()
+               + ", sp=" + getSelectedStrokePaint()
+               + ", state=" + state;
     }
 
     @Override

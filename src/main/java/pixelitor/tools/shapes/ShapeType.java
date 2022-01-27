@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,13 +37,14 @@ public enum ShapeType {
     RECTANGLE("Rectangle", true, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setPositiveCoordinates(drag);
             var rs = (RectangleSettings) settings;
             double radius = rs == null ? 0 : rs.getRadius();
+            Rectangle2D r = drag.createPositiveImRect();
             if (radius == 0) {
-                return new Rectangle2D.Double(x, y, width, height);
+                return r;
             } else {
-                return new RoundRectangle2D.Double(x, y, width, height, radius, radius);
+                return new RoundRectangle2D.Double(r.getX(), r.getY(),
+                    r.getWidth(), r.getHeight(), radius, radius);
             }
         }
 
@@ -64,8 +65,8 @@ public enum ShapeType {
     }, ELLIPSE("Ellipse", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setPositiveCoordinates(drag);
-            return new Ellipse2D.Double(x, y, width, height);
+            Rectangle2D r = drag.createPositiveImRect();
+            return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
@@ -80,28 +81,13 @@ public enum ShapeType {
     }, DIAMOND("Diamond", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return createDiamond(x, y, width, height);
-        }
-
-        private Shape createDiamond(double x, double y, double width, double height) {
-            Path2D path = new Path2D.Double();
-
-            double cx = x + width / 2.0;
-            double cy = y + height / 2.0;
-
-            path.moveTo(cx, y);
-            path.lineTo(x + width, cy);
-            path.lineTo(cx, y + height);
-            path.lineTo(x, cy);
-            path.closePath();
-
-            return path;
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createDiamond(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return createDiamond(x, y, size, size);
+            return Shapes.createDiamond(x, y, size, size);
         }
 
         @Override
@@ -147,18 +133,17 @@ public enum ShapeType {
     }, HEART("Heart", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return Shapes.createHeartShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createHeart(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return Shapes.createHeartShape(x, y, size, size);
+            return Shapes.createHeart(x, y, size, size);
         }
     }, STAR("Star", true, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setPositiveCoordinates(drag);
             StarSettings starSettings = (StarSettings) settings;
             int numBranches;
             double radiusRatio;
@@ -170,7 +155,9 @@ public enum ShapeType {
                 radiusRatio = 0.5;
             }
 
-            return createStar(numBranches, x, y, width, height, radiusRatio);
+            Rectangle2D r = drag.createPositiveImRect();
+            return createStar(numBranches, r.getX(), r.getY(),
+                r.getWidth(), r.getHeight(), radiusRatio);
         }
 
         private Shape createStar(int numBranches, double x, double y,
@@ -226,8 +213,8 @@ public enum ShapeType {
             }
             lastDrag = drag;
 
-            setCoordinates(drag);
-            return new RandomStarShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return new RandomStarShape(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
@@ -258,14 +245,14 @@ public enum ShapeType {
                 unitArrow = Shapes.createUnitArrow();
             }
 
-            setCoordinates(drag);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
 
             double distance = drag.calcImDist();
             if (drag.isStartFromCenter()) {
                 distance *= 2;
             }
 
-            var transform = AffineTransform.getTranslateInstance(x, y);
+            var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
             transform.scale(distance, distance); // originally it had a length of 1.0
             if (rotate) {
                 double angleInRadians = drag.getDrawAngle();
@@ -294,46 +281,46 @@ public enum ShapeType {
     }, CAT("Cat", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return Shapes.createCatShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createCat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return Shapes.createCatShape(x, y, size, size);
+            return Shapes.createCat(x, y, size, size);
         }
     }, KIWI("Kiwi", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return Shapes.createKiwiShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createKiwi(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return Shapes.createKiwiShape(x, y, size, size);
+            return Shapes.createKiwi(x, y, size, size);
         }
     }, BAT("Bat", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return Shapes.createBatShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createBat(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return Shapes.createBatShape(x, y, size, size);
+            return Shapes.createBat(x, y, size, size);
         }
     }, RABBIT("Rabbit", true, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            setCoordinates(drag);
-            return Shapes.createRabbitShape(x, y, width, height);
+            Rectangle2D r = drag.createPossiblyEmptyImRect();
+            return Shapes.createRabbit(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return Shapes.createRabbitShape(x, y, size, size);
+            return Shapes.createRabbit(x, y, size, size);
         }
 //    }, RND_ANIMAL_FACE("Random Animal Face", true, false) {
 //        final int[] codePoints = {
@@ -421,6 +408,10 @@ public enum ShapeType {
 //        }
     };
 
+    // the key can't be simpy "Shape", because
+    // that key is used by the stroke settings
+    public static final String PRESET_KEY = "ShapeType";
+
     private static final String NAME = "Shape";
     private final String guiName;
 
@@ -433,7 +424,7 @@ public enum ShapeType {
     // transform box is initialized at the angle of the shape
     private final boolean directional;
 
-    protected double x, y, width, height;
+//    protected double x, y, width, height;
 
     ShapeType(String guiName, boolean closed, boolean directional, boolean hasSettings) {
         this.guiName = guiName;
@@ -445,29 +436,6 @@ public enum ShapeType {
     public abstract Shape createShape(Drag drag, ShapeTypeSettings settings);
 
     public abstract Shape createShape(double x, double y, double size);
-
-    /**
-     * Set the x, y, width, height coordinates so that width and height are positive
-     */
-    protected void setPositiveCoordinates(Drag drag) {
-        Rectangle2D r = drag.createPositiveImRect();
-        x = r.getX();
-        y = r.getY();
-        width = r.getWidth();
-        height = r.getHeight();
-    }
-
-    /**
-     * Set the x, y, width, height coordinates
-     */
-    protected void setCoordinates(Drag drag) {
-        Rectangle2D r = drag.createPossiblyEmptyImRect();
-
-        x = r.getX();
-        y = r.getY();
-        width = r.getWidth();
-        height = r.getHeight();
-    }
 
     /**
      * Return the directional shape that would result

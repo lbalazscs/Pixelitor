@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -190,7 +190,7 @@ public class UserPreset {
         return writer.toString();
     }
 
-    public Action asAction(DialogMenuOwner owner) {
+    public Action asAction(PresetOwner owner) {
         return new PAction(name) {
             @Override
             public void onClick() {

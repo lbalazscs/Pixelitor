@@ -240,7 +240,7 @@ public class AppRunner {
     }
 
     void clickTool(Tool tool) {
-        pw.toggleButton(tool.getName() + " Tool Button").click();
+        pw.toggleButton(tool.getName() + " Button").click();
         //EDT.run(() -> Tools.changeTo(tool));
 
         Utils.sleep(200, MILLISECONDS);
@@ -641,7 +641,7 @@ public class AppRunner {
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
             // otherwise location on screen can lead to crazy results
-            runMenuCommand("100%");
+            runMenuCommand("Actual Pixels");
         }
 
         mouse.dragFromCanvasCenterToTheRight();

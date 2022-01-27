@@ -2136,17 +2136,17 @@ public class AssertJSwingTest {
         pw.button("traceWithSmudge")
             .requireEnabled()
             .click();
-        keyboard.undoRedo("Smudge");
+        keyboard.undoRedo("Smudge Tool");
 
         pw.button("traceWithEraser")
             .requireEnabled()
             .click();
-        keyboard.undoRedo("Eraser");
+        keyboard.undoRedo("Eraser Tool");
 
         pw.button("traceWithBrush")
             .requireEnabled()
             .click();
-        keyboard.undoRedo(GUIText.BRUSH);
+        keyboard.undoRedo("Brush Tool");
     }
 
     private void testPenToolTransformMode() {
@@ -2175,7 +2175,7 @@ public class AssertJSwingTest {
         mouse.moveToCanvas(300, 300);
         pw.click();
 
-        keyboard.undoRedoUndo("Paint Bucket");
+        keyboard.undoRedoUndo("Paint Bucket Tool");
         checkConsistency();
     }
 
@@ -2311,7 +2311,7 @@ public class AssertJSwingTest {
             }
         }
         if (tested) {
-            keyboard.undoRedo(tool == Tools.BRUSH ? GUIText.BRUSH : "Eraser");
+            keyboard.undoRedo(tool == Tools.BRUSH ? "Brush Tool" : "Eraser Tool");
         }
     }
 
@@ -2329,7 +2329,7 @@ public class AssertJSwingTest {
             mouse.dragRandomlyWithinCanvas();
         }
 
-        keyboard.undoRedo("Smudge");
+        keyboard.undoRedo("Smudge Tool");
 
         checkConsistency();
     }
@@ -2363,7 +2363,7 @@ public class AssertJSwingTest {
             mouse.dragToCanvas(x, 300);
             mouse.dragToCanvas(x, 400);
         }
-        keyboard.undoRedo("Clone Stamp");
+        keyboard.undoRedo("Clone Stamp Tool");
     }
 
     private void testSelectionToolAndMenus() {

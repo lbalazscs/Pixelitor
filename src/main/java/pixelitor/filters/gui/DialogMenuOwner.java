@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,18 +17,10 @@
 
 package pixelitor.filters.gui;
 
-public interface DialogMenuOwner {
+public interface DialogMenuOwner extends PresetOwner {
     boolean hasBuiltinPresets();
 
     FilterState[] getBuiltinPresets();
-
-    boolean canHaveUserPresets();
-
-    UserPreset createUserPreset(String presetName);
-
-    void loadUserPreset(UserPreset preset);
-
-    String getPresetDirName();
 
     boolean hasHelp();
 

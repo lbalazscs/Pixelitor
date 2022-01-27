@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,11 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 
 import javax.swing.*;
+import java.util.function.Consumer;
 
 /**
  * The settings for a rectangle shape.
@@ -48,8 +49,8 @@ class RectangleSettings extends ShapeTypeSettings {
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        radius.setAdjustmentListener(listener);
+    public void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(radius);
     }
 
     @Override

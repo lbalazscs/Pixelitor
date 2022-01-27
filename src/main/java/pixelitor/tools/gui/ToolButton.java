@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,13 @@
 
 package pixelitor.tools.gui;
 
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
+import java.awt.*;
+import java.util.List;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -37,12 +36,16 @@ public class ToolButton extends JToggleButton {
 
     private final Tool tool;
 
+    private List<UserPreset> startupPresets;
+    private int numPresets;
+    private JPopupMenu popup;
+
     public ToolButton(Tool tool, Dimension preferredSize) {
         this.tool = tool;
         tool.setButton(this);
 
         // used for component lookup when testing
-        String buttonName = tool.getName() + " Tool Button";
+        String buttonName = tool.getName() + " Button";
         setName(buttonName);
 
         putClientProperty("JComponent.sizeVariant", "mini");
@@ -54,14 +57,54 @@ public class ToolButton extends JToggleButton {
         assert icon.getIconHeight() == TOOL_ICON_SIZE;
 
         char c = tool.getActivationKey();
-        setToolTipText("<html>" + tool.getName() + " Tool (<b>" + c + "</b>)");
+        setToolTipText("<html>" + tool.getName() + " (<b>" + c + "</b>)");
 
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(true);
         setRolloverEnabled(false);
         addActionListener(e -> Tools.start(tool));
 
+        if (tool.canHaveUserPresets()) {
+            startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
+            numPresets = startupPresets.size();
+
+            popup = new JPopupMenu();
+            popup.add(tool.createSavePresetAction(this,
+                this::addPreset, this::removePreset));
+            if (!startupPresets.isEmpty()) {
+                popup.add(tool.createManagePresetsAction());
+                popup.addSeparator();
+                for (UserPreset preset : startupPresets) {
+                    popup.add(preset.asAction(tool));
+                }
+            }
+
+            setComponentPopupMenu(popup);
+        }
+
         setPreferredSize(preferredSize);
+    }
+
+    private void addPreset(UserPreset preset) {
+        if (numPresets == 0) {
+            popup.add(tool.createManagePresetsAction());
+            popup.addSeparator();
+        }
+        popup.add(preset.asAction(tool));
+        numPresets++;
+    }
+
+    private void removePreset(UserPreset preset) {
+        Component[] menuComponents = popup.getComponents();
+        for (Component item : menuComponents) {
+            if (item instanceof JMenuItem menuItem) {
+                if (menuItem.getText().equals(preset.getName())) {
+                    popup.remove(menuItem);
+                    numPresets--;
+                    break;
+                }
+            }
+        }
     }
 
     public Tool getTool() {

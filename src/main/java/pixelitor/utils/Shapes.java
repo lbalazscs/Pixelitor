@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -401,10 +401,25 @@ public class Shapes {
         return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
     }
 
+    public static Shape createDiamond(double x, double y, double width, double height) {
+        Path2D path = new Path2D.Double();
+
+        double cx = x + width / 2.0;
+        double cy = y + height / 2.0;
+
+        path.moveTo(cx, y);
+        path.lineTo(x + width, cy);
+        path.lineTo(cx, y + height);
+        path.lineTo(x, cy);
+        path.closePath();
+
+        return path;
+    }
+
     /**
      * Rabbit shape based on http://commons.wikimedia.org/wiki/File:Lapin01.svg
      */
-    public static Shape createRabbitShape(double x, double y, double width, double height) {
+    public static Shape createRabbit(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -660,7 +675,7 @@ public class Shapes {
     /**
      * Bat shape based on http://en.wikipedia.org/wiki/File:Bat_shadow_black.svg
      */
-    public static Shape createBatShape(double x, double y, double width, double height) {
+    public static Shape createBat(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -932,7 +947,7 @@ public class Shapes {
     /**
      * Cat shape based on http://commons.wikimedia.org/wiki/File:Cat_silhouette.svg
      */
-    public static Shape createCatShape(double x, double y, double width, double height) {
+    public static Shape createCat(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1
@@ -1117,7 +1132,7 @@ public class Shapes {
         return path;
     }
 
-    public static Shape createHeartShape(double x, double y, double width, double height) {
+    public static Shape createHeart(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double maxX = x + width;
@@ -1170,7 +1185,7 @@ public class Shapes {
     /**
      * Kiwi shape based on http://en.wikipedia.org/wiki/File:Kiwi_silhouette-by-flomar.svg
      */
-    public static Shape createKiwiShape(double x, double y, double width, double height) {
+    public static Shape createKiwi(double x, double y, double width, double height) {
         Path2D path = new Path2D.Float();
 
         double cp1X; // x of control point 1

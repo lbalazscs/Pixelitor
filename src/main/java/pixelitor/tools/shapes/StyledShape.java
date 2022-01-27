@@ -93,15 +93,13 @@ public class StyledShape implements Cloneable, Transformable {
     public StyledShape(ShapesTool tool) {
         setType(tool.getSelectedType(), tool);
 
-        setFillPaintType(tool.getSelectedFillPaint());
-        setStrokePaintType(tool.getSelectedStrokePaint());
-        setStroke(tool.getStroke());
+        reloadFillPaint(tool);
+        reloadStrokePaint(tool);
+        reloadStroke(tool);
         setEffects(tool.getEffects());
-        strokeSettings = tool.getStrokeSettings();
         insideBox = false;
 
-        fgColor = getFGColor();
-        bgColor = getBGColor();
+        reloadColors();
     }
 
     /**
@@ -246,16 +244,22 @@ public class StyledShape implements Cloneable, Transformable {
         view.getComp().update(REPAINT);
     }
 
-    private void setFillPaintType(TwoPointPaintType fillPaintType) {
-        this.fillPaintType = fillPaintType;
+    private void reloadFillPaint(ShapesTool tool) {
+        this.fillPaintType = tool.getSelectedFillPaint();
     }
 
-    private void setStrokePaintType(TwoPointPaintType strokePaintType) {
-        this.strokePaintType = strokePaintType;
+    private void reloadStrokePaint(ShapesTool tool) {
+        this.strokePaintType = tool.getSelectedStrokePaint();
     }
 
-    private void setStroke(Stroke stroke) {
-        this.stroke = stroke;
+    private void reloadStroke(ShapesTool tool) {
+        this.stroke = tool.getStroke();
+        strokeSettings = tool.getStrokeSettings();
+    }
+
+    private void reloadColors() {
+        this.fgColor = getFGColor();
+        this.bgColor = getBGColor();
     }
 
     private void setEffects(AreaEffects effects) {
@@ -461,6 +465,17 @@ public class StyledShape implements Cloneable, Transformable {
         }
     }
 
+    // a hack method
+    public void regenerateAll(TransformBox box, ShapesTool tool) {
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_TYPE);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_FILL);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_EFFECTS);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_COLORS);
+        regenerate(box, tool, ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS);
+    }
+
     public void regenerate(TransformBox box, ShapesTool tool, String editName) {
         StyledShape backup = clone();
 
@@ -472,18 +487,14 @@ public class StyledShape implements Cloneable, Transformable {
                     box.applyTransform();
                 }
             }
-            case ShapesTool.CHANGE_SHAPE_FILL -> setFillPaintType(tool.getSelectedFillPaint());
-            case ShapesTool.CHANGE_SHAPE_STROKE -> setStrokePaintType(tool.getSelectedStrokePaint());
+            case ShapesTool.CHANGE_SHAPE_FILL -> reloadFillPaint(tool);
+            case ShapesTool.CHANGE_SHAPE_STROKE -> reloadStrokePaint(tool);
             case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS -> {
-                setStroke(tool.getStroke());
-                strokeSettings = tool.getStrokeSettings();
+                reloadStroke(tool);
                 tool.invalidateStroke();
             }
             case ShapesTool.CHANGE_SHAPE_EFFECTS -> setEffects(tool.getEffects());
-            case ShapesTool.CHANGE_SHAPE_COLORS -> {
-                setFgColor(getFGColor());
-                setBgColor(getBGColor());
-            }
+            case ShapesTool.CHANGE_SHAPE_COLORS -> reloadColors();
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
@@ -520,16 +531,8 @@ public class StyledShape implements Cloneable, Transformable {
         return fgColor;
     }
 
-    private void setFgColor(Color fgColor) {
-        this.fgColor = fgColor;
-    }
-
     public Color getBgColor() {
         return bgColor;
-    }
-
-    private void setBgColor(Color bgColor) {
-        this.bgColor = bgColor;
     }
 
     /**
