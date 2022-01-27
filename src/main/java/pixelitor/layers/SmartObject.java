@@ -110,7 +110,7 @@ public class SmartObject extends ImageLayer {
     // copy constructor
     private SmartObject(SmartObject orig, String name) {
         super(orig.comp, name);
-        setContent(content.copy(false, true));
+        setContent(orig.content.copy(false, true));
         image = orig.image;
         if (!orig.smartFilters.isEmpty()) {
             smartFilters.add(orig.smartFilters.get(0).copy());
