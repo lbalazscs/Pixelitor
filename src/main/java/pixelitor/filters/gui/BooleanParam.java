@@ -165,6 +165,7 @@ public class BooleanParam extends AbstractFilterParam {
         setValue(newValue, true, false);
     }
 
+    // actionListener doesn't react to programmatic setSelected calls
     public void addItemListener(ItemListener itemListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it

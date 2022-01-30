@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
 import static pixelitor.selection.SelectionType.RECTANGLE;
-import static pixelitor.selection.ShapeCombination.REPLACE;
+import static pixelitor.selection.ShapeCombinator.REPLACE;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
@@ -90,7 +90,7 @@ class PenToolTest {
     @DisplayName("convert path to selection (edit mode)")
     void convertEditPathToSelection() {
         createSimpleClosedPathInBuildMode();
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
         assertThat(Tools.PEN)
             .isActive()
             .isConsistent()
@@ -120,7 +120,7 @@ class PenToolTest {
         assertThat(Tools.SELECTION)
             .isActive()
             .selectionTypeIs(RECTANGLE)
-            .interactionIs(REPLACE);
+            .combinatorIs(REPLACE);
 
         // build a quick rectangular selection by dragging
         press(100, 100);
@@ -165,7 +165,7 @@ class PenToolTest {
         assertThat(firstAnchor).isAt(100, 100);
 
         // switch to edit mode
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
         assertThat(Tools.PEN)
             .hasPath()
             .isConsistent()
@@ -199,7 +199,7 @@ class PenToolTest {
         SubPath sp = createSimpleClosedPathInBuildMode();
 
         // switch to edit mode
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
         assertThat(Tools.PEN)
             .hasPath()
             .isConsistent()
@@ -267,7 +267,7 @@ class PenToolTest {
         History.assertNumEditsIs(0);
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
 
         assertThat(Tools.PEN)
             .pathIs(path)
@@ -288,7 +288,7 @@ class PenToolTest {
 
         // go to build mode and back to edit - should have no effect
         Tools.PEN.startBuilding(false);
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
 
         undo("Delete Subpath");
         assertThat(PenTool.path).numSubPathsIs(2);

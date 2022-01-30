@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.assertions;
 
 import pixelitor.selection.SelectionType;
-import pixelitor.selection.ShapeCombination;
+import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.SelectionTool;
 
 /**
@@ -40,12 +40,12 @@ public class SelectionToolAssert extends ToolAssert<SelectionToolAssert, Selecti
         return this;
     }
 
-    public SelectionToolAssert interactionIs(ShapeCombination expected) {
+    public SelectionToolAssert combinatorIs(ShapeCombinator expected) {
         isNotNull();
 
-        var interaction = actual.getCurrentInteraction();
-        if (interaction != expected) {
-            throw new AssertionError("Expected " + expected + ", found " + interaction);
+        var combinator = actual.getCombinator();
+        if (combinator != expected) {
+            throw new AssertionError("Expected " + expected + ", found " + combinator);
         }
 
         return this;

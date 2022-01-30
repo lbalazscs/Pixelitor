@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,11 @@
 
 package pixelitor.utils;
 
+import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.UserPreset;
+
 import javax.swing.*;
+import java.util.function.Consumer;
 
 /**
  * Abstract superclass for settings that can be configured using a cached JPanel
@@ -30,4 +34,14 @@ public abstract class Configurable {
     }
 
     protected abstract JPanel createConfigPanel();
+
+    protected abstract void forEachParam(Consumer<FilterParam> consumer);
+
+    public void loadStateFrom(UserPreset preset) {
+        forEachParam(param -> param.loadStateFrom(preset));
+    }
+
+    public void saveStateTo(UserPreset preset) {
+        forEachParam(param -> param.saveStateTo(preset));
+    }
 }

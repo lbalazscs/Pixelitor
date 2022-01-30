@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
@@ -54,13 +55,15 @@ import static pixelitor.tools.pen.PenToolMode.*;
  * The pen tool.
  */
 public class PenTool extends Tool {
+    private static final PenToolMode[] MODES = {BUILD, EDIT, TRANSFORM};
     private final ComboBoxModel<PenToolMode> modeModel =
-        new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
+        new DefaultComboBoxModel<>(MODES);
 
     private final Action toSelectionAction;
     private final Action exportSVGAction;
 
-    private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
+    private static final String SHOW_RUBBER_BAND_TEXT = "Show Rubber Band";
+    private final JLabel rubberBandLabel = new JLabel(SHOW_RUBBER_BAND_TEXT + ":");
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
 
     private PenToolMode mode = BUILD;
@@ -137,6 +140,12 @@ public class PenTool extends Tool {
             "Delete the path");
     }
 
+    private PenToolMode getSelectedMode() {
+        return (PenToolMode) modeModel.getSelectedItem();
+    }
+
+    // TODO should be private and startMode should be always called instead?
+    //   also see changeMode
     public void setModeChooserCombo(PenToolMode mode) {
         modeModel.setSelectedItem(mode);
     }
@@ -149,11 +158,11 @@ public class PenTool extends Tool {
         assert Views.activePathIs(path) :
             "path = " + path + ", active path = " + Views.getActivePath();
 
-        PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
+        PenToolMode selectedMode = getSelectedMode();
         if (selectedMode == BUILD) {
             startBuilding(true);
         } else {
-            startRestrictedMode(selectedMode, true);
+            startMode(selectedMode, true);
         }
     }
 
@@ -170,9 +179,8 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
-    // starts either the editing or the transforming mode
-    public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
-        if (path == null) {
+    public void startMode(PenToolMode mode, boolean calledFromModeChooser) {
+        if (path == null && mode != BUILD) {
             if (AppContext.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
@@ -480,6 +488,25 @@ public class PenTool extends Tool {
 
     public static Action getTraceWithSmudgeAction() {
         return traceWithSmudgeAction;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.put("Mode", getSelectedMode().toString());
+        preset.putBoolean(SHOW_RUBBER_BAND_TEXT, rubberBandCB.isSelected());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        String modeString = preset.get("Mode");
+        for (PenToolMode mode : MODES) {
+            if (mode.toString().equals(modeString)) {
+                startMode(mode, false);
+                break;
+            }
+        }
+
+        rubberBandCB.setSelected(preset.getBoolean(SHOW_RUBBER_BAND_TEXT));
     }
 
     @Override

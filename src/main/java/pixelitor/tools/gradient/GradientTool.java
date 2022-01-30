@@ -20,6 +20,7 @@ package pixelitor.tools.gradient;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -406,6 +407,10 @@ public class GradientTool extends DragTool {
         return true;
     }
 
+    private GradientType getType() {
+        return (GradientType) typeCB.getSelectedItem();
+    }
+
     private CycleMethod getCycleType() {
         return cycleMethodFromString((String) cycleMethodCB.getSelectedItem());
     }
@@ -414,8 +419,8 @@ public class GradientTool extends DragTool {
         return (GradientColorType) colorTypeCB.getSelectedItem();
     }
 
-    private GradientType getType() {
-        return (GradientType) typeCB.getSelectedItem();
+    private boolean isReverted() {
+        return revertCB.isSelected();
     }
 
     private void drawGradient(Drawable dr, Drag drag,
@@ -438,8 +443,7 @@ public class GradientTool extends DragTool {
 
     private Gradient createGradient(Drag drag) {
         return new Gradient(drag,
-            getType(), getCycleType(), getGradientColorType(),
-            revertCB.isSelected(),
+            getType(), getCycleType(), getGradientColorType(), isReverted(),
             blendingModePanel.getBlendingMode(),
             blendingModePanel.getOpacity());
     }
@@ -573,6 +577,29 @@ public class GradientTool extends DragTool {
     }
 
     @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.put("Type", getType().toString());
+        preset.put("Cycling", (String) cycleMethodCB.getSelectedItem());
+        preset.put("Color", getGradientColorType().toString());
+        preset.putBoolean("Revert", isReverted());
+        blendingModePanel.saveStateTo(preset);
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        ignoreRegenerate = true;
+
+        typeCB.setSelectedItem(preset.getEnum("Type", GradientType.class));
+        cycleMethodCB.setSelectedItem(preset.get("Cycling"));
+        colorTypeCB.setSelectedItem(preset.getEnum("Color", GradientColorType.class));
+        revertCB.setSelected(preset.getBoolean("Revert"));
+        blendingModePanel.loadStateFrom(preset);
+
+        ignoreRegenerate = false;
+        regenerateGradient("Load Preset");
+    }
+
+    @Override
     public Icon createIcon() {
         return new GradientToolIcon();
     }
@@ -584,7 +611,7 @@ public class GradientTool extends DragTool {
         node.addString("type", getType().toString());
         node.addString("cycling", getCycleType().toString());
         node.addQuotedString("color", getGradientColorType().toString());
-        node.addBoolean("revert", revertCB.isSelected());
+        node.addBoolean("revert", isReverted());
         node.addFloat("opacity", blendingModePanel.getOpacity());
         node.addQuotedString("blending mode",
             blendingModePanel.getBlendingMode().toString());

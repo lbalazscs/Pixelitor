@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,31 +17,37 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.FilterParam;
+
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.util.function.Consumer;
 
 public class OutlineBrushSettings extends BrushSettings {
-    private static final boolean DEFAULT_SPEED_DEPENDENCE = true;
+    private static final String SPEED_TEXT = "Radius depends on mouse speed";
+    private final BooleanParam dependsOnSpeedParam =
+        new BooleanParam(SPEED_TEXT, true);
+    private JComponent speedGUI;
 
-    private JCheckBox dependsOnSpeedCB;
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(dependsOnSpeedParam);
+    }
 
     @Override
     protected JPanel createConfigPanel() {
         var p = new JPanel(new FlowLayout());
-        p.add(new JLabel("Radius depends on mouse speed"));
-        if (dependsOnSpeedCB == null) {
-            dependsOnSpeedCB = new JCheckBox("", DEFAULT_SPEED_DEPENDENCE);
-            dependsOnSpeedCB.setName("dependsOnSpeed");
+        p.add(new JLabel(SPEED_TEXT));
+        if (speedGUI == null) {
+            speedGUI = dependsOnSpeedParam.createGUI("dependsOnSpeed");
         }
-        p.add(dependsOnSpeedCB);
+        p.add(speedGUI);
 
         return p;
     }
 
     public boolean dependsOnSpeed() {
-        if (dependsOnSpeedCB != null) {
-            return dependsOnSpeedCB.isSelected();
-        }
-        return DEFAULT_SPEED_DEPENDENCE;
+        return dependsOnSpeedParam.isChecked();
     }
 }

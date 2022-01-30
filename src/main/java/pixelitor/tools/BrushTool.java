@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package pixelitor.tools;
 
+import pixelitor.colors.FgBgColors;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
@@ -90,5 +92,19 @@ public class BrushTool extends BlendingModeBrushTool {
     public void trace(Drawable dr, Shape shape) {
         drawingColor = getFGColor();
         super.trace(dr, shape);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        super.saveStateTo(preset);
+
+        FgBgColors.saveTo(preset);
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        super.loadUserPreset(preset);
+
+        FgBgColors.loadFrom(preset);
     }
 }

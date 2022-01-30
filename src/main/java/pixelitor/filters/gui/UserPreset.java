@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.bric.util.JVM;
+import pixelitor.AppContext;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
@@ -87,8 +88,9 @@ public class UserPreset {
             if ("Ray Colors".equals(key)) {
                 value = content.get("Ray Color");
             }
-
-            System.out.println("UserPreset::get: no value found for the key " + key);
+            if (AppContext.isDevelopment()) {
+                System.out.println("UserPreset::get: no value found for the key " + key);
+            }
         }
         return value;
     }
@@ -129,6 +131,20 @@ public class UserPreset {
 
     public void putColor(String key, Color c) {
         put(key, Colors.toHTMLHex(c, true));
+    }
+
+    /**
+     * A way to get an enum constant if its toString is overwritten.
+     */
+    public <T extends Enum<T>> T getEnum(String key, Class<T> clazz) {
+        String presetValue = get(key);
+        T[] enumConstants = clazz.getEnumConstants();
+        for (T constant : enumConstants) {
+            if (constant.toString().equals(presetValue)) {
+                return constant;
+            }
+        }
+        return null;
     }
 
     // not using Properties because it is ugly to escape the spaces in keys

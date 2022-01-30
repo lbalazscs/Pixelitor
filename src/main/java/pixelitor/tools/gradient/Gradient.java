@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -138,8 +138,7 @@ public class Gradient implements Serializable {
         g.fillRect(0, 0, width, height);
     }
 
-    public void paintIconThumbnail(Graphics2D g2, Canvas canvas,
-                                   Dimension thumbSize) {
+    public void paintIconThumbnail(Graphics2D g2, Canvas canvas, Dimension thumbSize) {
         double scaling;
         if (thumbSize.width > thumbSize.height) {
             scaling = thumbSize.width / (double) canvas.getWidth();
@@ -215,7 +214,8 @@ public class Gradient implements Serializable {
     }
 
     public Gradient copy() {
-        return new Gradient(drag, type, cycleMethod, colorType, reverted, blendingMode, opacity);
+        return new Gradient(drag, type, cycleMethod, colorType,
+            reverted, blendingMode, opacity);
     }
 
     public void startMovement() {

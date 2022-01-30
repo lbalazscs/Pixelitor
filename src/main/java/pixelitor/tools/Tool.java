@@ -345,23 +345,22 @@ public abstract class Tool implements KeyListener, PresetOwner {
 
     @Override
     public boolean canHaveUserPresets() {
-        return false;
-    }
-
-    @Override
-    public UserPreset createUserPreset(String presetName) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void loadUserPreset(UserPreset preset) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public String getPresetDirName() {
         return getName();
     }
+
+    @Override
+    public final UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, getPresetDirName());
+        saveStateTo(preset);
+        return preset;
+    }
+
+    protected abstract void saveStateTo(UserPreset preset);
 
     // used for debugging
     public String getStateInfo() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.GUIText;
 import pixelitor.tools.brushes.CopyBrushType;
-import pixelitor.tools.brushes.CopyBrushTypeChangedListener;
 import pixelitor.utils.ToolSettingsLayout;
 
 import javax.swing.*;
@@ -77,12 +76,13 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
-    public void addCheckBox(String text, boolean selected, String name,
-                            Consumer<Boolean> consumer) {
+    public JCheckBox addCheckBox(String text, boolean selected, String name,
+                                 Consumer<Boolean> consumer) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);
         checkBox.addActionListener(e -> consumer.accept(checkBox.isSelected()));
         add(checkBox);
+        return checkBox;
     }
 
     public JCheckBox addCheckBox(String text, boolean selected, String name,
@@ -94,8 +94,8 @@ public class ToolSettingsPanel extends JPanel {
         return checkBox;
     }
 
-    public void addCopyBrushTypeSelector(CopyBrushType defaultSelection,
-                                         CopyBrushTypeChangedListener listener) {
+    public EnumComboBoxModel<CopyBrushType> addCopyBrushTypeSelector(CopyBrushType defaultSelection,
+                                                                     Consumer<CopyBrushType> listener) {
         EnumComboBoxModel<CopyBrushType> typeModel = new EnumComboBoxModel<>(CopyBrushType.class);
         typeModel.setSelectedItem(defaultSelection);
 
@@ -105,8 +105,10 @@ public class ToolSettingsPanel extends JPanel {
         addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
         typeCB.addActionListener(e -> {
             CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
-            listener.copyBrushTypeChanged(brushType);
+            listener.accept(brushType);
         });
+
+        return typeModel;
     }
 
     public void addAutoZoomButtons() {

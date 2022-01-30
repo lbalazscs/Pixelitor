@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
@@ -37,8 +38,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
 
     protected BlendingModeBrushTool(String name, char activationKeyChar,
                                     String iconFileName, String toolMessage,
-                                    Cursor cursor, boolean canHaveSymmetry) {
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor, canHaveSymmetry);
+                                    Cursor cursor, boolean addSymmetry) {
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor, addSymmetry);
         drawDestination = DrawDestination.DIRECT;
         maskEditing = false;
     }
@@ -92,6 +93,20 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
         blendingModePanel.addActionListener(e -> setupDrawDestination());
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        super.saveStateTo(preset);
+
+        blendingModePanel.saveStateTo(preset);
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        super.loadUserPreset(preset);
+
+        blendingModePanel.loadStateFrom(preset);
     }
 
     @Override

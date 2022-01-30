@@ -29,7 +29,7 @@ import pixelitor.history.History;
 import pixelitor.layers.Layer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
-import pixelitor.selection.ShapeCombination;
+import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -105,8 +105,8 @@ public class EDT {
         }
     }
 
-    public static void assertSelectionInteractionIs(ShapeCombination expected) {
-        ShapeCombination actual = call(Tools.SELECTION::getCurrentInteraction);
+    public static void assertSelectionCombinatorIs(ShapeCombinator expected) {
+        ShapeCombinator actual = call(Tools.SELECTION::getCombinator);
         if (expected != actual) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }

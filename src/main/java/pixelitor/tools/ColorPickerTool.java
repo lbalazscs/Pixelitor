@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
@@ -136,6 +137,21 @@ public class ColorPickerTool extends Tool {
             // don't show the values for the old layer
             Messages.showPlainInStatusBar("");
         }
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

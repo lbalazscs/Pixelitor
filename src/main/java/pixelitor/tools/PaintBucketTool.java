@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
@@ -121,7 +122,7 @@ public class PaintBucketTool extends Tool {
             workingImage = image;
         }
 
-        String fill = (String) fillCB.getSelectedItem();
+        String fill = getSelectedFill();
         int rgbAtMouse = workingImage.getRGB(x, y);
 
         int fillRGB;
@@ -137,7 +138,7 @@ public class PaintBucketTool extends Tool {
             throw new IllegalStateException("fill = " + fill);
         }
 
-        String action = (String) actionCB.getSelectedItem();
+        String action = getSelectedAction();
         int tolerance = toleranceParam.getValue();
         Rectangle replacedArea = switch (action) {
             case ACTION_LOCAL -> scanlineFloodFill(workingImage,
@@ -324,9 +325,9 @@ public class PaintBucketTool extends Tool {
         int b2 = color2 & 0xFF;
 
         return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
-            (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
-            (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
-            (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
+               (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
+               (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
+               (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
     }
 
     @Override
@@ -334,13 +335,35 @@ public class PaintBucketTool extends Tool {
         return true;
     }
 
+    private String getSelectedFill() {
+        return (String) fillCB.getSelectedItem();
+    }
+
+    private String getSelectedAction() {
+        return (String) actionCB.getSelectedItem();
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        toleranceParam.saveStateTo(preset);
+        preset.put("Fill", getSelectedFill());
+        preset.put("Action", getSelectedAction());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        toleranceParam.loadStateFrom(preset);
+        fillCB.setSelectedItem(preset.get("Fill"));
+        actionCB.setSelectedItem(preset.get("Action"));
+    }
+
     @Override
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
         node.addInt("tolerance", toleranceParam.getValue());
-        node.addQuotedString("fill with", (String) fillCB.getSelectedItem());
-        node.addQuotedString("action", (String) actionCB.getSelectedItem());
+        node.addQuotedString("fill with", getSelectedFill());
+        node.addQuotedString("action", getSelectedAction());
 
         return node;
     }

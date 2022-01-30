@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -188,7 +188,7 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public void start() {
-        Tools.PEN.startRestrictedMode(TRANSFORM, false);
+        Tools.PEN.startMode(TRANSFORM, false);
     }
 
     @Override

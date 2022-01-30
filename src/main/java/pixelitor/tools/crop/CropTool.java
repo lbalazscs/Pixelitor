@@ -23,10 +23,10 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
@@ -61,31 +61,33 @@ public class CropTool extends DragTool {
 
     private CropBox cropBox;
 
-    private final RangeParam maskOpacity = new RangeParam("Mask Opacity (%)", 0, 75, 100);
-
+    private final RangeParam maskOpacity = new RangeParam(
+        "Mask Opacity (%)", 0, 75, 100, false, WEST);
     private Composite maskComposite = AlphaComposite.getInstance(
         SRC_OVER, maskOpacity.getPercentageValF());
 
     private final JButton cancelButton = new JButton(GUIText.CANCEL);
     private JButton cropButton;
 
+    private JComboBox<CompositionGuideType> guidesCB;
+    private final CompositionGuide compositionGuide;
+
     private final JLabel widthLabel = new JLabel("Width:");
     private final JLabel heightLabel = new JLabel("Height:");
     private JSpinner widthSpinner;
     private JSpinner heightSpinner;
-    private JComboBox<CompositionGuideType> guidesCB;
 
-    private JCheckBox allowGrowingCB;
     private JCheckBox deleteCroppedPixelsCB;
-
-    private final CompositionGuide compositionGuide;
+    private JCheckBox allowGrowingCB;
+    private static final String DELETE_CROPPED_TEXT = "Delete Cropped Pixels";
+    private static final String ALLOW_GROWING_TEXT = "Allow Growing";
 
     public CropTool() {
         super("Crop", 'C', "crop_tool.png",
             "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
-                "After the handles appear: " +
-                "<b>Shift-drag</b> keeps the aspect ratio, " +
-                "<b>Double-click</b> crops, <b>Esc</b> cancels.",
+            "After the handles appear: " +
+            "<b>Shift-drag</b> keeps the aspect ratio, " +
+            "<b>Double-click</b> crops, <b>Esc</b> cancels.",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
 
@@ -114,35 +116,28 @@ public class CropTool extends DragTool {
         addCropControlCheckboxes();
 
         enableCropActions(false);
-        if (AppContext.isDevelopment()) {
-            JButton b = new JButton("Dump State");
-            b.addActionListener(e -> {
-                View view = Views.getActive();
-                Canvas canvas = view.getCanvas();
-                System.out.println("CropTool::actionPerformed: canvas = " + canvas);
-                System.out.println("CropTool::initSettingsPanel: state = " + state);
-                System.out.println("CropTool::initSettingsPanel: cropBox = " + cropBox);
-            });
-            settingsPanel.add(b);
-        }
     }
 
     private void addMaskOpacitySelector() {
+        // use a change listener so that the mask is
+        // continuously updated while the slider is dragged
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(
-            maskOpacity, WEST, false);
-        settingsPanel.add(maskOpacitySpinner);
+        settingsPanel.add(maskOpacity.createGUI());
     }
 
     private void maskOpacityChanged() {
         float alpha = maskOpacity.getPercentageValF();
-        // because of a swing bug, the slider can get out of range?
+        // can the slider get out of range?
         if (alpha < 0.0f) {
-            System.out.printf("CropTool::maskOpacityChanged: alpha = %.2f%n", alpha);
+            if (AppContext.isDevelopment()) {
+                throw new IllegalStateException("alpha = " + alpha);
+            }
             alpha = 0.0f;
             maskOpacity.setValue(0);
         } else if (alpha > 1.0f) {
-            System.out.printf("CropTool::maskOpacityChanged: alpha = %.2f%n", alpha);
+            if (AppContext.isDevelopment()) {
+                throw new IllegalStateException("alpha = " + alpha);
+            }
             alpha = 1.0f;
             maskOpacity.setValue(100);
         }
@@ -196,11 +191,11 @@ public class CropTool extends DragTool {
 
     private void addCropControlCheckboxes() {
         deleteCroppedPixelsCB = settingsPanel.addCheckBox(
-            "Delete Cropped Pixels", true, "deleteCroppedPixelsCB",
+            DELETE_CROPPED_TEXT, true, "deleteCroppedPixelsCB",
             "If not checked, only the canvas gets smaller");
 
         allowGrowingCB = settingsPanel.addCheckBox(
-            "Allow Growing", false, "allowGrowingCB",
+            ALLOW_GROWING_TEXT, false, "allowGrowingCB",
             "Enables the enlargement of the canvas");
     }
 
@@ -290,8 +285,8 @@ public class CropTool extends DragTool {
                     throw new IllegalStateException();
                 }
 
-                Rectangle r = drag.toCoRect();
-                PRectangle rect = PRectangle.positiveFromCo(r, e.getView());
+                PRectangle rect = PRectangle.positiveFromCo(
+                    drag.toCoRect(), e.getView());
 
                 cropBox = new CropBox(rect, e.getView());
 
@@ -461,8 +456,7 @@ public class CropTool extends DragTool {
         }
 
         Crop.toolCropActiveImage(cropRect,
-            allowGrowingCB.isSelected(),
-            deleteCroppedPixelsCB.isSelected());
+            allowGrowingCB.isSelected(), deleteCroppedPixelsCB.isSelected());
         resetInitialState();
         return true;
     }
@@ -493,29 +487,48 @@ public class CropTool extends DragTool {
                 // Shift-O: change the orientation
                 // within the current composition guide family
                 if (state == TRANSFORM) {
-                    int o = compositionGuide.getOrientation();
-                    compositionGuide.setOrientation(o + 1);
+                    compositionGuide.setNextOrientation();
                     Views.repaintActive();
                     e.consume();
                 }
             } else {
                 // O: advance to the next composition guide
-                selectTheNextCompositionGuide();
+                selectNextCompositionGuide();
                 e.consume();
             }
         }
     }
 
-    private void selectTheNextCompositionGuide() {
+    private void selectNextCompositionGuide() {
         int index = guidesCB.getSelectedIndex();
-        int itemCount = guidesCB.getItemCount();
+        int numGuideTypes = guidesCB.getItemCount();
         int nextIndex;
-        if (index == itemCount - 1) {
+        if (index == numGuideTypes - 1) {
             nextIndex = 0;
         } else {
             nextIndex = index + 1;
         }
         guidesCB.setSelectedIndex(nextIndex);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        maskOpacity.saveStateTo(preset);
+        preset.put("Guides", guidesCB.getSelectedItem().toString());
+
+        preset.putBoolean(DELETE_CROPPED_TEXT, deleteCroppedPixelsCB.isSelected());
+        preset.putBoolean(ALLOW_GROWING_TEXT, allowGrowingCB.isSelected());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        maskOpacity.loadStateFrom(preset);
+
+        CompositionGuideType guideType = preset.getEnum("Guides", CompositionGuideType.class);
+        guidesCB.setSelectedItem(guideType);
+
+        deleteCroppedPixelsCB.setSelected(preset.getBoolean(DELETE_CROPPED_TEXT));
+        allowGrowingCB.setSelected(preset.getBoolean(ALLOW_GROWING_TEXT));
     }
 
     @Override

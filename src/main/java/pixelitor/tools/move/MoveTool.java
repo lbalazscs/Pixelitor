@@ -20,6 +20,7 @@ package pixelitor.tools.move;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -67,6 +68,7 @@ public class MoveTool extends DragTool {
         settingsPanel.addSeparator();
         settingsPanel.addWithLabel("Auto Select Layer:",
             autoSelectCheckBox, "autoSelectCheckBox");
+
         if (AppContext.enableFreeTransform) {
             settingsPanel.addWithLabel("Free Transform:",
                 freeTransformCheckBox, "freeTransformCheckBox");
@@ -243,13 +245,13 @@ public class MoveTool extends DragTool {
 
     private void createTransformBox() {
         View view = Views.getActive();
-        Selection selection = view.getComp().getSelection();
-        if (selection != null && transformBox == null) {
-            selection.startMovement();
-            Rectangle boxSize = view.imageToComponentSpace(selection.getShapeBounds2D());
+        Selection sel = view.getComp().getSelection();
+        if (sel != null && transformBox == null) {
+            sel.startMovement();
+            Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
-            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(selection));
-            selection.startMovement();
+            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(sel));
+            sel.startMovement();
         }
     }
 
@@ -260,6 +262,20 @@ public class MoveTool extends DragTool {
     @Override
     public boolean isDirectDrawing() {
         return false;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.put("Mode", modeSelector.getSelectedItem().toString());
+        preset.putBoolean("AutoSelect", useAutoSelect());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        MoveMode mode = preset.getEnum("Mode", MoveMode.class);
+        modeSelector.setSelectedItem(mode);
+
+        autoSelectCheckBox.setSelected(preset.getBoolean("AutoSelect"));
     }
 
     @Override
@@ -310,5 +326,4 @@ public class MoveTool extends DragTool {
             g.fill(shape);
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,10 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.FilterParam;
+
 import javax.swing.*;
+import java.util.function.Consumer;
 
 /**
  * The settings of a {@link DabsBrush}
@@ -25,6 +28,11 @@ import javax.swing.*;
 public class DabsBrushSettings extends BrushSettings {
     private AngleSettings angleSettings;
     private Spacing spacing;
+
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        throw new UnsupportedOperationException("TODO");
+    }
 
     public DabsBrushSettings(AngleSettings angleSettings, Spacing spacing) {
         this.angleSettings = angleSettings;

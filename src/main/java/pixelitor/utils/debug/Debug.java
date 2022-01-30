@@ -17,8 +17,8 @@
 
 package pixelitor.utils.debug;
 
-import pixelitor.*;
 import pixelitor.Canvas;
+import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
@@ -341,7 +341,7 @@ public class Debug {
         Path path = Shapes.shapeToPath(shape, Views.getActive());
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
         Tools.PEN.activate();
     }
 

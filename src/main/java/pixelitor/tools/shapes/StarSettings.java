@@ -62,7 +62,7 @@ public class StarSettings extends ShapeTypeSettings {
     }
 
     @Override
-    public void forEachParam(Consumer<FilterParam> consumer) {
+    protected void forEachParam(Consumer<FilterParam> consumer) {
         consumer.accept(numBranches);
         consumer.accept(radiusRatio);
     }

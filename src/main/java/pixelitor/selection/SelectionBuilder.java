@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.awt.Shape;
  */
 public class SelectionBuilder {
     private final SelectionType selectionType;
-    private final ShapeCombination interaction;
+    private final ShapeCombinator combinator;
 
     private Shape replacedShape;
 
@@ -41,8 +41,8 @@ public class SelectionBuilder {
     /**
      * Called in mousePressed (or mouseReleased for polygonal selection)
      */
-    public SelectionBuilder(SelectionType selectionType, ShapeCombination interaction, Composition comp) {
-        this.interaction = interaction;
+    public SelectionBuilder(SelectionType selectionType, ShapeCombinator combinator, Composition comp) {
+        this.combinator = combinator;
         this.selectionType = selectionType;
         Selection existingSelection = comp.getSelection();
 
@@ -54,7 +54,7 @@ public class SelectionBuilder {
 
         comp.setBuiltSelection(new Selection(null, comp.getView()));
 
-        if (interaction == ShapeCombination.REPLACE) {
+        if (combinator == ShapeCombinator.REPLACE) {
             replacedShape = existingSelection.getShape();
             // At this point the mouse was pressed, and it is clear that the
             // old selection should go away, but we don't know yet whether the
@@ -108,7 +108,7 @@ public class SelectionBuilder {
 
         if (oldSelection != null) { // needs to combine the shapes
             Shape oldShape = oldSelection.getShape();
-            Shape combinedShape = interaction.combine(oldShape, newShape);
+            Shape combinedShape = combinator.combine(oldShape, newShape);
 
             Rectangle newBounds = combinedShape.getBounds();
 
@@ -119,15 +119,15 @@ public class SelectionBuilder {
                 comp.deselect(true);
 
                 Messages.showInfo("Nothing selected", "As a result of the "
-                    + interaction.toString().toLowerCase()
-                    + " operation, nothing is selected now.", comp.getView());
+                                                      + combinator.toString().toLowerCase()
+                                                      + " operation, nothing is selected now.", comp.getView());
             } else {
                 oldSelection.die();
                 builtSelection.setShape(combinedShape);
                 comp.promoteSelection();
 
                 History.add(new SelectionShapeChangeEdit(
-                    interaction.getNameForUndo(), comp, oldShape));
+                    combinator.getNameForUndo(), comp, oldShape));
             }
         } else {
             // we can get here if either (1) a new selection
@@ -141,7 +141,7 @@ public class SelectionBuilder {
 
                 PixelitorEdit edit;
                 if (replacedShape != null) {
-                    edit = new SelectionShapeChangeEdit(interaction.getNameForUndo(), comp, replacedShape);
+                    edit = new SelectionShapeChangeEdit(combinator.getNameForUndo(), comp, replacedShape);
                 } else {
                     edit = new NewSelectionEdit(comp, newShape);
                 }

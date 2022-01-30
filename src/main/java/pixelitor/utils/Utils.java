@@ -428,17 +428,5 @@ public final class Utils {
         return article + s;
     }
 
-    /**
-     * A way to get an enum constant from a string if toString is overwritten.
-     */
-    public static <T extends Enum<T>> T fromString(String s, Class<T> clazz) {
-        T[] enumConstants = clazz.getEnumConstants();
-        for (T constant : enumConstants) {
-            if (constant.toString().equals(s)) {
-                return constant;
-            }
-        }
-        return null;
-    }
 }
 

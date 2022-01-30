@@ -19,6 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -169,6 +170,21 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
         node.addString("state", state.toString());
@@ -181,7 +197,6 @@ public class ZoomTool extends DragTool {
     }
 
     private static class ZoomToolIcon extends Tool.ToolIcon {
-
         @Override
         public void paintIcon(Graphics2D g) {
             // based on zoom_tool.svg
@@ -207,5 +222,4 @@ public class ZoomTool extends DragTool {
             g.draw(shape);
         }
     }
-
 }

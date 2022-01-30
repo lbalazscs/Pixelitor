@@ -18,7 +18,6 @@
 package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
@@ -50,7 +49,6 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Lazy;
-import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -738,13 +736,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public boolean canHaveUserPresets() {
-        return AppContext.enableExperimentalFeatures;
-    }
-
-    @Override
-    public UserPreset createUserPreset(String presetName) {
-        UserPreset preset = new UserPreset(presetName, getPresetDirName());
+    public void saveStateTo(UserPreset preset) {
         ShapeType type = getSelectedType();
         preset.put(ShapeType.PRESET_KEY, type.toString());
 
@@ -759,16 +751,11 @@ public class ShapesTool extends DragTool {
         effectsParam.saveStateTo(preset);
 
         FgBgColors.saveTo(preset);
-
-        System.out.println("ShapesTool::createUserPreset: preset = " + preset);
-
-        return preset;
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        System.out.println("ShapesTool::loadUserPreset: preset = " + preset);
-        ShapeType type = Utils.fromString(preset.get(ShapeType.PRESET_KEY), ShapeType.class);
+        ShapeType type = preset.getEnum(ShapeType.PRESET_KEY, ShapeType.class);
         typeModel.setSelectedItem(type);
 
         if (type.hasSettings()) {
@@ -776,9 +763,9 @@ public class ShapesTool extends DragTool {
         }
 
         fillPaintModel.setSelectedItem(
-            Utils.fromString(preset.get("Fill"), TwoPointPaintType.class));
+            preset.getEnum("Fill", TwoPointPaintType.class));
         strokePaintModel.setSelectedItem(
-            Utils.fromString(preset.get("Stroke"), TwoPointPaintType.class));
+            preset.getEnum("Stroke", TwoPointPaintType.class));
 
         strokeParam.loadStateFrom(preset);
         effectsParam.loadStateFrom(preset);

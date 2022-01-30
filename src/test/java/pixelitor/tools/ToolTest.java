@@ -28,6 +28,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.PenTool;
@@ -109,6 +110,14 @@ public class ToolTest {
     public void afterEachTest() {
         tool.toolEnded();
         Views.setActiveView(null, false);
+    }
+
+    @Test
+    public void presets() {
+        if (tool.canHaveUserPresets()) {
+            UserPreset preset = tool.createUserPreset("test");
+            tool.loadUserPreset(preset);
+        }
     }
 
     @Test

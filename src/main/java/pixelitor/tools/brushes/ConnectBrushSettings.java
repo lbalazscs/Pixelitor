@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,26 +17,31 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
 
 import javax.swing.*;
+import java.util.function.Consumer;
 
 public class ConnectBrushSettings extends BrushSettings {
-    private static final boolean RESET_DEFAULT = false;
-
-    private JCheckBox resetForEachStroke;
-
     private final EnumParam<Style> styleModel = Style.asParam();
-
     private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
     private final RangeParam widthModel = new RangeParam("Line Width (px)", 1, 1, 10);
+    private final BooleanParam resetForEachStroke = new BooleanParam(
+        "Reset History for Each Stroke", false);
+
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(styleModel);
+        consumer.accept(densityModel);
+        consumer.accept(widthModel);
+        consumer.accept(resetForEachStroke);
+    }
 
     public boolean deleteHistoryForEachStroke() {
-        if (resetForEachStroke == null) { // not configured
-            return RESET_DEFAULT;
-        }
-        return resetForEachStroke.isSelected();
+        return resetForEachStroke.isChecked();
     }
 
     public Style getStyle() {
@@ -50,10 +55,7 @@ public class ConnectBrushSettings extends BrushSettings {
         p.addParam(styleModel, "length");
         p.addSlider(densityModel, "density");
         p.addSlider(widthModel, "width");
-
-        resetForEachStroke = new JCheckBox("", RESET_DEFAULT);
-        resetForEachStroke.setName("resetForEach");
-        p.addLabelWithControl("Reset History for Each Stroke: ", resetForEachStroke);
+        p.addParam(resetForEachStroke, "resetForEach");
 
         p.addOnlyButton("Reset History Now",
             e -> ConnectBrush.deleteHistory(), "resetHistNow");

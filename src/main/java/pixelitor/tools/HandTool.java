@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -65,6 +66,21 @@ public class HandTool extends Tool {
     }
 
     @Override
+    public boolean canHaveUserPresets() {
+        return false;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Icon createIcon() {
         return new HandToolIcon();
     }
@@ -100,8 +116,6 @@ public class HandTool extends Tool {
 
             g.setStroke(new BasicStroke(1.1522429f, CAP_ROUND, JOIN_ROUND, 4));
             g.draw(shape);
-
         }
     }
-
 }

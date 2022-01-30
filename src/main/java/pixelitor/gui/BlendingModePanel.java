@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.BlendingMode;
@@ -119,6 +120,16 @@ public class BlendingModePanel extends JPanel {
 
     public boolean isNormalAndOpaque() {
         return getBlendingMode() == BlendingMode.NORMAL
-            && getOpacity() > CRITICAL_OPACITY;
+               && getOpacity() > CRITICAL_OPACITY;
+    }
+
+    public void saveStateTo(UserPreset preset) {
+        preset.putFloat("Opacity", getOpacity());
+        preset.put("Blending Mode", getBlendingMode().toString());
+    }
+
+    public void loadStateFrom(UserPreset preset) {
+        setOpacity(preset.getFloat("Opacity"));
+        setBlendingMode(preset.getEnum("Blending Mode", BlendingMode.class));
     }
 }

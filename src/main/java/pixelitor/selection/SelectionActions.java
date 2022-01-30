@@ -119,7 +119,7 @@ public final class SelectionActions {
         Path path = Shapes.shapeToPath(shape, comp.getView());
         comp.setActivePath(path);
         Tools.PEN.setPath(path);
-        Tools.PEN.startRestrictedMode(EDIT, false);
+        Tools.PEN.startMode(EDIT, false);
         Tools.PEN.activate();
 
         if (addToHistory) {

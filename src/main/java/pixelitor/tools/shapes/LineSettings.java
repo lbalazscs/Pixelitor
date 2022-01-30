@@ -57,7 +57,7 @@ class LineSettings extends ShapeTypeSettings {
     }
 
     @Override
-    public void forEachParam(Consumer<FilterParam> consumer) {
+    protected void forEachParam(Consumer<FilterParam> consumer) {
         consumer.accept(width);
         consumer.accept(cap);
     }

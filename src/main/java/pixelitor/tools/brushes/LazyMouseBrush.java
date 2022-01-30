@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.tools.brushes;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
@@ -61,7 +62,7 @@ public class LazyMouseBrush extends BrushDecorator {
         calcSpacing();
     }
 
-    private static void setDist(int value) {
+    public static void setDist(int value) {
         dist = value;
         dist2 = value * value;
     }
@@ -139,8 +140,8 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     public static RangeParam createDistParam() {
-        RangeParam param = new RangeParam(
-            "Distance (px)", MIN_DIST, dist, MAX_DIST);
+        RangeParam param = new RangeParam("Distance (px)", MIN_DIST, dist, MAX_DIST,
+            false, SliderSpinner.TextPosition.NONE);
         param.setAdjustmentListener(() -> setDist(param.getValue()));
         return param;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_JITTER;
 import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 
 /**
@@ -50,9 +49,13 @@ public enum BrushType {
     }, CALLIGRAPHY("Calligraphy", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (CalligraphyBrushSettings) findSettings(
+            return new CalligraphyBrush(radius, getSettings(tool));
+        }
+
+        @Override
+        public CalligraphyBrushSettings getSettings(Tool tool) {
+            return (CalligraphyBrushSettings) findSettings(
                 tool, CalligraphyBrushSettings::new);
-            return new CalligraphyBrush(radius, settings);
         }
     }, REALISTIC("Realistic", false) {
         @Override
@@ -69,55 +72,67 @@ public enum BrushType {
     }, SHAPE("Shapes", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (ShapeDabsBrushSettings) findSettings(
-                tool, this::createShapeDabsBrushSettings);
-            return new ShapeDabsBrush(radius, settings);
+            return new ShapeDabsBrush(radius, getSettings(tool));
         }
 
-        private ShapeDabsBrushSettings createShapeDabsBrushSettings() {
-            var shapeType = ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
-            double spacingRatio = ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
-            var spacing = new RadiusRatioSpacing(spacingRatio);
-            return new ShapeDabsBrushSettings(ANGLE_AWARE_NO_JITTER, spacing, shapeType);
+        @Override
+        public ShapeDabsBrushSettings getSettings(Tool tool) {
+            return (ShapeDabsBrushSettings) findSettings(tool, ShapeDabsBrushSettings::new);
         }
+
     }, SPRAY("Spray Shapes", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (SprayBrushSettings) findSettings(
-                tool, SprayBrushSettings::new);
-            return new SprayBrush(radius, settings);
+            return new SprayBrush(radius, getSettings(tool));
+        }
+
+        @Override
+        public SprayBrushSettings getSettings(Tool tool) {
+            return (SprayBrushSettings) findSettings(tool, SprayBrushSettings::new);
         }
     }, CONNECT("Connect", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (ConnectBrushSettings) findSettings(
-                tool, ConnectBrushSettings::new);
-            return new ConnectBrush(settings, radius);
+            return new ConnectBrush(getSettings(tool), radius);
+        }
+
+        @Override
+        public ConnectBrushSettings getSettings(Tool tool) {
+            return (ConnectBrushSettings) findSettings(tool, ConnectBrushSettings::new);
         }
     }, OUTLINE_CIRCLE("Circles", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (OutlineBrushSettings) findSettings(
-                tool, OutlineBrushSettings::new);
-            return new OutlineCircleBrush(radius, settings);
+            return new OutlineCircleBrush(radius, getSettings(tool));
+        }
+
+        @Override
+        public OutlineBrushSettings getSettings(Tool tool) {
+            return (OutlineBrushSettings) findSettings(tool, OutlineBrushSettings::new);
         }
     }, OUTLINE_SQUARE("Squares", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (OutlineBrushSettings) findSettings(
-                tool, OutlineBrushSettings::new);
-            return new OutlineSquareBrush(radius, settings);
+            return new OutlineSquareBrush(radius, getSettings(tool));
+        }
+
+        @Override
+        public OutlineBrushSettings getSettings(Tool tool) {
+            return (OutlineBrushSettings) findSettings(tool, OutlineBrushSettings::new);
         }
     }, ONE_PIXEL("One Pixel", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            var settings = (OnePixelBrushSettings) findSettings(
-                tool, OnePixelBrushSettings::new);
-            return new OnePixelBrush(settings);
+            return new OnePixelBrush(getSettings(tool));
         }
 
         @Override
-        public boolean sizeCanBeSet() {
+        public OnePixelBrushSettings getSettings(Tool tool) {
+            return (OnePixelBrushSettings) findSettings(tool, OnePixelBrushSettings::new);
+        }
+
+        @Override
+        public boolean hasRadius() {
             return false;
         }
     };
@@ -141,8 +156,8 @@ public enum BrushType {
         return guiName;
     }
 
-    public boolean sizeCanBeSet() {
-        return true; // intended to be overridden if necessary
+    public boolean hasRadius() {
+        return true; // overridden if necessary
     }
 
     public boolean hasSettings() {
@@ -158,6 +173,12 @@ public enum BrushType {
         assert settings != null; // already initialized
 
         return settings.getConfigPanel();
+    }
+
+
+    public BrushSettings getSettings(Tool tool) {
+        // overridden for brush types with settings
+        throw new UnsupportedOperationException();
     }
 
     protected BrushSettings findSettings(Tool tool,

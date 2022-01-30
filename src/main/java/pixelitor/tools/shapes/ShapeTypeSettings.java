@@ -17,29 +17,16 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.filters.gui.UserPreset;
 import pixelitor.utils.Configurable;
-
-import java.util.function.Consumer;
 
 /**
  * The settings of a configurable {@link ShapeType}.
  */
 public abstract class ShapeTypeSettings extends Configurable {
-    public abstract void forEachParam(Consumer<FilterParam> consumer);
 
     void setAdjustmentListener(ParamAdjustmentListener listener) {
         forEachParam(param -> param.setAdjustmentListener(listener));
-    }
-
-    public void loadStateFrom(UserPreset preset) {
-        forEachParam(param -> param.loadStateFrom(preset));
-    }
-
-    public void saveStateTo(UserPreset preset) {
-        forEachParam(param -> param.saveStateTo(preset));
     }
 
     public abstract ShapeTypeSettings copy();

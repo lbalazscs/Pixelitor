@@ -22,6 +22,7 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Views;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.selection.*;
@@ -36,7 +37,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Graphics2D;
 
-import static pixelitor.selection.ShapeCombination.*;
+import static pixelitor.selection.ShapeCombinator.*;
 
 /**
  * The selection tool
@@ -52,12 +53,13 @@ public class SelectionTool extends DragTool {
         "<b>Shift</b> adds to an existing selection, " +
         "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.";
     private static final String FREEHAND_HELP_TEXT = "Freehand selection: " +
-        "simply drag around the area that you want to select. " +
-        "<b>Shift-drag</b> adds to an existing selection, " +
-        "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+                                                     "simply drag around the area that you want to select. " +
+                                                     "<b>Shift-drag</b> adds to an existing selection, " +
+                                                     "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+    private static final String NEW_SELECTION_TEXT = "New Selection";
 
     private boolean altMeansSubtract = false;
-    private ShapeCombination originalShapeCombination;
+    private ShapeCombinator originalShapeCombinator;
 
     private SelectionBuilder selectionBuilder;
     private boolean polygonal = false;
@@ -65,8 +67,8 @@ public class SelectionTool extends DragTool {
 
     private final EnumComboBoxModel<SelectionType> typeModel
         = new EnumComboBoxModel<>(SelectionType.class);
-    private final EnumComboBoxModel<ShapeCombination> interactionModel
-        = new EnumComboBoxModel<>(ShapeCombination.class);
+    private final EnumComboBoxModel<ShapeCombinator> combinatorModel
+        = new EnumComboBoxModel<>(ShapeCombinator.class);
 
     SelectionTool() {
         super("Selection", 'M', "selection_tool.png",
@@ -83,9 +85,9 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addSeparator();
 
-        var interactionCB = new JComboBox<ShapeCombination>(interactionModel);
-        settingsPanel.addComboBox("New Selection:",
-            interactionCB, "interactionCB");
+        var combinatorCB = new JComboBox<ShapeCombinator>(combinatorModel);
+        settingsPanel.addComboBox(NEW_SELECTION_TEXT + ":",
+            combinatorCB, "combinatorCB");
 
         settingsPanel.addSeparator();
 
@@ -118,10 +120,10 @@ public class SelectionTool extends DragTool {
             return; // ignore mouse pressed
         }
 
-        setupInteractionWithKeyModifiers(e);
+        setupCombinatorWithKeyModifiers(e);
 
-        selectionBuilder = new SelectionBuilder(getSelectionType(),
-            getCurrentInteraction(), e.getComp());
+        selectionBuilder = new SelectionBuilder(
+            getSelectionType(), getCombinator(), e.getComp());
     }
 
     @Override
@@ -147,7 +149,7 @@ public class SelectionTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         if (drag.isClick() && !polygonal) { // will be handled by mouseClicked
-            restoreInteraction();
+            restoreCombinator();
             return;
         }
 
@@ -167,20 +169,18 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) :
-            "selection is empty";
-        assert ConsistencyChecks.selectionIsInsideCanvas(comp) :
-            "selection is outside";
+        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) : "selection is empty";
+        assert ConsistencyChecks.selectionIsInsideCanvas(comp) : "selection is outside";
     }
 
     private void polygonalDragFinished(PMouseEvent e) {
         var comp = e.getComp();
         if (selectionBuilder == null) {
-            setupInteractionWithKeyModifiers(e);
-            selectionBuilder = new SelectionBuilder(getSelectionType(),
-                getCurrentInteraction(), comp);
+            setupCombinatorWithKeyModifiers(e);
+            selectionBuilder = new SelectionBuilder(
+                getSelectionType(), getCombinator(), comp);
             selectionBuilder.updateBuiltSelection(e, comp);
-            restoreInteraction();
+            restoreCombinator();
         } else {
             selectionBuilder.updateBuiltSelection(e, comp);
             if (e.isRight()) {
@@ -192,7 +192,7 @@ public class SelectionTool extends DragTool {
 
     private void notPolygonalDragFinished(PMouseEvent e) {
         var comp = e.getComp();
-        restoreInteraction();
+        restoreCombinator();
 
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
         drag.setStartFromCenter(startFromCenter);
@@ -248,8 +248,7 @@ public class SelectionTool extends DragTool {
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(true);
-            var comp = Views.getActiveComp();
-            selectionBuilder.updateBuiltSelection(drag, comp);
+            selectionBuilder.updateBuiltSelection(drag, Views.getActiveComp());
         }
         altDown = true;
     }
@@ -258,8 +257,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(false);
-            var comp = Views.getActiveComp();
-            selectionBuilder.updateBuiltSelection(drag, comp);
+            selectionBuilder.updateBuiltSelection(drag, Views.getActiveComp());
         }
         altDown = false;
     }
@@ -286,30 +284,30 @@ public class SelectionTool extends DragTool {
         return DragDisplayType.NONE;
     }
 
-    private void setupInteractionWithKeyModifiers(PMouseEvent e) {
+    private void setupCombinatorWithKeyModifiers(PMouseEvent e) {
         boolean shiftDown = e.isShiftDown();
         altDown = e.isAltDown();
 
         altMeansSubtract = altDown;
 
         if (shiftDown || altDown) {
-            originalShapeCombination = getCurrentInteraction();
+            originalShapeCombinator = getCombinator();
             if (shiftDown) {
                 if (altDown) {
-                    setCurrentInteraction(INTERSECT);
+                    setCombinator(INTERSECT);
                 } else {
-                    setCurrentInteraction(ADD);
+                    setCombinator(ADD);
                 }
             } else if (altDown) {
-                setCurrentInteraction(SUBTRACT);
+                setCombinator(SUBTRACT);
             }
         }
     }
 
-    private void restoreInteraction() {
-        if (originalShapeCombination != null) {
-            setCurrentInteraction(originalShapeCombination);
-            originalShapeCombination = null;
+    private void restoreCombinator() {
+        if (originalShapeCombinator != null) {
+            setCombinator(originalShapeCombinator);
+            originalShapeCombinator = null;
         }
     }
 
@@ -325,8 +323,7 @@ public class SelectionTool extends DragTool {
 
     private void stopBuildingSelection() {
         if (selectionBuilder != null) {
-            var comp = Views.getActiveComp();
-            selectionBuilder.cancelIfNotFinished(comp);
+            selectionBuilder.cancelIfNotFinished(Views.getActiveComp());
             selectionBuilder = null;
         }
     }
@@ -346,17 +343,33 @@ public class SelectionTool extends DragTool {
     }
 
     @VisibleForTesting
-    public ShapeCombination getCurrentInteraction() {
-        return interactionModel.getSelectedItem();
+    public ShapeCombinator getCombinator() {
+        return combinatorModel.getSelectedItem();
     }
 
-    private void setCurrentInteraction(ShapeCombination interaction) {
-        interactionModel.setSelectedItem(interaction);
+    private void setSelectionType(SelectionType type) {
+        typeModel.setSelectedItem(type);
+    }
+
+    private void setCombinator(ShapeCombinator combinator) {
+        combinatorModel.setSelectedItem(combinator);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.put(GUIText.TYPE, getSelectionType().toString());
+        preset.put(NEW_SELECTION_TEXT, getCombinator().toString());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        setSelectionType(preset.getEnum(GUIText.TYPE, SelectionType.class));
+        setCombinator(preset.getEnum(NEW_SELECTION_TEXT, ShapeCombinator.class));
     }
 
     @Override
     public String getStateInfo() {
-        return getSelectionType() + ", " + getCurrentInteraction();
+        return getSelectionType() + ", " + getCombinator();
     }
 
     @Override
@@ -364,7 +377,7 @@ public class SelectionTool extends DragTool {
         var node = super.createDebugNode();
 
         node.addString("type", getSelectionType().toString());
-        node.addString("interaction", getCurrentInteraction().toString());
+        node.addString("combinator", getCombinator().toString());
 
         return node;
     }

@@ -32,7 +32,7 @@ import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
-import pixelitor.selection.ShapeCombination;
+import pixelitor.selection.ShapeCombinator;
 import pixelitor.tools.Tools;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.pen.Path;
@@ -1142,7 +1142,7 @@ public class Composition implements Serializable {
             if (totalShape == null) {
                 totalShape = selection.getShape();
             } else {
-                totalShape = ShapeCombination.ADD.combine(
+                totalShape = ShapeCombinator.ADD.combine(
                     totalShape, selection.getShape());
             }
         }
@@ -1222,14 +1222,14 @@ public class Composition implements Serializable {
                 return null;
             }
             Shape oldShape = selection.getShape();
-            ShapeCombination interaction = switch (answer) {
-                case 0 -> ShapeCombination.REPLACE;
-                case 1 -> ShapeCombination.ADD;
-                case 2 -> ShapeCombination.SUBTRACT;
-                case 3 -> ShapeCombination.INTERSECT;
+            ShapeCombinator combinator = switch (answer) {
+                case 0 -> ShapeCombinator.REPLACE;
+                case 1 -> ShapeCombinator.ADD;
+                case 2 -> ShapeCombinator.SUBTRACT;
+                case 3 -> ShapeCombinator.INTERSECT;
                 default -> throw new IllegalStateException("answer = " + answer);
             };
-            selection.setShape(interaction.combine(oldShape, newShape));
+            selection.setShape(combinator.combine(oldShape, newShape));
             selection.setHidden(false, false);
             edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);
         } else { // no existing selection
@@ -1317,7 +1317,7 @@ public class Composition implements Serializable {
     public void intersectSelection(Rectangle2D cropRect) {
         if (selection != null) {
             Shape currentShape = selection.getShape();
-            Shape intersection = ShapeCombination.INTERSECT.combine(currentShape, cropRect);
+            Shape intersection = ShapeCombinator.INTERSECT.combine(currentShape, cropRect);
             if (intersection.getBounds().isEmpty()) {
                 selection.die();
                 setSelectionRef(null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,34 +17,40 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.FilterParam;
+
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.util.function.Consumer;
 
 /**
  * The settings of a {@link OnePixelBrush}
  */
 public class OnePixelBrushSettings extends BrushSettings {
-    private static final boolean DEFAULT_AA = false;
+    private static final String AA_TEXT = "Anti-aliasing";
+    private final BooleanParam aaParam =
+        new BooleanParam(AA_TEXT, false);
+    private JComponent aaGUI;
 
-    private JCheckBox aa;
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        consumer.accept(aaParam);
+    }
 
     @Override
     protected JPanel createConfigPanel() {
         var p = new JPanel(new FlowLayout());
-        p.add(new JLabel("Anti-aliasing"));
-        if (aa == null) {
-            aa = new JCheckBox("", DEFAULT_AA);
-            aa.setName("aa");
+        p.add(new JLabel(AA_TEXT));
+        if (aaGUI == null) {
+            aaGUI = aaParam.createGUI("aa");
         }
-        p.add(aa);
+        p.add(aaGUI);
 
         return p;
     }
 
     public boolean hasAA() {
-        if (aa != null) {
-            return aa.isSelected();
-        }
-        return DEFAULT_AA;
+        return aaParam.isChecked();
     }
 }

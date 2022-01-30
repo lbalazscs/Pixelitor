@@ -153,7 +153,11 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        effectsPanel.saveStateTo(preset);
+        // can be null during unit testing
+        assert effectsPanel != null || AppContext.isUnitTesting();
+        if (effectsPanel != null) {
+            effectsPanel.saveStateTo(preset);
+        }
     }
 
     @Override

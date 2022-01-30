@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,10 @@
 package pixelitor.tools;
 
 import com.bric.util.JVM;
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -51,6 +53,13 @@ import static pixelitor.tools.CloneTool.State.*;
  * The clone stamp tool.
  */
 public class CloneTool extends BlendingModeBrushTool {
+    private static final String ALIGNED_TEXT = "Aligned";
+    private static final String SAMPLE_ALL_LAYERS_TEXT = "Sample All Layers";
+
+    private EnumComboBoxModel<CopyBrushType> brushModel;
+    private JCheckBox alignedCB;
+    private JCheckBox sampleAllCB;
+
     enum State {
         NO_SOURCE,
         SOURCE_DEFINED_FIRST_STROKE,
@@ -83,17 +92,17 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.addCopyBrushTypeSelector(
+        brushModel = settingsPanel.addCopyBrushTypeSelector(
             CopyBrushType.SOFT, cloneBrush::typeChanged);
         addSizeSelector();
         addBlendingModePanel();
 
         settingsPanel.addSeparator();
-        settingsPanel.addCheckBox("Aligned", true, "alignedCB",
-            cloneBrush::setAligned);
+        alignedCB = settingsPanel.addCheckBox(ALIGNED_TEXT, true,
+            "alignedCB", cloneBrush::setAligned);
 
         settingsPanel.addSeparator();
-        settingsPanel.addCheckBox("Sample All Layers", false,
+        sampleAllCB = settingsPanel.addCheckBox(SAMPLE_ALL_LAYERS_TEXT, false,
             "sampleAllLayersCB", selected -> sampleAllLayers = selected);
 
         settingsPanel.addSeparator();
@@ -133,8 +142,8 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void setLazyBrush() {
-        if (lazyMouseCB.isSelected()) {
+    protected void updateLazyBrushEnabledState() {
+        if (lazyMouseEnabled.isChecked()) {
             lazyMouseBrush = new LazyMouseBrush(cloneBrush);
             brush = new AffectedAreaTracker(lazyMouseBrush, affectedArea);
             lazyMouse = true;
@@ -260,6 +269,30 @@ public class CloneTool extends BlendingModeBrushTool {
     protected void closeToolDialogs() {
         super.closeToolDialogs();
         GUIUtils.closeDialog(transformDialog, true);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        super.saveStateTo(preset);
+
+        preset.put("Brush Type", brushModel.getSelectedItem().toString());
+        preset.putBoolean(ALIGNED_TEXT, alignedCB.isSelected());
+        preset.putBoolean(SAMPLE_ALL_LAYERS_TEXT, sampleAllCB.isSelected());
+        scaleParam.saveStateTo(preset);
+        rotationParam.saveStateTo(preset);
+        mirrorParam.saveStateTo(preset);
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        super.loadUserPreset(preset);
+
+        brushModel.setSelectedItem(preset.getEnum("Brush Type", CopyBrushType.class));
+        alignedCB.setSelected(preset.getBoolean(ALIGNED_TEXT));
+        sampleAllCB.setSelected(preset.getBoolean(SAMPLE_ALL_LAYERS_TEXT));
+        scaleParam.loadStateFrom(preset);
+        rotationParam.loadStateFrom(preset);
+        mirrorParam.loadStateFrom(preset);
     }
 
     @Override

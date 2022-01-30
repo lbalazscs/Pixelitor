@@ -91,8 +91,8 @@ import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.selection.SelectionType.RECTANGLE;
-import static pixelitor.selection.ShapeCombination.ADD;
-import static pixelitor.selection.ShapeCombination.REPLACE;
+import static pixelitor.selection.ShapeCombinator.ADD;
+import static pixelitor.selection.ShapeCombinator.REPLACE;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 
@@ -217,7 +217,7 @@ public class AssertJSwingTest {
     private void clickAndResetSelectTool() {
         pw.toggleButton("Selection Tool Button").click();
         pw.comboBox("typeCB").selectItem("Rectangle");
-        pw.comboBox("interactionCB").selectItem("Replace");
+        pw.comboBox("combinatorCB").selectItem("Replace");
     }
 
     private void clickAndResetShapesTool() {
@@ -2373,12 +2373,12 @@ public class AssertJSwingTest {
         keyboard.actualPixels();
 
         app.clickTool(Tools.SELECTION);
-        EDT.assertSelectionInteractionIs(REPLACE);
+        EDT.assertSelectionCombinatorIs(REPLACE);
 
         mouse.randomAltClick();
         // the Alt should change the interaction only temporarily,
         // while the mouse is down
-        EDT.assertSelectionInteractionIs(REPLACE);
+        EDT.assertSelectionCombinatorIs(REPLACE);
 
         // TODO test poly selection
         testWithSimpleSelection();
@@ -2425,8 +2425,8 @@ public class AssertJSwingTest {
         EDT.assertThereIsSelection();
 
         // add second ellipse
-        pw.comboBox("interactionCB").selectItem("Add");
-        EDT.assertSelectionInteractionIs(ADD);
+        pw.comboBox("combinatorCB").selectItem("Add");
+        EDT.assertSelectionCombinatorIs(ADD);
 
         int e2X = 400;
         int e2Y = 100;
