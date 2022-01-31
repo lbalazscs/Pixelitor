@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,15 +92,7 @@ public class FilterAction extends DrawableAction {
     }
 
     private void handleExistingSmartFilters(SmartObject so) {
-        boolean replace;
-        String existingFilterName = so.getSmartFilter(0).getName();
-        String msg = String.format(
-            "<html>The smart object <b>%s</> already has " +
-            "a smart filter (<b>%s</b>). " +
-            "<br>Currently a smart object can have only one smart filter." +
-            "<br>Replace <b>%s</b> with <b>%s</b>?",
-            so.getName(), existingFilterName, existingFilterName, name);
-        replace = Dialogs.showYesNoQuestionDialog("Second Smart Filter", msg);
+        boolean replace = Dialogs.showReplaceSmartFilterQuestion(so, name);
         if (replace) {
             Filter newFilter = createNewInstanceFilter();
             so.replaceSmartFilter(newFilter);

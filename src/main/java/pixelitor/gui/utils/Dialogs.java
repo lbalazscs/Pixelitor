@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Layer;
+import pixelitor.layers.SmartObject;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -378,5 +379,16 @@ public class Dialogs {
         } else {
             showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         }
+    }
+
+    public static boolean showReplaceSmartFilterQuestion(SmartObject so, String newFilterName) {
+        String existingFilterName = so.getSmartFilter(0).getName();
+        String msg = format(
+            "<html>The smart object <b>%s</> already has " +
+            "a smart filter (<b>%s</b>). " +
+            "<br>Currently a smart object can have only one smart filter." +
+            "<br>Replace <b>%s</b> with <b>%s</b>?",
+            so.getName(), existingFilterName, existingFilterName, newFilterName);
+        return showYesNoQuestionDialog("Second Smart Filter", msg);
     }
 }

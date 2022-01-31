@@ -765,6 +765,18 @@ public abstract class Layer implements Serializable {
             popup.add(mergeDownAction);
         }
 
+        if (isRasterizable()) {
+            if (popup == null) {
+                popup = new JPopupMenu();
+            }
+            popup.add(new PAction("Rasterize") {
+                @Override
+                public void onClick() {
+                    replaceWithRasterized();
+                }
+            });
+        }
+
         if (AppContext.enableExperimentalFeatures) {
             if (popup == null) {
                 popup = new JPopupMenu();
@@ -780,18 +792,6 @@ public abstract class Layer implements Serializable {
                     }
                 });
             }
-        }
-
-        if (isRasterizable()) {
-            if (popup == null) {
-                popup = new JPopupMenu();
-            }
-            popup.add(new PAction("Rasterize") {
-                @Override
-                public void onClick() {
-                    replaceWithRasterized();
-                }
-            });
         }
 
         return popup;

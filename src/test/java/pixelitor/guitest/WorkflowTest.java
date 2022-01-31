@@ -90,12 +90,15 @@ public class WorkflowTest {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
         addGuide();
         runFilterWithDialog("Wood", null);
+        duplicateLayerThenUndo();
+
         app.addTextLayer("Wood", null, "Pixelitor");
 
         app.editTextLayer(dialog -> {
             dialog.textBox("textTF").requireText("Wood");
             dialog.slider("fontSize").slideTo(200);
         });
+        duplicateLayerThenUndo();
 
         rasterizeThenUndo();
         selectionFromText();
@@ -185,6 +188,8 @@ public class WorkflowTest {
         app.runMenuCommand("Convert to Smart Object");
         keyboard.undoRedo("Convert to Smart Object");
 
+        duplicateLayerThenUndo();
+
         app.runMenuCommand("Edit Contents");
         app.editTextLayer(dialog -> {
             dialog.textBox("textTF")
@@ -221,6 +226,11 @@ public class WorkflowTest {
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
         app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
         keyboard.undoRedo(filterName);
+    }
+
+    private void duplicateLayerThenUndo() {
+        app.runMenuCommand("Duplicate Layer");
+        keyboard.undoRedoUndo("Duplicate Layer");
     }
 
     private void rasterizeThenUndo() {

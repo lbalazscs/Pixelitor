@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.FilterContext;
-import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.PresetOwner;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
@@ -44,9 +44,11 @@ import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
  * the filter modifies only the selection bounds, otherwise the whole
  * {@link Drawable} is modified, not just the part included in the canvas.
  */
-public abstract class Filter implements Serializable {
+public abstract class Filter implements Serializable, PresetOwner {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    public static Filter copiedSmartFilter;
 
     private transient String name;
 
@@ -204,8 +206,27 @@ public abstract class Filter implements Serializable {
         return new SerializationProxy(this);
     }
 
+    @Override
     public boolean canHaveUserPresets() {
         return false;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        // overridden if the filter supports presets
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        // overridden if the filter supports presets
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getPresetDirName() {
+        // overridden if the filter supports presets
+        throw new UnsupportedOperationException();
     }
 
     public Filter copy() {
@@ -215,6 +236,8 @@ public abstract class Filter implements Serializable {
         }
 
         // can be shared if there are no settings
+        // TODO a few filters do have settings, but no preset support.
+        //  Currently this isn't a problem, because this is used for smart filters only
         return this;
     }
 
@@ -235,8 +258,8 @@ public abstract class Filter implements Serializable {
             filterClass = filter.getClass();
             filterName = filter.getName();
 
-            if (filter instanceof FilterWithGUI fwg && fwg.canHaveUserPresets()) {
-                filterState = fwg.createUserPreset("").saveToString();
+            if (filter.canHaveUserPresets()) {
+                filterState = filter.createUserPreset("").saveToString();
             }
         }
 
@@ -250,10 +273,10 @@ public abstract class Filter implements Serializable {
                 Messages.showException(e);
             }
             filter.setName(filterName);
-            if (filter instanceof FilterWithGUI fwg && fwg.canHaveUserPresets() && filterState != null) {
+            if (filter.canHaveUserPresets() && filterState != null) {
                 UserPreset preset = new UserPreset("", null);
                 preset.loadFromString(filterState);
-                fwg.loadUserPreset(preset);
+                filter.loadUserPreset(preset);
             }
             return filter;
         }

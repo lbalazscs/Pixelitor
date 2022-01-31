@@ -24,6 +24,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.IO;
@@ -107,7 +108,7 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
-    // copy constructor
+    // the constructor used for duplication
     private SmartObject(SmartObject orig, String name) {
         super(orig.comp, name);
         setContent(orig.content.copy(false, true));
@@ -274,8 +275,27 @@ public class SmartObject extends ImageLayer {
                 }
             });
         }
-        if (!smartFilters.isEmpty()) {
-            JMenu filtersMenu = new JMenu("Smart Filters");
+        boolean hasSmartFilter = !smartFilters.isEmpty();
+        if (hasSmartFilter) {
+            Filter smartFilter = smartFilters.get(0);
+            popup.add(new PAction("Copy " + smartFilter.getName()) {
+                @Override
+                public void onClick() {
+                    Filter.copiedSmartFilter = smartFilter.copy();
+                }
+            });
+        }
+        if (Filter.copiedSmartFilter != null) {
+            popup.add(new PAction("Paste " + Filter.copiedSmartFilter.getName()) {
+                @Override
+                public void onClick() {
+                    // copy again, because it could be pasted multiple times
+                    pasteSmartFilter(Filter.copiedSmartFilter.copy());
+                }
+            });
+        }
+        if (hasSmartFilter) {
+            popup.addSeparator();
             for (int i = 0; i < smartFilters.size(); i++) {
                 int finalI = i;
                 Filter smartFilter = smartFilters.get(i);
@@ -288,16 +308,15 @@ public class SmartObject extends ImageLayer {
 
                 var editMenuItem = new JMenuItem(editAction);
                 editMenuItem.setAccelerator(CTRL_SHIFT_E);
-                filtersMenu.add(editMenuItem);
+                popup.add(editMenuItem);
 
-                filtersMenu.add(new PAction("Delete " + smartFilter.getName()) {
+                popup.add(new PAction("Delete " + smartFilter.getName()) {
                     @Override
                     public void onClick() {
                         deleteSmartFilter();
                     }
                 });
             }
-            popup.add(filtersMenu);
         }
     }
 
@@ -346,6 +365,20 @@ public class SmartObject extends ImageLayer {
         updateSmartFilterUI();
     }
 
+    public void runAndAddSmartFilter(Filter newFilter) {
+        assert smartFilters.isEmpty();
+
+        lastFilterOutput = image;
+        boolean filterDialogAccepted = newFilter.startOn(this, false);
+        if (filterDialogAccepted) {
+            lastFilterOutput.flush();
+            lastFilterOutput = null;
+            addSmartFilter(newFilter);
+        } else {
+            image = lastFilterOutput;
+        }
+    }
+
     public void replaceSmartFilter(Filter newFilter) {
         Filter prevFilter = smartFilters.get(0);
         lastFilterOutput = image;
@@ -361,6 +394,17 @@ public class SmartObject extends ImageLayer {
         } else {
             image = lastFilterOutput;
             addSmartFilter(prevFilter);
+        }
+    }
+
+    private void pasteSmartFilter(Filter newFilter) {
+        if (hasSmartFilters()) {
+            boolean replace = Dialogs.showReplaceSmartFilterQuestion(this, newFilter.getName());
+            if (replace) {
+                replaceSmartFilter(newFilter);
+            }
+        } else {
+            runAndAddSmartFilter(newFilter);
         }
     }
 
