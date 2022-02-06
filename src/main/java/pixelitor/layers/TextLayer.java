@@ -25,7 +25,6 @@ import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
-import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
@@ -383,16 +382,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public boolean hasBuiltinPresets() {
-        return false;
-    }
-
-    @Override
-    public FilterState[] getBuiltinPresets() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean canHaveUserPresets() {
         return true;
     }
@@ -410,16 +399,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public void loadUserPreset(UserPreset preset) {
         settings.loadUserPreset(preset);
-    }
-
-    @Override
-    public boolean hasHelp() {
-        return false;
-    }
-
-    @Override
-    public String getHelpURL() {
-        return null;
     }
 
     @Override

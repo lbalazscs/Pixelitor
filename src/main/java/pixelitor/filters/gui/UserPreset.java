@@ -126,7 +126,11 @@ public class UserPreset {
     }
 
     public Color getColor(String key) {
-        return Colors.fromHTMLHex(get(key));
+        String color = get(key);
+        if (color != null) {
+            return Colors.fromHTMLHex(color);
+        }
+        return Color.BLACK;
     }
 
     public void putColor(String key, Color c) {

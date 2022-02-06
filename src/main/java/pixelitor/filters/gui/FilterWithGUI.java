@@ -63,17 +63,6 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     @Override
-    public boolean hasBuiltinPresets() {
-        return false;
-    }
-
-    @Override
-    public FilterState[] getBuiltinPresets() {
-        // the subclasses implement this if they have built-in presets
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean canHaveUserPresets() {
         return true;
     }

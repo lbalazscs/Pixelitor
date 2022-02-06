@@ -20,6 +20,7 @@ package pixelitor.tools.gradient;
 import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
@@ -583,6 +584,7 @@ public class GradientTool extends DragTool {
         preset.put("Color", getGradientColorType().toString());
         preset.putBoolean("Revert", isReverted());
         blendingModePanel.saveStateTo(preset);
+        FgBgColors.saveTo(preset);
     }
 
     @Override
@@ -594,6 +596,7 @@ public class GradientTool extends DragTool {
         colorTypeCB.setSelectedItem(preset.getEnum("Color", GradientColorType.class));
         revertCB.setSelected(preset.getBoolean("Revert"));
         blendingModePanel.loadStateFrom(preset);
+        FgBgColors.loadFrom(preset);
 
         ignoreRegenerate = false;
         regenerateGradient("Load Preset");
