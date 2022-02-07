@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.UserPreset;
 
 import javax.swing.*;
@@ -36,6 +37,10 @@ public abstract class Configurable {
     protected abstract JPanel createConfigPanel();
 
     protected abstract void forEachParam(Consumer<FilterParam> consumer);
+
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        forEachParam(param -> param.setAdjustmentListener(listener));
+    }
 
     public void loadStateFrom(UserPreset preset) {
         forEachParam(param -> param.loadStateFrom(preset));

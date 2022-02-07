@@ -87,11 +87,6 @@ public class GridBagHelper {
         addLabelAndControl(text1, new JLabel(text2));
     }
 
-    public void addTwoComponents(Component c1, Component c2) {
-        addTwoComponents(c1, c2, autoIncrementedGridY);
-        autoIncrementedGridY++;
-    }
-
     public void addLabelAndControl(FilterSetting setting) {
         addLabelAndControl(setting.getName() + ":", setting.createGUI());
     }
@@ -110,16 +105,21 @@ public class GridBagHelper {
         addLabelAndControl(param.getName() + ":", param.createGUI());
     }
 
-    public void addParam(FilterParam param, String name) {
-        addLabelAndControl(param.getName() + ":", param.createGUI(name));
+    public void addParam(FilterParam param, String guiName) {
+        addLabelAndControl(param.getName() + ":", param.createGUI(guiName));
     }
 
     public void addLabelAndControl(String labelText, Component c, int gridY) {
         JLabel label = new JLabel(labelText, RIGHT);
-        addTwoComponents(label, c, gridY);
+        addTwoControls(label, c, gridY);
     }
 
-    private void addTwoComponents(Component c1, Component c2, int gridY) {
+    public void addTwoControls(Component c1, Component c2) {
+        addTwoControls(c1, c2, autoIncrementedGridY);
+        autoIncrementedGridY++;
+    }
+
+    private void addTwoControls(Component c1, Component c2, int gridY) {
         labelConstraint.gridx = 0;
         labelConstraint.gridy = gridY;
         container.add(c1, labelConstraint);

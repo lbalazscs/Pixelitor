@@ -17,18 +17,12 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.utils.Configurable;
 
 /**
  * The settings of a configurable {@link ShapeType}.
  */
 public abstract class ShapeTypeSettings extends Configurable {
-
-    void setAdjustmentListener(ParamAdjustmentListener listener) {
-        forEachParam(param -> param.setAdjustmentListener(listener));
-    }
-
     public abstract ShapeTypeSettings copy();
 }
 

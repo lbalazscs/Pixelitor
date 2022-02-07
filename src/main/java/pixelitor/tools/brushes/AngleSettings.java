@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,26 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.UserPreset;
+
 /**
  * Angle-related settings for the brushes
  */
-public record AngleSettings(boolean angleAware, double maxAngleJitter) {
+public final class AngleSettings {
     // global shared immutable instances for the most common cases
     public static final AngleSettings NOT_ANGLE_AWARE = new AngleSettings(false, 0);
     public static final AngleSettings ANGLE_AWARE_NO_JITTER = new AngleSettings(true, 0);
+
+    private static final String ANGLE_AWARE_KEY = "Angle Aware";
+    private static final String MAX_JITTER_KEY = "Max Angle Jitter";
+
+    private boolean angleAware;
+    private double maxAngleJitter;
+
+    public AngleSettings(boolean angleAware, double maxAngleJitter) {
+        this.angleAware = angleAware;
+        this.maxAngleJitter = maxAngleJitter;
+    }
 
     public boolean shouldJitterAngle() {
         return maxAngleJitter > 0;
@@ -36,5 +49,26 @@ public record AngleSettings(boolean angleAware, double maxAngleJitter) {
         retVal += 2 * maxAngleJitter * Math.random();
 
         return retVal;
+    }
+
+    public boolean isAngleAware() {
+        return angleAware;
+    }
+
+    public void saveStateTo(UserPreset preset) {
+        preset.putBoolean(ANGLE_AWARE_KEY, angleAware);
+        preset.putDouble(MAX_JITTER_KEY, maxAngleJitter);
+    }
+
+    public void loadStateFrom(UserPreset preset) {
+        angleAware = preset.getBoolean(ANGLE_AWARE_KEY);
+        maxAngleJitter = preset.getDouble(MAX_JITTER_KEY);
+    }
+
+    @Override
+    public String toString() {
+        return "AngleSettings[" +
+               "angleAware=" + angleAware + ", " +
+               "maxAngleJitter=" + maxAngleJitter + ']';
     }
 }

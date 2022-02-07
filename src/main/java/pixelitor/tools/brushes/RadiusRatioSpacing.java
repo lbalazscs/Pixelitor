@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,16 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.filters.gui.UserPreset;
+
 /**
  * A {@link Spacing} implementation where the spacing between the dabs
  * is proportional to the radius.
  */
 public class RadiusRatioSpacing implements Spacing {
-    private final double spacingRatio; // the spacing relative to the radius
+    private static final String RATIO_KEY = "Spacing Ratio";
+
+    private double spacingRatio; // the spacing relative to the radius
 
     public RadiusRatioSpacing(double spacingRatio) {
         assert spacingRatio > 0;
@@ -33,5 +37,15 @@ public class RadiusRatioSpacing implements Spacing {
     public double getSpacing(double radius) {
         assert radius > 0;
         return Math.max(radius * spacingRatio, MIN_SPACING);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.putDouble(RATIO_KEY, spacingRatio);
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        spacingRatio = preset.getDouble(RATIO_KEY);
     }
 }

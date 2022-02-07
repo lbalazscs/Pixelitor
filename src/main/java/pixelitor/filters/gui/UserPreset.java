@@ -125,6 +125,14 @@ public class UserPreset {
         put(key, "%.4f".formatted(f));
     }
 
+    public double getDouble(String key) {
+        return Double.parseDouble(get(key));
+    }
+
+    public void putDouble(String key, double d) {
+        put(key, "%.4f".formatted(d));
+    }
+
     public Color getColor(String key) {
         String color = get(key);
         if (color != null) {

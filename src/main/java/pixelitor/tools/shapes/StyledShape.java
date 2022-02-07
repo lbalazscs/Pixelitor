@@ -84,19 +84,18 @@ public class StyledShape implements Cloneable, Transformable {
     private Stroke stroke;
 
     // Not needed for the rendering, but needed
-    // to restore the the stroke GUI after undo
+    // to restore the stroke GUI after undo
     private StrokeSettings strokeSettings;
 
     private Color fgColor;
     private Color bgColor;
 
     public StyledShape(ShapesTool tool) {
-        setType(tool.getSelectedType(), tool);
-
+        reloadType(tool);
         reloadFillPaint(tool);
         reloadStrokePaint(tool);
         reloadStroke(tool);
-        setEffects(tool.getEffects());
+        reloadEffects(tool);
         insideBox = false;
 
         reloadColors();
@@ -244,6 +243,22 @@ public class StyledShape implements Cloneable, Transformable {
         view.getComp().update(REPAINT);
     }
 
+    private void reloadType(ShapesTool tool) {
+        ShapeType type = tool.getSelectedType();
+        boolean typeChanged = this.shapeType != type;
+        this.shapeType = type;
+
+        if (typeChanged) {
+            if (type.hasSettings()) {
+                // a copy is made so that each StyledShape can have independent settings
+                ShapeTypeSettings copyOfDefaults = tool.getDefaultSettingsFor(type).copy();
+                setTypeSettings(copyOfDefaults);
+            } else {
+                setTypeSettings(null);
+            }
+        }
+    }
+
     private void reloadFillPaint(ShapesTool tool) {
         this.fillPaintType = tool.getSelectedFillPaint();
     }
@@ -257,13 +272,13 @@ public class StyledShape implements Cloneable, Transformable {
         strokeSettings = tool.getStrokeSettings();
     }
 
+    private void reloadEffects(ShapesTool tool) {
+        this.effects = tool.getEffects();
+    }
+
     private void reloadColors() {
         this.fgColor = getFGColor();
         this.bgColor = getBGColor();
-    }
-
-    private void setEffects(AreaEffects effects) {
-        this.effects = effects;
     }
 
     private void changeTypeInBox(ShapesTool tool, String editName) {
@@ -274,8 +289,7 @@ public class StyledShape implements Cloneable, Transformable {
                                             + ", edit = " + editName);
         }
 
-        ShapeType selectedType = tool.getSelectedType();
-        setType(selectedType, tool);
+        reloadType(tool);
 
         if (shapeType.isDirectional()) {
             // make sure that the new directional shape is drawn
@@ -289,27 +303,16 @@ public class StyledShape implements Cloneable, Transformable {
         // after the other parameters have been set
     }
 
-    private void setType(ShapeType shapeType, ShapesTool tool) {
-        boolean typeChanged = this.shapeType != shapeType;
-        this.shapeType = shapeType;
-
-        if (typeChanged) {
-            if (shapeType.hasSettings()) {
-                // a copy is made so that each StyledShape can have independent settings
-                ShapeTypeSettings copyOfDefaults = tool.getDefaultSettingsFor(shapeType).copy();
-                setTypeSettings(copyOfDefaults);
-            } else {
-                setTypeSettings(null);
-            }
-        }
-    }
-
     private void setTypeSettings(ShapeTypeSettings settings) {
         shapeTypeSettings = settings;
         if (settings != null) {
-            settings.setAdjustmentListener(() ->
-                regenerate(Tools.SHAPES.getTransformBox(), Tools.SHAPES, ShapesTool.CHANGE_SHAPE_TYPE));
+            attachTo(settings);
         }
+    }
+
+    private void attachTo(ShapeTypeSettings settings) {
+        settings.setAdjustmentListener(() ->
+            regenerate(Tools.SHAPES.getTransformBox(), Tools.SHAPES, ShapesTool.CHANGE_SHAPE_TYPE));
     }
 
     public TransformBox createBox(Drag drag, View view) {
@@ -493,7 +496,7 @@ public class StyledShape implements Cloneable, Transformable {
                 reloadStroke(tool);
                 tool.invalidateStroke();
             }
-            case ShapesTool.CHANGE_SHAPE_EFFECTS -> setEffects(tool.getEffects());
+            case ShapesTool.CHANGE_SHAPE_EFFECTS -> reloadEffects(tool);
             case ShapesTool.CHANGE_SHAPE_COLORS -> reloadColors();
             default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }

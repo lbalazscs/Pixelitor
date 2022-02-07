@@ -20,6 +20,9 @@ package pixelitor.compactions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.DialogMenuBar;
+import pixelitor.filters.gui.DialogMenuOwner;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.Utils;
 
@@ -42,7 +45,7 @@ import static java.lang.Integer.parseInt;
  * The GUI for the resize dialog
  */
 @SuppressWarnings("SuspiciousNameCombination")
-public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener {
+public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener, DialogMenuOwner {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 
     private static final String CHOICE_PIXELS = "pixels";
@@ -360,6 +363,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         new DialogBuilder()
             .validatedContent(p)
             .title("Resize")
+            .menuBar(new DialogMenuBar(p))
             .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
                 .process(comp))
             .show();
@@ -369,6 +373,43 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         var comp = Views.getActiveCompOpt()
             .orElseThrow(() -> new IllegalStateException("no active image"));
         showInDialog(comp);
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        preset.putBoolean("Pixels", unitsArePixels());
+        preset.putBoolean("Constrain", constrainProportions());
+        preset.put("Width", getWidthText());
+        preset.put("Height", getHeightText());
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        boolean pixels = preset.getBoolean("Pixels");
+        sharedComboBoxModel.setSelectedItem(pixels ? CHOICE_PIXELS : CHOICE_PERCENT);
+
+        boolean constrain = preset.getBoolean("Constrain");
+        constrainProportionsCB.setSelected(constrain);
+
+        heightTF.setText(preset.get("Height"));
+        widthTF.setText(preset.get("Width"));
+
+        if (constrain) {
+            // Ensure that the values are consistent with the current image size.
+            // The height will be adjusted to match the width.
+            keyReleasedInWidthTF();
+        }
+        updateStatusLine();
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return "Resize";
     }
 
     /**

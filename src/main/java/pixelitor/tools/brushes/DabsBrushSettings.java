@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.UserPreset;
 
 import javax.swing.*;
 import java.util.function.Consumer;
@@ -28,11 +29,6 @@ import java.util.function.Consumer;
 public class DabsBrushSettings extends BrushSettings {
     private AngleSettings angleSettings;
     private Spacing spacing;
-
-    @Override
-    protected void forEachParam(Consumer<FilterParam> consumer) {
-        throw new UnsupportedOperationException("TODO");
-    }
 
     public DabsBrushSettings(AngleSettings angleSettings, Spacing spacing) {
         this.angleSettings = angleSettings;
@@ -50,7 +46,7 @@ public class DabsBrushSettings extends BrushSettings {
     }
 
     public boolean isAngleAware() {
-        return angleSettings.angleAware();
+        return angleSettings.isAngleAware();
     }
 
     public AngleSettings getAngleSettings() {
@@ -65,5 +61,24 @@ public class DabsBrushSettings extends BrushSettings {
     protected JPanel createConfigPanel() {
         // shouldn't be called for brushes without settings.
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        // this class doesn't use params, therefore the methods
+        // that would call this method are overridden 
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        angleSettings.saveStateTo(preset);
+        spacing.saveStateTo(preset);
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        angleSettings.loadStateFrom(preset);
+        spacing.loadStateFrom(preset);
     }
 }

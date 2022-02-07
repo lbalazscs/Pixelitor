@@ -87,10 +87,10 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         gbh.addParam(maxCurvature);
         gbh.addParam(colorsParam, "colorsCB");
 
-        toolsParam.setupEnableOtherIf(colorsParam, this::useColors);
+        toolsParam.setupEnableOtherIf(colorsParam, AutoPaintPanel::useColors);
     }
 
-    private boolean useColors(Tool selectedTool) {
+    private static boolean useColors(Tool selectedTool) {
         return selectedTool == BRUSH;
     }
 

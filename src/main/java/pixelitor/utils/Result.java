@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -34,6 +35,8 @@ public sealed interface Result<V, E> {
     E errorDetail();
 
     <W> Result<W, E> map(Function<? super V, ? extends W> mapper);
+
+    <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper);
 
     static <V, E> Result<V, E> ok(V value) {
         return new OK<>(value);
@@ -64,6 +67,13 @@ record OK<V, E>(V value) implements Result<V, E> {
     public <W> Result<W, E> map(Function<? super V, ? extends W> mapper) {
         return new OK<>(mapper.apply(value));
     }
+
+    @Override
+    public <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper) {
+        @SuppressWarnings("unchecked")
+        Result<W, E> returnValue = (Result<W, E>) mapper.apply(value);
+        return Objects.requireNonNull(returnValue);
+    }
 }
 
 record Error<V, E>(E errorDetail) implements Result<V, E> {
@@ -79,6 +89,11 @@ record Error<V, E>(E errorDetail) implements Result<V, E> {
 
     @Override
     public <W> Result<W, E> map(Function<? super V, ? extends W> mapper) {
+        return new Error<>(errorDetail);
+    }
+
+    @Override
+    public <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper) {
         return new Error<>(errorDetail);
     }
 }

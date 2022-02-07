@@ -357,7 +357,7 @@ public abstract class Layer implements Serializable {
 
         if (!createEdit) {
             // history and UI update will be handled in an
-            // enclosing nonrectangular selection crop
+            // enclosing non-rectangular selection crop
             return null;
         }
 

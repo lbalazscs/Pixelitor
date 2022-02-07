@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         distFromLastDab = 0; // moved from reset()
 
         prev = p;
-        if (angleSettings.angleAware()) {
+        if (angleSettings.isAngleAware()) {
             // No dab is drawn for the angle-aware brushes in this method,
             // because there is no angle information yet.
             // However, the distance from the last dab is set
@@ -72,7 +72,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double theta = 0;
         double dx = endX - prevX;
         double dy = endY - prevY;
-        if (angleSettings.angleAware()) {
+        if (angleSettings.isAngleAware()) {
             theta = Math.atan2(dy, dx);
         }
 
