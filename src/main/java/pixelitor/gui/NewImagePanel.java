@@ -155,14 +155,10 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
-        UserPreset preset = new UserPreset(presetName, getPresetDirName());
-
+    public void saveStateTo(UserPreset preset) {
         preset.putInt("Width", getSelectedWidth());
         preset.putInt("Height", getSelectedHeight());
         preset.put("Fill", getSelectedFill().toString());
-
-        return preset;
     }
 
     @Override

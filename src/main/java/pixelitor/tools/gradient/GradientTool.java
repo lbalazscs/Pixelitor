@@ -584,7 +584,7 @@ public class GradientTool extends DragTool {
         preset.put("Color", getGradientColorType().toString());
         preset.putBoolean("Revert", isReverted());
         blendingModePanel.saveStateTo(preset);
-        FgBgColors.saveTo(preset);
+        FgBgColors.saveStateTo(preset);
     }
 
     @Override
@@ -596,7 +596,7 @@ public class GradientTool extends DragTool {
         colorTypeCB.setSelectedItem(preset.getEnum("Color", GradientColorType.class));
         revertCB.setSelected(preset.getBoolean("Revert"));
         blendingModePanel.loadStateFrom(preset);
-        FgBgColors.loadFrom(preset);
+        FgBgColors.loadStateFrom(preset);
 
         ignoreRegenerate = false;
         regenerateGradient("Load Preset");

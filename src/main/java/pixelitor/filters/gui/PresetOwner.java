@@ -34,7 +34,14 @@ import static pixelitor.filters.gui.UserPreset.PRESETS_DIR;
 public interface PresetOwner {
     boolean canHaveUserPresets();
 
-    UserPreset createUserPreset(String presetName);
+    // should be final, but Java doesn't allow both default and final
+    default UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, getPresetDirName());
+        saveStateTo(preset);
+        return preset;
+    }
+
+    void saveStateTo(UserPreset preset);
 
     void loadUserPreset(UserPreset preset);
 

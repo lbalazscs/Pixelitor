@@ -191,12 +191,10 @@ public class WorkflowTest {
         duplicateLayerThenUndo();
 
         app.runMenuCommand("Edit Contents");
-        app.editTextLayer(dialog -> {
-            dialog.textBox("textTF")
-                .requireText("TEXT")
-                .deleteText()
-                .enterText("WARPED TEXT");
-        });
+        app.editTextLayer(dialog -> dialog.textBox("textTF")
+            .requireText("TEXT")
+            .deleteText()
+            .enterText("WARPED TEXT"));
 
         app.addLayerMask();
         app.drawGradient("Radial");

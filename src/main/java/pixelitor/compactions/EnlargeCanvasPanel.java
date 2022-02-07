@@ -21,7 +21,9 @@ import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.ImageUtils;
 
@@ -37,39 +39,39 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 /**
  * The GUI which has the four sliders and a {@link PreviewPanel} in center.
  */
-class EnlargeCanvasGUI extends JPanel {
+class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     // Percentage Based
-    private final RangeParam northRangePercent = new RangeParam("North", 0, 0, 100);
-    private final RangeParam eastRangePercent = new RangeParam("East", 0, 0, 100);
-    private final RangeParam southRangePercent = new RangeParam("South", 0, 0, 100);
-    private final RangeParam westRangePercent = new RangeParam("West", 0, 0, 100);
+    private final RangeParam northPercent = new RangeParam("North", 0, 0, 100);
+    private final RangeParam eastPercent = new RangeParam("East", 0, 0, 100);
+    private final RangeParam southPercent = new RangeParam("South", 0, 0, 100);
+    private final RangeParam westPercent = new RangeParam("West", 0, 0, 100);
 
     // Actual Pixel Based
-    private final RangeParam northRangePixels;
-    private final RangeParam eastRangePixels;
-    private final RangeParam southRangePixels;
-    private final RangeParam westRangePixels;
+    private final RangeParam northPixels;
+    private final RangeParam eastPixels;
+    private final RangeParam southPixels;
+    private final RangeParam westPixels;
 
     private final JRadioButton btnUsePixels = new JRadioButton("Pixels");
     private final JRadioButton btnUsePercentage = new JRadioButton("Percentage");
 
     private final PreviewPanel previewPanel = new PreviewPanel();
 
-    EnlargeCanvasGUI() {
+    EnlargeCanvasPanel() {
         setLayout(new GridBagLayout());
 
         Canvas c = Views.getActiveComp().getCanvas();
-        northRangePixels = new RangeParam("North", 0, 0, c.getHeight());
-        eastRangePixels = new RangeParam("East", 0, 0, c.getWidth());
-        southRangePixels = new RangeParam("South", 0, 0, c.getHeight());
-        westRangePixels = new RangeParam("West", 0, 0, c.getWidth());
+        northPixels = new RangeParam("North", 0, 0, c.getHeight());
+        eastPixels = new RangeParam("East", 0, 0, c.getWidth());
+        southPixels = new RangeParam("South", 0, 0, c.getHeight());
+        westPixels = new RangeParam("West", 0, 0, c.getWidth());
 
         addRadioButtons();
 
-        addSliderSpinner(northRangePercent, northRangePixels, "north", 1, 0, SliderSpinner.HORIZONTAL);
-        addSliderSpinner(eastRangePercent, eastRangePixels, "east", 2, 1, SliderSpinner.VERTICAL);
-        addSliderSpinner(southRangePercent, southRangePixels, "south", 1, 2, SliderSpinner.HORIZONTAL);
-        addSliderSpinner(westRangePercent, westRangePixels, "west", 0, 1, SliderSpinner.VERTICAL);
+        addSliderSpinner(northPercent, northPixels, "north", 1, 0, SliderSpinner.HORIZONTAL);
+        addSliderSpinner(eastPercent, eastPixels, "east", 2, 1, SliderSpinner.VERTICAL);
+        addSliderSpinner(southPercent, southPixels, "south", 1, 2, SliderSpinner.HORIZONTAL);
+        addSliderSpinner(westPercent, westPixels, "west", 0, 1, SliderSpinner.VERTICAL);
 
         btnUsePixels.doClick();
 
@@ -81,19 +83,8 @@ class EnlargeCanvasGUI extends JPanel {
         c.gridx = c.gridy = 2;
         c.anchor = GridBagConstraints.WEST;
 
-        btnUsePixels.addActionListener(e -> {
-            syncValueToPixels(northRangePixels, northRangePercent);
-            syncValueToPixels(eastRangePixels, eastRangePercent);
-            syncValueToPixels(westRangePixels, westRangePercent);
-            syncValueToPixels(southRangePixels, southRangePercent);
-        });
-
-        btnUsePercentage.addActionListener(e -> {
-            syncValueToPercentage(northRangePercent, northRangePixels);
-            syncValueToPercentage(eastRangePercent, eastRangePixels);
-            syncValueToPercentage(westRangePercent, westRangePixels);
-            syncValueToPercentage(southRangePercent, southRangePixels);
-        });
+        btnUsePixels.addActionListener(e -> syncToPixels());
+        btnUsePercentage.addActionListener(e -> syncToPercentage());
 
         new ButtonGroup() {{
             add(btnUsePixels);
@@ -106,11 +97,25 @@ class EnlargeCanvasGUI extends JPanel {
         }}, c);
     }
 
-    private static void syncValueToPixels(RangeParam pixels, RangeParam percent) {
+    private void syncToPixels() {
+        syncToPixels(northPixels, northPercent);
+        syncToPixels(eastPixels, eastPercent);
+        syncToPixels(westPixels, westPercent);
+        syncToPixels(southPixels, southPercent);
+    }
+
+    private static void syncToPixels(RangeParam pixels, RangeParam percent) {
         pixels.setValue(pixels.getMaximum() * percent.getValueAsDouble() / 100, false);
     }
 
-    private static void syncValueToPercentage(RangeParam percent, RangeParam pixels) {
+    private void syncToPercentage() {
+        syncToPercentage(northPercent, northPixels);
+        syncToPercentage(eastPercent, eastPixels);
+        syncToPercentage(westPercent, westPixels);
+        syncToPercentage(southPercent, southPixels);
+    }
+
+    private static void syncToPercentage(RangeParam percent, RangeParam pixels) {
         percent.setValue(100 * pixels.getValueAsDouble() / pixels.getMaximum(), false);
     }
 
@@ -149,44 +154,86 @@ class EnlargeCanvasGUI extends JPanel {
 
     private int getNorth(int height) {
         if (btnUsePixels.isSelected()) {
-            return northRangePixels.getValue();
+            return northPixels.getValue();
         } else {
-            return (int) (height * northRangePercent.getValueAsFloat() / 100);
+            return (int) (height * northPercent.getValueAsFloat() / 100);
         }
     }
 
     private int getSouth(int height) {
         if (btnUsePixels.isSelected()) {
-            return southRangePixels.getValue();
+            return southPixels.getValue();
         } else {
-            return (int) (height * southRangePercent.getValueAsFloat() / 100);
+            return (int) (height * southPercent.getValueAsFloat() / 100);
         }
     }
 
     private int getWest(int width) {
         if (btnUsePixels.isSelected()) {
-            return westRangePixels.getValue();
+            return westPixels.getValue();
         } else {
-            return (int) (width * westRangePercent.getValueAsFloat() / 100);
+            return (int) (width * westPercent.getValueAsFloat() / 100);
         }
     }
 
     private int getEast(int width) {
         if (btnUsePixels.isSelected()) {
-            return eastRangePixels.getValue();
+            return eastPixels.getValue();
         } else {
-            return (int) (width * eastRangePercent.getValueAsFloat() / 100);
+            return (int) (width * eastPercent.getValueAsFloat() / 100);
         }
     }
 
     public EnlargeCanvas getCompAction(Canvas canvas) {
         int w = canvas.getWidth(), h = canvas.getHeight();
-        return new EnlargeCanvas(
-            getNorth(h),
-            getEast(w),
-            getSouth(h),
-            getWest(w)
-        );
+        return new EnlargeCanvas(getNorth(h), getEast(w), getSouth(h), getWest(w));
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        boolean usePixels = btnUsePixels.isSelected();
+        preset.putBoolean("Pixels", usePixels);
+        if (usePixels) {
+            northPixels.saveStateTo(preset);
+            eastPixels.saveStateTo(preset);
+            southPixels.saveStateTo(preset);
+            westPixels.saveStateTo(preset);
+        } else {
+            northPercent.saveStateTo(preset);
+            eastPercent.saveStateTo(preset);
+            southPercent.saveStateTo(preset);
+            westPercent.saveStateTo(preset);
+        }
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        boolean usePixels = preset.getBoolean("Pixels");
+        if (usePixels) {
+            btnUsePixels.doClick();
+
+            northPixels.loadStateFrom(preset);
+            eastPixels.loadStateFrom(preset);
+            southPixels.loadStateFrom(preset);
+            westPixels.loadStateFrom(preset);
+        } else {
+            btnUsePercentage.doClick();
+
+            northPercent.loadStateFrom(preset);
+            eastPercent.loadStateFrom(preset);
+            southPercent.loadStateFrom(preset);
+            westPercent.loadStateFrom(preset);
+        }
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return "Enlarge Canvas";
     }
 
     /**
@@ -206,7 +253,7 @@ class EnlargeCanvasGUI extends JPanel {
         private class EventAdaptor extends ComponentAdapter {
             @Override
             public void componentResized(ComponentEvent e) {
-                createTheThumb();
+                createThumb();
             }
 
             @Override
@@ -216,7 +263,7 @@ class EnlargeCanvasGUI extends JPanel {
             }
         }
 
-        public void createTheThumb() {
+        public void createThumb() {
             Composition comp = Views.getActiveComp();
             if (comp != null) {
                 BufferedImage actualImage = comp.getCompositeImage();
@@ -266,13 +313,13 @@ class EnlargeCanvasGUI extends JPanel {
             );
 
             if (thumb == null) {
-                createTheThumb();
+                createThumb();
             }
 
             BufferedImage board = new BufferedImage((int) canvasW, (int) canvasH, thumb.getType());
-            Graphics2D g_b = board.createGraphics();
-            painter.paint(g_b, null, board.getWidth(), board.getHeight());
-            g_b.dispose();
+            Graphics2D boardGraphics = board.createGraphics();
+            painter.paint(boardGraphics, null, board.getWidth(), board.getHeight());
+            boardGraphics.dispose();
 
             // Drawing the thumb, which represents the old canvas
             g.drawImage(board, (int) (ox - newCanvasW / 2 + W), (int) (oy - newCanvasH / 2 + N), (int) canvasW, (int) canvasH, null);

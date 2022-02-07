@@ -135,8 +135,8 @@ public final class SelectionActions {
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
             EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
-            gbh.addLabelAndControl("Amount", amount.createGUI("amount"));
-            gbh.addLabelAndControl(GUIText.TYPE, type.createGUI("type"));
+            gbh.addOnlyControl(amount.createGUI("amount"));
+            gbh.addLabelAndControl(GUIText.TYPE + ":", type.createGUI("type"));
 
             new DialogBuilder()
                 .content(panel)

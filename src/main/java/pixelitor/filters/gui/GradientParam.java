@@ -194,7 +194,7 @@ public class GradientParam extends AbstractFilterParam {
     @Override
     protected void setEnabledState() {
         if (gradientSlider != null) {
-            gradientSlider.setEnabled(shouldBeEnabled());
+            gradientSlider.setEnabled(isEnabled());
         }
     }
 

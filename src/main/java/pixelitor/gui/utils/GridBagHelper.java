@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.ParamGUI;
 
@@ -103,6 +104,14 @@ public class GridBagHelper {
     public void addLabelAndControl(String labelText, Component c) {
         addLabelAndControl(labelText, c, autoIncrementedGridY);
         autoIncrementedGridY++;
+    }
+
+    public void addParam(FilterParam param) {
+        addLabelAndControl(param.getName() + ":", param.createGUI());
+    }
+
+    public void addParam(FilterParam param, String name) {
+        addLabelAndControl(param.getName() + ":", param.createGUI(name));
     }
 
     public void addLabelAndControl(String labelText, Component c, int gridY) {

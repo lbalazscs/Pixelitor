@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ package pixelitor.filters.gui;
  * Just like {@link IntChoiceParam}, this is a model
  * for a JComboBox, but the values are coming from an enum
  */
-public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E> {
+public class EnumParam<E extends Enum<E>> extends ListParam<E> {
     public EnumParam(String name, Class<E> enumClass) {
         super(name, enumClass.getEnumConstants(), RandomizePolicy.ALLOW_RANDOMIZE);
     }

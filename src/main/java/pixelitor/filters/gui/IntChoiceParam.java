@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Item> {
+public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     public IntChoiceParam(String name, Item[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
     }

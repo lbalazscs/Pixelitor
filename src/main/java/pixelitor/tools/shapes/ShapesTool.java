@@ -750,7 +750,7 @@ public class ShapesTool extends DragTool {
         strokeParam.saveStateTo(preset);
         effectsParam.saveStateTo(preset);
 
-        FgBgColors.saveTo(preset);
+        FgBgColors.saveStateTo(preset);
     }
 
     @Override
@@ -770,7 +770,7 @@ public class ShapesTool extends DragTool {
         strokeParam.loadStateFrom(preset);
         effectsParam.loadStateFrom(preset);
 
-        FgBgColors.loadFrom(preset);
+        FgBgColors.loadStateFrom(preset);
 
         if (styledShape != null) {
             styledShape.regenerateAll(transformBox, this);

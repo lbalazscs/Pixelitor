@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,11 @@
 
 package pixelitor.automate;
 
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.colors.FgBgColors;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.SliderSpinner.TextPosition;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.tools.Tool;
@@ -36,28 +36,29 @@ import static pixelitor.tools.Tools.BRUSH;
 /**
  * The GUI of the "Auto Paint" dialog
  */
-public class AutoPaintPanel extends ValidatedPanel {
+public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     private static final String COLOR_FOREGROUND = "Foreground";
     private static final String COLOR_INTERPOLATED = "Foreground-Background Mix";
     private static final String COLOR_RANDOM = "Random";
     public static final String[] COLOR_CHOICES =
         {COLOR_INTERPOLATED, COLOR_FOREGROUND, COLOR_RANDOM};
 
-    private final JComboBox<Tool> toolSelector;
+    private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
+    private static final String NUM_STROKES_TEXT = "Number of Strokes";
 
+    private final ListParam<Tool> toolsParam = new ListParam<>(
+        "Tool", AutoPaint.ALLOWED_TOOLS);
     private final JTextField numStrokesTF;
-
     private final JTextField lengthTF;
+    private final ListParam<String> colorsParam = new ListParam<>(
+        "Random Colors", COLOR_CHOICES);
 
-    private final JComboBox<String> colorsCB;
-    private final JLabel colorsLabel;
+    private final RangeParam lengthVariability = new RangeParam(
+        "Stroke Length Variability (%)", 0, 50, 100, true, TextPosition.NONE);
+    private final RangeParam maxCurvature = new RangeParam(
+        "Maximal Curvature (%)", 0, 100, 300, true, TextPosition.NONE);
 
-    private final RangeParam lengthVariability =
-        new RangeParam("", 0, 50, 100);
-    private final RangeParam maxCurvature =
-        new RangeParam("", 0, 100, 300);
-
-    private final IntChoiceParam angleType = new IntChoiceParam("", new Item[]{
+    private final IntChoiceParam angleType = new IntChoiceParam("Angle", new Item[]{
         new Item("Random", AutoPaintSettings.ANGLE_TYPE_RANDOM),
         new Item("Radial", AutoPaintSettings.ANGLE_TYPE_RADIAL),
         new Item("Circular", AutoPaintSettings.ANGLE_TYPE_CIRCULAR),
@@ -68,57 +69,38 @@ public class AutoPaintPanel extends ValidatedPanel {
         super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
-        toolSelector = new JComboBox<>(AutoPaint.ALLOWED_TOOLS);
-        toolSelector.setName("toolSelector");
-        gbh.addLabelAndControl("Tool:", toolSelector);
-
-        gbh.addLabelAndControl("Angle:", angleType.createGUI());
+        gbh.addParam(toolsParam, "toolSelector");
+        gbh.addParam(angleType);
 
         numStrokesTF = new JTextField("100");
         numStrokesTF.setName("numStrokesTF");
-        gbh.addLabelAndControl("Number of Strokes:",
+        gbh.addLabelAndControl(NUM_STROKES_TEXT + ":",
             createPositiveIntLayer(
-                "Number of Strokes", numStrokesTF, false));
+                NUM_STROKES_TEXT, numStrokesTF, false));
 
         lengthTF = new JTextField("100");
-        gbh.addLabelAndControl("Average Stroke Length:",
+        gbh.addLabelAndControl(STROKE_LENGTH_TEXT + ":",
             createPositiveIntLayer(
-                "Average Stroke Length", lengthTF, false));
+                STROKE_LENGTH_TEXT, lengthTF, false));
 
-        gbh.addLabelAndControl("Stroke Length Variability (%):",
-            SliderSpinner.from(lengthVariability));
+        gbh.addParam(lengthVariability);
+        gbh.addParam(maxCurvature);
+        gbh.addParam(colorsParam, "colorsCB");
 
-        gbh.addLabelAndControl("Maximal Curvature (%):",
-            SliderSpinner.from(maxCurvature));
-
-        colorsLabel = new JLabel("Random Colors:");
-        colorsCB = new JComboBox<>(COLOR_CHOICES);
-        colorsCB.setName("colorsCB");
-        gbh.addTwoComponents(colorsLabel, colorsCB);
-
-        toolSelector.addActionListener(e -> updateRandomColorsEnabledState());
-        updateRandomColorsEnabledState();
+        toolsParam.setupEnableOtherIf(colorsParam, this::useColors);
     }
 
-    private void updateRandomColorsEnabledState() {
-        Tool tool = (Tool) toolSelector.getSelectedItem();
-        if (tool == BRUSH) {
-            colorsLabel.setEnabled(true);
-            colorsCB.setEnabled(true);
-        } else {
-            colorsLabel.setEnabled(false);
-            colorsCB.setEnabled(false);
-        }
+    private boolean useColors(Tool selectedTool) {
+        return selectedTool == BRUSH;
     }
 
     public AutoPaintSettings getSettings() {
         int numStrokes = getNumStrokes();
         int strokeLength = getStrokeLength();
+        Tool tool = getSelectedTool();
 
-        Tool tool = (Tool) toolSelector.getSelectedItem();
-
-        boolean colorsEnabled = colorsCB.isEnabled();
-        String colors = (String) colorsCB.getSelectedItem();
+        boolean colorsEnabled = colorsParam.isEnabled();
+        String colors = colorsParam.getSelected();
         boolean randomColors = colorsEnabled && colors.equals(COLOR_RANDOM);
         boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_INTERPOLATED);
 
@@ -128,6 +110,10 @@ public class AutoPaintPanel extends ValidatedPanel {
         return new AutoPaintSettings(tool, numStrokes, strokeLength, randomColors,
             lengthRandomnessPercentage, maxCurvaturePercentage, interpolatedColors,
             angleType.getValue());
+    }
+
+    private Tool getSelectedTool() {
+        return toolsParam.getSelected();
     }
 
     private int getNumStrokes() {
@@ -143,18 +129,62 @@ public class AutoPaintPanel extends ValidatedPanel {
         var retVal = ValidationResult.ok();
         try {
             int ns = getNumStrokes();
-            retVal = retVal.addErrorIfZero(ns, "Number of Strokes");
-            retVal = retVal.addErrorIfNegative(ns, "Number of Strokes");
+            retVal = retVal.addErrorIfZero(ns, NUM_STROKES_TEXT);
+            retVal = retVal.addErrorIfNegative(ns, NUM_STROKES_TEXT);
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("\"Number of Strokes\" must be an integer.");
+            retVal = retVal.addError("\"" + NUM_STROKES_TEXT + "\" must be an integer.");
         }
         try {
             int ln = getStrokeLength();
-            retVal = retVal.addErrorIfZero(ln, "Average Stroke Length");
-            retVal = retVal.addErrorIfNegative(ln, "Average Stroke Length");
+            retVal = retVal.addErrorIfZero(ln, STROKE_LENGTH_TEXT);
+            retVal = retVal.addErrorIfNegative(ln, STROKE_LENGTH_TEXT);
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("\"Average Stroke Length\" must be an integer.");
+            retVal = retVal.addError("\"" + STROKE_LENGTH_TEXT + "\" must be an integer.");
         }
         return retVal;
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        toolsParam.saveStateTo(preset);
+        angleType.saveStateTo(preset);
+
+        preset.putInt(NUM_STROKES_TEXT, getNumStrokes());
+        preset.putInt(STROKE_LENGTH_TEXT, getStrokeLength());
+
+        lengthVariability.saveStateTo(preset);
+        maxCurvature.saveStateTo(preset);
+        colorsParam.saveStateTo(preset);
+
+        if (useColors(getSelectedTool())) {
+            FgBgColors.saveStateTo(preset);
+        }
+    }
+
+    @Override
+    public void loadUserPreset(UserPreset preset) {
+        toolsParam.loadStateFrom(preset);
+        angleType.loadStateFrom(preset);
+
+        numStrokesTF.setText(preset.get(NUM_STROKES_TEXT));
+        lengthTF.setText(preset.get(STROKE_LENGTH_TEXT));
+
+        lengthVariability.loadStateFrom(preset);
+        maxCurvature.loadStateFrom(preset);
+        colorsParam.loadStateFrom(preset);
+
+        if (useColors(getSelectedTool())) {
+            FgBgColors.loadStateFrom(preset);
+        }
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return "Auto Paint";
     }
 }

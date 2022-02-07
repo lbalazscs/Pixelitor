@@ -32,7 +32,7 @@ import static pixelitor.filters.gui.SelectImageParam.NamedImage;
  * A {@link FilterParam} that allows the user to select
  * an image from the list of currently opened images.
  */
-public class SelectImageParam extends AbstractMultipleChoiceParam<NamedImage> {
+public class SelectImageParam extends ListParam<NamedImage> {
     public SelectImageParam(String name) {
         super(name,
             openImageInfos(),

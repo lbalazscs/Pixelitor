@@ -51,7 +51,6 @@ import java.awt.Color;
 import java.io.File;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -278,7 +277,7 @@ public class AppRunner {
 
         // try again
         dialog.button("ok").click();
-        Utils.sleep(1, TimeUnit.SECONDS);
+        Utils.sleep(1, SECONDS);
 
         // this time the dialog should close
         dialog.requireNotVisible();

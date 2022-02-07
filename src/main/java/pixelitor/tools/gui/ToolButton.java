@@ -36,7 +36,6 @@ public class ToolButton extends JToggleButton {
 
     private final Tool tool;
 
-    private List<UserPreset> startupPresets;
     private int numPresets;
     private JPopupMenu popup;
 
@@ -65,7 +64,7 @@ public class ToolButton extends JToggleButton {
         addActionListener(e -> Tools.start(tool));
 
         if (tool.canHaveUserPresets()) {
-            startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
+            List<UserPreset> startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
             numPresets = startupPresets.size();
 
             popup = new JPopupMenu();

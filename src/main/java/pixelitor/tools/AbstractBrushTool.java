@@ -750,7 +750,9 @@ public abstract class AbstractBrushTool extends Tool {
             sb.append(", sym=").append(getSymmetry());
         }
         if (lazyMouse) {
-            sb.append(", (lazy " + UNICODE_MOUSE_SYMBOL + " d=")
+            sb.append(", (lazy ")
+                .append(UNICODE_MOUSE_SYMBOL)
+                .append(" d=")
                 .append(lazyMouseDist.getValue())
                 .append(")");
         } else {

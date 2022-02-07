@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,23 +29,23 @@ import java.util.function.Predicate;
 /**
  * Base class for filter params that have a JComboBox as their GUI
  */
-public abstract class AbstractMultipleChoiceParam<E>
+public class ListParam<E>
     extends AbstractFilterParam implements ComboBoxModel<E> {
     protected List<E> choices;
     protected E defaultChoice;
     protected E currentChoice;
     private final EventListenerList listenerList = new EventListenerList();
 
-    protected AbstractMultipleChoiceParam(String name,
-                                          E[] choices,
-                                          RandomizePolicy randomizePolicy) {
+    public ListParam(String name, E[] choices) {
+        this(name, choices, RandomizePolicy.ALLOW_RANDOMIZE);
+    }
+
+    public ListParam(String name, E[] choices, RandomizePolicy randomizePolicy) {
         this(name, List.of(choices), choices[0], randomizePolicy);
     }
 
-    protected AbstractMultipleChoiceParam(String name,
-                                          List<E> choices,
-                                          E defaultChoice,
-                                          RandomizePolicy randomizePolicy) {
+    public ListParam(String name, List<E> choices, E defaultChoice,
+                     RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
         this.choices = choices;
         this.defaultChoice = defaultChoice;

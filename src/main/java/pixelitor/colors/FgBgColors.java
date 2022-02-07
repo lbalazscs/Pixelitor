@@ -74,7 +74,7 @@ public class FgBgColors {
     }
 
     public static void randomizeColors() {
-        selector.randomize();
+        selector.randomizeColors();
     }
 
     public static void setDefaultColors() {
@@ -85,12 +85,12 @@ public class FgBgColors {
         selector.setLayerMaskEditing(b);
     }
 
-    public static void saveTo(UserPreset preset) {
+    public static void saveStateTo(UserPreset preset) {
         preset.putColor("FG", getFGColor());
         preset.putColor("BG", getBGColor());
     }
 
-    public static void loadFrom(UserPreset preset) {
+    public static void loadStateFrom(UserPreset preset) {
         setFGColor(preset.getColor("FG"));
         setBGColor(preset.getColor("BG"));
     }

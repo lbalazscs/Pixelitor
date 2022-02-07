@@ -89,8 +89,8 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
-        return settings.createUserPreset(presetName);
+    public void saveStateTo(UserPreset preset) {
+        settings.saveStateTo(preset);
     }
 
     @Override

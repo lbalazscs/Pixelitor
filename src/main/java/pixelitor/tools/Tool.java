@@ -21,7 +21,6 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
-import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -353,15 +352,6 @@ public abstract class Tool implements KeyListener, PresetOwner {
         return getName();
     }
 
-    @Override
-    public final UserPreset createUserPreset(String presetName) {
-        UserPreset preset = new UserPreset(presetName, getPresetDirName());
-        saveStateTo(preset);
-        return preset;
-    }
-
-    protected abstract void saveStateTo(UserPreset preset);
-
     // used for debugging
     public String getStateInfo() {
         return null;
@@ -375,7 +365,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
 
     @Override
     public String toString() {
-        return name; // so that they can be easily selected from a JComboBox
+        return shortName; // so that they can be selected from a JComboBox
     }
 
     protected abstract static class ToolIcon extends VectorIcon {

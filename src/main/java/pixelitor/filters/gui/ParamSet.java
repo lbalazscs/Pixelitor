@@ -277,20 +277,16 @@ public class ParamSet {
         runFilter();
     }
 
-    public UserPreset toUserPreset(String filterName, String presetName) {
-        UserPreset p = new UserPreset(presetName, filterName);
-
+    public void saveStateTo(UserPreset preset) {
         Locale locale = Locale.getDefault(FORMAT);
         try {
             Locale.setDefault(FORMAT, Locale.US);
             for (FilterParam param : paramList) {
-                param.saveStateTo(p);
+                param.saveStateTo(preset);
             }
         } finally {
             Locale.setDefault(FORMAT, locale);
         }
-
-        return p;
     }
 
     public void set(String paramName, String value) {

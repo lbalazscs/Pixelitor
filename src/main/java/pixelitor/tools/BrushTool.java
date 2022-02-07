@@ -98,13 +98,13 @@ public class BrushTool extends BlendingModeBrushTool {
     public void saveStateTo(UserPreset preset) {
         super.saveStateTo(preset);
 
-        FgBgColors.saveTo(preset);
+        FgBgColors.saveStateTo(preset);
     }
 
     @Override
     public void loadUserPreset(UserPreset preset) {
         super.loadUserPreset(preset);
 
-        FgBgColors.loadFrom(preset);
+        FgBgColors.loadStateFrom(preset);
     }
 }

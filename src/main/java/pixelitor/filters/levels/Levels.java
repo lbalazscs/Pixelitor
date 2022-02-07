@@ -88,10 +88,8 @@ public class Levels extends FilterWithGUI {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
-        UserPreset preset = new UserPreset(presetName, getName());
+    public void saveStateTo(UserPreset preset) {
         levelsModel.saveToUserPreset(preset);
-        return preset;
     }
 
     @Override

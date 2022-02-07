@@ -43,6 +43,10 @@ public class DialogMenuBar extends JMenuBar {
     private static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
         && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
+    public DialogMenuBar(DialogMenuOwner owner) {
+        this(owner, true);
+    }
+
     public DialogMenuBar(DialogMenuOwner owner, boolean addPresets) {
         this.owner = owner;
 
@@ -118,7 +122,6 @@ public class DialogMenuBar extends JMenuBar {
     }
 
     private void removeOldPreset(UserPreset preset) {
-        // "yes" was pressed, remove the old preset from the menu
         Component[] menuComponents = presetsMenu.getMenuComponents();
         for (Component item : menuComponents) {
             if (item instanceof JMenuItem menuItem) {

@@ -24,7 +24,6 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
@@ -228,8 +227,7 @@ public class TextSettings implements Serializable {
         return new TextSettings(this);
     }
 
-    public UserPreset createUserPreset(String presetName) {
-        UserPreset preset = new UserPreset(presetName, TextLayer.TEXT_PRESETS_DIR_NAME);
+    public void saveStateTo(UserPreset preset) {
         preset.put("text", text);
         preset.putColor("color", color);
         preset.putFloat("rotation", (float) rotation);
@@ -242,8 +240,6 @@ public class TextSettings implements Serializable {
         areaEffects.saveStateTo(preset);
 
         preset.putBoolean("watermark", watermark);
-
-        return preset;
     }
 
     public void loadUserPreset(UserPreset preset) {

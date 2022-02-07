@@ -70,7 +70,7 @@ public final class NewImage {
         var panel = new NewImagePanel();
         new DialogBuilder()
             .title(NEW_IMAGE_STRING)
-            .menuBar(new DialogMenuBar(panel, true))
+            .menuBar(new DialogMenuBar(panel))
             .validatedContent(panel)
             .okAction(panel::okPressedInDialog)
             .show();

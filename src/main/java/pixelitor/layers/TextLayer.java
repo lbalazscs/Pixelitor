@@ -378,7 +378,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     private JMenuBar getMenuBar() {
-        return new DialogMenuBar(this, true);
+        return new DialogMenuBar(this);
     }
 
     @Override
@@ -392,8 +392,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
-        return settings.createUserPreset(presetName);
+    public void saveStateTo(UserPreset preset) {
+        settings.saveStateTo(preset);
     }
 
     @Override

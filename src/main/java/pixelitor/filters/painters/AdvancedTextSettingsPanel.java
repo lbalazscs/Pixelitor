@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -66,11 +67,11 @@ public class AdvancedTextSettingsPanel extends JPanel {
     }
 
     private void addTrackingGUI(FontInfo font) {
-        trackingParam = new RangeParam("", -20, 0, 70);
+        trackingParam = new RangeParam("Tracking (Letter-spacing)",
+            -20, 0, 70, true, SliderSpinner.TextPosition.NONE);
         trackingParam.setValue(font.getTracking());
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
-        var trackingGUI = trackingParam.createGUI("trackingGUI");
-        gbh.addLabelAndControl("Tracking (Letter-spacing):", trackingGUI);
+        gbh.addParam(trackingParam, "trackingGUI");
     }
 
     public void saveStateTo(FontInfo fontInfo) {

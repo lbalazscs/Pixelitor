@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.automate;
 
 import pixelitor.Composition;
 import pixelitor.colors.Colors;
+import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
@@ -60,6 +61,7 @@ public class AutoPaint {
         new DialogBuilder()
             .validatedContent(configPanel)
             .title(i18n("auto_paint"))
+            .menuBar(new DialogMenuBar(configPanel))
             .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
             .show();
     }
@@ -67,14 +69,14 @@ public class AutoPaint {
     private static void paintStrokes(Drawable dr, AutoPaintSettings settings) {
         assert calledOnEDT() : threadInfo();
 
-        saveOriginalFgBgColors();
-        History.setIgnoreEdits(true);
         BufferedImage backupImage = dr.getSelectedSubImage(true);
-
-        String msg = format("Auto Paint with %s Tool: ", settings.getTool());
-        var progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
+        String msg = format("Auto Paint with %s: ", settings.getTool().getName());
+        ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
 
         try {
+            saveOriginalFgBgColors();
+            History.setIgnoreEdits(true);
+
             runStrokes(settings, dr, progressHandler);
         } catch (Exception e) {
             Messages.showException(e);
@@ -97,8 +99,8 @@ public class AutoPaint {
 
         var random = new SplittableRandom();
         var comp = dr.getComp();
-
         int numStrokes = settings.getNumStrokes();
+
         for (int i = 0; i < numStrokes; i++) {
             progressHandler.updateProgress(i);
 
@@ -141,9 +143,9 @@ public class AutoPaint {
         path.moveTo(start.getImX(), start.getImY());
         double controlPointX = (start.getImX() + end.getImX()) / 2.0;
         double controlPointY = (start.getImY() + end.getImY()) / 2.0;
-        float curvature = settings.getMaxCurvature();
-        if (curvature > 0) {
-            double maxShift = start.imDist(end) * curvature;
+        float maxCurvature = settings.getMaxCurvature();
+        if (maxCurvature > 0) {
+            double maxShift = start.imDist(end) * maxCurvature;
             controlPointX += (Rnd.nextDouble() - 0.5) * maxShift;
             controlPointY += (Rnd.nextDouble() - 0.5) * maxShift;
         }

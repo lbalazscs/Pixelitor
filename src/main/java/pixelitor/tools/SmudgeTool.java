@@ -152,7 +152,7 @@ public class SmudgeTool extends AbstractBrushTool {
         preset.put("Brush Type", brushModel.getSelectedItem().toString());
         strengthParam.saveStateTo(preset);
         preset.putBoolean("Finger Painting", fingerPaintingCB.isSelected());
-        FgBgColors.saveTo(preset);
+        FgBgColors.saveStateTo(preset);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class SmudgeTool extends AbstractBrushTool {
         brushModel.setSelectedItem(preset.getEnum("Brush Type", CopyBrushType.class));
         strengthParam.loadStateFrom(preset);
         fingerPaintingCB.setSelected(preset.getBoolean("Finger Painting"));
-        FgBgColors.loadFrom(preset);
+        FgBgColors.loadStateFrom(preset);
     }
 
     @Override

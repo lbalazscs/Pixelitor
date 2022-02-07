@@ -140,8 +140,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
-        return paramSet.toUserPreset(getName(), presetName);
+    public void saveStateTo(UserPreset preset) {
+        paramSet.saveStateTo(preset);
     }
 
     @Override
@@ -151,7 +151,9 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     @Override
     public String paramsAsString() {
-        return paramSet.toUserPreset(getName(), "Debug").toString();
+        UserPreset preset = new UserPreset(getName(), "Debug");
+        paramSet.saveStateTo(preset);
+        return preset.toString();
     }
 
     public void set(String paramName, String value) {

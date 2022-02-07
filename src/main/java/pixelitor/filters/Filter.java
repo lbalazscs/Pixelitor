@@ -212,7 +212,7 @@ public abstract class Filter implements Serializable, PresetOwner {
     }
 
     @Override
-    public UserPreset createUserPreset(String presetName) {
+    public void saveStateTo(UserPreset preset) {
         // overridden if the filter supports presets
         throw new UnsupportedOperationException();
     }
