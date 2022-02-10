@@ -17,11 +17,10 @@
 
 package pixelitor.tools.toolhandlers;
 
+import pixelitor.Composition;
 import pixelitor.layers.Drawable;
-import pixelitor.layers.GradientFillLayer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.Tool;
-import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
@@ -68,14 +67,19 @@ public class DrawableCheckHandler extends ToolHandler {
     }
 
     private boolean shouldForwardToNextHandler(PMouseEvent e) {
-        if (e.getComp().activeAcceptsToolDrawing()) {
+        Composition activeComp = e.getComp();
+        if (activeComp.activeAcceptsToolDrawing()) { // normal case
             return true;
         }
-        if (currentTool == Tools.GRADIENT) {
-            if (e.getComp().getActiveLayer().getClass() == GradientFillLayer.class) {
-                return true;
-            }
+
+        // special layers don't have to be rasterized even if the tool
+        // declares that it accepts only drawables
+        Tool preferredTool = activeComp.getActiveLayer().getPreferredTool();
+        if (preferredTool == currentTool) {
+            return true;
         }
+
+        // show the auto-rasterization dialog
         return false;
     }
 }

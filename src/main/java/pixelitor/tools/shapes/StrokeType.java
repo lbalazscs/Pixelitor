@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -216,8 +216,8 @@ public enum StrokeType {
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
 
     public Stroke createStroke(StrokeParam param, float width) {
-        int cap = param.getStrokeCapParam().getSelected().getValue();
-        int join = param.getStrokeJoinParam().getSelected().getValue();
+        int cap = param.getCapValue();
+        int join = param.getJoinValue();
         float[] dashFloats = param.getDashFloats(width);
         return createStroke(width, cap, join, dashFloats);
     }

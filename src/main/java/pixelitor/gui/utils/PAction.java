@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,14 +26,14 @@ import java.awt.event.ActionEvent;
  * The "Pixelitor action" is the common superclass of most actions.
  */
 public abstract class PAction extends NamedAction {
-    public PAction() {
+    protected PAction() {
     }
 
-    public PAction(String name) {
+    protected PAction(String name) {
         super(name);
     }
 
-    public PAction(String name, Icon icon) {
+    protected PAction(String name, Icon icon) {
         super(name, icon);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -254,8 +254,7 @@ public class FractalTree extends ParametrizedFilter {
                                       double x1, double y1,
                                       double x2, double y2, float c) {
         if (c == 0) {
-            var line = new Line2D.Double(x1, y1, x2, y2);
-            g.draw(line);
+            g.draw(new Line2D.Double(x1, y1, x2, y2));
         } else {
             Path2D path = new Path2D.Double();
             path.moveTo(x1, y1);
@@ -267,7 +266,7 @@ public class FractalTree extends ParametrizedFilter {
             double cx = x1 + dx / 2.0;
             double cy = y1 + dy / 2.0;
 
-            // The normal vector is -dy, dx.
+            // The normal vector is (-dy, dx).
             double ctrlX = cx - dy * c;
             double ctrlY = cy + dx * c;
 

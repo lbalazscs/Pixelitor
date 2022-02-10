@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,11 +23,15 @@ import pixelitor.tools.util.DragDisplay;
 import java.awt.Color;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 
 /**
  * A corner handle of a {@link TransformBox}
  */
 public class CornerHandle extends PositionHandle {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     // the two neighbors in the horizontal and vertical directions
     private CornerHandle horNeighbor;
     private EdgeHandle horEdge;
@@ -44,9 +48,15 @@ public class CornerHandle extends PositionHandle {
     private final boolean nextToRot;
 
     public CornerHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
-                        View view, Color c, int cursorIndex, int cursorIndexIO) {
-        super(name, box, pos.getX(), pos.getY(), view, c, Color.RED, cursorIndex, cursorIndexIO);
+                        View view, int cursorIndex, int cursorIndexIO) {
+        super(name, box, pos.getX(), pos.getY(), view,
+            Color.WHITE, Color.RED, cursorIndex, cursorIndexIO);
         this.nextToRot = nextToRot;
+    }
+
+    public CornerHandle copy(TransformBox newBox) {
+        return new CornerHandle(name, newBox, nextToRot,
+            this, view, cursorIndex, cursorIndexIO);
     }
 
     public void setVerNeighbor(CornerHandle verNeighbor, EdgeHandle verEdge, boolean propagate) {

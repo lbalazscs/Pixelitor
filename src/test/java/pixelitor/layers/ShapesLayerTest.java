@@ -15,29 +15,24 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.shapes;
+package pixelitor.layers;
 
-import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.RangeParam;
+import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
+import pixelitor.Composition;
+import pixelitor.TestHelper;
 
-import java.util.List;
-
-/**
- * The settings for a rectangle shape.
- */
-class RectangleSettings extends ShapeTypeSettings {
-    private final RangeParam radius = new RangeParam("Rounding Radius (px)", 0, 0, 500);
-    private final List<FilterParam> params = List.of(radius);
-
-    public RectangleSettings() {
+@DisplayName("shape layer tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class ShapesLayerTest {
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
     }
 
-    @Override
-    public List<FilterParam> getParams() {
-        return params;
-    }
-
-    public double getRadius() {
-        return radius.getValueAsDouble();
+    @Test
+    void duplicate() {
+        Composition comp = Mockito.mock(Composition.class);
+        ShapesLayer layer = new ShapesLayer(comp, "test");
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,16 @@ import pixelitor.tools.util.DragDisplay;
 
 import java.awt.Color;
 import java.awt.geom.Dimension2D;
+import java.io.Serial;
 
 /**
  * An edge handle of a {@link TransformBox}.
  * It is always at the midpoint between two {@link CornerHandle}s
  */
 public class EdgeHandle extends PositionHandle {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final CornerHandle ch1;
     private final CornerHandle ch2;
 

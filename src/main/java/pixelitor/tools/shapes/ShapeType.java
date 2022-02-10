@@ -59,7 +59,7 @@ public enum ShapeType {
         }
 
         @Override
-        public RectangleSettings createDefaultSettings() {
+        public RectangleSettings createSettings() {
             return new RectangleSettings();
         }
     }, ELLIPSE("Ellipse", true, false, false) {
@@ -127,7 +127,7 @@ public enum ShapeType {
         }
 
         @Override
-        public LineSettings createDefaultSettings() {
+        public LineSettings createSettings() {
             return new LineSettings();
         }
     }, HEART("Heart", true, false, false) {
@@ -198,8 +198,8 @@ public enum ShapeType {
         }
 
         @Override
-        public StarSettings createDefaultSettings() {
-            return new StarSettings();
+        public StarSettings createSettings() {
+            return new StarSettings(7, 50);
         }
     }, RANDOM_STAR("Random Star", true, false, false) {
         private Drag lastDrag;
@@ -464,7 +464,7 @@ public enum ShapeType {
         return hasSettings;
     }
 
-    public ShapeTypeSettings createDefaultSettings() {
+    public ShapeTypeSettings createSettings() {
         assert hasSettings() : "no settings for " + this;
         // should be overridden, if it has settings
         throw new UnsupportedOperationException("no settings for " + this);

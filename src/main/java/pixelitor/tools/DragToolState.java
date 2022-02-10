@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public enum DragToolState {
     NO_INTERACTION {
         @Override
         public boolean isOK(ShapesTool tool) {
-            return tool.getStyledShape() == null && tool.getTransformBox() == null;
+            return !tool.hasStyledShape() && !tool.hasBox();
         }
     },
     /**
@@ -39,7 +39,7 @@ public enum DragToolState {
     INITIAL_DRAG {
         @Override
         public boolean isOK(ShapesTool tool) {
-            return tool.getStyledShape() != null && tool.getTransformBox() == null;
+            return tool.hasStyledShape() && !tool.hasBox();
         }
     },
     /**
@@ -48,7 +48,7 @@ public enum DragToolState {
     TRANSFORM {
         @Override
         public boolean isOK(ShapesTool tool) {
-            return tool.getStyledShape() != null && tool.getTransformBox() != null;
+            return tool.hasStyledShape() && tool.hasBox();
         }
     };
 

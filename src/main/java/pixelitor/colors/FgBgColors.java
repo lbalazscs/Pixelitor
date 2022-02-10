@@ -91,7 +91,7 @@ public class FgBgColors {
     }
 
     public static void loadStateFrom(UserPreset preset) {
-        setFGColor(preset.getColor("FG"));
-        setBGColor(preset.getColor("BG"));
+        setFGColor(preset.getColor("FG"), false);
+        setBGColor(preset.getColor("BG"), false);
     }
 }

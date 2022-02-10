@@ -27,16 +27,16 @@ import javax.swing.*;
  * An Action that is enabled only if at least one view is opened.
  */
 public abstract class OpenViewEnabledAction extends PAction implements ViewActivationListener {
-    public OpenViewEnabledAction() {
+    protected OpenViewEnabledAction() {
         init();
     }
 
-    public OpenViewEnabledAction(String name) {
+    protected OpenViewEnabledAction(String name) {
         super(name);
         init();
     }
 
-    public OpenViewEnabledAction(String name, Icon icon) {
+    protected OpenViewEnabledAction(String name, Icon icon) {
         super(name, icon);
         init();
     }

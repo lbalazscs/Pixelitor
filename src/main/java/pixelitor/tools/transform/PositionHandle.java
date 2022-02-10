@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.tools.util.DraggablePoint;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
+import java.io.Serial;
 
 import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
 
@@ -31,14 +32,17 @@ import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
  * The common functionality of corner and edge handles
  */
 public abstract class PositionHandle extends DraggablePoint {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     protected final TransformBox box;
 
     // The sine and cosine of the current rotation angle
     protected double sin;
     protected double cos;
 
-    private final int cursorIndex;
-    private final int cursorIndexIO;
+    protected final int cursorIndex;
+    protected final int cursorIndexIO;
 
     private Direction direction;
 

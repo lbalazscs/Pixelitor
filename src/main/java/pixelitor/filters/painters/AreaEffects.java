@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import org.jdesktop.swingx.painter.effects.*;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -295,12 +296,29 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
         }
     }
 
+    public DebugNode createDebugNode() {
+        DebugNode node = new DebugNode("effects", this);
+        addToNode(node, glowEffect, "glow");
+        addToNode(node, innerGlowEffect, "inner glow");
+        addToNode(node, neonBorderEffect, "glow");
+        addToNode(node, dropShadowEffect, "glow");
+        return node;
+    }
+
+    private static void addToNode(DebugNode node, AreaEffect effect, String name) {
+        if (effect == null) {
+            node.addString(name, "null");
+        } else {
+            node.addString(name, "not null");
+        }
+    }
+
     @Override
     public String toString() {
         return "AreaEffects{glow=" + (glowEffect == null ? "null" : "not null") +
-            ", innerGlow=" + (innerGlowEffect == null ? "null" : "not null") +
-            ", neonBorder=" + (neonBorderEffect == null ? "null" : "not null") +
-            ", dropShadow=" + (dropShadowEffect == null ? "null" : "not null") +
-            '}';
+               ", innerGlow=" + (innerGlowEffect == null ? "null" : "not null") +
+               ", neonBorder=" + (neonBorderEffect == null ? "null" : "not null") +
+               ", dropShadow=" + (dropShadowEffect == null ? "null" : "not null") +
+               '}';
     }
 }

@@ -84,6 +84,23 @@ public class Gradient implements Serializable {
         colors = initColors(colorType, reverted);
     }
 
+    public Gradient(Gradient other) {
+        this.drag = other.drag;
+        this.type = other.type;
+        this.cycleMethod = other.cycleMethod;
+        this.colorType = other.colorType;
+        this.reverted = other.reverted;
+        this.blendingMode = other.blendingMode;
+        this.opacity = other.opacity;
+        this.fgColor = other.fgColor;
+        this.bgColor = other.bgColor;
+        this.colors = other.colors;
+    }
+
+    public Gradient copy() {
+        return new Gradient(this);
+    }
+
     private static Color[] initColors(GradientColorType colorType, boolean reverted) {
         Color startColor = colorType.getStartColor(reverted);
         Color endColor = colorType.getEndColor(reverted);
@@ -211,11 +228,6 @@ public class Gradient implements Serializable {
 
     public void transform(AffineTransform at) {
         drag = drag.transformedCopy(at);
-    }
-
-    public Gradient copy() {
-        return new Gradient(drag, type, cycleMethod, colorType,
-            reverted, blendingMode, opacity);
     }
 
     public void startMovement() {

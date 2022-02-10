@@ -396,6 +396,8 @@ public class TestHelper {
             // unit testing mode is already set
             return;
         }
+        AppContext.setUnitTestingMode();
+
         Utils.makeSureAssertionsAreEnabled();
 
         Language.setCurrent(Language.ENGLISH);
@@ -409,8 +411,6 @@ public class TestHelper {
         Layer.uiFactory = TestLayerUI::new;
         ToolSettingsPanelContainer.setInstance(mock(ToolSettingsPanelContainer.class));
         setupMockFgBgSelector();
-
-        AppContext.setUnitTestingMode();
     }
 
     private static void setupMockFgBgSelector() {

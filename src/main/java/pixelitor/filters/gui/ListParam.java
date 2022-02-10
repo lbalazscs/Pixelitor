@@ -23,6 +23,7 @@ import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import java.io.Serial;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -158,14 +159,14 @@ public class ListParam<E>
     }
 
     @Override
-    public ChoiceParamState<E> copyState() {
-        return new ChoiceParamState<>(getSelected());
+    public ListParamState<E> copyState() {
+        return new ListParamState<>(getSelected());
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         @SuppressWarnings("unchecked")
-        ChoiceParamState<E> paramState = (ChoiceParamState<E>) state;
+        ListParamState<E> paramState = (ListParamState<E>) state;
         setSelectedItem(paramState.value(), false);
     }
 
@@ -227,9 +228,12 @@ public class ListParam<E>
             choices, defaultChoice, currentChoice);
     }
 
-    public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {
+    public record ListParamState<E>(E value) implements ParamState<ListParamState<E>> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
-        public ChoiceParamState<E> interpolate(ChoiceParamState<E> endState, double progress) {
+        public ListParamState<E> interpolate(ListParamState<E> endState, double progress) {
             throw new UnsupportedOperationException();
         }
 

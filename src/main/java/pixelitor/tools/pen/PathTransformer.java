@@ -120,7 +120,7 @@ public class PathTransformer implements PenToolMode {
         // if no handle was hit, then look for whole-box movements
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
-                box.boxAreaHitWhenPressed(x, y);
+                box.startWholeBoxDrag(x, y);
                 draggedBox = box;
                 lastActiveBox = box;
                 e.repaint();

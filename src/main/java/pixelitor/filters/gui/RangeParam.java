@@ -27,6 +27,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Dimension;
+import java.io.Serial;
 import java.util.function.BooleanSupplier;
 
 import static java.lang.String.format;
@@ -439,14 +440,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return value;
     }
 
-    public RangeParam copy() {
-        RangeParam copy = new RangeParam(getName(), minValue, defaultValue, maxValue, addResetButton, textPosition, randomizePolicy);
-        // set the value separately in order to make
-        // sure that the default value is copied
-        copy.setValueNoTrigger(value);
-        return copy;
-    }
-
     @Override
     public String getPresetKey() {
         if (presetKey != null) {
@@ -523,6 +516,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public static class RangeParamState implements ParamState<RangeParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         final double value;
         final int decimalPlaces;
 

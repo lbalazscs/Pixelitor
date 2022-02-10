@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,15 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 
 /**
  * The handle that can be used to rotate a {@link TransformBox}
  */
 public class RotationHandle extends DraggablePoint {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final TransformBox box;
     private double cy;
     private double cx;
@@ -44,6 +48,10 @@ public class RotationHandle extends DraggablePoint {
         super(name, pos.getX(), pos.getY(), view, Color.WHITE, Color.RED);
         this.box = box;
         cursor = Cursors.DEFAULT;
+    }
+
+    public RotationHandle copy(TransformBox newBox) {
+        return new RotationHandle(name, newBox, this, view);
     }
 
     @Override
@@ -69,7 +77,7 @@ public class RotationHandle extends DraggablePoint {
 
         double angle = reCalcAngle(newX, newY, false);
 
-        box.transform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+        box.coTransform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
     }
 
     @Override

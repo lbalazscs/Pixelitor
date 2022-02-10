@@ -251,6 +251,16 @@ public class Keyboard {
         Utils.sleep(100, MILLISECONDS);
     }
 
+    void ctrlAltPress(int keyCode) {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(VK_ALT).pressKey(keyCode)
+                .releaseKey(keyCode).releaseKey(VK_ALT).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(CTRL_DOWN_MASK | ALT_DOWN_MASK, keyCode);
+        }
+        Utils.sleep(100, MILLISECONDS);
+    }
+
     public void pressCtrlOne() {
         ctrlPress(VK_1);
     }

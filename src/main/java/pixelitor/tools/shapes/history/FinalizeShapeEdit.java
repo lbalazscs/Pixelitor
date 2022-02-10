@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,10 +32,8 @@ public class FinalizeShapeEdit extends PixelitorEdit {
     private final TransformBox box;
     private final StyledShape styledShape;
 
-    public FinalizeShapeEdit(Composition comp,
-                             PartialImageEdit imageEdit,
-                             TransformBox box,
-                             StyledShape styledShape) {
+    public FinalizeShapeEdit(Composition comp, PartialImageEdit imageEdit,
+                             TransformBox box, StyledShape styledShape) {
         super("Finalize Shape", comp);
 
         // the image edit can be null!

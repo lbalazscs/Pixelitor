@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,8 @@ import pixelitor.tools.shapes.StrokeCap;
 import pixelitor.tools.shapes.StrokeJoin;
 import pixelitor.tools.shapes.StrokeType;
 
+import java.io.Serial;
+
 import static java.lang.String.format;
 
 /**
@@ -30,8 +32,12 @@ import static java.lang.String.format;
  * It also functions as the {@link ParamState} of {@link StrokeParam}
  */
 public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
-                             StrokeType type, ShapeType shapeType,
-                             boolean dashed) implements ParamState<StrokeSettings> {
+                             StrokeType type, ShapeType shapeType, boolean dashed)
+    implements ParamState<StrokeSettings> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Override
     public StrokeSettings interpolate(StrokeSettings endState, double progress) {
         // the stroke width is the only thing that can be animated

@@ -17,12 +17,49 @@
 
 package pixelitor.tools.shapes;
 
+import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.ParamState;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Configurable;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The settings of a configurable {@link ShapeType}.
  */
 public abstract class ShapeTypeSettings extends Configurable {
-    public abstract ShapeTypeSettings copy();
+    public abstract List<FilterParam> getParams();
+
+    @Override
+    protected JPanel createConfigPanel() {
+        return GUIUtils.arrangeVertically(getParams());
+    }
+
+    public List<ParamState<?>> copyState() {
+        List<FilterParam> params = getParams();
+        List<ParamState<?>> state = new ArrayList<>(params.size());
+        for (FilterParam param : params) {
+            state.add(param.copyState());
+        }
+        return state;
+    }
+
+    public void loadStateFrom(List<ParamState<?>> state) {
+        List<FilterParam> params = getParams();
+        for (int i = 0; i < params.size(); i++) {
+            params.get(i).loadStateFrom(state.get(i), true);
+        }
+    }
+
+    @Override
+    protected void forEachParam(Consumer<FilterParam> consumer) {
+        List<FilterParam> params = getParams();
+        for (FilterParam param : params) {
+            consumer.accept(param);
+        }
+    }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ class PathTest {
         SubPath sp = path.getActiveSubpath();
         assertThat(sp).firstAnchorIsAt(10, 10);
 
-        sp.storeTransformRefPoints(); // the ref point for the first anchor is 10, 10
+        sp.saveImTransformRefPoints(); // the ref point for the first anchor is 10, 10
 
         var at = AffineTransform.getTranslateInstance(20, 10);
         sp.transform(at);

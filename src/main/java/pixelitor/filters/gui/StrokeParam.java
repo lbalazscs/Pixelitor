@@ -258,8 +258,16 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeCapParam;
     }
 
+    public int getCapValue() {
+        return strokeCapParam.getSelected().getValue();
+    }
+
     public EnumParam<StrokeJoin> getStrokeJoinParam() {
         return strokeJoinParam;
+    }
+
+    public int getJoinValue() {
+        return strokeJoinParam.getSelected().getValue();
     }
 
     public EnumParam<StrokeType> getStrokeTypeParam() {

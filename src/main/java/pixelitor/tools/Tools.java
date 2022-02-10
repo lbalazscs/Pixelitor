@@ -21,7 +21,6 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
@@ -177,15 +176,19 @@ public class Tools {
         currentTool.compReplaced(newComp, reloaded);
     }
 
-    public static void editedObjectChanged(Layer layer) {
+    /**
+     * Called when a new layer or mask is being edited.
+     */
+    public static void editingTargetChanged(Layer layer) {
         assert currentTool != null || AppContext.isUnitTesting();
-        if (layer.getClass() == GradientFillLayer.class) {
-            if (currentTool != GRADIENT) {
-                startAndSelect(GRADIENT);
-            }
+
+        Tool preferredTool = layer.getPreferredTool();
+        if (preferredTool != null && preferredTool != currentTool) {
+            startAndSelect(preferredTool);
         }
+
         if (currentTool != null) {
-            currentTool.editedObjectChanged(layer);
+            currentTool.editingTargetChanged(layer);
         }
     }
 

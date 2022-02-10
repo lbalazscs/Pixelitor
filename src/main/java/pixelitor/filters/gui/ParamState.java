@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 package pixelitor.filters.gui;
 
+import java.io.Serializable;
+
 /**
  * Captures the state of a filter parameter at a given moment
  * (like the "Memento" design pattern)
@@ -23,7 +25,7 @@ package pixelitor.filters.gui;
  * The self-bounded type parameter is for ensuring that
  * interpolate receives and returns the actual type
  */
-public interface ParamState<S extends ParamState<S>> {
+public interface ParamState<S extends ParamState<S>> extends Serializable {
     /**
      * Calculate a new interpolated ParamState object,
      * where the current object represents the starting state

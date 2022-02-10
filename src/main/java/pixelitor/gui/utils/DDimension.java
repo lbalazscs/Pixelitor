@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,17 @@ package pixelitor.gui.utils;
 
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * The abstract JDK {@link Dimension2D} class doesn't have
  * a subclass with double precision in the JDK, so this is one.
  */
-public class DDimension extends Dimension2D {
+public class DDimension extends Dimension2D implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private double width;
     private double height;
 
@@ -36,6 +41,11 @@ public class DDimension extends Dimension2D {
     public DDimension(Rectangle2D rect) {
         width = rect.getWidth();
         height = rect.getHeight();
+    }
+
+    public DDimension(DDimension other) {
+        this.width = other.width;
+        this.height = other.height;
     }
 
     @Override

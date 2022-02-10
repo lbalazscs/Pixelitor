@@ -40,7 +40,7 @@ public class Keys {
     public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);
     public static final KeyStroke CTRL_E = getKeyStroke('E', CTRL);
     public static final KeyStroke CTRL_F = getKeyStroke('F', CTRL);
-    public static final KeyStroke CTRL_G = getKeyStroke('G', CTRL);
+//    public static final KeyStroke CTRL_G = getKeyStroke('G', CTRL);
     public static final KeyStroke CTRL_H = getKeyStroke('H', CTRL);
     public static final KeyStroke CTRL_I = getKeyStroke('I', CTRL);
     public static final KeyStroke CTRL_J = getKeyStroke('J', CTRL);
@@ -66,10 +66,12 @@ public class Keys {
     public static final KeyStroke CTRL_ALT_D = getKeyStroke('D', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_E = getKeyStroke('E', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_F = getKeyStroke('F', CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_G = getKeyStroke('G', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_O = getKeyStroke('O', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_S = getKeyStroke('S', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
 

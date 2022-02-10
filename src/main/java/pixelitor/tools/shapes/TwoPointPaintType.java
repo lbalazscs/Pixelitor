@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,27 +39,27 @@ import static pixelitor.colors.FgBgColors.getFGColor;
 public enum TwoPointPaintType {
     NONE("None") {
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             throw new UnsupportedOperationException();
         }
     }, FOREGROUND("Foreground") {
         @Override
-        protected Paint createPaint(Drag drag) {
-            return getFGColor();
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
+            return fgColor;
         }
     }, BACKGROUND("Background") {
         @Override
-        protected Paint createPaint(Drag drag) {
-            return getBGColor();
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
+            return bgColor;
         }
     }, TRANSPARENT("Transparent") {
         @Override
-        protected Paint createPaint(Drag drag) {
-            return Color.WHITE; // does not matter
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void prepare(Graphics2D g, Drag drag) {
+        public void prepare(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
             g.setComposite(AlphaComposite.getInstance(DST_OUT));
         }
 
@@ -69,45 +69,45 @@ public enum TwoPointPaintType {
         }
     }, LINEAR_GRADIENT("Linear Gradient") {
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new GradientPaint(
                 (float) drag.getStartXFromCenter(),
                 (float) drag.getStartYFromCenter(),
-                getFGColor(),
+                fgColor,
                 (float) drag.getEndX(),
                 (float) drag.getEndY(),
-                getBGColor());
+                bgColor);
         }
     }, RADIAL_GRADIENT("Radial Gradient") {
         private final float[] FRACTIONS = {0.0f, 1.0f};
         private final AffineTransform gradientTransform = new AffineTransform();
 
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             Point2D center = drag.getCenterPoint();
             float distance = (float) drag.calcImDist();
 
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS,
-                new Color[]{getFGColor(), getBGColor()},
+                new Color[]{fgColor, bgColor},
                 NO_CYCLE, SRGB, gradientTransform);
         }
     }, ANGLE_GRADIENT("Angle Gradient") {
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new AngleGradientPaint(drag.getCenterDrag(),
-                getFGColor(), getBGColor(), NO_CYCLE);
+                fgColor, bgColor, NO_CYCLE);
         }
     }, SPIRAL_GRADIENT("Spiral Gradient") {
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new SpiralGradientPaint(true, drag.getCenterDrag(),
-                getFGColor(), getBGColor(), NO_CYCLE);
+                fgColor, bgColor, NO_CYCLE);
         }
     }, DIAMOND_GRADIENT("Diamond Gradient") {
         @Override
-        protected Paint createPaint(Drag drag) {
+        protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new DiamondGradientPaint(drag.getCenterDrag(),
-                getFGColor(), getBGColor(), NO_CYCLE);
+                fgColor, bgColor, NO_CYCLE);
         }
     };
 
@@ -117,13 +117,17 @@ public enum TwoPointPaintType {
         this.guiName = guiName;
     }
 
-    protected abstract Paint createPaint(Drag drag);
+    protected final Paint createPaint(Drag drag) {
+        return createPaint(drag, getFGColor(), getBGColor());
+    }
+
+    protected abstract Paint createPaint(Drag drag, Color fgColor, Color bgColor);
 
     /**
      * Called before the drawing/filling
      */
-    public void prepare(Graphics2D g, Drag drag) {
-        g.setPaint(createPaint(drag));
+    public void prepare(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
+        g.setPaint(createPaint(drag, fgColor, bgColor));
     }
 
     /**

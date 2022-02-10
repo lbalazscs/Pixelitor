@@ -664,7 +664,7 @@ public class Composition implements Serializable {
         if (wasActive) {
             activeLayer = after;
         }
-        Tools.editedObjectChanged(activeLayer);
+        Tools.editingTargetChanged(activeLayer);
     }
 
     public void setActiveLayer(Layer newActiveLayer) {
@@ -695,7 +695,7 @@ public class Composition implements Serializable {
         }
 
         if (view != null) {  // shouldn't run while loading the composition
-            Tools.editedObjectChanged(activeLayer);
+            Tools.editingTargetChanged(activeLayer);
         }
 
         assert classInvariant();

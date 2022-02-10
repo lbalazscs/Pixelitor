@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,6 +59,7 @@ public class Drag implements Serializable {
     private transient double coEndX;
     private transient double coStartY;
     private transient double coEndY;
+    private transient boolean hasCoCoords;
 
     private transient double prevCoEndX;
     private transient double prevCoEndY;
@@ -71,6 +72,7 @@ public class Drag implements Serializable {
     private transient boolean equallySized;
 
     public Drag() {
+        hasCoCoords = false;
     }
 
     public Drag(double imStartX, double imStartY, double imEndX, double imEndY) {
@@ -78,6 +80,8 @@ public class Drag implements Serializable {
         this.imStartY = imStartY;
         this.imEndX = imEndX;
         this.imEndY = imEndY;
+
+        hasCoCoords = false;
     }
 
     public Drag(PPoint start, PPoint end) {
@@ -85,6 +89,8 @@ public class Drag implements Serializable {
         imStartY = start.getImY();
         imEndX = end.getImX();
         imEndY = end.getImY();
+
+        hasCoCoords = false;
     }
 
     public Drag(Rectangle2D r) {
@@ -92,6 +98,8 @@ public class Drag implements Serializable {
         imStartY = r.getY();
         imEndX = imStartX + r.getWidth();
         imEndY = imStartY + r.getHeight();
+
+        hasCoCoords = false;
     }
 
     public static Drag createRandom(int width, int height, int minDist) {
@@ -141,6 +149,8 @@ public class Drag implements Serializable {
         coStartY = e.getCoY();
         imStartX = view.componentXToImageSpace(coStartX);
         imStartY = view.componentYToImageSpace(coStartY);
+
+        hasCoCoords = true;
     }
 
     public void setEnd(PPoint e) {
@@ -173,25 +183,30 @@ public class Drag implements Serializable {
 
         dragging = true;
         startAdjusted = false;
+        hasCoCoords = true;
     }
 
     // returns the start x coordinate in component space
     public double getCoStartX() {
+        assert hasCoCoords;
         return coStartX;
     }
 
     // returns the start y coordinate in component space
     public double getCoStartY() {
+        assert hasCoCoords;
         return coStartY;
     }
 
     // returns the end x coordinate in component space
     public double getCoEndX() {
+        assert hasCoCoords;
         return coEndX;
     }
 
     // returns the end y coordinate in component space
     public double getCoEndY() {
+        assert hasCoCoords;
         return coEndY;
     }
 
@@ -248,6 +263,7 @@ public class Drag implements Serializable {
     }
 
     public boolean isClick() {
+        assert hasCoCoords;
         return coStartX == coEndX && coStartY == coEndY;
     }
 
@@ -256,11 +272,21 @@ public class Drag implements Serializable {
     }
 
     public boolean hasZeroWidth() {
+        assert hasCoCoords;
         return coStartX == coEndX;
     }
 
     public boolean hasZeroHeight() {
+        assert hasCoCoords;
         return coStartY == coEndY;
+    }
+
+    public boolean hasZeroImWidth() {
+        return imStartX == imEndX;
+    }
+
+    public boolean hasZeroImHeight() {
+        return imStartY == imEndY;
     }
 
     public void setConstrained(boolean constrained) {
@@ -268,6 +294,7 @@ public class Drag implements Serializable {
     }
 
     public void drawGradientArrow(Graphics2D g) {
+        assert hasCoCoords;
         Shapes.drawGradientArrow(g, coStartX, coStartY, coEndX, coEndY);
     }
 
@@ -277,6 +304,7 @@ public class Drag implements Serializable {
     }
 
     public void adjustStartForSpaceDownDrag(View view) {
+        assert hasCoCoords;
         double dx = coEndX - prevCoEndX;
         double dy = coEndY - prevCoEndY;
 
@@ -338,6 +366,7 @@ public class Drag implements Serializable {
     }
 
     public Rectangle toCoRect() {
+        assert hasCoCoords;
         int x;
         int y;
         int width;
@@ -458,6 +487,7 @@ public class Drag implements Serializable {
     }
 
     public double calcCoDist() {
+        assert hasCoCoords;
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
         return Math.sqrt(dx * dx + dy * dy);
@@ -485,10 +515,12 @@ public class Drag implements Serializable {
     }
 
     public double calcAngle() {
+        assert hasCoCoords;
         return Math.atan2(coEndY - coStartY, coEndX - coStartX);
     }
 
     protected double calcReversedAngle() {
+        assert hasCoCoords;
         return Math.atan2(coStartY - coEndY, coStartX - coEndX);
     }
 
@@ -501,6 +533,7 @@ public class Drag implements Serializable {
     }
 
     public void displayWidthHeight(Graphics2D g) {
+        assert hasCoCoords;
         double imWidth = imEndX - imStartX;
         double imHeight = imEndY - imStartY;
         String widthInfo = DragDisplay.getWidthDisplayString(imWidth);
@@ -550,10 +583,10 @@ public class Drag implements Serializable {
 
             float startInfoY;
             if (imHeight >= 0) {
-                // display the start info info above the start
+                // display the start info above the start
                 startInfoY = (float) (coStartY - mouseDist);
             } else {
-                // display the start info info bellow the start
+                // display the start info bellow the start
                 startInfoY = (float) (coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
             }
 
@@ -564,12 +597,15 @@ public class Drag implements Serializable {
     }
 
     public void displayRelativeMovement(Graphics2D g) {
+        assert hasCoCoords;
         int dx = (int) (imEndX - imStartX);
         int dy = (int) (imEndY - imStartY);
+        // TODO mixing co and im coordinates?
         DragDisplay.displayRelativeMovement(g, dx, dy, (float) (coEndX + 30), (float) (coEndY - 20));
     }
 
     public void displayAngleAndDist(Graphics2D g) {
+        assert hasCoCoords;
         int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
         DragDisplay dd = new DragDisplay(g, displayBgWidth);
 
@@ -613,7 +649,7 @@ public class Drag implements Serializable {
             // display it so that it has no sudden jumps
             y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
                 + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
+                   * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
         }
 
         String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
@@ -621,6 +657,18 @@ public class Drag implements Serializable {
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 
         dd.finish();
+    }
+
+
+    public void calcCoCoords(View view) {
+        if (hasCoCoords) {
+            return;
+        }
+        coStartX = view.imageXToComponentSpace(imStartX);
+        coStartY = view.imageYToComponentSpace(imStartY);
+        coEndX = view.imageXToComponentSpace(imEndX);
+        coEndY = view.imageYToComponentSpace(imEndY);
+        hasCoCoords = true;
     }
 
     public void debug(Graphics2D g, Color c) {

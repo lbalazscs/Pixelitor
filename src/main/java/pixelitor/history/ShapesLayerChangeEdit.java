@@ -15,49 +15,38 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.shapes.history;
+package pixelitor.history;
 
-import pixelitor.Composition;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.tools.Tools;
+import pixelitor.layers.ShapesLayer;
 import pixelitor.tools.shapes.StyledShape;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-/**
- * Represents an edit where the {@link StyledShape}
- * changes, but its associated transform box doesn't
- */
-public class StyledShapeEdit extends PixelitorEdit {
-    private StyledShape backup;
+public class ShapesLayerChangeEdit extends PixelitorEdit {
+    private final ShapesLayer layer;
+    private final StyledShape before;
+    private final StyledShape after;
 
-    public StyledShapeEdit(String editName,
-                           Composition comp,
-                           StyledShape backup) {
-        super(editName, comp);
-        this.backup = backup;
+    public ShapesLayerChangeEdit(ShapesLayer layer, StyledShape before, StyledShape after) {
+        super("Shape Layer Change", layer.getComp());
+
+        this.layer = layer;
+        this.before = before;
+        this.after = after;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapStyledShapes();
+        layer.setStyledShape(before, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapStyledShapes();
-    }
-
-    private void swapStyledShapes() {
-        StyledShape tmp = Tools.SHAPES.getStyledShape();
-        Tools.SHAPES.loadShapeAndBox(backup, null);
-        backup = tmp;
-
-        comp.update();
+        layer.setStyledShape(after, false);
     }
 }

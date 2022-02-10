@@ -106,10 +106,10 @@ public class MenuBar extends JMenuBar {
 
         add(createFileMenu(pw, texts));
         add(createEditMenu(texts));
-        add(createLayerMenu(pw, texts));
+        add(createLayerMenu(texts));
         add(createSelectMenu(texts));
         add(createImageMenu(texts));
-        add(createColorMenu(texts));
+        add(createColorMenu());
         add(createFilterMenu(texts));
         add(createViewMenu(pw, texts));
 
@@ -325,7 +325,7 @@ public class MenuBar extends JMenuBar {
         return editMenu;
     }
 
-    private static JMenu createLayerMenu(PixelitorWindow pw, ResourceBundle texts) {
+    private static JMenu createLayerMenu(ResourceBundle texts) {
         var layersMenu = new PMenu(texts.getString("layer"), 'L');
 
         layersMenu.add(AddNewLayerAction.INSTANCE);
@@ -366,16 +366,17 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.add(createLayerStackSubmenu(texts));
         layersMenu.add(createLayerMaskSubmenu(texts));
-        layersMenu.add(createTextLayerSubmenu(pw, texts));
+        layersMenu.add(createTextLayerSubmenu(texts));
 
         if (AppContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
         }
 
         if (AppContext.enableExperimentalFeatures) {
-            layersMenu.add(createSmartObjectSubmenu(pw, texts));
-            layersMenu.add(createColorFillLayerSubmenu(pw, texts));
-            layersMenu.add(createGradientFillLayerSubmenu(pw, texts));
+            layersMenu.add(createSmartObjectSubmenu());
+            layersMenu.add(createColorFillLayerSubmenu());
+            layersMenu.add(createGradientFillLayerSubmenu());
+            layersMenu.add(createShapeLayerSubmenu());
         }
 
         return layersMenu;
@@ -513,7 +514,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createTextLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+    private static JMenu createTextLayerSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("text_layer"));
 
         sub.add(new OpenViewEnabledAction("New Text Layer...") {
@@ -563,7 +564,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createSmartObjectSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+    private static JMenu createSmartObjectSubmenu() {
         PMenu sub = new PMenu("Smart Object");
 
         sub.add(new OpenViewEnabledAction("Convert to Smart Object") {
@@ -628,8 +629,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createColorFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
-        PMenu sub = new PMenu("Color Fill");
+    private static JMenu createColorFillLayerSubmenu() {
+        PMenu sub = new PMenu("Color Fill Layer");
 
         sub.add(new OpenViewEnabledAction("New Color Fill Layer...") {
             @Override
@@ -657,19 +658,41 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createGradientFillLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
-        PMenu sub = new PMenu("Gradient Fill");
+    private static JMenu createGradientFillLayerSubmenu() {
+        PMenu sub = new PMenu("Gradient Fill Layer");
 
         sub.add(new OpenViewEnabledAction("New Gradient Fill Layer...") {
             @Override
             public void onClick() {
                 GradientFillLayer.createNew();
             }
-        }, CTRL_G);
+        }, CTRL_ALT_G);
 
         Condition isGradientFillLayer = new ClassCondition(GradientFillLayer.class, "gradient fill layer");
 
         sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.replaceWithRasterized();
+            }
+        });
+
+        return sub;
+    }
+
+    private static JMenu createShapeLayerSubmenu() {
+        PMenu sub = new PMenu("Shape Layer");
+
+        sub.add(new OpenViewEnabledAction("New Shape Layer...") {
+            @Override
+            public void onClick() {
+                ShapesLayer.createNew();
+            }
+        }, CTRL_ALT_S);
+
+        Condition isShapeLayer = new ClassCondition(ShapesLayer.class, "shape layer");
+
+        sub.add(new RestrictedLayerAction("Rasterize Shape Layer", isShapeLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
                 layer.replaceWithRasterized();
@@ -784,7 +807,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createColorMenu(ResourceBundle texts) {
+    private static JMenu createColorMenu() {
         PMenu colorsMenu = new PMenu(GUIText.COLOR, 'C');
 
         colorsMenu.addFilter(ColorBalance.NAME, ColorBalance::new, CTRL_B);

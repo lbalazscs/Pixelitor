@@ -17,8 +17,11 @@
 
 package pixelitor.utils.debug;
 
+import pixelitor.colors.Colors;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import java.awt.Color;
 import java.util.Enumeration;
 
 import static java.lang.String.format;
@@ -47,9 +50,6 @@ public class DebugNode extends DefaultMutableTreeNode {
             return "\"" + name + "\": null,";
         }
 
-        @SuppressWarnings("unchecked")
-        Enumeration<TreeNode> childrenEnum = children();
-
         StringBuilder sb = new StringBuilder();
 
         indent(sb, getLevel());
@@ -59,6 +59,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             sb.append('"').append(name).append("\": {");
         }
 
+        Enumeration<TreeNode> childrenEnum = children();
         while (childrenEnum.hasMoreElements()) {
             indent(sb, getLevel() + 1);
 
@@ -106,6 +107,10 @@ public class DebugNode extends DefaultMutableTreeNode {
 
     public void addBoolean(String name, boolean b) {
         addNode("\"" + name + "\": " + b + ",");
+    }
+
+    public void addColor(String name, Color c) {
+        addNode("\"" + name + "\": " + Colors.toHTMLHex(c, true) + ",");
     }
 
     public void addClass() {

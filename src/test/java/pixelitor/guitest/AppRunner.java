@@ -747,7 +747,7 @@ public class AppRunner {
     public void addGradientFillLayer(String gradientType) {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
-        keyboard.ctrlPress(VK_G);
+        keyboard.ctrlAltPress(VK_G);
         keyboard.undoRedo("Add Gradient Fill Layer");
 
         EDT.assertActiveToolIs(Tools.GRADIENT);

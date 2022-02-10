@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -96,10 +96,10 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public void moveWhileDragging(double x, double y) {
-        tmpTx = (int) x;
-        tmpTy = (int) y;
-        super.moveWhileDragging(x, y);
+    public void moveWhileDragging(double relImX, double relImY) {
+        tmpTx = (int) relImX;
+        tmpTy = (int) relImY;
+        super.moveWhileDragging(relImX, relImY);
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class ContentLayer extends Layer {
         int oldTx = translationX;
         int oldTy = translationY;
 
-        // while dragging only the temporary values were updated
+        // while dragging only the temporary values were updated,
         // and now they can be committed to the final value
         translationX += tmpTx;
         translationY += tmpTy;
@@ -115,15 +115,15 @@ public abstract class ContentLayer extends Layer {
         tmpTy = 0;
 
         // possibly null if there is no linked mask
-        PixelitorEdit linkedEdit = super.endMovement();
+        PixelitorEdit linkedEdit = createLinkedMovementEdit();
 
-        ContentLayerMoveEdit ownEdit = createMovementEdit(oldTx, oldTy);
+        PixelitorEdit ownEdit = createMovementEdit(oldTx, oldTy);
         assert ownEdit != null;
 
         return MultiEdit.combine(ownEdit, linkedEdit, ContentLayerMoveEdit.NAME);
     }
 
-    abstract ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy);
+    abstract PixelitorEdit createMovementEdit(int oldTx, int oldTy);
 
     /**
      * Programmatically set the translation.

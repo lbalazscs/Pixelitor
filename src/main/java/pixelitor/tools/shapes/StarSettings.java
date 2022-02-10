@@ -19,38 +19,30 @@ package pixelitor.tools.shapes;
 
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.utils.GUIUtils;
 
-import javax.swing.*;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * The settings for a line.
  */
 public class StarSettings extends ShapeTypeSettings {
-    private final RangeParam numBranches;
-    private final RangeParam radiusRatio;
+    private final RangeParam numBranches = new RangeParam("Number of Branches",
+        3, 7, 12);
+    private final RangeParam radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)",
+        1, 50, 100);
+    private final List<FilterParam> params = List.of(numBranches, radiusRatio);
 
     public StarSettings() {
-        this(7, 50);
     }
 
     public StarSettings(int defNumBranches, int defRadiusRatio) {
-        numBranches = new RangeParam("Number of Branches",
-            3, defNumBranches, 12);
-        radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)",
-            1, defRadiusRatio, 100);
-    }
-
-    private StarSettings(RangeParam numBranches, RangeParam radiusRatio) {
-        this.numBranches = numBranches;
-        this.radiusRatio = radiusRatio;
+        numBranches.setValueNoTrigger(defNumBranches);
+        radiusRatio.setValueNoTrigger(defRadiusRatio);
     }
 
     @Override
-    protected JPanel createConfigPanel() {
-        return GUIUtils.arrangeVertically(List.of(numBranches, radiusRatio));
+    public List<FilterParam> getParams() {
+        return params;
     }
 
     public int getNumBranches() {
@@ -59,17 +51,6 @@ public class StarSettings extends ShapeTypeSettings {
 
     public double getRadiusRatio() {
         return radiusRatio.getPercentageValD();
-    }
-
-    @Override
-    protected void forEachParam(Consumer<FilterParam> consumer) {
-        consumer.accept(numBranches);
-        consumer.accept(radiusRatio);
-    }
-
-    @Override
-    public StarSettings copy() {
-        return new StarSettings(numBranches.copy(), radiusRatio.copy());
     }
 
     @Override

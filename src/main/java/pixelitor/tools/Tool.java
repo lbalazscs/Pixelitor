@@ -259,11 +259,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
         // empty by default
     }
 
-    /**
-     * Called after (1) a filter without dialog ends, or
-     * (2) the active layer changes, or (3) the mask editing changes
-     */
-    public void editedObjectChanged(Layer layer) {
+    public void editingTargetChanged(Layer layer) {
         // empty by default
     }
 

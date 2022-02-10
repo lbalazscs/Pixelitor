@@ -153,7 +153,7 @@ public class GradientTool extends DragTool {
             return;
         }
 
-        if (editingGradientLayer()) {
+        if (isEditingGradientLayer()) {
             View view = Views.getActive();
             if (view != null) {
                 Drag renderedDrag = handles.toDrag(view);
@@ -167,7 +167,7 @@ public class GradientTool extends DragTool {
         }
     }
 
-    private boolean editingGradientLayer() {
+    private boolean isEditingGradientLayer() {
         return gradientLayer != null;
     }
 
@@ -253,7 +253,7 @@ public class GradientTool extends DragTool {
                 drag.getCoEndX(), drag.getCoEndY(), e.getView());
         }
 
-        if (editingGradientLayer()) {
+        if (isEditingGradientLayer()) {
             gradientLayer.setGradient(createGradient(renderedDrag), true);
         } else {
             Drawable dr = comp.getActiveDrawable();
@@ -338,7 +338,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void editedObjectChanged(Layer layer) {
+    public void editingTargetChanged(Layer layer) {
         handleNewActiveLayer(layer);
     }
 
@@ -360,7 +360,7 @@ public class GradientTool extends DragTool {
     }
 
     private void hideHandles(Composition comp, boolean addHistory) {
-        if (editingGradientLayer()) {
+        if (isEditingGradientLayer()) {
             return;
         }
 
@@ -389,7 +389,7 @@ public class GradientTool extends DragTool {
         handles.arrowKeyPressed(key, view);
         Drag handleDrag = handles.toDrag(view);
 
-        if (editingGradientLayer()) {
+        if (isEditingGradientLayer()) {
             gradientLayer.setGradient(createGradient(handleDrag), true);
         } else {
             var comp = view.getComp();

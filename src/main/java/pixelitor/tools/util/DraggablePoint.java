@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class DraggablePoint extends Point2D.Double {
     protected static final double HANDLE_SIZE = 2.0 * HANDLE_RADIUS;
     private static final double SHADOW_OFFSET = 1.0;
 
-    private final String name; // used only for debugging
+    protected final String name; // used only for debugging
 
     // Coordinates in image space
     public double imX;
@@ -63,7 +63,7 @@ public class DraggablePoint extends Point2D.Double {
     protected double origX;
     protected double origY;
 
-    private final Color color;
+    protected final Color color;
     private final Color activeColor;
 
     // since there can be only one active point at a
@@ -126,7 +126,7 @@ public class DraggablePoint extends Point2D.Double {
      * Stores the current location as a reference point
      * for future affine transformations
      */
-    public void storeTransformRefPoint() {
+    public void saveImTransformRefPoint() {
         imTransformRefPoint = getImLocationCopy();
     }
 

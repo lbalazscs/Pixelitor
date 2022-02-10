@@ -188,7 +188,7 @@ public class Views {
         for (ViewActivationListener listener : activationListeners) {
             listener.viewActivated(oldView, view);
         }
-        Tools.editedObjectChanged(comp.getActiveLayer());
+        Tools.editingTargetChanged(comp.getActiveLayer());
 
         Layers.activeCompChanged(comp, true);
 
@@ -448,7 +448,7 @@ public class Views {
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addNewView(view);
             setActiveView(view, false);
-            Tools.editedObjectChanged(comp.getActiveLayer());
+            Tools.editingTargetChanged(comp.getActiveLayer());
         } catch (Exception e) {
             Messages.showException(e);
         }

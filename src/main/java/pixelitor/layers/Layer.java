@@ -28,6 +28,7 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.history.*;
 import pixelitor.io.ExportInfo;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -444,7 +445,7 @@ public abstract class Layer implements Serializable {
         if (maskEditing != newValue) {
             maskEditing = newValue;
             ui.updateSelectionState();
-            Tools.editedObjectChanged(this);
+            Tools.editingTargetChanged(this);
         }
     }
 
@@ -647,9 +648,9 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * On this level startMovement, moveWhileDragging and
-     * endMovement only care about the movement of the linked
-     * mask or owner.
+     * Starts a movement with the Move Tool.
+     * On this level startMovement, moveWhileDragging and endMovement
+     * only care about the movement of the linked mask or owner.
      * This object's own movement is handled in {@link ContentLayer}.
      */
     public void startMovement() {
@@ -666,12 +667,16 @@ public abstract class Layer implements Serializable {
         }
     }
 
+    /**
+     * Finishes a movement with the Move Tool and returns the edit that can undo it.
+     */
     public PixelitorEdit endMovement() {
-        // Returns the edit of the linked layer.
-        // Handles the case when we are in an adjustment
-        // layer and the layer mask needs to be moved.
-        // Otherwise the ContentLayer will override this,
-        // and call super for the linked edit.
+        // Handles the case of moving the layer mask of a layer without content.
+        // Content layers should override it to also include their own edit.
+        return createLinkedMovementEdit();
+    }
+
+    protected PixelitorEdit createLinkedMovementEdit() {
         Layer linked = getLinked();
         if (linked != null) {
             return linked.endMovement();
@@ -881,6 +886,10 @@ public abstract class Layer implements Serializable {
 
     public final DebugNode createDebugNode() {
         return createDebugNode(getTypeStringLC());
+    }
+
+    public Tool getPreferredTool() {
+        return null;
     }
 
     public DebugNode createDebugNode(String description) {

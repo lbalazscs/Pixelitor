@@ -220,8 +220,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void moveWhileDragging(double x, double y) {
-        super.moveWhileDragging(x, y);
+    public void moveWhileDragging(double relImX, double relImY) {
+        super.moveWhileDragging(relImX, relImY);
         painter.setTranslation(getTx(), getTy());
     }
 

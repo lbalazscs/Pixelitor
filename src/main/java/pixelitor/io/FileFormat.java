@@ -108,7 +108,7 @@ public enum FileFormat {
         return readSimpleSync(file);
     }
 
-    public Composition readSimpleSync(File file) {
+    public static Composition readSimpleSync(File file) {
         BufferedImage img = TrackedIO.uncheckedRead(file);
         return Composition.fromImage(img, file, null);
     }

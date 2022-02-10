@@ -22,7 +22,6 @@ import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.tools.Tools;
 
 import javax.swing.*;
 import java.io.Serial;
@@ -86,7 +85,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     public boolean startOn(Drawable dr, boolean reset) {
         dr.startPreviewing();
 
-        Tools.editedObjectChanged(dr.getLayer());
+//        Tools.editingTargetChanged(dr.getLayer());
 
         FilterGUI gui = createGUI(dr, reset);
 
