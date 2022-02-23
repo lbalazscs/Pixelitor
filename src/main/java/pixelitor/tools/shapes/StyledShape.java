@@ -22,6 +22,7 @@ import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.ParamState;
+import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.View;
@@ -42,6 +43,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -99,6 +102,16 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         reloadEffects(tool);
 
         reloadColors();
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        // TODO why is that sometimes it works without this
+        StrokeParam p = new StrokeParam("");
+        p.loadStateFrom(strokeSettings, false);
+        stroke = p.createStroke();
     }
 
     /**
@@ -226,10 +239,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     // called during the initial drag, when there is no transform box yet
     public void updateFromDrag(Drag drag, ShapesTool tool) {
         assert !tool.hasBox();
-
-        if (drag.isClick()) {
-            return;
-        }
+        assert !drag.isClick();
+        assert !drag.isImClick();
 
         origDrag = drag;
 
@@ -530,6 +541,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // the shape is not closed, and there is no stroke
             return STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
         }
+    }
+
+    public boolean hasOrigDrag() {
+        return origDrag != null;
     }
 
     @Override

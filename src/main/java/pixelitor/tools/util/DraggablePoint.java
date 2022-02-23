@@ -344,6 +344,14 @@ public class DraggablePoint extends Point2D.Double {
         return new Point2D.Double(imX, imY);
     }
 
+    public double getImX() {
+        return imX;
+    }
+
+    public double getImY() {
+        return imY;
+    }
+
     public Point getScreenCoords() {
         Point p = new Point((int) x, (int) y);
         SwingUtilities.convertPointToScreen(p, view);

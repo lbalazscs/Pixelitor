@@ -57,7 +57,7 @@ public class ShapesLayer extends ContentLayer {
     // it from the styled shape is currently not possible.
     private TransformBox transformBox;
 
-    ShapesLayer(Composition comp, String name) {
+    public ShapesLayer(Composition comp, String name) {
         super(comp, name);
     }
 
@@ -119,7 +119,8 @@ public class ShapesLayer extends ContentLayer {
         if (styledShape != null) {
             double sx = newSize.getWidth() / comp.getCanvasWidth();
             double sy = newSize.getHeight() / comp.getCanvasHeight();
-            transformBox.imTransform(AffineTransform.getScaleInstance(sx, sy));
+            transformBox.imCoordsChanged(AffineTransform.getScaleInstance(sx, sy), comp);
+            transformBox.coCoordsChanged(comp.getView());
         }
         return CompletableFuture.completedFuture(null);
     }

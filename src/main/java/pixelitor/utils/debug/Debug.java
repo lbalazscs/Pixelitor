@@ -28,10 +28,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.*;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.Threads;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -365,6 +362,12 @@ public class Debug {
         Views.getActiveLayer().addMask(LayerMaskAddType.PATTERN);
     }
 
+    public static void copyInternalState() {
+        AppNode node = new AppNode();
+        Utils.copyStringToClipboard(node.toJSON());
+        Messages.showInStatusBar("Internal state copied to the clipboard.");
+    }
+
     public static void showInternalState() {
         AppNode node = new AppNode();
 
@@ -372,7 +375,7 @@ public class Debug {
 
         JLabel explainLabel = new JLabel(
             "<html>If you are reporting a bug that cannot be reproduced," +
-                "<br>please include the following information:");
+            "<br>please include the following information:");
         explainLabel.setBorder(createEmptyBorder(5, 5, 5, 5));
 
         JPanel form = new JPanel(new BorderLayout());

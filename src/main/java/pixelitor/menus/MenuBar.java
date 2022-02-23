@@ -1341,7 +1341,7 @@ public class MenuBar extends JMenuBar {
             public void onClick() {
                 Debug.debugSmartObjects();
             }
-        }, CTRL_ALT_D);
+        });
 
         developMenu.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
             @Override
@@ -1494,6 +1494,13 @@ public class MenuBar extends JMenuBar {
                 System.out.println("gcBounds = " + gcBounds);
             }
         });
+
+        sub.add(new PAction("Copy Internal State to Clipboard") {
+            @Override
+            public void onClick() {
+                Debug.copyInternalState();
+            }
+        }, CTRL_ALT_D);
 
         return sub;
     }

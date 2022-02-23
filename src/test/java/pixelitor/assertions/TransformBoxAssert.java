@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,13 @@ package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.geom.Dimension2D;
+import java.util.function.Function;
 
-import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Custom AssertJ assertions for {@link TransformBox} objects.
@@ -38,27 +41,28 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
     public TransformBoxAssert angleDegreesIs(int expected) {
         isNotNull();
 
-        int degrees = actual.getAngleDegrees();
-        if (degrees != expected) {
-            throw new AssertionError("Expected " + expected + ", found " + degrees);
-        }
+        assertThat(actual.getAngleDegrees()).isEqualTo(expected);
 
         return this;
     }
 
-    public TransformBoxAssert rotSizeIs(double w, double h) {
+    public TransformBoxAssert rotSizeIs(double expectedWidth, double expectedHeight) {
         isNotNull();
 
         Dimension2D size = actual.getRotatedImSize();
-        double width = size.getWidth();
-        if (Math.abs(width - w) > DOUBLE_TOLERANCE) {
-            throw new AssertionError(format("Expected width %.2f, found %.2f", w, width));
-        }
+        assertThat(size.getWidth()).isCloseTo(expectedWidth, within(DOUBLE_TOLERANCE));
+        assertThat(size.getHeight()).isCloseTo(expectedHeight, within(DOUBLE_TOLERANCE));
 
-        double height = size.getHeight();
-        if (Math.abs(height - h) > DOUBLE_TOLERANCE) {
-            throw new AssertionError(format("Expected height %.2f, found %.2f", h, height));
-        }
+        return this;
+    }
+
+    public TransformBoxAssert handleImPosIs(Function<TransformBox, DraggablePoint> getter,
+                                            double expectedImX, double expectedImY) {
+        isNotNull();
+
+        DraggablePoint handle = getter.apply(actual);
+        assertThat(handle.getImX()).isCloseTo(expectedImX, within(DOUBLE_TOLERANCE));
+        assertThat(handle.getImY()).isCloseTo(expectedImY, within(DOUBLE_TOLERANCE));
 
         return this;
     }

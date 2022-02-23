@@ -357,13 +357,15 @@ public class ShapesTool extends DragTool {
 
         assert state == INITIAL_DRAG : "state = " + state;
 
-        updateStyledShapeFromDrag(e);
+        if (styledShape != null && !drag.isClick()) {
+            updateStyledShapeFromDrag(e);
 
-        // This will trigger paintOverActiveLayer,
-        // therefore the continuous drawing of the shape.
-        // It repaints the whole image because
-        // some shapes extend beyond their drag rectangle.
-        e.getComp().update(REPAINT);
+            // This will trigger paintOverActiveLayer,
+            // therefore the continuous drawing of the shape.
+            // It repaints the whole image because
+            // some shapes extend beyond their drag rectangle.
+            e.getComp().update(REPAINT);
+        }
     }
 
     @Override
@@ -419,11 +421,12 @@ public class ShapesTool extends DragTool {
     }
 
     private void updateStyledShapeFromDrag(PMouseEvent e) {
-        if (styledShape != null) {
-            drag.setStartFromCenter(e.isAltDown());
-            drag.setEquallySized(e.isShiftDown());
-            styledShape.updateFromDrag(drag, this);
-        }
+        assert styledShape != null;
+        assert !drag.isClick();
+
+        drag.setStartFromCenter(e.isAltDown());
+        drag.setEquallySized(e.isShiftDown());
+        styledShape.updateFromDrag(drag, this);
     }
 
     @Override
@@ -435,7 +438,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void altPressed() {
-        if (!altDown && state == INITIAL_DRAG && drag.isDragging()) {
+        if (!altDown && state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
             drag.setStartFromCenter(true);
 
             assert hasStyledShape();
@@ -449,7 +452,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void altReleased() {
-        if (state == INITIAL_DRAG && drag.isDragging()) {
+        if (state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
             drag.setStartFromCenter(false);
 
             assert hasStyledShape();

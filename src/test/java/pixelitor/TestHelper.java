@@ -184,6 +184,12 @@ public class TestHelper {
         return layer;
     }
 
+    public static ShapesLayer createEmptyShapesLayer(Composition comp, String name) {
+        ShapesLayer layer = new ShapesLayer(comp, name);
+        layer.createUI();
+        return layer;
+    }
+
     public static BufferedImage createImage() {
         return new BufferedImage(TEST_WIDTH, TEST_HEIGHT, BufferedImage.TYPE_INT_ARGB);
     }
