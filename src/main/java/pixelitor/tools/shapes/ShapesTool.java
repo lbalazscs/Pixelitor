@@ -466,7 +466,7 @@ public class ShapesTool extends DragTool {
         // pressing Esc should work similarly to the Gradient Tool,
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
-        if (state == TRANSFORM) {
+        if (state == TRANSFORM && !isEditingShapesLayer()) {
             Views.onActiveComp(this::rasterizeShape);
         }
     }
@@ -713,9 +713,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void rasterizeBox() {
-        if (transformBox != null) {
-            rasterizeBox(Views.getActiveComp());
-        }
+        rasterizeBox(Views.getActiveComp());
     }
 
     private void rasterizeBox(Composition comp) {
@@ -829,7 +827,7 @@ public class ShapesTool extends DragTool {
         return thickness;
     }
 
-    private boolean isEditingShapesLayer() {
+    public boolean isEditingShapesLayer() {
         return shapesLayer != null;
     }
 

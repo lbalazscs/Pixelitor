@@ -383,6 +383,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     public void rasterizeTo(Composition comp, TransformBox transformBox, ShapesTool tool) {
         assert shape != null;
+        assert !tool.isEditingShapesLayer();
 
         PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawable();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -159,6 +160,10 @@ public abstract class PPoint {
         return new LazyCo(view, x, y);
     }
 
+    public static PPoint lazyFromCo(MouseEvent e, View view) {
+        return new LazyCo(view, e.getX(), e.getY());
+    }
+
     public static PPoint eagerFromCo(double x, double y, View view) {
         return new EagerCo(view, x, y);
     }
@@ -279,3 +284,4 @@ public abstract class PPoint {
         }
     }
 }
+
