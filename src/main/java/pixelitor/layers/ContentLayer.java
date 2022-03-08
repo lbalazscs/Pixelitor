@@ -117,8 +117,8 @@ public abstract class ContentLayer extends Layer {
         // possibly null if there is no linked mask
         PixelitorEdit linkedEdit = createLinkedMovementEdit();
 
+        // can be null for empty shape layers
         PixelitorEdit ownEdit = createMovementEdit(oldTx, oldTy);
-        assert ownEdit != null;
 
         return MultiEdit.combine(ownEdit, linkedEdit, ContentLayerMoveEdit.NAME);
     }
@@ -136,8 +136,8 @@ public abstract class ContentLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
-        if (!deleteCroppedPixels) {
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+        if (!deleteCropped) {
             // relative to the canvas
             int cropX = (int) cropRect.getX();
             int cropY = (int) cropRect.getY();

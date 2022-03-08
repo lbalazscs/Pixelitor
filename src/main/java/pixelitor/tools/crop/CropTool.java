@@ -328,7 +328,7 @@ public class CropTool extends DragTool {
         Rectangle coCanvasBounds = comp.getCanvas().getCoBounds(view);
 
         Area darkAreaShape = new Area(coCanvasBounds);
-        darkAreaShape.subtract(new Area(cropRect.getCo()));
+        darkAreaShape.subtract(new Area(cropRect.getCo2D()));
 
         g2.setColor(BLACK);
         g2.setComposite(maskComposite);
@@ -341,7 +341,7 @@ public class CropTool extends DragTool {
     // Paint the handles and the guides.
     private void paintBox(Graphics2D g2, PRectangle cropRect) {
         compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
-        compositionGuide.draw(cropRect.getCo(), g2);
+        compositionGuide.draw(cropRect.getCo2D(), g2);
 
         cropBox.paint(g2);
     }
@@ -537,7 +537,7 @@ public class CropTool extends DragTool {
 
         node.addFloat("mask opacity", maskOpacity.getPercentageValF());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());
-        node.addString("state", state.toString());
+        node.addAsString("state", state);
 
         return node;
     }

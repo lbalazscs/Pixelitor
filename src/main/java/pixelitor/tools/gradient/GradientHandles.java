@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,14 @@ import pixelitor.tools.ToolWidget;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 
 /**
  * The three handles that can be used to manipulate a gradient.
@@ -42,19 +43,14 @@ public class GradientHandles implements ToolWidget {
     private final GradientCenterPoint middle;
     private final View view;
 
-    public GradientHandles(Point2D start, Point2D end, View view) {
-        this(start.getX(), start.getY(), end.getX(), end.getY(), view);
-    }
-
-    public GradientHandles(double startX, double startY,
-                           double endX, double endY, View view) {
+    public GradientHandles(PPoint startPos, PPoint endPos, View view) {
         this.view = view;
         Color defaultColor = Color.WHITE;
         Color activeColor = Color.RED;
 
-        start = new GradientDefiningPoint("start", startX, startY, view,
+        start = new GradientDefiningPoint("start", startPos, view,
             defaultColor, activeColor, this);
-        end = new GradientDefiningPoint("end", endX, endY, view,
+        end = new GradientDefiningPoint("end", endPos, view,
             defaultColor, activeColor, this);
         middle = new GradientCenterPoint(start, end, view, defaultColor, activeColor);
 
@@ -65,7 +61,7 @@ public class GradientHandles implements ToolWidget {
     }
 
     @Override
-    public DraggablePoint handleWasHit(double x, double y) {
+    public DraggablePoint findHandleAt(double x, double y) {
         if (end.handleContains(x, y)) {
             return end;
         }
@@ -80,7 +76,7 @@ public class GradientHandles implements ToolWidget {
 
     @Override
     public void paint(Graphics2D g) {
-        Shapes.drawGradientArrow(g, start.x, start.y, end.x, end.y);
+        Shapes.drawDirectionArrow(g, start.x, start.y, end.x, end.y);
 
         start.paintHandle(g);
         end.paintHandle(g);
@@ -159,5 +155,13 @@ public class GradientHandles implements ToolWidget {
     @VisibleForTesting
     public GradientCenterPoint getMiddle() {
         return middle;
+    }
+
+    public DebugNode createDebugNode() {
+        DebugNode node = new DebugNode("handles", this);
+        node.add(start.createDebugNode());
+        node.add(middle.createDebugNode());
+        node.add(end.createDebugNode());
+        return node;
     }
 }

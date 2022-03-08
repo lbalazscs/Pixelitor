@@ -51,6 +51,12 @@ public final class ConsistencyChecks {
         }
         assert layerDeleteActionEnabled();
         assert addMaskActionEnabled();
+        assert shapeLayersAreOK(comp);
+    }
+
+    public static boolean shapeLayersAreOK(Composition comp) {
+        comp.forEachLayer(ShapesLayer.class, ShapesLayer::checkConsistency);
+        return true;
     }
 
     public static boolean fadeWouldWorkOn(Composition comp) {
@@ -257,34 +263,37 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        boolean addMaskEnabled = action.isEnabled();
         Layer layer = comp.getActiveLayer();
-
-        LayerUI ui = layer.getUI();
-        if (ui == null) {
-            throw new IllegalStateException("no ui, name = "
-                + layer.getName() + ", class = " + layer.getClass().getSimpleName());
-        }
-        if (layer.hasMask()) {
-            if (addMaskEnabled) {
-                throw new IllegalStateException("The layer '" + layer.getName()
-                                                + "' has mask, but the add mask action is enabled");
-            }
-            if (!ui.hasMaskIcon()) {
-                throw new IllegalStateException("The layer '" + layer.getName()
-                                                + "' has mask, but no mask icon");
-            }
-        } else { // no mask
-            if (!addMaskEnabled) {
-                throw new IllegalStateException("The layer '" + layer.getName()
-                                                + "' has no mask, but the add mask action is not enabled");
-            }
-            if (ui.hasMaskIcon()) {
-                throw new IllegalStateException("The layer '" + layer.getName()
-                                                + "' has no mask, but it has mask icon");
-            }
+        String msg = checkLayerMaskAndUI(layer);
+        if (msg != null) {
+            throw new IllegalStateException(
+                msg.formatted(layer.getTypeStringLC(), layer.getName()));
         }
 
         return true;
+    }
+
+    private static String checkLayerMaskAndUI(Layer layer) {
+        LayerUI ui = layer.getUI();
+        if (ui == null) {
+            return "No ui in %s '%s'";
+        }
+        boolean addMaskEnabled = AddLayerMaskAction.INSTANCE.isEnabled();
+        if (layer.hasMask()) {
+            if (addMaskEnabled) {
+                return "The %s '%s' has mask, but the add mask action is enabled";
+            }
+            if (!ui.hasMaskIcon()) {
+                return "The %s '%s' has mask, but no mask icon";
+            }
+        } else { // no mask
+            if (!addMaskEnabled) {
+                return "The %s '%s' has no mask, but the add mask action is not enabled";
+            }
+            if (ui.hasMaskIcon()) {
+                return "The %s '%s' has no mask, but it has mask icon";
+            }
+        }
+        return null;
     }
 }

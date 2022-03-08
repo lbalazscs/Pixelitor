@@ -704,7 +704,7 @@ public class RandomToolTest {
 
         //noinspection EnumSwitchStatementWhichMissesCases
         switch (shapeType) {
-            case RECTANGLE -> slideRandomly(dialog.slider("radius"));
+            case RECTANGLE -> slideRandomly(dialog.slider("Rounding Radius (px)"));
             case LINE -> {
                 slideRandomly(dialog.slider("Width (px)"));
                 chooseRandomly(dialog.comboBox(StrokeCap.NAME));

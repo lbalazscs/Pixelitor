@@ -71,9 +71,8 @@ public interface PenToolMode {
         }
     }
 
-    default void modeEnded() {
+    default void modeEnded(Composition comp) {
         if (PenTool.hasPath()) {
-            var comp = Views.getActiveComp();
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
@@ -82,8 +81,8 @@ public interface PenToolMode {
                             "path's comp is %s, active comp is %s".formatted(
                                 path.getComp().getName(), comp.getName()));
                     }
-                    // the pen tools has a path but it does not belong to the
-                    // active composition - happened in Mac random gui tests
+                    // the pen tool has a path, but it does not belong to the
+                    // active composition - happened in random gui tests
                     // what can we do? at least avoid consistency errors
                     // don't use removePath, because it also removes from the active comp
                     PenTool.path = null;
@@ -94,8 +93,8 @@ public interface PenToolMode {
                 }
                 comp.repaint();
             }
-        } else { // no path in the pen tool
-            assert Views.activePathIs(null);
+//        } else { // no path in the pen tool
+//            assert Views.activePathIs(null);
         }
         DraggablePoint.lastActive = null;
     }

@@ -30,12 +30,14 @@ import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerButton;
-import pixelitor.tools.shapes.history.FinalizeShapeEdit;
+import pixelitor.tools.Tools;
+import pixelitor.tools.shapes.history.RasterizeShapeEdit;
 import pixelitor.tools.shapes.history.StyledShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.Drag;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.TaperingStroke;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
@@ -43,10 +45,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -65,12 +64,16 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
+    enum State {CREATED, DESERIALIZED, SHAPE_SET, BOX_CREATED}
+
+    private transient State state;
+
+    private static final boolean DEBUG_PAINT = false;
 
     private ShapeType shapeType;
     private List<ParamState<?>> typeSettings;
 
-    private Shape unTransformedShape; // the original shape, in image-space
+    private Shape origShape; // the original shape, in image-space
     private Shape shape; // the current shape, in image-space
 
     // this doesn't change after the transform box appears,
@@ -94,6 +97,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private Color fgColor;
     private Color bgColor;
 
+    // TODO this is a hack to enable a shapes layer to invalidate the image cache
+    //  when the styled shape changes. Instead of this, either the need for an
+    //  image cache should be eliminated or the image should be cached in this class.
+    private transient Runnable changeListener;
+
     public StyledShape(ShapesTool tool) {
         reloadType(tool);
         reloadFillPaint(tool);
@@ -102,21 +110,35 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         reloadEffects(tool);
 
         reloadColors();
+        state = State.CREATED;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        // TODO why is that sometimes it works without this
-        StrokeParam p = new StrokeParam("");
-        p.loadStateFrom(strokeSettings, false);
-        stroke = p.createStroke();
+        if (strokePaint != NONE) {
+            // A stroke might be needed before this object
+            // has a chance to load it from the tool.
+            StrokeParam p = new StrokeParam("");
+            p.loadStateFrom(strokeSettings, false);
+            stroke = p.createStroke();
+        } else {
+            stroke = null;
+        }
+        state = State.DESERIALIZED;
+        changeListener = null;
+        assert checkConsistency();
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        assert checkConsistency();
+        out.defaultWriteObject();
     }
 
     /**
-     * Paints this object on the given Graphics2D, which is expected to be
-     * in image space.
+     * Paints this object on the given Graphics2D, which is expected to be in image space.
      */
     public void paint(Graphics2D g) {
         if (transformedDrag == null) {
@@ -136,6 +158,15 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
+        if (DEBUG_PAINT) {
+            // draw the original shape with a semitransparent black
+            Composite oldComposite = g.getComposite();
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            g.setColor(Color.BLACK);
+            g.fill(origShape);
+            g.setComposite(oldComposite);
+        }
+
         if (fillPaint != NONE) {
             paintFill(g);
         }
@@ -146,6 +177,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         if (effects.isNotEmpty()) {
             paintEffects(g);
+        }
+
+        if (DEBUG_PAINT) {
+            origDrag.drawImDirectionArrow(g);
+            transformedDrag.drawImDirectionArrow(g);
         }
     }
 
@@ -165,19 +201,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintFill(Graphics2D g) {
-        if (shapeType.isClosed()) {
-            fillPaint.prepare(g, transformedDrag, fgColor, bgColor);
-            g.fill(shape);
-            fillPaint.finish(g);
-        } else if (strokePaint == NONE) {
-            // Special case: an open shape can't be filled,
-            // it can be only stroked, even if stroke is disabled.
-            // So use the default stroke and the fill paint.
-            g.setStroke(STROKE_FOR_OPEN_SHAPES);
-            fillPaint.prepare(g, transformedDrag, fgColor, bgColor);
-            g.draw(shape);
-            fillPaint.finish(g);
-        }
+        fillPaint.prepare(g, transformedDrag, fgColor, bgColor);
+        g.fill(shape);
+        fillPaint.finish(g);
     }
 
     private void paintStroke(Graphics2D g) {
@@ -189,7 +215,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private void paintEffects(Graphics2D g) {
         if (strokePaint != NONE) {
-            if (fillPaint != NONE && shapeType.isClosed()) {
+            if (fillPaint != NONE) {
                 paintEffectsForFilledStrokedShape(g);
             } else {
                 paintStrokeOutlineEffects(g);
@@ -200,11 +226,16 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintEffectsForFilledStrokedShape(Graphics2D g) {
-        // add the outline area of the stroke to the shape area
+        // Add the outline area of the stroke to the shape area
         // to get the shape for the effects, but these Area operations
-        // could be too slow for the WobbleStroke
-        if (stroke instanceof WobbleStroke) {
-            // give up, just draw something
+        // could be too slow for the WobbleStroke.
+        // TODO Also some shapes (Line, Cat, Bat + sometimes rounded rectangle) trigger
+        //  https://bugs.openjdk.java.net/browse/JDK-6357341
+        //  with Tapering stroke + neon border
+        var strokeClass = stroke.getClass();
+        if (strokeClass == WobbleStroke.class || (strokeClass == TaperingStroke.class && shapeType.hasAreaProblem())) {
+            // give up, draw the effect directly on the original shape,
+            // ignoring the stroke's width
             effects.drawOn(g, shape);
         } else {
             // do the correct thing
@@ -228,35 +259,44 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintEffectsNoStroke(Graphics2D g) {
-        if (shapeType.isClosed()) {
-            effects.drawOn(g, shape); // simplest case
-        } else {
-            Shape defaultOutline = STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
-            effects.drawOn(g, defaultOutline);
-        }
+        effects.drawOn(g, shape); // simplest case
     }
 
     // called during the initial drag, when there is no transform box yet
-    public void updateFromDrag(Drag drag, ShapesTool tool) {
-        assert !tool.hasBox();
-        assert !drag.isClick();
+    public void updateFromDrag(Drag drag, boolean altDown, boolean shiftDown) {
+        assert !Tools.SHAPES.hasBox();
         assert !drag.isImClick();
+
+        drag.setStartFromCenter(altDown);
+        if (shapeType.isDirectional()) {
+            // For directional shapes it's useful to have the
+            // ability to drag exactly horizontally or vertically.
+            drag.setConstrained(shiftDown);
+        } else {
+            drag.setEquallySized(shiftDown);
+        }
 
         origDrag = drag;
 
         // during the initial drag it can use the tool's settings directly
-        ShapeTypeSettings settings = tool.getSettingsFor(shapeType);
-        unTransformedShape = shapeType.createShape(drag, settings);
+        ShapeTypeSettings settings = Tools.SHAPES.getSettingsFor(shapeType);
+        origShape = shapeType.createShape(drag, settings);
 
         // since there is no transform box yet
-        transformedDrag = drag;
-        shape = unTransformedShape;
+        this.transformedDrag = drag;
+        shape = origShape;
+
+        state = State.SHAPE_SET;
+        assert checkConsistency();
     }
 
     @Override
-    public void transform(AffineTransform at) {
-        shape = at.createTransformedShape(unTransformedShape);
-        transformedDrag = origDrag.transformedCopy(at);
+    public void imTransform(AffineTransform at) {
+        shape = at.createTransformedShape(origShape);
+        transformedDrag = origDrag.imTransformedCopy(at);
+
+        notifyChangeListener();
+        assert checkConsistency();
     }
 
     @Override
@@ -265,9 +305,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void reloadType(ShapesTool tool) {
-        ShapeType type = tool.getSelectedType();
-        boolean typeChanged = this.shapeType != type;
-        this.shapeType = type;
+        ShapeType newType = tool.getSelectedType();
+        boolean typeChanged = this.shapeType != newType;
+        this.shapeType = newType;
 
         if (typeChanged) {
             reloadTypeSettings(tool);
@@ -288,6 +328,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private void reloadStrokePaint(ShapesTool tool) {
         this.strokePaint = tool.getSelectedStrokePaint();
+        if (stroke == null) { // can happen after deserialization
+            // This ignores the deserialized strokeSettings, but it's not a problem:
+            // if there is no stroke, then the disabled stroke settings aren't important.
+            reloadStroke(tool);
+        }
     }
 
     private void reloadStroke(ShapesTool tool) {
@@ -305,7 +350,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     // called after a change in the shape type or settings
-    private void recreateShapes(ShapesTool tool, TransformBox box, String editName) {
+    private void recreateShape(ShapesTool tool, TransformBox box, String editName) {
         assert origDrag != null : "no origDrag, edit = " + editName;
 
         ShapeTypeSettings settings = tool.getSettingsFor(shapeType);
@@ -313,10 +358,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // make sure that the new directional shape is drawn
             // along the direction of the existing box
             // TODO this still ignores the height of the current box
-            unTransformedShape = shapeType.createShape(origDrag.getCenterHorizontalDrag(), settings);
+            origShape = shapeType.createShape(origDrag.getCenterHorizontalDrag(), settings);
         } else {
-            unTransformedShape = shapeType.createShape(origDrag, settings);
+            origShape = shapeType.createShape(origDrag, settings);
         }
+        assert origShape != null;
 
         // Should always be non-null, unless the user somehow manages to change the
         // type via keyboard during the initial drag, but leave the check for safety.
@@ -326,29 +372,44 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
     }
 
+    public void resetTransform() {
+        assert transformedDrag != null : "state = " + state;
+        origDrag = transformedDrag;
+        origShape = shape;
+
+        assert checkConsistency();
+    }
+
     /**
      * Creates a transform box suitable for this styled shape.
      */
     public TransformBox createBox(View view) {
-        // This method works correctly only at the end of the first user drag.
-        assert origDrag == transformedDrag;
+        assert isInitialized();
+        if (origDrag != transformedDrag) {
+            // we aren't at the end of the first user drag
+            resetTransform();
+        }
 
         TransformBox box;
         if (shapeType.isDirectional()) {
             // for directional shapes, zero-width or zero-height drags are allowed
-            box = createRotatedBox(origDrag, view);
+            box = createRotatedBox(view, origDrag.calcAngle());
         } else {
-            if (origDrag.hasZeroWidth() || origDrag.hasZeroHeight()) {
+            if (origDrag.hasZeroImWidth() || origDrag.hasZeroImHeight()) {
                 return null;
             }
-            Rectangle origCoRect = origDrag.toPosCoRect();
-            assert !origCoRect.isEmpty() : "drag = " + origDrag;
-            box = new TransformBox(origCoRect, view, this);
+            Rectangle2D origImRect = origDrag.toPosImRect();
+            assert !origImRect.isEmpty() : "drag = " + origDrag;
+            box = new TransformBox(origImRect, view, this);
         }
+        state = State.BOX_CREATED;
         return box;
     }
 
-    private TransformBox createRotatedBox(Drag drag, View view) {
+    private TransformBox createRotatedBox(View view, double angle) {
+//        System.out.printf("StyledShape::createRotatedBox: angle = %.2f, transformedDrag = %s%n",
+//            angle, transformedDrag.toString());
+
         ShapeTypeSettings settings = null;
         if (shapeType.hasSettings()) {
             // this instance is independent of the tool's type settings
@@ -357,44 +418,55 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             settings.loadStateFrom(typeSettings);
         }
 
+        // The rotated box is created in 3 steps:
+        // 1) Rotate the original shape backwards.
+        // 2) Create a horizontal box for it.
+        // 3) Rotate the box (an implicitly the shape) forwards.
+
+        double imDist = transformedDrag.calcImDist();
+        double dragStartX = transformedDrag.getStartXFromCenter();
+        double dragStartY = transformedDrag.getStartYFromCenter();
+        Rectangle2D horBoxImBounds = new Rectangle.Double(
+            dragStartX,
+            dragStartY - imDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+            imDist,
+            imDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
+        assert !horBoxImBounds.isEmpty();
+
+        double rotCenterImX = horBoxImBounds.getX();
+        double rotCenterImY = horBoxImBounds.getY() + horBoxImBounds.getHeight() / 2.0;
+
         // Set the original shape to the horizontal shape.
         // It could also be rotated backwards with an AffineTransform.
-        unTransformedShape = shapeType.createHorizontalShape(drag, settings);
+        origShape = shapeType.createShape(transformedDrag, settings);
+        assert origShape != null;
+        AffineTransform rotBack = AffineTransform.getRotateInstance(-angle, rotCenterImX, rotCenterImY);
+        origShape = rotBack.createTransformedShape(origShape);
+        assert origShape != null;
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
-        double imDragDist = drag.calcImDist();
-        double halfImHeight = imDragDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
+        double halfImHeight = imDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
         origDrag = new Drag(
-            drag.getStartX(),
-            drag.getStartY() - halfImHeight,
-            drag.getStartX() + imDragDist,
-            drag.getStartY() + halfImHeight);
+            dragStartX,
+            dragStartY - halfImHeight,
+            dragStartX + imDist,
+            dragStartY + halfImHeight);
 
-        // create the horizontal box
-        double coDist = drag.calcCoDist();
-        Rectangle2D horBoxBounds = new Rectangle.Double(
-            drag.getCoStartX(),
-            drag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
-            coDist,
-            coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
-        assert !horBoxBounds.isEmpty();
-        TransformBox box = new TransformBox(horBoxBounds, view, this);
+        TransformBox box = new TransformBox(horBoxImBounds, view, this);
 
         // rotate the horizontal box into place
-        double angle = drag.calcAngle();
-        double rotCenterCoX = horBoxBounds.getX();
-        double rotCenterCoY = horBoxBounds.getY() + horBoxBounds.getHeight() / 2.0;
-        box.saveState(); // so that transform works
+        box.saveImState(); // so that transform works
         box.setAngle(angle);
-        box.coTransform(AffineTransform.getRotateInstance(
-            angle, rotCenterCoX, rotCenterCoY));
+
+        // this was coTransform before
+        box.imTransform(AffineTransform.getRotateInstance(
+            angle, rotCenterImX, rotCenterImY));
         return box;
     }
 
     public void rasterizeTo(Composition comp, TransformBox transformBox, ShapesTool tool) {
-        assert shape != null;
-        assert !tool.isEditingShapesLayer();
+        assert checkConsistency();
 
         PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawable();
@@ -412,11 +484,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         // must be added even if there is no image edit
         // to manage the shapes tool state changes
-        History.add(new FinalizeShapeEdit(comp,
-            imageEdit, transformBox, this));
+        History.add(new RasterizeShapeEdit(comp, imageEdit, transformBox, this));
 
         if (imageEdit != null) {
-            paintOnDrawable(dr, tool);
+            paintOnDrawable(dr);
             comp.update();
             dr.updateIconImage();
         } else {
@@ -425,7 +496,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
     }
 
-    private void paintOnDrawable(Drawable dr, ShapesTool tool) {
+    private void paintOnDrawable(Drawable dr) {
         int tx = -dr.getTx();
         int ty = -dr.getTy();
 
@@ -444,8 +515,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     public final StyledShape clone() {
         // this is used only for undo, it should be OK to share
         // all the references
+        assert checkConsistency();
         try {
-            return (StyledShape) super.clone();
+            StyledShape clone = (StyledShape) super.clone();
+            assert clone.checkConsistency();
+            return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(); // can't happen
         }
@@ -470,11 +544,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         switch (editName) {
             case ShapesTool.CHANGE_SHAPE_TYPE -> {
                 reloadType(tool);
-                recreateShapes(tool, box, editName);
+                recreateShape(tool, box, editName);
             }
             case ShapesTool.CHANGE_SHAPE_TYPE_SETTINGS -> {
                 reloadTypeSettings(tool);
-                recreateShapes(tool, box, editName);
+                recreateShape(tool, box, editName);
             }
             case ShapesTool.CHANGE_SHAPE_FILL -> reloadFillPaint(tool);
             case ShapesTool.CHANGE_SHAPE_STROKE -> reloadStrokePaint(tool);
@@ -490,6 +564,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         var comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
         comp.update();
+
+        notifyChangeListener();
     }
 
     public ShapeType getShapeType() {
@@ -524,41 +600,64 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return bgColor;
     }
 
-    /**
-     * Return a shape that is guaranteed to be closed and corresponds
-     * to the displayed pixels. The effects are ignored and the stroke
-     * is considered only for open shapes.
-     *
-     * @param tool
-     */
-    public Shape getShapeForSelection(ShapesTool tool) {
-        if (tool.getSelectedType().isClosed()) {
-            return shape;
-        } else if (tool.hasStroke()) {
-            // the shape is not closed, but there is a stroke
-            return tool.getStroke().createStrokedShape(shape);
-        } else {
-            // the shape is not closed, and there is no stroke
-            return STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
+    public Shape getShapeForSelection() {
+        return shape;
+    }
+
+    public boolean isInitialized() {
+        boolean initialized = state != State.CREATED;
+        assert initialized == (origDrag != null);
+        assert initialized == (shape != null);
+        return initialized;
+    }
+
+    public boolean hasBlendingIssue() {
+        // for some reason the JDK built-in gradients
+        // don't blend with the custom blending modes
+        return fillPaint.hasBlendingIssue() || strokePaint.hasBlendingIssue();
+    }
+
+    public void setChangeListener(Runnable changeListener) {
+        this.changeListener = changeListener;
+    }
+
+    private void notifyChangeListener() {
+        if (changeListener != null) {
+            changeListener.run();
         }
     }
 
-    public boolean hasOrigDrag() {
-        return origDrag != null;
+    public boolean checkConsistency() {
+        // TODO CREATED, but not initialized styled shapes
+        //  shouldn't be put in shape layers
+        if (state == State.CREATED) {
+            return true;
+        }
+
+        if (origShape == null) {
+            throw new IllegalStateException("state = " + state);
+        }
+        if (shape == null) {
+            throw new IllegalStateException("state = " + state);
+        }
+        return true;
     }
 
     @Override
     public DebugNode createDebugNode() {
         var node = new DebugNode("styled shape", this);
 
-        node.addString("origDrag",
-            origDrag == null ? "null" : origDrag.toString());
-        node.addString("transformedDrag",
-            transformedDrag == null ? "null" : transformedDrag.toString());
+        node.addAsString("state", state);
 
-        node.addString("type", shapeType.toString());
-        node.addString("fillPaint", fillPaint.toString());
-        node.addString("strokePaint", strokePaint.toString());
+        node.addAsClass("origShape", origShape);
+        node.addAsClass("shape", shape);
+
+        node.addAsString("origDrag", origDrag);
+        node.addAsString("transformedDrag", transformedDrag);
+
+        node.addAsString("type", shapeType);
+        node.addAsString("fillPaint", fillPaint);
+        node.addAsString("strokePaint", strokePaint);
         node.add(effects.createDebugNode());
         node.addColor("FG", fgColor);
         node.addColor("BG", bgColor);

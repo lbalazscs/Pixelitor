@@ -20,6 +20,7 @@ package pixelitor.tools.transform;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -47,10 +48,10 @@ public abstract class PositionHandle extends DraggablePoint {
     private Direction direction;
 
     protected PositionHandle(String name, TransformBox box,
-                             double x, double y, View view,
+                             PPoint p, View view,
                              Color color, Color activeColor,
                              int cursorIndex, int cursorIndexIO) {
-        super(name, x, y, view, color, activeColor);
+        super(name, p, view, color, activeColor);
         this.box = box;
         this.cursorIndex = cursorIndex;
         this.cursorIndexIO = cursorIndexIO;

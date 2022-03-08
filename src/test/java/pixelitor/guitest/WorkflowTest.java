@@ -28,8 +28,7 @@ import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.ShapeType;
@@ -90,7 +89,7 @@ public class WorkflowTest {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
         addGuide();
         runFilterWithDialog("Wood", null);
-        duplicateLayerThenUndo();
+        duplicateLayerThenUndo(ImageLayer.class);
 
         app.addTextLayer("Wood", null, "Pixelitor");
 
@@ -98,9 +97,8 @@ public class WorkflowTest {
             dialog.textBox("textTF").requireText("Wood");
             dialog.slider("fontSize").slideTo(200);
         });
-        duplicateLayerThenUndo();
-
-        rasterizeThenUndo();
+        duplicateLayerThenUndo(TextLayer.class);
+        rasterizeThenUndo(TextLayer.class);
         selectionFromText();
         deleteTextLayer();
         rotate90();
@@ -139,14 +137,8 @@ public class WorkflowTest {
         runFilterWithDialog("Spider Web", null);
         app.runMenuCommand("Duplicate");
 
-        app.addTextLayer("Spider", dialog -> {
-            dialog.comboBox("hAlignmentCB").selectItem("Left");
-            dialog.comboBox("vAlignmentCB").selectItem("Top");
-        }, "Pixelitor");
-        app.addTextLayer("Web", dialog -> {
-            dialog.comboBox("hAlignmentCB").selectItem("Right");
-            dialog.comboBox("vAlignmentCB").selectItem("Top");
-        }, "Pixelitor");
+        addTextLayer("Spider", "Top", "Left");
+        addTextLayer("Web", "Top", "Right");
 
         // switch back to the main tab
         pw.tabbedPane().selectTab("wf test 2");
@@ -161,11 +153,12 @@ public class WorkflowTest {
 
         app.addGradientFillLayer("CW Spiral");
         app.changeLayerBlendingMode("Multiply");
+        duplicateLayerThenUndo(GradientFillLayer.class);
+        rasterizeThenUndo(GradientFillLayer.class);
         app.mergeDown();
 
-        Consumer<DialogFixture> customizer = dialog ->
-            dialog.comboBox("Bump Map").selectItem("wf test 2 copy");
-        runFilterWithDialog("Bump Map", customizer);
+        runFilterWithDialog("Bump Map", dialog ->
+            dialog.comboBox("Bump Map").selectItem("wf test 2 copy"));
 
         // close the temporary tab
         pw.tabbedPane().selectTab("wf test 2 copy");
@@ -179,8 +172,8 @@ public class WorkflowTest {
         app.changeLayerBlendingMode("Hue");
         app.changeLayerOpacity(0.5f);
 
-        app.runMenuCommand("Rasterize Color Fill Layer");
-        keyboard.undoRedo("Rasterize Color Fill Layer");
+        duplicateLayerThenUndo(ColorFillLayer.class);
+        rasterizeThenUndo(ColorFillLayer.class);
 
         app.mergeDown();
 
@@ -188,7 +181,7 @@ public class WorkflowTest {
         app.runMenuCommand("Convert to Smart Object");
         keyboard.undoRedo("Convert to Smart Object");
 
-        duplicateLayerThenUndo();
+        duplicateLayerThenUndo(SmartObject.class);
 
         app.runMenuCommand("Edit Contents");
         app.editTextLayer(dialog -> dialog.textBox("textTF")
@@ -206,7 +199,25 @@ public class WorkflowTest {
                 dialog.slider("Horizontal").slideTo(250);
             });
 
+        duplicateLayerThenUndo(SmartObject.class);
+        rasterizeThenUndo(SmartObject.class);
+
+        app.addShapesLayer(ShapeType.CAT);
+        duplicateLayerThenUndo(ShapesLayer.class);
+        rasterizeThenUndo(ShapesLayer.class);
+
+        // ensure that the first layer is selected and the box is not shown
+        app.runMenuCommand("Lower Layer Selection");
+        app.runMenuCommand("Lower Layer Selection");
+
         loadReferenceImage("wf2_reference.pxc");
+    }
+
+    private void addTextLayer(String text, String vAlignment, String hAlignment) {
+        app.addTextLayer(text, dialog -> {
+            dialog.comboBox("hAlignmentCB").selectItem(hAlignment);
+            dialog.comboBox("vAlignmentCB").selectItem(vAlignment);
+        }, "Pixelitor");
     }
 
     private void addGuide() {
@@ -226,24 +237,35 @@ public class WorkflowTest {
         keyboard.undoRedo(filterName);
     }
 
-    private void duplicateLayerThenUndo() {
+    private void duplicateLayerThenUndo(Class<? extends Layer> expectedLayerType) {
+        int numLayers = EDT.getNumLayersInActiveComp();
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+
         app.runMenuCommand("Duplicate Layer");
+
+        EDT.assertNumLayersIs(numLayers + 1);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+
         keyboard.undoRedoUndo("Duplicate Layer");
+
+        EDT.assertNumLayersIs(numLayers);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
     }
 
-    private void rasterizeThenUndo() {
-        EDT.assertActiveLayerTypeIs(TextLayer.class);
-        EDT.assertNumLayersIs(2);
+    private void rasterizeThenUndo(Class<? extends Layer> expectedLayerType) {
+        int numLayers = EDT.getNumLayersInActiveComp();
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+        Layer layer = EDT.getActiveLayer();
 
-        app.runMenuCommand("Rasterize Text Layer");
+        app.runMenuCommand("Rasterize " + layer.getTypeString());
 
+        EDT.assertNumLayersIs(numLayers);
         EDT.assertActiveLayerTypeIs(ImageLayer.class);
-        EDT.assertNumLayersIs(2);
 
-        keyboard.undoRedoUndo("Rasterize Text Layer");
+        keyboard.undoRedoUndo("Rasterize " + layer.getTypeString());
 
-        EDT.assertActiveLayerTypeIs(TextLayer.class);
-        EDT.assertNumLayersIs(2);
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+        EDT.assertNumLayersIs(numLayers);
     }
 
     private void selectionFromText() {
@@ -368,7 +390,7 @@ public class WorkflowTest {
         mouse.moveToCanvas(340, 100);
         mouse.dragToCanvas(440, 200);
         keyboard.undoRedo("Create Shape");
-        keyboard.pressEsc(); // finalize the shape
+        keyboard.pressEsc(); // rasterize the shape
 
         app.runMenuCommand("Delete");
         keyboard.undoRedoUndo("Delete Layer Mask");

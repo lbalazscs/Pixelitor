@@ -611,7 +611,7 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_SHIFT_E);
 
-        sub.add(new OpenViewEnabledAction("Add Linked") {
+        sub.add(new OpenViewEnabledAction("Add Linked...") {
             @Override
             public void onClick() {
                 Composition comp = getActiveComp();

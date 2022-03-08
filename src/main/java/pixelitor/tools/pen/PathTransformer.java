@@ -103,12 +103,12 @@ public class PathTransformer implements PenToolMode {
         // handles can be manipulated even when the boxes are overlapping
         boolean handleWasHit = false;
         for (TransformBox box : boxes) {
-            DraggablePoint hit = box.handleWasHit(x, y);
+            DraggablePoint hit = box.findHandleAt(x, y);
             if (hit != null) {
                 handleWasHit = true;
                 draggedBox = box;
                 lastActiveBox = box;
-                box.handleHitWhenPressed(hit, x, y);
+                box.mousePressedOn(hit, x, y);
                 break;
             }
         }

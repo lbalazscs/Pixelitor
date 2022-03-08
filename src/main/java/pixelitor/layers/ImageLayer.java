@@ -331,7 +331,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         assert image.getRaster().getBounds().contains(selBounds) :
             "image bounds = " + image.getRaster().getBounds()
-                + ", selection bounds = " + selBounds;
+            + ", selection bounds = " + selBounds;
 
         return image.getSubimage(
             selBounds.x, selBounds.y,
@@ -631,7 +631,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // with settings without its dialog
             if (context != REPEAT_LAST && context != BATCH_AUTOMATE) {
                 throw new IllegalStateException(filterName
-                    + " returned the original image, context = " + context);
+                                                + " returned the original image, context = " + context);
             } else {
                 return;
             }
@@ -848,11 +848,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void crop(Rectangle2D cropRect,
-                     boolean deleteCroppedPixels,
+                     boolean deleteCropped,
                      boolean allowGrowing) {
         assert !cropRect.isEmpty() : "empty crop rectangle";
 
-        if (!deleteCroppedPixels && !allowGrowing) {
+        if (!deleteCropped && !allowGrowing) {
             // the simple case: it is guaranteed that the image will
             // cover the new canvas, so just set the new translation
             super.crop(cropRect, false, allowGrowing);
@@ -869,12 +869,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int cropX = (int) (cropRect.getX() - getTx());
         int cropY = (int) (cropRect.getY() - getTy());
 
-        if (!deleteCroppedPixels) {
+        if (!deleteCropped) {
             assert allowGrowing;
 
             boolean imageCoversNewCanvas = cropX >= 0 && cropY >= 0
-                && cropX + cropWidth <= image.getWidth()
-                && cropY + cropHeight <= image.getHeight();
+                                           && cropX + cropWidth <= image.getWidth()
+                                           && cropY + cropHeight <= image.getHeight();
             if (imageCoversNewCanvas) {
                 // no need to change the image, just set the translation
                 super.crop(cropRect, false, allowGrowing);
@@ -898,7 +898,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // if we get here, we know that the pixels have to be deleted,
         // that is, the new image dimensions must be cropWidth, cropHeight
         // and the translation must be 0, 0
-        assert deleteCroppedPixels;
+        assert deleteCropped;
 
         // this method call can also grow the image
         BufferedImage newImage = ImageUtils.crop(image, cropX, cropY, cropWidth, cropHeight);
@@ -1054,11 +1054,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
                 ", tx = " + getTx() + ", ty = " + getTy()
-                    + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
-                    + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
-                    + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
-                    + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
-                    + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
+                + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
+                + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
+                + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
+                + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
+                + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
         }
 
         int finalTx = newTx;
@@ -1226,7 +1226,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public DebugNode createDebugNode(String descr) {
         DebugNode node = super.createDebugNode(descr);
 
-        node.addString("state", state.toString());
+        node.addAsString("state", state);
         node.add(DebugNodes.createBufferedImageNode("image", image));
 
         return node;
@@ -1238,16 +1238,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
                + ", tx=" + getTx()
                + ", ty=" + getTy()
                + ", imgWidth=" + image.getWidth()
-            + ", imgHeight=" + image.getHeight()
-            + '}';
+               + ", imgHeight=" + image.getHeight()
+               + '}';
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
-            + "{img=" + image.getWidth() + "x" + image.getHeight()
-            + ", state=" + state
-            + ", super=" + super.toString()
-            + '}';
+               + "{img=" + image.getWidth() + "x" + image.getHeight()
+               + ", state=" + state
+               + ", super=" + super.toString()
+               + '}';
     }
 }

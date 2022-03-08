@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public record AngleGradientPaint(Drag drag, Color startColor, Color endColor,
     public PaintContext createContext(ColorModel cm,
                                       Rectangle deviceBounds, Rectangle2D userBounds,
                                       AffineTransform xform, RenderingHints hints) {
-        Drag trDrag = drag.transformedCopy(xform);
+        Drag trDrag = drag.imTransformedCopy(xform);
         if (cm.getNumComponents() == 1) {
             return new GrayAngleGradientPaintContext(trDrag,
                 startColor, endColor, cm, cycleMethod);

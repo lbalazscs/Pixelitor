@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -96,7 +96,7 @@ public abstract class StrokeBrush extends AbstractBrush {
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
-        node.addString("stroke type", strokeType.toString());
+        node.addAsString("stroke type", strokeType);
 
         return node;
     }

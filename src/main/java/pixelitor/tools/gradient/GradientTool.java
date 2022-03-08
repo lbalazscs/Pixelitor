@@ -17,7 +17,6 @@
 
 package pixelitor.tools.gradient;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColors;
@@ -31,6 +30,7 @@ import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
@@ -53,6 +53,8 @@ import java.awt.geom.AffineTransform;
 import static java.awt.MultipleGradientPaint.CycleMethod.*;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
@@ -77,6 +79,8 @@ public class GradientTool extends DragTool {
 
     private GradientFillLayer gradientLayer;
 
+    private DragToolState state;
+
     public GradientTool() {
         super("Gradient", 'G', "gradient_tool.png",
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
@@ -84,6 +88,7 @@ public class GradientTool extends DragTool {
             "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
             Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
+        state = NO_INTERACTION;
     }
 
     @Override
@@ -189,12 +194,13 @@ public class GradientTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
+        state = AFTER_FIRST_MOUSE_PRESS;
         if (handles == null) {
             return;
         }
         double x = e.getCoX();
         double y = e.getCoY();
-        DraggablePoint hit = handles.handleWasHit(x, y);
+        DraggablePoint hit = handles.findHandleAt(x, y);
         if (hit != null) {
             hit.setActive(true);
             hit.mousePressed(x, y);
@@ -222,6 +228,7 @@ public class GradientTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
+        checkActiveLayer(comp);
         if (drag.isClick()) {
             if (activePoint == null) {
                 // clicked outside the handles
@@ -248,9 +255,8 @@ public class GradientTool extends DragTool {
             }
         } else { // the initial drag just ended
             renderedDrag = drag;
-            handles = new GradientHandles(
-                drag.getCoStartX(), drag.getCoStartY(),
-                drag.getCoEndX(), drag.getCoEndY(), e.getView());
+            View view = e.getView();
+            handles = new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
         }
 
         if (isEditingGradientLayer()) {
@@ -260,17 +266,7 @@ public class GradientTool extends DragTool {
             if (dr != null) {
                 drawGradient(dr, renderedDrag, true, null);
             } else {
-                if (AppContext.isDevelopment()) {
-                    throw new IllegalStateException();
-                }
-                // error recovery
-                Layer layer = comp.getActiveLayer();
-                if (layer instanceof GradientFillLayer gfl) {
-                    // somehow a gradient layer got activated without the tool noticing it
-                    gradientLayer = gfl;
-                    gradientLayer.setGradient(createGradient(renderedDrag), true);
-                }
-                // else give up, do nothing
+                throw new IllegalStateException();
             }
         }
     }
@@ -278,12 +274,11 @@ public class GradientTool extends DragTool {
     @Override
     public void mouseMoved(MouseEvent e, View view) {
         if (handles == null) {
-            // in this method we only want to highlight the
-            // handle under the mouse
+            // this method only highlights the handle under the mouse
             return;
         }
 
-        DraggablePoint handle = handles.handleWasHit(e.getX(), e.getY());
+        DraggablePoint handle = handles.findHandleAt(e.getX(), e.getY());
         if (handle != null) {
             handle.setActive(true);
             view.repaint();
@@ -295,11 +290,16 @@ public class GradientTool extends DragTool {
         }
     }
 
-    @Override
-    protected void toolEnded() {
-        super.toolEnded();
-
-        resetInitialState();
+    // TODO for some reason it is necessary to check the active
+    //   layer again when the mouse is released - somehow a gradient
+    //   layer can be activated without the tool noticing it.
+    private void checkActiveLayer(Composition comp) {
+        Layer layer = comp.getActiveLayer();
+        if (layer instanceof GradientFillLayer gfl) {
+            gradientLayer = gfl;
+        } else {
+            gradientLayer = null;
+        }
     }
 
     @Override
@@ -326,6 +326,7 @@ public class GradientTool extends DragTool {
         handles = null;
         activePoint = null;
         lastGradient = null;
+        gradientLayer = null;
         Views.repaintActive();
     }
 
@@ -334,12 +335,12 @@ public class GradientTool extends DragTool {
         if (reloaded && handles != null) {
             hideHandles(newComp, false);
         }
-        handleNewActiveLayer(newComp.getActiveLayer());
+        layerActivated(newComp.getActiveLayer());
     }
 
     @Override
     public void editingTargetChanged(Layer layer) {
-        handleNewActiveLayer(layer);
+        layerActivated(layer);
     }
 
     @Override
@@ -354,8 +355,7 @@ public class GradientTool extends DragTool {
 
     private void hideHandles(boolean addHistory) {
         if (handles != null) {
-            var comp = Views.getActiveComp();
-            hideHandles(comp, addHistory);
+            hideHandles(Views.getActiveComp(), addHistory);
         }
     }
 
@@ -451,6 +451,10 @@ public class GradientTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
+        if (!comp.getActiveLayer().isVisible()) {
+            return;
+        }
+
         // the superclass draws the drag display
         super.paintOverImage(g2, comp);
 
@@ -460,7 +464,7 @@ public class GradientTool extends DragTool {
             if (drag != null && drag.isDragging()) {
                 // during the first drag, when there are no handles yet,
                 // paint only the arrow
-                drag.drawGradientArrow(g2);
+                drag.drawCoDirectionArrow(g2);
             }
         }
     }
@@ -498,18 +502,29 @@ public class GradientTool extends DragTool {
 
         Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
-            handleNewActiveLayer(activeLayer);
+            layerActivated(activeLayer);
         }
     }
 
-    private void handleNewActiveLayer(Layer layer) {
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+
+        resetInitialState();
+    }
+
+    private void layerActivated(Layer layer) {
         if (layer.isMaskEditing()) {
             setupMaskEditing(true);
             gradientLayer = null;
         } else {
             if (layer instanceof GradientFillLayer gfl) {
-                blendingModePanel.setEnabled(false);
+                if (gfl == gradientLayer) {
+                    return; // not a new layer
+                }
                 gradientLayer = gfl;
+
+                blendingModePanel.setEnabled(false);
                 Gradient gradient = gfl.getGradient();
                 if (gradient != null) {
                     loadSettingsFromGradient(gradient, gfl.getComp().getView());
@@ -611,13 +626,17 @@ public class GradientTool extends DragTool {
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
-        node.addString("type", getType().toString());
-        node.addString("cycling", getCycleType().toString());
-        node.addQuotedString("color", getGradientColorType().toString());
+        node.addAsString("type", getType());
+        node.addAsString("cycling", getCycleType());
+        node.addAsQuotedString("color", getGradientColorType());
         node.addBoolean("revert", isReverted());
         node.addFloat("opacity", blendingModePanel.getOpacity());
-        node.addQuotedString("blending mode",
-            blendingModePanel.getBlendingMode().toString());
+        node.addAsQuotedString("blending mode", blendingModePanel.getBlendingMode());
+        if (handles != null) {
+            node.add(handles.createDebugNode());
+        } else {
+            node.addString("handles", "null");
+        }
 
         return node;
     }

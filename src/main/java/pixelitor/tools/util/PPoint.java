@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * take the position of the {@link Canvas} within the
  * {@link View} and the image zooming into account.
  */
-public abstract class PPoint {
+public class PPoint {
     View view;
 
     // All the coordinates are initialized in subclasses.
@@ -54,6 +54,14 @@ public abstract class PPoint {
 
     protected PPoint(View view) {
         assert view != null;
+        this.view = view;
+    }
+
+    public PPoint(double coX, double coY, double imX, double imY, View view) {
+        this.coX = coX;
+        this.coY = coY;
+        this.imX = imX;
+        this.imY = imY;
         this.view = view;
     }
 
@@ -156,6 +164,10 @@ public abstract class PPoint {
         return Math.sqrt(coDistSq(other));
     }
 
+    public static PPoint from(double coX, double coY, double imX, double imY, View view) {
+        return new PPoint(coX, coY, imX, imY, view);
+    }
+
     public static PPoint lazyFromCo(double x, double y, View view) {
         return new LazyCo(view, x, y);
     }
@@ -178,6 +190,12 @@ public abstract class PPoint {
 
     public static PPoint lazyFromIm(double imX, double imY, View view) {
         return new LazyIm(view, imX, imY);
+    }
+
+    public static PPoint halfPointBetween(DraggablePoint p1, DraggablePoint p2) {
+        double x = (p1.getImX() + p2.getImX()) / 2.0;
+        double y = (p1.getImY() + p2.getImY()) / 2.0;
+        return eagerFromIm(x, y, p1.getView());
     }
 
     public Composition getComp() {

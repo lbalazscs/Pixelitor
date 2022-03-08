@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,9 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Utils;
 
 import java.awt.Graphics2D;
@@ -34,8 +36,8 @@ import java.awt.geom.Point2D;
 public class MovingPoint extends DraggablePoint {
     private final AnchorPoint prevAnchor;
 
-    public MovingPoint(double x, double y, AnchorPoint prevAnchor) {
-        super("moving", x, y, prevAnchor.getView(), null, null);
+    public MovingPoint(double coX, double coY, AnchorPoint prevAnchor, View view) {
+        super("moving", PPoint.eagerFromCo(coX, coY, view), view, null, null);
         this.prevAnchor = prevAnchor;
     }
 

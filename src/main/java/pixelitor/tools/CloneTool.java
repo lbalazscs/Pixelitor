@@ -299,14 +299,14 @@ public class CloneTool extends BlendingModeBrushTool {
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
-        node.addString("brush", cloneBrush.getType().toString());
-        node.addString("state", state.toString());
+        node.addAsString("brush", cloneBrush.getType());
+        node.addAsString("state", state);
         node.addBoolean("sample all layers", sampleAllLayers);
         node.addBoolean("aligned", cloneBrush.isAligned());
 
         node.addFloat("scale", scaleParam.getPercentageValF());
         node.addInt("rotation", rotationParam.getValue());
-        node.addString("mirror", mirrorParam.getSelected().toString());
+        node.addAsString("mirror", mirrorParam.getSelected());
 
         return node;
     }

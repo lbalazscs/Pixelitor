@@ -250,7 +250,7 @@ public class MoveTool extends DragTool {
             sel.startMovement();
             Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
-            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(sel));
+            transformBox = new TransformBox(boxSize, view, new SelectionTransformable(sel), true);
             sel.startMovement();
         }
     }

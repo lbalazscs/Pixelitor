@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,10 @@ import java.awt.geom.Rectangle2D;
  * a rectangle both in component and image space.
  */
 public class PRectangle {
-    private Rectangle coRect;
+    private Rectangle2D coRect;
     private Rectangle2D imRect;
 
-    private PRectangle(Rectangle coRect, Rectangle2D imRect) {
+    private PRectangle(Rectangle2D coRect, Rectangle2D imRect) {
         this.coRect = coRect;
         this.imRect = imRect;
     }
@@ -42,7 +42,7 @@ public class PRectangle {
     /**
      * Creates a {@link PRectangle} from a component-space input
      */
-    public static PRectangle fromCo(Rectangle coRect, View view) {
+    public static PRectangle fromCo(Rectangle2D coRect, View view) {
         Rectangle2D imRect = view.componentToImageSpace(coRect);
         return new PRectangle(coRect, imRect);
     }
@@ -80,6 +80,14 @@ public class PRectangle {
     }
 
     public Rectangle getCo() {
+        if (coRect.getClass() == Rectangle.class) { // in most cases this should be true
+            return (Rectangle) coRect;
+        }
+        return new Rectangle((int) coRect.getX(), (int) coRect.getY(),
+            (int) coRect.getWidth(), (int) coRect.getHeight());
+    }
+
+    public Rectangle2D getCo2D() {
         return coRect;
     }
 
@@ -127,6 +135,10 @@ public class PRectangle {
 
     public void recalcIm(View view) {
         imRect = view.componentToImageSpace(coRect);
+    }
+
+    public boolean isEmpty() {
+        return imRect.isEmpty();
     }
 
     @Override

@@ -28,7 +28,6 @@ import pixelitor.tools.util.Drag;
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -212,10 +211,8 @@ public class Gradient implements Serializable {
     }
 
     public GradientHandles createHandles(View view) {
-        Point2D handleStart = view.imageToComponentSpace(drag.getStartPoint());
-        Point2D handleEnd = view.imageToComponentSpace(drag.getEndPoint());
-
-        return new GradientHandles(handleStart, handleEnd, view);
+        drag.calcCoCoords(view);
+        return new GradientHandles(drag.getStart(view), drag.getEnd(view), view);
     }
 
     public void crop(Rectangle2D cropRect) {
@@ -226,8 +223,8 @@ public class Gradient implements Serializable {
         drag = drag.translatedCopy(west, north);
     }
 
-    public void transform(AffineTransform at) {
-        drag = drag.transformedCopy(at);
+    public void imTransform(AffineTransform at) {
+        drag = drag.imTransformedCopy(at);
     }
 
     public void startMovement() {

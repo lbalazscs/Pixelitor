@@ -59,20 +59,25 @@ public class AnchorPoint extends DraggablePoint {
     // not to be confused with DraggablePoint.lastActive!
     public static AnchorPoint recentlyEditedPoint = null;
 
-    public AnchorPoint(double x, double y, View view, SubPath subPath) {
-        super("AP" + debugCounter++, x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
+    public AnchorPoint(double coX, double coY, View view, SubPath subPath) {
+        this(PPoint.eagerFromCo(coX, coY, view), view, subPath);
+    }
+
+    public AnchorPoint(PPoint p, View view, SubPath subPath) {
+        super("AP" + debugCounter++, p, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
+
         this.subPath = subPath;
 
-        ctrlIn = new ControlPoint("ctrlIn", x, y, view, this,
+        ctrlIn = new ControlPoint("ctrlIn", p, view, this,
             CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
-        ctrlOut = new ControlPoint("ctrlOut", x, y, view, this,
+        ctrlOut = new ControlPoint("ctrlOut", p, view, this,
             CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
 
     public AnchorPoint(PPoint p, SubPath subPath) {
-        this(p.getCoX(), p.getCoY(), p.getView(), subPath);
+        this(p, p.getView(), subPath);
     }
 
     public AnchorPoint(AnchorPoint other, SubPath subPath,

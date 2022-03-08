@@ -19,6 +19,7 @@ package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Color;
 import java.awt.geom.Dimension2D;
@@ -47,16 +48,19 @@ public class CornerHandle extends PositionHandle {
     // true for NW and NE
     private final boolean nextToRot;
 
-    public CornerHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
+    public CornerHandle(String name, TransformBox box, boolean nextToRot, PPoint pos,
                         View view, int cursorIndex, int cursorIndexIO) {
-        super(name, box, pos.getX(), pos.getY(), view,
+        super(name, box, pos, view,
             Color.WHITE, Color.RED, cursorIndex, cursorIndexIO);
         this.nextToRot = nextToRot;
     }
 
     public CornerHandle copy(TransformBox newBox) {
+        // the position is based on image coordinates, because they are
+        // always accurate, even in boxes in inactive shape layers
+        PPoint pos = PPoint.eagerFromIm(getImX(), getImY(), view);
         return new CornerHandle(name, newBox, nextToRot,
-            this, view, cursorIndex, cursorIndexIO);
+            pos, view, cursorIndex, cursorIndexIO);
     }
 
     public void setVerNeighbor(CornerHandle verNeighbor, EdgeHandle verEdge, boolean propagate) {

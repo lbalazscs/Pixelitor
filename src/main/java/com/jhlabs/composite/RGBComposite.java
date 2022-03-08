@@ -66,6 +66,12 @@ public abstract class RGBComposite implements Composite {
 
         protected RGBCompositeContext(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
             this.alpha = alpha;
+
+            assert srcColorModel.getNumComponents() == 4 :
+                "# src components = " + srcColorModel.getNumComponents();
+            assert dstColorModel.getNumComponents() == 4 :
+                "# dst components = " + dstColorModel.getNumComponents();
+
 //            this.srcColorModel = srcColorModel;
 //            this.dstColorModel = dstColorModel;
         }

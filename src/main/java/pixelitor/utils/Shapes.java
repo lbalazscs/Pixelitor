@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
+import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
@@ -119,9 +120,9 @@ public class Shapes {
         g.fill(shape);
     }
 
-    public static void drawGradientArrow(Graphics2D g,
-                                         double startX, double startY,
-                                         double endX, double endY) {
+    public static void drawDirectionArrow(Graphics2D g,
+                                          double startX, double startY,
+                                          double endX, double endY) {
         drawVisibly(g, new Line2D.Double(startX, startY, endX, endY));
 
         double angle = Math.atan2(endY - startY, endX - startX);
@@ -145,6 +146,9 @@ public class Shapes {
         fillVisibly(g, arrowHead, WHITE);
     }
 
+    /**
+     * Creates a horizontal, arrow-shaped path around the X axis, with a length of 1.0.
+     */
     @SuppressWarnings("SuspiciousNameCombination")
     public static GeneralPath createUnitArrow() {
         float arrowWidth = 0.3f;
@@ -414,6 +418,33 @@ public class Shapes {
         path.closePath();
 
         return path;
+    }
+
+    public static Shape createStar(int numBranches, double x, double y,
+                                   double width, double height, double radiusRatio) {
+        double halfWidth = width / 2;
+        double halfHeight = height / 2;
+        double cx = x + halfWidth;
+        double cy = y + halfHeight;
+
+        double outerRadius = Math.max(halfWidth, halfHeight);
+        double innerRadius = radiusRatio * outerRadius;
+
+        Shape shape = new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
+        if (width != height) {
+            double sx = 1.0;
+            double sy = 1.0;
+            if (width > height) {
+                sy = height / width;
+            } else {
+                sx = width / height;
+            }
+            AffineTransform at = AffineTransform.getTranslateInstance(cx, cy);
+            at.scale(sx, sy);
+            at.translate(-cx, -cy);
+            shape = at.createTransformedShape(shape);
+        }
+        return shape;
     }
 
     /**
@@ -1128,6 +1159,8 @@ public class Shapes {
         epX = x + 0.3783726f * width;
         epY = y + 0.80843306f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
+
+        path.closePath();
 
         return path;
     }

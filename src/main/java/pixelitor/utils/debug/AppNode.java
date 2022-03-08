@@ -42,7 +42,7 @@ public class AppNode extends DebugNode {
         addInt("# open images", Views.getNumViews());
 
         Views.forEachView(view -> {
-            String prefix = view.isActive() ? "active image - " : "image - ";
+            String prefix = view.isActive() ? "active view - " : "view - ";
             add(DebugNodes.createViewNode(prefix + view.getName(), view));
         });
     }

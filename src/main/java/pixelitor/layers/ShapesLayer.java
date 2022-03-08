@@ -21,9 +21,7 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.Flip;
-import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.history.ShapesLayerChangeEdit;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.StyledShape;
@@ -32,10 +30,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -56,6 +51,8 @@ public class ShapesLayer extends ContentLayer {
     // The box is also stored here because recreating
     // it from the styled shape is currently not possible.
     private TransformBox transformBox;
+
+    private transient BufferedImage cachedImage;
 
     public ShapesLayer(Composition comp, String name) {
         super(comp, name);
@@ -80,8 +77,10 @@ public class ShapesLayer extends ContentLayer {
     protected Layer createTypeSpecificDuplicate(String duplicateName) {
         var duplicate = new ShapesLayer(comp, duplicateName);
         if (styledShape != null) {
-            duplicate.styledShape = styledShape.clone();
-            duplicate.transformBox = transformBox.copy(duplicate.styledShape, comp.getView());
+            duplicate.setStyledShape(styledShape.clone());
+            if (transformBox != null) {
+                duplicate.transformBox = transformBox.copy(duplicate.styledShape, comp.getView());
+            }
         }
         return duplicate;
     }
@@ -89,7 +88,22 @@ public class ShapesLayer extends ContentLayer {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         if (styledShape != null) {
-            styledShape.paint(g);
+            // the custom blending modes don't work with gradients
+            boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
+                                     && styledShape.hasBlendingIssue();
+            if (useCachedImage) {
+                if (cachedImage == null) {
+                    int width = comp.getCanvasWidth();
+                    int height = comp.getCanvasHeight();
+                    cachedImage = ImageUtils.createSysCompatibleImage(width, height);
+                    Graphics2D imgG = cachedImage.createGraphics();
+                    styledShape.paint(imgG);
+                    imgG.dispose();
+                }
+                g.drawImage(cachedImage, 0, 0, null);
+            } else {
+                styledShape.paint(g);
+            }
         }
     }
 
@@ -100,8 +114,7 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(
-            thumbSize, thumbSize);
+        BufferedImage img = ImageUtils.createSysCompatibleImage(thumbSize, thumbSize);
         Graphics2D g2 = img.createGraphics();
 
         if (styledShape == null) {
@@ -116,42 +129,48 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-        if (styledShape != null) {
-            double sx = newSize.getWidth() / comp.getCanvasWidth();
-            double sy = newSize.getHeight() / comp.getCanvasHeight();
-            transformBox.imCoordsChanged(AffineTransform.getScaleInstance(sx, sy), comp);
-            transformBox.coCoordsChanged(comp.getView());
-        }
+        transform(comp.getCanvas().createImTransformToSize(newSize));
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
-        if (styledShape != null) {
-            AffineTransform at = Crop.createCanvasTransform(cropRect);
-            transformBox.imTransform(at);
-        }
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+        transform(Crop.createCanvasTransform(cropRect));
     }
 
     @Override
     public void flip(Flip.Direction direction) {
-        if (styledShape != null) {
-            transformBox.imCoordsChanged(direction.createCanvasTransform(comp.getCanvas()), comp);
-        }
+        transform(direction.createCanvasTransform(comp.getCanvas()));
     }
 
     @Override
     public void rotate(QuadrantAngle angle) {
-        if (styledShape != null) {
-            transformBox.imCoordsChanged(angle.createCanvasTransform(comp.getCanvas()), comp);
-        }
+        transform(angle.createCanvasTransform(comp.getCanvas()));
     }
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        if (styledShape != null) {
-            transformBox.imTransform(AffineTransform.getTranslateInstance(west, north));
+        transform(AffineTransform.getTranslateInstance(west, north));
+    }
+
+    private void transform(AffineTransform at) {
+        if (hasShape()) {
+            if (transformBox != null) {
+                // the box will also transform the shape
+                transformBox.imCoordsChanged(at, comp);
+            } else {
+                // This case should never happen, because an
+                // initialized shape should always have a box.
+                // Implemented here, but not for the Move Tool support.
+                styledShape.resetTransform();
+                styledShape.imTransform(at);
+                System.out.println("ShapesLayer::transform: transforming only the shape");
+            }
         }
+    }
+
+    private boolean hasShape() {
+        return styledShape != null && styledShape.isInitialized();
     }
 
     public StyledShape getStyledShape() {
@@ -166,29 +185,13 @@ public class ShapesLayer extends ContentLayer {
         this.transformBox = transformBox;
     }
 
-    // Only sets the reference when the mouse is pressed.
+    // When the mouse is pressed, only the reference is set.
     // Later, when the mouse is released, the history and
     // the icon image will also be handled
     public void setStyledShape(StyledShape styledShape) {
+        assert styledShape != null;
         this.styledShape = styledShape;
-    }
-
-    public void setStyledShape(StyledShape shape, boolean addHistory) {
-        // the styled shape can be null if this is called while undoing the first shape
-        assert shape != null || !addHistory;
-
-        StyledShape oldShape = this.styledShape;
-
-        this.styledShape = shape;
-        comp.update();
-        updateIconImage();
-
-        if (addHistory) {
-            History.add(new ShapesLayerChangeEdit(this, oldShape, shape));
-//        } else {
-//            // called from the undo/redo
-//            Tools.editingTargetChanged(this);
-        }
+        styledShape.setChangeListener(() -> cachedImage = null);
     }
 
     @Override
@@ -210,7 +213,7 @@ public class ShapesLayer extends ContentLayer {
     @Override
     public void startMovement() {
         super.startMovement();
-        if (transformBox != null) {
+        if (hasShape() && transformBox != null) {
             transformBox.startMovement();
         }
     }
@@ -218,7 +221,7 @@ public class ShapesLayer extends ContentLayer {
     @Override
     public void moveWhileDragging(double relImX, double relImY) {
         super.moveWhileDragging(relImX, relImY);
-        if (transformBox != null) {
+        if (hasShape() && transformBox != null) {
             transformBox.moveWhileDragging(relImX, relImY);
         }
     }
@@ -226,7 +229,7 @@ public class ShapesLayer extends ContentLayer {
     @Override
     public PixelitorEdit endMovement() {
         PixelitorEdit edit = super.endMovement();
-        if (transformBox != null) {
+        if (hasShape() && transformBox != null) {
             transformBox.endMovement();
             updateIconImage();
         }
@@ -235,7 +238,7 @@ public class ShapesLayer extends ContentLayer {
 
     @Override
     PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
-        if (transformBox != null) {
+        if (hasShape() && transformBox != null) {
             return transformBox.createMovementEdit(comp, "Move Shape Layer");
         }
         return null;
@@ -251,18 +254,25 @@ public class ShapesLayer extends ContentLayer {
         return "Shape Layer";
     }
 
+    public boolean checkConsistency() {
+        if (styledShape != null) {
+            return styledShape.checkConsistency();
+        }
+        return true;
+    }
+
     @Override
     public DebugNode createDebugNode(String descr) {
         DebugNode node = super.createDebugNode(descr);
 
         if (styledShape == null) {
-            node.addString("shape", "NONE");
+            node.addString("styledShape", "null");
         } else {
             node.add(styledShape.createDebugNode());
         }
 
         if (transformBox == null) {
-            node.addString("box", "null");
+            node.addString("transformBox", "null");
         } else {
             node.add(transformBox.createDebugNode());
         }

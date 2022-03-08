@@ -18,6 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.tools.util.DragDisplay;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Color;
 import java.awt.geom.Dimension2D;
@@ -46,11 +47,8 @@ public class EdgeHandle extends PositionHandle {
                       CornerHandle ch1, CornerHandle ch2,
                       Color color, boolean horizontal,
                       int cursorIndex, int cursorIndexIO) {
-        super(name, box,
-            (ch1.getX() + ch2.getX()) / 2.0,
-            (ch1.getY() + ch2.getY()) / 2.0,
-            ch1.getView(), color, Color.RED,
-            cursorIndex, cursorIndexIO);
+        super(name, box, PPoint.halfPointBetween(ch1, ch2), ch1.getView(),
+            color, Color.RED, cursorIndex, cursorIndexIO);
         this.ch1 = ch1;
         this.ch2 = ch2;
         this.horizontal = horizontal;

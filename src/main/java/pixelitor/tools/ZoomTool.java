@@ -116,7 +116,7 @@ public class ZoomTool extends DragTool {
             return;
         }
 
-        Shapes.drawVisibly(g2, zoomRect.getCo());
+        Shapes.drawVisibly(g2, zoomRect.getCo2D());
     }
 
     private PRectangle getZoomRect(View view) {
@@ -187,7 +187,7 @@ public class ZoomTool extends DragTool {
     @Override
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
-        node.addString("state", state.toString());
+        node.addAsString("state", state);
         return node;
     }
 

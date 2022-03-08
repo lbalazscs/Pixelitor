@@ -71,8 +71,8 @@ public class LayerBlendingEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode();
 
         node.add(layer.createDebugNode());
-        node.addString("current", layer.getBlendingMode().toString());
-        node.addString("backup", backupBlendingMode.toString());
+        node.addAsString("current", layer.getBlendingMode());
+        node.addAsString("backup", backupBlendingMode);
 
         return node;
     }

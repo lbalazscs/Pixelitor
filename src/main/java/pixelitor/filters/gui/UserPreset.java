@@ -51,11 +51,18 @@ public class UserPreset implements Preset {
     static {
         if (JVM.isWindows) {
             PRESETS_DIR = System.getenv("APPDATA") +
-                FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
+                          FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
         } else {
             PRESETS_DIR = System.getProperty("user.home") +
-                FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
+                          FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
         }
+    }
+
+    /**
+     * Can be used for built-in presets.
+     */
+    public UserPreset(String name) {
+        this(name, null);
     }
 
     /**

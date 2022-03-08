@@ -139,7 +139,7 @@ public class ShapesTool extends DragTool {
     public ShapesTool() {
         super("Shapes", 'U', "shapes_tool.png",
             "<b>drag</b> to draw a shape. " +
-            "Hold <b>Alt</b> down to drag from the center. " +
+            "<b>Alt</b> starts from the center, <b>Shift</b> constrains. " +
             "Hold <b>SPACE</b> down while drawing to move the shape. ",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
@@ -331,15 +331,18 @@ public class ShapesTool extends DragTool {
             if (styledShape == null) {
                 startNewShape();
                 shapesLayer.setStyledShape(styledShape);
+            } else {
+                assert state == TRANSFORM : "state = " + state;
             }
         } else {
             startNewShape();
         }
+        assert state != NO_INTERACTION : "state = " + state;
     }
 
     private void startNewShape() {
         styledShape = new StyledShape(this);
-        setState(INITIAL_DRAG);
+        setState(AFTER_FIRST_MOUSE_PRESS);
     }
 
     @Override
@@ -355,7 +358,7 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        assert state == INITIAL_DRAG : "state = " + state;
+        assert state == AFTER_FIRST_MOUSE_PRESS || state == INITIAL_DRAG : "state = " + state;
 
         if (styledShape != null && !drag.isClick()) {
             updateStyledShapeFromDrag(e);
@@ -383,15 +386,14 @@ public class ShapesTool extends DragTool {
 
         if (drag.isClick()) {
             // cancel the shape started in dragStarted
-            styledShape = null;
-            setState(NO_INTERACTION);
+            setNoInteractionState();
             return;
         }
 
         if (styledShape == null) {
             // this can happen when getting a fake mouse released event
             // because the user started another tool via keyboard
-            setState(NO_INTERACTION);
+            setNoInteractionState();
             return;
         }
 
@@ -402,8 +404,7 @@ public class ShapesTool extends DragTool {
         if (transformBox == null) {
             // The box could not be created.
             // Cancel just as for empty clicks.
-            styledShape = null;
-            setState(NO_INTERACTION);
+            setNoInteractionState();
             e.getView().repaint();
             return;
         }
@@ -424,9 +425,8 @@ public class ShapesTool extends DragTool {
         assert styledShape != null;
         assert !drag.isClick();
 
-        drag.setStartFromCenter(e.isAltDown());
-        drag.setEquallySized(e.isShiftDown());
-        styledShape.updateFromDrag(drag, this);
+        styledShape.updateFromDrag(drag, e.isAltDown(), e.isShiftDown());
+        setState(INITIAL_DRAG);
     }
 
     @Override
@@ -439,13 +439,10 @@ public class ShapesTool extends DragTool {
     @Override
     public void altPressed() {
         if (!altDown && state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
-            drag.setStartFromCenter(true);
-
             assert hasStyledShape();
-            styledShape.updateFromDrag(drag, this);
+            styledShape.updateFromDrag(drag, true, false);
 
-            var comp = Views.getActiveComp();
-            comp.update(REPAINT);
+            Views.getActiveComp().update(REPAINT);
         }
         altDown = true;
     }
@@ -456,10 +453,9 @@ public class ShapesTool extends DragTool {
             drag.setStartFromCenter(false);
 
             assert hasStyledShape();
-            styledShape.updateFromDrag(drag, this);
+            styledShape.updateFromDrag(drag, false, false);
 
-            var comp = Views.getActiveComp();
-            comp.update(REPAINT);
+            Views.getActiveComp().update(REPAINT);
         }
         altDown = false;
     }
@@ -486,6 +482,13 @@ public class ShapesTool extends DragTool {
         return false;
     }
 
+    private void setNoInteractionState() {
+        transformBox = null;
+        styledShape = null;
+
+        setState(NO_INTERACTION);
+    }
+
     private void setState(DragToolState newState) {
         state = newState;
 
@@ -503,12 +506,11 @@ public class ShapesTool extends DragTool {
     private void rasterizeShape(Composition comp) {
         assert hasBox();
         assert hasStyledShape();
+        assert !isEditingShapesLayer();
 
         styledShape.rasterizeTo(comp, transformBox, this);
 
-        styledShape = null;
-        transformBox = null;
-        setState(NO_INTERACTION);
+        setNoInteractionState();
     }
 
     private void regenerateShape(String editName) {
@@ -541,6 +543,10 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void paintOverImage(Graphics2D g, Composition comp) {
+        if (!comp.getActiveLayer().isVisible()) {
+            return;
+        }
+
         if (state == INITIAL_DRAG) {
             assert !hasBox();
             // paint the drag display for the initial drag
@@ -573,7 +579,7 @@ public class ShapesTool extends DragTool {
     private void convertToSelection() {
         assert state == TRANSFORM : "state = " + state;
 
-        Shape shape = styledShape.getShapeForSelection(this);
+        Shape shape = styledShape.getShapeForSelection();
 
         var comp = Views.getActiveComp();
 
@@ -618,9 +624,7 @@ public class ShapesTool extends DragTool {
         // true, for example, when the initial box creation is undone
         boolean hadShape = styledShape != null;
 
-        transformBox = null;
-        styledShape = null;
-        setState(NO_INTERACTION);
+        setNoInteractionState();
 
         Views.onActiveComp(comp -> {
             if (hadShape) {
@@ -629,6 +633,7 @@ public class ShapesTool extends DragTool {
                 comp.repaint();
             }
         });
+        shapesLayer = null;
     }
 
     @Override
@@ -636,12 +641,12 @@ public class ShapesTool extends DragTool {
         if (reloaded) {
             resetInitialState();
         }
-        handleNewActiveLayer(newComp.getActiveLayer());
+        layerActivated(newComp.getActiveLayer());
     }
 
     @Override
     public void editingTargetChanged(Layer layer) {
-        handleNewActiveLayer(layer);
+        layerActivated(layer);
     }
 
     /**
@@ -690,15 +695,6 @@ public class ShapesTool extends DragTool {
         FgBgColors.setBGColor(styledShape.getBgColor(), false);
 
         setGUIDefaultsFrom(styledShape);
-    }
-
-    @Override
-    protected void toolEnded() {
-        super.toolEnded();
-
-        rasterizeBox();
-
-        resetInitialState();
     }
 
     @Override
@@ -840,35 +836,52 @@ public class ShapesTool extends DragTool {
 
         Layer activeLayer = Views.getActiveLayer();
         if (activeLayer != null) {
-            handleNewActiveLayer(activeLayer);
+            layerActivated(activeLayer);
         }
     }
 
-    private void handleNewActiveLayer(Layer layer) {
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+
+        rasterizeBox();
+
+        resetInitialState();
+    }
+
+    private void layerActivated(Layer layer) {
         boolean wasShapesLayer = isEditingShapesLayer();
         if (layer.isMaskEditing()) {
             setupMaskEditing(true);
             startEditingRasterLayer(layer, wasShapesLayer);
         } else {
             if (layer instanceof ShapesLayer sl) {
+                if (sl == shapesLayer) {
+                    return; // not a new layer
+                }
                 shapesLayer = sl;
                 styledShape = sl.getStyledShape();
-                if (styledShape != null) {
-                    transformBox = sl.getTransformBox();
+                if (styledShape != null && styledShape.isInitialized()) {
                     View view = layer.getComp().getView();
-                    if (transformBox.needsInitialization(view)) {
-                        transformBox.reInitialize(view, styledShape);
-                    }
-                    // the zoom could have changed since the box was active
-                    transformBox.coCoordsChanged(view);
+                    transformBox = sl.getTransformBox();
+//                    transformBox = styledShape.createBox(view);
 
-                    loadShapeAndBox(styledShape, transformBox);
+                    if (transformBox != null) {
+                        if (transformBox.needsInitialization(view)) {
+                            transformBox.reInitialize(view, styledShape);
+                        }
+                        // the zoom could have changed since the box was active
+                        transformBox.coCoordsChanged(view);
+
+                        loadShapeAndBox(styledShape, transformBox);
+                    } else {
+                        throw new IllegalStateException("what state is this? state = " + state);
+                    }
 
                     // make the loaded box visible - TODO necessary?
                     layer.getComp().repaint();
                 } else {
-                    transformBox = null;
-                    setState(NO_INTERACTION);
+                    setNoInteractionState();
                 }
             } else {
                 startEditingRasterLayer(layer, wasShapesLayer);
@@ -880,9 +893,7 @@ public class ShapesTool extends DragTool {
         shapesLayer = null;
         if (wasShapesLayer) {
             // hide the shape and box
-            transformBox = null;
-            styledShape = null;
-            setState(NO_INTERACTION);
+            setNoInteractionState();
             layer.getComp().repaint();
         }
     }
@@ -939,6 +950,11 @@ public class ShapesTool extends DragTool {
         }
     }
 
+    @VisibleForTesting
+    public void setSelectedType(ShapeType type) {
+        typeModel.setSelectedItem(type);
+    }
+
     @Override
     public String getStateInfo() {
         return getSelectedType()
@@ -950,7 +966,7 @@ public class ShapesTool extends DragTool {
     @Override
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
-        node.addString("state", state.toString());
+        node.addAsString("state", state);
 
         if (transformBox == null) {
             node.addString("transform box", "null");
@@ -963,9 +979,9 @@ public class ShapesTool extends DragTool {
             node.add(styledShape.createDebugNode());
         }
 
-        node.addString("type", getSelectedType().toString());
-        node.addString("fill", getSelectedFillPaint().toString());
-        node.addString("stroke", getSelectedStrokePaint().toString());
+        node.addAsString("type", getSelectedType());
+        node.addAsString("fill", getSelectedFillPaint());
+        node.addAsString("stroke", getSelectedStrokePaint());
         strokeParam.addDebugNodeInfo(node);
 
         return node;

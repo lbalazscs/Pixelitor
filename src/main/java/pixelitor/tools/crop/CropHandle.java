@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,8 @@ import java.awt.Cursor;
  * that can be dragged with the mouse
  */
 public class CropHandle extends DraggablePoint {
-    // All handle coordinates and sizes are in component space
-
     public CropHandle(String name, int cursorType, View view) {
-        super(name, 0, 0, view, Color.WHITE, Color.RED);
+        super(name, null, view, Color.WHITE, Color.RED);
         cursor = Cursor.getPredefinedCursor(cursorType);
     }
 }

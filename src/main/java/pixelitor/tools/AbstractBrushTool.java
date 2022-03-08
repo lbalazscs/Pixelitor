@@ -406,7 +406,6 @@ public abstract class AbstractBrushTool extends Tool {
      */
     private Graphics2D createGraphicsForNewBrushStroke(Drawable dr) {
         var comp = dr.getComp();
-        Composite composite = getComposite();
 
         // when editing masks, no tmp drawing layer should be used
         assert !(dr instanceof LayerMask)
@@ -416,7 +415,7 @@ public abstract class AbstractBrushTool extends Tool {
             + ", tool = " + getClass().getSimpleName()
             + ", drawDestination = " + drawDestination;
 
-        var g = drawDestination.createGraphics(dr, composite);
+        var g = drawDestination.createGraphics(dr, getComposite());
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initGraphics(g);
         comp.applySelectionClipping(g);
@@ -724,13 +723,13 @@ public abstract class AbstractBrushTool extends Tool {
         var node = super.createDebugNode();
 
         if (hasBrushType()) {
-            node.addString("brush type", getBrushType().toString());
+            node.addAsString("brush type", getBrushType());
         }
         node.addInt("radius", getRadius());
         node.add(brush.createDebugNode());
 
         if (symmetryBrush != null) { // can be null, for example in Clone
-            node.addString("symmetry", getSymmetry().toString());
+            node.addAsString("symmetry", getSymmetry());
             if (symmetryBrush != brush) {
                 node.add(symmetryBrush.createDebugNode());
             }

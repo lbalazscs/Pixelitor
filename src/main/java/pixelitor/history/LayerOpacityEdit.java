@@ -79,8 +79,8 @@ public class LayerOpacityEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode();
 
         node.add(layer.createDebugNode());
-        node.addString("current", String.format("%.2f", layer.getOpacity()));
-        node.addString("backup", String.format("%.2f", backupOpacity));
+        node.addFloat("current", layer.getOpacity());
+        node.addFloat("backup", backupOpacity);
 
         return node;
     }

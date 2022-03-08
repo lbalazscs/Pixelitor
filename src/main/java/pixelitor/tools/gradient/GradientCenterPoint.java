@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Color;
 
@@ -33,9 +34,7 @@ public class GradientCenterPoint extends DraggablePoint {
     public GradientCenterPoint(GradientDefiningPoint start,
                                GradientDefiningPoint end,
                                View view, Color color, Color activeColor) {
-        super("center",
-            (start.x + end.x) / 2.0,
-            (start.y + end.y) / 2.0,
+        super("center", PPoint.halfPointBetween(start, end),
             view, color, activeColor);
         this.start = start;
         this.end = end;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,12 @@ import pixelitor.tools.Symmetry;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -43,17 +45,13 @@ public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
-    // some non-transient field names are inconsistent
-    // with their getters, but they can't be renamed without breaking
-    // serialization compatibility with old pxc files
-
     // size in image space
     private int width;
     private int height;
 
     // size in component space
-    private int zoomedWidth;
-    private int zoomedHeight;
+    private transient int coWidth;
+    private transient int coHeight;
 
     @Serial
     private static final long serialVersionUID = -1459254568616232274L;
@@ -66,8 +64,8 @@ public class Canvas implements Serializable {
     public Canvas(Canvas orig) {
         width = orig.width;
         height = orig.height;
-        zoomedWidth = orig.zoomedWidth;
-        zoomedHeight = orig.zoomedHeight;
+        coWidth = orig.coWidth;
+        coHeight = orig.coHeight;
     }
 
     /**
@@ -84,18 +82,18 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Recalculates the component-space (zoomed) size
+     * Recalculates the component-space size
      */
     public void recalcCoSize(View view, boolean notify) {
         double viewScale = view.getScaling();
 
-        int oldZoomedWidth = zoomedWidth;
-        int oldZoomedHeight = zoomedHeight;
+        int oldCoWidth = coWidth;
+        int oldCoHeight = coHeight;
 
-        zoomedWidth = (int) (viewScale * width);
-        zoomedHeight = (int) (viewScale * height);
+        coWidth = (int) (viewScale * width);
+        coHeight = (int) (viewScale * height);
 
-        if (notify && (zoomedWidth != oldZoomedWidth || zoomedHeight != oldZoomedHeight)) {
+        if (notify && (coWidth != oldCoWidth || coHeight != oldCoHeight)) {
             view.canvasCoSizeChanged();
         }
     }
@@ -118,11 +116,11 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the (zoomed) bounds in component space
+     * Returns the component space bounds
      */
     public Rectangle getCoBounds(View view) {
         return new Rectangle(
-            view.getCanvasStartX(), view.getCanvasStartY(), zoomedWidth, zoomedHeight);
+            view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
     }
 
     /**
@@ -137,10 +135,10 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the (zoomed) size in component space
+     * Returns the size in component space
      */
     public Dimension getCoSize() {
-        return new Dimension(zoomedWidth, zoomedHeight);
+        return new Dimension(coWidth, coHeight);
     }
 
     /**
@@ -158,17 +156,17 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the (zoomed) width in component space
+     * Returns the width in component space
      */
     public int getCoWidth() {
-        return zoomedWidth;
+        return coWidth;
     }
 
     /**
-     * Returns the (zoomed) height in component space
+     * Returns the height in component space
      */
     public int getCoHeight() {
-        return zoomedHeight;
+        return coHeight;
     }
 
     public Point2D getImCenter() {
@@ -177,6 +175,12 @@ public class Canvas implements Serializable {
 
     public double getAspectRatio() {
         return width / (double) height;
+    }
+
+    public AffineTransform createImTransformToSize(Dimension newSize) {
+        double sx = newSize.getWidth() / width;
+        double sy = newSize.getHeight() / height;
+        return AffineTransform.getScaleInstance(sx, sy);
     }
 
     public Shape invertShape(Shape shape) {
@@ -227,6 +231,17 @@ public class Canvas implements Serializable {
 
     public PPoint getRandomPoint(View view) {
         return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
+    }
+
+    public DebugNode createDebugNode() {
+        DebugNode node = new DebugNode("canvas", this);
+
+        node.addInt("im width", width);
+        node.addInt("im height", height);
+        node.addInt("co width", coWidth);
+        node.addInt("co height", coHeight);
+
+        return node;
     }
 
     @Override

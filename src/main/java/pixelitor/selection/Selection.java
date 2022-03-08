@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -362,8 +362,8 @@ public class Selection {
         node.addBoolean("rectangular", isRectangular());
 
         node.addString("shape class", shape.getClass().getName());
-        node.addString("bounds", getShapeBounds().toString());
-        node.addString("bounds 2D", getShapeBounds2D().toString());
+        node.addAsString("bounds", getShapeBounds());
+        node.addAsString("bounds 2D", getShapeBounds2D());
 
         return node;
     }

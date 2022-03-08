@@ -376,8 +376,8 @@ public class SelectionTool extends DragTool {
     public DebugNode createDebugNode() {
         var node = super.createDebugNode();
 
-        node.addString("type", getSelectionType().toString());
-        node.addString("combinator", getCombinator().toString());
+        node.addAsString("type", getSelectionType());
+        node.addAsString("combinator", getCombinator());
 
         return node;
     }

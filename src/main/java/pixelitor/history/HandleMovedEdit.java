@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class HandleMovedEdit extends PixelitorEdit {
         super(name, comp);
         this.handle = handle;
         this.before = before;
-        after = handle.getLocationCopy();
+        after = handle.getCoLocationCopy();
 
         assert before.getX() != after.getX() || before.getY() != after.getY();
     }
@@ -63,8 +63,8 @@ public class HandleMovedEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode();
 
         node.add(handle.createDebugNode());
-        node.addString("before", before.toString());
-        node.addString("after", after.toString());
+        node.addAsString("before", before);
+        node.addAsString("after", after);
 
         return node;
     }

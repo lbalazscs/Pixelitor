@@ -17,7 +17,6 @@
 
 package pixelitor.tools.shapes;
 
-import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.Drag;
@@ -34,7 +33,7 @@ import java.awt.geom.*;
  * The shapes types in the shapes tool
  */
 public enum ShapeType {
-    RECTANGLE("Rectangle", true, false, true) {
+    RECTANGLE("Rectangle", false, true, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             var rs = (RectangleSettings) settings;
@@ -62,7 +61,7 @@ public enum ShapeType {
         public RectangleSettings createSettings() {
             return new RectangleSettings();
         }
-    }, ELLIPSE("Ellipse", true, false, false) {
+    }, ELLIPSE("Ellipse", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPositiveImRect();
@@ -78,7 +77,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, DIAMOND("Diamond", true, false, false) {
+    }, DIAMOND("Diamond", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -113,15 +112,6 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createHorizontalShape(Drag drag, ShapeTypeSettings settings) {
-            var line = new Line2D.Double(drag.getStartX(), drag.getStartY(),
-                drag.getStartX() + drag.calcImDist(), drag.getStartY());
-            var lineSettings = (LineSettings) settings;
-            Stroke stroke = lineSettings.getStroke();
-            return stroke.createStrokedShape(line);
-        }
-
-        @Override
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
@@ -130,7 +120,7 @@ public enum ShapeType {
         public LineSettings createSettings() {
             return new LineSettings();
         }
-    }, HEART("Heart", true, false, false) {
+    }, HEART("Heart", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -141,7 +131,7 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double size) {
             return Shapes.createHeart(x, y, size, size);
         }
-    }, STAR("Star", true, false, true) {
+    }, STAR("Star", false, true, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             StarSettings starSettings = (StarSettings) settings;
@@ -156,40 +146,13 @@ public enum ShapeType {
             }
 
             Rectangle2D r = drag.createPositiveImRect();
-            return createStar(numBranches, r.getX(), r.getY(),
+            return Shapes.createStar(numBranches, r.getX(), r.getY(),
                 r.getWidth(), r.getHeight(), radiusRatio);
-        }
-
-        private Shape createStar(int numBranches, double x, double y,
-                                 double width, double height, double radiusRatio) {
-            double halfWidth = width / 2;
-            double halfHeight = height / 2;
-            double cx = x + halfWidth;
-            double cy = y + halfHeight;
-
-            double outerRadius = Math.max(halfWidth, halfHeight);
-            double innerRadius = radiusRatio * outerRadius;
-
-            Shape shape = new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
-            if (width != height) {
-                double sx = 1.0;
-                double sy = 1.0;
-                if (width > height) {
-                    sy = height / width;
-                } else {
-                    sx = width / height;
-                }
-                AffineTransform at = AffineTransform.getTranslateInstance(cx, cy);
-                at.scale(sx, sy);
-                at.translate(-cx, -cy);
-                shape = at.createTransformedShape(shape);
-            }
-            return shape;
         }
 
         @Override
         public Shape createShape(double x, double y, double size) {
-            return createStar(7, x, y, size, size, 0.5);
+            return Shapes.createStar(7, x, y, size, size, 0.5);
         }
 
         @Override
@@ -201,7 +164,7 @@ public enum ShapeType {
         public StarSettings createSettings() {
             return new StarSettings(7, 50);
         }
-    }, RANDOM_STAR("Random Star", true, false, false) {
+    }, RANDOM_STAR("Random Star", false, false, false) {
         private Drag lastDrag;
 
         @Override
@@ -227,20 +190,11 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, ARROW("Arrow", true, true, false) {
+    }, ARROW("Arrow", true, false, false) {
         GeneralPath unitArrow = null;
 
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
-            return createArrowShape(drag, true);
-        }
-
-        @Override
-        public Shape createHorizontalShape(Drag drag, ShapeTypeSettings settings) {
-            return createArrowShape(drag, false);
-        }
-
-        private Shape createArrowShape(Drag drag, boolean rotate) {
             if (unitArrow == null) {
                 unitArrow = Shapes.createUnitArrow();
             }
@@ -248,18 +202,15 @@ public enum ShapeType {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
 
             double distance = drag.calcImDist();
-            if (drag.isStartFromCenter()) {
-                distance *= 2;
-            }
-
             var transform = AffineTransform.getTranslateInstance(r.getX(), r.getY());
             transform.scale(distance, distance); // originally it had a length of 1.0
-            if (rotate) {
-                double angleInRadians = drag.getDrawAngle();
-                double angle = Utils.atan2AngleToIntuitive(angleInRadians);
-                angle += Math.PI / 2;
-                transform.rotate(angle);
-            }
+
+            // rotate the arrow into the direction of the drag
+            double angleInRadians = drag.getDrawAngle();
+            double angle = Utils.atan2AngleToIntuitive(angleInRadians);
+            angle += Math.PI / 2;
+            transform.rotate(angle);
+
             return transform.createTransformedShape(unitArrow);
         }
 
@@ -278,7 +229,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
-    }, CAT("Cat", true, false, false) {
+    }, CAT("Cat", false, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -289,7 +240,7 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double size) {
             return Shapes.createCat(x, y, size, size);
         }
-    }, KIWI("Kiwi", true, false, false) {
+    }, KIWI("Kiwi", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -300,7 +251,7 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double size) {
             return Shapes.createKiwi(x, y, size, size);
         }
-    }, BAT("Bat", true, false, false) {
+    }, BAT("Bat", false, false, true) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -311,7 +262,7 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double size) {
             return Shapes.createBat(x, y, size, size);
         }
-    }, RABBIT("Rabbit", true, false, false) {
+    }, RABBIT("Rabbit", false, false, false) {
         @Override
         public Shape createShape(Drag drag, ShapeTypeSettings settings) {
             Rectangle2D r = drag.createPossiblyEmptyImRect();
@@ -415,10 +366,8 @@ public enum ShapeType {
     private static final String NAME = "Shape";
     private final String guiName;
 
-    // if a shape is not closed, then it can't be filled directly
-    private final boolean closed;
-
     private final boolean hasSettings;
+    private final boolean areaProblem;
 
     // directional shapes are the arrow and line, where the
     // transform box is initialized at the angle of the shape
@@ -426,26 +375,29 @@ public enum ShapeType {
 
 //    protected double x, y, width, height;
 
-    ShapeType(String guiName, boolean closed, boolean directional, boolean hasSettings) {
+    ShapeType(String guiName, boolean directional, boolean hasSettings, boolean areaProblem) {
         this.guiName = guiName;
-        this.closed = closed;
         this.directional = directional;
         this.hasSettings = hasSettings;
+        this.areaProblem = areaProblem;
     }
 
+    /**
+     * The returned shapes must always be closed, so that they can be filled.
+     */
     public abstract Shape createShape(Drag drag, ShapeTypeSettings settings);
 
     public abstract Shape createShape(double x, double y, double size);
 
-    /**
-     * Return the directional shape that would result
-     * from the given drag if it was horizontal
-     */
-    public Shape createHorizontalShape(Drag drag, ShapeTypeSettings settings) {
-        // overridden in directional types
-        assert !directional;
-        throw new UnsupportedOperationException("not directional");
-    }
+//    /**
+//     * Return the directional shape that would result
+//     * from the given drag if it was horizontal
+//     */
+//    public Shape createHorizontalShape(Drag drag, ShapeTypeSettings settings) {
+//        // overridden in directional types
+//        assert !directional;
+//        throw new UnsupportedOperationException("not directional");
+//    }
 
     public DragDisplayType getDragDisplayType() {
         // overridden if necessary
@@ -456,12 +408,15 @@ public enum ShapeType {
         return directional;
     }
 
-    public boolean isClosed() {
-        return closed;
-    }
-
     public boolean hasSettings() {
         return hasSettings;
+    }
+
+    /**
+     * Return true if the shape could trigger https://bugs.openjdk.java.net/browse/JDK-6357341
+     */
+    public boolean hasAreaProblem() {
+        return areaProblem;
     }
 
     public ShapeTypeSettings createSettings() {

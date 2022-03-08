@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,10 @@ import java.awt.geom.AffineTransform;
  */
 public interface ToolWidget {
     /**
-     * If a {@link DraggablePoint}'s handle was "hit" by a
-     * mouse event, return the point, otherwise return null;
+     * If a {@link DraggablePoint}'s handle contains the given
+     * component space location, return the point, otherwise return null.
      */
-    DraggablePoint handleWasHit(double x, double y);
+    DraggablePoint findHandleAt(double x, double y);
 
     /**
      * Paint the widget on the given Graphics2D,

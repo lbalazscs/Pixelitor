@@ -46,23 +46,31 @@ public class TransformBoxAssert extends AbstractAssert<TransformBoxAssert, Trans
         return this;
     }
 
-    public TransformBoxAssert rotSizeIs(double expectedWidth, double expectedHeight) {
+    public TransformBoxAssert rotSizeIs(double width, double height) {
         isNotNull();
 
         Dimension2D size = actual.getRotatedImSize();
-        assertThat(size.getWidth()).isCloseTo(expectedWidth, within(DOUBLE_TOLERANCE));
-        assertThat(size.getHeight()).isCloseTo(expectedHeight, within(DOUBLE_TOLERANCE));
+        assertThat(size.getWidth())
+            .as("width")
+            .isCloseTo(width, within(DOUBLE_TOLERANCE));
+        assertThat(size.getHeight())
+            .as("height")
+            .isCloseTo(height, within(DOUBLE_TOLERANCE));
 
         return this;
     }
 
     public TransformBoxAssert handleImPosIs(Function<TransformBox, DraggablePoint> getter,
-                                            double expectedImX, double expectedImY) {
+                                            double x, double y) {
         isNotNull();
 
         DraggablePoint handle = getter.apply(actual);
-        assertThat(handle.getImX()).isCloseTo(expectedImX, within(DOUBLE_TOLERANCE));
-        assertThat(handle.getImY()).isCloseTo(expectedImY, within(DOUBLE_TOLERANCE));
+        assertThat(handle.getImX())
+            .as("im x")
+            .isCloseTo(x, within(DOUBLE_TOLERANCE));
+        assertThat(handle.getImY())
+            .as("im y")
+            .isCloseTo(y, within(DOUBLE_TOLERANCE));
 
         return this;
     }

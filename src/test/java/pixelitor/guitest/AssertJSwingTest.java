@@ -1972,7 +1972,7 @@ public class AssertJSwingTest {
         EDT.assertShapesToolStateIs(NO_INTERACTION);
         pw.button("convertToSelection").requireDisabled();
 
-        keyboard.undoRedoUndo("Finalize Shape");
+        keyboard.undoRedoUndo("Rasterize Shape");
 
         // test convert to selection
         pw.button("convertToSelection").requireEnabled().click();

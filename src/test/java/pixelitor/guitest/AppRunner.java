@@ -42,6 +42,8 @@ import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Language;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -762,6 +764,27 @@ public class AppRunner {
         checkNewLayerHistory(numLayersBefore, "Add Gradient Fill Layer");
 
         keyboard.redo("Gradient Fill Layer Change");
+    }
+
+    public void addShapesLayer(ShapeType shapeType) {
+        int numLayersBefore = EDT.getNumLayersInActiveComp();
+
+        keyboard.ctrlAltPress(VK_S);
+        keyboard.undoRedo("Add Shape Layer");
+
+        EDT.assertActiveToolIs(Tools.SHAPES);
+        pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
+        pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.RADIAL_GRADIENT.toString());
+        EDT.run(() -> FgBgColors.setFGColor(new Color(248, 199, 25)));
+        EDT.run(() -> FgBgColors.setBGColor(new Color(39, 81, 39)));
+        mouse.moveToCanvas(20, 380);
+        mouse.dragToCanvas(120, 480);
+
+        keyboard.undo("Create Shape");
+
+        checkNewLayerHistory(numLayersBefore, "Add Shape Layer");
+
+        keyboard.redo("Create Shape");
     }
 
     public void changeLayerBlendingMode(String blendingMode) {

@@ -89,8 +89,16 @@ public class DebugNode extends DefaultMutableTreeNode {
         addNode("\"" + name + "\": " + s + ",");
     }
 
+    public void addAsString(String name, Object o) {
+        addString(name, o == null ? "null" : o.toString());
+    }
+
     public void addQuotedString(String name, String s) {
         addNode(format("\"%s\": \"%s\",", name, s));
+    }
+
+    public void addAsQuotedString(String name, Object o) {
+        addQuotedString(name, o == null ? "null" : o.toString());
     }
 
     public void addInt(String name, int i) {
@@ -115,6 +123,10 @@ public class DebugNode extends DefaultMutableTreeNode {
 
     public void addClass() {
         addNode("\"class\": " + userObject.getClass().getSimpleName() + ",");
+    }
+
+    public void addAsClass(String name, Object o) {
+        addString(name, o == null ? "null" : o.getClass().getName());
     }
 
     private void addNode(String userObject) {

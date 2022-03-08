@@ -26,6 +26,7 @@ import pixelitor.tools.transform.history.TransformBoxChangedEdit;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -92,32 +93,40 @@ public class TransformBox implements ToolWidget, Serializable {
     private int cursorOffset = 0;
 
     // the box shape in component coordinates
-    private GeneralPath boxShape;
+    private GeneralPath coBoxShape;
 
     private boolean wholeBoxDrag = false;
-    private double wholeBoxDragStartX;
-    private double wholeBoxDragStartY;
+    private double wholeBoxDragStartCoX;
+    private double wholeBoxDragStartCoY;
 
     private transient Memento beforeMovement;
 
-    public TransformBox(Rectangle2D origCoRect, View view, Transformable owner) {
-        // it must be transformed to positive rectangle before calling this
-        assert !origCoRect.isEmpty();
+    public TransformBox(Rectangle2D origRect, View view, Transformable owner) {
+        this(origRect, view, owner, false);
+    }
 
-        origImRect = view.componentToImageSpace(origCoRect);
+    public TransformBox(Rectangle2D origRect, View view, Transformable owner, boolean isCo) {
+        // it must be transformed to positive rectangle before calling this
+        assert !origRect.isEmpty();
+
+        if (isCo) {
+            origImRect = view.componentToImageSpace(origRect);
+        } else {
+            origImRect = origRect;
+        }
         rotatedImSize = new DDimension(origImRect);
         this.view = view;
         this.owner = owner;
 
-        double westX = origCoRect.getX();
-        double eastX = westX + origCoRect.getWidth();
-        double northY = origCoRect.getY();
-        double southY = northY + origCoRect.getHeight();
+        double westX = origImRect.getX();
+        double eastX = westX + origImRect.getWidth();
+        double northY = origImRect.getY();
+        double southY = northY + origImRect.getHeight();
 
-        Point2D nwLoc = new Point2D.Double(westX, northY);
-        Point2D neLoc = new Point2D.Double(eastX, northY);
-        Point2D seLoc = new Point2D.Double(eastX, southY);
-        Point2D swLoc = new Point2D.Double(westX, southY);
+        PPoint nwLoc = PPoint.eagerFromIm(westX, northY, view);
+        PPoint neLoc = PPoint.eagerFromIm(eastX, northY, view);
+        PPoint seLoc = PPoint.eagerFromIm(eastX, southY, view);
+        PPoint swLoc = PPoint.eagerFromIm(westX, southY, view);
 
         // initialize the corner handles
         nw = new CornerHandle("NW", this, true,
@@ -131,8 +140,8 @@ public class TransformBox implements ToolWidget, Serializable {
 
         // initialize the rotation handle
         Point2D center = Shapes.calcCenter(ne, sw);
-        rot = new RotationHandle("rot", this,
-            new Point2D.Double(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE), view);
+        PPoint rotPos = PPoint.eagerFromCo(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE, view);
+        rot = new RotationHandle("rot", this, rotPos, view);
 
         initBox();
     }
@@ -186,8 +195,8 @@ public class TransformBox implements ToolWidget, Serializable {
         this.angleDegrees = other.angleDegrees;
         this.cursorOffset = other.cursorOffset;
         this.wholeBoxDrag = other.wholeBoxDrag;
-        this.wholeBoxDragStartX = other.wholeBoxDragStartX;
-        this.wholeBoxDragStartY = other.wholeBoxDragStartY;
+        this.wholeBoxDragStartCoX = other.wholeBoxDragStartCoX;
+        this.wholeBoxDragStartCoY = other.wholeBoxDragStartCoY;
 
         if (other.beforeMovement == null) {
             this.beforeMovement = null;
@@ -327,7 +336,7 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     public void applyTransform() {
-        owner.transform(calcImTransform());
+        owner.imTransform(calcImTransform());
     }
 
     private void updateRotLocation() {
@@ -348,7 +357,7 @@ public class TransformBox implements ToolWidget, Serializable {
     @Override
     public void paint(Graphics2D g) {
         // paint the lines
-        Shapes.drawVisibly(g, boxShape);
+        Shapes.drawVisibly(g, coBoxShape);
         Shapes.drawVisibly(g, new Line2D.Double(Shapes.calcCenter(nw, ne), rot));
 
         // paint the handles
@@ -358,17 +367,17 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     private void updateBoxShape() {
-        boxShape = new GeneralPath();
-        boxShape.moveTo(nw.getX(), nw.getY());
-        boxShape.lineTo(ne.getX(), ne.getY());
-        boxShape.lineTo(se.getX(), se.getY());
-        boxShape.lineTo(sw.getX(), sw.getY());
-        boxShape.lineTo(nw.getX(), nw.getY());
-        boxShape.closePath();
+        coBoxShape = new GeneralPath();
+        coBoxShape.moveTo(nw.getX(), nw.getY());
+        coBoxShape.lineTo(ne.getX(), ne.getY());
+        coBoxShape.lineTo(se.getX(), se.getY());
+        coBoxShape.lineTo(sw.getX(), sw.getY());
+        coBoxShape.lineTo(nw.getX(), nw.getY());
+        coBoxShape.closePath();
     }
 
     @Override
-    public DraggablePoint handleWasHit(double x, double y) {
+    public DraggablePoint findHandleAt(double x, double y) {
         for (DraggablePoint handle : handles) {
             if (handle.handleContains(x, y)) {
                 return handle;
@@ -383,9 +392,9 @@ public class TransformBox implements ToolWidget, Serializable {
     public boolean processMousePressed(PMouseEvent e) {
         double x = e.getCoX();
         double y = e.getCoY();
-        DraggablePoint hit = handleWasHit(x, y);
+        DraggablePoint hit = findHandleAt(x, y);
         if (hit != null) {
-            handleHitWhenPressed(hit, x, y);
+            mousePressedOn(hit, x, y);
             return true;
         } else {
             activePoint = null;
@@ -398,17 +407,17 @@ public class TransformBox implements ToolWidget, Serializable {
         return false;
     }
 
-    public void handleHitWhenPressed(DraggablePoint handle, double x, double y) {
+    public void mousePressedOn(DraggablePoint handle, double x, double y) {
         handle.setActive(true);
         saveState();
         handle.mousePressed(x, y);
         view.repaint();
     }
 
-    public void startWholeBoxDrag(double x, double y) {
+    public void startWholeBoxDrag(double coX, double coY) {
         wholeBoxDrag = true;
-        wholeBoxDragStartX = x;
-        wholeBoxDragStartY = y;
+        wholeBoxDragStartCoX = coX;
+        wholeBoxDragStartCoY = coY;
         saveState();
     }
 
@@ -459,7 +468,7 @@ public class TransformBox implements ToolWidget, Serializable {
     public void mouseMoved(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint hit = handleWasHit(x, y);
+        DraggablePoint hit = findHandleAt(x, y);
         if (hit != null) {
             hit.setActive(true);
             view.repaint();
@@ -486,7 +495,7 @@ public class TransformBox implements ToolWidget, Serializable {
     public boolean processMouseMoved(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint hit = handleWasHit(x, y);
+        DraggablePoint hit = findHandleAt(x, y);
         if (hit != null) {
             hit.setActive(true);
             view.repaint();
@@ -496,8 +505,8 @@ public class TransformBox implements ToolWidget, Serializable {
         return false;
     }
 
-    public boolean contains(double x, double y) {
-        return boxShape.contains(x, y);
+    public boolean contains(double coX, double coY) {
+        return coBoxShape.contains(coX, coY);
     }
 
     void updateDirections() {
@@ -514,25 +523,25 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     private void dragBox(double coX, double coY) {
-        double dx = coX - wholeBoxDragStartX;
-        double dy = coY - wholeBoxDragStartY;
+        double coDX = coX - wholeBoxDragStartCoX;
+        double coDY = coY - wholeBoxDragStartCoY;
 
-        moveWholeBox(dx, dy);
+        moveWholeBox(coDX, coDY);
     }
 
-    private void moveWholeBox(double dx, double dy) {
+    private void moveWholeBox(double coDX, double coDY) {
         nw.setLocation(
-            beforeMovement.nw.getX() + dx,
-            beforeMovement.nw.getY() + dy);
+            beforeMovement.nw.getCoX() + coDX,
+            beforeMovement.nw.getCoY() + coDY);
         ne.setLocation(
-            beforeMovement.ne.getX() + dx,
-            beforeMovement.ne.getY() + dy);
+            beforeMovement.ne.getCoX() + coDX,
+            beforeMovement.ne.getCoY() + coDY);
         se.setLocation(
-            beforeMovement.se.getX() + dx,
-            beforeMovement.se.getY() + dy);
+            beforeMovement.se.getCoX() + coDX,
+            beforeMovement.se.getCoY() + coDY);
         sw.setLocation(
-            beforeMovement.sw.getX() + dx,
-            beforeMovement.sw.getY() + dy);
+            beforeMovement.sw.getCoX() + coDX,
+            beforeMovement.sw.getCoY() + coDY);
 
         cornerHandlesMoved();
 
@@ -575,10 +584,15 @@ public class TransformBox implements ToolWidget, Serializable {
      * Transforms the box geometry with the given component-space transformation
      */
     public void coTransform(AffineTransform at) {
-        at.transform(beforeMovement.nw, nw);
-        at.transform(beforeMovement.ne, ne);
-        at.transform(beforeMovement.se, se);
-        at.transform(beforeMovement.sw, sw);
+//        at.transform(beforeMovement.nw, nw);
+//        at.transform(beforeMovement.ne, ne);
+//        at.transform(beforeMovement.se, se);
+//        at.transform(beforeMovement.sw, sw);
+
+        nw.coTransformOnlyThis(at, beforeMovement.nw);
+        ne.coTransformOnlyThis(at, beforeMovement.ne);
+        se.coTransformOnlyThis(at, beforeMovement.se);
+        sw.coTransformOnlyThis(at, beforeMovement.sw);
 
         cornerHandlesMoved();
     }
@@ -586,7 +600,7 @@ public class TransformBox implements ToolWidget, Serializable {
     // TODO is this just a simpler version of imCoordsChanged?
     public void imTransform(AffineTransform at) {
         for (CornerHandle corner : corners) {
-            corner.imTransform(at, false);
+            corner.imTransform(at, true);
         }
 
         cornerHandlesMoved();
@@ -734,10 +748,10 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     public void restoreFrom(Memento m) {
-        nw.setLocation(m.nw);
-        ne.setLocation(m.ne);
-        se.setLocation(m.se);
-        sw.setLocation(m.sw);
+        nw.setLocationOnlyForThis(m.nw);
+        ne.setLocationOnlyForThis(m.ne);
+        se.setLocationOnlyForThis(m.se);
+        sw.setLocationOnlyForThis(m.sw);
         setAngle(m.angle);
 
         cornerHandlesMoved();
@@ -780,15 +794,17 @@ public class TransformBox implements ToolWidget, Serializable {
      * so that it can be returned to this state later.
      */
     public static class Memento {
-        private Point2D nw;
-        private Point2D ne;
-        private Point2D se;
-        private Point2D sw;
+        private PPoint nw;
+        private PPoint ne;
+        private PPoint se;
+        private PPoint sw;
 
         private double angle = 0.0;
 
         public Memento copy() {
             Memento copy = new Memento();
+            // sharing the references should be OK,
+            // because memento objects are never mutated
             copy.nw = nw;
             copy.ne = ne;
             copy.se = se;

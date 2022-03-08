@@ -28,6 +28,7 @@ import pixelitor.filters.gui.RangeParam.RangeParamState;
 import pixelitor.particles.Modifier;
 import pixelitor.particles.ParticleSystem;
 import pixelitor.particles.SmoothPathParticle;
+import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.*;
 
 import java.awt.*;
@@ -224,7 +225,7 @@ public class FlowField extends ParametrizedFilter {
 
     private final EnumParam<ForceMode> forceModeParam = new EnumParam<>("Force Mode", ForceMode.class);
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
-    private final RangeParam iterationsParam = new RangeParam("Path Length", 1, 100, 100, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam pathLengthParam = new RangeParam("Path Length", 1, 100, 100, true, BORDER, IGNORE_RANDOMIZE);
 
     private final RangeParam numParticlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
@@ -248,7 +249,7 @@ public class FlowField extends ParametrizedFilter {
         DialogParam noiseAdjustmentParam = new DialogParam("Noise", zoomParam, varianceParam, turbulenceParam, windParam);
         noiseParam.setupEnableOtherIfNotZero(noiseAdjustmentParam);
 
-        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, iterationsParam);
+        DialogParam advancedParam = new DialogParam("Advanced", forceModeParam, maxVelocityParam, pathLengthParam);
 
         setParams(
             forceMixerParam,
@@ -268,7 +269,7 @@ public class FlowField extends ParametrizedFilter {
 
         ).withAction(ReseedSupport.createSimplexAction());
 
-        UserPreset confetti = new UserPreset("Confetti", null);
+        UserPreset confetti = new UserPreset("Confetti");
         confetti.put("Force Mixer", "60.00,20.00,20.00,false");
         confetti.put("Zoom (%)", "2450");
         confetti.put("Variance", "100");
@@ -292,14 +293,62 @@ public class FlowField extends ParametrizedFilter {
         confetti.put("Maximum Velocity", "843");
         confetti.put("Path Length", "13");
 
+        UserPreset smoke = new UserPreset("Smoke");
+        smoke.put("Force Mixer", "70.00,15.00,15.00,false");
+        smoke.put("Zoom (%)", "6500");
+        smoke.put("Variance", "35");
+        smoke.put("Turbulence", "5");
+        smoke.put("Wind", "5");
+        smoke.put("Particle Count", "3272");
+        smoke.put("Stroke Width", "3");
+        smoke.put("Endpoint Cap", "Round");
+        smoke.put("Corner Join", "Round");
+        smoke.put("Line Type", "Reversed Tapering");
+        smoke.put("Shape", "Kiwi");
+        smoke.put("Dashed", "no");
+        smoke.put("Stroke Width Randomness (%)", "0");
+        smoke.put("Use Antialiasing", "yes");
+        smoke.put("Background Color", "000000FF");
+        smoke.put("Particle Color", "FFFFFF08");
+        smoke.put("Initialize Colors", "Default");
+        smoke.put("Start Flow from Source Image", "no");
+        smoke.put("Color Randomness (%)", "0");
+        smoke.put("Force Mode", "No Mass");
+        smoke.put("Maximum Velocity", "4000");
+        smoke.put("Path Length", "100");
+
+        UserPreset vanGogh = new UserPreset("Van Gogh");
+        vanGogh.put("Force Mixer", "100.00,0.00,0.00,false");
+        vanGogh.put("Zoom (%)", "3000");
+        vanGogh.put("Variance", "25");
+        vanGogh.put("Turbulence", "5");
+        vanGogh.put("Wind", "0");
+        vanGogh.put("Particle Count", "10000");
+        vanGogh.put("Stroke Width", "5");
+        vanGogh.put("Endpoint Cap", "Round");
+        vanGogh.put("Corner Join", "Round");
+        vanGogh.put("Line Type", "Basic");
+        vanGogh.put("Shape", "Kiwi");
+        vanGogh.put("Dashed", "no");
+        vanGogh.put("Stroke Width Randomness (%)", "0");
+        vanGogh.put("Use Antialiasing", "yes");
+        vanGogh.put("Background Color", "000000FF");
+        vanGogh.put("Particle Color", "FFFFFF1F");
+        vanGogh.put("Initialize Colors", "Source Image");
+        vanGogh.put("Start Flow from Source Image", "no");
+        vanGogh.put("Color Randomness (%)", "0");
+        vanGogh.put("Force Mode", "No Mass");
+        vanGogh.put("Maximum Velocity", "4000");
+        vanGogh.put("Path Length", "15");
+
         FilterState vortex = new FilterState("Vortex")
             .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
-            .with(strokeParam, StrokeSettings.defaultsWithWidth(2))
+            .with(strokeParam, StrokeSettings.defaultsWith(StrokeType.TAPERING_REV, 4))
             .with(widthRandomnessParam, new RangeParamState(100))
             .with(antiAliasParam, YES)
             .withReset();
 
-        paramSet.setBuiltinPresets(confetti, vortex);
+        paramSet.setBuiltinPresets(confetti, smoke, vanGogh, vortex);
 
         noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
         sinkParam.setToolTip("Make particles flow towards the center point.");
@@ -315,7 +364,7 @@ public class FlowField extends ParametrizedFilter {
         advancedParam.setToolTip("Advanced or rarely used settings.");
         forceModeParam.setToolTip("Advanced control over how forces act.");
         maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
-        iterationsParam.setToolTip("Make individual particles cover longer paths.");
+        pathLengthParam.setToolTip("Make individual particles cover longer paths.");
 
         numParticlesParam.setToolTip("Adjust the number of particles flowing in the field.");
         strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
@@ -339,7 +388,7 @@ public class FlowField extends ParametrizedFilter {
 
         ForceMode forceMode = forceModeParam.getSelected();
         float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
-        int iterationCount = iterationsParam.getValue() + 1;
+        int iterationCount = pathLengthParam.getValue() + 1;
 
         int particleCount = numParticlesParam.getValue();
         Stroke stroke = strokeParam.createStroke();

@@ -89,7 +89,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         node.add(layer.createDebugNode());
         node.add(oldMask.createDebugNode("old mask"));
         node.add(DebugNodes.createBufferedImageNode("old image", oldImage));
-        node.addString("old mode", oldMode.toString());
+        node.addAsString("old mode", oldMode);
 
         return node;
     }

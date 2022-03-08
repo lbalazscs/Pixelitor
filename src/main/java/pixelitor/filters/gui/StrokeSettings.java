@@ -38,9 +38,9 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static StrokeSettings defaultsWithWidth(double width) {
+    public static StrokeSettings defaultsWith(StrokeType type, double width) {
         return new StrokeSettings(width, StrokeCap.ROUND, StrokeJoin.ROUND,
-            StrokeType.BASIC, StrokeParam.DEFAULT_SHAPE_TYPE, false);
+            type, StrokeParam.DEFAULT_SHAPE_TYPE, false);
     }
 
     @Override

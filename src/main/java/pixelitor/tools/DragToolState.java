@@ -33,6 +33,12 @@ public enum DragToolState {
             return !tool.hasStyledShape() && !tool.hasBox();
         }
     },
+    AFTER_FIRST_MOUSE_PRESS {
+        @Override
+        public boolean isOK(ShapesTool tool) {
+            return tool.hasStyledShape() && !tool.hasBox();
+        }
+    },
     /**
      * The state during the initial drag (no handles yet).
      */

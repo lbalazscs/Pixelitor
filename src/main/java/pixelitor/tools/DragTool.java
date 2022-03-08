@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,15 +40,15 @@ public abstract class DragTool extends Tool {
 
     // subclasses will automatically support constrained
     // movement when Shift is pressed if this is set to true
-    private final boolean constrainIfShiftDown;
+    private final boolean shiftConstrains;
 
     protected DragTool(String name, char activationKeyChar, String iconFileName,
                        String toolMessage, Cursor cursor,
-                       boolean constrainIfShiftDown) {
+                       boolean shiftConstrains) {
 
         super(name, activationKeyChar, iconFileName, toolMessage, cursor);
 
-        this.constrainIfShiftDown = constrainIfShiftDown;
+        this.shiftConstrains = shiftConstrains;
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class DragTool extends Tool {
         if (spaceDragStartPoint) {
             drag.saveEndValues();
         }
-        if (constrainIfShiftDown) {
+        if (shiftConstrains) {
             drag.setConstrained(e.isShiftDown());
         }
 

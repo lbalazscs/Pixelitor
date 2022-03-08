@@ -32,6 +32,7 @@ import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
@@ -1000,24 +1001,40 @@ public class RandomGUITest {
     }
 
     private static void randomNewTextLayer() {
-        var comp = Views.getActiveComp();
-        TextLayer textLayer = new TextLayer(comp);
-        textLayer.randomizeSettings();
-        textLayer.updateLayerName();
-        log("new text layer: " + textLayer.getSettings().getText());
-        new LayerAdder(comp)
-            .withHistory("New Random Text Layer")
-            .atPosition(ABOVE_ACTIVE)
-            .add(textLayer);
-        textLayer.setName(textLayer.getSettings().getText(), true);
+        Composition comp = Views.getActiveComp();
+        MaskViewMode oldMaskViewMode = comp.getView().getMaskViewMode();
+        Layer activeLayerBefore = comp.getActiveLayer();
+
+        TextSettings settings = new TextSettings();
+        settings.randomize();
+        TextLayer textLayer = TextLayer.createNew(settings);
+
+        // has to be called explicitly, since no dialog will be shown
+        textLayer.finalizeCreation(comp, activeLayerBefore, oldMaskViewMode);
+
+        log("new text layer: " + textLayer.getName());
     }
 
-    private static void randomTextLayerRasterize() {
-        Layer layer = Views.getActiveLayer();
-        if (layer instanceof TextLayer textLayer) {
-            log("rasterize text layer " + layer.getName());
+    private static void randomNewColorFillLayer() {
+        log("new color fill layer");
+        ColorFillLayer.createNew();
+    }
 
-            textLayer.replaceWithRasterized();
+    private static void randomNewGradientFillLayer() {
+        log("new gradient fill layer");
+        GradientFillLayer.createNew();
+    }
+
+    private static void randomNewShapesLayer() {
+        log("new shapes layer");
+        ShapesLayer.createNew();
+    }
+
+    private static void randomRasterizeLayer() {
+        Layer layer = Views.getActiveLayer();
+        if (layer.isRasterizable()) {
+            log("rasterize " + layer.getTypeStringLC() + " " + layer.getName());
+            layer.replaceWithRasterized();
         }
     }
 
@@ -1209,8 +1226,11 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
         weightedCaller.registerCallback(5, RandomGUITest::randomTool);
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
-        weightedCaller.registerCallback(5, RandomGUITest::randomNewTextLayer);
-        weightedCaller.registerCallback(5, RandomGUITest::randomTextLayerRasterize);
+        weightedCaller.registerCallback(2, RandomGUITest::randomNewTextLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::randomNewColorFillLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::randomNewGradientFillLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::randomNewShapesLayer);
+        weightedCaller.registerCallback(5, RandomGUITest::randomRasterizeLayer);
         weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
         weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);
 

@@ -17,7 +17,6 @@
 
 package pixelitor.utils.debug;
 
-import pixelitor.Canvas;
 import pixelitor.gui.ImageFrame;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -70,11 +69,9 @@ public class DebugNodes {
     public static DebugNode createViewNode(String name, View view) {
         var node = new DebugNode(name, view);
 
-        var comp = view.getComp();
-        node.add(new CompositionNode(comp));
-
-        node.addQuotedString("name", comp.getName());
-        node.addQuotedString("mask view mode", view.getMaskViewMode().toString());
+        node.add(new CompositionNode(view.getComp()));
+        node.add(view.getCanvas().createDebugNode());
+        node.addQuotedString("zoom level", view.getZoomLevel().toString());
 
         node.addInt("view width", view.getWidth());
         node.addInt("view height", view.getHeight());
@@ -85,10 +82,7 @@ public class DebugNodes {
             node.addInt("frame height", frame.getHeight());
         }
 
-        node.addQuotedString("zoom level", view.getZoomLevel().toString());
-        Canvas canvas = view.getCanvas();
-        node.addInt("zoomed canvas width", canvas.getCoWidth());
-        node.addInt("zoomed canvas height", canvas.getCoHeight());
+        node.addQuotedString("mask view mode", view.getMaskViewMode().toString());
 
         return node;
     }
@@ -145,7 +139,7 @@ public class DebugNodes {
         return node;
     }
 
-    private static DebugNode createColorModelNode(String name, ColorModel colorModel) {
+    public static DebugNode createColorModelNode(String name, ColorModel colorModel) {
         var node = new DebugNode(name, colorModel);
 
         node.addClass();
@@ -208,7 +202,7 @@ public class DebugNodes {
 
         int numSubpaths = path.getNumSubpaths();
         node.addInt("number of subpaths", numSubpaths);
-        node.addString("build state", path.getBuildState().toString());
+        node.addAsString("build state", path.getBuildState());
 
         for (int i = 0; i < numSubpaths; i++) {
             var subPath = path.getSubPath(i);

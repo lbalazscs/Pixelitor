@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ class TransformBoxTest {
     private View view;
     private static final Transformable DUMMY_TRANSFORMABLE = new Transformable() {
         @Override
-        public void transform(AffineTransform transform) {
+        public void imTransform(AffineTransform transform) {
             // do nothing
         }
 

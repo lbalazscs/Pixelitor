@@ -37,22 +37,22 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * A Paint type based on two endpoints.
  */
 public enum TwoPointPaintType {
-    NONE("None") {
+    NONE("None", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             throw new UnsupportedOperationException();
         }
-    }, FOREGROUND("Foreground") {
+    }, FOREGROUND("Foreground", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return fgColor;
         }
-    }, BACKGROUND("Background") {
+    }, BACKGROUND("Background", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return bgColor;
         }
-    }, TRANSPARENT("Transparent") {
+    }, TRANSPARENT("Transparent", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             throw new UnsupportedOperationException();
@@ -67,7 +67,7 @@ public enum TwoPointPaintType {
         public void finish(Graphics2D g) {
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
         }
-    }, LINEAR_GRADIENT("Linear Gradient") {
+    }, LINEAR_GRADIENT("Linear Gradient", true) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new GradientPaint(
@@ -78,7 +78,7 @@ public enum TwoPointPaintType {
                 (float) drag.getEndY(),
                 bgColor);
         }
-    }, RADIAL_GRADIENT("Radial Gradient") {
+    }, RADIAL_GRADIENT("Radial Gradient", true) {
         private final float[] FRACTIONS = {0.0f, 1.0f};
         private final AffineTransform gradientTransform = new AffineTransform();
 
@@ -91,19 +91,19 @@ public enum TwoPointPaintType {
                 new Color[]{fgColor, bgColor},
                 NO_CYCLE, SRGB, gradientTransform);
         }
-    }, ANGLE_GRADIENT("Angle Gradient") {
+    }, ANGLE_GRADIENT("Angle Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new AngleGradientPaint(drag.getCenterDrag(),
                 fgColor, bgColor, NO_CYCLE);
         }
-    }, SPIRAL_GRADIENT("Spiral Gradient") {
+    }, SPIRAL_GRADIENT("Spiral Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new SpiralGradientPaint(true, drag.getCenterDrag(),
                 fgColor, bgColor, NO_CYCLE);
         }
-    }, DIAMOND_GRADIENT("Diamond Gradient") {
+    }, DIAMOND_GRADIENT("Diamond Gradient", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return new DiamondGradientPaint(drag.getCenterDrag(),
@@ -113,8 +113,13 @@ public enum TwoPointPaintType {
 
     private final String guiName;
 
-    TwoPointPaintType(String guiName) {
+    // true if when blending it with a custom blending mode,
+    // the src has no transparency, and the blending modes don't work
+    private final boolean hasBlendingIssue;
+
+    TwoPointPaintType(String guiName, boolean hasBlendingIssue) {
         this.guiName = guiName;
+        this.hasBlendingIssue = hasBlendingIssue;
     }
 
     protected final Paint createPaint(Drag drag) {
@@ -135,6 +140,10 @@ public enum TwoPointPaintType {
      */
     public void finish(Graphics2D g) {
         // by default do nothing
+    }
+
+    public boolean hasBlendingIssue() {
+        return hasBlendingIssue;
     }
 
     @Override

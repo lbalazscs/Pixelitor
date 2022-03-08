@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
     public PaintContext createContext(ColorModel cm,
                                       Rectangle deviceBounds, Rectangle2D userBounds,
                                       AffineTransform xform, RenderingHints hints) {
-        Drag trDrag = drag.transformedCopy(xform);
+        Drag trDrag = drag.imTransformedCopy(xform);
         if (cm.getNumComponents() == 1) {
             return new GraySpiralGradientPaintContext(clockwise, trDrag,
                 startColor, endColor, cm, cycleMethod);

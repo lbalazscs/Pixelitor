@@ -417,10 +417,13 @@ public abstract class Layer implements Serializable {
         View view = comp.getView();
         MaskViewMode oldMode = view.getMaskViewMode();
         mask = null;
-        setMaskEditing(false);
 
         ui.removeMaskIcon();
         Layers.maskDeletedFrom(this);
+
+        // call this only after AddLayerMaskAction is notified,
+        // because in some cases it might trigger a consistency check
+        setMaskEditing(false);
 
         if (addToHistory) {
             History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
@@ -618,7 +621,7 @@ public abstract class Layer implements Serializable {
      * relative to the canvas
      */
     public abstract void crop(Rectangle2D cropRect,
-                              boolean deleteCroppedPixels,
+                              boolean deleteCropped,
                               boolean allowGrowing);
 
     public void changeStackIndex(int newIndex) {
@@ -630,7 +633,7 @@ public abstract class Layer implements Serializable {
      */
     public boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL
-            && opacity > BlendingModePanel.CRITICAL_OPACITY;
+               && opacity > BlendingModePanel.CRITICAL_OPACITY;
     }
 
     /**

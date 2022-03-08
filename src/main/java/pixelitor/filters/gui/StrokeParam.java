@@ -292,10 +292,10 @@ public class StrokeParam extends AbstractFilterParam {
         DebugNode strokeNode = new DebugNode("stroke settings", this);
 
         strokeNode.addInt("width", strokeWidthParam.getValue());
-        strokeNode.addString("cap", strokeCapParam.getSelected().toString());
-        strokeNode.addString("join", strokeJoinParam.getSelected().toString());
-        strokeNode.addString("type", strokeTypeParam.getSelected().toString());
-        strokeNode.addString("shape type", shapeTypeParam.getSelected().toString());
+        strokeNode.addAsString("cap", strokeCapParam.getSelected());
+        strokeNode.addAsString("join", strokeJoinParam.getSelected());
+        strokeNode.addAsString("type", strokeTypeParam.getSelected());
+        strokeNode.addAsString("shape type", shapeTypeParam.getSelected());
         strokeNode.addBoolean("dashed", hasDashes());
 
         node.add(strokeNode);

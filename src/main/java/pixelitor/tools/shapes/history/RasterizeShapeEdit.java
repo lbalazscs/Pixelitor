@@ -27,14 +27,14 @@ import pixelitor.tools.transform.TransformBox;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-public class FinalizeShapeEdit extends PixelitorEdit {
+public class RasterizeShapeEdit extends PixelitorEdit {
     private final PartialImageEdit imageEdit;
     private final TransformBox box;
     private final StyledShape styledShape;
 
-    public FinalizeShapeEdit(Composition comp, PartialImageEdit imageEdit,
-                             TransformBox box, StyledShape styledShape) {
-        super("Finalize Shape", comp);
+    public RasterizeShapeEdit(Composition comp, PartialImageEdit imageEdit,
+                              TransformBox box, StyledShape styledShape) {
+        super("Rasterize Shape", comp);
 
         // the image edit can be null!
         assert box != null;

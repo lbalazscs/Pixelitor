@@ -188,7 +188,6 @@ public class Views {
         for (ViewActivationListener listener : activationListeners) {
             listener.viewActivated(oldView, view);
         }
-        Tools.editingTargetChanged(comp.getActiveLayer());
 
         Layers.activeCompChanged(comp, true);
 
@@ -198,6 +197,14 @@ public class Views {
 
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);
+
+//        // Invoke only later, when the view can correctly
+//        // translate between image and component spaces.
+//        // Important when loading serialized compositions with active shape layers.
+//        EventQueue.invokeLater(() -> Tools.editingTargetChanged(comp.getActiveLayer()));
+        // Invoking later can lead to situations where the comp has no view,
+        // and it's not necessary anymore?
+        Tools.editingTargetChanged(comp.getActiveLayer());
     }
 
     public static void repaintActive() {
@@ -448,7 +455,9 @@ public class Views {
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addNewView(view);
             setActiveView(view, false);
-            Tools.editingTargetChanged(comp.getActiveLayer());
+
+// commented out, because ImageArea.addNewView(view); should always call this anyway
+//            Tools.editingTargetChanged(comp.getActiveLayer());
         } catch (Exception e) {
             Messages.showException(e);
         }

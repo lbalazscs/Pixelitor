@@ -548,7 +548,6 @@ public class SubPath implements Serializable, Transformable {
         return moving != null;
     }
 
-    @VisibleForTesting
     public boolean isFinished() {
         return finished;
     }
@@ -699,7 +698,7 @@ public class SubPath implements Serializable, Transformable {
             return null;
         }
 
-        box = new TransformBox(coBoundingBox, comp.getView(), this);
+        box = new TransformBox(coBoundingBox, comp.getView(), this, true);
         return box;
     }
 
@@ -708,7 +707,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     @Override
-    public void transform(AffineTransform at) {
+    public void imTransform(AffineTransform at) {
         for (AnchorPoint point : anchorPoints) {
             point.imTransform(at, true);
         }

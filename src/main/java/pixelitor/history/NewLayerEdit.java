@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ public class NewLayerEdit extends PixelitorEdit {
         node.add(activeLayerBefore.createDebugNode("active layer before"));
         node.add(newLayer.createDebugNode("new layer"));
         node.addInt("new layer index", newLayerIndex);
-        node.addString("view mode before", viewModeBefore.toString());
+        node.addAsString("view mode before", viewModeBefore);
 
         return node;
     }

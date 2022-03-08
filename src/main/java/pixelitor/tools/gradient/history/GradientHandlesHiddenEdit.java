@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ public class GradientHandlesHiddenEdit extends PixelitorEdit {
         super("Hide Gradient Handles", comp);
         this.gradient = gradient;
         dr = comp.getActiveDrawable();
+        assert dr != null;
     }
 
     @Override

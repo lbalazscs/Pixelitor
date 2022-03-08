@@ -130,16 +130,15 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
         if (gradient != null) {
-            double sx = newSize.getWidth() / comp.getCanvasWidth();
-            double sy = newSize.getHeight() / comp.getCanvasHeight();
-            gradient.transform(AffineTransform.getScaleInstance(sx, sy));
+            AffineTransform at = comp.getCanvas().createImTransformToSize(newSize);
+            gradient.imTransform(at);
             cachedImage = null;
         }
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
         if (gradient != null) {
             gradient.crop(cropRect);
             cachedImage = null;
@@ -149,7 +148,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public void flip(Flip.Direction direction) {
         if (gradient != null) {
-            gradient.transform(direction.createCanvasTransform(comp.getCanvas()));
+            gradient.imTransform(direction.createCanvasTransform(comp.getCanvas()));
             cachedImage = null;
         }
     }
@@ -157,7 +156,7 @@ public class GradientFillLayer extends ContentLayer {
     @Override
     public void rotate(QuadrantAngle angle) {
         if (gradient != null) {
-            gradient.transform(angle.createCanvasTransform(comp.getCanvas()));
+            gradient.imTransform(angle.createCanvasTransform(comp.getCanvas()));
             cachedImage = null;
         }
     }

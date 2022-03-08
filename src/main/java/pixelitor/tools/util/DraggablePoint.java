@@ -87,12 +87,12 @@ public class DraggablePoint extends Point2D.Double {
     // a transform box is created to serve as reference points
     private Point2D imTransformRefPoint;
 
-    public DraggablePoint(String name, double x, double y,
+    public DraggablePoint(String name, PPoint p,
                           View view, Color color, Color activeColor) {
         assert view != null;
         this.view = view;
 
-        setLocationOnlyForThis(x, y);
+        setLocationOnlyForThis(p);
 
         this.name = name;
         this.color = color;
@@ -106,18 +106,29 @@ public class DraggablePoint extends Point2D.Double {
 
     // setLocation is overridden in subclasses to also move related
     // points, but we also need a pure version, which is final
-    public final void setLocationOnlyForThis(double x, double y) {
-        assert !isNaN(x) : this.x + " to NaN in " + this;
-        assert !isNaN(y) : this.y + " to NaN in " + this;
+    public final void setLocationOnlyForThis(double coX, double coY) {
+        assert !isNaN(coX) : this.x + " to NaN in " + this;
+        assert !isNaN(coY) : this.y + " to NaN in " + this;
 
-        this.x = x;
-        this.y = y;
+        this.x = coX;
+        this.y = coY;
 
-        imX = view.componentXToImageSpace(x);
-        imY = view.componentYToImageSpace(y);
+        imX = view.componentXToImageSpace(coX);
+        imY = view.componentYToImageSpace(coY);
 
         assert !isNaN(imX);
         assert !isNaN(imY);
+
+        updateShapes();
+    }
+
+    public final void setLocationOnlyForThis(PPoint p) {
+        if (p != null) { // TODO CropHandle objects are initialized after the constructor
+            this.x = p.getCoX();
+            this.y = p.getCoY();
+            this.imX = p.getImX();
+            this.imY = p.getImY();
+        }
 
         updateShapes();
     }
@@ -141,24 +152,31 @@ public class DraggablePoint extends Point2D.Double {
     public final void imTransformOnlyThis(AffineTransform at, boolean useRefPoint) {
         // Can't simply use at.transform(refPoint, this) because that would
         // call setLocation, which is in component space and also can be overridden
-        Point2D transformed;
+        Point2D newImLoc;
         if (useRefPoint) {
-            transformed = at.transform(imTransformRefPoint, null);
+            newImLoc = at.transform(imTransformRefPoint, null);
         } else {
-            transformed = at.transform(getImLocationCopy(), null);
+            newImLoc = at.transform(getImLocationCopy(), null);
         }
 
-        assert !isNaN(transformed.getX()) : "at = " + at + ", useRefPoint = " + useRefPoint;
-        assert !isNaN(transformed.getY()) : "at = " + at + ", useRefPoint = " + useRefPoint;
+        assert !isNaN(newImLoc.getX()) : "at = " + at + ", useRefPoint = " + useRefPoint;
+        assert !isNaN(newImLoc.getY()) : "at = " + at + ", useRefPoint = " + useRefPoint;
 
-        setImLocationOnlyForThis(transformed);
+        setImLocationOnlyForThis(newImLoc);
+    }
+
+    public final void coTransformOnlyThis(AffineTransform at, PPoint refPoint) {
+        Point2D transformed = new Point2D.Double();
+        Point2D orig = refPoint.asCoPoint2D();
+        at.transform(orig, transformed);
+        setLocationOnlyForThis(transformed);
     }
 
     public final void setLocationOnlyForThis(Point2D p) {
         setLocationOnlyForThis(p.getX(), p.getY());
     }
 
-    private void setImLocationOnlyForThis(Point2D p) {
+    public void setImLocationOnlyForThis(Point2D p) {
         imX = p.getX();
         imY = p.getY();
 
@@ -336,12 +354,16 @@ public class DraggablePoint extends Point2D.Double {
         assert !isNaN(imY);
     }
 
-    public Point2D getLocationCopy() {
+    public Point2D getCoLocationCopy() {
         return new Point2D.Double(x, y);
     }
 
     public Point2D getImLocationCopy() {
         return new Point2D.Double(imX, imY);
+    }
+
+    public PPoint getLocationCopy() {
+        return new PPoint(x, y, imX, imY, view);
     }
 
     public double getImX() {

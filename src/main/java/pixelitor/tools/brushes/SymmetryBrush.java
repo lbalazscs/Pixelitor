@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -202,8 +202,8 @@ public class SymmetryBrush implements Brush {
             node.add(brushes[i].createDebugNode());
         }
 
-        node.addString("type", brushType.toString());
-        node.addString("symmetry", symmetry.toString());
+        node.addAsString("type", brushType);
+        node.addAsString("symmetry", symmetry);
         node.add(affectedArea.createDebugNode());
 
         return node;

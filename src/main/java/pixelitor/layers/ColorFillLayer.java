@@ -147,7 +147,7 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
         // do nothing
     }
 

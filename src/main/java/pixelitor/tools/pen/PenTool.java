@@ -215,10 +215,10 @@ public class PenTool extends Tool {
     }
 
     // This method should not be called directly,
-    // otherwise the mode and the the combo box get out of sync.
+    // otherwise the mode and the combo box get out of sync.
     private void changeMode(PenToolMode mode) {
         if (this.mode != mode) {
-            this.mode.modeEnded();
+            this.mode.modeEnded(Views.getActiveComp());
             mode.modeStarted(this.mode);
         }
         this.mode = mode;
@@ -326,19 +326,30 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void viewActivated(View oldCV, View newCV) {
-        if (oldCV != null) { // is null if the first image is opened with active pen tool
-            Composition oldComp = oldCV.getComp();
+    public void viewActivated(View oldView, View newView) {
+        boolean restartMode = false;
+
+        if (oldView != null) { // is null if the first image is opened with active pen tool
+            Composition oldComp = oldView.getComp();
             Path oldPath = oldComp.getActivePath();
             if (oldPath != null) {
                 oldPath.setPreferredPenToolMode(mode);
             }
+
+            restartMode = true;
+            // Even if the mode doesn't change, end it with the
+            // old composition and start it with the new one.
+            mode.modeEnded(oldComp);
         }
 
-        super.viewActivated(oldCV, newCV);
-        path = newCV.getComp().getActivePath();
+        super.viewActivated(oldView, newView);
+        path = newView.getComp().getActivePath();
 
-        assert Views.getActive() == newCV;
+        if (restartMode) {
+            mode.modeStarted(mode);
+        }
+
+        assert Views.getActive() == newView;
         assert checkPathConsistency();
     }
 
@@ -448,7 +459,7 @@ public class PenTool extends Tool {
     @Override
     protected void toolEnded() {
         super.toolEnded();
-        mode.modeEnded();
+        mode.modeEnded(Views.getActiveComp());
 
         assert checkPathConsistency();
     }

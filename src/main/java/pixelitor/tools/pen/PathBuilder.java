@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -298,7 +298,7 @@ public class PathBuilder implements PenToolMode {
 
             // initialize the moving point for the next state
             SubPath sp = path.getActiveSubpath();
-            MovingPoint moving = new MovingPoint(x, y, last);
+            MovingPoint moving = new MovingPoint(x, y, last, last.getView());
             moving.mousePressed(x, y);
             sp.setMovingPoint(moving);
         }
@@ -456,13 +456,15 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public void modeEnded() {
+    public void modeEnded(Composition comp) {
         if (hasPath() && !path.getActiveSubpath().isFinished()) {
-            path.finishActiveSubpath();
+            // Adding something to the history at this point is risky,
+            // because this code could be called while undoing something.
+            path.finishActiveSubpath(false);
         } else {
             assertStateIs(NO_INTERACTION);
         }
-        PenToolMode.super.modeEnded();
+        PenToolMode.super.modeEnded(comp);
     }
 
     private static void assertStateIs(BuildState s) {
@@ -478,7 +480,8 @@ public class PathBuilder implements PenToolMode {
     }
 
     public MovingPoint createMovingPoint(SubPath sp) {
-        return new MovingPoint(lastX, lastY, sp.getLast());
+        AnchorPoint last = sp.getLast();
+        return new MovingPoint(lastX, lastY, last, last.getView());
     }
 
     @Override

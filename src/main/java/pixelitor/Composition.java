@@ -1002,6 +1002,9 @@ public class Composition implements Serializable {
     // The GUI doesn't have to be updated.
     public void changeLayerIndex(Layer layer, int newIndex) {
         int oldIndex = layerList.indexOf(layer);
+        assert oldIndex != -1;
+        assert newIndex < layerList.size() : "oldIndex = " + oldIndex + ", newIndex = " + newIndex;
+
         if (oldIndex == newIndex) {
             return;
         }

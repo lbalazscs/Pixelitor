@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,6 @@ import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Utils;
 
 import java.awt.Dimension;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -109,7 +108,7 @@ public class Resize implements CompAction {
         assert calledOnEDT() : threadInfo();
 
         Canvas newCanvas = newComp.getCanvas();
-        var canvasTransform = createCanvasTransform(newCanvasSize, newCanvas);
+        var canvasTransform = newCanvas.createImTransformToSize(newCanvasSize);
         newComp.imCoordsChanged(canvasTransform, false);
 
         View view = newComp.getView();
@@ -146,12 +145,6 @@ public class Resize implements CompAction {
             newComp.getName(), newCanvasSize.width, newCanvasSize.height));
 
         return newComp;
-    }
-
-    private static AffineTransform createCanvasTransform(Dimension targetSize, Canvas newCanvas) {
-        double sx = targetSize.width / (double) newCanvas.getWidth();
-        double sy = targetSize.height / (double) newCanvas.getHeight();
-        return AffineTransform.getScaleInstance(sx, sy);
     }
 
     private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {

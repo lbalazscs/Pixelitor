@@ -86,17 +86,21 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter.setTranslation(getTx(), getTy());
     }
 
-    public static void createNew() {
+    public static TextLayer createNew() {
+        return createNew(new TextSettings());
+    }
+
+    public static TextLayer createNew(TextSettings settings) {
         var comp = Views.getActiveComp();
         if (comp == null) {
             // It is possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77
-            return;
+            return null;
         }
 
         Tools.forceFinish();
 
-        var textLayer = new TextLayer(comp);
+        var textLayer = new TextLayer(comp, "", settings);
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
@@ -113,9 +117,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
                 textLayer.finalizeCreation(comp, activeLayerBefore, oldViewMode))
             .cancelAction(() -> comp.deleteLayer(textLayer, false))
             .show();
+        return textLayer;
     }
 
-    private void finalizeCreation(Composition comp, Layer activeLayerBefore, MaskViewMode oldViewMode) {
+    public void finalizeCreation(Composition comp, Layer activeLayerBefore, MaskViewMode oldViewMode) {
         updateLayerName();
 
         // now it is safe to add it to the history
@@ -323,7 +328,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
+    public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
         // the text will not be cropped, but the translations have to be adjusted
 
         // as the cropping is the exact opposite of "enlarge canvas",

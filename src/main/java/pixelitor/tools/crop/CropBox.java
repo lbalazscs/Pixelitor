@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -112,12 +112,12 @@ public class CropBox implements ToolWidget {
      * Iterates over all the handles and if it finds one that is
      * under the given mouse coordinates, sets the cursor accordingly.
      *
-     * @return true if cursor was set on any handle, false otherwise
+     * @return true if the cursor was set on any handle, false otherwise
      */
     private boolean setCursorForPoint(double x, double y, View view) {
-        CropHandle hit = handleWasHit(x, y);
-        if (hit != null) {
-            view.setCursor(hit.getCursor());
+        CropHandle handle = findHandleAt(x, y);
+        if (handle != null) {
+            view.setCursor(handle.getCursor());
             return true;
         }
 
@@ -125,7 +125,7 @@ public class CropBox implements ToolWidget {
     }
 
     @Override
-    public CropHandle handleWasHit(double x, double y) {
+    public CropHandle findHandleAt(double x, double y) {
         for (CropHandle handle : handles) {
             if (handle.handleContains(x, y)) {
                 return handle;
@@ -174,19 +174,20 @@ public class CropBox implements ToolWidget {
             return;
         }
 
-        rect.getCo().setRect(dragStartRect);
+        Rectangle coRect = rect.getCo();
+        coRect.setRect(dragStartRect);
         Point mouseOffset = new Point(
             (int) (e.getCoX() - dragStart.x),
             (int) (e.getCoY() - dragStart.y));
 
         if (transformMode == MODE_RESIZE) {
-            resize(rect.getCo(), dragStartCursor, mouseOffset);
+            resize(coRect, dragStartCursor, mouseOffset);
 
             if (e.isShiftDown() && aspectRatio > 0) {
-                keepAspectRatio(rect.getCo(), dragStartCursor, aspectRatio);
+                keepAspectRatio(coRect, dragStartCursor, aspectRatio);
             }
         } else if (transformMode == MODE_MOVE) {
-            rect.getCo().translate(mouseOffset.x, mouseOffset.y);
+            coRect.translate(mouseOffset.x, mouseOffset.y);
         }
 
         updateHandles();

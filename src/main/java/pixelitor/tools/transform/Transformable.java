@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,9 @@ import java.awt.geom.AffineTransform;
  */
 public interface Transformable {
     /**
-     * Apply the given transform.
-     * Called by the transform box manipulations.
+     * Apply the given transform in image space.
      */
-    void transform(AffineTransform transform);
+    void imTransform(AffineTransform transform);
 
     /**
      * Update the UI. A simple repaint is not enough for the
