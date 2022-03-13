@@ -17,22 +17,8 @@
 
 package pixelitor.filters.gui;
 
-public interface DialogMenuOwner extends PresetOwner {
-    default boolean hasBuiltinPresets() {
-        return false;
-    }
+import javax.swing.*;
 
-    default Preset[] getBuiltinPresets() {
-        // the subclasses override this if they have built-in presets
-        throw new UnsupportedOperationException();
-    }
-
-    default boolean hasHelp() {
-        return false;
-    }
-
-    default String getHelpURL() {
-        // the subclasses override this if they have a help URL
-        throw new UnsupportedOperationException();
-    }
+public interface Preset {
+    Action asAction(PresetOwner owner);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,9 +33,13 @@ import java.util.stream.Stream;
  * then it contains only the animatable {@link FilterParam}s.
  * It is also used for the built-in presets.
  */
-public class FilterState {
+public class FilterState implements Preset {
     private final Map<String, ParamState<?>> states;
     private String name; // used only for presets
+
+    // Whether the filter is reset before applying this state.
+    // There's a difference if not all fields are set.
+    private boolean reset;
 
     public FilterState(ParamSet paramSet, boolean animOnly) {
         this(paramSet.getParams().stream(), animOnly);
@@ -90,6 +94,11 @@ public class FilterState {
         return this;
     }
 
+    public FilterState withReset() {
+        reset = true;
+        return this;
+    }
+
     public String getName() {
         return name;
     }
@@ -98,11 +107,12 @@ public class FilterState {
         this.name = name;
     }
 
-    public Action asAction(ParamSet paramSet) {
+    @Override
+    public Action asAction(PresetOwner owner) {
         return new PAction(name) {
             @Override
             public void onClick() {
-                paramSet.applyState(FilterState.this);
+                owner.loadFilterState(FilterState.this, reset);
             }
         };
     }

@@ -88,6 +88,7 @@ public class ListParam<E>
     }
 
     public void setSelectedItem(E item, boolean trigger) {
+        assert item != null;
         if (!currentChoice.equals(item)) {
             currentChoice = item;
             fireContentsChanged(this, -1, -1);

@@ -45,6 +45,11 @@ public interface PresetOwner {
 
     void loadUserPreset(UserPreset preset);
 
+    default void loadFilterState(FilterState filterState, boolean reset) {
+        // used only for parametrized filters
+        throw new UnsupportedOperationException();
+    }
+
     String getPresetDirName();
 
     public default PAction createManagePresetsAction() {

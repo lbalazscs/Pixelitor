@@ -40,7 +40,7 @@ public class ParamSet {
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable beforeResetAction;
-    private FilterState[] builtinPresets;
+    private Preset[] builtinPresets;
     private boolean nonTrivialFilter;
 
     public ParamSet(FilterParam... params) {
@@ -229,6 +229,9 @@ public class ParamSet {
         return new FilterState(this, animOnly);
     }
 
+    /**
+     * Sets the state without triggering the filter.
+     */
     public void setState(FilterState newStateSet, boolean forAnimation) {
         for (FilterParam param : paramList) {
             if (forAnimation && !param.canBeAnimated()) {
@@ -243,16 +246,19 @@ public class ParamSet {
         }
     }
 
-    public void applyState(FilterState preset) {
+    public void applyState(FilterState preset, boolean reset) {
+        if (reset) {
+            reset();
+        }
         setState(preset, false);
         runFilter();
     }
 
-    public void setBuiltinPresets(FilterState... filterStates) {
-        this.builtinPresets = filterStates;
+    public void setBuiltinPresets(Preset... presets) {
+        this.builtinPresets = presets;
     }
 
-    public FilterState[] getBuiltinPresets() {
+    public Preset[] getBuiltinPresets() {
         return builtinPresets;
     }
 

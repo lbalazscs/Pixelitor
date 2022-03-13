@@ -23,6 +23,8 @@ import pd.OpenSimplex2F;
 import pixelitor.ThreadPool;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.GroupedRangeParam.GroupedRangeParamState;
+import pixelitor.filters.gui.RangeParam.RangeParamState;
 import pixelitor.particles.Modifier;
 import pixelitor.particles.ParticleSystem;
 import pixelitor.particles.SmoothPathParticle;
@@ -38,6 +40,7 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import static net.jafama.FastMath.*;
+import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
@@ -223,15 +226,15 @@ public class FlowField extends ParametrizedFilter {
     private final RangeParam maxVelocityParam = new RangeParam("Maximum Velocity", 1, 4000, 5000);
     private final RangeParam iterationsParam = new RangeParam("Path Length", 1, 100, 100, true, BORDER, IGNORE_RANDOMIZE);
 
-    private final RangeParam particlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
+    private final RangeParam numParticlesParam = new RangeParam("Particle Count", 1, 1000, 20000, true, BORDER, IGNORE_RANDOMIZE);
     private final StrokeParam strokeParam = new StrokeParam("Stroke");
-    private final BooleanParam antialiasParam = new BooleanParam("Use Antialiasing", false);
+    private final BooleanParam antiAliasParam = new BooleanParam("Use Antialiasing", false);
     private final ColorParam backgroundColorParam = new ColorParam("Background Color", new Color(0, 0, 0, 1.0f), FREE_TRANSPARENCY);
     private final ColorParam particleColorParam = new ColorParam("Particle Color", new Color(1, 1, 1, 0.12f), FREE_TRANSPARENCY);
     private final EnumParam<ColorSource> initialColorsParam = new EnumParam<>("Initialize Colors", ColorSource.class);
     private final BooleanParam startFlowFromSourceParam = new BooleanParam("Start Flow from Source Image", false, IGNORE_RANDOMIZE);
     private final RangeParam colorRandomnessParam = new RangeParam("Color Randomness (%)", 0, 0, 100);
-    private final RangeParam radiusRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 100);
+    private final RangeParam widthRandomnessParam = new RangeParam("Stroke Width Randomness (%)", 0, 0, 100);
 
     public FlowField() {
         super(false);
@@ -251,10 +254,10 @@ public class FlowField extends ParametrizedFilter {
             forceMixerParam,
             noiseAdjustmentParam,
 
-            particlesParam,
+            numParticlesParam,
             strokeParam,
-            radiusRandomnessParam,
-            antialiasParam,
+            widthRandomnessParam,
+            antiAliasParam,
             backgroundColorParam,
             particleColorParam,
             initialColorsParam,
@@ -264,6 +267,39 @@ public class FlowField extends ParametrizedFilter {
             advancedParam
 
         ).withAction(ReseedSupport.createSimplexAction());
+
+        UserPreset confetti = new UserPreset("Confetti", null);
+        confetti.put("Force Mixer", "60.00,20.00,20.00,false");
+        confetti.put("Zoom (%)", "2450");
+        confetti.put("Variance", "100");
+        confetti.put("Turbulence", "5");
+        confetti.put("Wind", "0");
+        confetti.put("Particle Count", "500");
+        confetti.put("Stroke Width", "7");
+        confetti.put("Endpoint Cap", "Round");
+        confetti.put("Corner Join", "Round");
+        confetti.put("Line Type", "Zigzag");
+        confetti.put("Shape", "Kiwi");
+        confetti.put("Dashed", "no");
+        confetti.put("Stroke Width Randomness (%)", "100");
+        confetti.put("Use Antialiasing", "yes");
+        confetti.put("Background Color", "00000000");
+        confetti.put("Particle Color", "FFFFFFC9");
+        confetti.put("Initialize Colors", "HSB Cycle");
+        confetti.put("Start Flow from Source Image", "yes");
+        confetti.put("Color Randomness (%)", "0");
+        confetti.put("Force Mode", "Thicken");
+        confetti.put("Maximum Velocity", "843");
+        confetti.put("Path Length", "13");
+
+        FilterState vortex = new FilterState("Vortex")
+            .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
+            .with(strokeParam, StrokeSettings.defaultsWithWidth(2))
+            .with(widthRandomnessParam, new RangeParamState(100))
+            .with(antiAliasParam, YES)
+            .withReset();
+
+        paramSet.setBuiltinPresets(confetti, vortex);
 
         noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
         sinkParam.setToolTip("Make particles flow towards the center point.");
@@ -281,7 +317,7 @@ public class FlowField extends ParametrizedFilter {
         maxVelocityParam.setToolTip("Adjust maximum velocity to make particles look more organised.");
         iterationsParam.setToolTip("Make individual particles cover longer paths.");
 
-        particlesParam.setToolTip("Adjust the number of particles flowing in the field.");
+        numParticlesParam.setToolTip("Adjust the number of particles flowing in the field.");
         strokeParam.setToolTip("Adjust how particles are drawn - their width, shape, joins...");
         backgroundColorParam
             .setToolTip("Fills the canvas with a color. Decrease transparency to show the previous image.");
@@ -291,8 +327,7 @@ public class FlowField extends ParametrizedFilter {
             .setToolTip("Make particles use the same color from their positions on the source image.");
         startFlowFromSourceParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
-        radiusRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
-
+        widthRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
     }
 
     @Override
@@ -306,15 +341,15 @@ public class FlowField extends ParametrizedFilter {
         float maximumVelocitySq = maxVelocityParam.getValue() * maxVelocityParam.getValue() / 10000.0f;
         int iterationCount = iterationsParam.getValue() + 1;
 
-        int particleCount = particlesParam.getValue();
+        int particleCount = numParticlesParam.getValue();
         Stroke stroke = strokeParam.createStroke();
-        boolean antialias = antialiasParam.isChecked();
+        boolean antialias = antiAliasParam.isChecked();
         Color bgColor = backgroundColorParam.getColor();
         Color particleColor = particleColorParam.getColor();
         ColorSource colorSource = initialColorsParam.getSelected();
         boolean inheritSpawnPoints = startFlowFromSourceParam.isChecked();
         float colorRandomness = colorRandomnessParam.getPercentageValF();
-        float radiusRandomness = radiusRandomnessParam.getPercentageValF();
+        float widthRandomness = widthRandomnessParam.getPercentageValF();
 
         float quality = min(QUALITY, SMOOTHNESS / zoom);
         int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
@@ -347,7 +382,7 @@ public class FlowField extends ParametrizedFilter {
 
         Graphics2D g2 = dest.createGraphics();
         boolean useColorField = colorRandomness != 0 || colorSource.requiresColorField();
-        boolean randomizeRadius = radiusRandomness != 0;
+        boolean randomizeWidth = widthRandomness != 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -363,12 +398,12 @@ public class FlowField extends ParametrizedFilter {
         }
 
         Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
-        Stroke[] strokes = getIf(randomizeRadius, () -> new Stroke[100]);
+        Stroke[] strokes = getIf(randomizeWidth, () -> new Stroke[100]);
         Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
         int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
 
-        if (randomizeRadius) {
-            fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, radiusRandomness));
+        if (randomizeWidth) {
+            fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, widthRandomness));
         }
 
         initializeAcceleration(multiplierNoise, multiplierSink, multiplierRevolve, zoom, turbulence, fieldWidth, fieldHeight, noise, center, variantPI, initTheta, fieldAccelerations);
@@ -396,7 +431,7 @@ public class FlowField extends ParametrizedFilter {
         ForceModeUpdater forceModeUpdater = new ForceModeUpdater(forceMode, fieldAccelerations);
 
         ParticleSystem<FlowFieldParticle> particleSystem = ParticleSystem.<FlowFieldParticle>createSystem(particleCount)
-            .setParticleCreator(() -> new FlowFieldParticle(graphicsCopies, randomizeRadius ? strokes[
+            .setParticleCreator(() -> new FlowFieldParticle(graphicsCopies, randomizeWidth ? strokes[
                 r.nextInt(strokes.length)] : stroke, meta))
             .addModifier(positionRandomizer)
             .addModifier(particleInitializer)

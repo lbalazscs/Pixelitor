@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
@@ -66,14 +65,10 @@ public class DialogMenuBar extends JMenuBar {
 
         if (owner.hasBuiltinPresets()) {
             JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
-            FilterState[] presets = owner.getBuiltinPresets();
+            Preset[] presets = owner.getBuiltinPresets();
 
-            // only filters have built-in presets
-            ParametrizedFilter pf = (ParametrizedFilter) owner;
-            ParamSet paramSet = pf.getParamSet();
-
-            for (FilterState preset : presets) {
-                builtinPresets.add(preset.asAction(paramSet));
+            for (Preset preset : presets) {
+                builtinPresets.add(preset.asAction(owner));
             }
             presetsMenu.add(builtinPresets);
         }

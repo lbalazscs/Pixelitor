@@ -39,6 +39,8 @@ import static pixelitor.tools.shapes.StrokeType.*;
  * Its GUI is a button, which shows a dialog when pressed.
  */
 public class StrokeParam extends AbstractFilterParam {
+    public static final ShapeType DEFAULT_SHAPE_TYPE = ShapeType.KIWI;
+
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
     private final EnumParam<StrokeCap> strokeCapParam = StrokeCap.asParam();
     private final EnumParam<StrokeJoin> strokeJoinParam = StrokeJoin.asParam();
@@ -55,7 +57,7 @@ public class StrokeParam extends AbstractFilterParam {
     public StrokeParam(String name) {
         super(name, ALLOW_RANDOMIZE);
 
-        shapeTypeParam.withDefault(ShapeType.KIWI);
+        shapeTypeParam.withDefault(DEFAULT_SHAPE_TYPE);
 
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
             strokeType -> strokeType == SHAPE);

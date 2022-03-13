@@ -38,7 +38,7 @@ import java.util.Map;
  * It is similar to but different from {@link FilterState} because
  * its internal structure is more suitable for saving as a flat text file.
  */
-public class UserPreset {
+public class UserPreset implements Preset {
     private final String name;
     private File file;
     private final String presetDirName;
@@ -218,6 +218,7 @@ public class UserPreset {
         return writer.toString();
     }
 
+    @Override
     public Action asAction(PresetOwner owner) {
         return new PAction(name) {
             @Override
@@ -232,11 +233,6 @@ public class UserPreset {
                 owner.loadUserPreset(UserPreset.this);
             }
         };
-    }
-
-    @Override
-    public String toString() {
-        return name + " " + content.toString();
     }
 
     public static List<UserPreset> loadPresets(String presetDirName) {
@@ -272,5 +268,10 @@ public class UserPreset {
 
     private static File calcSaveDir(String presetDirName) {
         return new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
+    }
+
+    @Override
+    public String toString() {
+        return name + " " + content.toString();
     }
 }

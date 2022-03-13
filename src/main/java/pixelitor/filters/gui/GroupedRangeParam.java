@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -367,6 +367,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
+        boolean wasNormalized = autoNormalizationEnabled;
+        autoNormalizationEnabled = false;
+
         GroupedRangeParamState grState = (GroupedRangeParamState) state;
         setLinked(grState.linked());
         double[] values = grState.values;
@@ -378,6 +381,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
                 children[i].setValueNoGUI(value);
             }
         }
+
+        autoNormalizationEnabled = wasNormalized;
     }
 
     @Override
@@ -425,8 +430,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
             .collect(toList());
     }
 
-    private record GroupedRangeParamState(double[] values,
-                                          boolean linked) implements ParamState<GroupedRangeParamState> {
+    public record GroupedRangeParamState(double[] values,
+                                         boolean linked) implements ParamState<GroupedRangeParamState> {
         @Override
         public GroupedRangeParamState interpolate(GroupedRangeParamState endState, double progress) {
             double[] interpolatedValues = new double[values.length];

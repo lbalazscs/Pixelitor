@@ -130,7 +130,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterState[] getBuiltinPresets() {
+    public Preset[] getBuiltinPresets() {
         return paramSet.getBuiltinPresets();
     }
 
@@ -147,6 +147,11 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     @Override
     public void loadUserPreset(UserPreset preset) {
         paramSet.loadUserPreset(preset);
+    }
+
+    @Override
+    public void loadFilterState(FilterState filterState, boolean reset) {
+        paramSet.applyState(filterState, reset);
     }
 
     @Override

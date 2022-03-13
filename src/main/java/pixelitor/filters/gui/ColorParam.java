@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -160,7 +160,7 @@ public class ColorParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), color);
     }
 
-    private record ColorParamState(Color color) implements ParamState<ColorParamState> {
+    public record ColorParamState(Color color) implements ParamState<ColorParamState> {
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
             return new ColorParamState(Colors.rgbInterpolate(
