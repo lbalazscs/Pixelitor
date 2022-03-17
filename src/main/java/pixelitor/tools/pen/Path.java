@@ -363,6 +363,9 @@ public class Path implements Serializable {
 
     // called only by the undo/redo mechanism
     public void setBuildingInProgressState() {
+        if (!Tools.PEN.isActive()) {
+            return;
+        }
         boolean mouseDown = Tools.EventDispatcher.isMouseDown();
         if (mouseDown) {
             setBuildState(DRAGGING_THE_CONTROL_OF_LAST);

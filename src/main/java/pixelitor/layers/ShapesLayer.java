@@ -195,18 +195,20 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public Rectangle getEffectiveBoundingBox() {
-        return comp.getCanvasBounds();
-    }
-
-    @Override
     public Rectangle getContentBounds() {
-        // by returning null, the move tool shows no outline
+        if (hasShape()) {
+            return styledShape.getContentBounds();
+        }
         return null;
     }
 
     @Override
     public int getPixelAtPoint(Point p) {
+        if (hasShape()) {
+            if (styledShape.containsPoint(p)) {
+                return 0xFF_FF_FF_FF;
+            }
+        }
         return 0;
     }
 
@@ -239,7 +241,7 @@ public class ShapesLayer extends ContentLayer {
     @Override
     PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
         if (hasShape() && transformBox != null) {
-            return transformBox.createMovementEdit(comp, "Move Shape Layer");
+            return transformBox.createMovementEdit(comp, "Move Layer");
         }
         return null;
     }

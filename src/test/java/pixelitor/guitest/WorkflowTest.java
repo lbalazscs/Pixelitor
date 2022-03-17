@@ -22,6 +22,7 @@ import org.assertj.swing.data.Index;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
@@ -31,6 +32,7 @@ import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
@@ -76,6 +78,10 @@ public class WorkflowTest {
     }
 
     private WorkflowTest() {
+        boolean expWasEnabled = EDT.call(() -> AppContext.enableExperimentalFeatures);
+        // enable it before building the menus so that shortcuts work
+        EDT.run(() -> AppContext.enableExperimentalFeatures = true);
+
         app = new AppRunner(null);
         mouse = app.getMouse();
         pw = app.getPW();
@@ -83,6 +89,10 @@ public class WorkflowTest {
 
         wfTest1();
         wfTest2();
+
+        if (!expWasEnabled) {
+            EDT.run(() -> AppContext.enableExperimentalFeatures = false);
+        }
     }
 
     private void wfTest1() {
@@ -148,11 +158,11 @@ public class WorkflowTest {
         app.addEmptyImageLayer(false);
         runFilterWithDialog("Fractal Tree",
             dialog -> dialog.slider("Age (Iterations)").slideTo(14));
-        app.changeLayerBlendingMode("Hard Light");
+        app.changeLayerBlendingMode(BlendingMode.HARD_LIGHT);
         app.mergeDown();
 
-        app.addGradientFillLayer("CW Spiral");
-        app.changeLayerBlendingMode("Multiply");
+        app.addGradientFillLayer(GradientType.SPIRAL_CW);
+        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
         duplicateLayerThenUndo(GradientFillLayer.class);
         rasterizeThenUndo(GradientFillLayer.class);
         app.mergeDown();
@@ -162,14 +172,14 @@ public class WorkflowTest {
 
         // close the temporary tab
         pw.tabbedPane().selectTab("wf test 2 copy");
-        app.runMenuCommand("Close");
+        app.closeCurrent();
         app.closeDoYouWantToSaveChangesDialog();
 
         // now the main tab should be the active one
         pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
 
         app.addColorFillLayer(Color.BLUE);
-        app.changeLayerBlendingMode("Hue");
+        app.changeLayerBlendingMode(BlendingMode.HUE);
         app.changeLayerOpacity(0.5f);
 
         duplicateLayerThenUndo(ColorFillLayer.class);
@@ -191,7 +201,7 @@ public class WorkflowTest {
 
         app.addLayerMask();
         app.drawGradient("Radial");
-        app.runMenuCommand("Close");
+        app.closeCurrent();
 
         runFilterWithDialog("Magnify",
             dialog -> {
@@ -483,6 +493,6 @@ public class WorkflowTest {
 
     private void loadReferenceImage(String fileName) {
         File f = new File("C:\\pix_tests\\reference_images\\" + fileName);
-        app.openFileWithDialog(f.getParentFile(), f.getName());
+        app.openFileWithDialog("Open...", f.getParentFile(), f.getName());
     }
 }

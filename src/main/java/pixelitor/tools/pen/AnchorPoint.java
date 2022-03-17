@@ -42,8 +42,9 @@ import static pixelitor.tools.pen.AnchorPointType.*;
  * A point on a {@link SubPath}
  */
 public class AnchorPoint extends DraggablePoint {
+    // compatible with Pixelitor 4.2.3
     @Serial
-    private static final long serialVersionUID = 250539317163980124L;
+    private static final long serialVersionUID = -7001569188242665053L;
 
     public final ControlPoint ctrlIn;
     public final ControlPoint ctrlOut;

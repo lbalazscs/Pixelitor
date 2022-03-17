@@ -23,6 +23,7 @@ import pixelitor.AppContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.layers.SmartObject;
 import pixelitor.utils.Utils;
@@ -72,11 +73,8 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
+        assert !(parent instanceof View);
         if (RandomGUITest.isRunning()) { // avoid dialogs
-            if (!msg.startsWith("As a result of")) {
-                System.out.println("\nInfo: " + msg);
-                Thread.dumpStack();
-            }
             return;
         }
 
@@ -106,6 +104,7 @@ public class Dialogs {
     public static int showYesNoCancelDialog(Component parent, String title,
                                             String question, Object[] options,
                                             int messageType) {
+        assert !(parent instanceof View);
         GlobalEvents.dialogOpened(title);
         int answer = showOptionDialog(parent, new JLabel(question),
             title, YES_NO_CANCEL_OPTION,
@@ -125,6 +124,8 @@ public class Dialogs {
 
     public static boolean showYesNoDialog(Component parent, String title,
                                           String msg, int messageType) {
+        assert !(parent instanceof View);
+
         GlobalEvents.dialogOpened(title);
         int reply = showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
         GlobalEvents.dialogClosed(title);
@@ -151,6 +152,8 @@ public class Dialogs {
                                              Object[] options,
                                              int initialOptionIndex,
                                              int messageType) {
+        assert !(parent instanceof View);
+
         GlobalEvents.dialogOpened(title);
         int userAnswer = showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
@@ -165,6 +168,8 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
+        assert !(parent instanceof View);
+
         if (RandomGUITest.isRunning()) {
             System.err.println("\nError: " + msg); // avoid dialogs
             Thread.dumpStack();
@@ -181,6 +186,8 @@ public class Dialogs {
     }
 
     public static String showInputDialog(Component parent, String title, String msg) {
+        assert !(parent instanceof View);
+
         GlobalEvents.dialogOpened(title);
         String userInput = JOptionPane.showInputDialog(parent, msg, title, QUESTION_MESSAGE);
         GlobalEvents.dialogClosed(title);
@@ -209,6 +216,8 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {
+        assert !(parent instanceof View);
+
         GlobalEvents.dialogOpened(title);
         showMessageDialog(parent, msg, title, WARNING_MESSAGE);
         GlobalEvents.dialogClosed(title);

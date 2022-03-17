@@ -611,6 +611,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return initialized;
     }
 
+    public Rectangle getContentBounds() {
+        return shape.getBounds();
+    }
+
     public boolean hasBlendingIssue() {
         // for some reason the JDK built-in gradients
         // don't blend with the custom blending modes
@@ -625,6 +629,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         if (changeListener != null) {
             changeListener.run();
         }
+    }
+
+    public boolean containsPoint(Point p) {
+        return shape.contains(p);
     }
 
     public boolean checkConsistency() {

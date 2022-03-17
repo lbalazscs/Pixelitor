@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,10 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
@@ -201,11 +204,6 @@ public class LayerMask extends ImageLayer {
             return new BufferedImage(TRANSPARENCY_COLOR_MODEL,
                 tmpImg.getRaster(), false, null);
         }
-    }
-
-    @Override
-    public Rectangle getEffectiveBoundingBox() {
-        return getContentBounds();
     }
 
     @Override

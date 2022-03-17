@@ -579,10 +579,10 @@ public class Views {
         activate(view);
         String title = "File already opened";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
-            + "</b> is already opened.";
+                     + "</b> is already opened.";
         String[] options = {"Open Again", GUIText.CANCEL};
-        boolean again = Dialogs.showOKCancelDialog(view, msg, title,
-            options, 1, WARNING_MESSAGE);
+        boolean again = Dialogs.showOKCancelDialog(view.getDialogParent(),
+            msg, title, options, 1, WARNING_MESSAGE);
         return again;
     }
 

@@ -201,9 +201,9 @@ public class ImageArea {
     }
 
     private static void showNoPixelGridMsg() {
-        Messages.showInfo("Pixel Grid",
-            """
-                The pixel grid consists of lines between the pixels,
-                and is shown only if the zoom is at least 1600%.""", (Component) ui);
+        String msg = """
+            The pixel grid consists of lines between the pixels,
+            and is shown only if the zoom is at least 1600%.""";
+        Messages.showInfo("Pixel Grid", msg, (Component) ui);
     }
 }

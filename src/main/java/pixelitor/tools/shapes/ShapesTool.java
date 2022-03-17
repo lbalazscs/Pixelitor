@@ -358,8 +358,6 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        assert state == AFTER_FIRST_MOUSE_PRESS || state == INITIAL_DRAG : "state = " + state;
-
         if (styledShape != null && !drag.isClick()) {
             updateStyledShapeFromDrag(e);
 
@@ -961,6 +959,13 @@ public class ShapesTool extends DragTool {
                + ", fp=" + getSelectedFillPaint()
                + ", sp=" + getSelectedStrokePaint()
                + ", state=" + state;
+    }
+
+    @Override
+    public void firstModalDialogShown() {
+        // Rasterize when a filter with dialog starts. This comes too
+        // late to influence the filter's image for an ImagePositionParam
+        rasterizeBox();
     }
 
     @Override

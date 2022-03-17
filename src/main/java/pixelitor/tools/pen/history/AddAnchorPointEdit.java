@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,8 +56,10 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
         subPath.addPoint(anchorPoint);
 
-        assert !subPath.isFinished();
-        subPath.getPath().setBuildingInProgressState();
+        // the subpath could be finished in the meantime without a history event
+        if (!subPath.isFinished()) {
+            subPath.getPath().setBuildingInProgressState();
+        }
 
         comp.repaint();
     }

@@ -22,7 +22,6 @@ import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.exception.ComponentLookupException;
-import org.assertj.swing.finder.JFileChooserFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
@@ -65,6 +64,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -107,7 +107,7 @@ import static pixelitor.tools.DragToolState.TRANSFORM;
 public class AssertJSwingTest {
     private static boolean quick = false;
 
-    private static File baseTestingDir;
+    private static File baseDir;
     private static File cleanerScript;
 
     private static File inputDir;
@@ -173,9 +173,10 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             app.runSlowly();
 
-            //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+            testMagick();
         } else {
+            runMenuCommand("Set Default Workspace");
+
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
             System.out.println("Quick = " + quick
@@ -210,7 +211,7 @@ public class AssertJSwingTest {
     }
 
     private void openFileWithDialog(File inputDir, String fileName) {
-        app.openFileWithDialog(inputDir, fileName);
+        app.openFileWithDialog("Open...", inputDir, fileName);
         maskMode.set(this);
     }
 
@@ -384,7 +385,7 @@ public class AssertJSwingTest {
         app.changeLayerOpacity(0.75f);
         checkConsistency();
 
-        app.changeLayerBlendingMode("Multiply");
+        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
         checkConsistency();
     }
 
@@ -880,8 +881,14 @@ public class AssertJSwingTest {
     void testImageMenu() {
         log(0, "image menu");
 
+        // image from the previous tests
         EDT.assertNumOpenImagesIs(1);
         app.checkNumLayersIs(1);
+
+        // add more layer types
+        app.addGradientFillLayer(GradientType.ANGLE);
+        app.addColorFillLayer(Color.BLUE);
+        app.addShapesLayer(ShapeType.BAT);
 
         testDuplicateImage();
 
@@ -893,16 +900,26 @@ public class AssertJSwingTest {
             testRotateFlip();
         });
 
+        // delete the 3 extra layers
+        pw.button("deleteLayer")
+            .requireEnabled()
+            .click()
+            .click()
+            .click();
+        app.checkNumLayersIs(1);
+
         checkConsistency();
     }
 
     private void testDuplicateImage() {
-        log(1, "image duplication");
+        int numLayers = EDT.getNumLayersInActiveComp();
+        log(1, "image duplication, num layers = " + numLayers);
 
         EDT.assertNumOpenImagesIs(1);
 
         runMenuCommand("Duplicate");
         EDT.assertNumOpenImagesIs(2);
+        EDT.assertNumLayersIs(numLayers);
 
         closeOneOfTwo();
         EDT.assertNumOpenImagesIs(1);
@@ -982,6 +999,7 @@ public class AssertJSwingTest {
         testFileOpen();
         closeOneOfTwo();
         testExportOptimizedJPEG();
+        testMagick();
         testExportLayerAnimation();
         testExportTweeningAnimation();
         testReload();
@@ -1010,7 +1028,7 @@ public class AssertJSwingTest {
         log(1, "file open");
 
         runMenuCommand("Open...");
-        var openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+        var openDialog = app.findOpenFileChooser();
         openDialog.cancel();
 
         openFileWithDialog(inputDir, "b.jpg");
@@ -1033,7 +1051,7 @@ public class AssertJSwingTest {
         var saveDialog = app.findSaveFileChooser();
 
         String fileName = "saved." + extension;
-        File file = new File(baseTestingDir, fileName);
+        File file = new File(baseDir, fileName);
 
         System.out.println("AssertJSwingTest::testSave: found file chooser, file = " + file);
 
@@ -1041,7 +1059,7 @@ public class AssertJSwingTest {
 
         String compName = EDT.active(Composition::getName);
 
-        saveDialog.setCurrentDirectory(baseTestingDir);
+        saveDialog.setCurrentDirectory(baseDir);
         saveDialog.fileNameTextBox()
             .requireText(compName)
             .deleteText()
@@ -1066,11 +1084,11 @@ public class AssertJSwingTest {
         runMenuCommand("Save As...");
 
         // there is always a dialog for "Save As"
-        app.saveWithOverwrite(baseTestingDir, fileName);
+        app.saveWithOverwrite(baseDir, fileName);
         assert !EDT.active(Composition::isDirty);
 
         runMenuCommand("Close");
-        openFileWithDialog(baseTestingDir, fileName);
+        openFileWithDialog(baseDir, fileName);
         maskMode.set(this);
 
         // can be dirty if a masked mask mode is set
@@ -1095,9 +1113,19 @@ public class AssertJSwingTest {
         Utils.sleep(2, SECONDS);
 
         findDialogByTitle("Save Optimized JPEG").button("ok").click();
-        app.saveWithOverwrite(baseTestingDir, "saved.jpg");
+        app.saveWithOverwrite(baseDir, "saved.jpg");
 
         checkConsistency();
+    }
+
+
+    private void testMagick() {
+        log(1, "testing ImageMagick export-import");
+
+        app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
+
+        // TODO test ImageMagick exporting as well
+        app.closeCurrent();
     }
 
     private void testExportLayerAnimation() {
@@ -1115,7 +1143,7 @@ public class AssertJSwingTest {
         runMenuCommand("Export Layer Animation...");
         findDialogByTitle("Export Animated GIF").button("ok").click();
 
-        app.saveWithOverwrite(baseTestingDir, "layeranim.gif");
+        app.saveWithOverwrite(baseDir, "layeranim.gif");
 
         checkConsistency();
     }
@@ -1176,7 +1204,7 @@ public class AssertJSwingTest {
 
         boolean dirty = EDT.active(Composition::isDirty);
 
-        runMenuCommand("Close");
+        app.closeCurrent();
 
         if (dirty) {
             app.closeDoYouWantToSaveChangesDialog();
@@ -1280,7 +1308,7 @@ public class AssertJSwingTest {
     private void testExportLayerToPNG() {
         log(1, "testing export layer to png");
 
-        Dirs.setLastSave(baseTestingDir);
+        Dirs.setLastSave(baseDir);
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
@@ -2500,9 +2528,7 @@ public class AssertJSwingTest {
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
         assert EDT.activeLayerHasMask();
 
-        keyboard.undo("Add Hiding Mask");
-        keyboard.redo("Add Hiding Mask");
-        keyboard.undo("Add Hiding Mask");
+        keyboard.undoRedoUndo("Add Hiding Mask");
 
         if (skipThis(0.5)) {
             return;
@@ -2514,9 +2540,7 @@ public class AssertJSwingTest {
         checkAfterSelectionCrop(selWidth, selHeight);
         assert EDT.activeLayerHasMask();
 
-        keyboard.undo("Crop and Hide");
-        keyboard.redo("Crop and Hide");
-        keyboard.undo("Crop and Hide");
+        keyboard.undoRedoUndo("Crop and Hide");
 
         if (skipThis(0.5)) {
             return;
@@ -2983,16 +3007,16 @@ public class AssertJSwingTest {
 
             System.exit(0);
         }
-        baseTestingDir = new File(args[0]);
-        assertThat(baseTestingDir).exists().isDirectory();
+        baseDir = new File(args[0]);
+        assertThat(baseDir).exists().isDirectory();
 
-        inputDir = new File(baseTestingDir, "input");
+        inputDir = new File(baseDir, "input");
         assertThat(inputDir).exists().isDirectory();
 
-        batchResizeOutputDir = new File(baseTestingDir, "batch_resize_output");
+        batchResizeOutputDir = new File(baseDir, "batch_resize_output");
         assertThat(batchResizeOutputDir).exists().isDirectory();
 
-        batchFilterOutputDir = new File(baseTestingDir, "batch_filter_output");
+        batchFilterOutputDir = new File(baseDir, "batch_filter_output");
         assertThat(batchFilterOutputDir).exists().isDirectory();
 
         String cleanerScriptExt;
@@ -3001,7 +3025,7 @@ public class AssertJSwingTest {
         } else {
             cleanerScriptExt = ".sh";
         }
-        cleanerScript = new File(baseTestingDir + File.separator
+        cleanerScript = new File(baseDir + File.separator
                                  + "0000_clean_outputs" + cleanerScriptExt);
 
         if (!cleanerScript.exists()) {

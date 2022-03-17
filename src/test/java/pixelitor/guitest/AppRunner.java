@@ -36,12 +36,14 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
+import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ColorFillLayer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Language;
@@ -312,11 +314,14 @@ public class AppRunner {
         optionPane.yesButton().click();
     }
 
-    void openFileWithDialog(File dir, String fileName) {
-        JFileChooserFixture openDialog;
-        runMenuCommand("Open...");
-        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
-        openDialog.selectFile(new File(dir, fileName));
+    void openFileWithDialog(String command, File dir, String fileName) {
+        runMenuCommand(command);
+        var openDialog = findOpenFileChooser();
+        File file = new File(dir, fileName);
+        assertThat(file)
+            .exists()
+            .isFile();
+        openDialog.selectFile(file);
         openDialog.approve();
 
         // wait a bit to make sure that the async open completed
@@ -352,6 +357,10 @@ public class AppRunner {
             Utils.sleep(1, SECONDS);
             stillWriting = EDT.call(IOTasks::isBusyWriting);
         }
+    }
+
+    void closeCurrent() {
+        runMenuCommand("Close");
     }
 
     void closeAll() {
@@ -505,6 +514,10 @@ public class AppRunner {
         return JOptionPaneFinder.findOptionPane()
             .withTimeout(10, SECONDS)
             .using(robot);
+    }
+
+    JFileChooserFixture findOpenFileChooser() {
+        return JFileChooserFinder.findFileChooser("open").using(robot);
     }
 
     JFileChooserFixture findSaveFileChooser() {
@@ -746,31 +759,27 @@ public class AppRunner {
         keyboard.redo("Color Fill Layer Change");
     }
 
-    public void addGradientFillLayer(String gradientType) {
+    public void addGradientFillLayer(GradientType gradientType) {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_G);
-        keyboard.undoRedo("Add Gradient Fill Layer");
+        checkNewLayerHistory(numLayersBefore, "Add Gradient Fill Layer");
 
         EDT.assertActiveToolIs(Tools.GRADIENT);
-        pw.comboBox("typeCB").selectItem(gradientType);
+        pw.comboBox("typeCB").selectItem(gradientType.toString());
         EDT.run(() -> FgBgColors.setFGColor(new Color(68, 152, 115)));
         EDT.run(() -> FgBgColors.setBGColor(new Color(185, 56, 177)));
         mouse.moveToCanvas(100, 100);
         mouse.dragToCanvas(200, 200);
 
-        keyboard.undo("Gradient Fill Layer Change");
-
-        checkNewLayerHistory(numLayersBefore, "Add Gradient Fill Layer");
-
-        keyboard.redo("Gradient Fill Layer Change");
+        keyboard.undoRedo("Gradient Fill Layer Change");
     }
 
     public void addShapesLayer(ShapeType shapeType) {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_S);
-        keyboard.undoRedo("Add Shape Layer");
+        checkNewLayerHistory(numLayersBefore, "Add Shape Layer");
 
         EDT.assertActiveToolIs(Tools.SHAPES);
         pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
@@ -780,26 +789,22 @@ public class AppRunner {
         mouse.moveToCanvas(20, 380);
         mouse.dragToCanvas(120, 480);
 
-        keyboard.undo("Create Shape");
-
-        checkNewLayerHistory(numLayersBefore, "Add Shape Layer");
-
-        keyboard.redo("Create Shape");
+        keyboard.undoRedo("Create Shape");
     }
 
-    public void changeLayerBlendingMode(String blendingMode) {
-        if (blendingMode.equals("Normal")) {
+    public void changeLayerBlendingMode(BlendingMode blendingMode) {
+        if (blendingMode == BlendingMode.NORMAL) {
             return;
         }
         pw.comboBox("layerBM")
             .requireSelection("Normal")
-            .selectItem(blendingMode);
+            .selectItem(blendingMode.toString());
 
         keyboard.undo("Blending Mode Change");
         pw.comboBox("layerBM").requireSelection("Normal");
 
         keyboard.redo("Blending Mode Change");
-        pw.comboBox("layerBM").requireSelection(blendingMode);
+        pw.comboBox("layerBM").requireSelection(blendingMode.toString());
     }
 
     public void changeLayerOpacity(float newValue) {

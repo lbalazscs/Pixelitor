@@ -39,7 +39,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  */
 public class GroupedRangeParam extends AbstractFilterParam {
     private final RangeParam[] children;
-    private final ButtonModel checkBoxModel;
+    private final ButtonModel linkedModel;
     private final boolean linkedByDefault;
     private boolean linkable = true; // whether a "Linked" checkbox appears
 
@@ -86,7 +86,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         super(name, ALLOW_RANDOMIZE);
         this.children = children;
 
-        checkBoxModel = new JToggleButton.ToggleButtonModel();
+        linkedModel = new JToggleButton.ToggleButtonModel();
 
         linkedByDefault = linked;
         setLinked(linkedByDefault);
@@ -228,8 +228,17 @@ public class GroupedRangeParam extends AbstractFilterParam {
         this.autoNormalizationEnabled = enable;
     }
 
-    public ButtonModel getCheckBoxModel() {
-        return checkBoxModel;
+    public ButtonModel getLinkedModel() {
+        return linkedModel;
+    }
+
+    public String createLinkedToolTip() {
+        if (children.length == 2) {
+            return "<html>Whether the <b>%s</b> and <b>%s</b> sliders move together"
+                .formatted(children[0].getName(), children[1].getName());
+        } else {
+            return "Whether the sliders move together";
+        }
     }
 
     @Override
@@ -258,11 +267,11 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     public boolean isLinked() {
-        return checkBoxModel.isSelected();
+        return linkedModel.isSelected();
     }
 
     public void setLinked(boolean linked) {
-        checkBoxModel.setSelected(linked);
+        linkedModel.setSelected(linked);
     }
 
     @Override

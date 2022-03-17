@@ -171,11 +171,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public Rectangle getEffectiveBoundingBox() {
-        return painter.getBoundingBox();
-    }
-
-    @Override
     public Rectangle getContentBounds() {
         return painter.getBoundingBox();
     }

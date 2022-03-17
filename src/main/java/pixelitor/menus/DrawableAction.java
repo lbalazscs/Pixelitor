@@ -132,6 +132,10 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
     }
 
     private boolean showRasterizeDialog(Layer layer) {
+        if (RandomGUITest.isRunning()) {
+            return true;
+        }
+
         boolean isNoun = name.contains("Tool");
         String firstName = isNoun ? "The " + name : name;
         String secondName = isNoun ? "the " + name : name;

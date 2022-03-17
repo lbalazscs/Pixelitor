@@ -118,9 +118,10 @@ public class SelectionBuilder {
                 comp.promoteSelection();
                 comp.deselect(true);
 
-                Messages.showInfo("Nothing selected", "As a result of the "
-                                                      + combinator.toString().toLowerCase()
-                                                      + " operation, nothing is selected now.", comp.getView());
+                String msg = "As a result of the "
+                             + combinator.toString().toLowerCase()
+                             + " operation, nothing is selected now.";
+                Messages.showInfo("Nothing selected", msg, comp.getDialogParent());
             } else {
                 oldSelection.die();
                 builtSelection.setShape(combinedShape);

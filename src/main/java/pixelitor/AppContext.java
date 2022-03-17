@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,6 +93,7 @@ public enum AppContext {
                              "<li>Smart objects</li>" +
                              "<li>Gradient fill layers</li>" +
                              "<li>Color fill layers</li>" +
+                             "<li>Shape layers</li>" +
                              "<li>Theme chooser in Preferences</li>" +
                              "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental smart objects.<br>" +
                              "Some experimental features will be fully activated<br>only after restarting Pixelitor.";

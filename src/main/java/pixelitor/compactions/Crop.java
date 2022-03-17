@@ -206,7 +206,7 @@ public class Crop implements CompAction {
                           "<br>Pixelitor can crop to the rectangular bounds of the selection." +
                           "<br>It can also hide parts of the image using layer masks.";
         // the yes-no-cancel dialog can actually show more than 3 options
-        int answer = Dialogs.showYesNoCancelDialog(comp.getView(), title, question,
+        int answer = Dialogs.showYesNoCancelDialog(comp.getDialogParent(), title, question,
             new String[]{"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL},
             JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {

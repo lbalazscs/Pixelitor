@@ -123,7 +123,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
                 "<br><b>%s</b>" +
                 "<br>doesn't exist anymore.",
                 comp.getName(), path);
-            Messages.showError("File not found", msg, this);
+            Messages.showError("File not found", msg, getDialogParent());
             return CompletableFuture.completedFuture(null);
         }
 
@@ -137,8 +137,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return IO.loadCompAsync(file)
             .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
             .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.checkForReadingProblems(e))
-            .exceptionally(Messages::showExceptionOnEDT);
+            .whenComplete((v, e) -> IO.checkForReadingProblems(e));
     }
 
     private Composition replaceJustReloadedComp(Composition newComp) {
@@ -159,8 +158,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             "Reload", this, comp, newComp, null, true));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
 
-        // the view was active when the reload started, but since the
-        // reload was asynchronous, this could have changed
+        // the view was active when the reloading started, but since
+        // the reloading was asynchronous, this could have changed
         if (isActive()) {
             SelectionActions.update(newComp);
         }
@@ -856,6 +855,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Point onScreen = getLocationOnScreen();
         retVal.translate(onScreen.x, onScreen.y);
         return retVal;
+    }
+
+    /**
+     * Returns the component that should be used as a parent in dialogs.
+     * The View itself is not a good parent component, because its center could be
+     * anywhere when zoomed in.
+     */
+    public Component getDialogParent() {
+        return (Component) viewContainer;
     }
 
     @Override

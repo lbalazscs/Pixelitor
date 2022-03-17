@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ public class Paths implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // currently there can be only one path, which is called activePath
-    // in order to be serialization-compatible with future versions
+    // Currently, there can be only one path, which is called activePath
+    // in order to be serialization-compatible with future versions.
     private Path activePath;
 
     public Path getActivePath() {

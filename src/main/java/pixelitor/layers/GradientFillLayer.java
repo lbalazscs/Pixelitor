@@ -193,11 +193,6 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public Rectangle getEffectiveBoundingBox() {
-        return comp.getCanvasBounds();
-    }
-
-    @Override
     public Rectangle getContentBounds() {
         // by returning null, the move tool shows no outline
         return null;
@@ -205,7 +200,9 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        return 0;
+        // a crude implementation that ensures that gradient fill
+        // layers are always found by the Move Tool/Auto Select Layer
+        return 0xFF_FF_FF_FF;
     }
 
     @Override

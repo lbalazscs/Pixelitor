@@ -467,7 +467,7 @@ public class SmartObject extends ImageLayer {
     @Override
     public void startMovement() {
         Messages.showInfo("Not Supported Yet",
-            "Moving a smart object is not implemented yet.", null);
+            "Moving a smart object is not implemented yet.");
     }
 
     @Override

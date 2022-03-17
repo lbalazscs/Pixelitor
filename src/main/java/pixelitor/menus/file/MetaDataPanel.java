@@ -200,7 +200,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         var comp = view.getComp();
         File file = comp.getFile();
         if (file == null) {
-            Dialogs.showInfoDialog(view, "No file", format(
+            Dialogs.showInfoDialog(view.getDialogParent(), "No file", format(
                 "<html>There is no file for <b>%s</b>.", comp.getName()));
             return;
         }
@@ -210,12 +210,12 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
                     "<b>%s</b><br>" +
                     "doesn't exist anymore.",
                 comp.getName(), file.getAbsolutePath());
-            Messages.showError("File not found", msg, view);
+            Messages.showError("File not found", msg, view.getDialogParent());
             return;
         }
         if (FileUtils.hasTGAExtension(file.getName())) {
             String msg = "Metadata for TGA files is not supported yet.";
-            Messages.showError("TGA File", msg, view);
+            Messages.showError("TGA File", msg, view.getDialogParent());
             return;
         }
         Metadata metadata = extractMetadata(file);

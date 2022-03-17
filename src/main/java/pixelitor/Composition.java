@@ -278,6 +278,14 @@ public class Composition implements Serializable {
         }
     }
 
+    public Component getDialogParent() {
+        assert view != null;
+        if (view == null) {
+            return null;
+        }
+        return view.getDialogParent();
+    }
+
     public void closed() {
         setView(null);
     }
@@ -721,10 +729,6 @@ public class Composition implements Serializable {
         return layerList.get(i);
     }
 
-    public List<Layer> getLayers() {
-        return layerList;
-    }
-
     public int getNumLayers() {
         return layerList.size();
     }
@@ -756,18 +760,15 @@ public class Composition implements Serializable {
     }
 
     public Layer findLayerAtPoint(Point2D p) {
-        // in edit mask mode - do not auto select other layers as they are invisible
-        // in this mode, active layer is mask layer
-        MaskViewMode viewMode = getView().getMaskViewMode();
-        if (viewMode.showMask()) {
+        // In mask editing mode never auto-select another layer
+        if (getView().getMaskViewMode().showMask()) {
             return getActiveLayer();
         }
 
         Point pixelLoc = new Point((int) p.getX(), (int) p.getY());
 
         // iterate in reverse order (we need to search layers from top to bottom)
-        List<Layer> layers = getLayers();
-        ListIterator<Layer> li = layers.listIterator(layers.size());
+        ListIterator<Layer> li = layerList.listIterator(layerList.size());
         while (li.hasPrevious()) {
             Layer layer = li.previous();
             if (!(layer instanceof ContentLayer contentLayer)) {
@@ -1215,7 +1216,7 @@ public class Composition implements Serializable {
 
         PixelitorEdit edit;
         if (selection != null) {
-            int answer = Dialogs.showYesNoCancelDialog(view, "Existing Selection",
+            int answer = Dialogs.showYesNoCancelDialog(getDialogParent(), "Existing Selection",
                 "<html>There is already a selection on " + getName() +
                 ".<br>How do you want to combine new selection with the existing one?",
                 new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
@@ -1453,7 +1454,7 @@ public class Composition implements Serializable {
         }
 
         if (enlargeCanvas.doesNothing()) {
-            Dialogs.showInfoDialog(view, "Nothing to be done",
+            Dialogs.showInfoDialog(getDialogParent(), "Nothing to be done",
                 "The canvas is already large enough to show all layer content.");
             return;
         }

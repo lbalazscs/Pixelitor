@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -152,6 +152,22 @@ class CompositionIOTest {
                 throw new IllegalStateException("Error while testing " + fileNames[i], e);
             }
         }
+    }
+
+    @Test
+    void readPXCWithAllFeatures() {
+        String fileName = "pxc_all_features.pxc";
+        File f = new File(TEST_IMAGES_DIR, fileName);
+
+        var future = IO.loadCompAsync(f);
+        var comp = future.join();
+        assertThat(comp)
+            .numLayersIs(2)
+            .canvasSizeIs(10, 10)
+            .hasGuides()
+            .hasPath()
+            .invariantIsOK();
+        checkAsyncReadResult(future);
     }
 
     @Test

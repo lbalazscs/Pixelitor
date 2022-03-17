@@ -27,7 +27,10 @@ import pixelitor.history.*;
 import pixelitor.io.ExportInfo;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
@@ -92,11 +95,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * It's different from the layer's image if there is a selection.
      */
     private transient BufferedImage filterSourceImage;
-
-    /**
-     * The image bounding box trimmed from transparent pixels
-     */
-    private transient Rectangle trimmedBoundingBox;
 
     /**
      * Whether the preview image is different from the normal image
@@ -239,7 +237,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         previewImage = null;
         filterSourceImage = null;
         image = null;
-        trimmedBoundingBox = null;
 
         in.defaultReadObject();
         if (serializeImage()) {
@@ -486,7 +483,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert Assertions.checkRasterMinimum(newImage);
 
         comp.invalidateCompositeCache();
-        invalidateTrimCache();
 
         if (oldRef != null && oldRef != image) {
             oldRef.flush();
@@ -552,7 +548,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageContentChanged) {
             updateIconImage();
-            invalidateTrimCache();
         }
 
         boolean wasShowOriginal = state == SHOW_ORIGINAL;
@@ -662,7 +657,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         filterSourceImage = null;
         updateIconImage();
         comp.update();
-        invalidateTrimCache();
 //        Tools.editingTargetChanged(this);
     }
 
@@ -677,22 +671,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         } else {
             setImageWithSelection(img, true);
         }
-    }
-
-    private void invalidateTrimCache() {
-        trimmedBoundingBox = null;
-    }
-
-    @Override
-    public Rectangle getEffectiveBoundingBox() {
-        // cache trimmed rect until better solution is found
-        if (trimmedBoundingBox == null) {
-            trimmedBoundingBox = ImageTrimUtil.getTrimRect(getImage());
-        }
-
-        return new Rectangle(
-            getTx() + trimmedBoundingBox.x, getTy() + trimmedBoundingBox.y,
-            trimmedBoundingBox.width, trimmedBoundingBox.height);
     }
 
     /**

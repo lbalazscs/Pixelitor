@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,8 +75,8 @@ public abstract class Wizard {
         };
         dialog.setHeaderMessage(currentPage.getHelpText(this));
 
-        // it is packed already, but not correctly, because of the header message
-        // and anyway we don't know the size of the filter dialogs in advance
+        // It's packed already, but not correctly, because of the header message,
+        // and anyway we don't know the size of the filter dialogs in advance.
         dialog.setSize(initialDialogWidth, initialDialogHeight);
         currentPage.onShowingInDialog(dialog);
         GUIUtils.showDialog(dialog);

@@ -765,6 +765,11 @@ public class RandomGUITest {
         Views.onActiveComp(Composition::activeLayerToCanvasSize);
     }
 
+    private static void fitCanvasToLayers() {
+        log("fit canvas to layers");
+        Views.onActiveComp(Composition::fitCanvasToLayers);
+    }
+
     private static void invertSelection() {
         if (SelectionActions.areEnabled()) {
             runAction(SelectionActions.getInvert());
@@ -1000,7 +1005,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomNewTextLayer() {
+    private static void newRandomTextLayer() {
         Composition comp = Views.getActiveComp();
         MaskViewMode oldMaskViewMode = comp.getView().getMaskViewMode();
         Layer activeLayerBefore = comp.getActiveLayer();
@@ -1015,19 +1020,27 @@ public class RandomGUITest {
         log("new text layer: " + textLayer.getName());
     }
 
-    private static void randomNewColorFillLayer() {
+    private static void newColorFillLayer() {
         log("new color fill layer");
         ColorFillLayer.createNew();
     }
 
-    private static void randomNewGradientFillLayer() {
+    private static void newGradientFillLayer() {
         log("new gradient fill layer");
         GradientFillLayer.createNew();
     }
 
-    private static void randomNewShapesLayer() {
+    private static void newShapesLayer() {
         log("new shapes layer");
         ShapesLayer.createNew();
+    }
+
+    private static void convertToSmartObject() {
+        Layer layer = Views.getActiveLayer();
+        if (!(layer instanceof SmartObject)) {
+            log("convert to smart object");
+            layer.replaceWithSmartObject();
+        }
     }
 
     private static void randomRasterizeLayer() {
@@ -1208,6 +1221,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(10, RandomGUITest::deselect);
         weightedCaller.registerCallback(1, () -> showHideSelection(r));
         weightedCaller.registerCallback(1, RandomGUITest::layerToCanvasSize);
+        weightedCaller.registerCallback(1, RandomGUITest::fitCanvasToLayers);
         weightedCaller.registerCallback(1, RandomGUITest::invertSelection);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentBrush);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
@@ -1226,10 +1240,11 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
         weightedCaller.registerCallback(5, RandomGUITest::randomTool);
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
-        weightedCaller.registerCallback(2, RandomGUITest::randomNewTextLayer);
-        weightedCaller.registerCallback(1, RandomGUITest::randomNewColorFillLayer);
-        weightedCaller.registerCallback(1, RandomGUITest::randomNewGradientFillLayer);
-        weightedCaller.registerCallback(1, RandomGUITest::randomNewShapesLayer);
+        weightedCaller.registerCallback(2, RandomGUITest::newRandomTextLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::newColorFillLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::newGradientFillLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::newShapesLayer);
+        weightedCaller.registerCallback(1, RandomGUITest::convertToSmartObject);
         weightedCaller.registerCallback(5, RandomGUITest::randomRasterizeLayer);
         weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
         weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);

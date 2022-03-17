@@ -30,11 +30,12 @@ import java.awt.geom.Point2D;
 import java.io.Serial;
 
 /**
- * A control point of a {@link AnchorPoint}
+ * A control point of an {@link AnchorPoint}
  */
 public class ControlPoint extends DraggablePoint {
+    // compatible with Pixelitor 4.2.3
     @Serial
-    private static final long serialVersionUID = -6861753348469512033L;
+    private static final long serialVersionUID = 8776344572399099909L;
 
     private final AnchorPoint anchor;
     private ControlPoint sibling;

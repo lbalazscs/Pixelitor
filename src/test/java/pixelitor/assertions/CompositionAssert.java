@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -337,13 +337,29 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
             }
             if (!maskUI.hasMaskIcon()) {
                 failWithMessage("The mask UI of the %s #%d ('%s') has no mask icon",
-                        layerClassName, i, layer.getName());
+                    layerClassName, i, layer.getName());
             }
         } else { // the layer has no mask
             if (layerUI.hasMaskIcon()) {
                 failWithMessage("The UI of the %s #%d ('%s') has an unexpected mask icon",
-                        layerClassName, i, layer.getName());
+                    layerClassName, i, layer.getName());
             }
         }
+    }
+
+    public CompositionAssert hasGuides() {
+        isNotNull();
+
+        assertThat(actual.getGuides()).isNotNull();
+
+        return this;
+    }
+
+    public CompositionAssert hasPath() {
+        isNotNull();
+
+        assertThat(actual.getActivePath()).isNotNull();
+
+        return this;
     }
 }

@@ -181,7 +181,7 @@ public class CloneTool extends BlendingModeBrushTool {
                 msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
                        "<br><b>Alt-Click</b> for window dragging in the window manager)";
             }
-            Messages.showError("No source point", msg, e.getView());
+            Messages.showError("No source point", msg, e.getView().getDialogParent());
         }
     }
 

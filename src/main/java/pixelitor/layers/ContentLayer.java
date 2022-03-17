@@ -72,12 +72,6 @@ public abstract class ContentLayer extends Layer {
     }
 
     /**
-     * Returns the layer bounding box relative to the canvas.
-     * The returned rectangle must be trimmed from transparent pixels.
-     */
-    public abstract Rectangle getEffectiveBoundingBox();
-
-    /**
      * Returns the rectangle representing the content, relative to the canvas.
      */
     public abstract Rectangle getContentBounds();

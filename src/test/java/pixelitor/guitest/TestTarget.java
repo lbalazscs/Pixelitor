@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,29 +18,20 @@
 package pixelitor.guitest;
 
 /**
- * Test targets for the {@link AssertJSwingTest}:
- * "all" (default),
- * "tools" (includes "Selection" menus),
- * "file", (the "File" menu with the exception of auto paint)
- * "autopaint",
- * "edit", ("Edit" menus)
- * "image", ("Image" menus)
- * "filters" ("Colors" and "Filters" menus),
- * "layers" ("Layers" menus and layer buttons),
- * "rest" ("View" and "Help" menus)
+ * Test targets for the {@link AssertJSwingTest}.
  */
 public enum TestTarget {
-    ALL {
+    ALL { // Test everything
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testAll();
         }
-    }, TOOLS {
+    }, TOOLS { // Tools + Selection menus
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testTools();
         }
-    }, FILE {
+    }, FILE { // The "File" menu except auto paint
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testFileMenu();
@@ -50,27 +41,27 @@ public enum TestTarget {
         public void run(AssertJSwingTest tester) {
             tester.testAutoPaint();
         }
-    }, EDIT {
+    }, EDIT { // "Edit" menus
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testEditMenu();
         }
-    }, IMAGE {
+    }, IMAGE { // "Image" menus
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testImageMenu();
         }
-    }, FILTERS {
+    }, FILTERS { // "Colors" and "Filters" menus
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testFilters();
         }
-    }, LAYERS {
+    }, LAYERS { // "Layers" menus and layer buttons
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testLayers();
         }
-    }, REST {
+    }, REST { // "View" and "Help" menus
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testViewMenu();

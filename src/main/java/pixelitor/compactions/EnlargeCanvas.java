@@ -53,6 +53,11 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     public void setupToFitContentOf(ContentLayer contentLayer) {
         Rectangle contentBounds = contentLayer.getContentBounds();
+        if (contentBounds == null) {
+            // can happen for gradient layers and for uninitialized shape layers
+            return;
+        }
+
         Canvas canvas = contentLayer.getComp().getCanvas();
 
         if (contentBounds.x < -west) {

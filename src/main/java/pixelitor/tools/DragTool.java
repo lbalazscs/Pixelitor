@@ -63,6 +63,11 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
+        // the drag could be null if this tool was activated while dragging
+        if (drag == null) {
+            mousePressed(e);
+        }
+
         if (drag.isCanceled()) {
             return;
         }
