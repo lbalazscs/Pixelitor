@@ -34,6 +34,7 @@ import pixelitor.utils.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -47,6 +48,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -2704082273724898173L;
+
     public static final String NAME = "Flow Field";
 
     private static final boolean IS_MULTI_THREADED = true;

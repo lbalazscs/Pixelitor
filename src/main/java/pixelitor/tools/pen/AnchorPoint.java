@@ -34,6 +34,7 @@ import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.io.Serial;
 
 import static pixelitor.tools.pen.AnchorPointType.*;
 
@@ -41,6 +42,9 @@ import static pixelitor.tools.pen.AnchorPointType.*;
  * A point on a {@link SubPath}
  */
 public class AnchorPoint extends DraggablePoint {
+    @Serial
+    private static final long serialVersionUID = 250539317163980124L;
+
     public final ControlPoint ctrlIn;
     public final ControlPoint ctrlOut;
     private final SubPath subPath;

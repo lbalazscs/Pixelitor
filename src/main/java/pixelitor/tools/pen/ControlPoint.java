@@ -27,11 +27,15 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 
 /**
  * A control point of a {@link AnchorPoint}
  */
 public class ControlPoint extends DraggablePoint {
+    @Serial
+    private static final long serialVersionUID = -6861753348469512033L;
+
     private final AnchorPoint anchor;
     private ControlPoint sibling;
 
