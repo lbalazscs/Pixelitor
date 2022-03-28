@@ -24,8 +24,8 @@ import pixelitor.ImageMode;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
-import pixelitor.io.ExportInfo;
 import pixelitor.io.PXCFormat;
+import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -395,8 +395,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public ExportInfo getExportInfo() {
-        return new ExportInfo(image, getTx(), getTy());
+    public TranslatedImage getTranslatedImage() {
+        return new TranslatedImage(image, getTx(), getTy());
     }
 
     @Override

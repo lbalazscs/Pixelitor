@@ -71,8 +71,7 @@ public class SelectionTool extends DragTool {
         = new EnumComboBoxModel<>(ShapeCombinator.class);
 
     SelectionTool() {
-        super("Selection", 'M', "selection_tool.png",
-            HELP_TEXT, Cursors.DEFAULT, false);
+        super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
     }
 

@@ -675,31 +675,28 @@ public class Composition implements Serializable {
         Tools.editingTargetChanged(activeLayer);
     }
 
-    public void setActiveLayer(Layer newActiveLayer) {
-        setActiveLayer(newActiveLayer, false, null);
+    public void setActiveLayer(Layer layer) {
+        setActiveLayer(layer, false, null);
     }
 
-    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory, String editName) {
-        if (activeLayer == newActiveLayer) {
+    public void setActiveLayer(Layer layer, boolean addToHistory, String editName) {
+        if (activeLayer == layer) {
             return;
         }
-        assert layerList.contains(newActiveLayer)
+        assert layerList.contains(layer)
             : format("new active layer '%s' (%s) not in the layer list of '%s'",
-            newActiveLayer.getName(),
-            System.identityHashCode(newActiveLayer),
-            getDebugName());
+            layer.getName(), System.identityHashCode(layer), getDebugName());
 
         Layer oldLayer = activeLayer;
-        activeLayer = newActiveLayer;
+        activeLayer = layer;
 
         if (activeLayer.hasUI()) {
             activeLayer.activateUI();
-            Layers.layerActivated(newActiveLayer, false);
+            Layers.layerActivated(layer, false);
         }
 
         if (addToHistory) {
-            History.add(new LayerSelectionChangeEdit(
-                editName, this, oldLayer, newActiveLayer));
+            History.add(new LayerSelectionChangeEdit(editName, this, oldLayer, layer));
         }
 
         if (view != null) {  // shouldn't run while loading the composition
@@ -876,8 +873,7 @@ public class Composition implements Serializable {
                 duplicateActiveLayer();
             }
 
-            Layer layer = getActiveMaskOrLayer();
-            layer.startMovement();
+            getActiveMaskOrLayer().startMovement();
         }
         if (mode.movesSelection()) {
             if (selection != null) {

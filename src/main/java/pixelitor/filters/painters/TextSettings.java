@@ -51,6 +51,13 @@ public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String DEFAULT_TEXT = "Pixelitor";
+    private static final String PRESET_KEY_TEXT = "text";
+    private static final String PRESET_KEY_COLOR = "color";
+    private static final String PRESET_KEY_ROTATION = "rotation";
+    private static final String PRESET_KEY_HOR_ALIGN = "hor_align";
+    private static final String PRESET_KEY_VER_ALIGN = "ver_align";
+    private static final String PRESET_KEY_WATERMARK = "watermark";
+    private static final String PRESET_KEY_ERASE_FILL = "eraseFill";
 
     private String text;
     private Font font;
@@ -59,6 +66,7 @@ public class TextSettings implements Serializable {
     private VerticalAlignment verticalAlignment;
     private HorizontalAlignment horizontalAlignment;
     private boolean watermark;
+    private boolean eraseFill;
     private double rotation;
 
     private transient Consumer<TextSettings> guiUpdater;
@@ -67,7 +75,7 @@ public class TextSettings implements Serializable {
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
-                        boolean watermark, double rotation,
+                        boolean watermark, boolean eraseFill, double rotation,
                         Consumer<TextSettings> guiUpdater) {
         assert effects != null;
 
@@ -78,6 +86,7 @@ public class TextSettings implements Serializable {
         this.text = text;
         this.verticalAlignment = verticalAlignment;
         this.watermark = watermark;
+        this.eraseFill = eraseFill;
         this.rotation = rotation;
         this.guiUpdater = guiUpdater;
     }
@@ -93,6 +102,7 @@ public class TextSettings implements Serializable {
         text = DEFAULT_TEXT;
         verticalAlignment = VerticalAlignment.CENTER;
         watermark = false;
+        eraseFill = false;
         rotation = 0;
     }
 
@@ -109,6 +119,7 @@ public class TextSettings implements Serializable {
         verticalAlignment = other.verticalAlignment;
         horizontalAlignment = other.horizontalAlignment;
         watermark = other.watermark;
+        eraseFill = other.eraseFill;
         rotation = other.rotation;
     }
 
@@ -154,6 +165,10 @@ public class TextSettings implements Serializable {
         return watermark;
     }
 
+    public boolean hasEraseFill() {
+        return eraseFill;
+    }
+
     public double getRotation() {
         return rotation;
     }
@@ -166,6 +181,7 @@ public class TextSettings implements Serializable {
         horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
         verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
         watermark = Rnd.nextBoolean();
+        eraseFill = Rnd.nextBoolean();
         rotation = Rnd.nextDouble() * Math.PI * 2;
     }
 
@@ -179,6 +195,7 @@ public class TextSettings implements Serializable {
         painter.setHorizontalAlignment(horizontalAlignment);
         painter.setVerticalAlignment(verticalAlignment);
         painter.setRotation(rotation);
+        painter.setEraseFill(eraseFill);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
@@ -228,32 +245,34 @@ public class TextSettings implements Serializable {
     }
 
     public void saveStateTo(UserPreset preset) {
-        preset.put("text", text);
-        preset.putColor("color", color);
-        preset.putFloat("rotation", (float) rotation);
-        preset.putInt("hor_align", horizontalAlignment.ordinal());
-        preset.putInt("ver_align", verticalAlignment.ordinal());
+        preset.put(PRESET_KEY_TEXT, text);
+        preset.putColor(PRESET_KEY_COLOR, color);
+        preset.putFloat(PRESET_KEY_ROTATION, (float) rotation);
+        preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
+        preset.putInt(PRESET_KEY_VER_ALIGN, verticalAlignment.ordinal());
 
         FontInfo fontInfo = new FontInfo(font);
         fontInfo.saveStateTo(preset);
 
         areaEffects.saveStateTo(preset);
 
-        preset.putBoolean("watermark", watermark);
+        preset.putBoolean(PRESET_KEY_WATERMARK, watermark);
+        preset.putBoolean(PRESET_KEY_ERASE_FILL, eraseFill);
     }
 
     public void loadUserPreset(UserPreset preset) {
-        text = preset.get("text");
-        color = preset.getColor("color");
-        rotation = preset.getFloat("rotation");
-        horizontalAlignment = HorizontalAlignment.values()[preset.getInt("hor_align")];
-        verticalAlignment = VerticalAlignment.values()[preset.getInt("ver_align")];
+        text = preset.get(PRESET_KEY_TEXT);
+        color = preset.getColor(PRESET_KEY_COLOR);
+        rotation = preset.getFloat(PRESET_KEY_ROTATION);
+        horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
+        verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
 
         FontInfo fontInfo = new FontInfo(preset);
         font = fontInfo.createFont();
 
         areaEffects.loadStateFrom(preset);
-        watermark = preset.getBoolean("watermark");
+        watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
+        eraseFill = preset.getBoolean(PRESET_KEY_ERASE_FILL);
 
         // should be always non-null while loading a preset,
         // because this happens only in the dialog
@@ -263,8 +282,9 @@ public class TextSettings implements Serializable {
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
-        node.addQuotedString("text", getText());
-        node.addBoolean("watermark", watermark);
+        node.addQuotedString("Text", getText());
+        node.addBoolean("Watermark", watermark);
+        node.addBoolean("Erase Fill", eraseFill);
 
         return node;
     }

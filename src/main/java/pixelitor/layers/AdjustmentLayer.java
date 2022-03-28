@@ -20,7 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.io.ExportInfo;
+import pixelitor.io.TranslatedImage;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -112,7 +112,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public ExportInfo getExportInfo() {
+    public TranslatedImage getTranslatedImage() {
         throw new UnsupportedOperationException();
     }
 

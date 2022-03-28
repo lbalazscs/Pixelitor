@@ -100,9 +100,9 @@ public abstract class AbstractBrushTool extends Tool {
 
     private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
 
-    AbstractBrushTool(String name, char activationKey, String iconFileName,
-                      String toolMessage, Cursor cursor, boolean addSymmetry) {
-        super(name, activationKey, iconFileName, toolMessage, cursor);
+    AbstractBrushTool(String name, char activationKey, String toolMessage,
+                      Cursor cursor, boolean addSymmetry) {
+        super(name, activationKey, toolMessage, cursor);
         this.addSymmetry = addSymmetry;
         if (addSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);

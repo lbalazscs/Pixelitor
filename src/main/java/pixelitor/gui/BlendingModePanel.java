@@ -129,7 +129,7 @@ public class BlendingModePanel extends JPanel {
     }
 
     public void loadStateFrom(UserPreset preset) {
-        setOpacity(preset.getFloat("Opacity"));
+        setOpacity(preset.getFloat("Opacity", 1.0f));
         setBlendingMode(preset.getEnum("Blending Mode", BlendingMode.class));
     }
 }

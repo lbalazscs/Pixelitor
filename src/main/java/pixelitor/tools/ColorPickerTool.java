@@ -53,8 +53,7 @@ public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
-        super("Color Picker", 'I', "color_picker_tool.png",
-            HELP_TEXT, Cursors.CROSSHAIR);
+        super("Color Picker", 'I', HELP_TEXT, Cursors.CROSSHAIR);
     }
 
     @Override

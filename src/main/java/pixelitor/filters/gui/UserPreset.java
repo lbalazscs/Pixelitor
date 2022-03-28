@@ -112,6 +112,14 @@ public class UserPreset implements Preset {
         return Integer.parseInt(get(key));
     }
 
+    public int getInt(String key, int defaultValue) {
+        String value = get(key);
+        if (value != null) {
+            return Integer.parseInt(value);
+        }
+        return defaultValue;
+    }
+
     public void putInt(String key, int i) {
         put(key, String.valueOf(i));
     }
@@ -128,6 +136,15 @@ public class UserPreset implements Preset {
         return Float.parseFloat(get(key));
     }
 
+    public float getFloat(String key, float defaultValue) {
+        String value = get(key);
+        if (value != null) {
+            return Float.parseFloat(value);
+        } else {
+            return defaultValue;
+        }
+    }
+
     public void putFloat(String key, float f) {
         put(key, "%.4f".formatted(f));
     }
@@ -136,16 +153,29 @@ public class UserPreset implements Preset {
         return Double.parseDouble(get(key));
     }
 
+    public double getDouble(String key, double defaultValue) {
+        String value = get(key);
+        if (value != null) {
+            return Double.parseDouble(value);
+        } else {
+            return defaultValue;
+        }
+    }
+
     public void putDouble(String key, double d) {
         put(key, "%.4f".formatted(d));
     }
 
     public Color getColor(String key) {
+        return getColor(key, Color.BLACK);
+    }
+
+    public Color getColor(String key, Color defaultValue) {
         String color = get(key);
         if (color != null) {
             return Colors.fromHTMLHex(color);
         }
-        return Color.BLACK;
+        return defaultValue;
     }
 
     public void putColor(String key, Color c) {
@@ -163,7 +193,7 @@ public class UserPreset implements Preset {
                 return constant;
             }
         }
-        return null;
+        return enumConstants[0];
     }
 
     // not using Properties because it is ugly to escape the spaces in keys

@@ -137,7 +137,7 @@ public class ShapesTool extends DragTool {
     };
 
     public ShapesTool() {
-        super("Shapes", 'U', "shapes_tool.png",
+        super("Shapes", 'U',
             "<b>drag</b> to draw a shape. " +
             "<b>Alt</b> starts from the center, <b>Shift</b> constrains. " +
             "Hold <b>SPACE</b> down while drawing to move the shape. ",

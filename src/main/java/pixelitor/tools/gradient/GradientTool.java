@@ -82,7 +82,7 @@ public class GradientTool extends DragTool {
     private DragToolState state;
 
     public GradientTool() {
-        super("Gradient", 'G', "gradient_tool.png",
+        super("Gradient", 'G',
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
             "<b>Shift-drag</b> to constrain the direction. " +
             "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",

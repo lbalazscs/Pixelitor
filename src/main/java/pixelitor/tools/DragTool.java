@@ -42,11 +42,10 @@ public abstract class DragTool extends Tool {
     // movement when Shift is pressed if this is set to true
     private final boolean shiftConstrains;
 
-    protected DragTool(String name, char activationKeyChar, String iconFileName,
-                       String toolMessage, Cursor cursor,
-                       boolean shiftConstrains) {
+    protected DragTool(String name, char activationKey, String toolMessage,
+                       Cursor cursor, boolean shiftConstrains) {
 
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor);
+        super(name, activationKey, toolMessage, cursor);
 
         this.shiftConstrains = shiftConstrains;
     }

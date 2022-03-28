@@ -162,7 +162,13 @@ class CompositionIOTest {
         var future = IO.loadCompAsync(f);
         var comp = future.join();
         assertThat(comp)
-            .numLayersIs(2)
+            .numLayersIs(6)
+            .typeOfLayerNIs(0, ImageLayer.class)
+            .typeOfLayerNIs(1, TextLayer.class)
+            .typeOfLayerNIs(2, GradientFillLayer.class)
+            .typeOfLayerNIs(3, ShapesLayer.class)
+            .typeOfLayerNIs(4, ColorFillLayer.class)
+            .typeOfLayerNIs(5, SmartObject.class)
             .canvasSizeIs(10, 10)
             .hasGuides()
             .hasPath()

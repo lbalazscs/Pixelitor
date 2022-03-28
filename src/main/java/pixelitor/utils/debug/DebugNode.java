@@ -68,9 +68,12 @@ public class DebugNode extends DefaultMutableTreeNode {
             String text;
             if (child instanceof DebugNode dn) {
                 text = dn.toJSON();
+            } else if (child instanceof DefaultMutableTreeNode defaultNode) {
+                text = ((StringUserObject) defaultNode.getUserObject()).toJSON();
             } else {
-                text = child.toString();
+                throw new IllegalStateException();
             }
+
             sb.append(text);
         }
 
@@ -86,7 +89,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addString(String name, String s) {
-        addNode("\"" + name + "\": " + s + ",");
+        addNode(name, s);
     }
 
     public void addAsString(String name, Object o) {
@@ -94,7 +97,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addQuotedString(String name, String s) {
-        addNode(format("\"%s\": \"%s\",", name, s));
+        addNode(name, "\"" + s + "\"");
     }
 
     public void addAsQuotedString(String name, Object o) {
@@ -102,39 +105,53 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addInt(String name, int i) {
-        addNode("\"" + name + "\": " + i + ",");
+        addNode(name, String.valueOf(i));
     }
 
     public void addFloat(String name, float f) {
-        addNode(format("\"%s\": %.2f,", name, f));
+        addNode(name, format("%.2f", f));
     }
 
     public void addDouble(String name, double f) {
-        addNode(format("\"%s\": %.2f,", name, f));
+        addNode(name, format("%.2f", f));
     }
 
     public void addBoolean(String name, boolean b) {
-        addNode("\"" + name + "\": " + b + ",");
+        addNode(name, String.valueOf(b));
     }
 
     public void addColor(String name, Color c) {
-        addNode("\"" + name + "\": " + Colors.toHTMLHex(c, true) + ",");
+        addNode(name, Colors.toHTMLHex(c, true));
     }
 
     public void addClass() {
-        addNode("\"class\": " + userObject.getClass().getSimpleName() + ",");
+        addNode("class", userObject.getClass().getSimpleName());
     }
 
     public void addAsClass(String name, Object o) {
         addString(name, o == null ? "null" : o.getClass().getName());
     }
 
-    private void addNode(String userObject) {
-        add(new DefaultMutableTreeNode(userObject));
+    private void addNode(String key, String value) {
+        add(new DefaultMutableTreeNode(new StringUserObject(key, value)));
     }
 
     private static void indent(StringBuilder sb, int indentLevel) {
         sb.append('\n');
         sb.append("  ".repeat(indentLevel));
+    }
+
+    /**
+     * Allow a leaf node to have two string representations: a GUI text and a JSON.
+     */
+    private record StringUserObject(String key, String value) {
+        public String toJSON() {
+            return "\"" + key + "\": " + value + ",";
+        }
+
+        @Override
+        public String toString() {
+            return key + " = " + value;
+        }
     }
 }

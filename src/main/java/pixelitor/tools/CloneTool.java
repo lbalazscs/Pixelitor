@@ -84,7 +84,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private boolean showUndefinedSourceDialog;
 
     protected CloneTool() {
-        super("Clone Stamp", 'S', "clone_tool.png",
+        super("Clone Stamp", 'S',
             "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
             "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
             Cursors.CROSSHAIR, false);

@@ -32,7 +32,7 @@ import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
-import pixelitor.io.ExportInfo;
+import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
@@ -259,7 +259,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public ExportInfo getExportInfo() {
+    public TranslatedImage getTranslatedImage() {
         // This method ensures that the whole text is exported by ignoring
         // the canvas and only exporting an image corresponding to the text's bounds
 
@@ -273,7 +273,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
 
         BufferedImage img = painter.renderRectangle(textBounds);
-        return new ExportInfo(img, textBounds.x, textBounds.y);
+        return new TranslatedImage(img, textBounds.x, textBounds.y);
     }
 
     @Override

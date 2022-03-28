@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -114,7 +114,7 @@ public class OpenRaster {
                                      int layerIndex,
                                      ZipOutputStream zos,
                                      ProgressTracker pt) throws IOException {
-        ExportInfo exportInfo = layer.getExportInfo();
+        TranslatedImage translatedImage = layer.getTranslatedImage();
 
         String stackXML = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
@@ -124,13 +124,13 @@ public class OpenRaster {
             layer.getBlendingMode().toSVGName(),
             layer.getOpacity(),
             layerIndex,
-            exportInfo.tx(),
-            exportInfo.ty());
+            translatedImage.tx(),
+            translatedImage.ty());
 
         var entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
 
-        TrackedIO.writeToStream(exportInfo.img(), zos, "PNG", pt);
+        TrackedIO.writeToStream(translatedImage.img(), zos, "PNG", pt);
 
         zos.closeEntry();
         return stackXML;

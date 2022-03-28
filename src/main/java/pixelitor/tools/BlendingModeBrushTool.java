@@ -36,10 +36,9 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;
     private boolean maskEditing;
 
-    protected BlendingModeBrushTool(String name, char activationKeyChar,
-                                    String iconFileName, String toolMessage,
+    protected BlendingModeBrushTool(String name, char activationKey, String toolMessage,
                                     Cursor cursor, boolean addSymmetry) {
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor, addSymmetry);
+        super(name, activationKey, toolMessage, cursor, addSymmetry);
         drawDestination = DrawDestination.DIRECT;
         maskEditing = false;
     }

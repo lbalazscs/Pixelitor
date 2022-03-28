@@ -22,6 +22,7 @@ import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.Flip;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.StyledShape;
@@ -110,6 +111,13 @@ public class ShapesLayer extends ContentLayer {
     @Override
     protected BufferedImage applyOnImage(BufferedImage src) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public TranslatedImage getTranslatedImage() {
+        // TODO the default implementation works, but it's suboptimal.
+        //   This is related to the fact that the cached image is also unnecessarily big.
+        return super.getTranslatedImage();
     }
 
     @Override

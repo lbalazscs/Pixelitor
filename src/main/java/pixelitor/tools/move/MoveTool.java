@@ -53,7 +53,7 @@ public class MoveTool extends DragTool {
     private TransformBox transformBox;
 
     public MoveTool() {
-        super("Move", 'V', "move_tool.png",
+        super("Move", 'V',
             "<b>drag</b> to move the active layer, " +
             "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
             "<b>Shift-drag</b> to constrain the movement.",

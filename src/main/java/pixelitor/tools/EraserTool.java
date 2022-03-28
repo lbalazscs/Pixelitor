@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static java.awt.BasicStroke.JOIN_MITER;
  */
 public class EraserTool extends AbstractBrushTool {
     public EraserTool() {
-        super("Eraser", 'E', "eraser_tool.png",
+        super("Eraser", 'E',
             "<b>click and drag</b> to erase pixels. <b>Shift-click</b> to erase lines.",
             Cursors.CROSSHAIR, true);
         drawDestination = DrawDestination.DIRECT;

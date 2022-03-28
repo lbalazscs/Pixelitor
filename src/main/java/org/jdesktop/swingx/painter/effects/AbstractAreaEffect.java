@@ -543,7 +543,7 @@ public class AbstractAreaEffect implements AreaEffect {
 
     public void loadStateFrom(UserPreset preset, String keyPrefix, boolean checkOffset) {
         setBrushColor(preset.getColor(keyPrefix + "Color"));
-        setOpacity(preset.getFloat(keyPrefix + "Opacity"));
+        setOpacity(preset.getFloat(keyPrefix + "Opacity", 1.0f));
         setEffectWidth(preset.getFloat(keyPrefix + "Width"));
         setAutoBrushSteps();
 

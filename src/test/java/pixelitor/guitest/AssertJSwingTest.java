@@ -1118,7 +1118,6 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-
     private void testMagick() {
         log(1, "testing ImageMagick export-import");
 

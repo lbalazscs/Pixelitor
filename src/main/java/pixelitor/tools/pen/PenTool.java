@@ -88,7 +88,7 @@ public class PenTool extends Tool {
     };
 
     public PenTool() {
-        super("Pen", 'P', "pen_tool.png",
+        super("Pen", 'P',
             "", // getStatusBarMessage() is overridden
             Cursors.DEFAULT);
 

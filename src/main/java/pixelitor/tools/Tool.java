@@ -33,7 +33,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Icons;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -54,7 +53,6 @@ import java.awt.geom.AffineTransform;
 public abstract class Tool implements KeyListener, PresetOwner {
     private final String name;
     private final String shortName;
-    private final String iconFileName;
     private final String toolMessage;
     private final char activationKey;
     final ToolHandlerChain handlerChain;
@@ -67,14 +65,12 @@ public abstract class Tool implements KeyListener, PresetOwner {
     // altPressed calls, but only the first one is relevant
     protected boolean altDown = false;
 
-    protected Tool(String name, char activationKey, String iconFileName,
-                   String toolMessage, Cursor cursor) {
+    protected Tool(String name, char activationKey, String toolMessage, Cursor cursor) {
         this.activationKey = activationKey;
         assert Character.isUpperCase(activationKey);
 
         this.shortName = name;
         this.name = name + " Tool";
-        this.iconFileName = iconFileName;
         this.toolMessage = toolMessage;
         this.cursor = cursor;
 
@@ -122,12 +118,10 @@ public abstract class Tool implements KeyListener, PresetOwner {
     }
 
     /**
-     * Creates the tool's icon. For most tools, this is overridden, and the icon
-     * file name field is not used, because the icon doesn't come from a file.
+     * Creates the tool's icon. Most tools create their icon using
+     * vector graphics so that is looks good on HiDPI screens.
      */
-    public Icon createIcon() {
-        return Icons.load(iconFileName);
-    }
+    public abstract Icon createIcon();
 
     public char getActivationKey() {
         return activationKey;

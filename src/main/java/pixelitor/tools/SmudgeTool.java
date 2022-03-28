@@ -46,7 +46,7 @@ public class SmudgeTool extends AbstractBrushTool {
     private EnumComboBoxModel<CopyBrushType> brushModel;
 
     public SmudgeTool() {
-        super("Smudge", 'K', "smudge_tool.png",
+        super("Smudge", 'K',
             "<b>click and drag</b> to smudge. " +
             "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
             Cursors.HAND, false);

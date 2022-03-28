@@ -27,7 +27,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.history.*;
-import pixelitor.io.ExportInfo;
+import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -710,9 +710,9 @@ public abstract class Layer implements Serializable {
         return true;
     }
 
-    public ExportInfo getExportInfo() {
+    public TranslatedImage getTranslatedImage() {
         // the default implementation is good for color and gradient fill layers
-        return new ExportInfo(asImage(true, false), 0, 0);
+        return new TranslatedImage(asImage(true, false), 0, 0);
     }
 
     /**

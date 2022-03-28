@@ -45,10 +45,10 @@ public class ZoomTool extends DragTool {
     private PRectangle box;
 
     public ZoomTool() { // Do I need this false in super call?
-        super("Zoom", 'Z', "zoom_tool.png",
+        super("Zoom", 'Z',
             "<b>click</b> to zoom in, " +
-                "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
-                "<b>Drag</b> to select an area.",
+            "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
+            "<b>Drag</b> to select an area.",
             Cursors.HAND, false);
         spaceDragStartPoint = true;
     }

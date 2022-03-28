@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package pixelitor.io;
 import java.awt.image.BufferedImage;
 import java.util.StringJoiner;
 
-public record ExportInfo(BufferedImage img, int tx, int ty) {
+public record TranslatedImage(BufferedImage img, int tx, int ty) {
     @Override
     public String toString() {
-        return new StringJoiner(", ", ExportInfo.class.getSimpleName() + "[", "]")
-            .add("img=" + img.getWidth() + "x" + img.getHeight())
+        return new StringJoiner(", ", TranslatedImage.class.getSimpleName() + "[", "]")
+            .add("size=" + img.getWidth() + "x" + img.getHeight())
             .add("tx=" + tx)
             .add("ty=" + ty)
             .toString();

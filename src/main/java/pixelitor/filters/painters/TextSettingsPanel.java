@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,6 +63,7 @@ public class TextSettingsPanel extends FilterGUI
     private JComboBox<VerticalAlignment> vAlignmentCB;
     private JComboBox<HorizontalAlignment> hAlignmentCB;
     private JCheckBox watermarkCB;
+    private JCheckBox eraseFillCB;
 
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
@@ -112,7 +113,7 @@ public class TextSettingsPanel extends FilterGUI
         createEffectsPanel(settings);
         add(effectsPanel);
 
-        add(createWatermarkPanel(settings));
+        add(createBottomPanel(settings));
     }
 
     private JPanel createTextPanel(TextSettings settings) {
@@ -274,14 +275,27 @@ public class TextSettingsPanel extends FilterGUI
         effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 
-    private JPanel createWatermarkPanel(TextSettings settings) {
-        watermarkCB = new JCheckBox("Use Text for Watermarking",
-            settings.hasWatermark());
-        watermarkCB.addActionListener(this);
+    private JPanel createBottomPanel(TextSettings settings) {
+        watermarkCB = new JCheckBox("Watermarking", settings.hasWatermark());
+        eraseFillCB = new JCheckBox("Erase Fill", settings.hasEraseFill());
 
-        var p = new JPanel(new FlowLayout(LEFT));
+        watermarkCB.addActionListener(e -> specialCBAction(eraseFillCB));
+        eraseFillCB.addActionListener(e -> specialCBAction(watermarkCB));
+
+        JPanel p = new JPanel(new FlowLayout(LEFT, 20, 5));
         p.add(watermarkCB);
+        p.add(eraseFillCB);
         return p;
+    }
+
+    // ensure that only one of them is selected and that only one update is triggered
+    private void specialCBAction(JCheckBox other) {
+        ignoreGUIChanges = true;
+        if (other.isSelected()) {
+            other.setSelected(false);
+        }
+        ignoreGUIChanges = false;
+        paramAdjusted();
     }
 
     @Override
@@ -309,7 +323,7 @@ public class TextSettingsPanel extends FilterGUI
             text, selectedFont, color.getColor(), effects,
             (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
             (VerticalAlignment) vAlignmentCB.getSelectedItem(),
-            watermarkCB.isSelected(), textRotationAngle, this);
+            watermarkCB.isSelected(), eraseFillCB.isSelected(), textRotationAngle, this);
 
         updateApp(settings);
     }
@@ -362,6 +376,7 @@ public class TextSettingsPanel extends FilterGUI
 
         effectsPanel.setEffects(settings.getEffects());
         watermarkCB.setSelected(settings.hasWatermark());
+        eraseFillCB.setSelected(settings.hasEraseFill());
     }
 
     private boolean isInFilterMode() {
