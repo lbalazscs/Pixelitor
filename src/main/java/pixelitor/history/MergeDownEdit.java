@@ -90,14 +90,14 @@ public class MergeDownEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
         node.add(bellowLayer.createDebugNode());
         node.addAsString("mask view mode", maskViewMode);
-        node.add(imageEdit.createDebugNode());
-        node.add(deleteLayerEdit.createDebugNode());
+        node.add(imageEdit.createDebugNode("image edit"));
+        node.add(deleteLayerEdit.createDebugNode("delete layer edit"));
 
         return node;
     }

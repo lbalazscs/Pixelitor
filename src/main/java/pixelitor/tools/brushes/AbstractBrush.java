@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -138,8 +138,8 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = new DebugNode("brush", this);
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
         node.addClass();
         node.addDouble("radius", radius);
         if (previous != null) {

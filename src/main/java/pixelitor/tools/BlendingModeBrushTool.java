@@ -109,8 +109,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.addFloat("opacity", blendingModePanel.getOpacity());
         node.addQuotedString("blending Mode",

@@ -406,11 +406,6 @@ public class Debug {
             paper.getImageableWidth(), paper.getImageableHeight());
     }
 
-    public static void debugSmartObjects() {
-        Views.forEachView(view ->
-            System.out.println(view.getComp().debugSmartObjects()));
-    }
-
     public static void throwTestException() {
         if (AppContext.isDevelopment()) {
             throw new IllegalStateException("Test");

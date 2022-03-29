@@ -182,9 +182,13 @@ public class Tools {
     public static void editingTargetChanged(Layer layer) {
         assert currentTool != null || AppContext.isUnitTesting();
 
-        Tool preferredTool = layer.getPreferredTool();
-        if (preferredTool != null && preferredTool != currentTool) {
-            startAndSelect(preferredTool);
+        // don't switch from the Move Tool, because it's confusing and
+        // bug-prone if the tool is changed during an auto-select
+        if (currentTool != MOVE) {
+            Tool preferredTool = layer.getPreferredTool();
+            if (preferredTool != null && preferredTool != currentTool) {
+                startAndSelect(preferredTool);
+            }
         }
 
         if (currentTool != null) {

@@ -149,8 +149,8 @@ public abstract class ContentLayer extends Layer {
     public abstract void enlargeCanvas(int north, int east, int south, int west);
 
     @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.addInt("translation X", getTx());
         node.addInt("translation Y", getTy());

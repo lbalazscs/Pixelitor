@@ -71,8 +71,8 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
         node.add(layerMask.createDebugNode());

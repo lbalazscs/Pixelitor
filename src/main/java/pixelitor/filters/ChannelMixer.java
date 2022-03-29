@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
 import java.util.function.BooleanSupplier;
 
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
@@ -55,6 +56,11 @@ public class ChannelMixer extends ParametrizedFilter {
     private final RangeParam blueFromRed = from(BLUE, RED, 0);
     private final RangeParam blueFromGreen = from(BLUE, GREEN, 0);
     private final RangeParam blueFromBlue = from(BLUE, BLUE, 100);
+
+    private final BooleanParam preserveBrightnessParam = new BooleanParam(
+        "Preserve Brightness", true, IGNORE_RANDOMIZE);
+    private final BooleanParam autoBWParam = new BooleanParam(
+        "Allow only Black and White", false, IGNORE_RANDOMIZE);
 
     private final Action swapRedGreen = new PAction("Swap Red-Green") {
         @Override
@@ -154,7 +160,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action removeRed = new PAction("Remove Red") {
         @Override
         public void onClick() {
-            assert !autoNormalize;
+            assert !preserveBrightnessParam.isChecked();
 
             redFromRed.setValueNoTrigger(0);
             redFromGreen.setValueNoTrigger(0);
@@ -175,7 +181,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action removeGreen = new PAction("Remove Green") {
         @Override
         public void onClick() {
-            assert !autoNormalize;
+            assert !preserveBrightnessParam.isChecked();
 
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
@@ -196,7 +202,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action removeBlue = new PAction("Remove Blue") {
         @Override
         public void onClick() {
-            assert !autoNormalize;
+            assert !preserveBrightnessParam.isChecked();
 
             redFromRed.setValueNoTrigger(100);
             redFromGreen.setValueNoTrigger(0);
@@ -255,7 +261,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action sepia = new PAction("Sepia") {
         @Override
         public void onClick() {
-            assert !autoNormalize;
+            assert !preserveBrightnessParam.isChecked();
 
             redFromRed.setValueNoTrigger(39);
             redFromGreen.setValueNoTrigger(77);
@@ -276,8 +282,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final Action[] presets = {swapRedGreen, swapRedBlue, swapGreenBlue,
         shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
         averageBW, luminosityBW, sepia};
-    private boolean autoNormalize = true;
-    private boolean monochrome = false;
+
     private final GroupedRangeParam redPercentageGroup;
     private final GroupedRangeParam greenPercentageGroup;
     private final GroupedRangeParam bluePercentageGroup;
@@ -285,19 +290,7 @@ public class ChannelMixer extends ParametrizedFilter {
     public ChannelMixer() {
         super(true);
 
-        redPercentageGroup = new GroupedRangeParam("Red Channel", new RangeParam[]{
-            redFromRed, redFromGreen, redFromBlue}, false).autoNormalized();
-        greenPercentageGroup = new GroupedRangeParam("Green Channel", new RangeParam[]{
-            greenFromRed, greenFromGreen, greenFromBlue}, false).autoNormalized();
-        bluePercentageGroup = new GroupedRangeParam("Blue Channel", new RangeParam[]{
-            blueFromRed, blueFromGreen, blueFromBlue}, false).autoNormalized();
-
-        FilterParam[] params = {
-            redPercentageGroup,
-            greenPercentageGroup,
-            bluePercentageGroup,
-        };
-        BooleanSupplier ifMonochrome = () -> monochrome;
+        BooleanSupplier ifMonochrome = autoBWParam::isChecked;
         redFromRed.linkWith(greenFromRed, ifMonochrome);
         redFromRed.linkWith(blueFromRed, ifMonochrome);
 
@@ -307,92 +300,30 @@ public class ChannelMixer extends ParametrizedFilter {
         redFromGreen.linkWith(greenFromGreen, ifMonochrome);
         redFromGreen.linkWith(blueFromGreen, ifMonochrome);
 
-        setParams(params);
+        redPercentageGroup = new GroupedRangeParam("Red Channel", new RangeParam[]{
+            redFromRed, redFromGreen, redFromBlue}, false).autoNormalized();
+        greenPercentageGroup = new GroupedRangeParam("Green Channel", new RangeParam[]{
+            greenFromRed, greenFromGreen, greenFromBlue}, false).autoNormalized();
+        bluePercentageGroup = new GroupedRangeParam("Blue Channel", new RangeParam[]{
+            blueFromRed, blueFromGreen, blueFromBlue}, false).autoNormalized();
 
+        autoBWParam.setToolTip("Link the sliders so that the image always stays black and white");
+        preserveBrightnessParam.setToolTip("Preserve brightness by ensuring that the sum of percentages is around 100%");
+
+        setParams(
+            autoBWParam,
+            preserveBrightnessParam,
+            redPercentageGroup,
+            greenPercentageGroup,
+            bluePercentageGroup);
+
+        paramSet.setAfterResetAllAction(this::afterResetAll);
         enablePresets();
     }
 
-    public void setMonochrome(boolean monochrome) {
-        boolean wasMonochrome = this.monochrome;
-        if (wasMonochrome == monochrome) {
-            return;
-        }
-        this.monochrome = monochrome;
-
-        enablePresets();
-
-        if (monochrome) {
-            // since the channels will be synchronized, it is enough to have only
-            // one auto-normalization constraint - this also prevents feedback loops
-            greenPercentageGroup.setAutoNormalizationEnabled(false, true);
-            bluePercentageGroup.setAutoNormalizationEnabled(false, true);
-
-            int fromRed = (redFromRed.getValue() + greenFromRed.getValue() + blueFromRed.getValue()) / 3;
-            redFromRed.setValueNoTrigger(fromRed);
-            greenFromRed.setValueNoTrigger(fromRed);
-            blueFromRed.setValueNoTrigger(fromRed);
-
-            int fromGreen = (redFromGreen.getValue() + greenFromGreen.getValue() + blueFromGreen.getValue()) / 3;
-            redFromGreen.setValueNoTrigger(fromGreen);
-            greenFromGreen.setValueNoTrigger(fromGreen);
-            blueFromGreen.setValueNoTrigger(fromGreen);
-
-            int fromBlue = (redFromBlue.getValue() + greenFromBlue.getValue() + blueFromBlue.getValue()) / 3;
-            redFromBlue.setValueNoTrigger(fromBlue);
-            greenFromBlue.setValueNoTrigger(fromBlue);
-            blueFromBlue.setValueNoTrigger(fromBlue);
-
-            getParamSet().runFilter();
-        } else {
-            // switching back to non-monochrome mode: enable all
-            // auto-normalization constraints if necessary
-            greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
-            bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
-        }
-    }
-
-    public void setAutoNormalize(boolean autoNormalize) {
-        boolean wasAutoNormalized = this.autoNormalize;
-        if (wasAutoNormalized == autoNormalize) {
-            return;
-        }
-
-        redPercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
-        greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
-        bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, true);
-
-        if (autoNormalize) {
-            getParamSet().runFilter();
-        }
-        this.autoNormalize = autoNormalize;
-        enablePresets();
-    }
-
-    public void enablePresets() {
-        boolean allowColors = !monochrome;
-        boolean allowAnySum = !autoNormalize;
-
-        swapGreenBlue.setEnabled(allowColors);
-        swapRedBlue.setEnabled(allowColors);
-        swapRedGreen.setEnabled(allowColors);
-
-        shiftRBGR.setEnabled(allowColors);
-        shiftRGBR.setEnabled(allowColors);
-
-        removeRed.setEnabled(allowColors && allowAnySum);
-        removeGreen.setEnabled(allowColors && allowAnySum);
-        removeBlue.setEnabled(allowColors && allowAnySum);
-
-        sepia.setEnabled(allowColors && allowAnySum);
-    }
-
-    public void temporarilyEnableNormalization(boolean enable) {
-        autoNormalize = enable;
-        redPercentageGroup.setAutoNormalizationEnabled(enable, false);
-
-        // if monochrome, then it's enough to enable the red group
-        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
-        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
+    @Override
+    public FilterGUI createGUI(Drawable dr, boolean reset) {
+        return new ChannelMixerGUI(this, dr, presets, reset);
     }
 
     @Override
@@ -454,9 +385,93 @@ public class ChannelMixer extends ParametrizedFilter {
         return dest;
     }
 
-    @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new ChannelMixerGUI(this, dr, presets, reset);
+    // Replace the adjustment listeners with custom versions which
+    // change other values before triggering the filter.
+    public void replaceAdjustmentListeners() {
+        autoBWParam.setAdjustmentListener(this::updateAutoBW);
+        preserveBrightnessParam.setAdjustmentListener(this::updatePreserveBrightness);
+    }
+
+    private void updateAutoBW() {
+        boolean autoBW = autoBWParam.isChecked();
+        enablePresets();
+
+        if (autoBW) {
+            // since the channels will be synchronized, it is enough to have only
+            // one auto-normalization constraint - this also prevents feedback loops
+            greenPercentageGroup.setAutoNormalizationEnabled(false, true);
+            bluePercentageGroup.setAutoNormalizationEnabled(false, true);
+
+            int fromRed = (redFromRed.getValue() + greenFromRed.getValue() + blueFromRed.getValue()) / 3;
+            redFromRed.setValueNoTrigger(fromRed);
+            greenFromRed.setValueNoTrigger(fromRed);
+            blueFromRed.setValueNoTrigger(fromRed);
+
+            int fromGreen = (redFromGreen.getValue() + greenFromGreen.getValue() + blueFromGreen.getValue()) / 3;
+            redFromGreen.setValueNoTrigger(fromGreen);
+            greenFromGreen.setValueNoTrigger(fromGreen);
+            blueFromGreen.setValueNoTrigger(fromGreen);
+
+            int fromBlue = (redFromBlue.getValue() + greenFromBlue.getValue() + blueFromBlue.getValue()) / 3;
+            redFromBlue.setValueNoTrigger(fromBlue);
+            greenFromBlue.setValueNoTrigger(fromBlue);
+            blueFromBlue.setValueNoTrigger(fromBlue);
+
+            getParamSet().runFilter();
+        } else {
+            // switching back to non-monochrome mode: enable all
+            // auto-normalization constraints if necessary
+            boolean autoNormalize = preserveBrightnessParam.isChecked();
+            greenPercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
+            bluePercentageGroup.setAutoNormalizationEnabled(autoNormalize, false);
+        }
+    }
+
+    private void updatePreserveBrightness() {
+        boolean preserveBrightness = preserveBrightnessParam.isChecked();
+        boolean autoBW = autoBWParam.isChecked();
+
+        redPercentageGroup.setAutoNormalizationEnabled(preserveBrightness, true);
+        if (!autoBW) {
+            greenPercentageGroup.setAutoNormalizationEnabled(preserveBrightness, true);
+            bluePercentageGroup.setAutoNormalizationEnabled(preserveBrightness, true);
+        }
+
+        enablePresets();
+        if (preserveBrightness) {
+            getParamSet().runFilter();
+        }
+    }
+
+    private void afterResetAll() {
+        enablePresets();
+    }
+
+    private void enablePresets() {
+        boolean allowColors = !autoBWParam.isChecked();
+        boolean allowAnySum = !preserveBrightnessParam.isChecked();
+
+        swapGreenBlue.setEnabled(allowColors);
+        swapRedBlue.setEnabled(allowColors);
+        swapRedGreen.setEnabled(allowColors);
+
+        shiftRBGR.setEnabled(allowColors);
+        shiftRGBR.setEnabled(allowColors);
+
+        removeRed.setEnabled(allowColors && allowAnySum);
+        removeGreen.setEnabled(allowColors && allowAnySum);
+        removeBlue.setEnabled(allowColors && allowAnySum);
+
+        sepia.setEnabled(allowColors && allowAnySum);
+    }
+
+    private void temporarilyEnableNormalization(boolean enable) {
+        redPercentageGroup.setAutoNormalizationEnabled(enable, false);
+
+        // if monochrome, then it's enough to enable the red group
+        boolean monochrome = autoBWParam.isChecked();
+        greenPercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
+        bluePercentageGroup.setAutoNormalizationEnabled(enable && !monochrome, false);
     }
 
     private static RangeParam from(String first, String second, int defaultValue) {
@@ -467,7 +482,7 @@ public class ChannelMixer extends ParametrizedFilter {
     }
 
     private void runWithDisabledNormalization(Runnable task) {
-        boolean wasNormalized = autoNormalize;
+        boolean wasNormalized = preserveBrightnessParam.isChecked();
         if (wasNormalized) {
             temporarilyEnableNormalization(false);
         }

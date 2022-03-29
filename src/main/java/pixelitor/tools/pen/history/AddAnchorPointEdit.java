@@ -65,8 +65,8 @@ public class AddAnchorPointEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.add(DebugNodes.createPathNode(subPath.getPath()));
 

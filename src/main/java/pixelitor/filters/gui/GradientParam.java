@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -252,6 +253,9 @@ public class GradientParam extends AbstractFilterParam {
 
     private record GradientParamState(float[] thumbPositions,
                                       Color[] colors) implements ParamState<GradientParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public GradientParamState interpolate(GradientParamState endState, double progress) {
             // This will not work if the number of thumbs changes

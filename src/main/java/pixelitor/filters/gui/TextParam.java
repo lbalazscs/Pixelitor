@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
+import java.io.Serial;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -122,6 +123,9 @@ public class TextParam extends AbstractFilterParam {
     }
 
     private record TextParamState(String value) implements ParamState<TextParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public TextParamState interpolate(TextParamState endState, double progress) {
             throw new UnsupportedOperationException();

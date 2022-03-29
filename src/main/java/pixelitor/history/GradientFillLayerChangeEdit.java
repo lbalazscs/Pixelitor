@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.layers.GradientFillLayer;
 import pixelitor.tools.gradient.Gradient;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -48,5 +49,16 @@ public class GradientFillLayerChangeEdit extends PixelitorEdit {
         super.redo();
 
         layer.setGradient(after, false);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(layer.createDebugNode());
+        node.addNullableChild("before", before);
+        node.addNullableChild("after", after);
+
+        return node;
     }
 }

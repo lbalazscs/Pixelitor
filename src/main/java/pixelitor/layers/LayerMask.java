@@ -248,8 +248,8 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.addBoolean("enabled", getOwner().isMaskEnabled());
         node.addBoolean("linked", isLinked());

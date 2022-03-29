@@ -63,8 +63,8 @@ public class DeleteLayerEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.addInt("layer index", layerIndex);
         node.add(layer.createDebugNode());

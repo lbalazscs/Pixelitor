@@ -22,6 +22,7 @@ import pixelitor.utils.Rnd;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -194,6 +195,9 @@ public class BooleanParam extends AbstractFilterParam {
 
     public enum BooleanParamState implements ParamState<BooleanParamState> {
         YES, NO;
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final String saveString;
 

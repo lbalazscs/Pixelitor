@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,15 +91,11 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
-        node.add(translationEdit.createDebugNode());
-        if (imageEdit != null) {
-            node.add(imageEdit.createDebugNode());
-        } else {
-            node.addString("image edit", "null");
-        }
+        node.add(translationEdit.createDebugNode("translationEdit"));
+        node.addNullableChild("image edit", imageEdit);
         node.add(layer.createDebugNode("layer"));
 
         return node;

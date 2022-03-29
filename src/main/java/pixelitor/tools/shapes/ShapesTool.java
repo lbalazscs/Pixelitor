@@ -873,7 +873,7 @@ public class ShapesTool extends DragTool {
 
                         loadShapeAndBox(styledShape, transformBox);
                     } else {
-                        throw new IllegalStateException("what state is this? state = " + state);
+                        throw new IllegalStateException("state = " + state);
                     }
 
                     // make the loaded box visible - TODO necessary?
@@ -969,8 +969,8 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
         node.addAsString("state", state);
 
         if (transformBox == null) {

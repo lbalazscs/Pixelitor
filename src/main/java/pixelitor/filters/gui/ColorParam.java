@@ -24,6 +24,7 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.io.Serial;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -161,6 +162,9 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public record ColorParamState(Color color) implements ParamState<ColorParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
             return new ColorParamState(Colors.rgbInterpolate(

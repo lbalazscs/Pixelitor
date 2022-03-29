@@ -24,6 +24,8 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
@@ -45,7 +47,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * Note that no pixel values are stored here, this is
  * all vector graphics.
  */
-public class Gradient implements Serializable {
+public class Gradient implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = -6574312118763734469L;
 
@@ -251,6 +253,15 @@ public class Gradient implements Serializable {
             case LINEAR, RADIAL -> false;
             default -> true;
         };
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addAsString("type", type);
+
+        return node;
     }
 
     @Override

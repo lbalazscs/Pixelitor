@@ -1336,13 +1336,6 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.add(new OpenViewEnabledAction("Debug Smart Objects") {
-            @Override
-            public void onClick() {
-                Debug.debugSmartObjects();
-            }
-        });
-
         developMenu.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
             @Override
             public void onActiveLayer(Layer layer) {

@@ -26,6 +26,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,7 +42,7 @@ import static java.awt.Color.WHITE;
 /**
  * Represents a selection on an image.
  */
-public class Selection {
+public class Selection implements Debuggable {
     private float dashPhase;
     private View view;
     private Timer marchingAntsTimer;
@@ -352,6 +353,7 @@ public class Selection {
         return edit;
     }
 
+    @Override
     public DebugNode createDebugNode(String name) {
         var node = new DebugNode(name, this);
 

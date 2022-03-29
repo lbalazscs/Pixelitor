@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -165,8 +165,8 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
         Composition backupComp = backupCompRef.get();
         if (backupComp != null) {
             node.add(new CompositionNode("backup comp", backupComp));

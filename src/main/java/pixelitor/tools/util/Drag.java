@@ -675,10 +675,12 @@ public class Drag implements Serializable {
 
     public void displayRelativeMovement(Graphics2D g) {
         assert hasCoCoords;
-        int dx = (int) (imEndX - imStartX);
-        int dy = (int) (imEndY - imStartY);
-        // TODO mixing co and im coordinates?
-        DragDisplay.displayRelativeMovement(g, dx, dy, (float) (coEndX + 30), (float) (coEndY - 20));
+        int imDx = (int) (imEndX - imStartX);
+        int imDy = (int) (imEndY - imStartY);
+        // It's OK to mix co and im coordinates here, the co coordinates are
+        // for the display's position, and im values are for the displayed value.
+        DragDisplay.displayRelativeMovement(g, imDx, imDy,
+            (float) (coEndX + 30), (float) (coEndY - 20));
     }
 
     public void displayAngleAndDist(Graphics2D g) {

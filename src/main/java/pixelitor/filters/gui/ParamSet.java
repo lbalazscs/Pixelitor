@@ -39,7 +39,7 @@ public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
-    private Runnable beforeResetAction;
+    private Runnable afterResetAction;
     private Preset[] builtinPresets;
     private boolean nonTrivialFilter;
 
@@ -145,21 +145,21 @@ public class ParamSet {
     }
 
     /**
-     * Allows registering an action that will run before "reset all"
+     * Allows registering an action that will run after "reset all"
      */
-    public void setBeforeResetAllAction(Runnable beforeResetAction) {
-        this.beforeResetAction = beforeResetAction;
+    public void setAfterResetAllAction(Runnable afterResetAction) {
+        this.afterResetAction = afterResetAction;
     }
 
     /**
      * Resets all params without triggering the filter
      */
     public void reset() {
-        if (beforeResetAction != null) {
-            beforeResetAction.run();
-        }
         for (FilterParam param : paramList) {
             param.reset(false);
+        }
+        if (afterResetAction != null) {
+            afterResetAction.run();
         }
     }
 

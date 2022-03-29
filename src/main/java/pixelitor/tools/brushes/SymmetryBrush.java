@@ -195,11 +195,11 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public DebugNode createDebugNode() {
+    public DebugNode createDebugNode(String key) {
         var node = new DebugNode("symmetry brush", this);
 
         for (int i = 0; i < numBrushes; i++) {
-            node.add(brushes[i].createDebugNode());
+            node.add(brushes[i].createDebugNode("brush " + i));
         }
 
         node.addAsString("type", brushType);

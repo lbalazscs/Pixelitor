@@ -89,6 +89,7 @@ public class WorkflowTest {
 
         wfTest1();
         wfTest2();
+        wfTest3();
 
         if (!expWasEnabled) {
             EDT.run(() -> AppContext.enableExperimentalFeatures = false);
@@ -221,6 +222,13 @@ public class WorkflowTest {
         app.runMenuCommand("Lower Layer Selection");
 
         loadReferenceImage("wf2_reference.pxc");
+    }
+
+    private void wfTest3() {
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 3");
+        app.addTextLayer("Cutout",
+            dialog -> dialog.slider("fontSize").slideTo(200), "Pixelitor");
+
     }
 
     private void addTextLayer(String text, String vAlignment, String hAlignment) {

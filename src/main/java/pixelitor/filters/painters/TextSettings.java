@@ -29,6 +29,7 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -46,7 +47,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
  * Settings for the text filter and text layers.
  * Edited by the {@link TextSettingsPanel}.
  */
-public class TextSettings implements Serializable {
+public class TextSettings implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -279,6 +280,7 @@ public class TextSettings implements Serializable {
         guiUpdater.accept(this);
     }
 
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 

@@ -20,6 +20,7 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
@@ -28,7 +29,7 @@ import javax.swing.undo.CannotUndoException;
 /**
  * The abstract superclass for all edits in Pixelitor
  */
-public abstract class PixelitorEdit extends AbstractUndoableEdit {
+public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debuggable {
     protected Composition comp;
     private final String name;
     private final boolean isHeavy;
@@ -165,14 +166,19 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     }
 
     public DebugNode createDebugNode() {
-        String nodeName = name;
+        String nodeKey = name;
 
-        boolean noNodeName = nodeName == null || nodeName.trim().isEmpty();
+        boolean noNodeName = nodeKey == null || nodeKey.trim().isEmpty();
         if (noNodeName) { // can happen with embedded edits
-            nodeName = getClass().getSimpleName();
+            nodeKey = getClass().getSimpleName();
         }
 
-        var node = new DebugNode(nodeName, this);
+        return createDebugNode(nodeKey);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
         node.addClass();
         node.addQuotedString("comp debug name", comp.getDebugName());
         node.addBoolean("embedded", embedded);

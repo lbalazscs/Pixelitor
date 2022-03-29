@@ -593,8 +593,8 @@ public class SmartObject extends ImageLayer {
     }
 
     @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         boolean linked = isContentLinked();
         node.addBoolean("linked", linked);

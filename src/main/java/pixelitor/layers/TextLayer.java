@@ -407,8 +407,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         if (settings == null) {
             node.addString("text settings", "NO TEXT SETTINGS!");

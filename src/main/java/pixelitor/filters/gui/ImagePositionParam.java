@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -159,6 +160,9 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     private record ImagePositionParamState(double relativeX,
                                            double relativeY) implements ParamState<ImagePositionParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public ImagePositionParamState interpolate(ImagePositionParamState endState, double progress) {
             double interpolatedX = ImageMath.lerp(progress, relativeX, endState.relativeX);

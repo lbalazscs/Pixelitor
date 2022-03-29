@@ -299,7 +299,14 @@ public final class AppPreferences {
         if (name == null) {
             return FileFormat.JPG;
         }
-        return FileFormat.valueOf(name.toUpperCase());
+        FileFormat fileFormat;
+        try {
+            fileFormat = FileFormat.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // can happen only if the preferences were manually edited
+            return FileFormat.JPG;
+        }
+        return fileFormat;
     }
 
     private static void saveLastSaveFormat() {

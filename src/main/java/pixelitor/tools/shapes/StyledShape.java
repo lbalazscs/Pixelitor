@@ -666,7 +666,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         node.addAsString("type", shapeType);
         node.addAsString("fillPaint", fillPaint);
         node.addAsString("strokePaint", strokePaint);
-        node.add(effects.createDebugNode());
+        node.add(effects.createDebugNode("effects"));
         node.addColor("FG", fgColor);
         node.addColor("BG", bgColor);
 

@@ -23,6 +23,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -41,7 +42,7 @@ import java.io.Serializable;
  * because it was moved with the Move Tool).
  * The saved images always have the size of the canvas.
  */
-public class Canvas implements Serializable {
+public class Canvas implements Serializable, Debuggable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
@@ -233,8 +234,9 @@ public class Canvas implements Serializable {
         return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
     }
 
-    public DebugNode createDebugNode() {
-        DebugNode node = new DebugNode("canvas", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
 
         node.addInt("im width", width);
         node.addInt("im height", height);

@@ -662,7 +662,7 @@ public class AppRunner {
         keyboard.pressEsc(); // hide the gradient handles
     }
 
-    private void checkNewLayerHistory(int numLayersBefore, String editName) {
+    private void undoRedoNewLayer(int numLayersBefore, String editName) {
         checkNumLayersIs(numLayersBefore + 1);
 
         keyboard.undo(editName);
@@ -696,7 +696,7 @@ public class AppRunner {
             keyboard.releaseCtrl();
         }
 
-        checkNewLayerHistory(numLayersBefore, "New Empty Layer");
+        undoRedoNewLayer(numLayersBefore, "New Empty Layer");
     }
 
     public void addTextLayer(String text, Consumer<DialogFixture> customizer, String expectedText) {
@@ -716,7 +716,7 @@ public class AppRunner {
         dialog.button("ok").click();
         dialog.requireNotVisible();
 
-        checkNewLayerHistory(numLayersBefore, "Add Text Layer");
+        undoRedoNewLayer(numLayersBefore, "Add Text Layer");
     }
 
     public void editTextLayer(Consumer<DialogFixture> customizer) {
@@ -755,7 +755,7 @@ public class AppRunner {
         EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).changeColor(c, true));
 
         keyboard.undo("Color Fill Layer Change");
-        checkNewLayerHistory(numLayersBefore, "Add Color Fill Layer");
+        undoRedoNewLayer(numLayersBefore, "Add Color Fill Layer");
         keyboard.redo("Color Fill Layer Change");
     }
 
@@ -763,7 +763,7 @@ public class AppRunner {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_G);
-        checkNewLayerHistory(numLayersBefore, "Add Gradient Fill Layer");
+        undoRedoNewLayer(numLayersBefore, "Add Gradient Fill Layer");
 
         EDT.assertActiveToolIs(Tools.GRADIENT);
         pw.comboBox("typeCB").selectItem(gradientType.toString());
@@ -779,7 +779,7 @@ public class AppRunner {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_S);
-        checkNewLayerHistory(numLayersBefore, "Add Shape Layer");
+        undoRedoNewLayer(numLayersBefore, "Add Shape Layer");
 
         EDT.assertActiveToolIs(Tools.SHAPES);
         pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());

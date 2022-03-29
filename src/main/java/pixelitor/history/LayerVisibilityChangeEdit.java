@@ -59,8 +59,8 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
         node.addBoolean("new visibility", newVisibility);

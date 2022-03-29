@@ -22,6 +22,7 @@ import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -37,7 +38,7 @@ import java.util.Objects;
  * A collection of 4 area effects, which can be enabled or disabled.
  * It also functions as the {@link ParamState} of {@link EffectsParam}
  */
-public class AreaEffects implements Serializable, ParamState<AreaEffects> {
+public class AreaEffects implements Serializable, ParamState<AreaEffects>, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -296,8 +297,9 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
         }
     }
 
-    public DebugNode createDebugNode() {
-        DebugNode node = new DebugNode("effects", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
         addToNode(node, glowEffect, "glow");
         addToNode(node, innerGlowEffect, "inner glow");
         addToNode(node, neonBorderEffect, "glow");

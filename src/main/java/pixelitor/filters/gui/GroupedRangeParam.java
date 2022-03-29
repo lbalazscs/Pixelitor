@@ -22,6 +22,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -441,6 +442,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     public record GroupedRangeParamState(double[] values,
                                          boolean linked) implements ParamState<GroupedRangeParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public GroupedRangeParamState interpolate(GroupedRangeParamState endState, double progress) {
             double[] interpolatedValues = new double[values.length];

@@ -296,8 +296,8 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.addAsString("brush", cloneBrush.getType());
         node.addAsString("state", state);

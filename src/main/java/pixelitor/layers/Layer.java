@@ -34,6 +34,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,7 +58,7 @@ import static pixelitor.utils.Threads.calledOnEDT;
 /**
  * The abstract superclass of all layer classes
  */
-public abstract class Layer implements Serializable {
+public abstract class Layer implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 2L;
 
@@ -895,8 +896,9 @@ public abstract class Layer implements Serializable {
         return null;
     }
 
-    public DebugNode createDebugNode(String description) {
-        DebugNode node = new DebugNode(description + " - " + getName(), this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key + " - " + getName(), this);
 
         node.addQuotedString("name", getName());
         node.addClass();

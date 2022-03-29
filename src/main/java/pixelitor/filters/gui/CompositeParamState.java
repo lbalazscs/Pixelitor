@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +27,9 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 public class CompositeParamState implements ParamState<CompositeParamState> {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final List<ParamState<?>> states;
 
     public CompositeParamState(FilterParam[] children) {

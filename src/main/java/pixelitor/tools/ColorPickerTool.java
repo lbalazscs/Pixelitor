@@ -154,8 +154,8 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
 

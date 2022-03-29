@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * Support for drawing drag information (pixels, angles) in the tools.
+ * All coordinates are in component space, unless they have the im prefix in their name.
  */
 public class DragDisplay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
@@ -55,10 +56,10 @@ public class DragDisplay {
         g.setClip(null);
     }
 
-    public static String getHeightDisplayString(double height) {
+    public static String getHeightDisplayString(double imHeight) {
         String dyString;
-        int rounded = (int) height;
-        if (height >= 0) {
+        int rounded = (int) imHeight;
+        if (imHeight >= 0) {
             dyString = "\u2195 = " + rounded + " px";
         } else {
             dyString = "\u2195 = " + (-rounded) + " px";
@@ -66,10 +67,10 @@ public class DragDisplay {
         return dyString;
     }
 
-    public static String getWidthDisplayString(double width) {
+    public static String getWidthDisplayString(double imWidth) {
         String dxString;
-        int rounded = (int) width;
-        if (width >= 0) {
+        int rounded = (int) imWidth;
+        if (imWidth >= 0) {
             dxString = "\u2194 = " + rounded + " px";
         } else {
             dxString = "\u2194 = " + (-rounded) + " px";
@@ -77,19 +78,19 @@ public class DragDisplay {
         return dxString;
     }
 
-    public static void displayRelativeMovement(Graphics2D g, int dx, int dy,
+    public static void displayRelativeMovement(Graphics2D g, int imDx, int imDy,
                                                float x, float y) {
         String dxString;
-        if (dx >= 0) {
-            dxString = "\u2192 = " + dx + " px";
+        if (imDx >= 0) {
+            dxString = "\u2192 = " + imDx + " px";
         } else {
-            dxString = "\u2190 = " + (-dx) + " px";
+            dxString = "\u2190 = " + (-imDx) + " px";
         }
         String dyString;
-        if (dy >= 0) {
-            dyString = "\u2193 = " + dy + " px";
+        if (imDy >= 0) {
+            dyString = "\u2193 = " + imDy + " px";
         } else {
-            dyString = "\u2191 = " + (-dy) + " px";
+            dyString = "\u2191 = " + (-imDy) + " px";
         }
 
         DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
@@ -111,7 +112,7 @@ public class DragDisplay {
     }
 
     /**
-     * x and y are the bottom left coordinates of the background rectangle
+     * x and y are the bottom left coordinates of the background rectangle.
      */
     public void drawOneLine(String s, float x, float y) {
         drawBg(x, y, ONE_LINER_BG_HEIGHT);

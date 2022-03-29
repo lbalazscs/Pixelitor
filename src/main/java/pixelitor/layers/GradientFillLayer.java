@@ -186,9 +186,11 @@ public class GradientFillLayer extends ContentLayer {
 
         if (addHistory) {
             History.add(new GradientFillLayerChangeEdit(this, oldGradient, gradient));
-//        } else {
-//            // called from the undo/redo
-//            Tools.editingTargetChanged(this);
+        } else { // called from the undo/redo
+            if (Tools.GRADIENT.isActive()) {
+                // the handles have to be updated by the tool
+                Tools.GRADIENT.updateFrom(this);
+            }
         }
     }
 

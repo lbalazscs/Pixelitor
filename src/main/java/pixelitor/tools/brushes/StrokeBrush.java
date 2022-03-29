@@ -93,8 +93,8 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.addAsString("stroke type", strokeType);
 

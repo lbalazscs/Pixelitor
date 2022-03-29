@@ -523,18 +523,8 @@ public class GradientTool extends DragTool {
                     return; // not a new layer
                 }
                 gradientLayer = gfl;
-
                 blendingModePanel.setEnabled(false);
-                Gradient gradient = gfl.getGradient();
-                if (gradient != null) {
-                    loadSettingsFromGradient(gradient, gfl.getComp().getView());
-
-                    // make the loaded handles visible
-                    layer.getComp().repaint();
-                } else {
-                    // can get here when undoing the first gradient
-                    hideHandlesUnchecked(gfl.getComp());
-                }
+                updateFrom(gfl);
             } else {
                 gradientLayer = null;
                 if (handles != null) {
@@ -566,6 +556,21 @@ public class GradientTool extends DragTool {
 
         lastGradient = gradient;
         view.repaint();
+    }
+
+    // called only when editing a gradient layer
+    public void updateFrom(GradientFillLayer gfl) {
+        Gradient gradient = gfl.getGradient();
+        Composition comp = gfl.getComp();
+        if (gradient != null) {
+            loadSettingsFromGradient(gradient, comp.getView());
+
+            // make the loaded handles visible
+            comp.repaint();
+        } else {
+            // can get here when undoing the first gradient
+            hideHandlesUnchecked(comp);
+        }
     }
 
     private void loadSettingsFromGradient(Gradient gradient, View view) {
@@ -629,8 +634,8 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = super.createDebugNode();
+    public DebugNode createDebugNode(String key) {
+        var node = super.createDebugNode(key);
 
         node.addAsString("type", getType());
         node.addAsString("cycling", getCycleType());

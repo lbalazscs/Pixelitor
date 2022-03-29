@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 
@@ -28,7 +28,7 @@ import java.awt.Graphics2D;
  * The received coordinates correspond to the mouse events,
  * they are not translated with the brush radius.
  */
-public interface Brush {
+public interface Brush extends Debuggable {
     /**
      * The start of a new brush stroke.
      */
@@ -119,6 +119,4 @@ public interface Brush {
      * any spacing that looks good, or 0 to skip the decision.
      */
     double getPreferredSpacing();
-
-    DebugNode createDebugNode();
 }

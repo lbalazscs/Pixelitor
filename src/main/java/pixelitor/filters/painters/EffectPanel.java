@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
+import pixelitor.colors.ColorHistory;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
@@ -104,6 +105,9 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     }
 
     public void setColor(Color newColor, boolean trigger) {
+        if (color.equals(newColor)) {
+            return;
+        }
         color = newColor;
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
@@ -113,6 +117,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
+        ColorHistory.FILTER.add(newColor);
     }
 
     ButtonModel getEnabledModel() {

@@ -164,18 +164,12 @@ public class ImageMagick {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectInput(ProcessBuilder.Redirect.PIPE);
         try {
-            long startTime = System.nanoTime();
-
             Process p = pb.start();
             try (OutputStream magickInput = p.getOutputStream()) {
                 writeToOutStream(img, magickInput);
                 magickInput.flush();
             }
             p.waitFor();
-
-            System.out.printf("ImageMagick::exportImage: took %.2f seconds.%n",
-                (System.nanoTime() - startTime) / 1_000_000_000.0);
-
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (InterruptedException e) {
@@ -234,10 +228,10 @@ public class ImageMagick {
 
     private static boolean checkInstalled() {
         if (!magickDirName.isEmpty()) {
-            System.out.println("ImageMagick found in preferences: " + magickDirName);
             String executable = JVM.isWindows ? "magick.exe" : "magick";
             magickCommand = new File(magickDirName, executable);
             if (magickCommand.exists()) {
+                // ImageMagick was found in the directory given in the preferences
                 return true;
             }
         }

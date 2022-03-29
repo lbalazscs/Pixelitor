@@ -205,12 +205,7 @@ public class TransformBox implements ToolWidget, Serializable {
         }
     }
 
-    public TransformBox copy(Transformable newOwner, View currentView) {
-        if (needsInitialization(currentView)) {
-            // can't be copied without a view
-            setView(currentView);
-        }
-
+    public TransformBox copy(Transformable newOwner) {
         TransformBox box = new TransformBox(this);
         box.setOwner(newOwner);
         return box;

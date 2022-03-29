@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import java.io.Serial;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -197,6 +198,9 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     private record AngleParamState(double angle) implements ParamState<AngleParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public AngleParamState interpolate(AngleParamState endState, double progress) {
             double interpolatedAngle = ImageMath.lerp(progress, angle, endState.angle);

@@ -347,8 +347,8 @@ public abstract class Tool implements KeyListener, PresetOwner {
         return null;
     }
 
-    public DebugNode createDebugNode() {
-        DebugNode toolNode = new DebugNode("active tool", this);
+    public DebugNode createDebugNode(String key) {
+        DebugNode toolNode = new DebugNode(key, this);
         toolNode.addString("name", getName());
         return toolNode;
     }

@@ -99,11 +99,11 @@ public class EdgeHandle extends PositionHandle {
     }
 
     @Override
-    protected void drawDragDisplays(DragDisplay dd, Dimension2D size) {
+    protected void drawDragDisplays(DragDisplay dd, Dimension2D imSize) {
         if (horizontal) {
-            ch2.drawHeightDisplay(dd, size);
+            ch2.drawHeightDisplay(dd, imSize);
         } else {
-            ch2.drawWidthDisplay(dd, size);
+            ch2.drawWidthDisplay(dd, imSize);
         }
     }
 }

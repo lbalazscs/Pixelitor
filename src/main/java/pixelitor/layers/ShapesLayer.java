@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.Flip;
+import pixelitor.gui.View;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tool;
@@ -80,7 +81,13 @@ public class ShapesLayer extends ContentLayer {
         if (styledShape != null) {
             duplicate.setStyledShape(styledShape.clone());
             if (transformBox != null) {
-                duplicate.transformBox = transformBox.copy(duplicate.styledShape, comp.getView());
+                View view = comp.getView();
+                if (transformBox.needsInitialization(view)) {
+                    // can't be copied without a view
+                    transformBox.reInitialize(view, styledShape);
+                }
+
+                duplicate.transformBox = transformBox.copy(duplicate.styledShape);
             }
         }
         return duplicate;
@@ -224,6 +231,10 @@ public class ShapesLayer extends ContentLayer {
     public void startMovement() {
         super.startMovement();
         if (hasShape() && transformBox != null) {
+            View view = Views.getActive();
+            if (transformBox.needsInitialization(view)) {
+                transformBox.reInitialize(view, styledShape);
+            }
             transformBox.startMovement();
         }
     }
@@ -272,8 +283,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public DebugNode createDebugNode(String descr) {
-        DebugNode node = super.createDebugNode(descr);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
         if (styledShape == null) {
             node.addString("styledShape", "null");

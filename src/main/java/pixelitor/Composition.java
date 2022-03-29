@@ -199,7 +199,7 @@ public class Composition implements Serializable {
         }
 
         createDebugName();
-        assert checkSOInvariants();
+        assert checkAllSOInvariants();
     }
 
     /**
@@ -1652,15 +1652,7 @@ public class Composition implements Serializable {
         forAllNestedSmartObjects(so -> so.getContent().close());
     }
 
-    public String debugSmartObjects() {
-        checkSOInvariants();
-
-        return "Composition::debugSmartObjects: "
-               + getDebugName() + ": owner = "
-               + ((owner == null) ? "null" : owner.getName());
-    }
-
-    public boolean checkSOInvariants() {
+    private boolean checkAllSOInvariants() {
         forAllNestedSmartObjects(SmartObject::checkInvariant);
         return true;
     }

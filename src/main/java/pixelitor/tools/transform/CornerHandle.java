@@ -146,23 +146,23 @@ public class CornerHandle extends PositionHandle {
     }
 
     @Override
-    protected void drawDragDisplays(DragDisplay dd, Dimension2D size) {
-        drawWidthDisplay(dd, size);
-        drawHeightDisplay(dd, size);
+    protected void drawDragDisplays(DragDisplay dd, Dimension2D imSize) {
+        drawWidthDisplay(dd, imSize);
+        drawHeightDisplay(dd, imSize);
     }
 
-    public void drawWidthDisplay(DragDisplay dd, Dimension2D size) {
+    public void drawWidthDisplay(DragDisplay dd, Dimension2D imSize) {
         Direction horEdgeDirection = getHorEdgeDirection();
-        String widthString = DragDisplay.getWidthDisplayString(size.getWidth());
+        String widthString = DragDisplay.getWidthDisplayString(imSize.getWidth());
         Point2D horHalf = getHorHalfPoint();
         float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
         float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
         dd.drawOneLine(widthString, horX, horY);
     }
 
-    public void drawHeightDisplay(DragDisplay dd, Dimension2D size) {
+    public void drawHeightDisplay(DragDisplay dd, Dimension2D imSize) {
         Direction verEdgeDirection = getVerEdgeDirection();
-        String heightString = DragDisplay.getHeightDisplayString(size.getHeight());
+        String heightString = DragDisplay.getHeightDisplayString(imSize.getHeight());
         Point2D verHalf = getVerHalfPoint();
         float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
         float verY = (float) (verHalf.getY() + verEdgeDirection.dy);

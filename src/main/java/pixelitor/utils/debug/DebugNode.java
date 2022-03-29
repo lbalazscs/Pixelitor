@@ -92,8 +92,22 @@ public class DebugNode extends DefaultMutableTreeNode {
         addNode(name, s);
     }
 
+    /**
+     * A null-safe way of adding the toString() of an object
+     */
     public void addAsString(String name, Object o) {
         addString(name, o == null ? "null" : o.toString());
+    }
+
+    /**
+     * A null-safe version of adding the DebugNode created by an object
+     */
+    public void addNullableChild(String name, Debuggable debuggable) {
+        if (debuggable == null) {
+            addString(name, "null");
+        } else {
+            add(debuggable.createDebugNode(name));
+        }
     }
 
     public void addQuotedString(String name, String s) {

@@ -98,5 +98,5 @@ public abstract class PositionHandle extends DraggablePoint {
         }
     }
 
-    protected abstract void drawDragDisplays(DragDisplay dd, Dimension2D size);
+    protected abstract void drawDragDisplays(DragDisplay dd, Dimension2D imSize);
 }

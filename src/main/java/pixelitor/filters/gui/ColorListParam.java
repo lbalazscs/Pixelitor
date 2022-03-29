@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -144,6 +145,9 @@ public class ColorListParam extends AbstractFilterParam {
     }
 
     private record ColorListParamState(Color[] colors) implements ParamState<ColorListParamState> {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         @Override
         public ColorListParamState interpolate(ColorListParamState endState, double progress) {
             throw new UnsupportedOperationException();
