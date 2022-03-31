@@ -17,6 +17,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -105,23 +106,20 @@ public enum FileFormat {
 
     public Composition readSync(File file) {
         // overwritten for multi-layered formats
-        return readSimpleSync(file);
+        return readSingleLayeredSync(file);
     }
 
-    public static Composition readSimpleSync(File file) {
+    public static Composition readSingleLayeredSync(File file) {
         BufferedImage img = TrackedIO.uncheckedRead(file);
         return Composition.fromImage(img, file, null);
     }
 
     public CompletableFuture<Composition> readAsync(File file) {
         // overwritten for multi-layered formats
-        return readSimpleAsync(file);
+        return readSingleLayeredAsync(file);
     }
 
-    /**
-     * Loads a composition from a file with a single-layer image format
-     */
-    private static CompletableFuture<Composition> readSimpleAsync(File file) {
+    private static CompletableFuture<Composition> readSingleLayeredAsync(File file) {
         return CompletableFuture.supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }
@@ -169,7 +167,7 @@ public enum FileFormat {
         };
     }
 
-    private static volatile FileFormat lastOutput = JPG;
+    private static volatile FileFormat lastOutput = AppPreferences.loadLastSaveFormat();
 
     public static FileFormat getLastOutput() {
         return lastOutput;

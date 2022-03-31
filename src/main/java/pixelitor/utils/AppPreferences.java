@@ -32,6 +32,7 @@ import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
+import pixelitor.io.FileFormat;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -83,6 +84,7 @@ public final class AppPreferences {
 
     private static final String LAST_OPEN_DIR_KEY = "last_open_dir";
     private static final String LAST_SAVE_DIR_KEY = "last_save_dir";
+    private static final String LAST_SAVE_FORMAT_KEY = "last_save_fmt";
 
     private static final String UNDO_LEVELS_KEY = "undo_levels";
     private static final String THUMB_SIZE_KEY = "thumb_size";
@@ -292,6 +294,19 @@ public final class AppPreferences {
         }
     }
 
+    public static FileFormat loadLastSaveFormat() {
+        String name = mainNode.get(LAST_SAVE_FORMAT_KEY, null);
+        if (name == null) {
+            return FileFormat.JPG;
+        }
+        return FileFormat.valueOf(name.toUpperCase());
+    }
+
+    private static void saveLastSaveFormat() {
+        FileFormat lastOutput = FileFormat.getLastOutput();
+        mainNode.put(LAST_SAVE_FORMAT_KEY, lastOutput.toString());
+    }
+
     public static int loadUndoLevels() {
         int retVal = mainNode.getInt(UNDO_LEVELS_KEY, -1);
         if (retVal == -1) {
@@ -359,6 +374,7 @@ public final class AppPreferences {
         saveFramePosition(PixelitorWindow.get());
         saveLastOpenDir();
         saveLastSaveDir();
+        saveLastSaveFormat();
         saveFgBgColors();
         WorkSpace.saveVisibility();
         saveUndoLevels();
