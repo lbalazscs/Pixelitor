@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pixelitor.gui.GUIText;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
+
+import static java.awt.AlphaComposite.DST_OUT;
 
 /**
  * The blending modes
@@ -127,6 +129,11 @@ public enum BlendingMode {
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Luminosity;
             return new ValueComposite(opacity);
+        }
+    }, ERASE("Erase", "svg:dst-out") {
+        @Override
+        public Composite getComposite(float opacity) {
+            return AlphaComposite.getInstance(DST_OUT, opacity);
         }
     };
 
