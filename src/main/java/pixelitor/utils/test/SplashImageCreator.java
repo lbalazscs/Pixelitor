@@ -133,8 +133,7 @@ public class SplashImageCreator {
             Drag randomDrag = Drag.createRandom(
                 SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
             Gradient gradient = new Gradient(randomDrag,
-                gradientType, REFLECT, FG_TO_BG,
-                false, MULTIPLY, 1.0f);
+                gradientType, REFLECT, FG_TO_BG, false, MULTIPLY, 1.0f);
             gradient.drawOn(layer);
         }
 
@@ -152,16 +151,13 @@ public class SplashImageCreator {
         FgBgColors.setFGColor(WHITE);
 
         Font font = createSplashFont(SPLASH_SMALL_FONT, 20);
-        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER,
-            font, 50);
+        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, font, 50);
 
         font = createSplashFont(SPLASH_MAIN_FONT, MAIN_FONT_SIZE);
-        addTextLayer(comp, "Pixelitor",
-            font, -17);
+        addTextLayer(comp, "Pixelitor", font, -17);
 
         font = createSplashFont(SPLASH_SMALL_FONT, 22);
-        addTextLayer(comp, "Loading...",
-            font, -70);
+        addTextLayer(comp, "Loading...", font, -70);
     }
 
     private static Font createSplashFont(String name, int size) {
@@ -199,9 +195,9 @@ public class SplashImageCreator {
         AreaEffects effects = createDropShadowEffect();
         var settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER,
-            VerticalAlignment.CENTER, false, false, 0, null);
+            VerticalAlignment.CENTER, false, 0, null);
 
-        TextLayer layer = addNewTextLayer(comp, text, settings, translationY);
+        addNewTextLayer(comp, text, settings, translationY);
     }
 
     private static AreaEffects createDropShadowEffect() {

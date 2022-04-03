@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.AlphaComposite.DST_OUT;
 import static java.awt.RenderingHints.*;
 
 /**
@@ -40,8 +39,6 @@ public class TransformedTextPainter extends TextPainter {
     private int translationX = 0;
     private int translationY = 0;
     private double rotation = 0;
-
-    private boolean eraseFill;
 
     private transient RotatedRectangle rotatedRect;
     private transient Rectangle boundingBox;
@@ -107,13 +104,9 @@ public class TransformedTextPainter extends TextPainter {
         }
         setupGraphics(g);
 
-        if (eraseFill) {
-            g.setComposite(AlphaComposite.getInstance(DST_OUT));
-        } else {
-            Paint paint = getFillPaint();
-            if (paint != null) {
-                g.setPaint(paint);
-            }
+        Paint paint = getFillPaint();
+        if (paint != null) {
+            g.setPaint(paint);
         }
 
         g.drawString(text, 0, (float) metrics.getAscent());
@@ -214,9 +207,5 @@ public class TransformedTextPainter extends TextPainter {
 
     public void setRotation(double rotation) {
         this.rotation = rotation;
-    }
-
-    public void setEraseFill(boolean eraseFill) {
-        this.eraseFill = eraseFill;
     }
 }

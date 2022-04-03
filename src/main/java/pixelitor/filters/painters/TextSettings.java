@@ -58,7 +58,6 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_HOR_ALIGN = "hor_align";
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
     private static final String PRESET_KEY_WATERMARK = "watermark";
-    private static final String PRESET_KEY_ERASE_FILL = "eraseFill";
 
     private String text;
     private Font font;
@@ -67,7 +66,6 @@ public class TextSettings implements Serializable, Debuggable {
     private VerticalAlignment verticalAlignment;
     private HorizontalAlignment horizontalAlignment;
     private boolean watermark;
-    private boolean eraseFill;
     private double rotation;
 
     private transient Consumer<TextSettings> guiUpdater;
@@ -76,7 +74,7 @@ public class TextSettings implements Serializable, Debuggable {
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
-                        boolean watermark, boolean eraseFill, double rotation,
+                        boolean watermark, double rotation,
                         Consumer<TextSettings> guiUpdater) {
         assert effects != null;
 
@@ -87,7 +85,6 @@ public class TextSettings implements Serializable, Debuggable {
         this.text = text;
         this.verticalAlignment = verticalAlignment;
         this.watermark = watermark;
-        this.eraseFill = eraseFill;
         this.rotation = rotation;
         this.guiUpdater = guiUpdater;
     }
@@ -103,7 +100,6 @@ public class TextSettings implements Serializable, Debuggable {
         text = DEFAULT_TEXT;
         verticalAlignment = VerticalAlignment.CENTER;
         watermark = false;
-        eraseFill = false;
         rotation = 0;
     }
 
@@ -120,7 +116,6 @@ public class TextSettings implements Serializable, Debuggable {
         verticalAlignment = other.verticalAlignment;
         horizontalAlignment = other.horizontalAlignment;
         watermark = other.watermark;
-        eraseFill = other.eraseFill;
         rotation = other.rotation;
     }
 
@@ -166,10 +161,6 @@ public class TextSettings implements Serializable, Debuggable {
         return watermark;
     }
 
-    public boolean hasEraseFill() {
-        return eraseFill;
-    }
-
     public double getRotation() {
         return rotation;
     }
@@ -182,7 +173,6 @@ public class TextSettings implements Serializable, Debuggable {
         horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
         verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
         watermark = Rnd.nextBoolean();
-        eraseFill = Rnd.nextBoolean();
         rotation = Rnd.nextDouble() * Math.PI * 2;
     }
 
@@ -196,7 +186,6 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setHorizontalAlignment(horizontalAlignment);
         painter.setVerticalAlignment(verticalAlignment);
         painter.setRotation(rotation);
-        painter.setEraseFill(eraseFill);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
@@ -258,7 +247,6 @@ public class TextSettings implements Serializable, Debuggable {
         areaEffects.saveStateTo(preset);
 
         preset.putBoolean(PRESET_KEY_WATERMARK, watermark);
-        preset.putBoolean(PRESET_KEY_ERASE_FILL, eraseFill);
     }
 
     public void loadUserPreset(UserPreset preset) {
@@ -273,7 +261,6 @@ public class TextSettings implements Serializable, Debuggable {
 
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
-        eraseFill = preset.getBoolean(PRESET_KEY_ERASE_FILL);
 
         // should be always non-null while loading a preset,
         // because this happens only in the dialog
@@ -286,7 +273,6 @@ public class TextSettings implements Serializable, Debuggable {
 
         node.addQuotedString("Text", getText());
         node.addBoolean("Watermark", watermark);
-        node.addBoolean("Erase Fill", eraseFill);
 
         return node;
     }

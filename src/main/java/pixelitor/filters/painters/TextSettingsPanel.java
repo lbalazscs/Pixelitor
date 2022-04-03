@@ -63,7 +63,6 @@ public class TextSettingsPanel extends FilterGUI
     private JComboBox<VerticalAlignment> vAlignmentCB;
     private JComboBox<HorizontalAlignment> hAlignmentCB;
     private JCheckBox watermarkCB;
-    private JCheckBox eraseFillCB;
 
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
@@ -277,14 +276,11 @@ public class TextSettingsPanel extends FilterGUI
 
     private JPanel createBottomPanel(TextSettings settings) {
         watermarkCB = new JCheckBox("Watermarking", settings.hasWatermark());
-        eraseFillCB = new JCheckBox("Erase Fill", settings.hasEraseFill());
 
-        watermarkCB.addActionListener(e -> specialCBAction(eraseFillCB));
-        eraseFillCB.addActionListener(e -> specialCBAction(watermarkCB));
+        watermarkCB.addActionListener(this);
 
-        JPanel p = new JPanel(new FlowLayout(LEFT, 20, 5));
+        JPanel p = new JPanel(new FlowLayout(LEFT, 5, 5));
         p.add(watermarkCB);
-        p.add(eraseFillCB);
         return p;
     }
 
@@ -323,7 +319,7 @@ public class TextSettingsPanel extends FilterGUI
             text, selectedFont, color.getColor(), effects,
             (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
             (VerticalAlignment) vAlignmentCB.getSelectedItem(),
-            watermarkCB.isSelected(), eraseFillCB.isSelected(), textRotationAngle, this);
+            watermarkCB.isSelected(), textRotationAngle, this);
 
         updateApp(settings);
     }
@@ -376,7 +372,6 @@ public class TextSettingsPanel extends FilterGUI
 
         effectsPanel.setEffects(settings.getEffects());
         watermarkCB.setSelected(settings.hasWatermark());
-        eraseFillCB.setSelected(settings.hasEraseFill());
     }
 
     private boolean isInFilterMode() {
