@@ -63,7 +63,7 @@ public class DraggablePoint extends Point2D.Double {
     protected double origX;
     protected double origY;
 
-    protected final Color color;
+    private final Color color;
     private final Color activeColor;
 
     // since there can be only one active point at a

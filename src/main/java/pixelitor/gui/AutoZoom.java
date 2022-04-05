@@ -71,7 +71,7 @@ public enum AutoZoom {
     private Action asAction() {
         var action = new OpenViewEnabledAction(guiName) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Views.fitActive(AutoZoom.this);
             }
         };

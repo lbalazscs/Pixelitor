@@ -43,6 +43,7 @@ import static pixelitor.Views.getActiveComp;
 import static pixelitor.Views.getActiveSelection;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Static methods for managing the actions that should be enabled
@@ -53,21 +54,21 @@ public final class SelectionActions {
 
     private static final Action crop = new PAction("Crop Selection") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             Crop.selectionCropActiveImage();
         }
     };
 
-    private static final Action deselect = new PAction("Deselect") {
+    private static final Action deselect = new PAction(i18n("deselect")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             getActiveComp().deselect(true);
         }
     };
 
-    private static final Action invert = new PAction("Invert Selection") {
+    private static final Action invert = new PAction(i18n("invert_sel")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             getActiveComp().invertSelection();
         }
     };
@@ -76,23 +77,23 @@ public final class SelectionActions {
 
     private static final Action convertToPath = new PAction("Convert to Path") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             var comp = getActiveComp();
             selectionToPath(comp, true);
         }
     };
 
-    private static final Action copySel = new PAction("Copy Selection") {
+    private static final Action copySel = new PAction(i18n("copy_sel")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             copiedSelShape = getActiveComp().getSelectionShape();
             pasteSel.setEnabled(true);
         }
     };
 
-    private static final Action pasteSel = new PAction("Paste Selection") {
+    private static final Action pasteSel = new PAction(i18n("paste_sel")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             getActiveComp().changeSelection(copiedSelShape);
         }
     };
@@ -127,9 +128,9 @@ public final class SelectionActions {
         }
     }
 
-    private static final Action modify = new PAction("Modify Selection...") {
+    private static final Action modify = new PAction(i18n("modify_sel") + "...") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             JPanel panel = new JPanel(new GridBagLayout());
             var gbh = new GridBagHelper(panel);
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
@@ -140,7 +141,7 @@ public final class SelectionActions {
 
             new DialogBuilder()
                 .content(panel)
-                .title("Modify Selection")
+                .title(i18n("modify_sel"))
                 .okText("Change!")
                 .cancelText(CLOSE_DIALOG)
                 .validator(d -> {

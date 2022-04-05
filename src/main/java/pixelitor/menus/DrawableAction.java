@@ -86,7 +86,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
     protected abstract void process(Drawable dr);
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         Views.onActiveLayer(this::startOnLayer);
     }
 

@@ -66,7 +66,13 @@ public class History {
 
         assert edit != null;
         if (forbidEdits) {
-            throw new IllegalStateException();
+            // TODO we can get here if undoing something activates a view, and this in turn
+            //   creates another edit, such as an auto-rasterization in the shapes tool
+            if (AppContext.isDevelopment()) {
+                throw new IllegalStateException();
+            } else {
+                return;
+            }
         }
         if (ignoreEdits) {
             return;

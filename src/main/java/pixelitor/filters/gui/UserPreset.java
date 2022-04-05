@@ -259,7 +259,7 @@ public class UserPreset implements Preset {
     public Action asAction(PresetOwner owner) {
         return new PAction(name) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 if (!loaded) {
                     try {
                         load();

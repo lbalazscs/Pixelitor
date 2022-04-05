@@ -193,7 +193,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         state = AFTER_FIRST_MOUSE_PRESS;
         if (handles == null) {
             return;
@@ -209,7 +209,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         // the gradient will be drawn only when the mouse is released
 
         if (activePoint != null) {
@@ -226,7 +226,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void dragFinished(PMouseEvent e) {
+    protected void dragFinished(PMouseEvent e) {
         Composition comp = e.getComp();
         checkActiveLayer(comp);
         if (drag.isClick()) {
@@ -470,7 +470,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public DragDisplayType getDragDisplayType() {
+    protected DragDisplayType getDragDisplayType() {
         if (handles == null) {
             return DragDisplayType.ANGLE_DIST;
         }

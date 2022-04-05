@@ -30,7 +30,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     private boolean enabledByAnimation = true;
     private boolean enabledByAppLogic = true;
     protected ParamGUI paramGUI;
-    protected RandomizePolicy randomizePolicy;
+    private RandomizePolicy randomizePolicy;
     private String toolTip;
 
     // If this is not null, then it's the model of an extra action button

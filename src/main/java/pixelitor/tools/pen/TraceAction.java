@@ -38,7 +38,7 @@ public class TraceAction extends PAction {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         Views.onActiveComp(this::trace);
     }
 

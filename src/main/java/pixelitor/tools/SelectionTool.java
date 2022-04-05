@@ -114,7 +114,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         if (polygonal) {
             return; // ignore mouse pressed
         }
@@ -126,7 +126,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         if (polygonal) {
             return; // ignore dragging
         }
@@ -146,7 +146,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void dragFinished(PMouseEvent e) {
+    protected void dragFinished(PMouseEvent e) {
         if (drag.isClick() && !polygonal) { // will be handled by mouseClicked
             restoreCombinator();
             return;
@@ -276,7 +276,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public DragDisplayType getDragDisplayType() {
+    protected DragDisplayType getDragDisplayType() {
         if (displayWidthHeight) {
             return DragDisplayType.WIDTH_HEIGHT;
         }

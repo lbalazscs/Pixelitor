@@ -39,7 +39,7 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, ToneCurvesFilter.NAME, new ToneCurvesFilter());
 

@@ -50,7 +50,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction implements 
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         Views.onActiveComp(this::process);
     }
 

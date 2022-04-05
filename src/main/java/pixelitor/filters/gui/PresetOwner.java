@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
-import pixelitor.utils.Utils;
+import pixelitor.io.FileUtils;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -55,7 +55,7 @@ public interface PresetOwner {
     public default PAction createManagePresetsAction() {
         return new PAction("Manage Presets...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 try {
                     String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();
                     Desktop.getDesktop().open(new File(dirPath));
@@ -71,14 +71,14 @@ public interface PresetOwner {
                                           Consumer<UserPreset> menuRemover) {
         Action savePresetAction = new PAction("Save Preset...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 String presetName = Dialogs.showInputDialog(
                     parent, "Preset Name", "Preset Name:");
                 if (presetName == null || presetName.isBlank()) {
                     return;
                 }
 
-                presetName = Utils.toFileName(presetName);
+                presetName = FileUtils.toFileName(presetName);
                 UserPreset preset = createUserPreset(presetName);
 
                 if (preset.fileExists()) {

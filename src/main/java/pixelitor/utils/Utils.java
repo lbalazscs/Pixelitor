@@ -52,13 +52,6 @@ public final class Utils {
     private Utils() {
     }
 
-    /**
-     * Replaces all the special characters in s string with an underscore
-     */
-    public static String toFileName(String s) {
-        return s.trim().replaceAll("[/\\\\?%*:|\"<>.,;=]", "_");
-    }
-
     public static String float2String(float f) {
         if (f == 0.0f) {
             return "";

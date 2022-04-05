@@ -32,6 +32,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.CompositionNode;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -94,6 +95,7 @@ public class SmartObject extends ImageLayer {
         contentLayer.setComp(content);
         content.addLayerInInitMode(contentLayer);
         content.setName(getName());
+        content.createDebugName();
         copyBlendingFrom(layer);
 
         recalculateImage(false);
@@ -257,20 +259,20 @@ public class SmartObject extends ImageLayer {
     void addSmartObjectSpecificItems(JPopupMenu popup) {
         popup.add(new PAction("Edit Contents") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 edit();
             }
         });
         if (isContentLinked()) {
             popup.add(new PAction("Embed Contents") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     embedLinkedContent();
                 }
             });
             popup.add(new PAction("Reload Contents") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     reloadLinkedContent();
                 }
             });
@@ -280,7 +282,7 @@ public class SmartObject extends ImageLayer {
             Filter smartFilter = smartFilters.get(0);
             popup.add(new PAction("Copy " + smartFilter.getName()) {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     Filter.copiedSmartFilter = smartFilter.copy();
                 }
             });
@@ -288,7 +290,7 @@ public class SmartObject extends ImageLayer {
         if (Filter.copiedSmartFilter != null) {
             popup.add(new PAction("Paste " + Filter.copiedSmartFilter.getName()) {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     // copy again, because it could be pasted multiple times
                     pasteSmartFilter(Filter.copiedSmartFilter.copy());
                 }
@@ -301,7 +303,7 @@ public class SmartObject extends ImageLayer {
                 Filter smartFilter = smartFilters.get(i);
                 PAction editAction = new PAction("Edit " + smartFilter.getName()) {
                     @Override
-                    public void onClick() {
+                    protected void onClick() {
                         editSmartFilter(finalI);
                     }
                 };
@@ -312,7 +314,7 @@ public class SmartObject extends ImageLayer {
 
                 popup.add(new PAction("Delete " + smartFilter.getName()) {
                     @Override
-                    public void onClick() {
+                    protected void onClick() {
                         deleteSmartFilter();
                     }
                 });
@@ -365,7 +367,7 @@ public class SmartObject extends ImageLayer {
         updateSmartFilterUI();
     }
 
-    public void runAndAddSmartFilter(Filter newFilter) {
+    private void runAndAddSmartFilter(Filter newFilter) {
         assert smartFilters.isEmpty();
 
         lastFilterOutput = image;
@@ -590,6 +592,16 @@ public class SmartObject extends ImageLayer {
     @Override
     public String getTypeString() {
         return "Smart Object";
+    }
+
+    public void debugAllImages() {
+        BufferedImage soImage = image;
+        BufferedImage contentImage = content.getCompositeImage();
+//        BufferedImage calcContentImage = content.calculateCompositeImage();
+
+        Debug.debugImage(soImage, "soImage");
+        Debug.debugImage(contentImage, "contentImage");
+//        Debug.debugImage(calcContentImage, "calcContentImage");
     }
 
     @Override

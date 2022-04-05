@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static java.util.Comparator.comparing;
@@ -53,6 +54,15 @@ public class FilterUtils {
         FilterAction[] filters = allFilters.toArray(EMPTY_FA_ARRAY);
         Arrays.sort(filters, comparing(FilterAction::getName));
         return filters;
+    }
+
+    public static void forEachSerializableFilter(Consumer<? super Filter> action) {
+        // all filters can be serialized, but only those
+        // with a no-arg constructor can be deserialized
+        allFilters.stream()
+            .map(FilterAction::getFilter)
+            .filter(Filter::canBeSmart)
+            .forEach(action);
     }
 
     public static FilterAction[] getAnimationFilters() {

@@ -38,13 +38,15 @@ enum MaskMode {
         }
 
         @Override
-        public void set(AssertJSwingTest tester) {
-            if(EDT.activeLayerHasMask()) {
+        public void setLayer(AssertJSwingTest tester) {
+            if (EDT.activeLayerHasMask()) {
                 tester.deleteLayerMask();
             }
-            
-            check();
-            tester.checkConsistency();
+        }
+
+        @Override
+        public void setMaskViewMode(Keyboard keyboard) {
+            keyboard.pressCtrlOne();
         }
     },
     /**
@@ -63,13 +65,15 @@ enum MaskMode {
         }
 
         @Override
-        public void set(AssertJSwingTest tester) {
+        public void setLayer(AssertJSwingTest tester) {
             // existing masks are allowed because even if they result
             // from a layer duplication, a correct mask must be set up
             tester.addLayerMask(true);
-            tester.keyboard().pressCtrlOne();
+        }
 
-            tester.checkConsistency();
+        @Override
+        public void setMaskViewMode(Keyboard keyboard) {
+            keyboard.pressCtrlOne();
         }
     },
     /**
@@ -90,11 +94,13 @@ enum MaskMode {
         }
 
         @Override
-        public void set(AssertJSwingTest tester) {
+        public void setLayer(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.keyboard().pressCtrlThree();
+        }
 
-            tester.checkConsistency();
+        @Override
+        public void setMaskViewMode(Keyboard keyboard) {
+            keyboard.pressCtrlThree();
         }
     },
     /**
@@ -115,11 +121,13 @@ enum MaskMode {
         }
 
         @Override
-        public void set(AssertJSwingTest tester) {
+        public void setLayer(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.keyboard().pressCtrlTwo();
+        }
 
-            tester.checkConsistency();
+        @Override
+        public void setMaskViewMode(Keyboard keyboard) {
+            keyboard.pressCtrlTwo();
         }
     },
     /**
@@ -140,11 +148,13 @@ enum MaskMode {
         }
 
         @Override
-        public void set(AssertJSwingTest tester) {
+        public void setLayer(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.keyboard().pressCtrlFour();
+        }
 
-            tester.checkConsistency();
+        @Override
+        public void setMaskViewMode(Keyboard keyboard) {
+            keyboard.pressCtrlFour();
         }
     };
 
@@ -174,5 +184,13 @@ enum MaskMode {
     /**
      * Make sure that the testing more is set on the active layer
      */
-    public abstract void set(AssertJSwingTest tester);
+    public void set(AssertJSwingTest tester) {
+        setLayer(tester);
+        setMaskViewMode(tester.keyboard());
+        tester.checkConsistency();
+    }
+
+    public abstract void setLayer(AssertJSwingTest tester);
+
+    public abstract void setMaskViewMode(Keyboard keyboard);
 }

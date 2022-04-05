@@ -888,7 +888,7 @@ public class AssertJSwingTest {
         // add more layer types
         app.addGradientFillLayer(GradientType.ANGLE);
         app.addColorFillLayer(Color.BLUE);
-        app.addShapesLayer(ShapeType.BAT);
+        app.addShapesLayer(ShapeType.BAT, 20, 380);
 
         testDuplicateImage();
 
@@ -908,6 +908,8 @@ public class AssertJSwingTest {
             .click();
         app.checkNumLayersIs(1);
 
+        maskMode.setMaskViewMode(keyboard);
+        maskMode.check();
         checkConsistency();
     }
 
@@ -1124,7 +1126,7 @@ public class AssertJSwingTest {
         app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
 
         // TODO test ImageMagick exporting as well
-        app.closeCurrent();
+        app.closeCurrentView();
     }
 
     private void testExportLayerAnimation() {
@@ -1203,7 +1205,7 @@ public class AssertJSwingTest {
 
         boolean dirty = EDT.active(Composition::isDirty);
 
-        app.closeCurrent();
+        app.closeCurrentView();
 
         if (dirty) {
             app.closeDoYouWantToSaveChangesDialog();
@@ -2904,7 +2906,7 @@ public class AssertJSwingTest {
         try {
             String cleanerScriptPath = cleanerScript.getCanonicalPath();
             System.out.println("AssertJSwingTest::cleanOutputs: running " + cleanerScript);
-            Process process = Runtime.getRuntime().exec(cleanerScriptPath);
+            Process process = Runtime.getRuntime().exec(new String[]{cleanerScriptPath});
             int exitValue = process.waitFor();
             if (exitValue != 0) {
                 throw new IllegalStateException("Exit value for " + cleanerScriptPath + " was " + exitValue);

@@ -45,7 +45,7 @@ import static pixelitor.utils.ImageUtils.*;
  * The GUI for "Mask from Color Range"
  */
 public class MaskFromColorRangePanel extends JPanel {
-    public static final String NAME = "Mask from Color Range";
+    private static final String NAME = "Mask from Color Range";
     private static final int DEFAULT_THUMB_SIZE = 512;
     private static final String HELP_TEXT = "Select a color by clicking or dragging on the image";
 

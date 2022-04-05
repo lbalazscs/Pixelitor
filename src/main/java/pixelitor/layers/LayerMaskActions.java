@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class LayerMaskActions {
     private static class PopupMouseListener extends MouseAdapter {
         private final JPopupMenu menu;
 
-        public PopupMouseListener(Layer layer) {
+        protected PopupMouseListener(Layer layer) {
             menu = new JPopupMenu();
 
             JMenu showMenu = new JMenu("Show/Edit");
@@ -86,13 +86,13 @@ public class LayerMaskActions {
     private static class DeleteMaskAction extends PAction {
         private final Layer layer;
 
-        public DeleteMaskAction(Layer layer) {
+        protected DeleteMaskAction(Layer layer) {
             super("Delete");
             this.layer = layer;
         }
 
         @Override
-        public void onClick() {
+        protected void onClick() {
             layer.deleteMask(true);
         }
     }
@@ -100,13 +100,13 @@ public class LayerMaskActions {
     private static class ApplyMaskAction extends PAction {
         private final Layer layer;
 
-        public ApplyMaskAction(Layer layer) {
+        protected ApplyMaskAction(Layer layer) {
             super("Apply");
             this.layer = layer;
         }
 
         @Override
-        public void onClick() {
+        protected void onClick() {
             if (!(layer instanceof ImageLayer)) {
                 // actually we should never get here because the popup menu
                 // is enabled only for image layers
@@ -130,7 +130,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void onClick() {
+        protected void onClick() {
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
             refreshText();
         }
@@ -160,7 +160,7 @@ public class LayerMaskActions {
         }
 
         @Override
-        public void onClick() {
+        protected void onClick() {
             LayerMask mask = layer.getMask();
             mask.setLinked(!mask.isLinked(), true);
             refreshText();

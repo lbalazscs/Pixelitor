@@ -39,7 +39,7 @@ public class AddTextLayerAction extends PAction implements ViewActivationListene
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         TextLayer.createNew();
     }
 

@@ -109,7 +109,7 @@ public enum FileFormat {
         return readSingleLayeredSync(file);
     }
 
-    public static Composition readSingleLayeredSync(File file) {
+    private static Composition readSingleLayeredSync(File file) {
         BufferedImage img = TrackedIO.uncheckedRead(file);
         return Composition.fromImage(img, file, null);
     }

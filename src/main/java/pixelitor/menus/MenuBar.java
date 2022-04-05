@@ -129,7 +129,7 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.add(new PAction(texts.getString("open") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 FileChoosers.openAsync();
             }
         }, CTRL_O);
@@ -140,21 +140,21 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("save")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 IO.save(false);
             }
         }, CTRL_S);
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("save_as") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 IO.save(true);
             }
         }, CTRL_SHIFT_S);
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("export_optimized_jpeg") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 BufferedImage image = getActiveCompositeImage();
                 OptimizedJpegSavePanel.showInDialog(image);
             }
@@ -166,7 +166,7 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("export_layer_animation") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 LayerAnimExport.start();
             }
         });
@@ -183,14 +183,14 @@ public class MenuBar extends JMenuBar {
         // reload
         fileMenu.add(new OpenViewEnabledAction(texts.getString("reload")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 reloadActiveAsync();
             }
         }, F12);
 
         fileMenu.add(new OpenViewEnabledAction(texts.getString("show_metadata") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 MetaDataPanel.showInDialog();
             }
         });
@@ -220,7 +220,7 @@ public class MenuBar extends JMenuBar {
             texts.getString("exit_mac") : texts.getString("exit");
         fileMenu.add(new PAction(exitName) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Pixelitor.exitApp(pw);
             }
         });
@@ -233,14 +233,14 @@ public class MenuBar extends JMenuBar {
 
         imMenu.add(new OpenViewEnabledAction("Export...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ImageMagick.exportActiveComp();
             }
         });
 
         imMenu.add(new PAction("Import...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ImageMagick.importComposition();
             }
         });
@@ -253,7 +253,7 @@ public class MenuBar extends JMenuBar {
 
         automateMenu.add(new PAction(texts.getString("batch_resize") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 BatchResize.showDialog();
             }
         });
@@ -267,7 +267,7 @@ public class MenuBar extends JMenuBar {
 
         automateMenu.add(new OpenViewEnabledAction(texts.getString("export_layers_to_png") + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 IO.exportLayersToPNGAsync();
             }
         });
@@ -317,7 +317,7 @@ public class MenuBar extends JMenuBar {
         String prefsMenuName = texts.getString("preferences") + "...";
         editMenu.add(new PAction(prefsMenuName) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PreferencesPanel.showInDialog();
             }
         });
@@ -337,7 +337,7 @@ public class MenuBar extends JMenuBar {
         // merge down
         var mergeDown = new OpenViewEnabledAction(GUIText.MERGE_DOWN) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().mergeActiveLayerDown();
             }
         };
@@ -347,7 +347,7 @@ public class MenuBar extends JMenuBar {
         // flatten image
         var flattenImage = new OpenViewEnabledAction(texts.getString("flatten_image")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().flattenImage();
             }
         };
@@ -357,7 +357,7 @@ public class MenuBar extends JMenuBar {
         // new layer from visible
         var newFromVisible = new OpenViewEnabledAction(texts.getString("new_from_visible")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().addNewLayerFromComposite();
             }
         };
@@ -392,7 +392,7 @@ public class MenuBar extends JMenuBar {
         // layer to top
         var layerToTop = new OpenViewEnabledAction(LAYER_TO_TOP) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().moveActiveLayerToTop();
             }
         };
@@ -402,7 +402,7 @@ public class MenuBar extends JMenuBar {
         // layer_to_bottom
         var layerToBottom = new OpenViewEnabledAction(LAYER_TO_BOTTOM) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().moveActiveLayerToBottom();
             }
         };
@@ -414,7 +414,7 @@ public class MenuBar extends JMenuBar {
         // raise layer selection
         var raiseLayerSelection = new OpenViewEnabledAction(RAISE_LAYER_SELECTION) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 var comp = getActiveComp();
                 comp.raiseLayerSelection();
             }
@@ -424,7 +424,7 @@ public class MenuBar extends JMenuBar {
 
         var lowerLayerSelection = new OpenViewEnabledAction(LOWER_LAYER_SELECTION) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().lowerLayerSelection();
             }
         };
@@ -474,7 +474,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Add/Replace from Color Range...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 MaskFromColorRangePanel.showInDialog();
             }
         });
@@ -519,7 +519,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("New Text Layer...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 TextLayer.createNew();
             }
         }, T);
@@ -556,7 +556,7 @@ public class MenuBar extends JMenuBar {
         // not called "Invert" because of assertj test lookup confusion
         sub.add(new OpenViewEnabledAction("Invert Adjustment") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 AddAdjLayerAction.INSTANCE.actionPerformed(null);
             }
         });
@@ -569,7 +569,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Convert to Smart Object") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveLayer().replaceWithSmartObject();
             }
         });
@@ -592,7 +592,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Edit All Nested Contents") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Composition comp = getActiveComp();
                 comp.forAllNestedSmartObjects(SmartObject::edit);
             }
@@ -613,7 +613,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Add Linked...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Composition comp = getActiveComp();
                 File file = FileChoosers.getSupportedOpenFile();
 
@@ -634,7 +634,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("New Color Fill Layer...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ColorFillLayer.createNew();
             }
         });
@@ -663,7 +663,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("New Gradient Fill Layer...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 GradientFillLayer.createNew();
             }
         }, CTRL_ALT_G);
@@ -685,7 +685,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("New Shape Layer...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ShapesLayer.createNew();
             }
         }, CTRL_ALT_S);
@@ -730,14 +730,14 @@ public class MenuBar extends JMenuBar {
         // resize
         imageMenu.add(new OpenViewEnabledAction("Resize...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ResizePanel.resizeActiveImage();
             }
         }, CTRL_ALT_I);
 
         imageMenu.add(new OpenViewEnabledAction("Duplicate") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 duplicateActiveComp();
             }
         });
@@ -752,7 +752,7 @@ public class MenuBar extends JMenuBar {
 
         var fitCanvasToLayers = new OpenViewEnabledAction(texts.getString("fit_canvas_to_layers")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().fitCanvasToLayers();
             }
         };
@@ -761,7 +761,7 @@ public class MenuBar extends JMenuBar {
 
         imageMenu.add(new OpenViewEnabledAction("Layer to Canvas Size") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().activeLayerToCanvasSize();
             }
         });
@@ -887,7 +887,7 @@ public class MenuBar extends JMenuBar {
 
         filterMenu.add(new OpenViewEnabledAction("Filter Search...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 FilterSearchPanel.showInDialog();
             }
         }, F3);
@@ -1149,13 +1149,13 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new OpenViewEnabledAction("Show History...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 History.showHistory();
             }
         });
         viewMenu.add(new OpenViewEnabledAction("Show Navigator...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Navigator.showInDialog();
             }
         });
@@ -1165,7 +1165,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.add(createColorVariationsSubmenu(pw));
         viewMenu.add(new PAction("Color Palette...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showDialog(pw, new FullPalette(),
                     ColorSwatchClickHandler.STANDARD);
             }
@@ -1181,7 +1181,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new PAction("Set Default Workspace") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 WorkSpace.resetDefaults(pw);
             }
         });
@@ -1197,7 +1197,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new OpenViewEnabledAction("Add Horizontal Guide...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 View view = getActive();
                 Guides.showAddSingleGuideDialog(view, true);
             }
@@ -1205,7 +1205,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new OpenViewEnabledAction("Add Vertical Guide...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 View view = getActive();
                 Guides.showAddSingleGuideDialog(view, false);
             }
@@ -1213,7 +1213,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new OpenViewEnabledAction("Add Grid Guides...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 View view = getActive();
                 Guides.showAddGridDialog(view);
             }
@@ -1221,7 +1221,7 @@ public class MenuBar extends JMenuBar {
 
         viewMenu.add(new OpenViewEnabledAction("Clear Guides") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 var comp = getActiveComp();
                 comp.clearGuides();
             }
@@ -1238,21 +1238,21 @@ public class MenuBar extends JMenuBar {
         PMenu variations = new PMenu("Color Variations");
         variations.add(new PAction("Foreground...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showFGVariationsDialog(pw);
             }
         });
         variations.add(new PAction(
             "HSB Mix Foreground with Background...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showHSBMixDialog(pw, true);
             }
         });
         variations.add(new PAction(
             "RGB Mix Foreground with Background...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showRGBMixDialog(pw, true);
             }
         });
@@ -1261,21 +1261,21 @@ public class MenuBar extends JMenuBar {
 
         variations.add(new PAction("Background...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showBGVariationsDialog(pw);
             }
         });
         variations.add(new PAction(
             "HSB Mix Background with Foreground...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showHSBMixDialog(pw, false);
             }
         });
         variations.add(new PAction(
             "RGB Mix Background with Foreground...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showRGBMixDialog(pw, false);
             }
         });
@@ -1287,7 +1287,7 @@ public class MenuBar extends JMenuBar {
 
         var cascadeAction = new PAction("Cascade") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ImageArea.cascadeWindows();
             }
         };
@@ -1296,7 +1296,7 @@ public class MenuBar extends JMenuBar {
 
         var tileAction = new PAction("Tile") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ImageArea.tileWindows();
             }
         };
@@ -1324,14 +1324,14 @@ public class MenuBar extends JMenuBar {
 
         developMenu.add(new PAction("Filter Creator...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 FilterCreator.showInDialog();
             }
         });
 
         developMenu.add(new OpenViewEnabledAction("Dump Event Queue") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Events.dumpAll();
             }
         });
@@ -1370,35 +1370,35 @@ public class MenuBar extends JMenuBar {
 
         developMenu.add(new OpenViewEnabledAction("Debug Copy Brush") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 CopyBrush.setDebugBrushImage(true);
             }
         });
 
         developMenu.add(new PAction("Create All Filters") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 FilterUtils.createAllFilters();
             }
         });
 
         developMenu.add(new PAction("Change UI") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 ImageArea.changeUI();
             }
         });
 
         developMenu.add(new PAction("frame size 1366x728") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PixelitorWindow.get().setSize(1366, 728);
             }
         });
 
         developMenu.add(new OpenViewEnabledAction("Export with ImageMagick") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 BufferedImage img = getActiveCompositeImage();
                 ImageMagick.exportImage(img, new File("out.webp"), ExportSettings.DEFAULTS);
             }
@@ -1412,35 +1412,50 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("repaint() on the active image") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 repaintActive();
             }
         });
 
         sub.add(new OpenViewEnabledAction("update(FULL) on the active image") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().update(FULL, true);
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Debug active composite image") {
+            @Override
+            protected void onClick() {
+                Composition comp = getActiveComp();
+                Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName());
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Debug all images") {
+            @Override
+            protected void onClick() {
+                Debug.debugAllImages();
             }
         });
 
         sub.add(new PAction("revalidate() the main window") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 pw.getContentPane().revalidate();
             }
         });
 
         sub.add(new PAction("update all UI") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Themes.updateAllUI();
             }
         });
 
         sub.add(new OpenViewEnabledAction("reset the translation of current layer") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 var comp = getActiveComp();
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof ContentLayer contentLayer) {
@@ -1455,7 +1470,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Update Histograms") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 var comp = getActiveComp();
                 HistogramsPanel.updateFrom(comp);
             }
@@ -1470,14 +1485,14 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("debug mouse to sys.out") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 GlobalEvents.registerDebugMouseWatching(false);
             }
         });
 
         sub.add(new PAction("Debug Screen Location") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Point locationOnScreen = pw.getLocationOnScreen();
                 System.out.println("locationOnScreen = " + locationOnScreen);
                 Rectangle bounds = pw.getBounds();
@@ -1490,10 +1505,24 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new PAction("Copy Internal State to Clipboard") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Debug.copyInternalState();
             }
         }, CTRL_ALT_D);
+
+        sub.add(new PAction("Serialize All Filters") {
+            @Override
+            protected void onClick() {
+                Debug.serializeAllFilters();
+            }
+        });
+
+        sub.add(new PAction("Deserialize All Filters") {
+            @Override
+            protected void onClick() {
+                Debug.deserializeAllFilters();
+            }
+        });
 
         return sub;
     }
@@ -1505,21 +1534,21 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new PAction("Random GUI Test") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 RandomGUITest.start();
             }
         }, CTRL_R);
 
         sub.add(new OpenViewEnabledAction("Save Current Image in All Formats...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 IO.saveCurrentImageInAllFormats();
             }
         });
 
         sub.add(new OpenViewEnabledAction("Test Filter Constructors") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 FilterUtils.testFilterConstructors();
             }
         });
@@ -1532,14 +1561,14 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new PAction("Create Splash Image") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 SplashImageCreator.createSplashComp();
             }
         }, CTRL_K);
 
         sub.add(new PAction("Save Many Splash Images...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 SplashImageCreator.saveManySplashImages(64);
             }
         });
@@ -1569,7 +1598,7 @@ public class MenuBar extends JMenuBar {
         String tipOfTheDayText = texts.getString("tip_of_the_day");
         helpMenu.add(new PAction(tipOfTheDayText) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 TipsOfTheDay.showTips(pw, true);
             }
         });
@@ -1581,14 +1610,14 @@ public class MenuBar extends JMenuBar {
 
         helpMenu.add(new PAction("Internal State...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Debug.showInternalState();
             }
         });
 
         helpMenu.add(new PAction("Check for Update...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 UpdatesCheck.checkForUpdates();
             }
         });
@@ -1596,7 +1625,7 @@ public class MenuBar extends JMenuBar {
         String aboutText = texts.getString("about");
         helpMenu.add(new PAction(aboutText) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 AboutDialog.showDialog(aboutText);
             }
         });

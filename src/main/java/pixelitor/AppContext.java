@@ -21,6 +21,8 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Lazy;
 
+import java.awt.EventQueue;
+
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -95,9 +97,11 @@ public enum AppContext {
                              "<li>Color fill layers</li>" +
                              "<li>Shape layers</li>" +
                              "<li>Theme chooser in Preferences</li>" +
-                             "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental smart objects.<br>" +
-                             "Some experimental features will be fully activated<br>only after restarting Pixelitor.";
-                Dialogs.showWarningDialog("Experimental Features", msg);
+                             "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental features." +
+                             "<br><br>Some experimental features will be fully activated<br>only after restarting Pixelitor.";
+                // show the new dialog only after the main dialog is closed
+                EventQueue.invokeLater(() ->
+                    Dialogs.showWarningDialog("Experimental Features", msg));
             }
         }
     }

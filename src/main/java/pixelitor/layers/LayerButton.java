@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         UNSELECTED {
             @Override
-            public void show(JLabel layerLabel, JLabel maskLabel) {
+            protected void show(JLabel layerLabel, JLabel maskLabel) {
                 layerLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
                 if (maskLabel != null) {
                     maskLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
@@ -85,7 +85,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         LAYER_SELECTED {
             @Override
-            public void show(JLabel layerLabel, JLabel maskLabel) {
+            protected void show(JLabel layerLabel, JLabel maskLabel) {
                 layerLabel.setBorder(selectedBorder);
                 if (maskLabel != null) {
                     maskLabel.setBorder(unselectedIconOnSelectedLayerBorder);
@@ -97,7 +97,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         MASK_SELECTED {
             @Override
-            public void show(JLabel layerLabel, JLabel maskLabel) {
+            protected void show(JLabel layerLabel, JLabel maskLabel) {
                 layerLabel.setBorder(unselectedIconOnSelectedLayerBorder);
                 if (maskLabel != null) {
                     maskLabel.setBorder(selectedBorder);
@@ -137,7 +137,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
          * Shows a selection state on a given layer and mask icon.
          * The mask argument can be null, if there is no mask.
          */
-        public abstract void show(JLabel layerLabel, JLabel maskLabel);
+        protected abstract void show(JLabel layerLabel, JLabel maskLabel);
     }
 
     private SelectionState selectionState;

@@ -22,9 +22,11 @@ import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
@@ -41,7 +43,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.io.IOException;
+import java.io.*;
 import java.lang.StackWalker.StackFrame;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -212,7 +214,7 @@ public class Debug {
     }
 
     public static void debugImage(Image img, String name) {
-        // make sure the this is called on the EDT
+        // make sure that this is called on the EDT
         if (calledOutsideEDT()) {
             EventQueue.invokeLater(() -> debugImage(img, name));
             return;
@@ -421,6 +423,60 @@ public class Debug {
     public static void throwTestError() {
         if (AppContext.isDevelopment()) {
             throw new AssertionError("Test");
+        }
+    }
+
+    public static void serializeAllFilters() {
+        FilterUtils.forEachSerializableFilter(Debug::serialize);
+    }
+
+    public static void deserializeAllFilters() {
+        FilterUtils.forEachSerializableFilter(Debug::deserialize);
+    }
+
+    private static void serialize(Filter filter) {
+        File out = createFileForSerializedFilter(filter);
+        String path = out.getAbsolutePath();
+        System.out.printf("SerTest::serialize: path = '%s'%n", path);
+        try (FileOutputStream fos = new FileOutputStream(out)) {
+            try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                oos.writeObject(filter);
+            }
+        } catch (IOException e) {
+            Messages.showException(e);
+        }
+    }
+
+    private static void deserialize(Filter filter) {
+        File in = createFileForSerializedFilter(filter);
+        String path = in.getAbsolutePath();
+        System.out.printf("SerTest::deserialize: path = '%s'%n", path);
+
+        try (FileInputStream fis = new FileInputStream(in)) {
+            try (ObjectInputStream ois = new ObjectInputStream(fis)) {
+                Object object = ois.readObject();
+                if (object.getClass() != filter.getClass()) {
+                    throw new IllegalStateException();
+                }
+            }
+        } catch (Exception e) {
+            Messages.showException(e);
+        }
+    }
+
+    private static File createFileForSerializedFilter(Filter filter) {
+        String fileName = FileUtils.toFileName(filter.getName()) + ".ser";
+        return new File("ser", fileName);
+    }
+
+    public static void debugAllImages() {
+        // make a copy, because this will add new views
+        List<View> origViews = List.copyOf(Views.getAll());
+        for (View view : origViews) {
+            view.getComp().forAllNestedSmartObjects(SmartObject::debugAllImages);
+        }
+        for (View view : origViews) {
+            view.getComp().debugImages();
         }
     }
 }

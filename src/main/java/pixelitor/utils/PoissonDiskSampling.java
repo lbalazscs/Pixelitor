@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.utils.Metric.DistanceFunction;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -158,6 +159,19 @@ public class PoissonDiskSampling {
     public void showSamples(Graphics2D g2, double radius) {
         for (Point2D s : samples) {
             g2.fill(Shapes.createCircle(s, radius));
+        }
+    }
+
+    public void showSamples(Graphics2D g2, double radius, Color[] colors) {
+        int colorIndex = 0;
+        for (Point2D s : samples) {
+            g2.setColor(colors[colorIndex]);
+            g2.fill(Shapes.createCircle(s, radius));
+
+            colorIndex++;
+            if (colorIndex == colors.length) {
+                colorIndex = 0;
+            }
         }
     }
 

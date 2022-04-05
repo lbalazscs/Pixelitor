@@ -101,11 +101,11 @@ public abstract class DragTool extends Tool {
         endPointInitialized = false;
     }
 
-    public abstract void dragStarted(PMouseEvent e);
+    protected abstract void dragStarted(PMouseEvent e);
 
-    public abstract void ongoingDrag(PMouseEvent e);
+    protected abstract void ongoingDrag(PMouseEvent e);
 
-    public abstract void dragFinished(PMouseEvent e);
+    protected abstract void dragFinished(PMouseEvent e);
 
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
@@ -116,7 +116,7 @@ public abstract class DragTool extends Tool {
         getDragDisplayType().draw(g2, drag);
     }
 
-    public DragDisplayType getDragDisplayType() {
+    protected DragDisplayType getDragDisplayType() {
         return DragDisplayType.WIDTH_HEIGHT;
     }
 }

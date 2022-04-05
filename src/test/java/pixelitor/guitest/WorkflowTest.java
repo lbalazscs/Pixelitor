@@ -70,9 +70,15 @@ public class WorkflowTest {
     private static final int EXTRA_HEIGHT = 20;
     private static final int EXTRA_WIDTH = 50;
 
+    private static File referenceImagesDir;
+
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
+
+        assert args.length == 1;
+        referenceImagesDir = new File(args[0]);
+        assert referenceImagesDir.exists();
 
         new WorkflowTest();
     }
@@ -86,6 +92,7 @@ public class WorkflowTest {
         mouse = app.getMouse();
         pw = app.getPW();
         keyboard = app.getKeyboard();
+//        app.runSlowly();
 
         wfTest1();
         wfTest2();
@@ -99,7 +106,7 @@ public class WorkflowTest {
     private void wfTest1() {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
         addGuide();
-        runFilterWithDialog("Wood", null);
+        runFilterWithDialog("Wood");
         duplicateLayerThenUndo(ImageLayer.class);
 
         app.addTextLayer("Wood", null, "Pixelitor");
@@ -122,7 +129,7 @@ public class WorkflowTest {
         renderCaustics();
         selectWoodLayer();
         addHeartShapedHoleToTheWoodLayer();
-        runFilterWithDialog("Drop Shadow", null);
+        runFilterWithDialog("Drop Shadow");
         app.mergeDown();
         createEllipseSelection();
         expandSelection();
@@ -139,13 +146,13 @@ public class WorkflowTest {
         tracePath(BrushType.SHAPE);
         flipHorizontal();
         clearGuides();
-        selectBrushTool();
+        app.clickTool(Tools.BRUSH);
         loadReferenceImage("wf1_reference.png");
     }
 
     private void wfTest2() {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 2");
-        runFilterWithDialog("Spider Web", null);
+        runFilterWithDialog("Spider Web");
         app.runMenuCommand("Duplicate");
 
         addTextLayer("Spider", "Top", "Left");
@@ -155,7 +162,7 @@ public class WorkflowTest {
         pw.tabbedPane().selectTab("wf test 2");
         int mainTabIndex = EDT.call(() -> ((TabsUI) ImageArea.getUI()).getSelectedIndex());
 
-        runFilterWithDialog("Clouds", null);
+        runFilterWithDialog("Clouds");
         app.addEmptyImageLayer(false);
         runFilterWithDialog("Fractal Tree",
             dialog -> dialog.slider("Age (Iterations)").slideTo(14));
@@ -173,7 +180,7 @@ public class WorkflowTest {
 
         // close the temporary tab
         pw.tabbedPane().selectTab("wf test 2 copy");
-        app.closeCurrent();
+        app.closeCurrentView();
         app.closeDoYouWantToSaveChangesDialog();
 
         // now the main tab should be the active one
@@ -189,10 +196,7 @@ public class WorkflowTest {
         app.mergeDown();
 
         app.addTextLayer("TEXT", null, "Pixelitor");
-        app.runMenuCommand("Convert to Smart Object");
-        keyboard.undoRedo("Convert to Smart Object");
-
-        duplicateLayerThenUndo(SmartObject.class);
+        convertLayerToSmartObject();
 
         app.runMenuCommand("Edit Contents");
         app.editTextLayer(dialog -> dialog.textBox("textTF")
@@ -202,7 +206,7 @@ public class WorkflowTest {
 
         app.addLayerMask();
         app.drawGradient("Radial");
-        app.closeCurrent();
+        app.closeCurrentView();
 
         runFilterWithDialog("Magnify",
             dialog -> {
@@ -213,7 +217,7 @@ public class WorkflowTest {
         duplicateLayerThenUndo(SmartObject.class);
         rasterizeThenUndo(SmartObject.class);
 
-        app.addShapesLayer(ShapeType.CAT);
+        app.addShapesLayer(ShapeType.CAT, 20, 380);
         duplicateLayerThenUndo(ShapesLayer.class);
         rasterizeThenUndo(ShapesLayer.class);
 
@@ -221,14 +225,35 @@ public class WorkflowTest {
         app.runMenuCommand("Lower Layer Selection");
         app.runMenuCommand("Lower Layer Selection");
 
-        loadReferenceImage("wf2_reference.pxc");
+        loadReferenceImage("wf2_reference.png");
     }
 
     private void wfTest3() {
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 3");
+        runFilterWithDialog("Spirograph");
+
         app.addTextLayer("Cutout",
             dialog -> dialog.slider("fontSize").slideTo(200), "Pixelitor");
 
+        convertLayerToSmartObject();
+        app.runMenuCommand("Edit Contents");
+
+        app.addEmptyImageLayer(false);
+        app.runMenuCommand("Lower Layer");
+        keyboard.undoRedo("Lower Layer");
+
+        runFilterWithDialog("Plasma");
+        app.runMenuCommand("Raise Layer Selection");
+        keyboard.undoRedo("Raise Layer Selection");
+        app.changeLayerBlendingMode(BlendingMode.ERASE);
+
+//        app.addShapesLayer(ShapeType.HEART, 300, 70);
+//        app.runMenuCommand("Rasterize Shape Layer");
+//        app.changeLayerBlendingMode(BlendingMode.ERASE);
+
+        app.closeCurrentView();
+
+        loadReferenceImage("wf3_reference.png");
     }
 
     private void addTextLayer(String text, String vAlignment, String hAlignment) {
@@ -248,6 +273,10 @@ public class WorkflowTest {
             .usingComparatorForType(new DoubleComparator(0.001), Double.class)
             .containsExactly(0.6);
         assertThat(EDT.getGuides().getVerticals()).isEmpty();
+    }
+
+    private void runFilterWithDialog(String filterName) {
+        runFilterWithDialog(filterName, null);
     }
 
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
@@ -340,7 +369,7 @@ public class WorkflowTest {
 
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.RECTANGLE.toString());
         pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.NONE.toString());
-        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.TRANSPARENT.toString());
+        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.ERASE.toString());
         EDT.assertShapesToolStateIs(NO_INTERACTION);
         pw.button("convertToSelection").requireDisabled();
 
@@ -495,12 +524,13 @@ public class WorkflowTest {
         app.runMenuCommand("Clear Guides");
     }
 
-    private void selectBrushTool() {
-        app.clickTool(Tools.BRUSH);
+    private void convertLayerToSmartObject() {
+        app.runMenuCommand("Convert to Smart Object");
+        keyboard.undoRedo("Convert to Smart Object");
+        duplicateLayerThenUndo(SmartObject.class);
     }
 
     private void loadReferenceImage(String fileName) {
-        File f = new File("C:\\pix_tests\\reference_images\\" + fileName);
-        app.openFileWithDialog("Open...", f.getParentFile(), f.getName());
+        app.openFileWithDialog("Open...", referenceImagesDir, fileName);
     }
 }

@@ -56,7 +56,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
     private final String toolMessage;
     private final char activationKey;
     final ToolHandlerChain handlerChain;
-    protected Cursor cursor;
+    private final Cursor cursor;
 
     private ToolButton toolButton;
     protected ToolSettingsPanel settingsPanel;

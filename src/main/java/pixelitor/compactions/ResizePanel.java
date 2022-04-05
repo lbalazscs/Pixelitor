@@ -358,7 +358,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return newHeight;
     }
 
-    public static void showInDialog(Composition comp) {
+    private static void showInDialog(Composition comp) {
         ResizePanel p = new ResizePanel(comp.getCanvas());
         new DialogBuilder()
             .validatedContent(p)

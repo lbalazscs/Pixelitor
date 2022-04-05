@@ -57,7 +57,7 @@ public class LayerMoveAction extends OpenViewEnabledAction
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         var comp = Views.getActiveComp();
         if (up) {
             comp.moveActiveLayerUp();

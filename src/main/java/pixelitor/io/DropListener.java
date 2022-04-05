@@ -52,7 +52,7 @@ public class DropListener extends DropTargetAdapter {
          */
         NEW_IMAGES {
             @Override
-            public void handleDrop(List<File> files, Component target) {
+            protected void handleDrop(List<File> files, Component target) {
                 for (File file : files) {
                     addDroppedFileAsNewImage(file, target);
                 }
@@ -63,7 +63,7 @@ public class DropListener extends DropTargetAdapter {
          */
         NEW_LAYERS {
             @Override
-            public void handleDrop(List<File> files, Component target) {
+            protected void handleDrop(List<File> files, Component target) {
                 var comp = Views.getActiveComp();
                 if (comp == null) {
                     // if there is no active composition,
@@ -78,7 +78,7 @@ public class DropListener extends DropTargetAdapter {
             }
         };
 
-        public abstract void handleDrop(List<File> files, Component target);
+        protected abstract void handleDrop(List<File> files, Component target);
     }
 
     public DropListener(Destination destination) {

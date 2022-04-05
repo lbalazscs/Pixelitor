@@ -46,7 +46,7 @@ public class ScreenCaptureAction extends PAction {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         new DialogBuilder()
             .content(getSettingsPanel())
             .title(SCREEN_CAPTURE_STRING)

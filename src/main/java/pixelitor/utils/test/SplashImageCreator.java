@@ -190,8 +190,7 @@ public class SplashImageCreator {
     }
 
     private static void addTextLayer(Composition comp, String text,
-                                     Font font,
-                                     int translationY) {
+                                     Font font, int translationY) {
         AreaEffects effects = createDropShadowEffect();
         var settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER,
@@ -225,10 +224,8 @@ public class SplashImageCreator {
             endY = startY;
         }
 
-        Gradient gradient = new Gradient(
-            new Drag(startX, startY, endX, endY),
-            GradientType.RADIAL, REFLECT, BLACK_TO_WHITE,
-            false, NORMAL, 1.0f);
+        Gradient gradient = new Gradient(new Drag(startX, startY, endX, endY),
+            GradientType.RADIAL, REFLECT, BLACK_TO_WHITE, false, NORMAL, 1.0f);
         gradient.drawOn(dr);
     }
 
@@ -247,8 +244,7 @@ public class SplashImageCreator {
     private static void cleanupAfterManySplashes(int numCreatedImages,
                                                  ProgressHandler progressHandler) {
         progressHandler.stopProgress();
-        Messages.showPlainInStatusBar(format(
-            "Finished saving %d splash images to %s",
+        Messages.showPlainInStatusBar(format("Finished saving %d splash images to %s",
             numCreatedImages, Dirs.getLastSave()));
     }
 }

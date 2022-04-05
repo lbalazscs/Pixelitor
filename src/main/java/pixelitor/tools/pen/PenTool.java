@@ -82,7 +82,7 @@ public class PenTool extends Tool {
 
     private static final Action deletePath = new PAction("Delete Path") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             path.delete();
         }
     };
@@ -94,14 +94,14 @@ public class PenTool extends Tool {
 
         toSelectionAction = new PAction("Convert to Selection") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 convertToSelection();
             }
         };
 
         exportSVGAction = new PAction("Export SVG...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 exportSVG();
             }
         };

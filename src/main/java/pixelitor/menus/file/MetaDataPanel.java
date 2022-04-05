@@ -65,7 +65,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JButton expandButton = new JButton(new PAction("Expand All") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 treeTable.expandAll();
             }
         });
@@ -73,7 +73,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JButton collapseButton = new JButton(new PAction("Collapse All") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 treeTable.collapseAll();
             }
         });
@@ -85,7 +85,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JButton helpButton = new JButton(new PAction(GUIText.HELP) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 showHelp();
             }
         });

@@ -47,7 +47,7 @@ public class CopyAction extends OpenViewEnabledAction {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         Views.onActiveComp(this::copyToClipboard);
     }
 

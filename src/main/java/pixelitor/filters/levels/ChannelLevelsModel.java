@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,8 @@ import java.awt.Color;
  * for one channel in the Levels filter
  */
 public class ChannelLevelsModel implements ParamAdjustmentListener {
-    public static final int MAX_VALUE = 255;
-    public static final int MIN_VALUE = 0;
+    private static final int MAX_VALUE = 255;
+    private static final int MIN_VALUE = 0;
     private static final int DARK_DEFAULT = MIN_VALUE;
     private static final int LIGHT_DEFAULT = MAX_VALUE;
 

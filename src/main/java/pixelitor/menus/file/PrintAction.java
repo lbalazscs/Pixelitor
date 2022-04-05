@@ -51,7 +51,7 @@ public class PrintAction extends OpenViewEnabledAction implements Printable {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         // The printed image will be the image at the start,
         // although it is editable during the asynchronous printing
         Composition comp = getActiveComp();

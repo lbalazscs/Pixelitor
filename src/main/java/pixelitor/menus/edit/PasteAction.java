@@ -50,7 +50,7 @@ public class PasteAction extends PAction implements ViewActivationListener {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         getImageFromClipboard().ifPresent(this::pasteImage);
     }
 

@@ -552,10 +552,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             }
             case ShapesTool.CHANGE_SHAPE_FILL -> reloadFillPaint(tool);
             case ShapesTool.CHANGE_SHAPE_STROKE -> reloadStrokePaint(tool);
-            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS -> {
-                reloadStroke(tool);
-//                tool.invalidateStroke();
-            }
+            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS -> reloadStroke(tool);
             case ShapesTool.CHANGE_SHAPE_EFFECTS -> reloadEffects(tool);
             case ShapesTool.CHANGE_SHAPE_COLORS -> reloadColors();
             default -> throw new IllegalStateException("Unexpected edit: " + editName);

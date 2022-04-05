@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,28 +71,30 @@ public class TwoLimitsUndoManager extends UndoManager {
     protected void trimForLimit() {
         super.trimForLimit();
 
-        int extraHeavyEdits = getHeavyEditCount() - heavyEditLimit;
+        int extraHeavyEdits = getHeavyEditsCount() - heavyEditLimit;
         if (extraHeavyEdits > 0) {
-            for (int i = 0, c = 0; i < edits.size(); i++) {
+            int numHeavy = 0;
+            for (int i = 0; i < edits.size(); i++) {
                 PixelitorEdit edit = (PixelitorEdit) edits.get(i);
                 if (edit.isHeavy()) {
-                    c++;
+                    numHeavy++;
                 }
-                if (c == extraHeavyEdits) {
+                if (numHeavy == extraHeavyEdits) {
                     trimEdits(0, i);
                     break;
                 }
             }
         }
 
-        int extraLightEdits = getLightEditCount() - lightEditLimit;
+        int extraLightEdits = getLightEditsCount() - lightEditLimit;
         if (extraLightEdits > 0) {
-            for (int i = 0, c = 0; i < edits.size(); i++) {
+            int numLight = 0;
+            for (int i = 0; i < edits.size(); i++) {
                 PixelitorEdit edit = (PixelitorEdit) edits.get(i);
                 if (!edit.isHeavy()) {
-                    c++;
+                    numLight++;
                 }
-                if (c == extraLightEdits) {
+                if (numLight == extraLightEdits) {
                     trimEdits(0, i);
                     break;
                 }
@@ -100,7 +102,7 @@ public class TwoLimitsUndoManager extends UndoManager {
         }
     }
 
-    public int getHeavyEditCount() {
+    public int getHeavyEditsCount() {
         int count = 0;
         for (UndoableEdit edit : edits) {
             if (((PixelitorEdit) edit).isHeavy()) {
@@ -110,7 +112,7 @@ public class TwoLimitsUndoManager extends UndoManager {
         return count;
     }
 
-    public int getLightEditCount() {
+    public int getLightEditsCount() {
         int count = 0;
         for (UndoableEdit edit : edits) {
             if (!((PixelitorEdit) edit).isHeavy()) {

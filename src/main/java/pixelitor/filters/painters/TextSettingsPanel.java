@@ -284,16 +284,6 @@ public class TextSettingsPanel extends FilterGUI
         return p;
     }
 
-    // ensure that only one of them is selected and that only one update is triggered
-    private void specialCBAction(JCheckBox other) {
-        ignoreGUIChanges = true;
-        if (other.isSelected()) {
-            other.setSelected(false);
-        }
-        ignoreGUIChanges = false;
-        paramAdjusted();
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         paramAdjusted();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,7 +89,7 @@ public class SmoothConnectTest extends JPanel {
         }
 
 //        Path2D path = Shapes.smoothConnect(points);
-        Path2D path = Shapes.smoothConnect(points, smoothness.getValue() / 100f);
+        Path2D path = Shapes.smoothConnect(points, smoothness.getValue() / 100.0f);
 
         g2.setColor(Color.WHITE);
         g2.draw(path);

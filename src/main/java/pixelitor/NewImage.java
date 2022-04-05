@@ -79,7 +79,7 @@ public final class NewImage {
     public static Action getAction() {
         return new PAction(NEW_IMAGE_STRING + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 showInDialog();
             }
         };

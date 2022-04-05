@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -349,7 +349,7 @@ public class Colors {
 
         popup.add(new PAction("Color Variations...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Window window = SwingUtilities.windowForComponent(parent);
                 PalettePanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
             }
@@ -357,7 +357,7 @@ public class Colors {
 
         popup.add(new PAction("Filter Color History...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Window window = SwingUtilities.windowForComponent(parent);
                 ColorHistory.FILTER.showDialog(window, clickHandler);
             }
@@ -397,7 +397,7 @@ public class Colors {
     public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {
         popup.add(new PAction("Copy Color") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 copyColorToClipboard(colorSupplier.get());
             }
         });
@@ -406,7 +406,7 @@ public class Colors {
     public static void setupPasteColorPopupMenu(JPopupMenu popup, Window window, Consumer<Color> colorSetter) {
         popup.add(new PAction("Paste Color") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Color color = getColorFromClipboard();
                 if (color == null) {
                     Dialogs.showNotAColorOnClipboardDialog(window);

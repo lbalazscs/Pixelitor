@@ -35,7 +35,7 @@ import java.awt.geom.AffineTransform;
  * it adds empty space around a layer or makes the hidden part of the layer visible.
  */
 public class EnlargeCanvas extends SimpleCompAction {
-    public static final String NAME = "Enlarge Canvas";
+    private static final String NAME = "Enlarge Canvas";
     private int north;
     private int east;
     private int south;
@@ -119,7 +119,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     public static Action getAction() {
         return new OpenViewEnabledAction("Enlarge Canvas...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 showInDialog();
             }
         };

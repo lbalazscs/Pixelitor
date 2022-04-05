@@ -2,7 +2,7 @@
 
 # This script creates a custom Java runtime image for Pixelitor using jlink
 
-# JAVA_HOME must point to a JDK 15+
+# JAVA_HOME must point to a JDK 17+
 if [ -z "$JAVA_HOME" ]
 then
       echo "JAVA_HOME is not set"

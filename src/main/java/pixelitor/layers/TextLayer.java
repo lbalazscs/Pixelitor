@@ -356,7 +356,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
         popup.add(new PAction("Selection from Text") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 createSelectionFromText();
             }
         });

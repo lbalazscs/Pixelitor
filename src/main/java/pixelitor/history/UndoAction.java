@@ -37,7 +37,7 @@ public class UndoAction extends PAction implements UndoableEditListener {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         History.undo();
     }
 

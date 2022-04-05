@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ import static pixelitor.utils.Threads.onPool;
  * Static image-related utility methods
  */
 public class ImageUtils {
-    public static final double DEG_315_IN_RADIANS = Math.PI / 4;
+    private static final double DEG_315_IN_RADIANS = Math.PI / 4;
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
     private static final GraphicsConfiguration graphicsConfig = GraphicsEnvironment

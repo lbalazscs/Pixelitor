@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ColorListParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.PoissonDiskSampling;
 import pixelitor.utils.ReseedSupport;
@@ -28,6 +29,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -41,6 +44,10 @@ public class PoissonDiskTester extends ParametrizedFilter {
     private final BooleanParam improved = new BooleanParam("Improved", false);
     private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
 
+    private final ColorListParam colors = new ColorListParam("Colors",
+        1, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
+        Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
+
     public PoissonDiskTester() {
         super(false);
 
@@ -48,7 +55,8 @@ public class PoissonDiskTester extends ParametrizedFilter {
             distance,
             k,
             improved,
-            debugGrid
+            debugGrid,
+            colors
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -57,15 +65,18 @@ public class PoissonDiskTester extends ParametrizedFilter {
         SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
 
         Graphics2D g2 = dest.createGraphics();
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         int width = dest.getWidth();
         int height = dest.getHeight();
         Colors.fillWith(Color.WHITE, g2, width, height);
 
+        double dist = distance.getValueAsDouble();
         var sampling = new PoissonDiskSampling(width, height,
-            distance.getValueAsDouble(), k.getValue(), improved.isChecked(), rand);
+            dist, k.getValue(), improved.isChecked(), rand);
 
+        Color[] dotColors = colors.getColors();
         g2.setColor(Color.RED);
-        sampling.showSamples(g2, 5.0);
+        sampling.showSamples(g2, dist / 2, dotColors);
 
         if (debugGrid.isChecked()) {
             g2.setColor(Color.BLACK);

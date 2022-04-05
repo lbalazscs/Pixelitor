@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -299,9 +299,9 @@ public final class GUIUtils {
         // Desktop.getDesktop().browseFileDirectory(file);
         String path = file.getCanonicalPath();
         if (JVM.isWindows) {
-            Runtime.getRuntime().exec("explorer.exe /select," + path);
+            Runtime.getRuntime().exec(new String[]{"explorer.exe", "/select," + path});
         } else if (JVM.isMac) {
-            Runtime.getRuntime().exec("open -R " + path);
+            Runtime.getRuntime().exec(new String[]{"open", "-R", path});
         } else {
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
@@ -321,12 +321,12 @@ public final class GUIUtils {
                                                        File file, Component parent) {
         return new PAction("Print...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 if (comp.isDirty()) {
                     String msg = "<html>The file <i>" + file.getName() +
-                        "</i> contains unsaved changes.<br>" +
-                        "Only the saved changes can be printed.<br>" +
-                        "Do you want to save your changes now?";
+                                 "</i> contains unsaved changes.<br>" +
+                                 "Only the saved changes can be printed.<br>" +
+                                 "Do you want to save your changes now?";
 
                     String[] options = {"Save and Print", GUIText.CANCEL};
                     boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,

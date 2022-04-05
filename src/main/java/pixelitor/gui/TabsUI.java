@@ -129,7 +129,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
         return new JRadioButtonMenuItem(new PAction(name) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 setTabPlacement(pos);
                 ImageArea.setTabPlacement(pos);
             }

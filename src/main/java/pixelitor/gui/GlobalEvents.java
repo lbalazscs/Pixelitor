@@ -57,14 +57,14 @@ public class GlobalEvents {
 
     private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
         @Override
-        public void onClick() {
+        protected void onClick() {
             Tools.increaseActiveBrushSize();
         }
     };
 
     private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
         @Override
-        public void onClick() {
+        protected void onClick() {
             Tools.decreaseActiveBrushSize();
         }
     };

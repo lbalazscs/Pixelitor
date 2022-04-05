@@ -18,7 +18,9 @@
 package pixelitor.guitest;
 
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
+import org.assertj.swing.exception.WaitTimedOutError;
 import org.assertj.swing.fixture.DialogFixture;
+import org.assertj.swing.fixture.JOptionPaneFixture;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
 import pixelitor.Views;
@@ -302,7 +304,12 @@ public class RandomToolTest {
         if (EDT.getNumModalDialogs() == 0) {
             return;
         }
-        var optionPane = app.findJOptionPane();
+        JOptionPaneFixture optionPane;
+        try {
+            optionPane = app.findJOptionPane();
+        } catch (WaitTimedOutError e) {
+            throw new IllegalStateException("no option pane");
+        }
         String title = optionPane.title();
         switch (title) {
             case "Nothing selected", "No Selection" -> optionPane.okButton().click();

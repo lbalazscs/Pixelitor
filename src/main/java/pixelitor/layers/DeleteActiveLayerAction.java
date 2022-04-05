@@ -47,7 +47,7 @@ public class DeleteActiveLayerAction extends PAction
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         var comp = Views.getActiveComp();
         comp.deleteActiveLayer(true);
     }

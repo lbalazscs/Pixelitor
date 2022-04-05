@@ -71,7 +71,7 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         if (state == NO_INTERACTION) {
             setState(INITIAL_DRAG);
         } else if (state == INITIAL_DRAG) {
@@ -80,12 +80,12 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         e.repaint();
     }
 
     @Override
-    public void dragFinished(PMouseEvent e) {
+    protected void dragFinished(PMouseEvent e) {
         if (state == NO_INTERACTION) {
             return;
         }

@@ -35,7 +35,7 @@ public class DuplicateLayerAction extends OpenViewEnabledAction {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         var comp = Views.getActiveComp();
         comp.duplicateActiveLayer();
     }

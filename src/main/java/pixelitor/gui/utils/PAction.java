@@ -46,5 +46,5 @@ public abstract class PAction extends NamedAction {
         }
     }
 
-    public abstract void onClick();
+    protected abstract void onClick();
 }

@@ -363,9 +363,15 @@ public class Path implements Serializable {
 
     // called only by the undo/redo mechanism
     public void setBuildingInProgressState() {
+        // such checks would not be necessary if tool switching
+        // and mode switching were recorded as events in the history
         if (!Tools.PEN.isActive()) {
             return;
         }
+        if (Tools.PEN.getMode() != PenToolMode.BUILD) {
+            return;
+        }
+
         boolean mouseDown = Tools.EventDispatcher.isMouseDown();
         if (mouseDown) {
             setBuildState(DRAGGING_THE_CONTROL_OF_LAST);

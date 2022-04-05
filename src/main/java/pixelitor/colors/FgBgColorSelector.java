@@ -131,7 +131,7 @@ public class FgBgColorSelector extends JLayeredPane {
 
         popup.add(new PAction(selectorName + " Color Variations...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 if (fg) {
                     PalettePanel.showFGVariationsDialog(pw);
                 } else {
@@ -142,14 +142,14 @@ public class FgBgColorSelector extends JLayeredPane {
 
         popup.add(new PAction("HSB Mix with " + otherName + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showHSBMixDialog(pw, fg);
             }
         });
 
         popup.add(new PAction("RGB Mix with " + otherName + "...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 PalettePanel.showRGBMixDialog(pw, fg);
             }
         });
@@ -157,7 +157,7 @@ public class FgBgColorSelector extends JLayeredPane {
         ColorHistory history = fg ? ColorHistory.FOREGROUND : ColorHistory.BACKGROUND;
         popup.add(new PAction(selectorName + " Color History...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 history.showDialog(pw, ColorSwatchClickHandler.STANDARD);
             }
         });
@@ -181,7 +181,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private void initResetDefaultsButton() {
         resetToDefaultAction = new PAction() {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 setDefaultColors();
             }
         };
@@ -200,7 +200,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private void initSwapColorsButton() {
         swapColorsAction = new PAction() {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 swapColors();
             }
         };
@@ -225,7 +225,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private void initRandomizeButton() {
         randomizeColorsAction = new PAction() {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 randomizeColors();
             }
         };

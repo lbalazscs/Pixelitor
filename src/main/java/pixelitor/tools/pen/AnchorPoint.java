@@ -242,7 +242,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.add(new PAction("Retract Handles") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 retractHandles();
             }
         });
@@ -252,7 +252,7 @@ public class AnchorPoint extends DraggablePoint {
         if (AppContext.isDevelopment()) {
             popup.add(new PAction("Dump") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     dump();
                 }
             });
@@ -264,7 +264,7 @@ public class AnchorPoint extends DraggablePoint {
         if (!isLastPoint) {
             popup.add(new PAction("Delete Point") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     delete();
                 }
             });
@@ -273,7 +273,7 @@ public class AnchorPoint extends DraggablePoint {
         if (!singleSubPath) {
             popup.add(new PAction("Delete Subpath") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     subPath.delete();
                 }
             });
@@ -281,7 +281,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.add(new PAction("Delete Path") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 subPath.deletePath();
             }
         });

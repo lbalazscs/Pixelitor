@@ -103,7 +103,7 @@ public class Navigator extends JComponent
         for (ZoomLevel level : levels) {
             popup.add(new PAction("Navigator Zoom: " + level) {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     setNavigatorSizeFromZoom(level);
                 }
             });
@@ -111,7 +111,7 @@ public class Navigator extends JComponent
         popup.addSeparator();
         popup.add(new PAction("View Box Color...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Colors.selectColorWithDialog(Navigator.this,
                     "View Box Color", viewBoxColor, true,
                     Navigator.this::setNewViewBoxColor);

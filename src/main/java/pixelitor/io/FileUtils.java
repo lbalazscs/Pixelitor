@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -37,6 +38,7 @@ public class FileUtils {
     // export-only formats that aren't offered when using save
     private static final Set<String> SUPPORTED_EXPORT_EXTENSIONS =
         Set.of("svg");
+    private static Pattern fileNamePattern = null;
 
     private FileUtils() {
     }
@@ -141,5 +143,16 @@ public class FileUtils {
             Collections.addAll(set, filter.getExtensions());
         }
         return set;
+    }
+
+    /**
+     * Replaces all the special characters in s string with an underscore
+     */
+    public static String toFileName(String s) {
+        if (fileNamePattern == null) {
+            //noinspection NonThreadSafeLazyInitialization
+            fileNamePattern = Pattern.compile("[/\\\\?%*:|\"<>.,;=]");
+        }
+        return fileNamePattern.matcher(s.trim()).replaceAll("_");
     }
 }

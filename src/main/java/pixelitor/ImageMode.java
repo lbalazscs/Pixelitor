@@ -77,7 +77,7 @@ public enum ImageMode {
     private JMenuItem createMenuItem() {
         Action action = new OpenViewEnabledAction(toString()) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 getActiveComp().changeMode(ImageMode.this);
             }
         };

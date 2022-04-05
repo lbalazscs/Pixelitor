@@ -66,21 +66,21 @@ public class Views {
 
     public static final Action CLOSE_ALL_ACTION = new OpenViewEnabledAction(i18n("close_all")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             warnAndCloseAll();
         }
     };
 
     public static final Action CLOSE_ACTIVE_ACTION = new OpenViewEnabledAction(i18n("close")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             warnAndCloseActive();
         }
     };
 
     public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction("Close Unmodified") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             warnAndCloseUnmodified();
         }
     };

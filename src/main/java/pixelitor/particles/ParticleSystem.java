@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
-    public void step(int start, int end) {
+    private void step(int start, int end) {
         for (int i = start, s = FastMath.min(particles.size(), end); i < s; i++) {
             P particle = particles.get(i);
             particle.groupIndex = start / (end - start);
@@ -67,7 +67,7 @@ public class ParticleSystem<P extends Particle> {
         }
     }
 
-    public void iterate(int iterations, int start, int end) {
+    private void iterate(int iterations, int start, int end) {
         for (int i = 0; i < iterations; i++) {
             step(start, end);
         }

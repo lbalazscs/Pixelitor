@@ -1,3 +1,20 @@
+/*
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.history;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -43,23 +60,23 @@ class TwoLimitsUndoManagerTest {
 
         undoManager.addEdit(createMockEdit(true));
         assertThat(undoManager.getSize()).isEqualTo(8);
-        assertThat(undoManager.getHeavyEditCount()).isEqualTo(3);
-        assertThat(undoManager.getLightEditCount()).isEqualTo(5);
+        assertThat(undoManager.getHeavyEditsCount()).isEqualTo(3);
+        assertThat(undoManager.getLightEditsCount()).isEqualTo(5);
 
         undoManager.addEdit(createMockEdit(true));
         assertThat(undoManager.getSize()).isEqualTo(8);
-        assertThat(undoManager.getHeavyEditCount()).isEqualTo(3);
-        assertThat(undoManager.getLightEditCount()).isEqualTo(5);
+        assertThat(undoManager.getHeavyEditsCount()).isEqualTo(3);
+        assertThat(undoManager.getLightEditsCount()).isEqualTo(5);
 
         undoManager.addEdit(createMockEdit(true));
         assertThat(undoManager.getSize()).isEqualTo(8);
-        assertThat(undoManager.getHeavyEditCount()).isEqualTo(3);
-        assertThat(undoManager.getLightEditCount()).isEqualTo(5);
+        assertThat(undoManager.getHeavyEditsCount()).isEqualTo(3);
+        assertThat(undoManager.getLightEditsCount()).isEqualTo(5);
 
         undoManager.addEdit(createMockEdit(true));
         assertThat(undoManager.getSize()).isEqualTo(3);
-        assertThat(undoManager.getHeavyEditCount()).isEqualTo(3);
-        assertThat(undoManager.getLightEditCount()).isEqualTo(0); // Important - this time all light edits in between were removed!
+        assertThat(undoManager.getHeavyEditsCount()).isEqualTo(3);
+        assertThat(undoManager.getLightEditsCount()).isEqualTo(0); // Important - this time all light edits in between were removed!
 
     }
 
@@ -72,16 +89,16 @@ class TwoLimitsUndoManagerTest {
         for (int i = 0; i < 8; i++) {
             undoManager.addEdit(createMockEdit(false));
             assertThat(undoManager.getSize()).isEqualTo(10);
-            assertThat(undoManager.getHeavyEditCount()).isEqualTo(2);
-            assertThat(undoManager.getLightEditCount()).isEqualTo(8);
+            assertThat(undoManager.getHeavyEditsCount()).isEqualTo(2);
+            assertThat(undoManager.getLightEditsCount()).isEqualTo(8);
         }
 
         // now, the first 2 edits in the vector are heavy edits. Adding in one more light edit will cause those 2 and a light next to be removed
 
         undoManager.addEdit(createMockEdit(false));
         assertThat(undoManager.getSize()).isEqualTo(8);
-        assertThat(undoManager.getHeavyEditCount()).isEqualTo(0);
-        assertThat(undoManager.getLightEditCount()).isEqualTo(8);
+        assertThat(undoManager.getHeavyEditsCount()).isEqualTo(0);
+        assertThat(undoManager.getLightEditsCount()).isEqualTo(8);
 
     }
 

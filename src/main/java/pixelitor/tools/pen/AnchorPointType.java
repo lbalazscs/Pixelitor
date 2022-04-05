@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -98,7 +98,7 @@ public enum AnchorPointType {
         public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
             super(new PAction(type.toString()) {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     ap.setType(type);
                 }
             });

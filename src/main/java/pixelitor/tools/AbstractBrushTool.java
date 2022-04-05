@@ -176,7 +176,7 @@ public abstract class AbstractBrushTool extends Tool {
     protected void addBrushSettingsButton() {
         brushSettingsAction = new PAction("Settings...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 brushSettingsButtonPressed();
             }
         };

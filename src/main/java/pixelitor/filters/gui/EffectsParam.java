@@ -97,7 +97,6 @@ public class EffectsParam extends AbstractFilterParam {
     public void setEffects(AreaEffects effects) {
         if (effectsPanel == null) { // probably never true
             ensureEffectsPanelIsCreated();
-            return;
         }
 
         effectsPanel.setEffects(effects);
@@ -153,11 +152,10 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        // can be null during unit testing
-        assert effectsPanel != null || AppContext.isUnitTesting();
-        if (effectsPanel != null) {
-            effectsPanel.saveStateTo(preset);
+        if (effectsPanel == null) { // can happen in tests
+            ensureEffectsPanelIsCreated();
         }
+        effectsPanel.saveStateTo(preset);
     }
 
     @Override

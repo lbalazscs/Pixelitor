@@ -359,7 +359,7 @@ public class AppRunner {
         }
     }
 
-    void closeCurrent() {
+    void closeCurrentView() {
         runMenuCommand("Close");
     }
 
@@ -775,7 +775,7 @@ public class AppRunner {
         keyboard.undoRedo("Gradient Fill Layer Change");
     }
 
-    public void addShapesLayer(ShapeType shapeType) {
+    public void addShapesLayer(ShapeType shapeType, int canvasX, int canvasY) {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_S);
@@ -786,8 +786,8 @@ public class AppRunner {
         pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.RADIAL_GRADIENT.toString());
         EDT.run(() -> FgBgColors.setFGColor(new Color(248, 199, 25)));
         EDT.run(() -> FgBgColors.setBGColor(new Color(39, 81, 39)));
-        mouse.moveToCanvas(20, 380);
-        mouse.dragToCanvas(120, 480);
+        mouse.moveToCanvas(canvasX, canvasY);
+        mouse.dragToCanvas(canvasX + 100, canvasY + 100);
 
         keyboard.undoRedo("Create Shape");
     }

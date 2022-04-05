@@ -35,7 +35,6 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
-import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
@@ -868,7 +867,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     @Override
     public String toString() {
-        var node = DebugNodes.createViewNode("view", this);
-        return node.toJSON();
+//        return DebugNodes.createViewNode("view", this).toJSON();
+        return "View of " + comp.getDebugName();
     }
 }

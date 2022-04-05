@@ -43,6 +43,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.*;
@@ -363,7 +364,7 @@ public class Composition implements Serializable {
         this.dirty = dirty;
     }
 
-    public void clearAllDirtyFlagsAfterSave() {
+    private void clearAllDirtyFlagsAfterSave() {
         setDirty(false);
 
         forAllNestedSmartObjects(so -> {
@@ -1655,6 +1656,14 @@ public class Composition implements Serializable {
     private boolean checkAllSOInvariants() {
         forAllNestedSmartObjects(SmartObject::checkInvariant);
         return true;
+    }
+
+    public void debugImages() {
+        if (compositeImage != null) {
+            Debug.debugImage(compositeImage, "cached composite for " + getDebugName());
+        }
+        BufferedImage calc = calculateCompositeImage();
+        Debug.debugImage(calc, "calculated composite for " + getDebugName());
     }
 
     public enum UpdateActions {

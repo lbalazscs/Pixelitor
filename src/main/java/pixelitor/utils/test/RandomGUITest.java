@@ -145,7 +145,7 @@ public class RandomGUITest {
         // make sure it can be stopped by pressing a key
         GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new PAction() {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                     stopRunning = true;
                 }
@@ -156,7 +156,7 @@ public class RandomGUITest {
         // This key not only stops the testing, but also exits the app
         GlobalEvents.addHotKey(EXIT_KEY_CHAR, new PAction() {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                     EXIT_KEY_CHAR);
                 // no need to reset the GUI here, because preferences won't be saved

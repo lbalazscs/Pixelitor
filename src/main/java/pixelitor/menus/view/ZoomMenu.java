@@ -51,14 +51,14 @@ public class ZoomMenu extends PMenu {
 
     private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(i18n("zoom_in")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             Views.onActiveView(View::increaseZoom);
         }
     };
 
     private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(i18n("zoom_out")) {
         @Override
-        public void onClick() {
+        protected void onClick() {
             Views.onActiveView(View::decreaseZoom);
         }
     };

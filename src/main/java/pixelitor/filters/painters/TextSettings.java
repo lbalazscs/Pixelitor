@@ -262,9 +262,9 @@ public class TextSettings implements Serializable, Debuggable {
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
 
-        // should be always non-null while loading a preset,
-        // because this happens only in the dialog
-        guiUpdater.accept(this);
+        if (guiUpdater != null) { // can be null in tests that don't create a dialog
+            guiUpdater.accept(this);
+        }
     }
 
     @Override

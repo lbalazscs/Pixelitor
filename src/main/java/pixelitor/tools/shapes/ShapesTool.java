@@ -95,7 +95,7 @@ public class ShapesTool extends DragTool {
     private JButton showShapeSettingsButton;
     private final Action shapeSettingsAction = new PAction("Settings...") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             showShapeSettingsDialog();
         }
     };
@@ -131,7 +131,7 @@ public class ShapesTool extends DragTool {
 
     private final Action convertToSelectionAction = new PAction("Convert to Selection") {
         @Override
-        public void onClick() {
+        protected void onClick() {
             convertToSelection();
         }
     };
@@ -163,7 +163,7 @@ public class ShapesTool extends DragTool {
 
         strokeSettingsAction = new PAction("Stroke Settings...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 initAndShowStrokeSettingsDialog();
             }
         };
@@ -313,7 +313,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         if (state == TRANSFORM) {
             assert hasBox();
             assert hasStyledShape();
@@ -346,7 +346,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
             assert hasBox();
             assert hasStyledShape();
@@ -370,7 +370,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void dragFinished(PMouseEvent e) {
+    protected void dragFinished(PMouseEvent e) {
         if (state == TRANSFORM) {
             assert hasBox();
             assert hasStyledShape();
@@ -557,7 +557,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public DragDisplayType getDragDisplayType() {
+    protected DragDisplayType getDragDisplayType() {
         assert state == INITIAL_DRAG : "state = " + state;
         return getSelectedType().getDragDisplayType();
     }

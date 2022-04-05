@@ -120,7 +120,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
     }
 
     @Override
-    public void onClick() {
+    protected void onClick() {
         Layer activeLayer = Views.getActiveLayer();
         if (layerType.isAllowed(activeLayer)) {
             onActiveLayer(activeLayer);
@@ -129,5 +129,5 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
         }
     }
 
-    public abstract void onActiveLayer(Layer layer);
+    protected abstract void onActiveLayer(Layer layer);
 }

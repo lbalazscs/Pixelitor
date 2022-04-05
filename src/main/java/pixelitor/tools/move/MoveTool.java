@@ -102,7 +102,7 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         if (currentMode.movesLayer() && useAutoSelect()) {
             Point2D p = e.asImPoint2D();
             Layer movedLayer = e.getComp().findLayerAtPoint(p);
@@ -125,7 +125,7 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         if (transformBox != null) {
             if (transformBox.processMouseDragged(e)) {
                 return;
@@ -158,7 +158,7 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public DragDisplayType getDragDisplayType() {
+    protected DragDisplayType getDragDisplayType() {
         return DragDisplayType.REL_MOUSE_POS;
     }
 

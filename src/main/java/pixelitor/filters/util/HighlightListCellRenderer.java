@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ public class HighlightListCellRenderer extends DefaultListRenderer {
         this.filterText = filterText;
     }
 
-    public static String highlight(String text, String filter) {
+    private static String highlight(String text, String filter) {
         int index = text.toLowerCase().indexOf(filter);
         if (index == -1) {
             return text;
@@ -37,11 +37,11 @@ public class HighlightListCellRenderer extends DefaultListRenderer {
 
         int filterLength = filter.length();
         return "<html>"
-            + text.substring(0, index)
-            + "<b><span style='background:#8A3958;'>"
-            + text.substring(index, index + filterLength)
-            + "</span></b>"
-            + text.substring(index + filterLength);
+               + text.substring(0, index)
+               + "<b><span style='background:#8A3958;'>"
+               + text.substring(index, index + filterLength)
+               + "</span></b>"
+               + text.substring(index + filterLength);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -86,7 +86,7 @@ public enum MaskViewMode {
     public void addToPopupMenu(JMenu menu, Layer layer) {
         var action = new PAction(guiName) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 activate(layer);
             }
         };

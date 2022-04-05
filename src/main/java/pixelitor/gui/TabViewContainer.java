@@ -107,7 +107,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
 
         popup.add(new PAction("Rename...") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 view.getComp().rename(TabViewContainer.this);
             }
         });
@@ -117,13 +117,13 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         // close the clicked one, even if it is not the active!
         popup.add(new PAction(i18n("close")) {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Views.warnAndClose(view);
             }
         });
         popup.add(new PAction("Close Others") {
             @Override
-            public void onClick() {
+            protected void onClick() {
                 Views.warnAndCloseAllBut(view);
             }
         });

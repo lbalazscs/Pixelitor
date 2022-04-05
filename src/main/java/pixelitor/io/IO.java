@@ -28,7 +28,6 @@ import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
 
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
@@ -257,7 +256,7 @@ public class IO {
         assert calledOutsideEDT() : "on EDT";
 
         File outputDir = Dirs.getLastSave();
-        String fileName = format("%03d_%s.png", layerIndex, Utils.toFileName(layerName));
+        String fileName = format("%03d_%s.png", layerIndex, FileUtils.toFileName(layerName));
         File file = new File(outputDir, fileName);
 
         saveImageToFile(image, new SaveSettings(FileFormat.PNG, file));

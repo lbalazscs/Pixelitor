@@ -21,13 +21,15 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.selection.Selection;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * The action that either shows or hides the selection,
  * depending on the current visibility
  */
 public class ShowHideSelectionAction extends ShowHideAction {
     public ShowHideSelectionAction() {
-        super("Show Selection Edges", "Hide Selection Edges");
+        super(i18n("show_sel_edges"), i18n("hide_sel_edges"));
     }
 
     @Override

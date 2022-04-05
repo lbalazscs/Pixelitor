@@ -632,7 +632,7 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Returns true if the layer is in normal mode and the opacity is 100%
      */
-    public boolean isNormalAndOpaque() {
+    protected boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL
                && opacity > BlendingModePanel.CRITICAL_OPACITY;
     }
@@ -762,7 +762,7 @@ public abstract class Layer implements Serializable, Debuggable {
             popup = new JPopupMenu();
             var mergeDownAction = new PAction(GUIText.MERGE_DOWN) {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     // check again to be sure that the layer bellow
                     // this didn't change in the meantime
                     if (comp.canMergeDown(Layer.this)) {
@@ -780,7 +780,7 @@ public abstract class Layer implements Serializable, Debuggable {
             }
             popup.add(new PAction("Rasterize") {
                 @Override
-                public void onClick() {
+                protected void onClick() {
                     replaceWithRasterized();
                 }
             });
@@ -796,7 +796,7 @@ public abstract class Layer implements Serializable, Debuggable {
             } else if (canExportImage()) {
                 popup.add(new PAction("Convert to Smart Object") {
                     @Override
-                    public void onClick() {
+                    protected void onClick() {
                         replaceWithSmartObject();
                     }
                 });

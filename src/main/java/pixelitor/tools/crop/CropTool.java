@@ -233,7 +233,7 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void dragStarted(PMouseEvent e) {
+    protected void dragStarted(PMouseEvent e) {
         assert state != INITIAL_DRAG;
         if (state == NO_INTERACTION) {
             setState(INITIAL_DRAG);
@@ -246,7 +246,7 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void ongoingDrag(PMouseEvent e) {
+    protected void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
             cropBox.mouseDragged(e);
         } else if (drag != null) {
@@ -273,7 +273,7 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void dragFinished(PMouseEvent e) {
+    protected void dragFinished(PMouseEvent e) {
         var comp = e.getComp();
         comp.update();
 
