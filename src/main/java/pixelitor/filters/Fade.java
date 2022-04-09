@@ -43,6 +43,8 @@ public class Fade extends ParametrizedFilter {
     public Fade() {
         super(true);
 
+        opacityParam.setPresetKey("Opacity (%)");
+
         setParams(opacityParam);
     }
 

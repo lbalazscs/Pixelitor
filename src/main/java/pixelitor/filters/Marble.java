@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,6 @@ import static com.jhlabs.image.WaveType.wave01;
 import static com.jhlabs.math.Noise.*;
 import static net.jafama.FastMath.*;
 import static pixelitor.filters.gui.ReseedActions.reseedNoise;
-import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Marble filter
@@ -39,7 +38,7 @@ import static pixelitor.gui.GUIText.ZOOM;
 public class Marble extends ParametrizedFilter {
     public static final String NAME = "Marble";
 
-    private final RangeParam zoom = new RangeParam(ZOOM, 1, 10, 200);
+    private final RangeParam zoom = new RangeParam(GUIText.ZOOM, 1, 10, 200);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam distortion = new RangeParam("Distortion", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time (Phase)", 0, 0, 100);
@@ -75,6 +74,8 @@ public class Marble extends ParametrizedFilter {
         var details = new GroupedRangeParam("Details",
             new RangeParam[]{detailsLevel, detailsStrength}, false);
 
+        type.setPresetKey("Type");
+        zoom.setPresetKey("Zoom");
         setParams(
             type,
             waveType,

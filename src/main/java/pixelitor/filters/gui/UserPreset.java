@@ -90,6 +90,7 @@ public class UserPreset implements Preset {
 
     public String get(String key) {
         String value = content.get(key);
+        assert value != null;
         if (value == null) {
             // oct 2021: temporary hack for compatible color list upgrade of starburst
             if ("Ray Colors".equals(key)) {

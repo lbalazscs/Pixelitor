@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,6 +54,8 @@ public class Spirograph extends ShapeFilter {
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 701);
 
     public Spirograph() {
+        zoom.setPresetKey("Zoom (%)");
+
         addParamsToFront(
             time,
             radii.notLinkable().withAdjustedRange(0.5),

@@ -52,7 +52,7 @@ public enum TwoPointPaintType {
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             return bgColor;
         }
-    }, ERASE("Erase", false) {
+    }, TRANSPARENT("Erase", false) {
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             throw new UnsupportedOperationException();

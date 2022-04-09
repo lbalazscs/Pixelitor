@@ -369,7 +369,7 @@ public class WorkflowTest {
 
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.RECTANGLE.toString());
         pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.NONE.toString());
-        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.ERASE.toString());
+        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.TRANSPARENT.toString());
         EDT.assertShapesToolStateIs(NO_INTERACTION);
         pw.button("convertToSelection").requireDisabled();
 

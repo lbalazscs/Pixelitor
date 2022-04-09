@@ -57,8 +57,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
-    private String presetKey;
-
     public RangeParam(String name, int min, double def, int max) {
         this(name, min, def, max, true, BORDER);
     }
@@ -438,18 +436,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     @Override
     public Object getParamValue() {
         return value;
-    }
-
-    @Override
-    public String getPresetKey() {
-        if (presetKey != null) {
-            return presetKey;
-        }
-        return getName();
-    }
-
-    public void setPresetKey(String presetKey) {
-        this.presetKey = presetKey;
     }
 
     @Override

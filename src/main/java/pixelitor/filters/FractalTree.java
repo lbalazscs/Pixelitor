@@ -90,6 +90,8 @@ public class FractalTree extends ParametrizedFilter {
     public FractalTree() {
         super(false);
 
+        zoom.setPresetKey("Zoom");
+
         setParams(
             iterations,
             zoom,

@@ -32,6 +32,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected ParamGUI paramGUI;
     private RandomizePolicy randomizePolicy;
     private String toolTip;
+    private String presetKey;
 
     // If this is not null, then it's the model of an extra action button
     // to the right of the normal GUI, typically some randomization, which
@@ -69,6 +70,18 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getPresetKey() {
+        if (presetKey != null) {
+            return presetKey;
+        }
+        return getName();
+    }
+
+    public void setPresetKey(String presetKey) {
+        this.presetKey = presetKey;
     }
 
     @Override

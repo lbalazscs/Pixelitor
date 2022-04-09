@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -34,7 +35,6 @@ import java.awt.image.BufferedImage;
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.gui.GUIText.OPACITY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**
@@ -45,7 +45,7 @@ public class JHDropShadow extends ParametrizedFilter {
 
     private final AngleParam angle = new AngleParam("Angle", 315, CCW_DEGREES);
     private final RangeParam distance = new RangeParam("Distance", 0, 10, 100);
-    private final RangeParam opacity = new RangeParam(OPACITY, 0, 90, 100);
+    private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 90, 100);
     private final RangeParam softness = new RangeParam("Softness", 0, 10, 25);
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only", false);
     private final ColorParam color = new ColorParam("Color", BLACK, NO_TRANSPARENCY);
@@ -54,6 +54,8 @@ public class JHDropShadow extends ParametrizedFilter {
 
     public JHDropShadow() {
         super(true);
+
+        opacity.setPresetKey("Opacity (%)");
 
         setParams(
             angle,
