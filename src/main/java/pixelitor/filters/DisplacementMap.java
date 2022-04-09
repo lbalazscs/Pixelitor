@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,6 +63,11 @@ public class DisplacementMap extends ParametrizedFilter {
         filter.setInterpolation(interpolation.getValue());
 
         return filter.filter(src, dest);
+    }
+
+    @Override
+    public boolean canBeSmart() {
+        return false;
     }
 
     private static class Impl extends TransformFilter {

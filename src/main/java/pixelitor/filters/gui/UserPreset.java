@@ -28,10 +28,7 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a user-created preset.
@@ -90,7 +87,6 @@ public class UserPreset implements Preset {
 
     public String get(String key) {
         String value = content.get(key);
-        assert value != null;
         if (value == null) {
             // oct 2021: temporary hack for compatible color list upgrade of starburst
             if ("Ray Colors".equals(key)) {
@@ -100,6 +96,7 @@ public class UserPreset implements Preset {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
         }
+//        assert value != null;
         return value;
     }
 
@@ -147,7 +144,7 @@ public class UserPreset implements Preset {
     }
 
     public void putFloat(String key, float f) {
-        put(key, "%.4f".formatted(f));
+        put(key, String.format(Locale.ENGLISH, "%.4f", f));
     }
 
     public double getDouble(String key) {
@@ -164,7 +161,7 @@ public class UserPreset implements Preset {
     }
 
     public void putDouble(String key, double d) {
-        put(key, "%.4f".formatted(d));
+        put(key, String.format(Locale.ENGLISH, "%.4f", d));
     }
 
     public Color getColor(String key) {

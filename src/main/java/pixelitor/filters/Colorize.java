@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import static pixelitor.utils.Texts.i18n;
 public class Colorize extends ParametrizedFilter {
     public static final String NAME = i18n("colorize");
 
-    private final RangeParam adjustBrightness = new RangeParam(
+    private final RangeParam brightnessParam = new RangeParam(
         BRIGHTNESS, -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
         COLOR, new Color(255, 207, 119), NO_TRANSPARENCY);
@@ -46,16 +46,19 @@ public class Colorize extends ParametrizedFilter {
     public Colorize() {
         super(true);
 
+        brightnessParam.setPresetKey("Brightness");
+        colorParam.setPresetKey("Color");
+
         setParams(
             colorParam,
-            adjustBrightness,
+            brightnessParam,
             opacityParam
         );
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float briShift = adjustBrightness.getPercentageValF();
+        float briShift = brightnessParam.getPercentageValF();
         float opacity = opacityParam.getPercentageValF();
 
         Color color = colorParam.getColor();

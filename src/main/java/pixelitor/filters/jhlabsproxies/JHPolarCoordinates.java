@@ -54,7 +54,9 @@ public class JHPolarCoordinates extends ParametrizedFilter {
     public JHPolarCoordinates() {
         super(true);
 
+        type.setPresetKey("Type");
         zoom.setPresetKey("Zoom (%)");
+
         setParams(center, type, zoom, angle, edgeAction, interpolation);
     }
 

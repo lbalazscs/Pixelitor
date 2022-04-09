@@ -22,6 +22,8 @@ import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
+import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -53,6 +55,8 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
+import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
+import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.Views.addAsNewComp;
 import static pixelitor.Views.findCompByName;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
@@ -427,11 +431,11 @@ public class Debug {
     }
 
     public static void serializeAllFilters() {
-        FilterUtils.forEachSerializableFilter(Debug::serialize);
+        FilterUtils.forEachSmartFilter(Debug::serialize);
     }
 
     public static void deserializeAllFilters() {
-        FilterUtils.forEachSerializableFilter(Debug::deserialize);
+        FilterUtils.forEachSmartFilter(Debug::deserialize);
     }
 
     private static void serialize(Filter filter) {
@@ -478,5 +482,34 @@ public class Debug {
         for (View view : origViews) {
             view.getComp().debugImages();
         }
+    }
+
+    public static void addAllSmartFilters(Composition comp) {
+        FilterUtils.forEachSmartFilter(filter ->
+            addSmartFilter(comp, filter));
+    }
+
+    private static void addSmartFilter(Composition comp, Filter filter) {
+        System.out.println("Debug::addOneSmartFilter: adding " + filter.getName());
+
+        TextSettings settings = new TextSettings();
+        settings.randomize();
+        settings.setText(filter.getName());
+        TextLayer textLayer = new TextLayer(comp, "", settings);
+        textLayer.updateLayerName();
+
+        SmartObject smartObject = new SmartObject(textLayer);
+        new Composition.LayerAdder(comp).add(smartObject);
+        if (filter instanceof FilterWithGUI guiFilter) {
+            guiFilter.randomize();
+            smartObject.startPreviewing();
+            filter.startOn(smartObject, PREVIEWING);
+            smartObject.onFilterDialogAccepted(filter.getName());
+        } else {
+            filter.startOn(smartObject, FILTER_WITHOUT_DIALOG);
+        }
+
+        smartObject.addSmartFilter(filter);
+        smartObject.updateIconImage();
     }
 }

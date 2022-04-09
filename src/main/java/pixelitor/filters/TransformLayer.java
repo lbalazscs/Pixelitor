@@ -49,6 +49,8 @@ public class TransformLayer extends ParametrizedFilter {
     public TransformLayer() {
         super(true);
 
+        bgColorParam.setPresetKey("Background Color");
+
         setParams(
             centerParam,
             angleParam,

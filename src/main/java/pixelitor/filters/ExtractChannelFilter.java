@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,8 @@ import static pixelitor.utils.Texts.i18n;
  * Extracts a channel from the image
  */
 public class ExtractChannelFilter extends Filter {
+    public static final String DESATURATE_NAME = i18n("desaturate");
+    public static final String SATURATION_NAME = i18n("saturation");
     private final RGBPixelOp rgbOp;
 
     public ExtractChannelFilter(RGBPixelOp rgbOp) {
@@ -93,7 +95,7 @@ public class ExtractChannelFilter extends Filter {
 
             return a << 24 | r << 16 | g << 8 | b;
         };
-        return rgbOp.toFilterAction(i18n("desaturate"));
+        return rgbOp.toFilterAction(DESATURATE_NAME);
     }
 
     public static FilterAction getSaturationChannelFA() {
@@ -118,7 +120,7 @@ public class ExtractChannelFilter extends Filter {
 
             return a << 24 | r << 16 | g << 8 | b;
         };
-        return rgbOp.toFilterAction(i18n("saturation"));
+        return rgbOp.toFilterAction(SATURATION_NAME);
     }
 
     public static FilterAction getHueChannelFA() {

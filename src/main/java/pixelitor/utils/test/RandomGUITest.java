@@ -441,39 +441,39 @@ public class RandomGUITest {
             return;
         }
 
-        Filter f;
+        Filter filter;
         if (preferredFilter == null) {
-            f = FilterUtils.getRandomFilter(filter ->
-                (!(filter instanceof RandomFilter)
-                 && !(filter instanceof FlowField))
+            filter = FilterUtils.getRandomFilter(f ->
+                (!(f instanceof RandomFilter)
+                 && !(f instanceof FlowField))
             );
         } else {
-            f = preferredFilter;
+            filter = preferredFilter;
         }
 
-        String filterName = f.getName();
+        String filterName = filter.getName();
         log("filter: " + filterName);
 
         long runCountBefore = Filter.runCount;
 
-        if (f instanceof FilterWithGUI filterWithGUI) {
-            filterWithGUI.randomizeSettings();
+        if (filter instanceof FilterWithGUI guiFilter) {
+            guiFilter.randomize();
             dr.startPreviewing();
 
             try {
-                f.startOn(dr, PREVIEWING);
+                filter.startOn(dr, PREVIEWING);
             } catch (Throwable e) {
                 BufferedImage src = dr.getFilterSourceImage();
-                if (filterWithGUI instanceof ParametrizedFilter pf) {
+                if (guiFilter instanceof ParametrizedFilter pf) {
                     ParamSet paramSet = pf.getParamSet();
                     System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d, params = %s%n",
+                        "src.width = %d, src.height = %d, params = %s%n",
                         filterName, src.getWidth(), src.getHeight(), paramSet);
                 } else {
                     System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d%n",
+                        "src.width = %d, src.height = %d%n",
                         filterName, src.getWidth(), src.getHeight());
                 }
                 throw e;
@@ -487,7 +487,7 @@ public class RandomGUITest {
         } else {
             BufferedImage src = dr.getFilterSourceImage();
             try {
-                f.startOn(dr, FILTER_WITHOUT_DIALOG);
+                filter.startOn(dr, FILTER_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.printf(
                     "RandomGUITest::randomFilter: name = %s, width = %d, height = %d%n",

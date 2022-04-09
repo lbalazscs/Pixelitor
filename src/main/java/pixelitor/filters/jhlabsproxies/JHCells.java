@@ -67,7 +67,9 @@ public class JHCells extends ParametrizedFilter {
     public JHCells() {
         super(false);
 
+        type.setPresetKey("Type");
         scale.setPresetKey("Zoom");
+
         setParams(
             type,
             refineType,

@@ -92,8 +92,15 @@ public class SelectImageParam extends ListParam<NamedImage> {
         NamedImage(Composition comp) {
             // it's important to store this image before the filter starts,
             // because the current composite image is affected by the filter
-            this.image = comp.getCompositeImage();
-            this.comp = comp;
+            if (comp != null) {
+                this.image = comp.getCompositeImage();
+                this.comp = comp;
+            } else {
+                // Can happen when deserializing a filter in the first
+                // opened pxc, and there is no open view yet.
+                // For this reason filters using this param can't be smart at the moment.
+                throw new IllegalStateException();
+            }
         }
 
         public BufferedImage getImage() {

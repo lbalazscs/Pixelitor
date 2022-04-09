@@ -73,7 +73,7 @@ public class Levels extends FilterWithGUI {
     }
 
     @Override
-    public void randomizeSettings() {
+    public void randomize() {
         int inputDark = Rnd.nextInt(255);
         int inputLight = Rnd.nextInt(255);
         int outputDark = Rnd.nextInt(255);

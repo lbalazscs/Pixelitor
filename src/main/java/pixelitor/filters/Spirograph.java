@@ -55,6 +55,7 @@ public class Spirograph extends ShapeFilter {
 
     public Spirograph() {
         zoom.setPresetKey("Zoom (%)");
+        type.setPresetKey("Type");
 
         addParamsToFront(
             time,

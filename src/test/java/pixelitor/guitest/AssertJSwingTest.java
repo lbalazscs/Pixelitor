@@ -34,6 +34,11 @@ import pixelitor.Views;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.AutoPaintPanel;
 import pixelitor.colors.FgBgColorSelector;
+import pixelitor.filters.*;
+import pixelitor.filters.jhlabsproxies.JHKaleidoscope;
+import pixelitor.filters.jhlabsproxies.JHPolarCoordinates;
+import pixelitor.filters.levels.Levels;
+import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
@@ -1620,28 +1625,28 @@ public class AssertJSwingTest {
 
     private void testFiltersColor(boolean squashedImage) {
         testColorBalance(squashedImage);
-        testFilterWithDialog("Hue/Saturation", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Colorize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Levels", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Brightness/Contrast", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Solarize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Sepia", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(HueSat.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Colorize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Levels.NAME, Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(BrightnessContrast.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Solarize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Sepia.NAME, Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testInvert(squashedImage);
         testFilterWithDialog("Channel Invert", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Channel Mixer", Randomize.YES,
+        testFilterWithDialog(ChannelMixer.NAME, Randomize.YES,
             Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
             "R -> G -> B -> R", "R -> B -> G -> R",
             "Average BW", "Luminosity BW", "Sepia");
         testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
-        testNoDialogFilter("Desaturate");
-        testNoDialogFilter("Hue");
+        testNoDialogFilter(ExtractChannelFilter.DESATURATE_NAME);
+        testNoDialogFilter(GUIText.HUE);
         testNoDialogFilter("Hue (with colors)");
-        testNoDialogFilter("Saturation");
+        testNoDialogFilter(ExtractChannelFilter.SATURATION_NAME);
         testFilterWithDialog("Quantize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Posterize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Posterize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Threshold.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Color Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Tritone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map", Randomize.NO, Reseed.NO, ShowOriginal.YES);
@@ -1679,18 +1684,18 @@ public class AssertJSwingTest {
         testFilterWithDialog("Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Polar Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Frosted Glass", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Little Planet", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Polar Coordinates", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(LittlePlanet.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(JHPolarCoordinates.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Wrap Around Arc", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersDislocate() {
         testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(JHKaleidoscope.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Slice", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Mirror", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Mirror.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Video Feedback", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
@@ -1788,13 +1793,13 @@ public class AssertJSwingTest {
 
     private void testColorBalance(boolean squashedImage) {
         runWithSelectionAndTranslation(squashedImage, () ->
-            testFilterWithDialog("Color Balance",
+            testFilterWithDialog(ColorBalance.NAME,
                 Randomize.YES, Reseed.NO, ShowOriginal.YES));
     }
 
     private void testInvert(boolean squashedImage) {
         runWithSelectionAndTranslation(squashedImage, () ->
-            testNoDialogFilter("Invert"));
+            testNoDialogFilter(Invert.NAME));
     }
 
     private void testText() {

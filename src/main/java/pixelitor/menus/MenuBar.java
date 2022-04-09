@@ -1510,6 +1510,14 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_ALT_D);
 
+        sub.add(new OpenViewEnabledAction("Add All Smart Filters") {
+            @Override
+            protected void onClick() {
+                Composition activeComp = getActiveComp();
+                Debug.addAllSmartFilters(activeComp);
+            }
+        });
+
         sub.add(new PAction("Serialize All Filters") {
             @Override
             protected void onClick() {

@@ -38,6 +38,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -249,11 +250,11 @@ public class Colors {
 
     public static String toHTMLHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
-            String argb = format("%08X", c.getRGB());
+            String argb = format(Locale.ENGLISH, "%08X", c.getRGB());
             String rgba = argb.substring(2) + argb.substring(0, 2);
             return rgba;
         } else {
-            return format("%06X", 0xFFFFFF & c.getRGB());
+            return format(Locale.ENGLISH, "%06X", 0xFFFFFF & c.getRGB());
         }
     }
 

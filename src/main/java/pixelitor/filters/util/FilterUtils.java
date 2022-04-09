@@ -17,10 +17,7 @@
 
 package pixelitor.filters.util;
 
-import pixelitor.filters.Fade;
-import pixelitor.filters.Filter;
-import pixelitor.filters.RGBPixelOp;
-import pixelitor.filters.RepeatLast;
+import pixelitor.filters.*;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
@@ -56,12 +53,14 @@ public class FilterUtils {
         return filters;
     }
 
-    public static void forEachSerializableFilter(Consumer<? super Filter> action) {
+    public static void forEachSmartFilter(Consumer<? super Filter> action) {
         // all filters can be serialized, but only those
         // with a no-arg constructor can be deserialized
         allFilters.stream()
             .map(FilterAction::getFilter)
             .filter(Filter::canBeSmart)
+            .filter(filter -> !(filter instanceof RandomFilter))
+            .sorted(comparing(Filter::getName))
             .forEach(action);
     }
 

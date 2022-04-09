@@ -1771,6 +1771,9 @@ public class Composition implements Serializable {
             return this;
         }
 
+        /**
+         * The final operation which actually adds the layer.
+         */
         public void add(Layer newLayer) {
             Layer activeLayerBefore = null;
             MaskViewMode oldViewMode = null;

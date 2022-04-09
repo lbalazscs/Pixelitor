@@ -17,12 +17,10 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.AppContext;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Threads;
 
 import javax.swing.*;
 import java.awt.EventQueue;
@@ -86,7 +84,6 @@ public class EffectsParam extends AbstractFilterParam {
 
     private void ensureEffectsPanelIsCreated() {
         if (effectsPanel == null) {
-            assert AppContext.isUnitTesting() || Threads.calledOnEDT();
             effectsPanel = new EffectsPanel(null);
             if (adjustmentListener != null) { // the listener was set before this
                 effectsPanel.setAdjustmentListener(adjustmentListener);

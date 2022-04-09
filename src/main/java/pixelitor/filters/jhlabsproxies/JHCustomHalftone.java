@@ -46,4 +46,9 @@ public class JHCustomHalftone extends JHMaskedHalftone {
 //        // this filter is selected as a random filter
 //        return ImageUtils.copyImage(src);
     }
+
+    @Override
+    public boolean canBeSmart() {
+        return false;
+    }
 }

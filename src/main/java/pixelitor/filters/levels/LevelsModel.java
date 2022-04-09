@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,10 +57,6 @@ public class LevelsModel {
     }
 
     public void settingsChanged() {
-        if (lastGUI == null) {
-            return; // it's null when loading a smart filter
-        }
-
         GrayScaleLookup rgb = rgbModel.getLookup();
 
         GrayScaleLookup r = rModel.getLookup();
@@ -69,6 +65,10 @@ public class LevelsModel {
 
         RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b);
         filter.setRGBLookup(unifiedLookup);
+
+        if (lastGUI == null) {
+            return; // it's null when loading a smart filter
+        }
         lastGUI.runFilterPreview();
     }
 
