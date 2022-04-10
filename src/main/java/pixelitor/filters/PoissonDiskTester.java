@@ -27,6 +27,7 @@ import pixelitor.utils.ReseedSupport;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.SplittableRandom;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -38,6 +39,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class PoissonDiskTester extends ParametrizedFilter {
     public static final String NAME = "Poisson Disk Sampling";
+
+    @Serial
+    private static final long serialVersionUID = -6684473485597318552L;
 
     private final RangeParam distance = new RangeParam("Distance", 10, 20, 300);
     private final RangeParam k = new RangeParam("k", 1, 30, 100);

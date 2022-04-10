@@ -95,7 +95,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
     }
 
     @Override
-    public void randomize() {
+    public void randomizeSettings() {
         // no settings
     }
 

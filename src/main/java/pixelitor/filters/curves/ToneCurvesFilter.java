@@ -85,7 +85,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
     }
 
     @Override
-    public void randomize() {
+    public void randomizeSettings() {
         // not supported yet
     }
 

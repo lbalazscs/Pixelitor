@@ -495,13 +495,15 @@ public class Debug {
         TextSettings settings = new TextSettings();
         settings.randomize();
         settings.setText(filter.getName());
+        settings.setWatermark(false);
         TextLayer textLayer = new TextLayer(comp, "", settings);
         textLayer.updateLayerName();
 
         SmartObject smartObject = new SmartObject(textLayer);
+        smartObject.setOpacity(0.2f, false);
         new Composition.LayerAdder(comp).add(smartObject);
         if (filter instanceof FilterWithGUI guiFilter) {
-            guiFilter.randomize();
+            guiFilter.randomizeSettings();
             smartObject.startPreviewing();
             filter.startOn(smartObject, PREVIEWING);
             smartObject.onFilterDialogAccepted(filter.getName());

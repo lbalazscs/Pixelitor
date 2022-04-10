@@ -24,6 +24,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.gui.GUIText.BRIGHTNESS;
@@ -35,6 +36,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Colorize extends ParametrizedFilter {
     public static final String NAME = i18n("colorize");
+
+    @Serial
+    private static final long serialVersionUID = 7036946857972080432L;
 
     private final RangeParam brightnessParam = new RangeParam(
         BRIGHTNESS, -100, 0, 100);

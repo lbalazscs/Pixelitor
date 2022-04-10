@@ -54,7 +54,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public void randomize() {
+    public void randomizeSettings() {
         paramSet.randomize();
     }
 

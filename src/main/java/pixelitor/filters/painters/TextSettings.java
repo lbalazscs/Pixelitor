@@ -161,6 +161,10 @@ public class TextSettings implements Serializable, Debuggable {
         return watermark;
     }
 
+    public void setWatermark(boolean watermark) {
+        this.watermark = watermark;
+    }
+
     public double getRotation() {
         return rotation;
     }

@@ -457,7 +457,7 @@ public class RandomGUITest {
         long runCountBefore = Filter.runCount;
 
         if (filter instanceof FilterWithGUI guiFilter) {
-            guiFilter.randomize();
+            guiFilter.randomizeSettings();
             dr.startPreviewing();
 
             try {
