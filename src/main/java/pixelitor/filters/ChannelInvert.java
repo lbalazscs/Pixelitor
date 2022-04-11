@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -54,9 +53,13 @@ public class ChannelInvert extends ParametrizedFilter {
     private final Item[] invertChoices = {
         new Item("Nothing", NOTHING),
 
-        new Item(GUIText.HUE, HUE_ONLY),
-        new Item(GUIText.SATURATION, SATURATION_ONLY),
-        new Item(GUIText.BRIGHTNESS, BRI_ONLY),
+//        new Item(GUIText.HUE, HUE_ONLY),
+//        new Item(GUIText.SATURATION, SATURATION_ONLY),
+//        new Item(GUIText.BRIGHTNESS, BRI_ONLY),
+
+        new Item("Hue", HUE_ONLY),
+        new Item("Saturation", SATURATION_ONLY),
+        new Item("Brightness", BRI_ONLY),
 
         new Item("Hue and Saturation", HUE_SAT),
         new Item("Hue and Brightness", HUE_BRI),

@@ -581,7 +581,7 @@ public class AssertJSwingTest {
         }
         log(1, "mask from color range");
 
-        runMenuCommand("Add/Replace from Color Range...");
+        runMenuCommand("Mask from Color Range...");
 
         var dialog = findDialogByTitle("Mask from Color Range");
 

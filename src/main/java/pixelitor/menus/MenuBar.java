@@ -472,7 +472,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new OpenViewEnabledAction("Add/Replace from Color Range...") {
+        sub.add(new OpenViewEnabledAction(MaskFromColorRangePanel.NAME + "...") {
             @Override
             protected void onClick() {
                 MaskFromColorRangePanel.showInDialog();
@@ -499,7 +499,7 @@ public class MenuBar extends JMenuBar {
                 ((ImageLayer) layer).applyLayerMask(true);
 
                 // not necessary, as the result looks the same, but still
-                // useful because eventual problems would be spotted early
+                // useful because bugs would be spotted early
                 layer.getComp().update();
             }
         });

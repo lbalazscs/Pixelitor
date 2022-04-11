@@ -962,13 +962,6 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void firstModalDialogShown() {
-        // Rasterize when a filter with dialog starts. This comes too
-        // late to influence the filter's image for an ImagePositionParam
-        rasterizeBox();
-    }
-
-    @Override
     public DebugNode createDebugNode(String key) {
         var node = super.createDebugNode(key);
         node.addAsString("state", state);

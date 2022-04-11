@@ -22,11 +22,8 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.LuminanceLookup;
-import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
-
-import static pixelitor.utils.Texts.i18n;
 
 /**
  * Makes pixels transparent proportionally to a channel value
@@ -40,10 +37,14 @@ public class ChannelToTransparency extends ParametrizedFilter {
     private static final int BLUE = 4;
 
     private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
-        new Item(GUIText.BRIGHTNESS, LUMINOSITY),
-        new Item(i18n("red"), RED),
-        new Item(i18n("green"), GREEN),
-        new Item(i18n("blue"), BLUE)
+//        new Item(GUIText.BRIGHTNESS, LUMINOSITY),
+//        new Item(i18n("red"), RED),
+//        new Item(i18n("green"), GREEN),
+//        new Item(i18n("blue"), BLUE)
+        new Item("Brightness", LUMINOSITY),
+        new Item("Red", RED),
+        new Item("Green", GREEN),
+        new Item("Blue", BLUE)
     });
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
     private final BooleanParam keepParam = new BooleanParam("Keep Existing Transparency", true);

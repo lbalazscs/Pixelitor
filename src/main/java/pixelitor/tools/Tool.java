@@ -257,6 +257,9 @@ public abstract class Tool implements KeyListener, PresetOwner {
         // empty by default
     }
 
+    /**
+     * A modal dialog, such as a filter or the color selector, was shown.
+     */
     public void firstModalDialogShown() {
         // empty by default
     }

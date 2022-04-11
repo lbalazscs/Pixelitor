@@ -598,12 +598,6 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void firstModalDialogShown() {
-        // hide the handles when a filter with dialog starts
-        hideHandles(false);
-    }
-
-    @Override
     public void saveStateTo(UserPreset preset) {
         preset.put("Type", getType().toString());
         preset.put("Cycling", (String) cycleMethodCB.getSelectedItem());
