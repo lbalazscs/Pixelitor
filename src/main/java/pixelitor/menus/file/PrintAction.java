@@ -117,8 +117,13 @@ public class PrintAction extends OpenViewEnabledAction implements Printable {
         if (doPrint) {
             var progressHandler = Messages.startProgress(
                 "Printing " + compName, -1);
-            CompletableFuture.runAsync(() -> startPrintJob(job), onIOThread)
-                .thenRunAsync(progressHandler::stopProgress, onEDT);
+            CompletableFuture.supplyAsync(() -> runPrintJob(job), onIOThread)
+                .thenAcceptAsync(printingFinished -> {
+                    progressHandler.stopProgress();
+                    if (!printingFinished) {
+                        Messages.showInStatusBar("Printing was cancelled.");
+                    }
+                }, onEDT);
         }
     }
 
@@ -151,15 +156,20 @@ public class PrintAction extends OpenViewEnabledAction implements Printable {
         return attributes;
     }
 
-    private void startPrintJob(PrinterJob job) {
+    private boolean runPrintJob(PrinterJob job) {
         try {
             Book book = new Book();
             book.append(this, page);
             job.setPageable(book);
             job.print();
+        } catch (PrinterAbortException e) {
+            // This only means that the printing was aborted at the OS level.
+            return false;
         } catch (PrinterException e) {
             Messages.showException(e);
+            return false;
         }
+        return true;
     }
 
     @Override

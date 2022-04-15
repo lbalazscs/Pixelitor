@@ -267,10 +267,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setValue(double v, boolean trigger) {
-        if (paramGUI != null) {
-            // while loading a smart filter, it can happen that
+        if (paramGUI != null || trigger) {
+            // While loading a smart filter, it can happen that
             // the value is out of range (if the range is adjusted
-            // to the canvas size, but this adjustment didn't happen yet)
+            // to the canvas size, but this adjustment didn't happen yet).
+            // The trigger condition is important, because when used outside
+            // the filters paramGUI could be null even if a GUI was created.
             if (v > maxValue) {
                 v = maxValue;
             }
