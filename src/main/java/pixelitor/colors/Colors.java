@@ -371,6 +371,9 @@ public class Colors {
         Window window = SwingUtilities.windowForComponent(parent);
         setupPasteColorPopupMenu(popup, window, colorSetter);
 
+        popup.addSeparator();
+        setupSetToFgBgColorMenus(popup, colorSetter);
+
         // swatch.setComponentPopupMenu doesn't consider the disabled state
         swatch.addMouseListener(new MouseAdapter() {
             @Override
@@ -414,6 +417,21 @@ public class Colors {
                 } else {
                     colorSetter.accept(color);
                 }
+            }
+        });
+    }
+
+    private static void setupSetToFgBgColorMenus(JPopupMenu popup, Consumer<Color> colorSetter) {
+        popup.add(new PAction("Set to Foreground Color") {
+            @Override
+            protected void onClick() {
+                colorSetter.accept(FgBgColors.getFGColor());
+            }
+        });
+        popup.add(new PAction("Set to Background Color") {
+            @Override
+            protected void onClick() {
+                colorSetter.accept(FgBgColors.getBGColor());
             }
         });
     }
