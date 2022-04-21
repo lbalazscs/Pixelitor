@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Lens Blur filter based on the JHLabs LensBlurFilter
  */
 public class JHLensBlur extends ParametrizedFilter {
     public static final String NAME = "Lens Blur";
+
+    @Serial
+    private static final long serialVersionUID = 788524159732735827L;
 
     private final RangeParam amount = new RangeParam("Amount (Radius)", 1, 2, 101);
     private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
@@ -69,5 +73,10 @@ public class JHLensBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 }

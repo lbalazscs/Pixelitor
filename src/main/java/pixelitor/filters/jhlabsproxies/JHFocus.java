@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,16 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Focus filter based on the JHLabs VariableBlurFilter
  */
 public class JHFocus extends ParametrizedFilter {
     public static final String NAME = "Focus";
+
+    @Serial
+    private static final long serialVersionUID = 6331340888057548063L;
 
     private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 0, 200, 1000, false);
@@ -109,6 +113,11 @@ public class JHFocus extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 
     private static class FocusImpl extends VariableBlurFilter {

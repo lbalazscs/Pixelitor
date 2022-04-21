@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * "Motion Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
  */
 public class JHMotionBlur extends ParametrizedFilter {
     public static final String NAME = "Motion Blur";
+
+    @Serial
+    private static final long serialVersionUID = 6811375510367120301L;
 
     private final AngleParam angle = new AngleParam("Direction", 0);
     private final RangeParam distance = new RangeParam("Distance", 0, 0, 200);
@@ -67,5 +71,10 @@ public class JHMotionBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 }

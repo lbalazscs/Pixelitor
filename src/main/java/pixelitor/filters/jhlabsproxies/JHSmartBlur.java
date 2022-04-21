@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,16 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Smart Blur filter based on the JHLabs SmartBlurFilter
  */
 public class JHSmartBlur extends ParametrizedFilter {
     public static final String NAME = "Smart Blur";
+
+    @Serial
+    private static final long serialVersionUID = 1462572105604633438L;
 
     private final RangeParam radiusParam = new RangeParam(GUIText.RADIUS, 0, 5, 100);
     private final RangeParam threshold = new RangeParam("Threshold", 0, 10, 256);
@@ -72,6 +76,11 @@ public class JHSmartBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 
     @Override

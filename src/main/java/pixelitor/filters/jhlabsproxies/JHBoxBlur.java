@@ -26,12 +26,16 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Box Blur filter based on the JHLabs BoxBlurFilter
  */
 public class JHBoxBlur extends ParametrizedFilter {
     public static final String NAME = "Box Blur";
+
+    @Serial
+    private static final long serialVersionUID = -3687029298672175297L;
 
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 0, 100);
     private final RangeParam numberOfIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
@@ -77,5 +81,10 @@ public class JHBoxBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 }

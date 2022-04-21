@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * "Spin and Zoom Blur" filter based on the JHLabs MotionBlurOp/MotionBlurFilter classes
  */
 public class JHSpinZoomBlur extends ParametrizedFilter {
     public static final String NAME = "Spin and Zoom Blur";
+
+    @Serial
+    private static final long serialVersionUID = -1904077888275935586L;
 
     private final RangeParam rotation = new RangeParam("Spin Blur Amount (Degrees)", -45, 0, 45);
     private final RangeParam zoom = new RangeParam("Zoom Blur Amount", 0, 0, 200);
@@ -73,5 +77,10 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 }

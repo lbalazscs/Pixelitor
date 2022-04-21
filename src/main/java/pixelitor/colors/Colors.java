@@ -25,6 +25,7 @@ import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -344,35 +345,8 @@ public class Colors {
     public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
                                                   Supplier<Color> colorSupplier,
                                                   Consumer<Color> colorSetter) {
-        var popup = new JPopupMenu();
-
-        ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
-
-        popup.add(new PAction("Color Variations...") {
-            @Override
-            protected void onClick() {
-                Window window = SwingUtilities.windowForComponent(parent);
-                PalettePanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
-            }
-        });
-
-        popup.add(new PAction("Filter Color History...") {
-            @Override
-            protected void onClick() {
-                Window window = SwingUtilities.windowForComponent(parent);
-                ColorHistory.FILTER.showDialog(window, clickHandler);
-            }
-        });
-
-        popup.addSeparator();
-
-        setupCopyColorPopupMenu(popup, colorSupplier);
-
-        Window window = SwingUtilities.windowForComponent(parent);
-        setupPasteColorPopupMenu(popup, window, colorSetter);
-
-        popup.addSeparator();
-        setupSetToFgBgColorMenus(popup, colorSetter);
+        Lazy<JPopupMenu> popupHolder = Lazy.of(() ->
+            createFilterColorPopup(parent, colorSupplier, colorSetter));
 
         // swatch.setComponentPopupMenu doesn't consider the disabled state
         swatch.addMouseListener(new MouseAdapter() {
@@ -392,10 +366,44 @@ public class Colors {
 
             private void showPopup(MouseEvent e) {
                 if (swatch.isEnabled()) {
-                    popup.show(swatch, e.getX(), e.getY());
+                    popupHolder.get().show(swatch, e.getX(), e.getY());
                 }
             }
         });
+    }
+
+    private static JPopupMenu createFilterColorPopup(JComponent parent,
+                                                     Supplier<Color> colorSupplier,
+                                                     Consumer<Color> colorSetter) {
+        JPopupMenu popup = new JPopupMenu();
+
+        ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
+        Window window = SwingUtilities.windowForComponent(parent);
+
+        popup.add(new PAction("Color Variations...") {
+            @Override
+            protected void onClick() {
+                PalettePanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
+            }
+        });
+
+        popup.add(new PAction("Filter Color History...") {
+            @Override
+            protected void onClick() {
+                ColorHistory.FILTER.showDialog(window, clickHandler);
+            }
+        });
+
+        popup.addSeparator();
+
+        setupCopyColorPopupMenu(popup, colorSupplier);
+
+        setupPasteColorPopupMenu(popup, window, colorSetter);
+
+        popup.addSeparator();
+        setupSetToFgBgColorMenus(popup, colorSetter);
+
+        return popup;
     }
 
     public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {

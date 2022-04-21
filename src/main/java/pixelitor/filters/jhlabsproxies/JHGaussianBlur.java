@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,16 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Gaussian Blur filter based on JHLabs GaussianFilter
  */
 public class JHGaussianBlur extends ParametrizedFilter {
     public static final String NAME = "Gaussian Blur";
+
+    @Serial
+    private static final long serialVersionUID = 5650559334811606541L;
 
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 2, 101);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
@@ -65,6 +69,11 @@ public class JHGaussianBlur extends ParametrizedFilter {
         }
 
         return dest;
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return !hpSharpening.isChecked();
     }
 
     @Override
