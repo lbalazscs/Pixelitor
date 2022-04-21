@@ -117,7 +117,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
-        ColorHistory.FILTER.add(newColor);
+        ColorHistory.remember(newColor);
     }
 
     ButtonModel getEnabledModel() {

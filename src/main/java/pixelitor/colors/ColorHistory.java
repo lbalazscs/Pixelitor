@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,60 +32,37 @@ import java.util.List;
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 /**
- * A color history. There are separate histories
- * for the foreground, background and filter colors.
+ * The history of the colors used as foreground, background and filter colors.
  */
 public class ColorHistory {
-    private final Type type;
-
-    private enum Type {
-        FG("Foreground Color History") {
-        }, BG("Background Color History") {
-        }, FLT("Filter Color History") {
-            @Override
-            public String getHelpText() {
-                return "Filter Color History: " + ColorSwatchClickHandler.FILTER_HTML_HELP;
-            }
-        };
-
-        final String title;
-
-        Type(String title) {
-            this.title = title;
-        }
-
-        public String getDialogTitle() {
-            return title;
-        }
-
-        public String getHelpText() {
-            return title + ": " + ColorSwatchClickHandler.STANDARD_HTML_HELP;
-        }
-    }
-
-    public static final ColorHistory FOREGROUND = new ColorHistory(Type.FG);
-    public static final ColorHistory BACKGROUND = new ColorHistory(Type.BG);
-    public static final ColorHistory FILTER = new ColorHistory(Type.FLT);
+    public static final ColorHistory INSTANCE = new ColorHistory();
 
     private static final int MAX_SIZE = 200;
 
     private final List<Color> colors;
-    private final String dialogTitle;
 
-    private ColorHistory(Type type) {
-        this.type = type;
-        dialogTitle = type.getDialogTitle();
+    private ColorHistory() {
         colors = new ArrayList<>();
     }
 
-    public void add(Color c) {
-        colors.add(c);
+    private void add(Color newColor) {
+        int newRGB = newColor.getRGB();
+        for (Color color : colors) {
+            if (color.getRGB() == newRGB) {
+                return;
+            }
+        }
+        colors.add(newColor);
         if (colors.size() > MAX_SIZE) {
             colors.remove(0);
         }
     }
 
-    public void showDialog(Window window, ColorSwatchClickHandler clickHandler) {
+    public static void remember(Color c) {
+        INSTANCE.add(c);
+    }
+
+    public void showDialog(Window window, ColorSwatchClickHandler clickHandler, boolean isFilter) {
         assert window != null;
         assert clickHandler != null;
 
@@ -98,10 +75,12 @@ public class ColorHistory {
             panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
         }
 
-        Messages.showInStatusBar(type.getHelpText());
+        Messages.showInStatusBar("Color History: " + (isFilter ?
+            ColorSwatchClickHandler.FILTER_HTML_HELP :
+            ColorSwatchClickHandler.STANDARD_HTML_HELP));
 
         new DialogBuilder()
-            .title(dialogTitle)
+            .title("Color History")
             .owner(window)
             .content(panel)
             .notModal()

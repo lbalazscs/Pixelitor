@@ -154,11 +154,10 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        ColorHistory history = fg ? ColorHistory.FOREGROUND : ColorHistory.BACKGROUND;
-        popup.add(new PAction(selectorName + " Color History...") {
+        popup.add(new PAction("Color History...") {
             @Override
             protected void onClick() {
-                history.showDialog(pw, ColorSwatchClickHandler.STANDARD);
+                ColorHistory.INSTANCE.showDialog(pw, ColorSwatchClickHandler.STANDARD, false);
             }
         });
 
@@ -313,7 +312,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         setFgButtonColor(newColor);
-        ColorHistory.FOREGROUND.add(newColor);
+        ColorHistory.remember(newColor);
         if (notifyListeners) {
             Tools.fgBgColorsChanged();
         }
@@ -335,7 +334,7 @@ public class FgBgColorSelector extends JLayeredPane {
         }
 
         setBgButtonColor(newColor);
-        ColorHistory.BACKGROUND.add(newColor);
+        ColorHistory.remember(newColor);
         if (notifyListeners) {
             Tools.fgBgColorsChanged();
         }

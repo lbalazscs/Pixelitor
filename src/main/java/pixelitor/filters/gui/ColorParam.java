@@ -47,7 +47,7 @@ public class ColorParam extends AbstractFilterParam {
         color = defaultColor;
         this.transparencyPolicy = transparencyPolicy;
 
-        ColorHistory.FILTER.add(defaultColor);
+        ColorHistory.remember(defaultColor);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ColorParam extends AbstractFilterParam {
         }
         color = newColor;
 
-        ColorHistory.FILTER.add(newColor);
+        ColorHistory.remember(newColor);
 
         if (paramGUI != null) {
             paramGUI.updateGUI();

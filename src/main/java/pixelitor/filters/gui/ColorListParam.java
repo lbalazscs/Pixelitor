@@ -68,7 +68,7 @@ public class ColorListParam extends AbstractFilterParam {
         }
         colors[index] = newColor;
 
-        ColorHistory.FILTER.add(newColor);
+        ColorHistory.remember(newColor);
 
         updateGUI(trigger);
     }

@@ -387,10 +387,10 @@ public class Colors {
             }
         });
 
-        popup.add(new PAction("Filter Color History...") {
+        popup.add(new PAction("Color History...") {
             @Override
             protected void onClick() {
-                ColorHistory.FILTER.showDialog(window, clickHandler);
+                ColorHistory.INSTANCE.showDialog(window, clickHandler, true);
             }
         });
 
