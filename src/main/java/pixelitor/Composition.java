@@ -418,7 +418,7 @@ public class Composition implements Serializable {
         String oldName = getName();
         String newName = JOptionPane.showInputDialog(owner,
             "New Name:", oldName);
-        if (oldName.equals(newName)) {
+        if (newName.equals(oldName)) {
             return;
         }
         setName(newName);
@@ -451,8 +451,10 @@ public class Composition implements Serializable {
     }
 
     public void setFile(File file) {
-        assert file != null;
         this.file = file;
+        if (file == null) {
+            return;
+        }
         this.fileTime = file.lastModified();
         setName(file.getName());
     }
@@ -1661,9 +1663,18 @@ public class Composition implements Serializable {
     // that has this composition as contents
     public void replaceWithSmartObject() {
         Composition newComp = new Composition(canvas.copy(), mode);
+
+        if (file != null) {
+            newComp.setFile(file);
+            setFile(null);
+        } else {
+            newComp.setName(name);
+        }
+
         SmartObject so = new SmartObject(newComp, this);
         newComp.addLayerInInitMode(so);
         view.replaceComp(newComp);
+        setName("Contents of " + name);
     }
 
     public void debugImages() {
