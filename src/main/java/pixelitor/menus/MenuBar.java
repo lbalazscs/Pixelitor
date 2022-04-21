@@ -567,10 +567,17 @@ public class MenuBar extends JMenuBar {
     private static JMenu createSmartObjectSubmenu() {
         PMenu sub = new PMenu("Smart Object");
 
-        sub.add(new OpenViewEnabledAction("Convert to Smart Object") {
+        sub.add(new OpenViewEnabledAction("Convert Layer to Smart Object") {
             @Override
             protected void onClick() {
                 getActiveLayer().replaceWithSmartObject();
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Convert All to Smart Object") {
+            @Override
+            protected void onClick() {
+                getActiveComp().replaceWithSmartObject();
             }
         });
 

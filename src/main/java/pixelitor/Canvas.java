@@ -69,6 +69,10 @@ public class Canvas implements Serializable, Debuggable {
         coHeight = orig.coHeight;
     }
 
+    public Canvas copy() {
+        return new Canvas(this);
+    }
+
     /**
      * Changes the size with values given in image space
      */

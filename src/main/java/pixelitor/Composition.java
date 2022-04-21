@@ -207,8 +207,7 @@ public class Composition implements Serializable {
      * Creates and returns a deep copy of this composition.
      */
     public Composition copy(boolean forUndo, boolean copySelection) {
-        var canvasCopy = new Canvas(canvas);
-        var compCopy = new Composition(canvasCopy, mode);
+        var compCopy = new Composition(canvas.copy(), mode);
 
         // copy layers
         for (Layer layer : layerList) {
@@ -1656,6 +1655,15 @@ public class Composition implements Serializable {
     private boolean checkAllSOInvariants() {
         forAllNestedSmartObjects(SmartObject::checkInvariant);
         return true;
+    }
+
+    // replaces the entire composition with a smart object
+    // that has this composition as contents
+    public void replaceWithSmartObject() {
+        Composition newComp = new Composition(canvas.copy(), mode);
+        SmartObject so = new SmartObject(newComp, this);
+        newComp.addLayerInInitMode(so);
+        view.replaceComp(newComp);
     }
 
     public void debugImages() {

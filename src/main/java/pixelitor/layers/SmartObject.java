@@ -101,6 +101,12 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
+    public SmartObject(Composition parent, Composition content) {
+        super(parent, "Smart " + content.getName());
+        setContent(content);
+        recalculateImage(false);
+    }
+
     // constructor called for "Add Linked"
     public SmartObject(File file, Composition parent, Composition content) {
         super(parent, file.getName());
