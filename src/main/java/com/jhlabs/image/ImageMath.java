@@ -404,6 +404,15 @@ public class ImageMath {
     }
 
     /**
+     * Sets the alpha channel of the given ARGB packed int
+     * according to the given 0..1 parameter.
+     */
+    public static int setAlpha(int rgb, double t) {
+        int newAlpha = (int) (255.0 * t);
+        return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
+    }
+
+    /**
      * Bilinear interpolation of ARGB values.
      *
      * @param x   the X interpolation parameter 0..1

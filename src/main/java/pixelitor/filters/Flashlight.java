@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
@@ -42,6 +43,7 @@ public class Flashlight extends ParametrizedFilter {
     private final IntChoiceParam bg = new IntChoiceParam("Background", new Item[]{
         new Item("Black", Impl.BG_BLACK),
         new Item("White", Impl.BG_WHITE),
+        new Item("Background Color", Impl.BG_TOOL_BG),
         new Item("Transparent", Impl.BG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
     private final BooleanParam invert = new BooleanParam("Invert", false);
@@ -97,6 +99,7 @@ public class Flashlight extends ParametrizedFilter {
         public static final int BG_BLACK = 0;
         public static final int BG_WHITE = 1;
         public static final int BG_TRANSPARENT = 2;
+        public static final int BG_TOOL_BG = 3;
 
         private int bgPixel;
         private BlurredShape shape;
@@ -117,7 +120,12 @@ public class Flashlight extends ParametrizedFilter {
             } else if (outside == 0.0) {
                 return rgb;
             } else {
-                return ImageMath.mixColors((float) outside, rgb, bgPixel);
+                if (bgPixel == 0) {
+                    // if the background is transparent, don't mix with black transparent
+                    return ImageMath.setAlpha(rgb, 1.0 - outside);
+                } else {
+                    return ImageMath.mixColors((float) outside, rgb, bgPixel);
+                }
             }
         }
 
@@ -137,6 +145,7 @@ public class Flashlight extends ParametrizedFilter {
             bgPixel = switch (bg) {
                 case BG_BLACK -> 0xFF000000;
                 case BG_WHITE -> 0xFFFFFFFF;
+                case BG_TOOL_BG -> FgBgColors.getBGColor().getRGB();
                 case BG_TRANSPARENT -> 0;
                 default -> throw new IllegalArgumentException("bg = " + bg);
             };
