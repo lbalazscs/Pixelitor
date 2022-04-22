@@ -177,9 +177,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        // we treat surrounding rect as area for mouse hit detection
-        // for small font sizes or thin font styles it can be helpful
-        // for larger font sizes it could be more appropriate to use pixel perfect test
         if (painter.getBoundingShape().contains(p)) {
             if (hasMask() && mask.isMaskEnabled()) {
                 BufferedImage maskImage = mask.getImage();
@@ -187,13 +184,17 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
                 int iy = p.y - mask.getTy();
                 if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
                     int maskPixel = maskImage.getRGB(ix, iy);
-                    int maskAlpha = maskPixel & 0xff;
-                    return 0x00ffffff | maskAlpha << 24;
+                    int maskAlpha = maskPixel & 0xFF;
+                    return 0x00_FF_FF_FF | maskAlpha << 24;
                 }
             }
-            return 0xffffffff;
+            // There is no pixel-perfect hit detection for text layers, this value
+            // signals that auto-select should select in the entire bounding box.
+            return 0xFF_FF_FF_FF;
+        } else {
+            // signal that auto-select should ignore this layer
+            return 0x00_00_00_00;
         }
-        return 0x00000000;
     }
 
     @Override

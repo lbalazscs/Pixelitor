@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,10 +70,10 @@ public class RGBColorMixPalette extends Palette {
                     int rowsMiddle = numRows / 2;
                     if (y < rowsMiddle) {
                         float mixFactor = (rowsMiddle - y) / (rowsMiddle + 1.0f);
-                        mixed = mixColors(mixFactor, mixed, 0xFF000000);
+                        mixed = mixColors(mixFactor, mixed, 0xFF_00_00_00);
                     } else if (y > rowsMiddle) {
                         float mixFactor = (y - rowsMiddle) / (rowsMiddle + 1.0f);
-                        mixed = mixColors(mixFactor, mixed, 0xFFFFFFFF);
+                        mixed = mixColors(mixFactor, mixed, 0xFF_FF_FF_FF);
                     }
                     c = new Color(mixed);
                 }

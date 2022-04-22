@@ -180,9 +180,9 @@ public class ColorPickerTool extends Tool {
             shape.lineTo(17.305561, 12.512863);
             shape.closePath();
 
-            g.setPaint(new Color(0x68000000, true));
+            g.setPaint(new Color(0x68_00_00_00, true));
             g.fill(shape);
-            g.setPaint(new Color(0xA5000000, true));
+            g.setPaint(new Color(0xA5_00_00_00, true));
             g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(shape);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class Luminosity extends Filter {
 
         for (int i = 0; i < destData.length; i++) {
             int rgb = srcData[i];
-            int alpha = rgb & 0xFF000000;
+            int alpha = rgb & 0xFF_00_00_00;
             if (alpha == 0) {
                 destData[i] = 0;
             } else {

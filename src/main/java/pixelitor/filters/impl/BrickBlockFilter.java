@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -98,7 +98,7 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
         i = 0;
         for (int by = 0; by < h; by++) {
             for (int bx = 0; bx < w; bx++) {
-                pixels[i] = (pixels[i] & 0xff000000) | rgb;
+                pixels[i] = (pixels[i] & 0xFF_00_00_00) | rgb;
                 i++;
             }
         }

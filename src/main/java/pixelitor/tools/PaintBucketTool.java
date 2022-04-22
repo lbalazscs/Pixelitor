@@ -130,7 +130,7 @@ public class PaintBucketTool extends Tool {
         } else if (fill.equals(FILL_BACKGROUND)) {
             fillRGB = getBGColor().getRGB();
         } else if (fill.equals(FILL_TRANSPARENT)) {
-            fillRGB = 0x00000000;
+            fillRGB = 0x00_00_00_00;
         } else if (fill.equals(FILL_CLICKED)) {
             fillRGB = rgbAtMouse;
         } else {

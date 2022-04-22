@@ -244,9 +244,7 @@ public class Colors {
 
     public static int HSBAtoARGB(float[] hsb_col, int alpha) {
         int col = Color.HSBtoRGB(hsb_col[0], hsb_col[1], hsb_col[2]);
-        col &= 0x00FFFFFF; // Remove the FF alpha which was added by HSBtoRGB.
-        col |= (alpha << 24); // Add the alpha specified by user.
-        return col;
+        return setAlpha(col, alpha);
     }
 
     public static String toHTMLHex(Color c, boolean includeAlpha) {
@@ -255,7 +253,7 @@ public class Colors {
             String rgba = argb.substring(2) + argb.substring(0, 2);
             return rgba;
         } else {
-            return format(Locale.ENGLISH, "%06X", 0xFFFFFF & c.getRGB());
+            return format(Locale.ENGLISH, "%06X", 0x00_FF_FF_FF & c.getRGB());
         }
     }
 
@@ -447,5 +445,13 @@ public class Colors {
     public static void fillWith(Color color, Graphics2D g2, int width, int height) {
         g2.setColor(color);
         g2.fillRect(0, 0, width, height);
+    }
+
+    /**
+     * Sets the alpha channel of the given ARGB packed int to the given 0..255 value.
+     */
+    public static int setAlpha(int rgb, int newAlpha) {
+        // discard the original alpha and set it to the new value
+        return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
     }
 }

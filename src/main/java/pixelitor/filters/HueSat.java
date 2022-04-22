@@ -94,7 +94,7 @@ public class HueSat extends ParametrizedFilter {
 
         @Override
         public int filterRGB(int x, int y, int rgb) {
-            int a = rgb & 0xFF000000;
+            int a = rgb & 0xFF_00_00_00;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
@@ -129,7 +129,7 @@ public class HueSat extends ParametrizedFilter {
             }
 
             int newRGB = Color.HSBtoRGB(shiftedHue, shiftedSat, shiftedBri);  // alpha is 255 here
-            newRGB &= 0x00FFFFFF;  // set alpha to 0
+            newRGB &= 0x00_FF_FF_FF;  // set alpha to 0
             return a | newRGB; // add the real alpha
         }
     }

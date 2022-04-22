@@ -356,7 +356,7 @@ public class ChannelMixer extends ParametrizedFilter {
 
             for (int i = 0; i < length; i++) {
                 int rgb = srcData[i];
-                int a = rgb & 0xFF000000;
+                int a = rgb & 0xFF_00_00_00;
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
                 int b = rgb & 0xFF;

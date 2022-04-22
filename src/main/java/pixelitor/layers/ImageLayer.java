@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.FilterContext;
 import pixelitor.ImageMode;
+import pixelitor.colors.Colors;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
@@ -690,17 +691,17 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 int maskPixel = getMask().getPixelAtPoint(p);
                 if (maskPixel != 0) {
                     int imagePixel = image.getRGB(x, y);
-                    float maskAlpha = (maskPixel & 0xff) / 255.0f;
-                    int imageAlpha = (imagePixel >> 24) & 0xff;
-                    int layerAlpha = (int) (imageAlpha * maskAlpha);
-                    return (imagePixel & 0x00ffffff) | (layerAlpha << 24);
+                    float maskAlpha = (maskPixel & 0xFF) / 255.0f;
+                    int imageAlpha = (imagePixel >> 24) & 0xFF;
+                    int effectiveAlpha = (int) (imageAlpha * maskAlpha);
+                    return Colors.setAlpha(imagePixel, effectiveAlpha);
                 }
             }
 
             return image.getRGB(x, y);
         }
 
-        return 0x00000000;
+        return 0x00_00_00_00;
     }
 
     private boolean imageDoesNotCoverCanvas() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,7 +83,7 @@ public class Invert extends Filter {
             int a = (srcPixel >>> 24) & 0xFF;
 
             if (a == 255 || simple) {
-                destData[i] = srcPixel ^ 0x00FFFFFF;  // invert the r, g, b values
+                destData[i] = srcPixel ^ 0x00_FF_FF_FF;  // invert the r, g, b values
             } else if (a == 0) {
                 destData[i] = 0;
             } else {
@@ -131,7 +131,7 @@ public class Invert extends Filter {
     public static void quickInvert(BufferedImage dest) {
         int[] pixels = ImageUtils.getPixelsAsArray(dest);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
-            pixels[i] ^= 0x00FFFFFF;
+            pixels[i] ^= 0x00_FF_FF_FF;
         }
     }
 

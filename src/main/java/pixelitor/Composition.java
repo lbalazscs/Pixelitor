@@ -783,7 +783,7 @@ public class Composition implements Serializable {
             int pixel = contentLayer.getPixelAtPoint(pixelLoc);
 
             int pixelAlphaThreshold = 30;
-            if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
+            if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
                 return layer;
             }
         }

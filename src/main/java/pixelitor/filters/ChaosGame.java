@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -259,7 +259,7 @@ public class ChaosGame extends ParametrizedFilter {
         if (colorsValue == COLORS_BW) {
             center.color = 0xFF_00_00_00;
         } else {
-            center.color = 0xFF004000; // dark green
+            center.color = 0xFF_00_40_00; // dark green
         }
         vertices.add(center);
     }

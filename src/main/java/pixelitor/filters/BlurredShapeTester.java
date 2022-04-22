@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,8 +81,8 @@ public class BlurredShapeTester extends ParametrizedFilter {
         private double outerRadiusX;
         private double outerRadiusY;
 
-        private static final int RGB_BLACK = 0xFF000000;
-        private static final int RGB_WHITE = 0xFFFFFFFF;
+        private static final int RGB_BLACK = 0xFF_00_00_00;
+        private static final int RGB_WHITE = 0xFF_FF_FF_FF;
 
         private BlurredShape shape;
 

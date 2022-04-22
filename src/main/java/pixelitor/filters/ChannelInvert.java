@@ -101,18 +101,18 @@ public class ChannelInvert extends ParametrizedFilter {
 
         for (int i = 0; i < destData.length; i++) {
             int srcPixel = srcData[i];
-            int alpha = srcPixel & 0xFF000000;
+            int alpha = srcPixel & 0xFF_00_00_00;
             if (alpha == 0) {
                 destData[i] = srcPixel;
             } else {
                 destData[i] = switch (invertType) {
-                    case RED_ONLY -> srcPixel ^ 0x00FF0000;
-                    case GREEN_ONLY -> srcPixel ^ 0x0000FF00;
-                    case BLUE_ONLY -> srcPixel ^ 0x000000FF;
-                    case RED_GREEN -> srcPixel ^ 0x00FFFF00;
-                    case RED_BLUE -> srcPixel ^ 0x00FF00FF;
-                    case GREEN_BLUE -> srcPixel ^ 0x0000FFFF;
-                    case RED_GREEN_BLUE -> srcPixel ^ 0x00FFFFFF;
+                    case RED_ONLY -> srcPixel ^ 0x00_FF_00_00;
+                    case GREEN_ONLY -> srcPixel ^ 0x00_00_FF_00;
+                    case BLUE_ONLY -> srcPixel ^ 0x00_00_00_FF;
+                    case RED_GREEN -> srcPixel ^ 0x00_FF_FF_00;
+                    case RED_BLUE -> srcPixel ^ 0x00_FF_00_FF;
+                    case GREEN_BLUE -> srcPixel ^ 0x00_00_FF_FF;
+                    case RED_GREEN_BLUE -> srcPixel ^ 0x00_FF_FF_FF;
                     default -> throw new IllegalStateException("Unexpected type: " + invertType);
                 };
             }
@@ -129,8 +129,8 @@ public class ChannelInvert extends ParametrizedFilter {
 
         for (int i = 0; i < destData.length; i++) {
             int srcPixel = srcData[i];
-            int a = srcPixel & 0xFF000000;
-            if (a == 0) {
+            int origAlphaShifted = srcPixel & 0xFF_00_00_00;
+            if (origAlphaShifted == 0) {
                 destData[i] = srcPixel;
                 continue;
             }
@@ -146,12 +146,11 @@ public class ChannelInvert extends ParametrizedFilter {
                 case HUE_SAT -> Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], hsb[2]);
                 case SAT_BRI -> Color.HSBtoRGB(hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
                 case HUE_SAT_BRI -> Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
-                default -> 0;
+                default -> throw new IllegalStateException("invertType = " + invertType);
             };
 
-            //  alpha is 255 here
-            newRGB &= 0x00FFFFFF;  // set alpha to 0
-            destData[i] = a | newRGB; // add the real alpha
+            // Color.HSBtoRGB always creates an alpha of 255, so now restore the original value
+            destData[i] = origAlphaShifted | (newRGB & 0x00_FF_FF_FF);
         }
 
         return dest;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.WholeImageFilter;
 import pixelitor.filters.Morphology;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 /**
  * The implementation of the {@link Morphology} filter.
@@ -68,19 +68,19 @@ public class MorphologyFilter extends WholeImageFilter {
             }
             for (int i = 0; i < numPixels; i++) {
                 int rgb = inPixels[i];
-                inA[i] = (short) ((rgb >> 24) & 0xff);
-                inR[i] = (short) ((rgb >> 16) & 0xff);
-                inG[i] = (short) ((rgb >> 8) & 0xff);
-                inB[i] = (short) (rgb & 0xff);
+                inA[i] = (short) ((rgb >> 24) & 0xFF);
+                inR[i] = (short) ((rgb >> 16) & 0xFF);
+                inG[i] = (short) ((rgb >> 8) & 0xFF);
+                inB[i] = (short) (rgb & 0xFF);
             }
 
             int index = 0;
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    short a = 0xff;
-                    short r = 0xff;
-                    short g = 0xff;
-                    short b = 0xff;
+                    short a = 0xFF;
+                    short r = 0xFF;
+                    short g = 0xFF;
+                    short b = 0xFF;
 
                     if (op == OP_DILATE) {
                         r = 0;

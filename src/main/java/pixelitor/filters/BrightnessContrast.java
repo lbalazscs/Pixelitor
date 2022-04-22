@@ -87,7 +87,7 @@ public class BrightnessContrast extends ParametrizedFilter {
             int rgb = srcData[i];
 
 //            int a = (rgb >>> 24) & 0xFF;
-            int a = rgb & 0xFF000000;
+            int a = rgb & 0xFF_00_00_00;
 
             if (a == 0) {
                 destData[i] = 0; // for premultiplied images

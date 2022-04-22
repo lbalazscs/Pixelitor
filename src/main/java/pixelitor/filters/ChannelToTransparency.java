@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PointFilter;
+import pixelitor.colors.Colors;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -127,8 +128,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 }
             }
 
-            argb = argb & 0x00FFFFFF; // clear alpha
-            return alpha << 24 | argb;
+            return Colors.setAlpha(argb, alpha);
         }
 
         abstract int getChannelValue(int rgb);

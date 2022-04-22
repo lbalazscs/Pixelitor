@@ -401,12 +401,12 @@ public final class AppPreferences {
     }
 
     public static Color loadFgColor() {
-        int fgInt = mainNode.getInt(FG_COLOR_KEY, 0xFF000000);
+        int fgInt = mainNode.getInt(FG_COLOR_KEY, 0xFF_00_00_00);
         return new Color(fgInt);
     }
 
     public static Color loadBgColor() {
-        int bgInt = mainNode.getInt(BG_COLOR_KEY, 0xFFFFFFFF);
+        int bgInt = mainNode.getInt(BG_COLOR_KEY, 0xFF_FF_FF_FF);
         return new Color(bgInt);
     }
 

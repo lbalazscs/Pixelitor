@@ -535,7 +535,7 @@ public class FlowField extends ParametrizedFilter {
     private static List<Point2D> initializeSpawnPoints(int imgWidth, float fieldDensity, int[] sourcePixels) {
         List<Point2D> spawns = new ArrayList<>();
         for (int i = 0; i < sourcePixels.length; i++) {
-            if ((sourcePixels[i] & 0xFF000000) != 0) {
+            if ((sourcePixels[i] & 0xFF_00_00_00) != 0) {
                 int y = i / imgWidth;
                 int x = i - y * imgWidth;
                 spawns.add(new Point(x *= fieldDensity, y *= fieldDensity));

@@ -826,10 +826,10 @@ public class ImageUtils {
                     if (density > rn) {
                         pixels[x + y * diameter] = random.nextInt();
                     } else {
-                        pixels[x + y * diameter] = 0xFFFFFFFF;  // white
+                        pixels[x + y * diameter] = 0xFF_FF_FF_FF;  // white
                     }
                 } else {
-                    pixels[x + y * diameter] = 0xFFFFFFFF; // white
+                    pixels[x + y * diameter] = 0xFF_FF_FF_FF; // white
                 }
             }
         }

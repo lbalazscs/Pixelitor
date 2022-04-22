@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.colors.Colors;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.GUIText;
@@ -158,9 +159,9 @@ public class ExtractChannelFilter extends Filter {
                 }
                 tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
                 int newRGB = Color.HSBtoRGB(tmpHSBArray[0],
-                    DEFAULT_SATURATION, DEFAULT_BRIGHTNESS); // alpha is 255
-                newRGB &= 0x00FFFFFF;  // set alpha to 0
-                return a << 24 | newRGB; // add the real alpha
+                    DEFAULT_SATURATION, DEFAULT_BRIGHTNESS);
+                // Color.HSBtoRGB always creates an alpha of 255 => restore the original value
+                return Colors.setAlpha(newRGB, a);
             }
         };
         return rgbOp.toFilterAction("Hue (with colors)");

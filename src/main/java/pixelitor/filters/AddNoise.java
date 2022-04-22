@@ -114,7 +114,7 @@ public class AddNoise extends ParametrizedFilter {
                 continue;
             }
 
-            int sourceAlpha = 0xFF000000 & srcRGB;
+            int sourceAlpha = 0xFF_00_00_00 & srcRGB;
             if (sourceAlpha == 0) {
                 destData[i] = 0;
                 continue;

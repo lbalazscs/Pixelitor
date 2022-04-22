@@ -147,10 +147,10 @@ public class Debug {
         if (cm instanceof DirectColorModel dcm
             && cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            return dcm.getRedMask() == 0x00FF0000
-                && dcm.getGreenMask() == 0x0000FF00
-                && dcm.getBlueMask() == 0x000000FF
-                && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF000000);
+            return dcm.getRedMask() == 0x00_FF_00_00
+                   && dcm.getGreenMask() == 0x00_00_FF_00
+                   && dcm.getBlueMask() == 0x00_00_00_FF
+                   && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;
@@ -160,10 +160,10 @@ public class Debug {
         if (cm instanceof DirectColorModel dcm &&
             cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-            return dcm.getRedMask() == 0x000000FF
-                && dcm.getGreenMask() == 0x0000FF00
-                && dcm.getBlueMask() == 0x00FF0000
-                && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF000000);
+            return dcm.getRedMask() == 0x00_00_00_FF
+                   && dcm.getGreenMask() == 0x00_00_FF_00
+                   && dcm.getBlueMask() == 0x00_FF_00_00
+                   && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;
@@ -282,7 +282,7 @@ public class Debug {
         if (numBands == 4) { // normal color image
             colorModel = new DirectColorModel(
                 ColorSpace.getInstance(ColorSpace.CS_sRGB), 32,
-                0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000,
+                0x00_FF_00_00, 0x00_00_FF_00, 0x00_00_00_FF, 0xFF_00_00_00,
                 true, DataBuffer.TYPE_INT);
         } else if (numBands == 1) { // grayscale image
             int[] nBits = {8};

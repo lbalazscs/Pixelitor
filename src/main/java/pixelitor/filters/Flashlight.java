@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
+import pixelitor.colors.Colors;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -121,8 +122,15 @@ public class Flashlight extends ParametrizedFilter {
                 return rgb;
             } else {
                 if (bgPixel == 0) {
-                    // if the background is transparent, don't mix with black transparent
-                    return ImageMath.setAlpha(rgb, 1.0 - outside);
+                    // if the background is transparent, set the alpha directly,
+                    // because mixing with black transparent would darken it.
+
+                    int origAlpha = (rgb >>> 24) & 0xFF;
+                    int calcAlpha = (int) (255.0 * (1.0 - outside));
+                    // take the smaller one in order to preserve existing transparency
+                    int newAlpha = Math.min(origAlpha, calcAlpha);
+
+                    return Colors.setAlpha(rgb, newAlpha);
                 } else {
                     return ImageMath.mixColors((float) outside, rgb, bgPixel);
                 }
@@ -143,8 +151,8 @@ public class Flashlight extends ParametrizedFilter {
 
         public void setBG(int bg) {
             bgPixel = switch (bg) {
-                case BG_BLACK -> 0xFF000000;
-                case BG_WHITE -> 0xFFFFFFFF;
+                case BG_BLACK -> 0xFF_00_00_00;
+                case BG_WHITE -> 0xFF_FF_FF_FF;
                 case BG_TOOL_BG -> FgBgColors.getBGColor().getRGB();
                 case BG_TRANSPARENT -> 0;
                 default -> throw new IllegalArgumentException("bg = " + bg);

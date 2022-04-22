@@ -119,7 +119,7 @@ public class Colorize extends ParametrizedFilter {
                 destBlue = (int) (destBlue * opacity + srcB * translucence);
             }
 
-            int a = srcRGB & 0xFF000000;
+            int a = srcRGB & 0xFF_00_00_00;
             destData[i] = a | destRed << 16 | destGreen << 8 | destBlue;
         }
 

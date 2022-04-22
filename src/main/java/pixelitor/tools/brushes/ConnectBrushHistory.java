@@ -75,7 +75,7 @@ public class ConnectBrushHistory {
 
         if (numPoints > 2) {
             int currentColor = targetG.getColor().getRGB();
-            int currentColorZeroAlpha = currentColor & 0x00FFFFFF;
+            int currentColorZeroAlpha = currentColor & 0x00_FF_FF_FF;
 
             double offSet = settings.getStyle().getOffset();
             double density = settings.getDensity();
