@@ -451,6 +451,7 @@ public class Colors {
      * Sets the alpha channel of the given ARGB packed int to the given 0..255 value.
      */
     public static int setAlpha(int rgb, int newAlpha) {
+//        assert newAlpha >= 0 && newAlpha <=0xFF : "newAlpha = " + newAlpha;
         // discard the original alpha and set it to the new value
         return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
     }

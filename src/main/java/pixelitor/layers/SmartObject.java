@@ -212,6 +212,14 @@ public class SmartObject extends ImageLayer {
         if (ImageUtils.isSubImage(image)) {
             image = ImageUtils.copySubImage(image);
         }
+        if (image.isAlphaPremultiplied()) {
+            // image layer images should not be premultiplied
+            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = newImage.createGraphics();
+            g.drawImage(image, 0, 0, null);
+            g.dispose();
+            image = newImage;
+        }
     }
 
     public void invalidateImageCache() {
