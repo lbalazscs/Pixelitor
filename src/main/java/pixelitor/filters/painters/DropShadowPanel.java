@@ -41,6 +41,10 @@ public class DropShadowPanel extends EffectPanel {
                     double defaultSpread, float opacity) {
         super("Drop Shadow", defaultEnabled, defaultColor, opacity);
 
+        if (defaultDistance < 1) { // can happen due to rounding errors
+            defaultDistance = 1;
+        }
+
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
         var distanceSlider = SliderSpinner.from(distanceParam);
         gbh.addLabelAndControl("Distance:", distanceSlider);
