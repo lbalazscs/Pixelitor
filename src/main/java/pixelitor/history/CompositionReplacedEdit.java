@@ -54,8 +54,12 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         assert oldComp != null;
         assert newComp != null;
-        assert oldComp.hasSameFileAs(newComp, !reload) :
-            "old = " + oldComp.getFile() + ", new = " + newComp.getFile();
+
+        if (canvasTransform != null || reload) {
+            if (!oldComp.hasSameFileAs(newComp, !reload)) {
+                throw new IllegalStateException("old = " + oldComp.getFile() + ", new = " + newComp.getFile());
+            }
+        }
 
         if (oldComp.hasSelection()) {
             // saved compositions should never have a live selection,

@@ -627,6 +627,10 @@ public class Composition implements Serializable {
     }
 
     public void deleteLayer(Layer layer, boolean addToHistory) {
+        deleteLayer(layer, addToHistory, true);
+    }
+
+    public void deleteLayer(Layer layer, boolean addToHistory, boolean updateUI) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
@@ -647,15 +651,17 @@ public class Composition implements Serializable {
             }
         }
 
-        LayerUI ui = layer.getUI();
-        if (ui != null) { // can be null if part of layer rasterization
-            view.removeLayerUI(ui);
+        if (updateUI) {
+            LayerUI ui = layer.getUI();
+            if (ui != null) { // can be null if part of layer rasterization
+                view.removeLayerUI(ui);
 
-            if (isActive()) {
-                Layers.numLayersChanged(this, layerList.size());
+                if (isActive()) {
+                    Layers.numLayersChanged(this, layerList.size());
+                }
+
+                update();
             }
-
-            update();
         }
     }
 
@@ -1673,8 +1679,43 @@ public class Composition implements Serializable {
 
         SmartObject so = new SmartObject(newComp, this);
         newComp.addLayerInInitMode(so);
+        History.add(new CompositionReplacedEdit("Convert All to Smart Object",
+            view, this, newComp, null, false));
         view.replaceComp(newComp);
         setName("Contents of " + name);
+    }
+
+    public void convertVisibleLayersToSmartObject() {
+        long visibleCount = layerList.stream().filter(Layer::isVisible).count();
+        if (visibleCount == 0) {
+            Messages.showInfo("No visible layers",
+                "There are no visible layers in " + getName());
+            return;
+        }
+        if (visibleCount == layerList.size()) {
+            replaceWithSmartObject();
+            return;
+        }
+
+        Composition content = new Composition(canvas.copy(), mode);
+        content.setName("visible");
+        Composition newMainComp = copy(true, true);
+
+        List<Layer> visibleLayers = newMainComp.layerList.stream()
+            .filter(Layer::isVisible)
+            .toList();
+
+        for (Layer layer : visibleLayers) {
+            newMainComp.deleteLayer(layer, false, false);
+            content.addLayerInInitMode(layer);
+            layer.setComp(content);
+        }
+
+        SmartObject so = new SmartObject(newMainComp, content);
+        newMainComp.addLayerInInitMode(so);
+        History.add(new CompositionReplacedEdit("Convert Visible to Smart Object",
+            view, this, newMainComp, null, false));
+        view.replaceComp(newMainComp);
     }
 
     public void debugImages() {

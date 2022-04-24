@@ -581,6 +581,14 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        sub.add(new OpenViewEnabledAction("Convert Visible to Smart Object") {
+            @Override
+            protected void onClick() {
+                getActiveComp().convertVisibleLayersToSmartObject();
+            }
+        });
+        sub.addSeparator();
+
         Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
 
         sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
