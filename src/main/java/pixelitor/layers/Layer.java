@@ -824,7 +824,7 @@ public abstract class Layer implements Serializable, Debuggable {
                 msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
                     getName(), Utils.addArticle(getTypeStringLC()));
             }
-            Messages.showInfo("Convert to Smart Object", msg);
+            Messages.showInfo("Convert Layer to Smart Object", msg);
             return;
         }
 

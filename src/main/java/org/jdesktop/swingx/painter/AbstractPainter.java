@@ -30,6 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
 
@@ -59,6 +60,7 @@ import java.lang.ref.SoftReference;
  */
 @SuppressWarnings("nls")
 public abstract class AbstractPainter<T> extends AbstractBean implements Painter<T>, Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

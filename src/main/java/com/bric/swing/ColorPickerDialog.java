@@ -22,13 +22,8 @@ package com.bric.swing;
 import com.bric.swing.DialogFooter.EscapeKeyBehavior;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
+import java.io.Serial;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +35,7 @@ import java.util.function.Consumer;
  * @see ColorPickerPanel
  */
 class ColorPickerDialog extends JDialog {
+    @Serial
     private static final long serialVersionUID = 2L;
 
     private ColorPicker cp;

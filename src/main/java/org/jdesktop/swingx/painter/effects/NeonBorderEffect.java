@@ -26,6 +26,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
 
 import java.awt.*;
+import java.io.Serial;
 
 /**
  * An effect which draws a multicolored border around a painter's shape.
@@ -34,6 +35,7 @@ import java.awt.*;
  * @author joshy
  */
 public class NeonBorderEffect extends AbstractAreaEffect {
+    @Serial
     private static final long serialVersionUID = -5540563968609885522L;
 
     private Color edgeColor;

@@ -98,7 +98,7 @@ public class DiamondsTransition2D extends Transition2D {
 
         int ctr = 0;
         progress = progress / 2.0f;
-        for (float y = -dy; y < size.height + diamondSize; y += diamondSize / 2) {
+        for (float y = -dy; y < size.height + diamondSize; y += diamondSize / 2.0f) {
             float z = 0;
             if (ctr % 2 == 0) {
                 z = diamondSize / 2.0f;

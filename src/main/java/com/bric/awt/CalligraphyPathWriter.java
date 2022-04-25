@@ -346,16 +346,12 @@ public class CalligraphyPathWriter extends PathWriter {
         float[] y_ = segment.getYCoeffs(rotate);
 
         float t = (t0 + t1) / 2;
-        boolean b;
-        if (y_.length == 2) {
-            b = y_[0] > 0;
-        } else if (y_.length == 3) {
-            b = (2 * y_[0] * t + y_[1]) > 0;
-        } else if (y_.length == 4) {
-            b = (3 * y_[0] * t * t + 2 * y_[1] * t + y_[2]) > 0;
-        } else {
-            throw new RuntimeException("unexpected condition");
-        }
+        boolean b = switch (y_.length) {
+            case 2 -> y_[0] > 0;
+            case 3 -> (2 * y_[0] * t + y_[1]) > 0;
+            case 4 -> (3 * y_[0] * t * t + 2 * y_[1] * t + y_[2]) > 0;
+            default -> throw new RuntimeException("unexpected condition");
+        };
         if (writingTrack1 != null && writingTrack1 != b) {
             float x = segment.getX(t0);
             float y = segment.getY(t0);

@@ -107,14 +107,11 @@ public class WipeTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (direction == RIGHT) {
-            return "Wipe Right";
-        } else if (direction == LEFT) {
-            return "Wipe Left";
-        } else if (direction == DOWN) {
-            return "Wipe Down";
-        } else {
-            return "Wipe Up";
-        }
+        return switch (direction) {
+            case RIGHT -> "Wipe Right";
+            case LEFT -> "Wipe Left";
+            case DOWN -> "Wipe Down";
+            default -> "Wipe Up";
+        };
     }
 }

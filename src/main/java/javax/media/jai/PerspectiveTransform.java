@@ -14,6 +14,7 @@ package javax.media.jai;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -49,6 +50,7 @@ import java.util.Objects;
  * </pre>
  */
 public final class PerspectiveTransform implements Cloneable, Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static final double PERSPECTIVE_DIVIDE_EPSILON = 1.0e-10;

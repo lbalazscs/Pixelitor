@@ -167,15 +167,12 @@ public class WaveTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (type == UP) {
-            return "Wave Up";
-        } else if (type == DOWN) {
-            return "Wave Down";
-        } else if (type == RIGHT) {
-            return "Wave Right";
-        } else {
-            return "Wave Left";
-        }
+        return switch (type) {
+            case UP -> "Wave Up";
+            case DOWN -> "Wave Down";
+            case RIGHT -> "Wave Right";
+            default -> "Wave Left";
+        };
     }
 
 }

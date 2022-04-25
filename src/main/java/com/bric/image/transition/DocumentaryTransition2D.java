@@ -103,28 +103,25 @@ public class DocumentaryTransition2D extends Transition2D {
 
 
         float cutOff = 0.4f;
-        Rectangle2D r2;
-        if (type == RIGHT) {
-            r2 = new Rectangle2D.Float(k2 * r1.width,
-                    k3 * r1.height,
-                    k1 * r1.width,
-                    k1 * r1.height);
-        } else if (type == LEFT) {
-            r2 = new Rectangle2D.Float(0.05f * r1.width,
-                    k3 * r1.height,
-                    k1 * r1.width,
-                    k1 * r1.height);
-        } else if (type == DOWN) {
-            r2 = new Rectangle2D.Float(k3 * r1.width,
-                    k2 * r1.height,
-                    k1 * r1.width,
-                    k1 * r1.height);
-        } else {  //up
-            r2 = new Rectangle2D.Float(k3 * r1.width,
+        Rectangle2D r2 = switch (type) {
+            case RIGHT -> new Rectangle2D.Float(k2 * r1.width,
+                k3 * r1.height,
+                k1 * r1.width,
+                k1 * r1.height);
+            case LEFT -> new Rectangle2D.Float(0.05f * r1.width,
+                k3 * r1.height,
+                k1 * r1.width,
+                k1 * r1.height);
+            case DOWN -> new Rectangle2D.Float(k3 * r1.width,
+                k2 * r1.height,
+                k1 * r1.width,
+                k1 * r1.height);
+            default ->   //up
+                new Rectangle2D.Float(k3 * r1.width,
                     0.05f * r1.height,
                     k1 * r1.width,
                     k1 * r1.height);
-        }
+        };
         float zoomProgress;
         float panProgress = (float) (0.5 + 0.5 * sin(PI * (progress * progress - 0.5)));
         if (progress < cutOff) {

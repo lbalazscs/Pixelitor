@@ -52,7 +52,13 @@ public class RotationHandle extends DraggablePoint {
     }
 
     public RotationHandle copy(TransformBox newBox) {
-        PPoint pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+        PPoint pos;
+        if (view != null) {
+            pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+        } else {
+            pos = PPoint.lazyFromIm(getImX(), getImY(), view);
+        }
+
         return new RotationHandle(name, newBox, pos, view);
     }
 

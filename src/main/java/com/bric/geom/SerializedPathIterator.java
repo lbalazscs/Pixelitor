@@ -20,6 +20,7 @@
 package com.bric.geom;
 
 import java.awt.geom.PathIterator;
+import java.io.Serial;
 
 /**
  * A PathIterator that parses serialized shape info.
@@ -126,18 +127,15 @@ class SerializedPathIterator implements PathIterator {
     }
 
     class ParserException extends RuntimeException {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         ParserException(String msg, int ptr, int length) {
             super(msg);
             System.err.println("\"" + new String(c) + "\"");
             StringBuilder sb = new StringBuilder();
-            for (int a = 0; a < ptr + 1; a++) {
-                sb.append(' ');
-            }
-            for (int a = 0; a < length; a++) {
-                sb.append('^');
-            }
+            sb.append(" ".repeat(ptr + 1));
+            sb.append("^".repeat(length));
             System.err.println(sb);
         }
     }

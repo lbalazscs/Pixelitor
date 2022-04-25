@@ -145,14 +145,11 @@ public class PlafPaintUtils {
     private static void drawColors(Color[] colors, Graphics g, int x1, int y1, int x2, int y2, int direction) {
         for (int a = 0; a < colors.length; a++) {
             g.setColor(colors[colors.length - a - 1]);
-            if (direction == SwingConstants.SOUTH) {
-                g.drawLine(x1, y1 - a, x2, y2 - a);
-            } else if (direction == SwingConstants.NORTH) {
-                g.drawLine(x1, y1 + a, x2, y2 + a);
-            } else if (direction == SwingConstants.EAST) {
-                g.drawLine(x1 - a, y1, x2 - a, y2);
-            } else if (direction == SwingConstants.WEST) {
-                g.drawLine(x1 + a, y1, x2 + a, y2);
+            switch (direction) {
+                case SwingConstants.SOUTH -> g.drawLine(x1, y1 - a, x2, y2 - a);
+                case SwingConstants.NORTH -> g.drawLine(x1, y1 + a, x2, y2 + a);
+                case SwingConstants.EAST -> g.drawLine(x1 - a, y1, x2 - a, y2);
+                case SwingConstants.WEST -> g.drawLine(x1 + a, y1, x2 + a, y2);
             }
         }
     }

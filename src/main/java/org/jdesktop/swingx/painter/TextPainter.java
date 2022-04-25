@@ -32,6 +32,7 @@ import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 import java.util.Map;
 
 import static java.awt.RenderingHints.*;
@@ -51,6 +52,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
     protected Font font = null;
 
     // for compatibility with older pixelitor versions
+    @Serial
     private static final long serialVersionUID = 8840747324227212590L;
 
     /**

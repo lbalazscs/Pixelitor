@@ -86,17 +86,12 @@ public class RevealTransition2D extends Transition2D {
     @Override
     public Transition2DInstruction[] getInstructions(float progress,
                                                      Dimension size) {
-        AffineTransform transform;
-
-        if (direction == LEFT) {
-            transform = AffineTransform.getTranslateInstance(-progress * size.width, 0);
-        } else if (direction == RIGHT) {
-            transform = AffineTransform.getTranslateInstance(progress * size.width, 0);
-        } else if (direction == UP) {
-            transform = AffineTransform.getTranslateInstance(0, -progress * size.height);
-        } else {
-            transform = AffineTransform.getTranslateInstance(0, progress * size.height);
-        }
+        AffineTransform transform = switch (direction) {
+            case LEFT -> AffineTransform.getTranslateInstance(-progress * size.width, 0);
+            case RIGHT -> AffineTransform.getTranslateInstance(progress * size.width, 0);
+            case UP -> AffineTransform.getTranslateInstance(0, -progress * size.height);
+            default -> AffineTransform.getTranslateInstance(0, progress * size.height);
+        };
 
         return new ImageInstruction[]{
                 new ImageInstruction(false),
@@ -106,14 +101,11 @@ public class RevealTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (direction == UP) {
-            return "Reveal Up";
-        } else if (direction == LEFT) {
-            return "Reveal Left";
-        } else if (direction == RIGHT) {
-            return "Reveal Right";
-        } else {
-            return "Reveal Down";
-        }
+        return switch (direction) {
+            case UP -> "Reveal Up";
+            case LEFT -> "Reveal Left";
+            case RIGHT -> "Reveal Right";
+            default -> "Reveal Down";
+        };
     }
 }

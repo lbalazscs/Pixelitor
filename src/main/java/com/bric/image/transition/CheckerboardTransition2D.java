@@ -167,15 +167,12 @@ public class CheckerboardTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (type == RIGHT) {
-            return "Checkerboard Right";
-        } else if (type == LEFT) {
-            return "Checkerboard Left";
-        } else if (type == UP) {
-            return "Checkerboard Up";
-        } else {
-            return "Checkerboard Down";
-        }
+        return switch (type) {
+            case RIGHT -> "Checkerboard Right";
+            case LEFT -> "Checkerboard Left";
+            case UP -> "Checkerboard Up";
+            default -> "Checkerboard Down";
+        };
     }
 
 }

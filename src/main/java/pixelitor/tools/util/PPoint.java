@@ -53,7 +53,8 @@ public class PPoint {
     protected double coY;
 
     protected PPoint(View view) {
-        assert view != null;
+        // the view can be null for example if a composition
+        // with shape layers but without a view is duplicated
         this.view = view;
     }
 
@@ -195,7 +196,12 @@ public class PPoint {
     public static PPoint halfPointBetween(DraggablePoint p1, DraggablePoint p2) {
         double x = (p1.getImX() + p2.getImX()) / 2.0;
         double y = (p1.getImY() + p2.getImY()) / 2.0;
-        return eagerFromIm(x, y, p1.getView());
+        View p1view = p1.getView();
+        if (p1view != null) {
+            return eagerFromIm(x, y, p1view);
+        } else {
+            return lazyFromIm(x, y, p1view);
+        }
     }
 
     public Composition getComp() {
@@ -285,6 +291,9 @@ public class PPoint {
 
         @Override
         public double getCoX() {
+            if (view == null) {
+                return 0; // placeholder until we have a view
+            }
             if (!xConverted) {
                 coX = view.imageXToComponentSpace(imX);
                 xConverted = true;
@@ -294,6 +303,9 @@ public class PPoint {
 
         @Override
         public double getCoY() {
+            if (view == null) {
+                return 0; // placeholder until we have a view
+            }
             if (!yConverted) {
                 coY = view.imageYToComponentSpace(imY);
                 yConverted = true;

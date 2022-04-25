@@ -58,7 +58,12 @@ public class CornerHandle extends PositionHandle {
     public CornerHandle copy(TransformBox newBox) {
         // the position is based on image coordinates, because they are
         // always accurate, even in boxes in inactive shape layers
-        PPoint pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+        PPoint pos;
+        if (view != null) {
+            pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+        } else {
+            pos = PPoint.lazyFromIm(getImX(), getImY(), view);
+        }
         return new CornerHandle(name, newBox, nextToRot,
             pos, view, cursorIndex, cursorIndexIO);
     }

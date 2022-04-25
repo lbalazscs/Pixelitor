@@ -24,6 +24,7 @@ package org.jdesktop.swingx.painter.effects;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.io.Serial;
 
 /**
  * An effect which draws a glow around the painter
@@ -31,6 +32,7 @@ import java.awt.Point;
  * @author joshy
  */
 public class GlowPathEffect extends AbstractAreaEffect {
+    @Serial
     private static final long serialVersionUID = -6738743422803660317L;
 
     public GlowPathEffect() {

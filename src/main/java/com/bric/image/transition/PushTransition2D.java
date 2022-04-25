@@ -109,14 +109,11 @@ public class PushTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (type == RIGHT) {
-            return "Push Right";
-        } else if (type == LEFT) {
-            return "Push Left";
-        } else if (type == DOWN) {
-            return "Push Down";
-        } else {
-            return "Push Up";
-        }
+        return switch (type) {
+            case RIGHT -> "Push Right";
+            case LEFT -> "Push Left";
+            case DOWN -> "Push Down";
+            default -> "Push Up";
+        };
     }
 }

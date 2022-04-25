@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * An effect which draws a glow inside the painter's shape
@@ -33,6 +34,7 @@ import java.awt.image.BufferedImage;
  * @author joshy
  */
 public class InnerGlowPathEffect extends AbstractAreaEffect {
+    @Serial
     private static final long serialVersionUID = 1887188174881815174L;
 
     public InnerGlowPathEffect() {

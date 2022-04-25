@@ -24,6 +24,7 @@ package org.jdesktop.swingx.painter.effects;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.io.Serial;
 
 /**
  * An effect which draws a shadow around the the painter's shape.
@@ -31,6 +32,7 @@ import java.awt.Point;
  * @author joshy
  */
 public class ShadowPathEffect extends AbstractAreaEffect {
+    @Serial
     private static final long serialVersionUID = 1223861400165925384L;
 
     public ShadowPathEffect() {

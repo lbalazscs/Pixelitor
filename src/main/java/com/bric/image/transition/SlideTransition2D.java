@@ -86,14 +86,11 @@ public class SlideTransition2D extends Transition2D {
     public Transition2DInstruction[] getInstructions(float progress, Dimension size) {
         AffineTransform transform = new AffineTransform();
 
-        if (type == LEFT) {
-            transform.translate(size.width * (1 - progress), 0);
-        } else if (type == RIGHT) {
-            transform.translate(size.width * (progress - 1), 0);
-        } else if (type == UP) {
-            transform.translate(0, size.height * (1 - progress));
-        } else {
-            transform.translate(0, size.height * progress - 1);
+        switch (type) {
+            case LEFT -> transform.translate(size.width * (1 - progress), 0);
+            case RIGHT -> transform.translate(size.width * (progress - 1), 0);
+            case UP -> transform.translate(0, size.height * (1 - progress));
+            default -> transform.translate(0, size.height * progress - 1);
         }
 
         return new Transition2DInstruction[]{
@@ -104,14 +101,11 @@ public class SlideTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (type == RIGHT) {
-            return "Slide Right";
-        } else if (type == LEFT) {
-            return "Slide Left";
-        } else if (type == DOWN) {
-            return "Slide Down";
-        } else {
-            return "Slide Up";
-        }
+        return switch (type) {
+            case RIGHT -> "Slide Right";
+            case LEFT -> "Slide Left";
+            case DOWN -> "Slide Down";
+            default -> "Slide Up";
+        };
     }
 }

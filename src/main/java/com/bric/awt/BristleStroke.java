@@ -140,8 +140,8 @@ public class BristleStroke implements Stroke {
             float k2 = (k1 - 0.5f) * 2; //range from [-1,1]
 
             float k3 = thickness;
-            final float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
-            final float maxGapDistance = (40 + 10 * k3) / (1 + 9 * spacing);
+            float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
+            float maxGapDistance = (40 + 10 * k3) / (1 + 9 * spacing);
             float dd = minGapDistance * (1 + 20 * (1 - thickness) * Math.abs(k2 * k2));
 
             Point2D p2 = new Point2D.Float();

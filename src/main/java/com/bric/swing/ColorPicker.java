@@ -26,16 +26,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.Color;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serial;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -69,6 +63,7 @@ import java.util.function.Consumer;
  * @see com.bric.swing.ColorPickerPanel
  */
 public class ColorPicker extends JPanel {
+    @Serial
     private static final long serialVersionUID = 3L;
 
     /**
@@ -136,7 +131,7 @@ public class ColorPicker extends JPanel {
         }
 
         d.setTitle(title == null ?
-                strings.getObject("ColorPickerDialogTitle").toString() :
+                strings.getString("ColorPickerDialogTitle") :
                 title);
         d.pack();
         d.setVisible(true);
@@ -296,19 +291,14 @@ public class ColorPicker extends JPanel {
      */
     private Option getSelectedOption() {
         int mode = getMode();
-        if (mode == HUE) {
-            return hue;
-        } else if (mode == SAT) {
-            return sat;
-        } else if (mode == BRI) {
-            return bri;
-        } else if (mode == RED) {
-            return red;
-        } else if (mode == GREEN) {
-            return green;
-        } else {
-            return blue;
-        }
+        return switch (mode) {
+            case HUE -> hue;
+            case SAT -> sat;
+            case BRI -> bri;
+            case RED -> red;
+            case GREEN -> green;
+            default -> blue;
+        };
     }
 
     final HexDocumentListener hexDocListener = new HexDocumentListener();
@@ -436,15 +426,15 @@ public class ColorPicker extends JPanel {
         }
     }
 
-    private final Option alpha = new Option(strings.getObject("alphaLabel").toString(), 255);
-    private final Option hue = new Option(strings.getObject("hueLabel").toString(), 360);
-    private final Option sat = new Option(strings.getObject("saturationLabel").toString(), 100);
-    private final Option bri = new Option(strings.getObject("brightnessLabel").toString(), 100);
-    private final Option red = new Option(strings.getObject("redLabel").toString(), 255);
-    private final Option green = new Option(strings.getObject("greenLabel").toString(), 255);
-    private final Option blue = new Option(strings.getObject("blueLabel").toString(), 255);
+    private final Option alpha = new Option(strings.getString("alphaLabel"), 255);
+    private final Option hue = new Option(strings.getString("hueLabel"), 360);
+    private final Option sat = new Option(strings.getString("saturationLabel"), 100);
+    private final Option bri = new Option(strings.getString("brightnessLabel"), 100);
+    private final Option red = new Option(strings.getString("redLabel"), 255);
+    private final Option green = new Option(strings.getString("greenLabel"), 255);
+    private final Option blue = new Option(strings.getString("blueLabel"), 255);
     private final ColorSwatch preview = new ColorSwatch(50);
-    private final JLabel hexLabel = new JLabel(strings.getObject("hexLabel").toString());
+    private final JLabel hexLabel = new JLabel(strings.getString("hexLabel"));
     private final JTextField hexField = new JTextField("000000");
 
     /**
@@ -500,7 +490,7 @@ public class ColorPicker extends JPanel {
     private final ColorPickerPanel colorPanel = new ColorPickerPanel();
 
     private final JSlider opacitySlider = new JSlider(0, 255, 255);
-    private final JLabel opacityLabel = new JLabel(strings.getObject("opacityLabel").toString());
+    private final JLabel opacityLabel = new JLabel(strings.getString("opacityLabel"));
 
     /**
      * Create a new <code>ColorPicker</code> with all controls visible except opacity.
@@ -944,19 +934,16 @@ public class ColorPicker extends JPanel {
         adjustingSlider++;
         try {
             int mode = getMode();
-            if (mode == HUE) {
-                slider.setValue(hue.getIntValue());
-            } else if (mode == SAT) {
-                slider.setValue(sat.getIntValue());
-            } else if (mode == BRI) {
-                slider.setValue(bri.getIntValue());
-            } else if (mode == RED) {
-                slider.setValue(red.getIntValue());
-            } else if (mode == GREEN) {
-                slider.setValue(green.getIntValue());
-            } else if (mode == BLUE) {
-                slider.setValue(blue.getIntValue());
-            }
+            int newValue = switch (mode) {
+                case HUE -> hue.getIntValue();
+                case SAT -> sat.getIntValue();
+                case BRI -> bri.getIntValue();
+                case RED -> red.getIntValue();
+                case GREEN -> green.getIntValue();
+                case BLUE -> blue.getIntValue();
+                default -> throw new IllegalStateException("Unexpected value: " + mode);
+            };
+            slider.setValue(newValue);
         } finally {
             adjustingSlider--;
         }

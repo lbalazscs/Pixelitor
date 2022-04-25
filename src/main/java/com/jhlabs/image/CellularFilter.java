@@ -249,19 +249,14 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     }
 
     public void setGridType(int gt) {
-        if (gt == GR_HEXAGONAL) {
-            gridType = GridType.HEXAGONAL;
-        } else if (gt == GR_OCTAGONAL) {
-            gridType = GridType.OCTAGONAL;
-        } else if (gt == GR_RANDOM) {
-            gridType = GridType.RANDOM;
-        } else if (gt == GR_SQUARE) {
-            gridType = GridType.SQUARE;
-        } else if (gt == GR_TRIANGULAR) {
-            gridType = GridType.TRIANGULAR;
-        } else {
-            throw new IllegalArgumentException("gridType = " + gt);
-        }
+        gridType = switch (gt) {
+            case GR_HEXAGONAL -> GridType.HEXAGONAL;
+            case GR_OCTAGONAL -> GridType.OCTAGONAL;
+            case GR_RANDOM -> GridType.RANDOM;
+            case GR_SQUARE -> GridType.SQUARE;
+            case GR_TRIANGULAR -> GridType.TRIANGULAR;
+            default -> throw new IllegalArgumentException("gridType = " + gt);
+        };
     }
 
     public void setDistancePower(float distancePower) {

@@ -44,14 +44,12 @@ public class ShapeUtils {
         float[] coords = new float[6];
         while (!i.isDone()) {
             int k = i.currentSegment(coords);
-            int s = 0;
-            if (k == SEG_MOVETO || k == SEG_LINETO) {
-                s = 2;
-            } else if (k == SEG_QUADTO) {
-                s = 4;
-            } else if (k == SEG_CUBICTO) {
-                s = 6;
-            }
+            int s = switch (k) {
+                case SEG_MOVETO, SEG_LINETO -> 2;
+                case SEG_QUADTO -> 4;
+                case SEG_CUBICTO -> 6;
+                default -> 0;
+            };
             for (int a = 0; a < s; a++) {
                 if (Float.isNaN(coords[a])) {
                     return false;

@@ -19,6 +19,8 @@
  */
 package com.bric.geom;
 
+import java.io.Serial;
+
 /**
  * This indicates that a path had no shape data.
  * <P>This means it had no lines, quadratic or cubic
@@ -26,6 +28,7 @@ package com.bric.geom;
  * and a CLOSE segment).
  */
 public class EmptyPathException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public EmptyPathException() {

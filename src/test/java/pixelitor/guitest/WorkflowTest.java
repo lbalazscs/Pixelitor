@@ -525,7 +525,7 @@ public class WorkflowTest {
     }
 
     private void convertLayerToSmartObject() {
-        app.runMenuCommand("Convert to Smart Object");
+        app.runMenuCommand("Convert Layer to Smart Object");
         keyboard.undoRedo("Convert to Smart Object");
         duplicateLayerThenUndo(SmartObject.class);
     }

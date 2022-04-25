@@ -26,15 +26,12 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.ComponentUI;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeListener;
+import java.io.Serial;
 import java.lang.reflect.Constructor;
 
 /**
@@ -52,6 +49,7 @@ import java.lang.reflect.Constructor;
  * @see com.bric.swing.GradientSliderDemo
  */
 public class GradientSlider extends MultiThumbSlider {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     static {
@@ -185,6 +183,7 @@ public class GradientSlider extends MultiThumbSlider {
     }
 
     abstract class AbstractPopup extends JPopupMenu {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         int lastSelectedThumb;
@@ -229,6 +228,7 @@ public class GradientSlider extends MultiThumbSlider {
     }
 
     class ColorPickerPopup extends AbstractPopup {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         final ColorPicker mini;

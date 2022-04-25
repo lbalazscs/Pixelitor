@@ -33,6 +33,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.util.Objects;
 
 /**
@@ -47,6 +48,7 @@ public class AbstractAreaEffect implements AreaEffect {
     private static final boolean debug = false;
 
     // for compatibility with pixelitor versions before 4.2.0
+    @Serial
     private static final long serialVersionUID = -9104855683480422662L;
 
     /**
@@ -342,6 +344,7 @@ public class AbstractAreaEffect implements AreaEffect {
      */
     protected int effectWidth;
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         if (effectWidthDouble < 0.01) { // 4.2.3 file => effectWidthDouble is uninitialized

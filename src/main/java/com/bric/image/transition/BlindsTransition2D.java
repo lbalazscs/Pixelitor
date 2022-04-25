@@ -123,16 +123,12 @@ public class BlindsTransition2D extends Transition2D {
             k = ((float) size.height) / ((float) blinds);
         }
         for (int a = 0; a < blinds; a++) {
-            Rectangle2D r;
-            if (type == DOWN) {
-                r = new Rectangle2D.Float(0, a * k, size.width, progress * k);
-            } else if (type == UP) {
-                r = new Rectangle2D.Float(0, a * k, size.width, k - progress * k);
-            } else if (type == RIGHT) {
-                r = new Rectangle2D.Float(a * k, 0, progress * k, size.height);
-            } else {
-                r = new Rectangle2D.Float(a * k, 0, k - progress * k, size.height);
-            }
+            Rectangle2D r = switch (type) {
+                case DOWN -> new Rectangle2D.Float(0, a * k, size.width, progress * k);
+                case UP -> new Rectangle2D.Float(0, a * k, size.width, k - progress * k);
+                case RIGHT -> new Rectangle2D.Float(a * k, 0, progress * k, size.height);
+                default -> new Rectangle2D.Float(a * k, 0, k - progress * k, size.height);
+            };
             v.add(new ImageInstruction(type == UP || type == LEFT, null, r));
         }
         return v.toArray(new Transition2DInstruction[v.size()]);
@@ -140,14 +136,11 @@ public class BlindsTransition2D extends Transition2D {
 
     @Override
     public String toString() {
-        if (type == LEFT) {
-            return "Blinds Left (" + blinds + ")";
-        } else if (type == RIGHT) {
-            return "Blinds Right (" + blinds + ")";
-        } else if (type == UP) {
-            return "Blinds Up (" + blinds + ")";
-        } else {
-            return "Blinds Down (" + blinds + ")";
-        }
+        return switch (type) {
+            case LEFT -> "Blinds Left (" + blinds + ")";
+            case RIGHT -> "Blinds Right (" + blinds + ")";
+            case UP -> "Blinds Up (" + blinds + ")";
+            default -> "Blinds Down (" + blinds + ")";
+        };
     }
 }

@@ -24,15 +24,12 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * This represents a single closed path.
@@ -40,6 +37,7 @@ import static java.awt.geom.PathIterator.SEG_QUADTO;
  * <code>writeShape()</code> methods.
  */
 public class MeasuredShape implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -119,6 +117,7 @@ public class MeasuredShape implements Serializable {
     }
 
     static class Segment implements Serializable {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         final int type;

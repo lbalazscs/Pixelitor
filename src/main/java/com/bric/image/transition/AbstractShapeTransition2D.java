@@ -142,11 +142,11 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
         transform.setToIdentity();
 
 
-        transform.translate(size.width / 2, size.height / 2);
+        transform.translate(size.width / 2.0, size.height / 2.0);
         transform.scale(
                 progress * multiplier.floatValue(),
                 progress * multiplier.floatValue());
-        transform.translate(-size.width / 2, -size.height / 2);
+        transform.translate(-size.width / 2.0, -size.height / 2.0);
 
         transform.translate(
                 -r.getCenterX() + size.width / 2.0f,

@@ -26,35 +26,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bric.swing.ColorPicker.BLUE;
-import static com.bric.swing.ColorPicker.BRI;
-import static com.bric.swing.ColorPicker.GREEN;
-import static com.bric.swing.ColorPicker.HUE;
-import static com.bric.swing.ColorPicker.RED;
-import static com.bric.swing.ColorPicker.SAT;
+import static com.bric.swing.ColorPicker.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -89,6 +69,7 @@ import static net.jafama.FastMath.sin;
  * @see com.bric.swing.ColorPickerDialog
  */
 public class ColorPickerPanel extends JPanel {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

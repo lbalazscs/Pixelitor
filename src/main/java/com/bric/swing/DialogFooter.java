@@ -25,20 +25,9 @@ import com.bric.util.JVM;
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.Serial;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +93,7 @@ import java.util.ResourceBundle;
  * because they aren't universally active doesn't mean you're hurting accessibility needs.)</LI></ul>
  */
 public class DialogFooter extends JPanel {
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final JComponent[] EMPTY_ARRAY = {};
 
@@ -637,6 +627,7 @@ public class DialogFooter extends JPanel {
      * This action calls <code>button.doClick()</code>.
      */
     public static class ClickAction extends AbstractAction {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         final JButton button;
@@ -1138,6 +1129,7 @@ public class DialogFooter extends JPanel {
      * but it does nothing in that case...)
      */
     public static final Action closeDialogAndDisposeAction = new AbstractAction() {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         @Override

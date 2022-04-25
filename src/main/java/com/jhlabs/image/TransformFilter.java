@@ -172,14 +172,15 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
         int[] inPixels = getRGB(src, 0, 0, srcWidth, srcHeight, null);
 
-        if (interpolation == BILINEAR) {
-            return filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
-        } else if (interpolation == NEAREST_NEIGHBOUR) {
-            return filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
-        } else if (interpolation == BILINEAR_OLD) {
-            return filterPixelsBilinearOLD(dst, srcWidth, srcHeight, inPixels);
-        } else if (interpolation == NEAREST_NEIGHBOUR_OLD) {
-            return filterPixelsNNOLD(dst, srcWidth, srcHeight, inPixels);
+        switch (interpolation) {
+            case BILINEAR:
+                return filterPixelsBilinear(dst, srcWidth, srcHeight, inPixels);
+            case NEAREST_NEIGHBOUR:
+                return filterPixelsNN(dst, srcWidth, srcHeight, inPixels);
+            case BILINEAR_OLD:
+                return filterPixelsBilinearOLD(dst, srcWidth, srcHeight, inPixels);
+            case NEAREST_NEIGHBOUR_OLD:
+                return filterPixelsNNOLD(dst, srcWidth, srcHeight, inPixels);
         }
 
         throw new IllegalStateException("should not get here");

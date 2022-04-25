@@ -1038,7 +1038,7 @@ public class RandomGUITest {
     private static void convertToSmartObject() {
         Layer layer = Views.getActiveLayer();
         if (!(layer instanceof SmartObject)) {
-            log("convert to smart object");
+            log("Convert Layer to Smart Object");
             layer.replaceWithSmartObject();
         }
     }

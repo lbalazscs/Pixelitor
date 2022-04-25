@@ -117,18 +117,13 @@ public abstract class PathWriter {
         int k;
         while (!i.isDone()) {
             k = i.currentSegment(coords);
-            if (k == SEG_MOVETO) {
-                moveTo(coords[0], coords[1]);
-            } else if (k == SEG_LINETO) {
-                lineTo(coords[0], coords[1]);
-            } else if (k == SEG_QUADTO) {
-                quadTo(coords[0], coords[1], coords[2], coords[3]);
-            } else if (k == SEG_CUBICTO) {
-                curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-            } else if (k == SEG_CLOSE) {
-                closePath();
-            } else {
-                throw new RuntimeException("Unexpected segment: " + k);
+            switch (k) {
+                case SEG_MOVETO -> moveTo(coords[0], coords[1]);
+                case SEG_LINETO -> lineTo(coords[0], coords[1]);
+                case SEG_QUADTO -> quadTo(coords[0], coords[1], coords[2], coords[3]);
+                case SEG_CUBICTO -> curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                case SEG_CLOSE -> closePath();
+                default -> throw new RuntimeException("Unexpected segment: " + k);
             }
             i.next();
         }

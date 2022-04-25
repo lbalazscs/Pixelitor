@@ -89,7 +89,6 @@ public class DraggablePoint extends Point2D.Double {
 
     public DraggablePoint(String name, PPoint p,
                           View view, Color color, Color activeColor) {
-        assert view != null;
         this.view = view;
 
         setLocationOnlyForThis(p);

@@ -22,6 +22,7 @@ package com.bric.swing;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +69,7 @@ import java.util.List;
  * minimum thumb is, say, .2f, and the maximum thumb is .5f.
  */
 public abstract class MultiThumbSlider extends JComponent {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

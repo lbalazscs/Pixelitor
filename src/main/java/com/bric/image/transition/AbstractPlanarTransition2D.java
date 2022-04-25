@@ -57,9 +57,9 @@ public abstract class AbstractPlanarTransition2D extends Transition2D {
         PerspectiveTransform transform;
         double upperY, lowerY;
 
-        upperY = size.height * 7 / 10;
+        upperY = size.height * 7.0 / 10.0;
         lowerY = size.height;
-        double x = size.width * 5 / 20;
+        double x = size.width * 5.0 / 20.0;
         transform = PerspectiveTransform.getQuadToQuad(
                 0, 0,
                 1, 0,
