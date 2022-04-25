@@ -25,40 +25,10 @@ import java.awt.geom.GeneralPath;
 import java.util.Random;
 
 /**
- * This resembles a bucket of paint being thrown at a wall.  The
- * clipping of the incoming shape is this liquid-dripping outline. Here are playback samples:
- * <p><table summary="Sample Animations of GooTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/GooTransition2D/Goo(10).gif" alt="Goo (10)">
- * <p>Goo (10)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/GooTransition2D/Goo(20).gif" alt="Goo (10)">
- * <p>Goo (20)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/GooTransition2D/Goo(50).gif" alt="Goo (10)">
- * <p>Goo (50)
- * </td>
- * </tr></table>
+ * This resembles a bucket of paint being thrown at a wall. The
+ * clipping of the incoming shape is this liquid-dripping outline.
  */
 public class GooTransition2D extends AbstractClippedTransition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new GooTransition2D(10),
-                new GooTransition2D(20),
-                new GooTransition2D(50)
-        };
-    }
-
     private final float[] offset;
     private final float[] accel;
 
@@ -66,20 +36,22 @@ public class GooTransition2D extends AbstractClippedTransition2D {
      * Creates a new goo transtion with 20 columns.
      */
     public GooTransition2D() {
-        this(20);
+        this(20, System.currentTimeMillis());
     }
+
+    private int strokeWidth = 1;
 
     /**
      * Creates a new goo transition.
      *
      * @param columns the number of columns to use.
+     * @param seed
      */
-    public GooTransition2D(int columns) {
+    public GooTransition2D(int columns, long seed) {
         Random r = new Random();
         offset = new float[columns];
         accel = new float[columns];
         boolean ok = false;
-        long seed = System.currentTimeMillis();
         while (!ok) {
             seed++;
             r.setSeed(seed);
@@ -134,7 +106,11 @@ public class GooTransition2D extends AbstractClippedTransition2D {
 
     @Override
     public float getStrokeWidth(float progress, Dimension size) {
-        return 1;
+        return strokeWidth;
+    }
+
+    public void setStrokeWidth(int strokeWidth) {
+        this.strokeWidth = strokeWidth;
     }
 
     @Override

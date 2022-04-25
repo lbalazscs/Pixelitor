@@ -26,54 +26,19 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 
 /**
- * This creates a checkerboard pattern that grows to reveal the new frame. Here are playback samples:
- * <p><table summary="Sample Animations of CheckerboardTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CheckerboardTransition2D/CheckerboardLeft.gif" alt="Checkerboard Left">
- * <p>Checkerboard Left
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CheckerboardTransition2D/CheckerboardRight.gif" alt="Checkerboard Right">
- * <p>Checkerboard Right
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CheckerboardTransition2D/CheckerboardUp.gif" alt="Checkerboard Up">
- * <p>Checkerboard Up
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/CheckerboardTransition2D/CheckerboardDown.gif" alt="Checkerboard Down">
- * <p>Checkerboard Down
- * </td>
- * </tr></table>
+ * This creates a checkerboard pattern that grows to reveal the new frame.
  */
 public class CheckerboardTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new CheckerboardTransition2D(LEFT),
-                new CheckerboardTransition2D(RIGHT),
-                new CheckerboardTransition2D(UP),
-                new CheckerboardTransition2D(DOWN)
-        };
-    }
-
     private final int type;
 
-    private static final int rowCount = 20;
-    private static final int columnCount = 20;
+    private final int rowCount;
+    private final int columnCount;
 
     /**
      * Creates a new CheckerboardTransition2D that moves right.
      */
     public CheckerboardTransition2D() {
-        this(RIGHT);
+        this(RIGHT, 20, 20);
     }
 
     /**
@@ -81,7 +46,9 @@ public class CheckerboardTransition2D extends Transition2D {
      *
      * @param type must be LEFT, RIGHT, UP or DOWN
      */
-    public CheckerboardTransition2D(int type) {
+    public CheckerboardTransition2D(int type, int rowCount, int columnCount) {
+        this.rowCount = rowCount;
+        this.columnCount = columnCount;
         if (!(type == RIGHT || type == LEFT || type == UP || type == DOWN)) {
             throw new IllegalArgumentException("The type must be RIGHT, LEFT, UP or DOWN.");
         }
@@ -104,12 +71,16 @@ public class CheckerboardTransition2D extends Transition2D {
                     dx = k / 2;
                 }
 
+                float startY = row * k2;
+                float endY = startY + k2;
                 for (int column = -1; column < columnCount; column++) {
-                    clipping.moveTo(column * k + dx, row * k2);
-                    clipping.lineTo(column * k + dx, row * k2 + k2);
-                    clipping.lineTo(column * k + k * progress + dx, row * k2 + k2);
-                    clipping.lineTo(column * k + k * progress + dx, row * k2);
-                    clipping.lineTo(column * k + dx, row * k2);
+                    float startX = column * k + dx;
+                    float endX = column * k + k * progress + dx;
+                    clipping.moveTo(startX, startY);
+                    clipping.lineTo(startX, endY);
+                    clipping.lineTo(endX, endY);
+                    clipping.lineTo(endX, startY);
+                    clipping.lineTo(startX, startY);
                     clipping.closePath();
                 }
             }
@@ -125,7 +96,7 @@ public class CheckerboardTransition2D extends Transition2D {
                 );
                 clipping.transform(flip);
             }
-        } else {
+        } else { // up or down
             float k = ((float) size.height) / rowCount * 2;
             float k2 = ((float) size.width) / columnCount;
 
@@ -135,12 +106,16 @@ public class CheckerboardTransition2D extends Transition2D {
                     dy = k / 2;
                 }
 
+                float startX = column * k2;
+                float endX = startX + k2;
                 for (int row = -1; row < rowCount; row++) {
-                    clipping.moveTo(column * k2, row * k + dy);
-                    clipping.lineTo(column * k2 + k2, row * k + dy);
-                    clipping.lineTo(column * k2 + k2, row * k + k * progress + dy);
-                    clipping.lineTo(column * k2, row * k + k * progress + dy);
-                    clipping.lineTo(column * k2, row * k + dy);
+                    float startY = row * k + dy;
+                    float endY = row * k + k * progress + dy;
+                    clipping.moveTo(startX, startY);
+                    clipping.lineTo(endX, startY);
+                    clipping.lineTo(endX, endY);
+                    clipping.lineTo(startX, endY);
+                    clipping.lineTo(startX, startY);
                     clipping.closePath();
                 }
             }

@@ -97,33 +97,10 @@ public class ParamSet {
         return this;
     }
 
-    public ParamSet addCommonActions(FilterButtonModel... actions) {
-        for (FilterButtonModel action : actions) {
-            if (action != null) {
-                actionList.add(action);
-            }
-        }
-
-        // no need for "randomize"/"reset all"
-        // if the filter has only one parameter...
-        nonTrivialFilter = paramList.size() > 1;
-
-        if (!nonTrivialFilter) {
-            FilterParam param = paramList.get(0);
-            // ...except if that single parameter is grouped...
-            if (param instanceof GroupedRangeParam) {
-                nonTrivialFilter = true;
-            }
-            // ...or it is a gradient param
-            if (param instanceof GradientParam) {
-                nonTrivialFilter = true;
-            }
-        }
-        if (nonTrivialFilter) {
-            addRandomizeAction();
-            addResetAllAction();
-        }
-        return this;
+    public void addCommonActions(boolean nonTrivial) {
+        nonTrivialFilter = nonTrivial;
+        addRandomizeAction();
+        addResetAllAction();
     }
 
     private void addRandomizeAction() {

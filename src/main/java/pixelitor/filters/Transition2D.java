@@ -34,7 +34,7 @@ import static pixelitor.filters.impl.BricTransitionFilter.*;
 public class Transition2D extends ParametrizedFilter {
     public static final String NAME = "2D Transitions";
 
-    private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);
+    private final RangeParam progress = new RangeParam("Progress (%)", 0, 50, 100);
     private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Box In", BOX_IN),
         new Item("Box Out", BOX_OUT),

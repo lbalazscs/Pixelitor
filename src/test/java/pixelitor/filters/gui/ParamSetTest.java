@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,10 +40,12 @@ class ParamSetTest {
     @BeforeEach
     void beforeEachTest() {
         params = new ParamSet(ParamTest.getTestParams())
-            .withAction(ReseedSupport.createAction())
-            .addCommonActions();
+            .withAction(ReseedSupport.createAction());
+        params.addCommonActions(true);
+
         adjustmentListener = mock(ParamAdjustmentListener.class);
         params.setAdjustmentListener(adjustmentListener);
+
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParamAtIndex(extraParam, 3);

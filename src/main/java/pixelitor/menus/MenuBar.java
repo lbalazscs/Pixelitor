@@ -42,6 +42,10 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.filters.transitions.BlindsTransition;
+import pixelitor.filters.transitions.CheckerboardTransition;
+import pixelitor.filters.transitions.GooTransition;
+import pixelitor.filters.transitions.ShapesGridTransition;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
@@ -912,20 +916,48 @@ public class MenuBar extends JMenuBar {
 
         filterMenu.addSeparator();
 
+        filterMenu.add(createArtisticSubmenu(texts));
         filterMenu.add(createBlurSharpenSubmenu(texts));
-        filterMenu.add(createDistortSubmenu(texts));
         filterMenu.add(createDisplaceSubmenu(texts));
+        filterMenu.add(createDistortSubmenu(texts));
+        filterMenu.add(createFindEdgesSubmenu(texts));
         filterMenu.add(createLightSubmenu(texts));
         filterMenu.add(createNoiseSubmenu(texts));
-        filterMenu.add(createRenderSubmenu(texts));
-        filterMenu.add(createArtisticSubmenu(texts));
-        filterMenu.add(createFindEdgesSubmenu(texts));
         filterMenu.add(createOtherSubmenu());
-
-        // the text as filter is still useful for batch operations
-        filterMenu.addFilter("Text", TextFilter::new);
+        filterMenu.add(createRenderSubmenu(texts));
+        filterMenu.add(createTransitionsSubmenu());
 
         return filterMenu;
+    }
+
+    private static JMenu createArtisticSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("artistic"));
+
+        sub.addFilter(ComicBook.NAME, ComicBook::new);
+        sub.addFilter(JHCrystallize.NAME, JHCrystallize::new);
+        sub.addFilter(JHEmboss.NAME, JHEmboss::new);
+        sub.addFilter(JHOilPainting.NAME, JHOilPainting::new);
+        sub.addFilter(Orton.NAME, Orton::new);
+        sub.addFilter(PhotoCollage.NAME, PhotoCollage::new);
+        sub.addFilter(JHPointillize.NAME, JHPointillize::new);
+        sub.addFilter(JHSmear.NAME, JHSmear::new);
+        sub.addFilter(Spheres.NAME, Spheres::new);
+        sub.addFilter(JHStamp.NAME, JHStamp::new);
+        sub.addFilter(JHWeave.NAME, JHWeave::new);
+
+        sub.add(createHalftoneSubmenu());
+
+        return sub;
+    }
+
+    private static JMenu createHalftoneSubmenu() {
+        PMenu sub = new PMenu("Halftone");
+
+        sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
+        sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);
+        sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
+
+        return sub;
     }
 
     private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
@@ -941,6 +973,20 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHSpinZoomBlur.NAME, JHSpinZoomBlur::new);
         sub.addSeparator();
         sub.addFilter(JHUnsharpMask.NAME, JHUnsharpMask::new);
+
+        return sub;
+    }
+
+    private static JMenu createDisplaceSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("displace"));
+
+        sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
+        sub.addFilter(DrunkVision.NAME, DrunkVision::new);
+        sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
+        sub.addFilter(JHOffset.NAME, JHOffset::new);
+        sub.addFilter(Mirror.NAME, Mirror::new);
+        sub.addFilter(Slice.NAME, Slice::new);
+        sub.addFilter(JHVideoFeedback.NAME, JHVideoFeedback::new);
 
         return sub;
     }
@@ -981,16 +1027,17 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createDisplaceSubmenu(ResourceBundle texts) {
-        PMenu sub = new PMenu(texts.getString("displace"));
+    private static JMenu createFindEdgesSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("find_edges"));
 
-        sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
-        sub.addFilter(DrunkVision.NAME, DrunkVision::new);
-        sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
-        sub.addFilter(JHOffset.NAME, JHOffset::new);
-        sub.addFilter(Mirror.NAME, Mirror::new);
-        sub.addFilter(Slice.NAME, Slice::new);
-        sub.addFilter(JHVideoFeedback.NAME, JHVideoFeedback::new);
+        sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
+
+        String laplacianFilterName = "Laplacian";
+        sub.addNoGrayForwardingFilter(laplacianFilterName,
+            () -> new LaplaceFilter(laplacianFilterName));
+
+        sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
+        sub.addFilter("Canny", Canny::new);
 
         return sub;
     }
@@ -1023,6 +1070,31 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(AddNoise.NAME, AddNoise::new);
         sub.addFilter(JHPixelate.NAME, JHPixelate::new);
+
+        return sub;
+    }
+
+    private static JMenu createOtherSubmenu() {
+        PMenu sub = new PMenu("Other");
+
+        sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
+        sub.addFilter(Morphology.NAME, Morphology::new);
+        sub.addFilter("Random Filter", RandomFilter::new);
+
+        // the text as filter is still useful for batch operations
+        sub.addFilter("Text", TextFilter::new);
+
+        sub.addFilter("Transform Layer", TransformLayer::new);
+
+        sub.addSeparator();
+
+        sub.add(Convolve.createFilterAction(3));
+        sub.add(Convolve.createFilterAction(5));
+
+        sub.addSeparator();
+
+        sub.addFilter(ChannelToTransparency.NAME, ChannelToTransparency::new);
+        sub.addFilterWithoutGUI(JHInvertTransparency.NAME, JHInvertTransparency::new);
 
         return sub;
     }
@@ -1088,69 +1160,15 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createArtisticSubmenu(ResourceBundle texts) {
-        PMenu sub = new PMenu(texts.getString("artistic"));
+    private static JMenu createTransitionsSubmenu() {
+        PMenu sub = new PMenu("Transitions");
 
-        sub.addFilter(ComicBook.NAME, ComicBook::new);
-        sub.addFilter(JHCrystallize.NAME, JHCrystallize::new);
-        sub.addFilter(JHEmboss.NAME, JHEmboss::new);
-        sub.addFilter(JHOilPainting.NAME, JHOilPainting::new);
-        sub.addFilter(Orton.NAME, Orton::new);
-        sub.addFilter(PhotoCollage.NAME, PhotoCollage::new);
-        sub.addFilter(JHPointillize.NAME, JHPointillize::new);
-        sub.addFilter(JHSmear.NAME, JHSmear::new);
-        sub.addFilter(Spheres.NAME, Spheres::new);
-        sub.addFilter(JHStamp.NAME, JHStamp::new);
-        sub.addFilter(JHWeave.NAME, JHWeave::new);
-
-        sub.add(createHalftoneSubmenu());
-
-        return sub;
-    }
-
-    private static JMenu createHalftoneSubmenu() {
-        PMenu sub = new PMenu("Halftone");
-
-        sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
-        sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);
-        sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
-
-        return sub;
-    }
-
-    private static JMenu createFindEdgesSubmenu(ResourceBundle texts) {
-        PMenu sub = new PMenu(texts.getString("find_edges"));
-
-        sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
-
-        String laplacianFilterName = "Laplacian";
-        sub.addNoGrayForwardingFilter(laplacianFilterName,
-            () -> new LaplaceFilter(laplacianFilterName));
-
-        sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
-        sub.addFilter("Canny", Canny::new);
-
-        return sub;
-    }
-
-    private static JMenu createOtherSubmenu() {
-        PMenu sub = new PMenu("Other");
-
-        sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
-        sub.addFilter(Morphology.NAME, Morphology::new);
-        sub.addFilter("Random Filter", RandomFilter::new);
-        sub.addFilter("Transform Layer", TransformLayer::new);
         sub.addFilter(Transition2D.NAME, Transition2D::new);
-
         sub.addSeparator();
-
-        sub.add(Convolve.createFilterAction(3));
-        sub.add(Convolve.createFilterAction(5));
-
-        sub.addSeparator();
-
-        sub.addFilter(ChannelToTransparency.NAME, ChannelToTransparency::new);
-        sub.addFilterWithoutGUI(JHInvertTransparency.NAME, JHInvertTransparency::new);
+        sub.addFilter(BlindsTransition.NAME, BlindsTransition::new);
+        sub.addFilter(CheckerboardTransition.NAME, CheckerboardTransition::new);
+        sub.addFilter(GooTransition.NAME, GooTransition::new);
+        sub.addFilter(ShapesGridTransition.NAME, ShapesGridTransition::new);
 
         return sub;
     }

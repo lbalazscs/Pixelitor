@@ -100,7 +100,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case CIRCLE_OUT -> new CircleTransition2D(OUT);
             case COLLAPSE -> new CollapseTransition2D();
             case CURTAIN -> new CurtainTransition2D();
-            case DIAMONDS -> new DiamondsTransition2D(100);
+            case DIAMONDS -> new DiamondsTransition2D(100, DiamondsTransition2D.TYPE_DIAMOND);
             case DOTS -> new DotsTransition2D();
             case FLURRY -> new FlurryTransition2D(OUT);
             case FUNKY_WIPE -> new FunkyWipeTransition2D(true);

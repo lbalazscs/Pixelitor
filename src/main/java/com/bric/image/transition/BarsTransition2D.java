@@ -126,8 +126,7 @@ public class BarsTransition2D extends Transition2D {
                 }
                 if (run != 0) {
                     Rectangle2D r2 = new Rectangle2D.Float(0, a, size.width, run);
-                    ImageInstruction ii = new ImageInstruction(true, null, r2, false);
-                    v.add(ii);
+                    v.add(new ImageInstruction(true, null, r2, false));
                     a += run;
                 }
                 a++;
@@ -141,8 +140,7 @@ public class BarsTransition2D extends Transition2D {
                 }
                 if (run != 0) {
                     Rectangle2D r2 = new Rectangle2D.Float(a, 0, run, size.height);
-                    ImageInstruction ii = new ImageInstruction(true, null, r2, false);
-                    v.add(ii);
+                    v.add(new ImageInstruction(true, null, r2, false));
                     a += run;
                 }
                 a++;

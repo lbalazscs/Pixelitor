@@ -104,8 +104,8 @@ public class BlindsTransition2D extends Transition2D {
         if (!(type == LEFT || type == RIGHT || type == UP || type == DOWN)) {
             throw new IllegalArgumentException("The type must be LEFT, RIGHT, UP or DOWN");
         }
-        if (numberOfBlinds < 4) {
-            throw new IllegalArgumentException("The number of blinds (" + numberOfBlinds + ") must be greater than 3.");
+        if (numberOfBlinds < 1) {
+            throw new IllegalArgumentException("The number of blinds (" + numberOfBlinds + ") must be greater than 0.");
         }
         this.type = type;
         blinds = numberOfBlinds;

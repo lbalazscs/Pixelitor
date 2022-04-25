@@ -24,6 +24,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 
 /**
  * A filter that keeps its settings in a ParamSet object
@@ -81,7 +82,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         // switch the affected area functionality here on-off
 //        paramSet.addCommonActions(showAffectedAreaParam);
 
-        paramSet.addCommonActions();
+        paramSet.addCommonActions(isNonTrivial());
     }
 
     public ParamSet setParams(FilterParam param) {
@@ -163,5 +164,27 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     public void set(String paramName, String value) {
         paramSet.set(paramName, value);
+    }
+
+    public boolean isNonTrivial() {
+        List<FilterParam> params = paramSet.getParams();
+        if (params.size() > 1) {
+            // no need for "randomize"/"reset all"
+            // if the filter has only one parameter...
+            return true;
+        }
+
+        // ...except if that single parameter is grouped...
+        FilterParam param = params.get(0);
+        if (param instanceof GroupedRangeParam) {
+            return true;
+        }
+
+        // ...or it is a gradient param
+        if (param instanceof GradientParam) {
+            return true;
+        }
+
+        return false;
     }
 }

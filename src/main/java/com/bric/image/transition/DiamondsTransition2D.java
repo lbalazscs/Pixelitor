@@ -20,65 +20,43 @@
 package com.bric.image.transition;
 
 import java.awt.Dimension;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 
 /**
- * This creates a pattern of growing diamonds.  (The new frame is clipped
- * to these diamonds.) Here are playback samples:
- * <p><table summary="Sample Animations of DiamondsTransition2D" cellspacing="50" border="0"><tr>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/DiamondsTransition2D/Diamonds(10).gif" alt="Diamonds (10)">
- * <p>Diamonds (10)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/DiamondsTransition2D/Diamonds(20).gif" alt="Diamonds (20)">
- * <p>Diamonds (20)
- * </td>
- * <td align="center">
- * <img src="https://javagraphics.java.net/resources/transition/DiamondsTransition2D/Diamonds(40).gif" alt="Diamonds (40)">
- * <p>Diamonds (40)
- * </td>
- * </tr></table>
+ * This creates a pattern of growing shapes.  (The new frame is clipped
+ * to these shapes.)
  */
 public class DiamondsTransition2D extends Transition2D {
-    /**
-     * This public static method is used by the
-     * {@link com.bric.image.transition.Transition2DDemoHelper}
-     * class to create sample animations of this transition.
-     *
-     * @return the transitions that should be used to demonstrate this
-     * transition.
-     */
-    public static Transition[] getDemoTransitions() {
-        return new Transition[]{
-                new DiamondsTransition2D(10),
-                new DiamondsTransition2D(20),
-                new DiamondsTransition2D(40)
-        };
-    }
+    public static int TYPE_DIAMOND = 0;
+    public static int TYPE_CIRCLE = 1;
+    public static int TYPE_SQUARE = 2;
 
     private final int diamondSize;
+    private final int type;
 
     /**
      * Creates a new DiamondsTransition2D with a diamond size of 50.
      */
     public DiamondsTransition2D() {
-        this(50);
+        this(50, TYPE_DIAMOND);
     }
 
     /**
      * Creates a new DiamondsTransition2D.
      *
-     * @param diamondSize the width of the diamonds.
-     *                    It is not recommended that this value is less than 40, as that
-     *                    can really hurt performance in some situations.
+     * @param size the width of the diamonds.
+     *             It is not recommended that this value is less than 40, as that
+     *             can really hurt performance in some situations.
      */
-    public DiamondsTransition2D(int diamondSize) {
-        if (diamondSize <= 0) {
-            throw new IllegalArgumentException("size (" + diamondSize + ") must be greater than 4");
+    public DiamondsTransition2D(int size, int type) {
+        this.type = type;
+        if (size <= 0) {
+            throw new IllegalArgumentException("size (" + size + ") must be greater than 4");
         }
-        this.diamondSize = diamondSize;
+        this.diamondSize = size;
     }
 
     @Override
@@ -89,42 +67,47 @@ public class DiamondsTransition2D extends Transition2D {
 
         float dx = size.width / 2.0f;
         float dy = size.height / 2.0f;
-        while (dx > 0 + diamondSize) {
+        while (dx > diamondSize) {
             dx -= diamondSize;
         }
-        while (dy > 0 + diamondSize) {
+        while (dy > diamondSize) {
             dy -= diamondSize;
         }
 
         int ctr = 0;
-        progress = progress / 2.0f;
+        float currentSize = diamondSize * progress;
+        float currentHalfSize = currentSize / 2.0f;
         for (float y = -dy; y < size.height + diamondSize; y += diamondSize / 2.0f) {
-            float z = 0;
+            float polkaX = 0;
             if (ctr % 2 == 0) {
-                z = diamondSize / 2.0f;
+                polkaX = diamondSize / 2.0f;
             }
 
             for (float x = -dx; x < size.width + diamondSize; x += diamondSize) {
-                clipping.moveTo(x + z, y - diamondSize * progress);
-                clipping.lineTo(x + diamondSize * progress + z, y);
-                clipping.lineTo(x + z, y + diamondSize * progress);
-                clipping.lineTo(x - diamondSize * progress + z, y);
-                clipping.lineTo(x + z, y - diamondSize * progress);
-                clipping.closePath();
+                if (type == TYPE_DIAMOND) {
+                    clipping.moveTo(x + polkaX, y - currentHalfSize);
+                    clipping.lineTo(x + currentHalfSize + polkaX, y);
+                    clipping.lineTo(x + polkaX, y + currentHalfSize);
+                    clipping.lineTo(x - currentHalfSize + polkaX, y);
+                    clipping.lineTo(x + polkaX, y - currentHalfSize);
+                    clipping.closePath();
+                } else if (type == TYPE_CIRCLE) {
+                    clipping.append(new Ellipse2D.Float(x - currentHalfSize + polkaX, y - currentHalfSize, currentSize, currentSize), false);
+                } else { // square
+                    clipping.append(new Rectangle2D.Float(x - currentHalfSize + polkaX, y - currentHalfSize, currentSize, currentSize), false);
+                }
             }
             ctr++;
         }
 
         return new Transition2DInstruction[]{
-                new ImageInstruction(true),
-                new ImageInstruction(false, null, clipping)
+            new ImageInstruction(true),
+            new ImageInstruction(false, null, clipping)
         };
     }
-
 
     @Override
     public String toString() {
         return "Diamonds (" + diamondSize + ")";
     }
-
 }
