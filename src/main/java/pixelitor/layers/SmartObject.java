@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.Filter;
@@ -27,9 +26,11 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.Debug;
@@ -173,13 +174,12 @@ public class SmartObject extends ImageLayer {
                 assert content == null;
                 setContent(IO.loadCompSync(linkedContentFile));
             } else { // linked file not found
-                Canvas canvas = comp.getCanvas();
-                setContent(
-                    Composition.createTransparent(canvas.getWidth(), canvas.getHeight()));
-                EventQueue.invokeLater(() ->
-                    Messages.showError(linkedContentFile.getName() + " not found.",
-                        "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() + "</b> was not found.")
-                );
+                // Set a transparent image as content to avoid all sorts of errors.
+                // It will be replaced if the content is found later.
+                setContent(Composition.createTransparent(
+                    comp.getCanvasWidth(), comp.getCanvasHeight()));
+
+                EventQueue.invokeLater(this::handleMissingContentLater);
             }
         } else {
             assert content != null;
@@ -187,6 +187,35 @@ public class SmartObject extends ImageLayer {
         }
 
         recalculateImage(false);
+    }
+
+    private void handleMissingContentLater() {
+        assert Threads.calledOnEDT();
+
+        String title = linkedContentFile.getName() + " not found.";
+        String msg = "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() +
+                     "</b> was not found.<br>You can search for it or use a transparent image.";
+        boolean search = Dialogs.showOKCancelDialog(msg, title,
+            new String[]{"Search...", "Use Transparent Image"}, 0, JOptionPane.ERROR_MESSAGE);
+
+        File newFile = null;
+        if (search) {
+            newFile = FileChoosers.getSupportedOpenFile();
+        }
+        if (newFile != null) { // file found
+            linkedContentFile = newFile;
+            updateLinkedContentTime();
+
+            IO.loadCompAsync(linkedContentFile)
+                .thenAcceptAsync(loadedComp -> {
+                    setContent(loadedComp);
+                    recalculateImage(true);
+                    comp.update();
+                }, onEDT);
+        } else {
+            // give up and use the previously created transparent image
+            linkedContentFile = null;
+        }
     }
 
     @Override

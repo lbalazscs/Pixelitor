@@ -174,7 +174,7 @@ public class Composition implements Serializable {
      */
     public static Composition createTransparent(int width, int height) {
         BufferedImage img = ImageUtils.createSysCompatibleImage(width, height);
-        return fromImage(img, null, "");
+        return fromImage(img, null, "transparent");
     }
 
     @Serial
