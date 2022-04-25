@@ -19,13 +19,13 @@
 <launch4jConfig>
     <dontWrapJar>false</dontWrapJar>
     <headerType>gui</headerType>
-    <jar>C:\dev_p\pixelitor\target\Pixelitor-4.3.0.jar</jar>
+    <jar>C:\dev_p\pixelitor\target\Pixelitor-4.3.1.jar</jar>
     <outfile>C:\dev_p\pixelitor\installer\pixelitor.exe</outfile>
-    <errTitle>Pixelitor - Java 15+ required</errTitle>
+    <errTitle>Pixelitor - Java 17+ required</errTitle>
     <cmdLine></cmdLine>
     <chdir></chdir>
     <priority>normal</priority>
-    <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+    <downloadUrl>https://adoptium.net/</downloadUrl>
     <supportUrl></supportUrl>
     <stayAlive>false</stayAlive>
     <restartOnCrash>false</restartOnCrash>
@@ -35,7 +35,7 @@
         <path>runtime</path>
         <bundledJre64Bit>true</bundledJre64Bit>
         <bundledJreAsFallback>false</bundledJreAsFallback>
-        <minVersion>15</minVersion>
+        <minVersion>17</minVersion>
         <maxVersion></maxVersion>
         <jdkPreference>preferJre</jdkPreference>
         <runtimeBits>64/32</runtimeBits>
@@ -43,14 +43,14 @@
         <maxHeapPercent>95</maxHeapPercent>
     </jre>
     <versionInfo>
-        <fileVersion>4.3.0.0</fileVersion>
-        <txtFileVersion>4.3.0</txtFileVersion>
+        <fileVersion>4.3.1.0</fileVersion>
+        <txtFileVersion>4.3.1</txtFileVersion>
         <fileDescription>Pixelitor Image Editor</fileDescription>
-        <copyright>Copyright (c) 2009-2021 Laszlo Balazs-Csiki and Contributors</copyright>
-        <productVersion>4.3.0.0</productVersion>
-        <txtProductVersion>4.3.0</txtProductVersion>
+        <copyright>Copyright (c) 2009-2023 Laszlo Balazs-Csiki and Contributors</copyright>
+        <productVersion>4.3.1.0</productVersion>
+        <txtProductVersion>4.3.1</txtProductVersion>
         <productName>Pixelitor</productName>
-        <companyName>http://pixelitor.sourceforge.net/</companyName>
+        <companyName>https://pixelitor.sourceforge.io/</companyName>
         <internalName>Pixelitor</internalName>
         <originalFilename>Pixelitor.exe</originalFilename>
         <trademarks></trademarks>

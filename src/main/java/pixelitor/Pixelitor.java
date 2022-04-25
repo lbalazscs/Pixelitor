@@ -54,7 +54,7 @@ import static pixelitor.utils.Threads.*;
  * The main class
  */
 public class Pixelitor {
-    public static final String VERSION_NUMBER = "4.3.0";
+    public static final String VERSION_NUMBER = "4.3.1";
     public static Locale SYS_LOCALE;
 
     private Pixelitor() {

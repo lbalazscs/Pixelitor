@@ -28,16 +28,14 @@ import pixelitor.Pixelitor;
 import pixelitor.automate.DirectoryChooser;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
-import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
+import pixelitor.filters.AbstractLights;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
 import pixelitor.io.FileUtils;
 import pixelitor.io.SaveSettings;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.Drag;
@@ -58,19 +56,18 @@ import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.font.TextAttribute.*;
 import static java.lang.String.format;
 import static pixelitor.Composition.LayerAdder.Position.TOP;
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
-import static pixelitor.layers.BlendingMode.MULTIPLY;
 import static pixelitor.layers.BlendingMode.NORMAL;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
-import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 import static pixelitor.utils.Threads.*;
 
 /**
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
-    private static final String SPLASH_SMALL_FONT = "DejaVu Sans Light";
-    private static final String SPLASH_MAIN_FONT = "Segoe Print";
+    //    private static final String SPLASH_SMALL_FONT = "Irish Grover";
+//    private static final String SPLASH_MAIN_FONT = "Irish Grover";
+    private static final String SPLASH_SMALL_FONT = "Mochiy Pop One";
+    private static final String SPLASH_MAIN_FONT = "Mochiy Pop One";
     private static final int MAIN_FONT_SIZE = 62;
 
     private static final int SPLASH_WIDTH = 400;
@@ -127,20 +124,28 @@ public class SplashImageCreator {
             SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
-        for (int i = 0; i < 3; i++) {
-            GradientType gradientType = Rnd.chooseFrom(GradientType.values());
+//        for (int i = 0; i < 3; i++) {
+//            GradientType gradientType = Rnd.chooseFrom(GradientType.values());
+//
+//            Drag randomDrag = Drag.createRandom(
+//                SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
+//            Gradient gradient = new Gradient(randomDrag,
+//                gradientType, REFLECT, FG_TO_BG, false, MULTIPLY, 1.0f);
+//            gradient.drawOn(layer);
+//        }
+//
+//        layer = addNewLayer(comp, "rendered");
+//        var brushedMetal = new JHBrushedMetal();
+//        layer.startFilter(brushedMetal, FILTER_WITHOUT_DIALOG);
+//        layer.setBlendingMode(MULTIPLY, true, true);
 
-            Drag randomDrag = Drag.createRandom(
-                SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
-            Gradient gradient = new Gradient(randomDrag,
-                gradientType, REFLECT, FG_TO_BG, false, MULTIPLY, 1.0f);
-            gradient.drawOn(layer);
-        }
+        layer.replaceWithSmartObject();
+        SmartObject so = (SmartObject) comp.getLayer(0);
+        AbstractLights lights = new AbstractLights();
+        lights.randomize();
 
-        layer = addNewLayer(comp, "rendered");
-        var brushedMetal = new JHBrushedMetal();
-        layer.startFilter(brushedMetal, FILTER_WITHOUT_DIALOG);
-        layer.setBlendingMode(MULTIPLY, true, true);
+        SmartFilter lightsSF = new SmartFilter(lights, so.getContent(), so);
+        so.addSmartFilter(lightsSF, false, true);
 
         addTextLayers(comp);
 
