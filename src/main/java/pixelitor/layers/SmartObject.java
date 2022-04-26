@@ -37,8 +37,10 @@ import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.awt.RenderingHints.*;
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 import static pixelitor.utils.Threads.onEDT;
 
@@ -76,6 +79,8 @@ public class SmartObject extends ImageLayer {
      * they don't have to run every time some other layer is edited.
      */
     private final List<Filter> smartFilters = new ArrayList<>();
+
+    private AffineTransform contentTransform;
 
     // The following two fields are used only during editing of smart filters
     // to restore the image and filter state if the user cancels the dialog.
@@ -131,6 +136,9 @@ public class SmartObject extends ImageLayer {
         smartFilterIsVisible = orig.smartFilterIsVisible;
         linkedContentFile = orig.linkedContentFile;
         linkedContentFileTime = orig.linkedContentFileTime;
+        if (orig.contentTransform != null) {
+            contentTransform = new AffineTransform(orig.contentTransform);
+        }
     }
 
     @Serial
@@ -237,17 +245,34 @@ public class SmartObject extends ImageLayer {
     }
 
     private void resetImageFromContent() {
+        resetImageFromContent(comp.getCanvasWidth(), comp.getCanvasHeight());
+    }
+
+    private void resetImageFromContent(int targetWidth, int targetHeight) {
         image = content.getCompositeImage();
-        if (ImageUtils.isSubImage(image)) {
-            image = ImageUtils.copySubImage(image);
-        }
-        if (image.isAlphaPremultiplied()) {
-            // image layer images should not be premultiplied
-            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        boolean imageConverted = false;
+        if (contentTransform != null) {
+            BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = newImage.createGraphics();
+            g.setTransform(contentTransform);
+            if (targetWidth > image.getWidth() || targetHeight > image.getHeight()) {
+                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+            } else {
+                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+            }
             g.drawImage(image, 0, 0, null);
             g.dispose();
             image = newImage;
+            imageConverted = true;
+        }
+        if (!imageConverted && image.isAlphaPremultiplied()) {
+            // image layer images should not be premultiplied
+            image = ImageUtils.copyTo(BufferedImage.TYPE_INT_ARGB, image);
+            imageConverted = true;
+        }
+        if (!imageConverted && ImageUtils.isSubImage(image)) {
+            image = ImageUtils.copySubImage(image);
+            imageConverted = true;
         }
     }
 
@@ -622,6 +647,22 @@ public class SmartObject extends ImageLayer {
                 return parent;
             }
         }
+    }
+
+    @Override
+    public CompletableFuture<Void> resize(Dimension newSize) {
+        // it's so simple only because smart objects can't be moved,
+        // therefore there's no translation to be set!
+        double sx = newSize.getWidth() / comp.getCanvasWidth();
+        double sy = newSize.getHeight() / comp.getCanvasHeight();
+        AffineTransform newScaling = AffineTransform.getScaleInstance(sx, sy);
+        if (contentTransform == null) {
+            contentTransform = newScaling;
+        } else {
+            contentTransform.concatenate(newScaling);
+        }
+        return CompletableFuture.runAsync(() ->
+            resetImageFromContent(newSize.width, newSize.height));
     }
 
     public boolean checkInvariant() {

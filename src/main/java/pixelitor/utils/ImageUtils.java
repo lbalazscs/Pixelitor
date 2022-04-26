@@ -409,7 +409,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = drawOn(TYPE_INT_ARGB_PRE, src);
+        BufferedImage dest = copyTo(TYPE_INT_ARGB_PRE, src);
 
         if (flushOld) {
             src.flush();
@@ -421,7 +421,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = drawOn(TYPE_INT_ARGB, src);
+        BufferedImage dest = copyTo(TYPE_INT_ARGB, src);
 
         if (flushOld) {
             src.flush();
@@ -430,8 +430,8 @@ public class ImageUtils {
         return dest;
     }
 
-    private static BufferedImage drawOn(int newType, BufferedImage src) {
-        var dest = new BufferedImage(src.getWidth(), src.getHeight(), newType);
+    public static BufferedImage copyTo(int newType, BufferedImage src) {
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), newType);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -469,7 +469,7 @@ public class ImageUtils {
     public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = drawOn(TYPE_INT_RGB, src);
+        BufferedImage dest = copyTo(TYPE_INT_RGB, src);
 
         if (flushOld) {
             src.flush();
@@ -663,11 +663,7 @@ public class ImageUtils {
 
     // Can copy an image which was created by BufferedImage.getSubimage
     public static BufferedImage copySubImage(BufferedImage src) {
-        BufferedImage copy = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
-        Graphics2D g2 = copy.createGraphics();
-        g2.drawImage(src, 0, 0, null);
-        g2.dispose();
-        return copy;
+        return copyTo(src.getType(), src);
     }
 
     /**
@@ -1031,13 +1027,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
-        BufferedImage dest = new BufferedImage(
-            src.getWidth(), src.getHeight(), TYPE_BYTE_GRAY);
-        Graphics2D g2 = dest.createGraphics();
-        g2.drawImage(src, 0, 0, null);
-        g2.dispose();
-
-        return dest;
+        return copyTo(TYPE_BYTE_GRAY, src);
     }
 
     public static void paintAffectedAreaShapes(BufferedImage image, Shape[] shapes) {

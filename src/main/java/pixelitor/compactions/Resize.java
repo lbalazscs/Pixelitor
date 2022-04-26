@@ -56,11 +56,6 @@ public class Resize implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.hasSmartObjects()) {
-            Messages.showNotImplementedForSmartObjects("Resizing");
-            return CompletableFuture.completedFuture(oldComp);
-        }
-
         Canvas oldCanvas = oldComp.getCanvas();
         int canvasCurrWidth = oldCanvas.getWidth();
         int canvasCurrHeight = oldCanvas.getHeight();
