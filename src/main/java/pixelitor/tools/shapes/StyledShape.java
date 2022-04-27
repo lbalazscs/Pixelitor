@@ -426,7 +426,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         double imDist = transformedDrag.calcImDist();
         double dragStartX = transformedDrag.getStartXFromCenter();
         double dragStartY = transformedDrag.getStartYFromCenter();
-        Rectangle2D horBoxImBounds = new Rectangle.Double(
+        Rectangle2D horBoxImBounds = new Rectangle2D.Double(
             dragStartX,
             dragStartY - imDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
             imDist,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,12 @@ import pixelitor.filters.levels.Channel;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 import java.util.EventListener;
 
 /**
@@ -76,8 +80,8 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
     }
 
-    private Point.Float getNormalizedMousePos(MouseEvent e) {
-        var mousePos = new Point.Float(e.getX(), e.getY());
+    private Point2D.Float getNormalizedMousePos(MouseEvent e) {
+        var mousePos = new Point2D.Float(e.getX(), e.getY());
         toneCurves.normalizePoint(mousePos);
         return mousePos;
     }
@@ -100,7 +104,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     @Override
     public void mouseDragged(MouseEvent e) {
         if (mouseKnotIndex >= 0) {
-            Point.Float mousePos = getNormalizedMousePos(e);
+            Point2D.Float mousePos = getNormalizedMousePos(e);
             if (toneCurves.getActiveCurve().isDraggedOff(mouseKnotIndex, mousePos)) {
                 toneCurves.getActiveCurve().deleteKnot(mouseKnotIndex);
                 mouseKnotIndexDeleted = mouseKnotIndex;
@@ -111,7 +115,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
             stateChanged();
         } else if (mouseKnotIndexDeleted >= 0) {
-            Point.Float mousePos = getNormalizedMousePos(e);
+            Point2D.Float mousePos = getNormalizedMousePos(e);
             if (toneCurves.getActiveCurve().isDraggedIn(mouseKnotIndexDeleted, mousePos)) {
                 mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, false);
                 mouseKnotIndexDeleted = -1;
@@ -122,7 +126,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Point.Float mousePos = getNormalizedMousePos(e);
+        Point2D.Float mousePos = getNormalizedMousePos(e);
         ToneCurve activeCurve = toneCurves.getActiveCurve();
         if (activeCurve.isOverKnot(mousePos)) {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -139,7 +143,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
             return;
         }
 
-        Point.Float mousePos = getNormalizedMousePos(e);
+        Point2D.Float mousePos = getNormalizedMousePos(e);
         mouseKnotIndex = toneCurves.getActiveCurve().getKnotIndexAt(mousePos);
 
         if (mouseKnotIndex < 0) {

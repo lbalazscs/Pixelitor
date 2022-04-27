@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.levels.Channel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
@@ -78,12 +77,12 @@ public class ToneCurve {
                && Math.abs(p.getY() - q.getY()) < NEARBY_RADIUS;
     }
 
-    private static void clampPoint(Point.Float p) {
+    private static void clampPoint(Point2D.Float p) {
         p.x = ImageMath.clamp01(p.x);
         p.y = ImageMath.clamp01(p.y);
     }
 
-    public int addKnot(Point.Float p, boolean allowReplace) {
+    public int addKnot(Point2D.Float p, boolean allowReplace) {
         // clamp to boundaries [0,1]
         clampPoint(p);
 
@@ -99,10 +98,10 @@ public class ToneCurve {
         // this protect against placing two knots too close to each other
         if (allowReplace) {
             int prevIndex = index - 1;
-            if (isClose(p, new Point.Float(curve.x[prevIndex], curve.y[prevIndex]))) {
+            if (isClose(p, new Point2D.Float(curve.x[prevIndex], curve.y[prevIndex]))) {
                 setKnotPosition(prevIndex, p);
                 return prevIndex;
-            } else if (isClose(p, new Point.Float(curve.x[index], curve.y[index]))) {
+            } else if (isClose(p, new Point2D.Float(curve.x[index], curve.y[index]))) {
                 setKnotPosition(index, p);
                 return index;
             }
@@ -136,7 +135,7 @@ public class ToneCurve {
      * @param index point index
      * @param p     normalized point data
      */
-    public void setKnotPosition(int index, Point.Float p) {
+    public void setKnotPosition(int index, Point2D.Float p) {
         int lastIndex = curve.x.length - 1;
 
         if (index < 0 || index > lastIndex) {
@@ -161,7 +160,7 @@ public class ToneCurve {
      * @param index knot index
      * @param p     normalized point data
      */
-    public boolean isDraggedOff(int index, Point.Float p) {
+    public boolean isDraggedOff(int index, Point2D.Float p) {
         if (index <= 0 || index >= curve.x.length - 1) {
             return false;
         }
@@ -175,7 +174,7 @@ public class ToneCurve {
      * @param index knot index
      * @param p     normalized point data
      */
-    public boolean isDraggedIn(int index, Point.Float p) {
+    public boolean isDraggedIn(int index, Point2D.Float p) {
         if (index <= 0 || index > curve.x.length - 1) {
             return false;
         }
@@ -183,21 +182,21 @@ public class ToneCurve {
         return p.x < curve.x[index] && p.x > curve.x[index - 1];
     }
 
-    private static boolean isOver(Point.Float p, Point.Float q) {
+    private static boolean isOver(Point2D.Float p, Point2D.Float q) {
         if (Math.abs(p.x - q.x) < KNOT_RADIUS) {
             return Math.abs(p.y - q.y) < KNOT_RADIUS;
         }
         return false;
     }
 
-    public boolean isOverKnot(Point.Float p) {
+    public boolean isOverKnot(Point2D.Float p) {
         return getKnotIndexAt(p) >= 0;
     }
 
     public boolean isOverKnot(int index) {
-        var p = new Point.Float(curve.x[index], curve.y[index]);
+        var p = new Point2D.Float(curve.x[index], curve.y[index]);
         for (int i = 0; i < curve.x.length; i++) {
-            if (i != index && isOver(p, new Point.Float(curve.x[i], curve.y[i]))) {
+            if (i != index && isOver(p, new Point2D.Float(curve.x[i], curve.y[i]))) {
                 return true;
             }
         }
@@ -205,13 +204,13 @@ public class ToneCurve {
         return false;
     }
 
-    public static boolean isOverChart(Point.Float p) {
+    public static boolean isOverChart(Point2D.Float p) {
         return p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
     }
 
-    public int getKnotIndexAt(Point.Float p) {
+    public int getKnotIndexAt(Point2D.Float p) {
         for (int i = 0; i < curve.x.length; i++) {
-            if (isOver(p, new Point.Float(curve.x[i], curve.y[i]))) {
+            if (isOver(p, new Point2D.Float(curve.x[i], curve.y[i]))) {
                 return i;
             }
         }

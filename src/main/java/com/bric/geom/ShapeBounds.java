@@ -62,6 +62,7 @@ public class ShapeBounds {
                     r.add(t);
                 }
             } catch (EmptyPathException e) {
+                e.printStackTrace();
             }
         }
         return r;

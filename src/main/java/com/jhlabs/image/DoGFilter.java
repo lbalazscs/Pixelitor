@@ -40,7 +40,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
     /**
      * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
-     * @param radius the radius of the blur in pixels.
+     * @param radius1 the radius of the blur in pixels.
      * @min-value 0
      * @max-value 100+
      * @see #getRadius
@@ -62,7 +62,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
     /**
      * Set the radius of the kernel, and hence the amount of blur. The bigger the radius, the longer this filter will take.
      *
-     * @param radius the radius of the blur in pixels.
+     * @param radius2 the radius of the blur in pixels.
      * @min-value 0
      * @max-value 100+
      * @see #getRadius

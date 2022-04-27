@@ -308,8 +308,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
             g.fillRect(
                 (int) (ox - newCanvasW / 2),
                 (int) (oy - newCanvasH / 2),
-                (int) (newCanvasW),
-                (int) (newCanvasH)
+                (int) newCanvasW,
+                (int) newCanvasH
             );
 
             if (thumb == null) {

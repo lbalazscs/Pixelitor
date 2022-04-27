@@ -100,9 +100,9 @@ public class TossTransition2D extends Transition2D {
                 size.width, size.height,
                 0, 0,
 
-                size.width * 4 / 5, size.height - 5 * size.height / 4,
-                size.width * 4 / 5 + size.width, size.height - 5 * size.height / 4,
-                size.width * 4 / 5, 0 - 5 * size.height / 4
+                size.width * 0.8, size.height - 5 * size.height / 4.0,
+                size.width * 0.8 + size.width, size.height - 5 * size.height / 4.0,
+                size.width * 0.8, 0 - 5 * size.height / 4.0
         );
         if (type == RIGHT) {
             untouched.preConcatenate(flipped);

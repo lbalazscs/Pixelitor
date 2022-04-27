@@ -18,12 +18,12 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.GUIText;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.util.List;
 
 import static pixelitor.filters.gui.UserPreset.loadPresets;
@@ -39,8 +39,6 @@ public class DialogMenuBar extends JMenuBar {
     private final DialogMenuOwner owner;
     private JMenu presetsMenu;
     private int numUserPresets = 0;
-    private static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
-        && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
     public DialogMenuBar(DialogMenuOwner owner) {
         this(owner, true);
@@ -99,7 +97,7 @@ public class DialogMenuBar extends JMenuBar {
     }
 
     private void addManagePresetsMenu() {
-        if (!CAN_USE_FILE_MANAGER) {
+        if (!GUIUtils.CAN_USE_FILE_MANAGER) {
             return;
         }
         presetsMenu.add(owner.createManagePresetsAction());

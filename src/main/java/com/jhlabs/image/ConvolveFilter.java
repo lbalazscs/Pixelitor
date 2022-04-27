@@ -218,7 +218,6 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param outPixels  the output pixels
      * @param width      the width
      * @param height     the height
-     * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
     public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
@@ -254,7 +253,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < height; y++) {
             int offset = y * width;
             for (int x = 0; x < width; x++) {
-                float r = 0, g = 0, b = 0, a = 0;
+                float r = 0, g = 0, b = 0;
                 int origPacked = inPixels[offset + x];
                 int origAlpha = (origPacked >> 24) & 0xff;
 

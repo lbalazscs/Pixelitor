@@ -289,7 +289,6 @@ public class RectangleReader {
      * This checks to see if a Rectangle2D can be expressed as
      * a int-based Rectangle.
      *
-     * @param r
      * @return a new <code>Rectangle</code> if possible, or
      * the null if not.
      */

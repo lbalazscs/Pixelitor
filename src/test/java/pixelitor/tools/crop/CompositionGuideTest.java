@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,9 @@ import pixelitor.guides.GuidesRenderer;
 import pixelitor.utils.Geometry;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -145,11 +145,11 @@ class CompositionGuideTest {
         compositionGuide.setOrientation(0);
         compositionGuide.draw(rect, g2);
 
-        Point.Double p = new Point.Double(5, 5);
+        Point2D p = new Point2D.Double(5, 5);
         Line2D[] lines = new Line2D[3];
         lines[0] = new Line2D.Double(0, 0, 10, 10);
-        lines[1] = new Line2D.Double(0, 10, p.x, p.y);
-        lines[2] = new Line2D.Double(10, 0, p.x, p.y);
+        lines[1] = new Line2D.Double(0, 10, p.getX(), p.getY());
+        lines[2] = new Line2D.Double(10, 0, p.getX(), p.getY());
 
         verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
@@ -163,11 +163,11 @@ class CompositionGuideTest {
         compositionGuide.setOrientation(1);
         compositionGuide.draw(rect, g2);
 
-        Point.Double p = new Point.Double(5, 5);
+        Point2D p = new Point2D.Double(5, 5);
         Line2D[] lines = new Line2D[3];
         lines[0] = new Line2D.Double(0, 10, 10, 0);
-        lines[1] = new Line2D.Double(0, 0, p.x, p.y);
-        lines[2] = new Line2D.Double(10, 10, p.x, p.y);
+        lines[1] = new Line2D.Double(0, 0, p.getX(), p.getY());
+        lines[2] = new Line2D.Double(10, 10, p.getX(), p.getY());
 
         verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }

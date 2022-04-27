@@ -1371,7 +1371,7 @@ public class MenuBar extends JMenuBar {
         developMenu.add(new RestrictedLayerAction("Mask update transparency from BW", HAS_LAYER_MASK) {
             @Override
             public void onActiveLayer(Layer layer) {
-                layer.getMask().updateFromBWImage();
+                layer.getMask().updateTransparencyImage();
                 layer.getComp().update();
             }
         });

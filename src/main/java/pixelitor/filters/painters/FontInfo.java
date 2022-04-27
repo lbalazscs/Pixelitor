@@ -38,9 +38,9 @@ public class FontInfo {
     private boolean italic;
 
     // advanced properties
-    private boolean strikeThrough = false;
+    private boolean strikethrough = false;
     private boolean kerning = false;
-    private boolean underLine = false;
+    private boolean underline = false;
     private boolean ligatures = false;
     private int tracking = 0;
 
@@ -53,9 +53,9 @@ public class FontInfo {
         if (font.hasLayoutAttributes()) {
             var map = font.getAttributes();
 
-            strikeThrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
+            strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
             kerning = KERNING_ON.equals(map.get(KERNING));
-            underLine = UNDERLINE_ON.equals(map.get(UNDERLINE));
+            underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
             ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
 
             Float trackingSetting = (Float) map.get(TRACKING);
@@ -71,9 +71,9 @@ public class FontInfo {
         bold = preset.getBoolean("bold");
         italic = preset.getBoolean("italic");
 
-        strikeThrough = preset.getBoolean("strikethrough");
+        strikethrough = preset.getBoolean("strikethrough");
         kerning = preset.getBoolean("kerning");
-        underLine = preset.getBoolean("underline");
+        underline = preset.getBoolean("underline");
         ligatures = preset.getBoolean("ligatures");
         tracking = preset.getInt("tracking", 0);
     }
@@ -84,9 +84,9 @@ public class FontInfo {
         preset.putBoolean("bold", bold);
         preset.putBoolean("italic", italic);
 
-        preset.putBoolean("strikethrough", strikeThrough);
+        preset.putBoolean("strikethrough", strikethrough);
         preset.putBoolean("kerning", kerning);
-        preset.putBoolean("underline", underLine);
+        preset.putBoolean("underline", underline);
         preset.putBoolean("ligatures", ligatures);
         preset.putInt("tracking", tracking);
     }
@@ -98,12 +98,12 @@ public class FontInfo {
         this.italic = italic;
     }
 
-    public void updateAdvanced(boolean strikeThrough, boolean kerning, boolean ligatures,
+    public void updateAdvanced(boolean strikethrough, boolean kerning, boolean ligatures,
                                boolean underline, int tracking) {
-        this.strikeThrough = strikeThrough;
+        this.strikethrough = strikethrough;
         this.kerning = kerning;
         this.ligatures = ligatures;
-        this.underLine = underline;
+        this.underline = underline;
         this.tracking = tracking;
     }
 
@@ -112,7 +112,7 @@ public class FontInfo {
 
         Map<TextAttribute, Object> map = new HashMap<>();
         Boolean strikeThroughSetting = Boolean.FALSE;
-        if (strikeThrough) {
+        if (strikethrough) {
             strikeThroughSetting = STRIKETHROUGH_ON;
         }
         map.put(STRIKETHROUGH, strikeThroughSetting);
@@ -130,7 +130,7 @@ public class FontInfo {
         map.put(LIGATURES, ligaturesSetting);
 
         Integer underlineSetting = -1;
-        if (underLine) {
+        if (underline) {
             underlineSetting = UNDERLINE_ON;
         }
         map.put(UNDERLINE, underlineSetting);
@@ -141,7 +141,7 @@ public class FontInfo {
     }
 
     public boolean hasStrikeThrough() {
-        return strikeThrough;
+        return strikethrough;
     }
 
     public boolean hasKerning() {
@@ -149,7 +149,7 @@ public class FontInfo {
     }
 
     public boolean hasUnderLine() {
-        return underLine;
+        return underline;
     }
 
     public boolean hasLigatures() {

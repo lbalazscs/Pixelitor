@@ -79,10 +79,12 @@ public class RotateTransition2D extends Transition2D {
             progress = 1 - progress;
         }
         AffineTransform transform = new AffineTransform();
-        transform.translate(size.width / 2, size.height / 2);
+        double anchorX = size.width / 2.0;
+        double anchorY = size.height / 2.0;
+        transform.translate(anchorX, anchorY);
         transform.scale(progress, progress);
         transform.rotate((1 - progress) * 6);
-        transform.translate(-size.width / 2, -size.height / 2);
+        transform.translate(-anchorX, -anchorY);
 
         return new ImageInstruction[]{
                 new ImageInstruction(type == IN),

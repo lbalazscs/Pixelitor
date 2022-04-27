@@ -441,7 +441,7 @@ public class Equations {
         // it is the only solved row.
         //So we can skip it, and move to the row that reads: "0 ... 1 a b".
 
-        ctr = 0;
+//        ctr = 0;
         for (a = order.length - 2; a >= 0; a--) {
             row = order[a];
             for (i = coefficients[row].length - 2; i > a; i--) {

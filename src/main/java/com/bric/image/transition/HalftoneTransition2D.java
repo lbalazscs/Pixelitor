@@ -120,7 +120,7 @@ public class HalftoneTransition2D extends Transition2D {
             transform.scale(30 * (1 - progress) + 1, 30 * (1 - progress) + 1);
             transform.translate(-r.getCenterX(), -r.getCenterY());
 
-            transform.rotate(0.3 * (1 - progress2), size.width / 3, size.height / 2);
+            transform.rotate(0.3 * (1 - progress2), size.width / 3.0, size.height / 2.0);
 
             transform.transform(p1, p2);
             transform.setToTranslation(p1.getX() - p2.getX(), p1.getY() - p2.getY());

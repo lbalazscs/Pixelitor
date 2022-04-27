@@ -726,7 +726,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public Rectangle2D componentToImageSpace(Rectangle2D co) {
-        return new Rectangle.Double(
+        return new Rectangle2D.Double(
             componentXToImageSpace(co.getX()),
             componentYToImageSpace(co.getY()),
             co.getWidth() / scaling,

@@ -59,10 +59,13 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Static GUI-related utility methods
  */
 public final class GUIUtils {
-    private static final int BUSY_CURSOR_DELAY = 300; // in milliseconds
-
     private GUIUtils() {
     }
+
+    public static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
+                                                       && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
+
+    private static final int BUSY_CURSOR_DELAY = 300; // in milliseconds
 
     private static final Map<String, Point> lastDialogLocationsByTitle = new HashMap<>();
 

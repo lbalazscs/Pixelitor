@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,7 +82,7 @@ public class MirrorFilter extends CenteredTransformFilter {
         }
 
         // -2 * (a*x₁ + b*y₁ + c)
-        double rhs = -2 * (put) / aa_bb;
+        double rhs = -2 * put / aa_bb;
 
         // x₂ = x₁ + a * rhs
         out[0] = (float) (x + a * rhs);

@@ -109,7 +109,7 @@ public class PlasmaFilter extends WholeImageFilter {
     }
 
     public void randomize() {
-        seed = new Date().getTime();
+        seed = System.currentTimeMillis();
     }
 
     private int randomRGB() {

@@ -18,6 +18,7 @@
 package pixelitor.tools.gui;
 
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
@@ -71,7 +72,9 @@ public class ToolButton extends JToggleButton {
             popup.add(tool.createSavePresetAction(this,
                 this::addPreset, this::removePreset));
             if (!startupPresets.isEmpty()) {
-                popup.add(tool.createManagePresetsAction());
+                if (GUIUtils.CAN_USE_FILE_MANAGER) {
+                    popup.add(tool.createManagePresetsAction());
+                }
                 popup.addSeparator();
                 for (UserPreset preset : startupPresets) {
                     popup.add(preset.asAction(tool));
@@ -86,7 +89,9 @@ public class ToolButton extends JToggleButton {
 
     private void addPreset(UserPreset preset) {
         if (numPresets == 0) {
-            popup.add(tool.createManagePresetsAction());
+            if (GUIUtils.CAN_USE_FILE_MANAGER) {
+                popup.add(tool.createManagePresetsAction());
+            }
             popup.addSeparator();
         }
         popup.add(preset.asAction(tool));

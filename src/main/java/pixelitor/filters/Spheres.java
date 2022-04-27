@@ -41,7 +41,7 @@ public class Spheres extends ParametrizedFilter {
     public static final String NAME = "Spheres";
 
     // see http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
-    private static final double PHI_2 = 1.32471795724474602596;
+    private static final double PHI_2 = 1.324717957244746;
     private static final double a1 = 1.0 / PHI_2;
     private static final double a2 = 1.0 / (PHI_2 * PHI_2);
 

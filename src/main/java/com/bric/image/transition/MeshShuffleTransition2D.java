@@ -36,7 +36,7 @@ public class MeshShuffleTransition2D extends Transition2D {
     public Transition2DInstruction[] getInstructions(float progress,
                                                      Dimension size) {
         progress = (float) Math.pow(progress, 0.45);
-        float stripHeight = size.height * 10 / 200;
+        float stripHeight = size.height * 0.05f;
 
         List<Rectangle2D> v = new ArrayList<>();
         for (int y = size.height; y > -stripHeight; y = (int) (y - stripHeight)) {

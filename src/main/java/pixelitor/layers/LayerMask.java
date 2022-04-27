@@ -93,20 +93,20 @@ public class LayerMask extends ImageLayer {
         ui = owner.getUI();
     }
 
-    public void applyToImage(BufferedImage in) {
+    public void applyTo(BufferedImage in) {
         Graphics2D g = in.createGraphics();
         g.setComposite(DstIn);
         g.drawImage(getTransparencyImage(), 0, 0, null);
         g.dispose();
     }
 
-    public void updateFromBWImage() {
+    public void updateTransparencyImage() {
         assert image.getType() == TYPE_BYTE_GRAY;
         assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
 
         // The transparency image shares the raster data with the BW image,
         // but interprets the bytes differently.
-        // Therefore this method needs to be called only when
+        // Therefore, this method needs to be called only when
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
         transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL,
@@ -137,7 +137,7 @@ public class LayerMask extends ImageLayer {
 
     @Override
     protected void imageRefChanged() {
-        updateFromBWImage();
+        updateTransparencyImage();
     }
 
     /**

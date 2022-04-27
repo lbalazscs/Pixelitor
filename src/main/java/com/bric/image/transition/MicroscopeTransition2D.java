@@ -45,8 +45,8 @@ public class MicroscopeTransition2D extends Transition2D {
         float tileWidth = (size.width - 1) * progress + 1;
         float tileHeight = (size.height - 1) * progress + 1;
 
-        float startX = size.width / 2;
-        float startY = size.height / 2;
+        float startX = size.width / 2.0f;
+        float startY = size.height / 2.0f;
         while (startX > 0) {
             startX -= tileWidth;
         }

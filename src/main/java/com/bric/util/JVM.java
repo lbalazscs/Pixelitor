@@ -49,24 +49,24 @@ public class JVM {
         return sb;
     }
 
-    private static final String osName = (System.getProperty("os.name").toLowerCase());
+    private static final String osName = System.getProperty("os.name").toLowerCase();
 
     /**
      * Whether this session is on a Mac.
      */
-    public static final boolean isMac = (osName.contains("mac"));
+    public static final boolean isMac = osName.contains("mac");
 
-    public static final boolean isLinux = (osName.toLowerCase().contains("linux"));
+    public static final boolean isLinux = osName.toLowerCase().contains("linux");
 
     /**
      * Whether this session is on Windows.
      */
-    public static final boolean isWindows = (osName.contains("windows"));
+    public static final boolean isWindows = osName.contains("windows");
 
     /**
      * Whether this session is on Vista.
      */
-    public static final boolean isVista = (osName.contains("vista"));
+    public static final boolean isVista = osName.contains("vista");
 
     /**
      * If on a Mac: whether Quartz is the rendering pipeline.
@@ -76,8 +76,6 @@ public class JVM {
     public static final boolean usingQuartz = isUsingQuartz();
 
     private static boolean isUsingQuartz() {
-        return isMac
-               && ((System.getProperty("apple.awt.graphics.UseQuartz") != null
-                    && System.getProperty("apple.awt.graphics.UseQuartz").equals("true")));
+        return isMac && "true".equals(System.getProperty("apple.awt.graphics.UseQuartz"));
     }
 }

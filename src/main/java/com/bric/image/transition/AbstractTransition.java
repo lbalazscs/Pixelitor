@@ -89,7 +89,7 @@ public abstract class AbstractTransition implements Transition {
         float width = (float) font.getStringBounds(text, frc).getWidth();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(text, bi.getWidth() / 2 - width / 2, size * 160 / 200);
+        g.drawString(text, (int)(bi.getWidth() / 2.0 - width / 2.0), (int)(size * 160.0 / 200));
         g.dispose();
 
         return bi;

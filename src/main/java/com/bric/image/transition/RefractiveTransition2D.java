@@ -62,24 +62,26 @@ public class RefractiveTransition2D extends Transition2D {
                 p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
                 AffineTransform transform = new AffineTransform();
 
-                transform.setToRotation(-2 * PI * angleProgress, size.width / 2, size.height / 2);
-                transform.translate(size.width / 2, size.height / 2);
+                double anchorX = size.width / 2.0;
+                double anchorY = size.height / 2.0;
+                transform.setToRotation(-2 * PI * angleProgress, anchorX, anchorY);
+                transform.translate(anchorX, anchorY);
                 transform.scale(progress, progress);
-                transform.translate(-size.width / 2, -size.height / 2);
+                transform.translate(-anchorX, -anchorY);
 
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
                 v2.add(new ImageInstruction(false, (float) Math.pow(progress, 0.4), transform.createInverse(), r));
 
-                transform.setToRotation(2 * PI * angleProgress, size.width / 2, size.height / 2);
+                transform.setToRotation(2 * PI * angleProgress, anchorX, anchorY);
 
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
                 v2.add(new ImageInstruction(false, progress * progress, transform.createInverse(), r));
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
         return v2.toArray(new Transition2DInstruction[v2.size()]);

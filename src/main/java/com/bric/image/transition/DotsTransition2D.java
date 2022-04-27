@@ -133,7 +133,7 @@ public class DotsTransition2D extends AbstractClippedTransition2D {
                         bubbles[a].getHeight() * size.height / 2);
                 r = r * p;
 
-                random.setSeed(10 * a);
+                random.setSeed(10L * a);
                 float dx = (1 - p) * (2 * random.nextFloat() - 1);
                 float dy = (1 - p) * (2 * random.nextFloat() - 1);
                 dx = (1 - p) * (float) (r * cos(random.nextFloat() * 10 + 8 * (1 - p)));

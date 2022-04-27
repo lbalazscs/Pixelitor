@@ -101,7 +101,6 @@ public class LayersPanel extends JLayeredPane {
     @Override
     public void doLayout() {
         int parentHeight = getHeight();
-        int numButtons = layerButtons.size();
         int y = parentHeight;
         for (LayerButton button : layerButtons) {
             int buttonHeight = button.getPreferredHeight();

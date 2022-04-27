@@ -49,7 +49,7 @@ public class ColorWheel extends ParametrizedFilter {
             int toRGB(float a, float b, float c) {
                 int[] buffer = new int[3];
                 ColorUtilities.HSLtoRGB((a - (float) Math.floor(a)), b, c, buffer);
-                return 0xFF_00_00_00 | (buffer[0] << 16) | (buffer[1] << 8) | (buffer[2]);
+                return 0xFF_00_00_00 | (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
             }
         };
 

@@ -483,7 +483,7 @@ public abstract class Layer implements Serializable, Debuggable {
         g.fill(unselectedPart);
         g.dispose();
 
-        mask.updateFromBWImage();
+        mask.updateTransparencyImage();
 
         if (createEdit) {
             return new ImageEdit("Modify Mask",
@@ -596,7 +596,7 @@ public abstract class Layer implements Serializable, Debuggable {
         }
         BufferedImage transformed = applyOnImage(imgSoFar);
         if (usesMask()) {
-            mask.applyToImage(transformed);
+            mask.applyTo(transformed);
         }
         if (!usesMask() && isNormalAndOpaque()) {
             return transformed;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import java.awt.Color;
 import java.util.Random;
 
 public class GoldenRatio {
-    public static final double GOLDEN_RATIO = 1.61803398874989490253;
-    public static final float GOLDEN_RATIO_CONJUGATE = 0.618033988749895f;
+    public static final double GOLDEN_RATIO = 1.618033988749895;
+    public static final float GOLDEN_RATIO_CONJUGATE = 0.618034f;
 
     private final Color root;
     private final float colorRandomness;

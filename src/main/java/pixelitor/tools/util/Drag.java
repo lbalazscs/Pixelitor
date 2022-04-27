@@ -628,7 +628,7 @@ public class Drag implements Serializable {
             // display the width info above the mouse
             widthY = (float) (coEndY - MOUSE_DISPLAY_DISTANCE);
         }
-        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - displayBgWidth / 2);
+        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - displayBgWidth / 2.0f);
         dd.drawOneLine(widthInfo, widthX, widthY);
 
         // draw the height display

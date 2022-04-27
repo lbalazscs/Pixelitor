@@ -877,7 +877,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // if we get here, we know that the pixels have to be deleted,
         // that is, the new image dimensions must be cropWidth, cropHeight
         // and the translation must be 0, 0
-        assert deleteCropped;
 
         // this method call can also grow the image
         BufferedImage newImage = ImageUtils.crop(image, cropX, cropY, cropWidth, cropHeight);
@@ -1165,7 +1164,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         LayerMask oldMask = mask;
         MaskViewMode oldMode = comp.getView().getMaskViewMode();
 
-        mask.applyToImage(image);
+        mask.applyTo(image);
         deleteMask(false);
 
         if (addToHistory) {

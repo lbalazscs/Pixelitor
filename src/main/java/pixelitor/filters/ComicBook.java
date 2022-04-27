@@ -117,7 +117,7 @@ public class ComicBook extends ParametrizedFilter {
             g = rgbs[1];
             b = rgbs[2];
 
-            rgb = ((0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+            rgb = (0xFF << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
             pixels[i] = rgb;
         }
         return out;
@@ -140,7 +140,7 @@ public class ComicBook extends ParametrizedFilter {
     }
 
     public static int packSingleValue(int c) {
-        return ((0xFF) << 24) | ((c & 0xFF) << 16) | ((c & 0xFF) << 8) | (c & 0xFF);
+        return (0xFF << 24) | ((c & 0xFF) << 16) | ((c & 0xFF) << 8) | (c & 0xFF);
     }
 
     public static class Stairs {

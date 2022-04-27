@@ -82,18 +82,18 @@ public final class MiscComposite implements Composite {
             "Overlay",
             "Soft Light",
             "Hard Light",
-            "Pin Light",
+        "Pin Light",
 
-            "Exclusion",
-            "Negation",
-            "Average",
+        "Exclusion",
+        "Negation",
+        "Average",
 
-            "Stencil",
-            "Silhouette",
+        "Stencil",
+        "Silhouette",
     };
 
-    protected float extraAlpha;
-    protected int rule;
+    private float extraAlpha;
+    private int rule;
 
     private MiscComposite(int rule) {
         this(rule, 1.0f);

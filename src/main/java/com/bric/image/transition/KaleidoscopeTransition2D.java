@@ -61,26 +61,28 @@ public class KaleidoscopeTransition2D extends Transition2D {
                 p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
                 AffineTransform transform = new AffineTransform();
 
+                double halfWidth = size.width / 2.0;
+                double halfHeight = size.height / 2.0;
                 transform.setToRotation(-2 * PI * (1 - Math
-                        .sqrt(progress)), size.width / 2 + dx, size.height / 2 + dy);
-                transform.translate(size.width / 2, size.height / 2);
+                        .sqrt(progress)), halfWidth + dx, halfHeight + dy);
+                transform.translate(halfWidth, halfHeight);
                 transform.scale(progress * progress, progress * progress);
-                transform.translate(-size.width / 2, -size.height / 2);
+                transform.translate(-halfWidth, -halfHeight);
 
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
                 v2.add(new ImageInstruction(false, progress, transform.createInverse(), r));
 
-                transform.setToRotation(-2 * PI * (1 - Math
-                        .sqrt(progress)), size.width / 2 + dx, size.height / 2 + dy);
+                transform.setToRotation(-2 * PI * (1 - Math.sqrt(progress)),
+                    halfWidth + dx, halfHeight + dy);
 
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
                 v2.add(new ImageInstruction(true, progress * progress, transform.createInverse(), r));
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
         return v2.toArray(new Transition2DInstruction[v2.size()]);

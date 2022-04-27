@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -60,7 +61,7 @@ public interface PresetOwner {
                     String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();
                     Desktop.getDesktop().open(new File(dirPath));
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    Messages.showException(ex);
                 }
             }
         };

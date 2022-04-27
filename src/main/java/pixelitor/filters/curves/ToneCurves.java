@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,13 @@ package pixelitor.filters.curves;
 import pixelitor.colors.Colors;
 import pixelitor.filters.levels.Channel;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.EnumMap;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -92,7 +97,7 @@ public class ToneCurves {
         }
     }
 
-    public void normalizePoint(Point.Float p) {
+    public void normalizePoint(Point2D.Float p) {
         p.x -= CURVE_PADDING + AXIS_PADDING;
         p.y -= CURVE_PADDING;
 
@@ -156,7 +161,7 @@ public class ToneCurves {
         }
 
         // draw horizontal gradient
-        var rectH = new Rectangle.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
+        var rectH = new Rectangle2D.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
         var gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, gradientEndColor);
         g.setPaint(gradientH);
         g.fill(rectH);
@@ -164,7 +169,7 @@ public class ToneCurves {
         g.draw(rectH);
 
         // draw vertical gradient
-        var rectV = new Rectangle.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
+        var rectV = new Rectangle2D.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
         gradientH = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, gradientEndColor);
         g.setPaint(gradientH);
         g.fill(rectV);

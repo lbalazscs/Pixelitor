@@ -143,7 +143,7 @@ public class CharcoalStroke implements FilteredStroke {
 
         charcoal.write(shape);
 
-        return (newShape);
+        return newShape;
     }
 
     /**

@@ -49,8 +49,10 @@ public class MirageTransition2D extends Transition2D {
         }
         Transition2DInstruction[] instr = new Transition2DInstruction[2 * v.size()];
         Random random = new Random();
-        Point2D center = new Point2D.Double(size.width / 2, size.height / 2);
-        double max = Math.sqrt(size.width * size.width / 4 + size.height * size.height / 4);
+        double halfWidth = size.width / 2.0;
+        double halfHeight = size.height / 2.0;
+        Point2D center = new Point2D.Double(halfWidth, halfHeight);
+        double max = Math.sqrt(halfWidth*halfWidth + halfHeight*halfHeight);
         Point2D p1, p2;
         try {
             for (int a = 0; a < v.size(); a++) {
@@ -59,7 +61,7 @@ public class MirageTransition2D extends Transition2D {
                 AffineTransform transform = new AffineTransform();
                 Shape shape;
 
-                transform.setToRotation(-PI + PI * (1 - progress2), size.width / 2, size.height / 2);
+                transform.setToRotation(-PI + PI * (1 - progress2), halfWidth, halfHeight);
                 p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
@@ -71,10 +73,10 @@ public class MirageTransition2D extends Transition2D {
                 } else {
                     instr[2 * a + 0] = new ImageInstruction(true, 0, transform, shape);
                 }
-                transform.setToRotation(-1 * PI * (1 - progress), size.width / 2, size.height / 2);
-                transform.translate(size.width / 2, size.height / 2);
+                transform.setToRotation(-1 * PI * (1 - progress), halfWidth, halfHeight);
+                transform.translate(halfWidth, halfHeight);
                 transform.scale(1 / progress2, 1 / progress2);
-                transform.translate(-size.width / 2, -size.height / 2);
+                transform.translate(-halfWidth, -halfHeight);
 
                 p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
                 p2 = new Point2D.Double();
@@ -90,7 +92,7 @@ public class MirageTransition2D extends Transition2D {
                 instr[2 * a + 1] = new ImageInstruction(false, 1 - progress3, transform.createInverse(), shape);
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return instr;
     }

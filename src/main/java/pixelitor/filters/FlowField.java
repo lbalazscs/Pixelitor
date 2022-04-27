@@ -453,7 +453,7 @@ public class FlowField extends ParametrizedFilter {
         Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
         Stroke[] strokes = getIf(randomizeWidth, () -> new Stroke[100]);
         Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
-        int[] sourcePixels = getIf(useColorField | inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
+        int[] sourcePixels = getIf(useColorField || inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
 
         if (randomizeWidth) {
             fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, widthRandomness));

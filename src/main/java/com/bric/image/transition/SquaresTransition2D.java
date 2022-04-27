@@ -159,8 +159,8 @@ public class SquaresTransition2D extends Transition2D {
                 Rectangle2D r = new Rectangle2D.Float(x * columnWidth, y * rowHeight, columnWidth, rowHeight);
                 RectangularTransform transform = new RectangularTransform();
 
-                float centerX = size.width / 2;
-                float centerY = size.height / 2;
+                float centerX = size.width / 2.0f;
+                float centerY = size.height / 2.0f;
 
                 transform.translate(centerX, centerY);
                 transform.scale(z, z);

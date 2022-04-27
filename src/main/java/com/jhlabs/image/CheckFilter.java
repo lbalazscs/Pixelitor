@@ -185,7 +185,7 @@ public class CheckFilter extends PointFilter {
         if (!straight || hasDistortion) {
             // the necessary AA quality depends on the angle
             float minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
-            if (minSinCos > 0.5 || hasDistortion && distortion > 0.5) {
+            if ((minSinCos > 0.5) || (hasDistortion && distortion > 0.5)) {
                 setAaRes(3);
             } else if (minSinCos > 0.15 || (hasDistortion && distortion > 0.2)) {
                 setAaRes(4);

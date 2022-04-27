@@ -148,7 +148,7 @@ public class BristleStroke implements Stroke {
             float x, y;
 
             for (int b = 0; b < paths.length; b++) {
-                r.setSeed(randomSeed + 1000 * a + 10000 * b);
+                r.setSeed(randomSeed + 1000L * a + 10000L * b);
 
                 float d = r.nextFloat() * (maxGapDistance - minGapDistance)
                         + dd;

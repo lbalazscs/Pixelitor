@@ -34,47 +34,26 @@ import java.io.*;
  * @author Kevin Weiner, FM Software
  * @version 1.03 November 2003
  */
-
 public class AnimatedGifEncoder {
-
     private int width; // image size
-
     private int height;
-
     private Color transparent = null; // transparent color if given
-
     private int transIndex; // transparent index in color table
-
     private int repeat = -1; // no repeat
-
     private int delay = 0; // frame delay (hundredths)
-
     private boolean started = false; // ready to output frames
-
     private OutputStream out;
-
     private BufferedImage image; // current frame
-
     private byte[] pixels; // BGR byte array from frame
-
     private byte[] indexedPixels; // converted frame indexed to palette
-
     private int colorDepth; // number of bit planes
-
     private byte[] colorTab; // RGB palette
-
     private final boolean[] usedEntry = new boolean[256]; // active palette entries
-
     private int palSize = 7; // color table size (bits-1)
-
     private int dispose = -1; // disposal code (-1 = use default)
-
     private boolean closeStream = false; // close stream when finished
-
     private boolean firstFrame = true;
-
     private boolean sizeSet = false; // if false, get size from first frame
-
     private int sample = 10; // default sample interval for quantizer
     private File file;
 
@@ -107,7 +86,6 @@ public class AnimatedGifEncoder {
      * added.
      *
      * @param iter int number of iterations.
-     * @return
      */
     public void setRepeat(int iter) {
         if (iter >= 0) {
@@ -236,7 +214,6 @@ public class AnimatedGifEncoder {
      * greater than 20 do not yield significant improvements in speed.
      *
      * @param quality int greater than 0.
-     * @return
      */
     public void setQuality(int quality) {
         if (quality < 1) {

@@ -48,6 +48,7 @@ public class ArrayColormap implements Colormap, Cloneable {
             g.map = map.clone();
             return g;
         } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
         }
         return null;
     }

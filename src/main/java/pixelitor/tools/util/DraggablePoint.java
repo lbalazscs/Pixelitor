@@ -28,6 +28,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.Serial;
 import java.util.Optional;
 
@@ -196,7 +197,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     protected Shape createShape(double startX, double startY) {
-        return new Rectangle.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
+        return new Rectangle2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     /**

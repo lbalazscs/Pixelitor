@@ -132,7 +132,7 @@ public class SquareRainTransition2D extends AbstractClippedTransition2D {
         for (int a = 0; a < offset.length; a++) {
             float x = a * columnWidth;
             float centerX = x + columnWidth / 2;
-            float w = size.width / offset.length;
+            float w = size.width / (float)offset.length;
             float y = size.height * (offset[a] + progress + progress * progress * accel[a]);
 
             int row = (int) ((y - 2 * rowHeight) / rowHeight);

@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 
 import javax.swing.*;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.InputEvent;
@@ -150,7 +149,7 @@ public final class Utils {
         double offsetX = distance * FastMath.cos(angle);
         double offsetY = distance * FastMath.sin(angle);
 
-        return new Point.Double(offsetX, offsetY);
+        return new Point2D.Double(offsetX, offsetY);
     }
 
     public static double clamp01(double d) {
