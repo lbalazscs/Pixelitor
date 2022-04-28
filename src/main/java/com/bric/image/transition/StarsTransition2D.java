@@ -280,6 +280,7 @@ public class StarsTransition2D extends AbstractClippedTransition2D {
             if (transition2DInstruction instanceof ImageInstruction) {
                 ImageInstruction i = (ImageInstruction) transition2DInstruction;
                 i.isFirstFrame = !i.isFirstFrame;
+                i.setSoftClipping(false);
             }
         }
         return instr;

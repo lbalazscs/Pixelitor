@@ -89,10 +89,15 @@ public class WaveTransition2D extends Transition2D {
 
     @Override
     public Transition2DInstruction[] getInstructions(float progress, Dimension size) {
+        // Laszlo: manually reversed the progress and switched the frames,
+        // because using ReverseTransform for the same cooler effect ruins
+        // the soft clipping
+        progress = 1.0f - progress;
+
         int k = size.height / 5;
         Transition2DInstruction[] i = new Transition2DInstruction[k + 1];
         float progress2 = (float) Math.sqrt(progress);
-        i[0] = new ImageInstruction(true);
+        i[0] = new ImageInstruction(false);
 
         int measurement = size.width;
         if (type == UP || type == DOWN) {
@@ -158,7 +163,7 @@ public class WaveTransition2D extends Transition2D {
                         );
                     }
                 }
-                i[a] = new ImageInstruction(false, transform, transform.createTransformedShape(clipping));
+                i[a] = new ImageInstruction(true, transform, transform.createTransformedShape(clipping));
             }
             lastD = d;
         }

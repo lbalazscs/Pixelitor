@@ -59,6 +59,7 @@ public class StarTransition2D extends AbstractShapeTransition2D {
      * Creates a new StarTransition2D that zooms out.
      */
     public StarTransition2D() {
+        super(true);
     }
 
     /**
@@ -67,7 +68,7 @@ public class StarTransition2D extends AbstractShapeTransition2D {
      * @param type must be IN or OUT
      */
     public StarTransition2D(int type) {
-        super(type);
+        super(type, true);
     }
 
     @Override

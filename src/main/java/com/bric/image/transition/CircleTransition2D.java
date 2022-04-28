@@ -55,6 +55,7 @@ public class CircleTransition2D extends AbstractShapeTransition2D {
      * Creates a new CircleTransition2D that zooms out
      */
     public CircleTransition2D() {
+        super(true);
     }
 
     /**
@@ -63,7 +64,7 @@ public class CircleTransition2D extends AbstractShapeTransition2D {
      * @param type must be IN or OUT
      */
     public CircleTransition2D(int type) {
-        super(type);
+        super(type, true);
     }
 
     @Override

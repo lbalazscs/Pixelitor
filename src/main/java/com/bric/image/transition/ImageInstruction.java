@@ -23,13 +23,9 @@ import com.bric.geom.Clipper;
 import com.bric.geom.RectangularTransform;
 import com.bric.geom.ShapeStringUtils;
 import org.jdesktop.swingx.graphics.BlendComposite;
+import pixelitor.utils.Rnd;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -59,8 +55,10 @@ public class ImageInstruction extends Transition2DInstruction {
      */
     public float opacity = 1;
 
+    private boolean softClipping;
+
     public ImageInstruction(boolean isFirstFrame, float opacity, AffineTransform transform, Shape clipping) {
-        this(isFirstFrame, transform, clipping);
+        this(isFirstFrame, transform, clipping, !isFirstFrame);
         this.opacity = opacity;
     }
 
@@ -82,13 +80,7 @@ public class ImageInstruction extends Transition2DInstruction {
      *                     the incoming image.
      */
     public ImageInstruction(boolean isFirstFrame) {
-        this(isFirstFrame, null, null);
-    }
-
-    @Override
-    public String toString() {
-        String clippingString = (clipping == null) ? "null" : ShapeStringUtils.toString(clipping);
-        return "ImageInstruction[ isFirstFrame = " + isFirstFrame + ", transform = " + transform + ", clipping = " + clippingString + " opacity=" + opacity + "]";
+        this(isFirstFrame, null, null, false);
     }
 
     /**
@@ -99,10 +91,16 @@ public class ImageInstruction extends Transition2DInstruction {
         this.isFirstFrame = i.isFirstFrame;
         this.transform = i.transform;
         this.opacity = i.opacity;
+        this.softClipping = i.softClipping;
     }
 
     public ImageInstruction(boolean isFirstFrame, AffineTransform transform, Shape clipping) {
+        this(isFirstFrame, transform, clipping, !isFirstFrame);
+    }
+
+    public ImageInstruction(boolean isFirstFrame, AffineTransform transform, Shape clipping, boolean softClipping) {
         this.isFirstFrame = isFirstFrame;
+        this.softClipping = softClipping;
         if (transform != null) {
             this.transform = new AffineTransform(transform);
         }
@@ -121,7 +119,7 @@ public class ImageInstruction extends Transition2DInstruction {
 
     public ImageInstruction(boolean isFirstFrame, Rectangle2D dest, Dimension frameSize, Shape clipping) {
         this(isFirstFrame, RectangularTransform
-                .create(new Rectangle2D.Double(0, 0, frameSize.width, frameSize.height), dest), clipping);
+                .create(new Rectangle2D.Double(0, 0, frameSize.width, frameSize.height), dest), clipping, true);
     }
 
     @Override
@@ -129,40 +127,71 @@ public class ImageInstruction extends Transition2DInstruction {
         // Laszlo: In Pixelitor frameB is always transparent, the following
         // code will work only in that case - but the original code used to work
         // only with opaque images, see http://javagraphics.blogspot.hu/2008/06/crossfades-what-is-and-isnt-possible.html
-
-
         BufferedImage img = isFirstFrame ? frameA : frameB;
-
-//		if(opacity!=1) {
         Composite oldComposite = g.getComposite();
-//			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-//			g.setComposite(new CrossFadeToTransparentComposite(opacity));
-//			g.setComposite(new AddComposite(opacity));
-//			g.setComposite(BlendComposite.Src.derive(opacity));
+
+        // save and restore because different instructions use different clips
+        Shape oldClipping = null;
+        if (clipping != null && !softClipping) {
+            oldClipping = g.getClip();
+        }
 
         if (isFirstFrame) {
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         } else {
-//				g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, opacity));
-            g.setComposite(BlendComposite.CrossFade.derive(opacity));
+            if (clipping != null) {
+                if (softClipping) {
+                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+                } else {
+                    g.setComposite(BlendComposite.CrossFade.derive(opacity));
+                }
+            } else {
+                g.setComposite(BlendComposite.CrossFade.derive(opacity));
+            }
         }
 
-        //}
-
-        Shape oldClipping = null;
         if (clipping != null) {
-            oldClipping = g.getClip();
-            Clipper.clip(g, clipping);
+            if (softClipping) {
+                // a special version of soft clipping that only works
+                // in Pixelitor, where the imageB is transparent
+                if (isFirstFrame) {
+                    // drawing the original image with a clip on transparent:
+                    // it could be implemented, but it's generally not needed, therefore
+                    // soft clipping is disabled in this case in the constructors
+                    throw new IllegalStateException();
+                } else {
+                    // drawing the transparent imageB on the original imageA
+                    g.setComposite(AlphaComposite.Clear);
+                    if (transform == null) {
+                        g.fill(clipping);
+                    } else {
+                        AffineTransform oldTransform = g.getTransform();
+                        g.setTransform(transform);
+                        g.fill(clipping);
+                        g.setTransform(oldTransform);
+                    }
+                }
+            } else {
+                Clipper.clip(g, clipping);
+                g.drawImage(img, transform, null);
+            }
+        } else {
+            g.drawImage(img, transform, null);
         }
 
-        g.drawImage(img, transform, null);
-
-        if (clipping != null) {
+        g.setComposite(oldComposite);
+        if (clipping != null && !softClipping) {
             g.setClip(oldClipping);
         }
+    }
 
-        if (opacity != 1) {
-            g.setComposite(oldComposite);
-        }
+    public void setSoftClipping(boolean b) {
+        this.softClipping = b;
+    }
+
+    @Override
+    public String toString() {
+        String clippingString = (clipping == null) ? "null" : ShapeStringUtils.toString(clipping);
+        return "ImageInstruction[ isFirstFrame = " + isFirstFrame + ", transform = " + transform + ", clipping = " + clippingString + " opacity=" + opacity + "]";
     }
 }

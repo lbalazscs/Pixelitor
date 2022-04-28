@@ -55,6 +55,7 @@ public class BoxTransition2D extends AbstractShapeTransition2D {
      * Creates a new BoxTransition2D that zooms out
      */
     public BoxTransition2D() {
+        super(false);
     }
 
     /**
@@ -63,7 +64,7 @@ public class BoxTransition2D extends AbstractShapeTransition2D {
      * @param type must be IN or OUT
      */
     public BoxTransition2D(int type) {
-        super(type);
+        super(type, false);
     }
 
     @Override

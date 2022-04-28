@@ -1149,7 +1149,7 @@ public class ImageUtils {
     /**
      * Sets up the given image to be temporary image needed for soft
      * (anti-aliased) selection clipping, following ideas from
-     * https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
+     * http://web.archive.org/web/20120603053853/http://weblogs.java.net/blog/campbell/archive/2006/07/java_2d_tricker.html
      */
     public static Graphics2D setupForSoftSelection(Image image, Shape selShape,
                                                    int selStartX, int selStartY) {

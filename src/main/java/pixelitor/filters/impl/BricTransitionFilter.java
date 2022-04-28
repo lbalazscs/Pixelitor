@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import static com.bric.image.transition.Transition.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * A transition filter based on the com.bric.image.transition classes
@@ -83,6 +85,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
         var frameB = ImageUtils.createImageWithSameCM(src);
 
         Graphics2D g2 = dest.createGraphics();
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Transition transition = switch (type) {
             case BARS_HORIZONTAL -> new BarsTransition2D(HORIZONTAL, false);
@@ -118,7 +121,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             case SQUARES -> createSquareTransition();
             case STARS -> new StarsTransition2D();
             case TOSS_IN -> createTossInTransition();
-            case WAVE -> new ReversedTransition(new WaveTransition2D(LEFT));
+            case WAVE -> new WaveTransition2D(RIGHT);
             default -> throw new IllegalStateException("Unexpected type = " + type);
         };
 

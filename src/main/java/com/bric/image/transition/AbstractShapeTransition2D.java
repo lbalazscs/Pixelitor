@@ -40,21 +40,26 @@ import java.util.Map;
 public abstract class AbstractShapeTransition2D extends Transition2D {
     private final int type;
 
+    // the box transition can look nicer without anti-aliasing
+    private final boolean antiAliasing;
+
     /**
      * Creates a new AbstractShapeTransition2D that zooms out
      */
-    protected AbstractShapeTransition2D() {
-        this(OUT);
+    protected AbstractShapeTransition2D(boolean antiAliasing) {
+        this(OUT, antiAliasing);
     }
 
     /**
      * Creates a new AbstractShapeTransition2D
      *
-     * @param type must be IN or OUT.
-     *             <P>This indicates whether the shape grows or shrinks as this
-     *             transition progresses.
+     * @param type         must be IN or OUT.
+     *                     <P>This indicates whether the shape grows or shrinks as this
+     *                     transition progresses.
+     * @param antiAliasing
      */
-    protected AbstractShapeTransition2D(int type) {
+    protected AbstractShapeTransition2D(int type, boolean antiAliasing) {
+        this.antiAliasing = antiAliasing;
         if (!(type == IN || type == OUT)) {
             throw new IllegalArgumentException("Type must be IN or OUT.");
         }
@@ -144,19 +149,25 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
 
         transform.translate(size.width / 2.0, size.height / 2.0);
         transform.scale(
-                progress * multiplier.floatValue(),
-                progress * multiplier.floatValue());
+            progress * multiplier.floatValue(),
+            progress * multiplier.floatValue());
         transform.translate(-size.width / 2.0, -size.height / 2.0);
 
         transform.translate(
-                -r.getCenterX() + size.width / 2.0f,
-                -r.getCenterY() + size.height / 2.0f);
+            -r.getCenterX() + size.width / 2.0f,
+            -r.getCenterY() + size.height / 2.0f);
 
         clipping = transform.createTransformedShape(clipping);
 
+        if (type == IN) {
+            Area area = new Area(new Rectangle2D.Double(0, 0, size.width, size.height));
+            area.subtract(new Area(clipping));
+            clipping = area;
+        }
+
         return new Transition2DInstruction[]{
-                new ImageInstruction(type == OUT),
-                new ImageInstruction(type != OUT, null, clipping)
+            new ImageInstruction(true),
+            new ImageInstruction(false, null, clipping, antiAliasing)
         };
     }
 
