@@ -232,7 +232,11 @@ public class SmartObject extends ImageLayer {
     }
 
     private void recalculateImage(boolean updateIcon) {
-        resetImageFromContent();
+        recalculateImage(comp.getCanvasWidth(), comp.getCanvasHeight(), updateIcon);
+    }
+
+    private void recalculateImage(int targetWidth, int targetHeight, boolean updateIcon) {
+        resetImageFromContent(targetWidth, targetHeight);
         if (smartFilterIsVisible) {
             for (Filter filter : smartFilters) {
                 image = filter.transformImage(image);
@@ -662,7 +666,7 @@ public class SmartObject extends ImageLayer {
             contentTransform.concatenate(newScaling);
         }
         return CompletableFuture.runAsync(() ->
-            resetImageFromContent(newSize.width, newSize.height));
+            recalculateImage(newSize.width, newSize.height, false));
     }
 
     public boolean checkInvariant() {
