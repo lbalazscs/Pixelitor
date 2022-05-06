@@ -75,19 +75,19 @@ public class GooTransition2D extends AbstractClippedTransition2D {
     }
 
     @Override
-    public Shape[] getShapes(float progress, Dimension size) {
+    protected Shape[] getShapes(float progress, Dimension size) {
         float[] f = new float[offset.length];
         for (int a = 0; a < f.length; a++) {
             f[a] = size.height * (offset[a] + progress + progress * progress * accel[a]);
         }
         float w = ((float) size.width) / ((float) f.length);
 
-        int k = 4; //padding to make the stroke doesn't show
+        int padding = 4; // to make sure that the stroke doesn't show
 
         GeneralPath path = new GeneralPath();
-        path.moveTo(-k, -k);
+        path.moveTo(-padding, -padding);
 
-        path.lineTo(-k, f[0]);
+        path.lineTo(-padding, f[0]);
         path.lineTo(w / 2.0f, f[0]);
 
         for (int a = 1; a < f.length; a++) {
@@ -95,10 +95,10 @@ public class GooTransition2D extends AbstractClippedTransition2D {
             float x2 = a * w + w / 2.0f;
             path.curveTo(x1 + w / 2, f[a - 1], x2 - w / 2, f[a], x2, f[a]);
         }
-        path.lineTo(size.width + k, f[f.length - 1]);
+        path.lineTo(size.width + padding, f[f.length - 1]);
 
-        path.lineTo(size.width + k, -k);
-        path.lineTo(-k, -k);
+        path.lineTo(size.width + padding, -padding);
+        path.lineTo(-padding, -padding);
         path.closePath();
 
         return new Shape[]{path};

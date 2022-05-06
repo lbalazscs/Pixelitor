@@ -68,7 +68,7 @@ public class BoxTransition2D extends AbstractShapeTransition2D {
     }
 
     @Override
-    public Shape getShape() {
+    protected Shape getShape() {
         return new Rectangle2D.Float(0, 0, 100, 100);
     }
 

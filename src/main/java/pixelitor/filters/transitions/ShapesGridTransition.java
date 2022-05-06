@@ -19,6 +19,7 @@ package pixelitor.filters.transitions;
 
 import com.bric.image.transition.DiamondsTransition2D;
 import com.bric.image.transition.Transition;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -32,13 +33,14 @@ public class ShapesGridTransition extends AbstractTransition {
         new Item("Squares", DiamondsTransition2D.TYPE_SQUARE),
     });
     private final RangeParam size = new RangeParam("Grid Size", 10, 50, 500);
+    private final AngleParam angle = new AngleParam("Angle", 0);
 
     public ShapesGridTransition() {
-        addParamsToFront(type, size);
+        addParamsToFront(type, size, angle);
     }
 
     @Override
     Transition createTransition() {
-        return new DiamondsTransition2D(size.getValue(), type.getValue());
+        return new DiamondsTransition2D(size.getValue(), type.getValue(), angle.getValueInRadians());
     }
 }

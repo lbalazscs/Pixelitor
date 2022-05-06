@@ -72,7 +72,7 @@ public class StarTransition2D extends AbstractShapeTransition2D {
     }
 
     @Override
-    public Shape getShape() {
+    protected Shape getShape() {
         GeneralPath p = new GeneralPath();
         double angle = PI / 10;
         float r2 = 2.5f;

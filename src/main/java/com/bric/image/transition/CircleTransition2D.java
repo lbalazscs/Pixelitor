@@ -68,7 +68,7 @@ public class CircleTransition2D extends AbstractShapeTransition2D {
     }
 
     @Override
-    public Shape getShape() {
+    protected Shape getShape() {
         return new Ellipse2D.Float(0, 0, 100, 100);
     }
 

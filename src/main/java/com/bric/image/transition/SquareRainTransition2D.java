@@ -123,7 +123,7 @@ public class SquareRainTransition2D extends AbstractClippedTransition2D {
 
     @SuppressWarnings("unused")
     @Override
-    public Shape[] getShapes(float progress, Dimension size) {
+    protected Shape[] getShapes(float progress, Dimension size) {
         List<Shape> v = new ArrayList<>();
         Rectangle2D rect;
         float columnWidth = ((float) size.width) / ((float) offset.length);

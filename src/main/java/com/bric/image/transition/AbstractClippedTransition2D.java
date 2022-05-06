@@ -36,7 +36,7 @@ public abstract class AbstractClippedTransition2D extends Transition2D {
      * @param size     the dimensions of the frame
      * @return the shapes that make up the clipped area.
      */
-    public abstract Shape[] getShapes(float progress, Dimension size);
+    protected abstract Shape[] getShapes(float progress, Dimension size);
 
     /**
      * An optional stroke width.

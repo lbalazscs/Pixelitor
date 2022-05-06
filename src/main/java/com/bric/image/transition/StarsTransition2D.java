@@ -19,11 +19,7 @@
  */
 package com.bric.image.transition;
 
-import com.bric.geom.RectangularTransform;
-import com.bric.geom.ShapeBounds;
-import com.bric.geom.ShapeStringUtils;
-import com.bric.geom.ShapeUtils;
-import com.bric.geom.TransformUtils;
+import com.bric.geom.*;
 
 import java.awt.Dimension;
 import java.awt.Shape;
@@ -172,7 +168,7 @@ public class StarsTransition2D extends AbstractClippedTransition2D {
     };
 
     @Override
-    public Shape[] getShapes(float progress, Dimension size) {
+    protected Shape[] getShapes(float progress, Dimension size) {
         progress = 1 - progress;
 
         GeneralPath star1 = new GeneralPath(star[8]);

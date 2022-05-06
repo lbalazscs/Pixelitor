@@ -66,14 +66,14 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
         this.type = type;
     }
 
-    public abstract Shape getShape();
+    protected abstract Shape getShape();
 
     private final Map<Dimension, Number> multipliers = new HashMap<>();
 
     /**
      * Calculating the scaling ratio for the shape to fit the dimensions provided.
      */
-    protected float calculateMultiplier(Dimension size) {
+    private float calculateMultiplier(Dimension size) {
         Shape shape = getShape();
         Area base = new Area(shape);
         AffineTransform transform = new AffineTransform();
@@ -171,7 +171,7 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
         };
     }
 
-    public abstract String getShapeName();
+    protected abstract String getShapeName();
 
     @Override
     public String toString() {

@@ -110,7 +110,7 @@ public class DotsTransition2D extends AbstractClippedTransition2D {
     }
 
     @Override
-    public Shape[] getShapes(float progress, Dimension size) {
+    protected Shape[] getShapes(float progress, Dimension size) {
         List<Shape> v = new ArrayList<>();
         float domain = 0.9f;
         float span = 1 - domain;

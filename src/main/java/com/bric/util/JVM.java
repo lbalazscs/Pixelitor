@@ -28,27 +28,6 @@ package com.bric.util;
  */
 public class JVM {
 
-    /**
-     * Prints basic information about this session's JVM:
-     * the OS name &amp; version, the Java version, and (on Mac) whether Quartz is being used.
-     */
-    public static void printProfile() {
-        System.out.println(getProfile());
-    }
-
-    /**
-     * Gets basic information about this session's JVM:
-     * the OS name &amp; version, the Java version, and (on Mac) whether Quartz is being used.
-     */
-    public static String getProfile() {
-        String sb = "OS = " + System.getProperty("os.name")
-                    + " (" + System.getProperty("os.version")
-                    + "), " + System.getProperty("os.arch") + "\n"
-                    + "Java Version = " + System.getProperty("java.version")
-                    + "\n";
-        return sb;
-    }
-
     private static final String osName = System.getProperty("os.name").toLowerCase();
 
     /**
