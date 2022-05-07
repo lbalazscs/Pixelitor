@@ -120,9 +120,9 @@ public abstract class ContentLayer extends Layer {
     abstract PixelitorEdit createMovementEdit(int oldTx, int oldTy);
 
     /**
-     * Programmatically set the translation.
+     * Programmatically sets the translation.
      * There is no check for layer enlargement.
-     * Also the linked layer is NOT translated.
+     * The linked layer is NOT translated.
      */
     public void setTranslation(int x, int y) {
         translationX = x;

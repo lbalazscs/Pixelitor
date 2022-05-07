@@ -25,7 +25,7 @@ import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
-import pixelitor.history.PixelitorEdit;
+import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
@@ -139,6 +139,7 @@ public class SmartObject extends ImageLayer {
         if (orig.contentTransform != null) {
             contentTransform = new AffineTransform(orig.contentTransform);
         }
+        forceTranslation(orig.getTx(), orig.getTy());
     }
 
     @Serial
@@ -538,17 +539,17 @@ public class SmartObject extends ImageLayer {
         return img;
     }
 
-    @Override
-    public void startMovement() {
-        Messages.showInfo("Not Supported Yet",
-            "Moving a smart object is not implemented yet.");
-    }
-
-    @Override
-    public PixelitorEdit endMovement() {
-        // do nothing, see startMovement()
-        return null;
-    }
+//    @Override
+//    public void startMovement() {
+//        Messages.showInfo("Not Supported Yet",
+//            "Moving a smart object is not implemented yet.");
+//    }
+//
+//    @Override
+//    public PixelitorEdit endMovement() {
+//        // do nothing, see startMovement()
+//        return null;
+//    }
 
     public View getParentView() {
         if (isContentOpen()) {
@@ -655,10 +656,10 @@ public class SmartObject extends ImageLayer {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-        // it's so simple only because smart objects can't be moved,
-        // therefore there's no translation to be set!
         double sx = newSize.getWidth() / comp.getCanvasWidth();
         double sy = newSize.getHeight() / comp.getCanvasHeight();
+
+        setTranslation((int)(getTx() * sx), (int)(getTy() * sy));
         AffineTransform newScaling = AffineTransform.getScaleInstance(sx, sy);
         if (contentTransform == null) {
             contentTransform = newScaling;
@@ -667,6 +668,39 @@ public class SmartObject extends ImageLayer {
         }
         return CompletableFuture.runAsync(() ->
             recalculateImage(newSize.width, newSize.height, false));
+    }
+
+    @Override
+    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
+        // a smart object never enlarges the image
+        return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
+    }
+
+    @Override
+    public void setTranslation(int x, int y) {
+        // positive translation values are allowed for smart objects
+        forceTranslation(x, y);
+    }
+
+    @Override
+    public BufferedImage getCanvasSizedVisibleImage() {
+        int tx = getTx();
+        int ty = getTy();
+        BufferedImage visibleImage = getVisibleImage();
+        if (tx == 0 && ty == 0) {
+            assert visibleImage.getWidth() == comp.getCanvasWidth();
+            assert visibleImage.getHeight() == comp.getCanvasHeight();
+            return visibleImage;
+        }
+
+        // the image of a moved layer might not cover the canvas,
+        // therefore (unlike in the superclass) here we can't use subimage
+        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+        Graphics2D g = img.createGraphics();
+        g.drawImage(visibleImage, tx, ty, null);
+        g.dispose();
+
+        return img;
     }
 
     public boolean checkInvariant() {

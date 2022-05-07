@@ -63,6 +63,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.getComp().update();
+            layer.updateIconImage();
         }
     }
 
@@ -77,6 +78,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.getComp().update();
+            layer.updateIconImage();
         }
     }
 
