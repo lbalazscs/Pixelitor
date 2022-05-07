@@ -33,6 +33,7 @@ public class DiamondsTransition2D extends Transition2D {
     public static final int TYPE_DIAMOND = 0;
     public static final int TYPE_CIRCLE = 1;
     public static final int TYPE_SQUARE = 2;
+    public static final int TYPE_TRIANGLE = 3;
 
     private final int shapeSize;
     private final int type;
@@ -62,9 +63,7 @@ public class DiamondsTransition2D extends Transition2D {
     }
 
     @Override
-    public Transition2DInstruction[] getInstructions(float progress,
-                                                     Dimension size) {
-
+    public Transition2DInstruction[] getInstructions(float progress, Dimension size) {
         GeneralPath path = new GeneralPath(Path2D.WIND_NON_ZERO);
 
         float dx = size.width / 2.0f;
@@ -108,17 +107,24 @@ public class DiamondsTransition2D extends Transition2D {
 
             for (float x = -dx - extraX; x < size.width + shapeSize + extraX; x += shapeSize) {
                 float adjX = x + polkaX;
-                if (type == TYPE_DIAMOND) {
-                    path.moveTo(adjX, y - currentHalfSize);
-                    path.lineTo(adjX + currentHalfSize, y);
-                    path.lineTo(adjX, y + currentHalfSize);
-                    path.lineTo(adjX - currentHalfSize, y);
-                    path.lineTo(adjX, y - currentHalfSize);
-                    path.closePath();
-                } else if (type == TYPE_CIRCLE) {
-                    path.append(new Ellipse2D.Float(adjX - currentHalfSize, y - currentHalfSize, currentSize, currentSize), false);
-                } else { // square
-                    path.append(new Rectangle2D.Float(adjX - currentHalfSize, y - currentHalfSize, currentSize, currentSize), false);
+                switch (type) {
+                    case TYPE_DIAMOND -> {
+                        path.moveTo(adjX, y - currentHalfSize);
+                        path.lineTo(adjX + currentHalfSize, y);
+                        path.lineTo(adjX, y + currentHalfSize);
+                        path.lineTo(adjX - currentHalfSize, y);
+                        path.lineTo(adjX, y - currentHalfSize);
+                    }
+                    case TYPE_CIRCLE -> path.append(new Ellipse2D.Float(
+                        adjX - currentHalfSize, y - currentHalfSize, currentSize, currentSize), false);
+                    case TYPE_SQUARE -> path.append(new Rectangle2D.Float(
+                        adjX - currentHalfSize, y - currentHalfSize, currentSize, currentSize), false);
+                    case TYPE_TRIANGLE -> {
+                        path.moveTo(adjX, y - currentHalfSize);
+                        path.lineTo(adjX + currentSize, y + currentHalfSize);
+                        path.lineTo(adjX - currentSize, y + currentHalfSize);
+                    }
+                    default -> throw new IllegalStateException("type = " + type);
                 }
             }
             ctr++;

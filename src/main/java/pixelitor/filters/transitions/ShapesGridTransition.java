@@ -31,6 +31,7 @@ public class ShapesGridTransition extends AbstractTransition {
         new Item("Diamonds", DiamondsTransition2D.TYPE_DIAMOND),
         new Item("Circles", DiamondsTransition2D.TYPE_CIRCLE),
         new Item("Squares", DiamondsTransition2D.TYPE_SQUARE),
+        new Item("Triangles", DiamondsTransition2D.TYPE_TRIANGLE),
     });
     private final RangeParam size = new RangeParam("Grid Size", 10, 50, 500);
     private final AngleParam angle = new AngleParam("Angle", 0);
