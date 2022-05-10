@@ -390,9 +390,12 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
         if (hasMask()) {
+            mask.setTranslation(0, 0);
             mask.replaceImage(bwMask, editName);
         } else {
-            addImageAsMask(bwMask, true, true, true,
+            // don't inherit the translation, because Add Mask from
+            // Color Range adds canvas-sized masks
+            addImageAsMask(bwMask, false, true, true,
                 editName, false);
         }
     }

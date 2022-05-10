@@ -92,9 +92,9 @@ public class MaskFromColorRangePanel extends JPanel {
         this.layer = layer;
 
         // by default use the layer image
-        srcImage = layer.asImage(false, false);
+        createLayerBasedSourceImage();
         srcIsLayer = true;
-        imageSourceCB.addActionListener(e -> imageSourceChanged(comp));
+        imageSourceCB.addActionListener(e -> updateImageSource(comp));
 
         createInvertCheckBox();
         createColorSpaceComboBox();
@@ -104,11 +104,11 @@ public class MaskFromColorRangePanel extends JPanel {
         add(createSouthPanel(), SOUTH);
     }
 
-    private void imageSourceChanged(Composition comp) {
+    private void updateImageSource(Composition comp) {
         Object selectedSource = imageSourceCB.getSelectedItem();
         if (selectedSource.equals(IMG_SRC_LAYER) && !srcIsLayer) {
             // change to layer-based
-            srcImage = layer.asImage(false, false);
+            createLayerBasedSourceImage();
             srcIsLayer = true;
             refreshColorPickerImage(true);
         } else if (srcIsLayer) {
@@ -116,6 +116,13 @@ public class MaskFromColorRangePanel extends JPanel {
             srcImage = comp.getCompositeImage();
             srcIsLayer = false;
             refreshColorPickerImage(true);
+        }
+    }
+
+    private void createLayerBasedSourceImage() {
+        srcImage = layer.asImage(false, false);
+        if (isSubImage(srcImage)) { // can happen for big image layers
+            srcImage = copySubImage(srcImage);
         }
     }
 
