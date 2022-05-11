@@ -65,39 +65,59 @@ public class SlippingTiles extends ParametrizedFilter {
 
     }
 
+    public enum SlipDirection {
+        FALL(3), CCW(2), CW(1), RISE(0);
+        private final int val;
+
+        SlipDirection(int val) {
+            this.val = val;
+        }
+
+        boolean isFirstSideFalling() {
+            return (val & 0b10) > 0;
+        }
+
+        boolean isSecondSideFalling() {
+            return (val & 0b1) > 0;
+        }
+    }
+
     private final RangeParam centerWidthParam = new RangeParam("Width", 1, 50, 99);
     private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 2, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam heightVarianceParam = new RangeParam("Height", 1, 50, 99);
-    private final BooleanParam isMirrorParam = new BooleanParam("isMirror", false);
+//    private final BooleanParam isHorizontalParam = new BooleanParam("Is Horizontal", false);
+    private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Slip Direction", SlipDirection.class);
 
     public SlippingTiles() {
-        super(false);
+        super(true);
 
         setParams(
                 centerWidthParam,
                 numberOfTilesParam,
                 distributionParam,
                 heightVarianceParam,
-                isMirrorParam
+//                isHorizontalParam,
+                slipDirectionParam
         );
 
         centerWidthParam.setToolTip("The width of the center tile (%).");
         numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
         distributionParam.setToolTip("The method of cutting the tiles.");
         heightVarianceParam.setToolTip("The distance the tiles must slip.");
-        isMirrorParam.setToolTip("Alters if the tiles should slip in the same direction or opposite.");
+        slipDirectionParam.setToolTip("Alters the direction the tiles should slip.");
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+//        var isHorizontal = isHorizontalParam.isChecked();
         int width = src.getWidth();
         int height = src.getHeight();
-        int centerTileWidth = (int) (centerWidthParam.getValueAsDouble() * src.getWidth() / 100);
+        int centerTileWidth = (int) (centerWidthParam.getValueAsDouble() * width / 100);
         int numberOfTiles = numberOfTilesParam.getValue();
         var distributor = distributionParam.getSelected();
-        int finalHeight = (int) (heightVarianceParam.getValueAsDouble() * src.getHeight() / 100);
-        var isMirror = isMirrorParam.isChecked();
+        int finalHeight = (int) (heightVarianceParam.getValueAsDouble() * height / 100);
+        var slipDirection = slipDirectionParam.getSelected();
         int remainingSpaceOnOneSide = (width - centerTileWidth) / 2;
         var graphics = dest.createGraphics();
 
@@ -105,7 +125,8 @@ public class SlippingTiles extends ParametrizedFilter {
         for (int i = 0; i < numberOfTiles; i++) {
 
             float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            float nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            float nthHeight = -distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            if (slipDirection.isFirstSideFalling()) nthHeight *= -1;
 
             graphics.clipRect((int) widthCovered, 0, (int) (widthCovered + nthWidth), height);
             graphics.drawImage(src, 0, (int) heightCovered, null);
@@ -125,13 +146,14 @@ public class SlippingTiles extends ParametrizedFilter {
         for (int i = numberOfTiles - 1; i >= 0; i--) {
 
             float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            float nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            float nthHeight = -distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            if (slipDirection.isSecondSideFalling()) nthHeight *= -1;
 
-            heightCovered += isMirror ? nthHeight : -nthHeight;
+            heightCovered += nthHeight;
 
             graphics.clipRect((int) (remainingSpaceOnOneSide + centerTileWidth + widthCovered), 0, (int) (widthCovered + nthWidth), height);
             graphics.drawImage(src, 0, (int) heightCovered, null);
-            graphics.drawImage(src, 0, (int) (heightCovered - (isMirror ? height : -height)), null);
+            graphics.drawImage(src, 0, (int) (heightCovered - (slipDirection.isSecondSideFalling() ? height : -height)), null);
             graphics.setClip(null);
 
             widthCovered += nthWidth;
