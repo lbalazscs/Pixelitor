@@ -24,7 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 
 /**
- *
+ * Slipping Tiles filter, it will slice the image from right and left side and slip them away from the canvas vertically.
  */
 public class SlippingTiles extends ParametrizedFilter {
     public static final String NAME = "Slipping Tiles";
@@ -82,7 +82,11 @@ public class SlippingTiles extends ParametrizedFilter {
                 isMirrorParam
         );
 
-        centerWidthParam.setToolTip("//TODO");
+        centerWidthParam.setToolTip("The width of the center tile (%).");
+        numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
+        distributionParam.setToolTip("The method of cutting the tiles.");
+        heightVarianceParam.setToolTip("The distance the tiles must slip.");
+        isMirrorParam.setToolTip("Alters if the tiles should slip in the same direction or opposite.");
     }
 
     @Override
