@@ -32,22 +32,22 @@ public class SlippingTiles extends ParametrizedFilter {
     public enum Distributor {
         EVEN() {
             @Override
-            int getNthSegment(float n, float N, float of) {
-                return (int) (of / N);
+            float getNthSegment(float n, float N, float of) {
+                return of / N;
             }
         },
         EXPONENTIAL() {
             private static final double LN_10 = Math.log(10);
 
             @Override
-            int getNthSegment(float n, float N, float of) {
-                return (int) (Math.exp(LN_10 * n / (N - 1)) * /*normalising*/ (of * (Math.exp(LN_10 / (N - 1)) - 1) / (Math.exp(LN_10 * N / (N - 1)) - 1)));
+            float getNthSegment(float n, float N, float of) {
+                return (float) (Math.exp(LN_10 * n / (N - 1)) * /*normalising*/ (of * (Math.exp(LN_10 / (N - 1)) - 1) / (Math.exp(LN_10 * N / (N - 1)) - 1)));
             }
         },
         TICK_TOCK() {
             @Override
-            int getNthSegment(float n, float N, float of) {
-                return (int) (of / N + (((int) n) % 2 == 0 ? 1 : -1) * of / 3 / N + /*normalising*/ ((N % 2 == 1 && n == 0) ? -of / 3 / N : 0));
+            float getNthSegment(float n, float N, float of) {
+                return of / N + (((int) n) % 2 == 0 ? 1 : -1) * of / 3 / N + /*normalising*/ ((N % 2 == 1 && n == 0) ? -of / 3 / N : 0);
             }
         };
 
@@ -61,7 +61,7 @@ public class SlippingTiles extends ParametrizedFilter {
          * @param N The total number of tile there should be.
          * @return The width of nth segment among the N divisions of the width 'of`
          */
-        abstract int getNthSegment(float n, float N, float of);
+        abstract float getNthSegment(float n, float N, float of);
 
     }
 
@@ -101,18 +101,15 @@ public class SlippingTiles extends ParametrizedFilter {
         int remainingSpaceOnOneSide = (width - centerTileWidth) / 2;
         var graphics = dest.createGraphics();
 
-        for (int
-             i = 0,
-             widthCovered = 0,
-             heightCovered = finalHeight
-             ; i < numberOfTiles; i++) {
+        float widthCovered = 0, heightCovered = finalHeight;
+        for (int i = 0; i < numberOfTiles; i++) {
 
-            int nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            int nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
+            float nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
 
-            graphics.clipRect(widthCovered, 0, widthCovered + nthWidth, height);
-            graphics.drawImage(src, 0, heightCovered, null);
-            graphics.drawImage(src, 0, heightCovered - height, null);
+            graphics.clipRect((int) widthCovered, 0, (int) (widthCovered + nthWidth), height);
+            graphics.drawImage(src, 0, (int) heightCovered, null);
+            graphics.drawImage(src, 0, (int) (heightCovered - height), null);
             graphics.setClip(null);
 
             widthCovered += nthWidth;
@@ -123,20 +120,18 @@ public class SlippingTiles extends ParametrizedFilter {
         graphics.drawImage(src, 0, 0, null);
         graphics.setClip(null);
 
-        for (int
-             i = numberOfTiles - 1,
-             widthCovered = 0,
-             heightCovered = 0
-             ; i >= 0; i--) {
+        widthCovered = 0;
+        heightCovered = 0;
+        for (int i = numberOfTiles - 1; i >= 0; i--) {
 
-            int nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            int nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
+            float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
+            float nthHeight = distributor.getNthSegment(i, numberOfTiles, finalHeight);
 
             heightCovered += isMirror ? nthHeight : -nthHeight;
 
-            graphics.clipRect(remainingSpaceOnOneSide + centerTileWidth + widthCovered, 0, widthCovered + nthWidth, height);
-            graphics.drawImage(src, 0, heightCovered, null);
-            graphics.drawImage(src, 0, heightCovered - (isMirror ? height : -height), null);
+            graphics.clipRect((int) (remainingSpaceOnOneSide + centerTileWidth + widthCovered), 0, (int) (widthCovered + nthWidth), height);
+            graphics.drawImage(src, 0, (int) heightCovered, null);
+            graphics.drawImage(src, 0, (int) (heightCovered - (isMirror ? height : -height)), null);
             graphics.setClip(null);
 
             widthCovered += nthWidth;
