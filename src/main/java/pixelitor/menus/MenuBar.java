@@ -1014,9 +1014,10 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.addFilter(JHFrostedGlass.NAME, JHFrostedGlass::new);
         sub.addFilter(GlassTiles.NAME, GlassTiles::new);
         sub.addFilter(PolarTiles.NAME, PolarTiles::new);
-        sub.addFilter(JHFrostedGlass.NAME, JHFrostedGlass::new);
+        sub.addFilter(SlippingTiles.NAME, SlippingTiles::new);
 
         sub.addSeparator();
 
