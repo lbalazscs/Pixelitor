@@ -47,7 +47,7 @@ public class SlippingTiles extends ParametrizedFilter {
         TICK_TOCK() {
             @Override
             int getNthSegment(float n, float N, float of) {
-                return ((int) n) % 2 == 0 ? (0) : (1);
+                return (int) (of / N + (((int) n) % 2 == 0 ? 1 : -1) * of / 3 / N + /*normalising*/ ((N % 2 == 1 && n == 0) ? -of / 3 / N : 0));
             }
         };
 
