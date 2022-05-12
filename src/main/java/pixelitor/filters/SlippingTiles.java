@@ -84,7 +84,7 @@ public class SlippingTiles extends ParametrizedFilter {
     }
 
     private final RangeParam centerTileSizeParam = new RangeParam("Center Tile Width", 1, 50, 99);
-    //    private final BooleanParam isCenterWidthAutoCalculatedParam = new BooleanParam("Calculate Width Automatically", false);
+    private final BooleanParam isCenterTileSizeAutomaticallyCalculatedParam = new BooleanParam("Auto-Adjust Width", false);
     private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 2, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam slipDisplacementParam = new RangeParam("Length Of Slip", 1, 50, 99);
@@ -96,6 +96,7 @@ public class SlippingTiles extends ParametrizedFilter {
 
         setParams(
                 centerTileSizeParam,
+                isCenterTileSizeAutomaticallyCalculatedParam,
                 numberOfTilesParam,
                 distributionParam,
                 slipDisplacementParam,
@@ -103,7 +104,10 @@ public class SlippingTiles extends ParametrizedFilter {
                 slipDirectionParam
         );
 
+        isCenterTileSizeAutomaticallyCalculatedParam.setupDisableOtherIfChecked(centerTileSizeParam);
+
         centerTileSizeParam.setToolTip("The width of the center tile (in %).");
+        isCenterTileSizeAutomaticallyCalculatedParam.setToolTip("If checked, the width of center tile is calculated to fit along with the size of cuts.");
         numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
         distributionParam.setToolTip("The method of cutting the tiles.");
         slipDisplacementParam.setToolTip("The distance the tiles must slip.");
@@ -120,9 +124,11 @@ public class SlippingTiles extends ParametrizedFilter {
         // Size of image along the cut
         int sizeAlonCut = isVertical ? src.getHeight() : src.getWidth();
 
-        int centerTileSize = (int) (centerTileSizeParam.getValueAsDouble() * sizePerpCut / 100);
         int numberOfTiles = numberOfTilesParam.getValue();
         var distributor = distributionParam.getSelected();
+        int centerTileSize = isCenterTileSizeAutomaticallyCalculatedParam.isChecked() ?
+                (int) (distributor.getNthSegment(2 * numberOfTiles + 1, 2 * numberOfTiles + 1, sizePerpCut)) :
+                ((int) (centerTileSizeParam.getValueAsDouble() * sizePerpCut / 100));
         int finalSlipDisplacement = (int) (slipDisplacementParam.getValueAsDouble() * sizeAlonCut / 100);
         var slipDirection = slipDirectionParam.getSelected();
         int remainingSpaceOnOneSide = (sizePerpCut - centerTileSize) / 2;
