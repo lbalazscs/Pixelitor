@@ -21,6 +21,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -82,85 +83,108 @@ public class SlippingTiles extends ParametrizedFilter {
         }
     }
 
-    private final RangeParam centerWidthParam = new RangeParam("Width", 1, 50, 99);
+    private final RangeParam centerTileSizeParam = new RangeParam("Center Tile Width", 1, 50, 99);
+    //    private final BooleanParam isCenterWidthAutoCalculatedParam = new BooleanParam("Calculate Width Automatically", false);
     private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 2, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
-    private final RangeParam heightVarianceParam = new RangeParam("Height", 1, 50, 99);
-//    private final BooleanParam isHorizontalParam = new BooleanParam("Is Horizontal", false);
-    private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Slip Direction", SlipDirection.class);
+    private final RangeParam slipDisplacementParam = new RangeParam("Length Of Slip", 1, 50, 99);
+    private final BooleanParam isVerticalParam = new BooleanParam("Is Vertical", true);
+    private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Direction Of Slip", SlipDirection.class);
 
     public SlippingTiles() {
         super(true);
 
         setParams(
-                centerWidthParam,
+                centerTileSizeParam,
                 numberOfTilesParam,
                 distributionParam,
-                heightVarianceParam,
-//                isHorizontalParam,
+                slipDisplacementParam,
+                isVerticalParam,
                 slipDirectionParam
         );
 
-        centerWidthParam.setToolTip("The width of the center tile (%).");
+        centerTileSizeParam.setToolTip("The width of the center tile (in %).");
         numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
         distributionParam.setToolTip("The method of cutting the tiles.");
-        heightVarianceParam.setToolTip("The distance the tiles must slip.");
+        slipDisplacementParam.setToolTip("The distance the tiles must slip.");
+        isVerticalParam.setToolTip("Alters the direction of the cut.");
         slipDirectionParam.setToolTip("Alters the direction the tiles should slip.");
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-//        var isHorizontal = isHorizontalParam.isChecked();
-        int width = src.getWidth();
-        int height = src.getHeight();
-        int centerTileWidth = (int) (centerWidthParam.getValueAsDouble() * width / 100);
+        var isVertical = isVerticalParam.isChecked();
+
+        // Size of image perpendicular to the cut
+        int sizePerpCut = isVertical ? src.getWidth() : src.getHeight();
+        // Size of image along the cut
+        int sizeAlonCut = isVertical ? src.getHeight() : src.getWidth();
+
+        int centerTileSize = (int) (centerTileSizeParam.getValueAsDouble() * sizePerpCut / 100);
         int numberOfTiles = numberOfTilesParam.getValue();
         var distributor = distributionParam.getSelected();
-        int finalHeight = (int) (heightVarianceParam.getValueAsDouble() * height / 100);
+        int finalSlipDisplacement = (int) (slipDisplacementParam.getValueAsDouble() * sizeAlonCut / 100);
         var slipDirection = slipDirectionParam.getSelected();
-        int remainingSpaceOnOneSide = (width - centerTileWidth) / 2;
+        int remainingSpaceOnOneSide = (sizePerpCut - centerTileSize) / 2;
         var graphics = dest.createGraphics();
 
-        float widthCovered = 0, heightCovered = finalHeight;
+        float distCoveredPerpCut = 0, distCoveredAlonCut = finalSlipDisplacement;
         for (int i = 0; i < numberOfTiles; i++) {
 
-            float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            float nthHeight = -distributor.getNthSegment(i, numberOfTiles, finalHeight);
-            if (slipDirection.isFirstSideFalling()) nthHeight *= -1;
+            float nthSizePerpCut = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
+            float nthSizeAlonCut = -distributor.getNthSegment(i, numberOfTiles, finalSlipDisplacement);
+            if (slipDirection.isFirstSideFalling()) nthSizeAlonCut *= -1;
 
-            graphics.clipRect((int) widthCovered, 0, (int) (widthCovered + nthWidth), height);
-            graphics.drawImage(src, 0, (int) heightCovered, null);
-            graphics.drawImage(src, 0, (int) (heightCovered - height), null);
-            graphics.setClip(null);
+            if (isVertical)
+                paintWalls(graphics, src, (int) distCoveredPerpCut, (int) (distCoveredPerpCut + nthSizePerpCut), sizeAlonCut, (int) distCoveredAlonCut, (int) (distCoveredAlonCut - sizeAlonCut));
+            else
+                paintRoofAndCeiling(graphics, src, (int) distCoveredPerpCut, (int) (distCoveredPerpCut + nthSizePerpCut), sizeAlonCut, (int) distCoveredAlonCut, (int) (distCoveredAlonCut - sizeAlonCut));
 
-            widthCovered += nthWidth;
-            heightCovered -= nthHeight;
+            distCoveredPerpCut += nthSizePerpCut;
+            distCoveredAlonCut -= nthSizeAlonCut;
         }
 
-        graphics.clipRect(remainingSpaceOnOneSide, 0, remainingSpaceOnOneSide + centerTileWidth, height);
+        if (isVertical)
+            graphics.clipRect(remainingSpaceOnOneSide, 0, remainingSpaceOnOneSide + centerTileSize, sizeAlonCut);
+        else
+            graphics.clipRect(0, remainingSpaceOnOneSide, sizeAlonCut, remainingSpaceOnOneSide + centerTileSize);
         graphics.drawImage(src, 0, 0, null);
         graphics.setClip(null);
 
-        widthCovered = 0;
-        heightCovered = 0;
+        distCoveredPerpCut = distCoveredAlonCut = 0;
         for (int i = numberOfTiles - 1; i >= 0; i--) {
 
-            float nthWidth = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
-            float nthHeight = -distributor.getNthSegment(i, numberOfTiles, finalHeight);
-            if (slipDirection.isSecondSideFalling()) nthHeight *= -1;
+            float nthSizePerpCut = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
+            float nthSizeAlonCut = -distributor.getNthSegment(i, numberOfTiles, finalSlipDisplacement);
+            if (slipDirection.isSecondSideFalling()) nthSizeAlonCut *= -1;
 
-            heightCovered += nthHeight;
+            distCoveredAlonCut += nthSizeAlonCut;
 
-            graphics.clipRect((int) (remainingSpaceOnOneSide + centerTileWidth + widthCovered), 0, (int) (widthCovered + nthWidth), height);
-            graphics.drawImage(src, 0, (int) heightCovered, null);
-            graphics.drawImage(src, 0, (int) (heightCovered - (slipDirection.isSecondSideFalling() ? height : -height)), null);
-            graphics.setClip(null);
+            if (isVertical)
+                paintWalls(graphics, src, (int) (remainingSpaceOnOneSide + centerTileSize + distCoveredPerpCut), (int) (distCoveredPerpCut + nthSizePerpCut), sizeAlonCut, (int) distCoveredAlonCut, (int) (distCoveredAlonCut - (slipDirection.isSecondSideFalling() ? sizeAlonCut : -sizeAlonCut)));
+            else
+                paintRoofAndCeiling(graphics, src, (int) (remainingSpaceOnOneSide + centerTileSize + distCoveredPerpCut), (int) (distCoveredPerpCut + nthSizePerpCut), sizeAlonCut, (int) distCoveredAlonCut, (int) (distCoveredAlonCut - (slipDirection.isSecondSideFalling() ? sizeAlonCut : -sizeAlonCut)));
 
-            widthCovered += nthWidth;
+            distCoveredPerpCut += nthSizePerpCut;
         }
 
         graphics.dispose();
 
         return dest;
     }
+
+    private static void paintWalls(Graphics2D graphics, BufferedImage src, int clipOffset, int clipSizePerpCut, int clipSizeAlonCut, int imageDisplacement1, int imageDisplacement2) {
+        graphics.clipRect(clipOffset, 0, clipSizePerpCut, clipSizeAlonCut);
+        graphics.drawImage(src, 0, imageDisplacement1, null);
+        graphics.drawImage(src, 0, imageDisplacement2, null);
+        graphics.setClip(null);
+    }
+
+    private static void paintRoofAndCeiling(Graphics2D graphics, BufferedImage src, int clipOffset, int clipSizePerpCut, int clipSizeAlonCut, int imageDisplacement1, int imageDisplacement2) {
+        graphics.clipRect(0, clipOffset, clipSizeAlonCut, clipSizePerpCut);
+        graphics.drawImage(src, imageDisplacement1, 0, null);
+        graphics.drawImage(src, imageDisplacement2, 0, null);
+        graphics.setClip(null);
+    }
+
 }
