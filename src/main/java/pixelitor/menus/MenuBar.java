@@ -986,6 +986,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHOffset.NAME, JHOffset::new);
         sub.addFilter(Mirror.NAME, Mirror::new);
         sub.addFilter(Slice.NAME, Slice::new);
+        sub.addFilter(SlippingTiles.NAME, SlippingTiles::new);
         sub.addFilter(JHVideoFeedback.NAME, JHVideoFeedback::new);
 
         return sub;
@@ -1014,9 +1015,9 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.addFilter(JHFrostedGlass.NAME, JHFrostedGlass::new);
         sub.addFilter(GlassTiles.NAME, GlassTiles::new);
         sub.addFilter(PolarTiles.NAME, PolarTiles::new);
-        sub.addFilter(JHFrostedGlass.NAME, JHFrostedGlass::new);
 
         sub.addSeparator();
 
