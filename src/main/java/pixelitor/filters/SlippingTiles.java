@@ -67,7 +67,7 @@ public class SlippingTiles extends ParametrizedFilter {
     }
 
     public enum SlipDirection {
-        FALL(3), CCW(2), CW(1), RISE(0);
+        DEFAULT(3), COUNTER_CLOCK_WISE(2), CLOCK_WISE(1), OPPOSITE(0);
         private final int val;
 
         SlipDirection(int val) {
