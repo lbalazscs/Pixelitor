@@ -88,6 +88,7 @@ public class SlippingTiles extends ParametrizedFilter {
     private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 2, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam slipDisplacementParam = new RangeParam("Length Of Slip", 1, 50, 99);
+    private final RangeParam dominanceParam = new RangeParam("Dominance", 1, 50, 99);
     private final BooleanParam isVerticalParam = new BooleanParam("Is Vertical", true);
     private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Direction Of Slip", SlipDirection.class);
 
@@ -100,6 +101,7 @@ public class SlippingTiles extends ParametrizedFilter {
                 numberOfTilesParam,
                 distributionParam,
                 slipDisplacementParam,
+                dominanceParam,
                 isVerticalParam,
                 slipDirectionParam
         );
@@ -111,6 +113,7 @@ public class SlippingTiles extends ParametrizedFilter {
         numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
         distributionParam.setToolTip("The method of cutting the tiles.");
         slipDisplacementParam.setToolTip("The distance the tiles must slip.");
+        dominanceParam.setToolTip("Shift the center tile.");
         isVerticalParam.setToolTip("Alters the direction of the cut.");
         slipDirectionParam.setToolTip("Alters the direction the tiles should slip.");
     }
@@ -128,11 +131,14 @@ public class SlippingTiles extends ParametrizedFilter {
         var distributor = distributionParam.getSelected();
         int centerTileSize = isCenterTileSizeAutomaticallyCalculatedParam.isChecked() ?
                 (int) (distributor.getNthSegment(2 * numberOfTiles + 1, 2 * numberOfTiles + 1, sizePerpCut)) :
-                ((int) (centerTileSizeParam.getValueAsDouble() * sizePerpCut / 100));
-        int finalSlipDisplacement = (int) (slipDisplacementParam.getValueAsDouble() * sizeAlonCut / 100);
+                ((int) (centerTileSizeParam.getPercentageValF() * sizePerpCut));
+        int finalSlipDisplacement = (int) (slipDisplacementParam.getPercentageValF() * sizeAlonCut);
         var slipDirection = slipDirectionParam.getSelected();
-        int remainingSpaceOnOneSide = (sizePerpCut - centerTileSize) / 2;
         var graphics = dest.createGraphics();
+
+        var dominance = dominanceParam.getPercentageValF();
+        int remainingSpaceOnOneSide = (int) ((sizePerpCut - centerTileSize) * dominance);
+        int remainingSpaceOnOtherSide = (int) ((sizePerpCut - centerTileSize) * (1 - dominance));
 
         float distCoveredPerpCut = 0, distCoveredAlonCut = finalSlipDisplacement;
         for (int i = 0; i < numberOfTiles; i++) {
@@ -160,7 +166,7 @@ public class SlippingTiles extends ParametrizedFilter {
         distCoveredPerpCut = distCoveredAlonCut = 0;
         for (int i = numberOfTiles - 1; i >= 0; i--) {
 
-            float nthSizePerpCut = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOneSide);
+            float nthSizePerpCut = distributor.getNthSegment(i, numberOfTiles, remainingSpaceOnOtherSide);
             float nthSizeAlonCut = -distributor.getNthSegment(i, numberOfTiles, finalSlipDisplacement);
             if (slipDirection.isSecondSideFalling()) nthSizeAlonCut *= -1;
 
