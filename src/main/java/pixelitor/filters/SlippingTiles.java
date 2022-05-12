@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.*;
@@ -31,26 +32,33 @@ public class SlippingTiles extends ParametrizedFilter {
     public static final String NAME = "Slipping Tiles";
 
     public enum Distributor {
-        EVEN() {
+        EVEN("Even") {
             @Override
             float getNthSegment(float n, float N, float of) {
                 return of / N;
             }
         },
-        EXPONENTIAL() {
+        EXPONENTIAL("Exponential") {
             private static final double LN_10 = Math.log(10);
 
             @Override
             float getNthSegment(float n, float N, float of) {
+                if (N == 1) return of;
                 return (float) (Math.exp(LN_10 * n / (N - 1)) * /*normalising*/ (of * (Math.exp(LN_10 / (N - 1)) - 1) / (Math.exp(LN_10 * N / (N - 1)) - 1)));
             }
         },
-        TICK_TOCK() {
+        TICK_TOCK("Tick Tock") {
             @Override
             float getNthSegment(float n, float N, float of) {
                 return of / N + (((int) n) % 2 == 0 ? 1 : -1) * of / 3 / N + /*normalising*/ ((N % 2 == 1 && n == 0) ? -of / 3 / N : 0);
             }
         };
+
+        private final String name;
+
+        Distributor(String name) {
+            this.name = name;
+        }
 
         /**
          * Consider that the given width `of` is divided into `N` segments.
@@ -64,13 +72,20 @@ public class SlippingTiles extends ParametrizedFilter {
          */
         abstract float getNthSegment(float n, float N, float of);
 
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     public enum SlipDirection {
-        DEFAULT(3), COUNTER_CLOCK_WISE(2), CLOCK_WISE(1), OPPOSITE(0);
-        private final int val;
+        DEFAULT("Default", 3), COUNTER_CLOCK_WISE("Counter Clock Wise", 2), CLOCK_WISE("Clock Wise", 1), OPPOSITE("Opposite", 0);
 
-        SlipDirection(int val) {
+        private final int val;
+        private final String name;
+
+        SlipDirection(String name, int val) {
+            this.name = name;
             this.val = val;
         }
 
@@ -85,11 +100,11 @@ public class SlippingTiles extends ParametrizedFilter {
 
     private final RangeParam centerTileSizeParam = new RangeParam("Center Tile Width", 1, 50, 99);
     private final BooleanParam isCenterTileSizeAutomaticallyCalculatedParam = new BooleanParam("Auto-Adjust Width", false);
-    private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 2, 4, 20);
+    private final RangeParam numberOfTilesParam = new RangeParam("Number Of Tiles", 1, 4, 20);
     private final EnumParam<Distributor> distributionParam = new EnumParam<>("Distribution", Distributor.class);
     private final RangeParam slipDisplacementParam = new RangeParam("Length Of Slip", 1, 50, 99);
-    private final RangeParam dominanceParam = new RangeParam("Dominance", 1, 50, 99);
-    private final BooleanParam isVerticalParam = new BooleanParam("Is Vertical", true);
+    private final RangeParam centerTilePositionParam = new RangeParam("Center Tile Position", 1, 50, 99);
+    private final ListParam<String> isVerticalParam = new ListParam<>("Is Vertical", new String[]{"Vertical", "Horizontal"});
     private final EnumParam<SlipDirection> slipDirectionParam = new EnumParam<>("Direction Of Slip", SlipDirection.class);
 
     public SlippingTiles() {
@@ -101,7 +116,7 @@ public class SlippingTiles extends ParametrizedFilter {
                 numberOfTilesParam,
                 distributionParam,
                 slipDisplacementParam,
-                dominanceParam,
+                centerTilePositionParam,
                 isVerticalParam,
                 slipDirectionParam
         );
@@ -113,14 +128,14 @@ public class SlippingTiles extends ParametrizedFilter {
         numberOfTilesParam.setToolTip("The number of tiles to cut on either side.");
         distributionParam.setToolTip("The method of cutting the tiles.");
         slipDisplacementParam.setToolTip("The distance the tiles must slip.");
-        dominanceParam.setToolTip("Shift the center tile.");
+        centerTilePositionParam.setToolTip("Move around the center tile.");
         isVerticalParam.setToolTip("Alters the direction of the cut.");
         slipDirectionParam.setToolTip("Alters the direction the tiles should slip.");
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        var isVertical = isVerticalParam.isChecked();
+        var isVertical = isVerticalParam.getParamValue().equals("Vertical");
 
         // Size of image perpendicular to the cut
         int sizePerpCut = isVertical ? src.getWidth() : src.getHeight();
@@ -136,9 +151,9 @@ public class SlippingTiles extends ParametrizedFilter {
         var slipDirection = slipDirectionParam.getSelected();
         var graphics = dest.createGraphics();
 
-        var dominance = dominanceParam.getPercentageValF();
-        int remainingSpaceOnOneSide = (int) ((sizePerpCut - centerTileSize) * dominance);
-        int remainingSpaceOnOtherSide = (int) ((sizePerpCut - centerTileSize) * (1 - dominance));
+        var shiftFactor = centerTilePositionParam.getPercentageValF();
+        int remainingSpaceOnOneSide = (int) ((sizePerpCut - centerTileSize) * shiftFactor);
+        int remainingSpaceOnOtherSide = (int) ((sizePerpCut - centerTileSize) * (1 - shiftFactor));
 
         float distCoveredPerpCut = 0, distCoveredAlonCut = finalSlipDisplacement;
         for (int i = 0; i < numberOfTiles; i++) {
@@ -198,5 +213,4 @@ public class SlippingTiles extends ParametrizedFilter {
         graphics.drawImage(src, imageDisplacement2, 0, null);
         graphics.setClip(null);
     }
-
 }
