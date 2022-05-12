@@ -1,0 +1,26 @@
+<!doctype html>
+<html>  
+<head>  
+	<meta charset="utf-8">
+    <title>The PXC format</title>  
+   <link type="text/css" rel="stylesheet" href="pixelitor.css">
+</head>  
+<body>  
+<h1>The PXC format</h1>
+
+The PXC format is the "native" file format of <a href="index.html">Pixelitor</a>. You can use it to preserve the layer structure of your work. Technically, PXC files consist of the following:
+<ol>
+	<li> The identification bytes AB C4</li>
+	<li> A byte giving the PXC version number. Currently (Pixelitor 2.*) this is  03. Older versions:
+    <ul>
+        <li> 00 was used for versions 0.9.2-0.9.7</li>
+        <li> 01 was used for versions 0.9.8</li>
+        <li> 02 was used for versions 0.9.9-1.1.2</li>
+    </ul>
+    </li>
+	<li> A gzipped-serialized pixelitor.Composition object</li>
+</ol>
+PXC files can only be opened in Pixelitor. You can save the image in the <a href="http://en.wikipedia.org/wiki/OpenRaster">OpenRaster</a> format if you want to open the image layers in Gimp, Krita, Paint.net, etc., but note that as there is no support for layer masks and text layers in OpenRaster, some information can be lost. Only image layers, and their opacity and blending modes are saved into OpenRaster.
+<p>
+If you only want to save the final image, you can do it in the <a href="http://en.wikipedia.org/wiki/JPEG">jpeg</a>, <a href="http://en.wikipedia.org/wiki/Portable_Network_Graphics">png</a>, <a href="http://en.wikipedia.org/wiki/BMP_file_format">bmp</a> or <a href="http://en.wikipedia.org/wiki/Graphics_Interchange_Format">gif</a> formats.
+

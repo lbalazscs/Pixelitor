@@ -1,0 +1,403 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pixelitor release notes</title>
+    <link type="text/css" rel="stylesheet" href="pixelitor.css">
+</head>
+<body>
+
+<nav class="navbar">
+<ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">Home</a>
+    </li>
+    <li class="nav-item active">
+      <a class="nav-link" href="release_notes.html">Release Notes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="installation.html">Installation</a>
+    </li>
+  </ul>
+</nav>
+
+<h1>Pixelitor release notes</h1>
+
+<div class="release">
+<h2>4.3.0 - released on 2022-04-14</h2>
+<ul>
+    <li>Contributions by <a href="https://github.com/Minecraftian14">Anirudh Sharma</a>:
+        <ul>
+            <li>New filters: Flow Field, Comic Book</li>
+            <li>Improved filters: Grid, Spiral, Color Wheel, Mirror</li>
+			<li>Area zooming in the Zoom Tool and in the Navigator</li>
+			<li>New UI for "Enlarge Canvas"</li>
+			<li>Tapering and Reverse Tapering strokes</li>
+			<li>Higher undo limit for lightweight changes</li>
+        </ul>
+	<li>The beginnings of Dutch, French, German, Italian, Spanish translations (with contributions by <a href="https://github.com/albanobattistella">Albano Battistella</a>, <a href="https://github.com/NastyGamer">Jonas Mohr</a>, <a href="https://github.com/Vistaus">Heimen Stoffels</a>)</li>
+	<li>Pixelitor 4.3.0 requires Java 17 or higher</li>
+	<li>The Windows installer includes the required Java, on Windows there's no need anymore to install Java first</li>
+	<li>Support for the TGA and NetPBM file formats</li>
+	<li>ImageMagick-based export/import for all the formats supported by ImageMagick 7</li>
+	<li>SVG export in the Pen Tool and the Render/Shapes filters</li>
+	<li>Erase blending mode</li>
+	<li>Presets for filters, tools, and in other places</li>
+	<li>Curved strokes and angle setting in Auto Paint</li>
+	<li>New filters: Spider Web, Spiral, Grid, Truchet Tiles, Bump Map, Displacement Map</li>
+	<li>Improved filters: Circle to Square, Checker Pattern, Four Color Gradient, Value Noise, Channel Mixer, Threshold, Waves, Marble, Polar Glass Tiles, Starburst, Spiral, Flashlight, Magnify</li>
+	<li>Filter Search</li>
+	<li>Show Last Filter</li>
+	<li>Shape settings in the Shapes Tool</li>
+	<li>Shift-drag creates equally sized shapes in Shapes Tool</li>
+	<li>New options for zooming and panning (in Preferences)</li>
+	<li>Printing</li>
+	<li>Better tool icons on HiDPI screens</li>
+	<li>Optional Operating System file choosers</li>
+	<li>Experimental features:<ul> 
+		<li>Smart objects, smart filters</li>
+		<li>Color fill layers</li>
+		<li>Gradient fill layers</li>
+		<li>Shape layers</li>
+		<li>Operating System theme</li>
+	</ul></li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.2.3 - released on 2019-12-11</h2>
+<ul>
+	<li>Brush outline in the Brush, Eraser, Smudge and Clone Tools</li>
+	<li>Create selection from the text of a text layer</li>
+    <li>Move selection in the Move Tool</li>
+    <li>Copy/paste for selections</li>
+	<li>Selection crop can be nonrectangular (with generated layer masks)</li>
+    <li>"Color randomness" option in the "Spray Shapes Brush"</li>
+    <li>"Image Source" option and Hue/Saturation distances in the "Mask from Color Range"</li>
+    <li>Add layer mask from transparency and from layer contents</li>
+	<li>Chaos Game, Mandelbrot and Julia fractal renderers</li>
+	<li>"Watermarking" option for the Render/Shapes filters</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.2.2 - released on 2019-10-11</h2>
+<ul>
+    <li>Keyboard nudging for the Gradient, Pen, Shapes tools</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.2.1 - released on 2019-09-26</h2>
+<ul>
+    <li>Contributions by <a href="https://github.com/LucasTheCure/Pixelitor">Łukasz Kurzaj</a>:
+        <ul>
+            <li>"Layer Auto Selection" checkbox in the Move Tool</li>
+            <li>Styles and colors for the guides (in the Preferences)</li>
+        </ul>
+    <li>Transform mode in the Pen Tool</li>
+    <li>Rotating and resizing shapes in the Shapes Tool</li>
+    <li>"Delete Cropped Pixels" checkbox in the Crop Tool</li>
+    <li>In the Crop Tool, the initial Alt-dragging creates the rectangle from the center</li>
+    <li>File/View Metadata (using the <a href="https://github.com/drewnoakes/metadata-extractor">metadata-extractor</a> library)</li>
+    <li>Right-click popup menus on tabs</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.2.0 - released on 2018-10-03</h2>
+<ul>
+    <li>Contributions by <a href="https://github.com/LucasTheCure/Pixelitor">Łukasz Kurzaj</a>:
+        <ul>
+            <li>New "Curves" filter</li>
+            <li>New composition guides in the Crop Tool: golden spiral, triangles, grid</li>
+        </ul></li>
+    <li>Tabbed user interface (it's optional, the old internal windows are still available in the Preferences)</li>
+    <li>New Pen Tool</li>
+    <li>Handles in the Gradient Tool</li>
+    <li>Image files can be drag-and-dropped on the layers area to be added as image layers</li>
+    <li>New "Lazy Mouse" smoothing option in the Brush, Eraser, Smudge and Clone tools</li>
+    <li>New "Spray" and "Connect" brushes in the Brush and Eraser tools. "Connect" is based on ideas from the <a href="https://mrdoob.com/projects/harmony/index.html">harmony project</a></li>
+    <li>Guides (in the View menu)</li>
+    <li>More brushes have settings</li>
+    <li>New filters: "Striped Halftone", "Concentric Halftone", "Render Grid", "Checker Pattern"</li>
+    <li>New options for the "Channel Mixer", "Slice" filters</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.1.0 - released on 2018-06-16</h2>
+<ul>
+    <li>Improvements to the Crop Tool contributed by <a href="https://github.com/LucasTheCure/Pixelitor">Łukasz Kurzaj</a>:
+        <ul>
+            <li>Precise width and height controls for cropping</li>
+            <li>The crop area can be dragged as a whole with the mouse after the handles appear</li>
+            <li>Holding down the Shift key keeps the aspect ratio while dragging</li>
+            <li>Composition guides in the crop rectangle (rule of thirds, golden sections, diagonal lines)</li>
+            <li>The crop selection can be accepted by double-clicking inside it</li>
+        </ul></li>
+    <li>Rotation in text layers</li>
+    <li>Opening and saving TIFF files when running on Java 9+</li>
+    <li>Progressive JPEG export option</li>
+    <li>Progress bar in the status bar while opening and saving large files</li>
+    <li>Faster previews and progress bar in the open dialog</li>
+    <li>Stroke length variability and mixed colors in Auto Paint
+    <li>Zoom improvements: fit width/height, and exact Navigator zooming with right-click</li>
+    <li>New settings for the "Focus", "Magnify", "Flashlight", "Turbulent Distortion", "Glass Tiles", "Marble", "Smear", "Posterize", "Starburst" filters, new "Color Threshold" filter</li>
+    <li>"Clicked Pixel" fill and "Action" setting in the Paint Bucket Tool</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.0.2 - released on 2016-05-03</h2>
+<ul>
+    <li>Polygonal selection</li>
+    <li>Duplicate image</li>
+    <li>Rubylith mask view mode</li>
+    <li>Color palette, color variations</li>
+    <li>Color history</li>
+    <li>Copy/paste colors</li>
+    <li>Shapes Tool: more gradient fill types</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.0.1 - released on 2016-03-13</h2>
+<ul>
+    <li>Navigator window</li>
+    <li>Mask from Color Range</li>
+    <li>Thumbnail image size in Settings</li>
+    <li>Selection edges can be hidden</li>
+    <li>New Filters "Marble" and "Morphology"</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>4.0.0 - released on 2016-02-18</h2>
+<ul>
+    <li>Layer masks</li>
+    <li>Text layers</li>
+    <li>Most filters show a progress bar in the status bar if they need more than 0.2 seconds</li>
+    <li>Zoom control in the status bar</li>
+    <li>File reload</li>
+    <li>History dialog</li>
+    <li>Transform settings for all Render/Shapes filters</li>
+    <li>A few filters became faster. "Box Blur" became just as fast as "Fast Blur", so "Fast Blur" was removed</li>
+    <li>On Mac the Command key is used in the menu keyboard shortcuts (instead of Control)</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.1.4 - released on 2016-01-19</h2>
+<ul>
+    <li>Auto Paint</li>
+    <li>New filters: "Flashlight", "Focus", "Invert Transparency", "Fractal Tree", "Mystic Rose", "Lissajous Curve", "Spirograph", "Flower of Life"</li>
+    <li>After resize, flip, rotate, crop, the selection is also resized, flipped, rotated, cropped (instead of deselecting)</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.1.3 - released on 2015-07-11</h2>
+<ul>
+    <li>Layers have thumbnail images</li>
+    <li>Shapes Tool: transparent fill option</li>
+    <li>"Enlarge canvas" menu</li>
+    <li>Kerning, tracking and ligatures support for text</li>
+    <li>Improved performance for the "Rays", "Oil Painting", "Drop Shadow" filters</li>
+    <li>The Move, Clone Stamp and Color Picker tools can use the right-mouse as an alternative to Alt-mouse (so that Linux users don't have to reconfigure their window managers).</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.1.2 - released on 2015-06-24</h2>
+<ul>
+    <li>"Keyboard nudging": in the move, crop and selection tools the arrow keys move things one pixel, and shift-arrow keys move things ten pixels.</li>
+    <li>New "Modify" menu under Selection that can expand/contract a selection or create a new selection around the selection border </li>
+    <li>New "Voronoi Diagram", "Drunk Vision" and "Weave" filters</li>
+    <li>The angle, spiral and diamond gradients are anti-aliased</li>
+    <li>The anti-aliasing of the one-pixel brush can be configured in the brush settings</li>
+    <li>The Windows installer and the jar file are digitally signed (Thanks to <a href="https://www.certum.eu/">Certum</a> for the free open source code signing certificate).
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.1.1 - released on 2015-05-30</h2>
+<ul>
+    <li>Clone Tool: new scale, rotate and mirror options</li>
+    <li>Smudge Tool: soft brush option</li>
+    <li>Pixel grid is disabled by default (see View/Show Pixel Grid)</li>
+    <li>More angle settings for shape brushes</li>
+    <li>Minor bugfixes and UI improvements</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.1.0 - released on 2015-05-18</h2>
+<ul>
+    <li>New tool: Smudge</li>
+    <li>Clone Tool: soft brush option</li>
+    <li>"Random Filter" maintains history, and has "Back" and "Forward" buttons to navigate it</li>
+    <li>A generic "Shape" brush type (instead of the "Heart" brush), with settings</li>
+    <li>New filter: "Channel to Transparency"</li> 
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.0.1 - released on 2015-04-05</h2>
+<ul>
+    <li>Clone Tool: "Aligned" and "Sample All Layers" options</li>
+    <li>Pixel grid is shown if the zooming is 1600% or higher</li>
+    <li>Button for duplicating layers</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>3.0.0 - released on 2015-03-27</h2>
+<ul>
+    <li>Starting with this version, Pixelitor <b>requires Java 8</b> or newer</li>
+    <li>New tool: Clone</li>
+    <li>"Ping pong" option for both the layer-based and tweening animations</li>
+    <li>Batch processing: apply a filter to all images in a folder</li>
+    <li>Reseed setting for the "Add Noise", "Brushed Metal", "Smear" filters</li>
+    <li>"Show Original" option for "Levels"</li>
+    <li>"Randomize and Normalize" button for "Channel Mixer"</li>
+    <li>"One Pixel" Brush (like the pencil tool in other programs, but also available for Eraser Tool)</li> 
+    <li>"Central 3" mirror option for Brush Tool and Erase Tool</li>
+    <li>"Stroke with Current Brush/Eraser" in Selection Tool considers the mirror setting of brush/erase</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.3.0 - released on 2014-12-28</h2>
+<ul>
+    <li>Tweening animation export</li>
+    <li>New "2D Transitions" filter with more than 30 transitions</li>
+    <li>Layers can be reordered by dragging</li>
+    <li>New meta-filter "Random Filter"</li>
+    <li>"Rotate" and "Reseed" parameters for "Starburst"</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.2.1 - released on 2014-12-05</h2>
+<ul>
+    <li>Image centered in the internal window</li>
+    <li>"Allow Growing" option for the Crop Tool</li>
+    <li>More zoom levels and "Ctrl + mouse wheel" zooming</li>
+    <li>New "Underwater" filter</li>
+    <li>The "Pinch, Bulge, Twirl" and "Swirl" filters were unified into one filter
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.2.0 - released on 2014-11-23</h2>
+<ul>
+    <li>Pixelitor can now open and save files in the <a href="http://en.wikipedia.org/wiki/OpenRaster">OpenRaster</a>
+        format - layered images can be transferred to/from other editors such as Gimp, Krita, Paint.net, etc.
+    </li>
+    <li>Animated GIF export (the frames of the animation are based on the layers)</li>
+    <li>Performance improvements and new "Reseed" button for the "Crystallize", "Pointillize", "Cells" filters</li>
+    <li>New "Sepia" filter (contributed by Daniel Wreczycki)</li>
+    <li>Performance improvements for the "Color Wheel" filter</li>
+    <li>A new "Random Star" shape in the Shapes Tool</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.1.4 - released on 2014-10-25</h2>
+<ul>
+    <li>Performance improvements for the "Clouds", "Value Noise", "Caustics", "Wood" filters
+    <li>New parameter for the "Threshold" filter
+    <li>Fixed a bug that led to "out of memory" errors under certain conditions, so you should upgrade</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.1.3 - released on 2014-10-22</h2>
+<ul>
+    <li>New filters: "Angular Waves", "Radial Waves", "Polar Glass Tiles", "Slice"</li>
+    <li>New or improved parameters for the "Pinch, Bulge, Twirl", "Swirl", "Kaleidoscope", "Polar Coordinates", "Glass
+        Tiles", "Waves" filters
+    </li>
+    <li>All filters with an "Edge Action" parameter now also have the "Mirror" option for it
+    <li>Performance improvements for the "Crystallize", "Pointillize", "Cells", "Glint", "Glow", "Sparkle", "Brushed
+        Metal", "Frosted Glass", "Canny Edge Detector" filters
+    <li>Minor bugfixes</li>
+</ul>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.1.2 - released on 2014-10-07</h2>
+<ul>
+    <li>Many filters became faster due to the usage of the <a href="https://sourceforge.net/projects/jafama/">Jafama</a>
+        library
+    </li>
+    <li>Some other filters are faster because they can use multiple processor cores</li>
+    <li>The "Add Noise" filter has a "Saturation" parameter</li>
+    <li>The "Stamp" filter has a "Blur Method" parameter</li>
+    <li>Menus and keyboard shortcuts for "Fit on Screen" and "Actual Pixels"</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.1.1 - released on 2014-10-01</h2>
+<ul>
+    <li>"Check for Update" functionality (in the Help menu)</li>
+    <li>"Hand Tool"-like behavior in the "Save Optimized JPEG" dialog</li>
+    <li>Some filters have better default settings for large images</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.1.0 - released on 2014-09-12</h2>
+<ul>
+    <li>Brush engine improvements, the new "Heart" brush is an example of angle-aware brush</li>
+    <li>New tool: Zoom</li>
+    <li>More zoom levels</li>
+    <li>Smaller tool buttons</li>
+    <li>Minor bugfixes</li>
+</ul>
+</div>
+
+<div class="release">
+<h2>2.0.0 - released on 2014-06-07</h2>
+<ul>
+    <li>New tool: Crop</li>
+    <li>18 filters are much faster (they use all the CPU cores)</li>
+    <li>More filters have a "show original" parameter</li>
+    <li>There are some new filters like "Little Planet", "Swirl", "Perspective", "Tritone", "Color Halftone", "Dither"</li>
+    <li>Bugfixes</li>
+</ul>
+</div>
+
+<h3>Upgrade guide from 1.1.2 to 2.0.0:</h3>
+I changed the main version number mainly because this requires a new Java version (2.0.0 requires at least Java 7 while
+1.1.2 requires Java 6) and because the <a href="pxc_format.html">PXC</a> format has changed.
+
+You should upgrade unless
+<ul>
+    <li>For some reason you can have only Java 6 on your computer</li>
+    <li>You need to open old <a href="pxc_format.html">PXC</a> files</li>
+</ul>
+
+</body>

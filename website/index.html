@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pixelitor 4.3.0</title>
+    <meta name="description" content="Pixelitor is an open source image editor that supports layers, masks, many filters, unlimited undo etc." />
+    <meta name="keywords" content="Pixelitor">
+	
+	<meta property="og:title" content="Pixelitor">
+	<meta property="og:description" content="An open source image editor">
+	<meta property="og:image" content="http://pixelitor.sourceforge.net/images/screenshot1.jpg">
+	<meta property="og:url" content="http://pixelitor.sourceforge.net/">
+	
+    <link type="text/css" rel="stylesheet" href="pixelitor.css">
+
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="scripts/jquery-1.10.1.min.js"></script>
+
+	<!-- Add mousewheel plugin (this is optional) -->
+	<script type="text/javascript" src="scripts/jquery.mousewheel-3.0.6.pack.js"></script>
+
+	<!-- Add fancyBox main JS and CSS files -->
+	<script type="text/javascript" src="scripts/fancybox/jquery.fancybox.js?v=2.1.5"></script>
+	<link rel="stylesheet" type="text/css" href="scripts/fancybox/jquery.fancybox.css?v=2.1.5" media="screen" />
+
+	<!-- Add Button helper (this is optional) -->
+	<link rel="stylesheet" type="text/css" href="scripts/fancybox/helpers/jquery.fancybox-buttons.css?v=1.0.5" />
+	<script type="text/javascript" src="scripts/fancybox/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+
+</head>
+<body>
+
+<nav class="navbar">
+<ul class="navbar-nav">
+    <li class="nav-item active">
+      <a class="nav-link" href="index.html">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="release_notes.html">Release Notes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="installation.html">Installation</a>
+    </li>
+  </ul>
+</nav>
+
+<h1>Pixelitor 4.3.0</h1>
+
+Pixelitor is an open source image editor that supports layers, layer masks, text layers, filters, multiple undo etc. It requires <a href="installation.html">Java 17 or higher</a>.<p>
+As of 4.3.0, it has more than 110 image filters and color adjustments, some of which are unique to Pixelitor. Some of the gradients can also be found only here.
+<p>
+You should have some experience with <a href="https://en.wikipedia.org/wiki/Image_editing"  target="_blank">image editors</a> in order to use it, because there isn't much documentation available yet, and many concepts (<a href="http://en.wikipedia.org/wiki/Layers_%28digital_image_editing%29" target="_blank">layers</a>, <a href="http://en.wikipedia.org/wiki/Blend_modes" target="_blank">blending modes</a>, <a href="https://en.wikipedia.org/wiki/Cropping_(image)" target="_blank">cropping</a>, <a href="http://en.wikipedia.org/wiki/Gaussian_blur" target="_blank">Gaussian blurring</a>, <a href="http://en.wikipedia.org/wiki/Unsharp_mask" target="_blank">unsharp masking</a>, <a href="http://en.wikipedia.org/wiki/Image_histogram" target="_blank">histograms</a>, etc.) are the same.
+<p>
+<a href="http://sourceforge.net/projects/pixelitor/files/latest">Download the latest version for your operating system</a>
+<br>
+<a href="http://sourceforge.net/projects/pixelitor/files/">See all downloads</a>
+<p>
+<a href="installation.html">Installation Instructions</a>
+<br>
+<a href="https://github.com/lbalazscs/Pixelitor">Source Code</a>
+<br>
+<a href="release_notes.html">Release Notes</a>
+
+
+<p>
+Screenshots (click to enlarge):
+<br>
+
+<div class="thumbs-container">
+	<div class="thumb">
+		<a class="fancybox-button" rel="fancybox-button" href="images/screenshot1.jpg" title="Glass Tiles Filter"><img src="images/thumb1.jpg" alt="Screenshot"></a>
+	</div>
+	<div class="thumb">
+		<a class="fancybox-button" rel="fancybox-button" href="images/screenshot2.jpg" title="Photo Collage Filter"><img src="images/thumb2.jpg" alt="Screenshot"></a>
+	</div>
+	<div class="thumb">
+		<a class="fancybox-button" rel="fancybox-button" href="images/screenshot3.jpg" title="Render Marble"><img src="images/thumb3.jpg" alt="Screenshot"></a>
+	</div>
+	<div class="thumb">
+		<a class="fancybox-button" rel="fancybox-button" href="images/screenshot4.jpg" title="Pixelitor on Linux"><img src="images/thumb4.jpg" alt="Screenshot"></a>
+	</div>
+</div>
+
+<p>
+<b>Feedback:</b> If you like Pixelitor, or if you have suggestions or questions regarding the Pixelitor functionality or user interface, feel free to contact the author (László Balázs-Csíki) at lbal<span style="display:none">invisible</span>azscs<span style="display:none">invisible</span> at <span style="display:none">invisible</span>gma<span style="display:none">invisible</span>il&#46;com. I am looking forward to your feedback. Creating an <a href="https://github.com/lbalazscs/Pixelitor/issues">issue</a> is also a good place for bug reports and feature requests.
+
+<p>
+<b>Saving files:</b> if you want to save every information, including the layer structure, use the the <a href=pxc_format.html> PXC format</a>. Note that "pxc" files can be opened only in Pixelitor. You can save the image in the <a href="http://en.wikipedia.org/wiki/OpenRaster"  target="_blank">OpenRaster</a> format (which also supports image layers) if you want to open the image layers in Gimp, Krita, Paint.net, etc., but note that as there is no support for layer masks and text layers in OpenRaster, some information may be lost. If you only want to save the final image, you can save to single-layered jpeg, png, bmp, gif, tiff, tga, pam, ppm files. If you also install ImageMagick 7, you can export/import all the formats supported by ImageMagick.
+</ul>
+<br>
+
+
+<script>
+$(document).ready(function() {
+	$(".fancybox-button").fancybox({
+		prevEffect		: 'none',
+		nextEffect		: 'none',
+		closeBtn		: false,
+		helpers		: {
+			title	: { type : 'float' },
+			buttons	: {}
+		}
+	});
+});
+</script>
+
+
+</body>
+</html>

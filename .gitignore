@@ -10,7 +10,6 @@ build.num
 *.7z
 Pixelitor.iml
 dependency-reduced-pom.xml
-website/*
 installer/runtime/*
 out/*
 target/*

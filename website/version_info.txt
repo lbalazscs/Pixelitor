@@ -1,0 +1,2 @@
+last_version=4.3.0
+required_java_version=17

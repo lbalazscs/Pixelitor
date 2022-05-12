@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pixelitor Installation</title>
+    <meta name="description" content="Pixelitor Installation"/>
+    <meta name="keywords" content="Pixelitor,Installation">
+    <link type="text/css" rel="stylesheet" href="pixelitor.css">
+</head>
+<body>
+
+<nav class="navbar">
+<ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="release_notes.html">Release Notes</a>
+    </li>
+    <li class="nav-item active">
+      <a class="nav-link" href="installation.html">Installation</a>
+    </li>
+  </ul>
+</nav>
+
+<h1>Pixelitor Installation</h1>
+
+Starting with the version 4.3.0 Pixelitor requires Java 17 or higher. The Windows installer contains the required Java, but the other downloads don't contain the Java Runtime Environment.
+
+<ul>
+    <li>
+        <b>Windows</b>:
+        <ul>
+            <li>You can just run the installer progeam, it will install everything. If you prefer to use the jar file, you need to also download and install the latest Java OpenJDK from <a href="https://adoptium.net/">here</a>. When installing OpenJDK, make sure to select the "Set JAVA_HOME variable" option.</li>
+            </li>
+            <li>Pixelitor:
+                <ul>
+                    <li>
+                        Just run the setup program. It is not necessary to uninstall first a previous version. 
+                    </li>
+                    <li>
+                        Alternatively you can also download the jar file and double-click on that to start the program.
+                        (Less user-friendly, but it does not require administrator privileges, and it can be used as a
+                        "portable application")
+                    </li>
+                </ul>
+        </ul>
+    </li>
+	<p>
+    <li>
+        <b>Linux</b>: you can install Pixelitor either using Flathub or manually. Please note that Pixelitor can't currently use ImageMagick if you are using the Flathub installation.
+        <ul> 
+			<li>Flathub: see the <a href="https://flathub.org/apps/details/io.sourceforge.Pixelitor">Pixelitor page on Flathub</a>
+			<li>Manually:
+			<ul>
+				<li>Java: You can use the newest OpenJDK package for your Linux distribution.
+				<li>Pixelitor: Run it as a Java program according to your distribution guidelines (double-clicking on the downloaded jar file should work, the command line <code>java
+                -jar pixelitor_VERSION.jar</code> always works).
+			</ul>
+        </ul>
+    </li>
+	<p>
+    <li>
+        <b>Mac</b>:
+        <ul>
+            <li>Java: You might need to install the newest Java from <a href="https://adoptium.net/">here</a>.</li>
+            <li>Pixelitor: Double-click on the downloaded jar file to start the program.</li>
+        </ul>
+    </li>
+
+</ul>
