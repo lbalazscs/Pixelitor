@@ -1350,93 +1350,10 @@ public class MenuBar extends JMenuBar {
         PMenu developMenu = new PMenu("Develop", 'D');
 
         developMenu.add(createDebugSubmenu(pw));
-        developMenu.add(createTestSubmenu());
-        developMenu.add(createSplashSubmenu());
         developMenu.add(createExperimentalSubmenu());
-
-        developMenu.addFilter(PorterDuff.NAME, PorterDuff::new);
-
-        developMenu.add(new PAction("Filter Creator...") {
-            @Override
-            protected void onClick() {
-                FilterCreator.showInDialog();
-            }
-        });
-
-        developMenu.add(new OpenViewEnabledAction("Dump Event Queue") {
-            @Override
-            protected void onClick() {
-                Events.dumpAll();
-            }
-        });
-
-        developMenu.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                Debug.debugImage(imageLayer.getImage(), "layer image");
-
-                if (imageLayer.hasMask()) {
-                    LayerMask layerMask = imageLayer.getMask();
-                    BufferedImage maskImage = layerMask.getImage();
-                    Debug.debugImage(maskImage, "mask image");
-
-                    BufferedImage transparencyImage = layerMask.getTransparencyImage();
-                    Debug.debugImage(transparencyImage, "transparency image");
-                }
-            }
-        });
-
-        developMenu.add(new RestrictedLayerAction("Mask update transparency from BW", HAS_LAYER_MASK) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                layer.getMask().updateTransparencyImage();
-                layer.getComp().update();
-            }
-        });
-
-        developMenu.add(new DrawableAction("Debug getCanvasSizedSubImage") {
-            @Override
-            protected void process(Drawable dr) {
-                Debug.debugImage(dr.getCanvasSizedSubImage());
-            }
-        });
-
-        developMenu.add(new OpenViewEnabledAction("Debug Copy Brush") {
-            @Override
-            protected void onClick() {
-                CopyBrush.setDebugBrushImage(true);
-            }
-        });
-
-        developMenu.add(new PAction("Create All Filters") {
-            @Override
-            protected void onClick() {
-                FilterUtils.createAllFilters();
-            }
-        });
-
-        developMenu.add(new PAction("Change UI") {
-            @Override
-            protected void onClick() {
-                ImageArea.changeUI();
-            }
-        });
-
-        developMenu.add(new PAction("frame size 1366x728") {
-            @Override
-            protected void onClick() {
-                PixelitorWindow.get().setSize(1366, 728);
-            }
-        });
-
-        developMenu.add(new OpenViewEnabledAction("Export with ImageMagick") {
-            @Override
-            protected void onClick() {
-                BufferedImage img = getActiveCompositeImage();
-                ImageMagick.exportImage(img, new File("out.webp"), ExportSettings.DEFAULTS);
-            }
-        }, CTRL_ALT_E);
+        developMenu.add(createManualSubmenu(pw));
+        developMenu.add(createSplashSubmenu());
+        developMenu.add(createTestSubmenu());
 
         return developMenu;
     }
@@ -1444,21 +1361,14 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDebugSubmenu(PixelitorWindow pw) {
         PMenu sub = new PMenu("Debug");
 
-        sub.add(new OpenViewEnabledAction("repaint() on the active image") {
+        sub.add(new PAction("Copy Internal State to Clipboard") {
             @Override
             protected void onClick() {
-                repaintActive();
+                Debug.copyInternalState();
             }
-        });
+        }, CTRL_ALT_D);
 
-        sub.add(new OpenViewEnabledAction("update(FULL) on the active image") {
-            @Override
-            protected void onClick() {
-                getActiveComp().update(FULL, true);
-            }
-        });
-
-        sub.add(new OpenViewEnabledAction("Debug active composite image") {
+        sub.add(new OpenViewEnabledAction("Debug Active Composite Image") {
             @Override
             protected void onClick() {
                 Composition comp = getActiveComp();
@@ -1466,47 +1376,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new OpenViewEnabledAction("Debug all images") {
+        sub.add(new OpenViewEnabledAction("Debug All Images") {
             @Override
             protected void onClick() {
                 Debug.debugAllImages();
-            }
-        });
-
-        sub.add(new PAction("revalidate() the main window") {
-            @Override
-            protected void onClick() {
-                pw.getContentPane().revalidate();
-            }
-        });
-
-        sub.add(new PAction("update all UI") {
-            @Override
-            protected void onClick() {
-                Themes.updateAllUI();
-            }
-        });
-
-        sub.add(new OpenViewEnabledAction("reset the translation of current layer") {
-            @Override
-            protected void onClick() {
-                var comp = getActiveComp();
-                Layer layer = comp.getActiveLayer();
-                if (layer instanceof ContentLayer contentLayer) {
-                    contentLayer.setTranslation(0, 0);
-                }
-                if (layer.hasMask()) {
-                    layer.getMask().setTranslation(0, 0);
-                }
-                comp.update();
-            }
-        });
-
-        sub.add(new OpenViewEnabledAction("Update Histograms") {
-            @Override
-            protected void onClick() {
-                var comp = getActiveComp();
-                HistogramsPanel.updateFrom(comp);
             }
         });
 
@@ -1517,7 +1390,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new OpenViewEnabledAction("debug mouse to sys.out") {
+        sub.add(new OpenViewEnabledAction("Debug Mouse to System.out") {
             @Override
             protected void onClick() {
                 GlobalEvents.registerDebugMouseWatching(false);
@@ -1537,61 +1410,148 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new PAction("Copy Internal State to Clipboard") {
+        sub.add(new OpenViewEnabledAction("Dump Event Queue") {
             @Override
             protected void onClick() {
-                Debug.copyInternalState();
-            }
-        }, CTRL_ALT_D);
-
-        sub.add(new OpenViewEnabledAction("Add All Smart Filters") {
-            @Override
-            protected void onClick() {
-                Composition activeComp = getActiveComp();
-                Debug.addAllSmartFilters(activeComp);
+                Events.dumpAll();
             }
         });
 
-        sub.add(new PAction("Serialize All Filters") {
+        sub.add(new RestrictedLayerAction("Debug Layer Mask", HAS_LAYER_MASK) {
             @Override
-            protected void onClick() {
-                Debug.serializeAllFilters();
+            public void onActiveLayer(Layer layer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                Debug.debugImage(imageLayer.getImage(), "layer image");
+
+                if (imageLayer.hasMask()) {
+                    LayerMask layerMask = imageLayer.getMask();
+                    BufferedImage maskImage = layerMask.getImage();
+                    Debug.debugImage(maskImage, "mask image");
+
+                    BufferedImage transparencyImage = layerMask.getTransparencyImage();
+                    Debug.debugImage(transparencyImage, "transparency image");
+                }
             }
         });
 
-        sub.add(new PAction("Deserialize All Filters") {
+        sub.add(new DrawableAction("Debug getCanvasSizedSubImage()") {
             @Override
-            protected void onClick() {
-                Debug.deserializeAllFilters();
+            protected void process(Drawable dr) {
+                Debug.debugImage(dr.getCanvasSizedSubImage());
             }
         });
+
+        sub.add(new OpenViewEnabledAction("Debug Copy Brush") {
+            @Override
+            protected void onClick() {
+                CopyBrush.setDebugBrushImage(true);
+            }
+        });
+
+        sub.addFilter(PorterDuff.NAME, PorterDuff::new);
 
         return sub;
     }
 
-    private static JMenu createTestSubmenu() {
-        PMenu sub = new PMenu("Test");
+    private static JMenu createExperimentalSubmenu() {
+        PMenu sub = new PMenu("Experimental");
 
-        sub.addFilter("ParamTest", ParamTest::new);
+        sub.addFilter(Contours.NAME, Contours::new);
+        sub.addFilter(JHCustomHalftone.NAME, JHCustomHalftone::new);
 
-        sub.add(new PAction("Random GUI Test") {
+        sub.addSeparator();
+
+        sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
+        sub.addFilter(XYZTest.NAME, XYZTest::new);
+        sub.addFilter(Sphere3D.NAME, Sphere3D::new);
+        sub.addFilter(PoissonDiskTester.NAME, PoissonDiskTester::new);
+
+        return sub;
+    }
+
+    private static JMenu createManualSubmenu(PixelitorWindow pw) {
+        PMenu sub = new PMenu("Manual");
+
+        sub.add(new OpenViewEnabledAction("repaint() on the active image") {
             @Override
             protected void onClick() {
-                RandomGUITest.start();
-            }
-        }, CTRL_R);
-
-        sub.add(new OpenViewEnabledAction("Save Current Image in All Formats...") {
-            @Override
-            protected void onClick() {
-                IO.saveCurrentImageInAllFormats();
+                repaintActive();
             }
         });
 
-        sub.add(new OpenViewEnabledAction("Test Filter Constructors") {
+        sub.add(new PAction("revalidate() the main window") {
             @Override
             protected void onClick() {
-                FilterUtils.testFilterConstructors();
+                pw.getContentPane().revalidate();
+            }
+        });
+
+        sub.add(new PAction("Themes.updateAllUI()") {
+            @Override
+            protected void onClick() {
+                Themes.updateAllUI();
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("update(FULL) on the active image") {
+            @Override
+            protected void onClick() {
+                getActiveComp().update(FULL, true);
+            }
+        });
+
+        sub.addSeparator();
+
+        sub.add(new PAction("Change UI") {
+            @Override
+            protected void onClick() {
+                ImageArea.changeUI();
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Export with ImageMagick") {
+            @Override
+            protected void onClick() {
+                BufferedImage img = getActiveCompositeImage();
+                ImageMagick.exportImage(img, new File("out.webp"), ExportSettings.DEFAULTS);
+            }
+        }, CTRL_ALT_E);
+
+        sub.add(new OpenViewEnabledAction("Reset the translation of current layer") {
+            @Override
+            protected void onClick() {
+                var comp = getActiveComp();
+                Layer layer = comp.getActiveLayer();
+                if (layer instanceof ContentLayer contentLayer) {
+                    contentLayer.setTranslation(0, 0);
+                }
+                if (layer.hasMask()) {
+                    layer.getMask().setTranslation(0, 0);
+                }
+                comp.update();
+            }
+        });
+
+        sub.add(new PAction("Set Window Size to 1366x728") {
+            @Override
+            protected void onClick() {
+                PixelitorWindow.get().setSize(1366, 728);
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Update Histograms") {
+            @Override
+            protected void onClick() {
+                var comp = getActiveComp();
+                HistogramsPanel.updateFrom(comp);
+            }
+        });
+
+        sub.add(new RestrictedLayerAction("Update Mask Transparency from BW", HAS_LAYER_MASK) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                layer.getMask().updateTransparencyImage();
+                layer.getComp().update();
             }
         });
 
@@ -1618,18 +1578,62 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createExperimentalSubmenu() {
-        PMenu sub = new PMenu("Experimental");
+    private static JMenu createTestSubmenu() {
+        PMenu sub = new PMenu("Test");
 
-        sub.addFilter(Contours.NAME, Contours::new);
-        sub.addFilter(JHCustomHalftone.NAME, JHCustomHalftone::new);
+        sub.add(new PAction("Create All Filters") {
+            @Override
+            protected void onClick() {
+                FilterUtils.createAllFilters();
+            }
+        });
+
+        sub.addFilter("ParamTest", ParamTest::new);
+
+        sub.add(new PAction("Random GUI Test") {
+            @Override
+            protected void onClick() {
+                RandomGUITest.start();
+            }
+        }, CTRL_R);
+
+        sub.add(new OpenViewEnabledAction("Save Current Image in All Formats...") {
+            @Override
+            protected void onClick() {
+                IO.saveCurrentImageInAllFormats();
+            }
+        });
 
         sub.addSeparator();
 
-        sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
-        sub.addFilter(XYZTest.NAME, XYZTest::new);
-        sub.addFilter(Sphere3D.NAME, Sphere3D::new);
-        sub.addFilter(PoissonDiskTester.NAME, PoissonDiskTester::new);
+        sub.add(new OpenViewEnabledAction("Add All Smart Filters") {
+            @Override
+            protected void onClick() {
+                Composition activeComp = getActiveComp();
+                Debug.addAllSmartFilters(activeComp);
+            }
+        });
+
+        sub.add(new OpenViewEnabledAction("Test Filter Constructors") {
+            @Override
+            protected void onClick() {
+                FilterUtils.testFilterConstructors();
+            }
+        });
+
+        sub.add(new PAction("Serialize All Filters") {
+            @Override
+            protected void onClick() {
+                Debug.serializeAllFilters();
+            }
+        });
+
+        sub.add(new PAction("Deserialize All Filters") {
+            @Override
+            protected void onClick() {
+                Debug.deserializeAllFilters();
+            }
+        });
 
         return sub;
     }
