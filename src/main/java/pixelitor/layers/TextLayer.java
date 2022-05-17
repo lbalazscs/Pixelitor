@@ -84,6 +84,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter = new TransformedTextPainter();
         settings.configurePainter(painter);
         painter.setTranslation(getTx(), getTy());
+
+        settings.checkFontIsInstalled(this);
     }
 
     public static TextLayer createNew() {

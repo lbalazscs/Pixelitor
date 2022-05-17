@@ -24,19 +24,19 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.Utils;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.layers.TextLayer;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static java.awt.Color.BLACK;
@@ -268,6 +268,16 @@ public class TextSettings implements Serializable, Debuggable {
 
         if (guiUpdater != null) { // can be null in tests that don't create a dialog
             guiUpdater.accept(this);
+        }
+    }
+
+    public void checkFontIsInstalled(TextLayer textLayer) {
+        String fontName = font.getName();
+        int index = Arrays.binarySearch(Utils.getAvailableFontNames(), fontName);
+        if (index < 0) {
+            EventQueue.invokeLater(() -> Messages.showError("Font Not Found",
+                "<html>The font <b>" + fontName + "</b> was not found on this computer." +
+                "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>."));
         }
     }
 

@@ -47,6 +47,7 @@ public final class Utils {
     private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
     public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
+    private static String[] fontNames;
 
     private Utils() {
     }
@@ -377,15 +378,21 @@ public final class Utils {
         };
     }
 
+    private static void fetchAvailableFontNames() {
+        fontNames = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .getAvailableFontFamilyNames();
+    }
+
     public static void preloadFontNames() {
-        // the results are cached, no need to cache them here
-        getAvailableFontNames();
+        fetchAvailableFontNames();
     }
 
     public static String[] getAvailableFontNames() {
-        return GraphicsEnvironment
-            .getLocalGraphicsEnvironment()
-            .getAvailableFontFamilyNames();
+        if (fontNames == null) {
+            fetchAvailableFontNames();
+        }
+        return fontNames;
     }
 
     /**
