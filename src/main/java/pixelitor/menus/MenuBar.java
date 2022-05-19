@@ -1154,6 +1154,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderGeometrySubmenu() {
         PMenu sub = new PMenu("Geometry");
 
+        sub.addFilter(BorderMask.NAME, BorderMask::new);
         sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
         sub.addFilter(Truchet.NAME, Truchet::new);
