@@ -173,7 +173,7 @@ public class PrintAction extends OpenViewEnabledAction implements Printable {
     }
 
     @Override
-    public int print(Graphics g, PageFormat pf, int page) throws PrinterException {
+    public int print(Graphics g, PageFormat pf, int page) {
         if (page > 0) {
             return NO_SUCH_PAGE;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,7 +83,7 @@ public enum Metric {
         return this::distanceDouble;
     }
 
-    public static interface DistanceFunction {
+    public interface DistanceFunction {
         double apply(double x1, double y1, double x2, double y2);
     }
 }

@@ -29,7 +29,6 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +37,7 @@ import java.util.Objects;
  * A collection of 4 area effects, which can be enabled or disabled.
  * It also functions as the {@link ParamState} of {@link EffectsParam}
  */
-public class AreaEffects implements Serializable, ParamState<AreaEffects>, Debuggable {
+public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 

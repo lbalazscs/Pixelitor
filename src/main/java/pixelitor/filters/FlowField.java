@@ -628,9 +628,9 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private static record ParticleInitializer(Color particleColor,
-                                              boolean randomizeColor,
-                                              Color[][] fieldColors) implements Modifier<FlowFieldParticle> {
+    private record ParticleInitializer(Color particleColor,
+                                       boolean randomizeColor,
+                                       Color[][] fieldColors) implements Modifier<FlowFieldParticle> {
 
         @Override
         public void modify(FlowFieldParticle particle) {
@@ -641,8 +641,8 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private static record ForceModeUpdater(ForceMode forceMode,
-                                           Vector2D[][] fieldAccelerations) implements Modifier<FlowFieldParticle> {
+    private record ForceModeUpdater(ForceMode forceMode,
+                                    Vector2D[][] fieldAccelerations) implements Modifier<FlowFieldParticle> {
         @Override
         public void modify(FlowFieldParticle particle) {
             particle.delta.set(fieldAccelerations[particle.getFieldX()][particle.getFieldY()]);

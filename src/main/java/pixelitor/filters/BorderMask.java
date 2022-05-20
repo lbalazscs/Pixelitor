@@ -18,8 +18,11 @@
 package pixelitor.filters;
 
 import pixelitor.colors.Colors;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Shapes;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -45,8 +48,9 @@ public class BorderMask extends ParametrizedFilter {
     private static final long serialVersionUID = 1L;
 
     private final GroupedRangeParam distanceParam = new GroupedRangeParam("Distance",
-        new String[] {"North", "East", "South", "West"}, 0, 10, 500, true);
-    private final GroupedRangeParam roundnessParam = new GroupedRangeParam("Roundness", 0, 20, 500);
+        new String[]{"North", "East", "South", "West"}, 0, 10, 500, true);
+    private final RangeParam roundnessParam = new RangeParam("Roundness", 0, 20, 500);
+    private final AngleParam angleParam = new AngleParam("Rotate", 0);
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
     private final BooleanParam transparencyParam = new BooleanParam("Render Transparency", false);
 
@@ -56,6 +60,7 @@ public class BorderMask extends ParametrizedFilter {
         setParams(
             distanceParam,
             roundnessParam,
+            angleParam,
             invertParam,
             transparencyParam
         );
@@ -83,11 +88,15 @@ public class BorderMask extends ParametrizedFilter {
         double distE = distanceParam.getValueAsDouble(1);
         double distS = distanceParam.getValueAsDouble(2);
         double distW = distanceParam.getValueAsDouble(3);
-        double roundnessH = roundnessParam.getValueAsDouble(0);
-        double roundnessV = roundnessParam.getValueAsDouble(1);
+        double roundness = roundnessParam.getValueAsDouble();
 
         Shape rect = new RoundRectangle2D.Double(distW, distN,
-            width - distW - distE, height - distN - distS, roundnessH, roundnessV);
+            width - distW - distE, height - distN - distS, roundness, roundness);
+
+        double angle = angleParam.getValueInRadians();
+        if (angle != 0) {
+            rect = Shapes.rotate(rect, angle, width / 2.0, height / 2.0);
+        }
 
         if (renderTransparency) {
             g.setComposite(AlphaComposite.DstOut);

@@ -25,6 +25,7 @@ import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.tools.move.MoveMode;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -330,8 +331,7 @@ public class Selection implements Debuggable {
                 startRect.getX() + relImX, startRect.getY() + relImY,
                 startRect.getWidth(), startRect.getHeight());
         } else {
-            var at = AffineTransform.getTranslateInstance(relImX, relImY);
-            shape = at.createTransformedShape(moveStartShape);
+            shape = Shapes.translate(moveStartShape, relImX, relImY);
         }
     }
 

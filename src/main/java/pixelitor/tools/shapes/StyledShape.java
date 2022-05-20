@@ -440,8 +440,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         // It could also be rotated backwards with an AffineTransform.
         origShape = shapeType.createShape(transformedDrag, settings);
         assert origShape != null;
-        AffineTransform rotBack = AffineTransform.getRotateInstance(-angle, rotCenterImX, rotCenterImY);
-        origShape = rotBack.createTransformedShape(origShape);
+        // rotate back
+        origShape = Shapes.rotate(origShape, -angle, rotCenterImX, rotCenterImY);
         assert origShape != null;
 
         // Set the original drag to the diagonal of the back-rotated transform box,

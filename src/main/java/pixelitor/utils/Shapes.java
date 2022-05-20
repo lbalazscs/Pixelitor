@@ -1696,4 +1696,14 @@ public class Shapes {
         Geometry.add(P, B, P);
         Geometry.add(Q, B, Q);
     }
+
+    public static Shape rotate(Shape shape, double theta, double anchorX, double anchorY) {
+        return AffineTransform.getRotateInstance(theta, anchorX, anchorY)
+            .createTransformedShape(shape);
+    }
+
+    public static Shape translate(Shape shape, double tx, double ty) {
+        return AffineTransform.getTranslateInstance(tx, ty)
+            .createTransformedShape(shape);
+    }
 }

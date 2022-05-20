@@ -40,7 +40,7 @@ import static java.lang.String.format;
  * {@link View} and the image zooming into account.
  */
 public class PPoint {
-    View view;
+    final View view;
 
     // All the coordinates are initialized in subclasses.
 

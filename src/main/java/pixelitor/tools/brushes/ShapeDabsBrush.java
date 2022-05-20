@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,10 @@ package pixelitor.tools.brushes;
 import pixelitor.Composition;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.Shapes;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -49,8 +49,7 @@ public class ShapeDabsBrush extends DabsBrush {
         ShapeType shapeType = ((ShapeDabsBrushSettings) settings).getShapeType();
         if (theta != 0) {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
-            var rotTx = AffineTransform.getRotateInstance(theta, x, y);
-            Shape rotatedShape = rotTx.createTransformedShape(shape);
+            Shape rotatedShape = Shapes.rotate(shape, theta, x, y);
             targetG.fill(rotatedShape);
         } else {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);

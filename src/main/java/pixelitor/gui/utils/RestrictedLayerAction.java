@@ -31,7 +31,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
-    public static interface Condition {
+    public interface Condition {
         boolean isAllowed(Layer layer);
 
         String getErrorMessage(Layer layer);

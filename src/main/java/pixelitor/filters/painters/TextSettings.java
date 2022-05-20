@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
@@ -272,6 +273,10 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public void checkFontIsInstalled(TextLayer textLayer) {
+        if (AppContext.isUnitTesting()) {
+            // the fonts are not found when testing in the cloud, but that's OK
+            return;
+        }
         String fontName = font.getName();
         int index = Arrays.binarySearch(Utils.getAvailableFontNames(), fontName);
         if (index < 0) {
