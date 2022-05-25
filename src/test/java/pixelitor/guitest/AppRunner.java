@@ -809,7 +809,8 @@ public class AppRunner {
 
     public void changeLayerOpacity(float newValue) {
         String newValueString = String.valueOf((int) (newValue * 100));
-        pw.textBox("layerOpacity")
+        JTextComponentFixture layerOpacity = findLayerOpacityTF();
+        layerOpacity
             .requireText("100")
             .deleteText()
             .enterText(newValueString)
@@ -817,10 +818,22 @@ public class AppRunner {
             .releaseKey(VK_ENTER);
 
         keyboard.undo("Layer Opacity Change");
-        pw.textBox("layerOpacity").requireText("100");
+        layerOpacity.requireText("100");
 
         keyboard.redo("Layer Opacity Change");
-        pw.textBox("layerOpacity").requireText(newValueString);
+        layerOpacity.requireText(newValueString);
+    }
+
+    private JTextComponentFixture findLayerOpacityTF() {
+        // the name of the inner textfield can't be set directly,
+        // because Nimbus uses it => use the name of the parent combo box
+        JTextComponentFixture layerOpacity = pw.textBox(new GenericTypeMatcher<JTextField>(JTextField.class) {
+            @Override
+            protected boolean isMatching(JTextField c) {
+                return "layerOpacity".equals(c.getParent().getName());
+            }
+        });
+        return layerOpacity;
     }
 
     public enum Randomize {YES, NO}

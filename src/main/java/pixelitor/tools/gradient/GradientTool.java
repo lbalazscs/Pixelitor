@@ -24,6 +24,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.GradientFillLayer;
@@ -142,10 +143,10 @@ public class GradientTool extends DragTool {
 
     private void blendingModePanelChanged(ActionEvent e) {
         String editName;
-        if (e.getSource() instanceof JComboBox) {
-            editName = "Change Gradient Blending Mode";
-        } else {
+        if (e.getSource() instanceof DropDownSlider) {
             editName = "Change Gradient Opacity";
+        } else {
+            editName = "Change Gradient Blending Mode";
         }
         regenerateGradient(editName);
     }

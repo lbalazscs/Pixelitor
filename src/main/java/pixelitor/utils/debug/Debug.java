@@ -430,6 +430,31 @@ public class Debug {
         }
     }
 
+    private static String debugDimension(Dimension d) {
+        return d.width + "x" + d.height;
+    }
+
+    public static String debugJComponent(JComponent c) {
+        return String.format("""
+                size = %s
+                preferredSize = %s
+                minimumSize = %s
+                maximumSize = %s
+                insets = %s
+                border = %s
+                border insets = %s
+                doubleBuffered = %s
+                """,
+            debugDimension(c.getSize()),
+            debugDimension(c.getPreferredSize()),
+            debugDimension(c.getMinimumSize()),
+            debugDimension(c.getMaximumSize()),
+            c.getInsets().toString(),
+            c.getBorder().toString(),
+            c.getBorder().getBorderInsets(c).toString(),
+            c.isDoubleBuffered());
+    }
+
     public static void serializeAllFilters() {
         FilterUtils.forEachSmartFilter(Debug::serialize);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,13 +19,14 @@ package pixelitor.automate;
 
 import pixelitor.compactions.Resize;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.IntTextField;
+import pixelitor.gui.utils.IntDocumentFilter;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
 
 import static javax.swing.BoxLayout.Y_AXIS;
+import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 
 /**
  * The batch resize functionality
@@ -58,26 +59,34 @@ public class BatchResize {
      */
     static class BatchResizePanel extends ValidatedPanel {
         private final OpenSaveDirsPanel openSaveDirsPanel;
-        private final IntTextField widthTF;
-        private final IntTextField heightTF;
+        private final JTextField widthTF;
+        private final JTextField heightTF;
+
+        private static final int DEFAULT_WIDTH = 300;
+        private static final int DEFAULT_HEIGHT = 300;
 
         private BatchResizePanel() {
             var sizePanel = new JPanel();
 
-            sizePanel.add(new JLabel("Max Width:"));
-            widthTF = new IntTextField(300, 5);
-            widthTF.setName("widthTF");
-            sizePanel.add(widthTF);
+            IntDocumentFilter documentFilter = new IntDocumentFilter();
 
-            sizePanel.add(new JLabel("Max Height:"));
-            heightTF = new IntTextField(300, 5);
-            heightTF.setName("heightTF");
-            sizePanel.add(heightTF);
+            widthTF = addTextField("Max Width:", "widthTF", DEFAULT_WIDTH, sizePanel, documentFilter);
+            heightTF = addTextField("Max Height:", "heightTF", DEFAULT_HEIGHT, sizePanel, documentFilter);
 
             setLayout(new BoxLayout(this, Y_AXIS));
             add(sizePanel);
             openSaveDirsPanel = new OpenSaveDirsPanel();
             add(openSaveDirsPanel);
+        }
+
+        private JTextField addTextField(String label, String name, int defaultValue, JPanel sizePanel, IntDocumentFilter documentFilter) {
+            sizePanel.add(new JLabel(label));
+
+            JTextField tf = new JTextField(String.valueOf(defaultValue), 5);
+            tf.setName(name);
+            sizePanel.add(createPositiveIntLayer(label, tf, false));
+            documentFilter.useFor(tf);
+            return tf;
         }
 
         @Override
@@ -94,11 +103,21 @@ public class BatchResize {
         }
 
         private int getNewWidth() {
-            return widthTF.getIntValue();
+            try {
+                return Integer.parseInt(widthTF.getText());
+            } catch (NumberFormatException e) {
+                widthTF.setText(String.valueOf(DEFAULT_WIDTH));
+                return DEFAULT_WIDTH;
+            }
         }
 
         private int getNewHeight() {
-            return heightTF.getIntValue();
+            try {
+                return Integer.parseInt(heightTF.getText());
+            } catch (NumberFormatException e) {
+                heightTF.setText(String.valueOf(DEFAULT_HEIGHT));
+                return DEFAULT_HEIGHT;
+            }
         }
     }
 }

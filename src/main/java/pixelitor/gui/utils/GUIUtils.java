@@ -412,4 +412,9 @@ public final class GUIUtils {
             c.removeMouseListener(mouseListener);
         }
     }
+
+    public static void replaceMouseListeners(JComponent c, MouseListener newMouseListener) {
+        removeAllMouseListeners(c);
+        c.addMouseListener(newMouseListener);
+    }
 }

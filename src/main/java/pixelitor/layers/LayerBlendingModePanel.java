@@ -43,6 +43,9 @@ public class LayerBlendingModePanel extends BlendingModePanel
     private LayerBlendingModePanel() {
         super(false);
 
+        opacityDDSlider.setName("layerOpacity");
+        bmCombo.setName("layerBM");
+
         Views.addActivationListener(this);
         Layers.addCompositionListener(this);
 

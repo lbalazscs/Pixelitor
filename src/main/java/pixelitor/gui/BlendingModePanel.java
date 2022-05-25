@@ -53,10 +53,6 @@ public class BlendingModePanel extends JPanel {
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(0, 100, 100, true);
 
-        if (!forTools) {
-            opacityDDSlider.setTFName("layerOpacity");
-        }
-
         add(opacityDDSlider);
 
         if (forTools) {
@@ -69,9 +65,6 @@ public class BlendingModePanel extends JPanel {
         BlendingMode[] blendingModes = BlendingMode.values();
         bmCombo = GUIUtils.createComboBox(blendingModes);
         bmCombo.setFocusable(false);
-        if (!forTools) {
-            bmCombo.setName("layerBM");
-        }
         add(bmCombo);
     }
 
