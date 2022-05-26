@@ -25,6 +25,7 @@ import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.PanMethod;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
@@ -34,7 +35,10 @@ import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.ArrayList;
@@ -115,8 +119,22 @@ public class Pixelitor {
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
-        Themes.install(AppPreferences.getDefaultTheme(),
-            false, true);
+        Theme theme = AppPreferences.getDefaultTheme();
+        Themes.install(theme, false, true);
+
+        int uiFontSize = AppPreferences.loadUIFontSize();
+        if (uiFontSize != 0) {
+            Font defaultFont = UIManager.getFont("defaultFont");
+            if (defaultFont != null) {
+                Font newFont = defaultFont.deriveFont((float) uiFontSize);
+                FontUIResource fontUIResource = new FontUIResource(newFont);
+                UIManager.put("defaultFont", fontUIResource);
+
+                if (theme.isNimbus()) {
+                    UIManager.getLookAndFeel().getDefaults().put("defaultFont", fontUIResource);
+                }
+            }
+        }
 
         var pw = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);

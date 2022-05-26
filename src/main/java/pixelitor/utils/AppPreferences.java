@@ -40,9 +40,11 @@ import pixelitor.tools.BrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
+import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.prefs.Preferences;
@@ -104,6 +106,8 @@ public final class AppPreferences {
 
     private static final String MAGICK_DIR_KEY = "magick_dir";
     private static final String EXPERIMENTAL_KEY = "experimental";
+
+    private static final String UI_FONT_SIZE_KEY = "ui_font_size";
 
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
@@ -392,6 +396,7 @@ public final class AppPreferences {
         saveGuideStyles();
         saveCropGuideStyles();
         saveTheme();
+        saveUIFontSize();
         saveLanguage();
         saveMouseZoom();
         savePan();
@@ -494,6 +499,16 @@ public final class AppPreferences {
 
     private static void saveTheme() {
         mainNode.put(THEME_KEY, Themes.getCurrent().getSaveCode());
+    }
+
+    public static int loadUIFontSize() {
+        return mainNode.getInt(UI_FONT_SIZE_KEY, 0);
+    }
+
+    public static void saveUIFontSize() {
+        Font font = UIManager.getFont("defaultFont");
+        int size = font == null ? 0 : font.getSize();
+        mainNode.putInt(UI_FONT_SIZE_KEY, size);
     }
 
     public static String loadLanguageCode() {

@@ -73,4 +73,9 @@ public enum Theme {
     public String toString() {
         return guiName;
     }
+
+    public boolean isFlat() {
+        // TODO
+        return guiName.startsWith("Flat");
+    }
 }

@@ -25,6 +25,7 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
@@ -106,11 +107,24 @@ public class GradientParam extends AbstractFilterParam {
         }
     }
 
+    private void debugParents() {
+        Container parent = gradientSlider.getParent();
+        while (parent != null) {
+            System.out.println("GradientParam::debugParents: parent = " + (parent == null ? "null" :
+                (parent + ", class = " + parent.getClass().getName())));
+            parent = parent.getParent();
+        }
+    }
+
     private boolean shouldStartFilter(PropertyChangeEvent evt) {
+//        if (evt.getPropertyName().equals("UI")) {
+//            debugParents();
+//        }
+
         if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             return switch (evt.getPropertyName()) {
                 case "ancestor", "selected thumb", "enabled",
-                    "graphicsConfiguration", USE_BEVEL -> false;
+                    "graphicsConfiguration", "UI", USE_BEVEL -> false;
                 default -> true;
             };
         }

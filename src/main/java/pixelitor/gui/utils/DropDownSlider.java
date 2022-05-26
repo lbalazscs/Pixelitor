@@ -109,8 +109,17 @@ public class DropDownSlider extends JComboBox<String> {
         return preferredSize;
     }
 
+    // The default preferred size is larger than required,
+    // and it would increase the width of the whole layer panel.
     private void recalcPreferredSize() {
-        preferredSize = new Dimension(55, super.getPreferredSize().height);
+        JTextField tf = getEditorComponent();
+        int stringWidth = tf.getFontMetrics(tf.getFont()).stringWidth("100");
+        preferredSize = super.getPreferredSize();
+        if (Themes.getCurrent().isFlat()) {
+            preferredSize.width = 20 + (int) (stringWidth * 2.6);
+        } else {
+            preferredSize.width = stringWidth + 40;
+        }
     }
 
     public int getValue() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,9 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppContext;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
+import pixelitor.gui.utils.SliderSpinner.TextPosition;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
@@ -34,21 +36,22 @@ import pixelitor.utils.Language;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.io.File;
 
 import static java.lang.Integer.parseInt;
-import static javax.swing.SwingConstants.LEFT;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.utils.Texts.i18n;
 
 /**
  * The GUI for the preferences dialog
  */
-public class PreferencesPanel extends JPanel {
+public class PreferencesPanel extends JTabbedPane {
     private static final Border EMPTY_BORDER =
         BorderFactory.createEmptyBorder(0, 10, 5, 0);
     private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
@@ -66,23 +69,21 @@ public class PreferencesPanel extends JPanel {
     private static int lastSelectedTabIndex = 0;
 
     private PreferencesPanel() {
-        var tabbedPane = new JTabbedPane(LEFT);
+        super(LEFT);
 
-        tabbedPane.add("General", createGeneralPanel());
-        tabbedPane.add("Mouse", createMousePanel());
-        tabbedPane.add("Guides", createGuidesPanel());
+        add("General", createGeneralPanel());
+        add("Mouse", createMousePanel());
+        add("Guides", createGuidesPanel());
 
-        setupTabSelection(tabbedPane);
-
-        add(tabbedPane);
+        setupRememberingTabSelection();
     }
 
-    private static void setupTabSelection(JTabbedPane tabbedPane) {
+    private void setupRememberingTabSelection() {
         if (lastSelectedTabIndex != 0) {
-            tabbedPane.setSelectedIndex(lastSelectedTabIndex);
+            setSelectedIndex(lastSelectedTabIndex);
         }
-        tabbedPane.addChangeListener(e ->
-            lastSelectedTabIndex = tabbedPane.getSelectedIndex());
+        addChangeListener(e ->
+            lastSelectedTabIndex = getSelectedIndex());
     }
 
     private JPanel createGeneralPanel() {
@@ -94,6 +95,7 @@ public class PreferencesPanel extends JPanel {
 
         if (AppContext.enableExperimentalFeatures) {
             addThemeChooser(gbh);
+            addFontSizeChooser(gbh);
         }
 
         addUndoLevelsChooser(gbh);
@@ -115,7 +117,7 @@ public class PreferencesPanel extends JPanel {
         JComboBox<Language> langChooser = new JComboBox<>(languages);
 
         langChooser.setName("langChooser");
-        gbh.addLabelAndControl("Language: ", langChooser);
+        gbh.addLabelAndControlNoStretch("Language: ", langChooser);
         langChooser.addActionListener(e -> {
             Language language = languages.getSelectedItem();
             if (language != Language.getCurrent()) {
@@ -135,7 +137,7 @@ public class PreferencesPanel extends JPanel {
         JComboBox<Theme> themeChooser = new JComboBox<>(themes);
 
         themeChooser.setName("themeChooser");
-        gbh.addLabelAndControl("Theme: ", themeChooser);
+        gbh.addLabelAndControlNoStretch("Theme: ", themeChooser);
         themeChooser.addActionListener(e -> {
             Theme theme = themes.getSelectedItem();
             setCursor(Cursors.BUSY);
@@ -147,11 +149,49 @@ public class PreferencesPanel extends JPanel {
         });
     }
 
+    private void addFontSizeChooser(GridBagHelper gbh) {
+        Font font = UIManager.getFont("defaultFont");
+        if (font == null) {
+            return;
+        }
+
+        int currentSize = font.getSize();
+        int minSize = Math.min(10, currentSize);
+        int maxSize = Math.max(30, currentSize);
+
+        RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, TextPosition.NONE);
+        gbh.addLabelAndControl("UI Font Size: ", fontSize.createGUI());
+
+        fontSize.setAdjustmentListener(() -> {
+            setCursor(Cursors.BUSY);
+
+            Font newFont = font.deriveFont(fontSize.getValueAsFloat());
+            UIManager.put("defaultFont", new FontUIResource(newFont));
+
+            if (Themes.getCurrent().isNimbus()) {
+                try {
+                    NimbusLookAndFeel laf = new NimbusLookAndFeel();
+                    UIManager.setLookAndFeel(laf);
+                    laf.getDefaults().put("defaultFont", new FontUIResource(newFont));
+                } catch (UnsupportedLookAndFeelException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            EventQueue.invokeLater(() -> {
+                Themes.updateAllUI();
+                SwingUtilities.getWindowAncestor(this).pack();
+                setCursor(Cursors.DEFAULT);
+            });
+
+        });
+    }
+
     private static void addUIChooser(GridBagHelper gbh) {
         JComboBox<ImageArea.Mode> uiChooser = new JComboBox<>(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
-        gbh.addLabelAndControl("Images In: ", uiChooser);
+        gbh.addLabelAndControlNoStretch("Images In: ", uiChooser);
         uiChooser.addActionListener(e -> {
             ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
             ImageArea.changeUI(mode);
@@ -179,14 +219,15 @@ public class PreferencesPanel extends JPanel {
         int currentSize = LayerButtonLayout.getThumbSize();
         thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
 
-        gbh.addLabelAndControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
+        gbh.addLabelAndControlNoStretch("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
     }
 
     private void addMagickDirField(GridBagHelper gbh) {
         magickDirTF = new JTextField(AppPreferences.magickDirName);
+        magickDirTF.setColumns(10);
         // don't let the textfield grow too large
-        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
+//        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
     }
 
@@ -218,8 +259,8 @@ public class PreferencesPanel extends JPanel {
         guideStyleCB.setName("guideStyleCB");
         guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelAndControl("Guide Color: ", guideColorSwatch);
-        gbh.addLabelAndControl("Guide Style: ", guideStyleCB);
+        gbh.addLabelAndControlNoStretch("Guide Color: ", guideColorSwatch);
+        gbh.addLabelAndControlNoStretch("Guide Style: ", guideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
@@ -240,8 +281,8 @@ public class PreferencesPanel extends JPanel {
         cropGuideStyleCB.setName("cropGuideStyleCB");
         cropGuideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelAndControl("Cropping Guide Color: ", guideColorSwatch);
-        gbh.addLabelAndControl("Cropping Guide Style: ", cropGuideStyleCB);
+        gbh.addLabelAndControlNoStretch("Cropping Guide Color: ", guideColorSwatch);
+        gbh.addLabelAndControlNoStretch("Cropping Guide Style: ", cropGuideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
@@ -266,12 +307,12 @@ public class PreferencesPanel extends JPanel {
         zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
         zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
         zoomMethodCB.setName("zoomMethod");
-        gbh.addLabelAndControl("Zoom with:", zoomMethodCB);
+        gbh.addLabelAndControlNoStretch("Zoom with:", zoomMethodCB);
 
         panMethodCB = new JComboBox<>(PanMethod.values());
         panMethodCB.setSelectedItem(PanMethod.CURRENT);
         panMethodCB.setName("panMethod");
-        gbh.addLabelAndControl("Pan with:", panMethodCB);
+        gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
 
         mousePanel.setBorder(EMPTY_BORDER);
         return mousePanel;

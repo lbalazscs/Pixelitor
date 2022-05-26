@@ -19,20 +19,19 @@
  */
 package com.bric.swing;
 
+import com.bric.plaf.GradientSliderUI;
 import com.bric.plaf.MultiThumbSliderUI;
 import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeListener;
 import java.io.Serial;
-import java.lang.reflect.Constructor;
 
 /**
  * This component lets the user manipulate the colors in a gradient.
@@ -176,11 +175,7 @@ public class GradientSlider extends MultiThumbSlider {
     /**
      * The popup for contextual menus.
      */
-    JPopupMenu popup;
-
-    private JPopupMenu createPopup() {
-        return new ColorPickerPopup();
-    }
+    private JPopupMenu popup;
 
     abstract class AbstractPopup extends JPopupMenu {
         @Serial
@@ -282,7 +277,7 @@ public class GradientSlider extends MultiThumbSlider {
     @Override
     public boolean doPopup(int x, int y) {
         if (popup == null) {
-            popup = createPopup();
+            popup = new ColorPickerPopup();
         }
         popup.show(this, x, y);
         return true;
@@ -336,26 +331,27 @@ public class GradientSlider extends MultiThumbSlider {
 
     @Override
     public void updateUI() {
-        String name = UIManager.getString("GradientSliderUI");
-        if (name == null) {
-            name = "com.bric.plaf.GradientSliderUI";
-        }
-        try {
-            Class<?> c = Class.forName(name);
-            Constructor<?>[] constructors = c.getConstructors();
-            for (Constructor<?> constructor : constructors) {
-                Class<?>[] types = constructor.getParameterTypes();
-                if (types.length == 1 && types[0].equals(GradientSlider.class)) {
-                    ComponentUI ui = (ComponentUI) constructor.newInstance(new Object[]{this});
-                    setUI(ui);
-                    return;
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("The class \"" + name + "\" could not be found.");
-        } catch (Throwable t) {
-            RuntimeException e = new RuntimeException("The class \"" + name + "\" could not be constructed.", t);
-            throw e;
-        }
+        setUI(new GradientSliderUI(this));
+//        String name = UIManager.getString("GradientSliderUI");
+//        if (name == null) {
+//            name = "com.bric.plaf.GradientSliderUI";
+//        }
+//        try {
+//            Class<?> c = Class.forName(name);
+//            Constructor<?>[] constructors = c.getConstructors();
+//            for (Constructor<?> constructor : constructors) {
+//                Class<?>[] types = constructor.getParameterTypes();
+//                if (types.length == 1 && types[0].equals(GradientSlider.class)) {
+//                    ComponentUI ui = (ComponentUI) constructor.newInstance(new Object[]{this});
+//                    setUI(ui);
+//                    return;
+//                }
+//            }
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException("The class \"" + name + "\" could not be found.");
+//        } catch (Throwable t) {
+//            RuntimeException e = new RuntimeException("The class \"" + name + "\" could not be constructed.", t);
+//            throw e;
+//        }
     }
 }
