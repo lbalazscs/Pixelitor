@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -240,11 +240,11 @@ class LayerBlendingModesTest {
         alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
-        // adjustment layer with with white mask
+        // adjustment layer with white mask
         alwaysUpperColorAdjustment.addMask(LayerMaskAddType.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
-        // adjustment layer with with black mask, expect lower color
+        // adjustment layer with black mask, expect lower color
         alwaysUpperColorAdjustment.deleteMask(true);
         alwaysUpperColorAdjustment.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
@@ -263,7 +263,7 @@ class LayerBlendingModesTest {
         upperColorTextLayer.addMask(LayerMaskAddType.REVEAL_ALL);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
-        // text layer with with black mask, expect lower color
+        // text layer with black mask, expect lower color
         upperColorTextLayer.deleteMask(true);
         upperColorTextLayer.addMask(LayerMaskAddType.HIDE_ALL);
         assertThat(getResultingColor()).isEqualTo(lowerColor);

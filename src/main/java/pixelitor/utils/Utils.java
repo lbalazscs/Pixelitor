@@ -20,6 +20,7 @@ package pixelitor.utils;
 import net.jafama.FastMath;
 
 import javax.swing.*;
+import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -47,7 +49,9 @@ public final class Utils {
     private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
     public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
+
     private static String[] fontNames;
+    private static final CountDownLatch fontNamesLoaded = new CountDownLatch(1);
 
     private Utils() {
     }
@@ -378,20 +382,30 @@ public final class Utils {
         };
     }
 
-    private static void fetchAvailableFontNames() {
+    public static void preloadFontNames() {
         fontNames = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
+        fontNamesLoaded.countDown();
     }
 
-    public static void preloadFontNames() {
-        fetchAvailableFontNames();
+    public static void preloadUnitTestFontNames() {
+        fontNames = new String[]{Font.DIALOG, Font.DIALOG_INPUT,
+            Font.MONOSPACED, Font.SANS_SERIF, Font.SERIF};
+        fontNamesLoaded.countDown();
     }
 
     public static String[] getAvailableFontNames() {
-        if (fontNames == null) {
-            fetchAvailableFontNames();
+        // make sure that all font names are loaded
+        try {
+            boolean ok = fontNamesLoaded.await(5, TimeUnit.MINUTES);
+            if (!ok) {
+                throw new RuntimeException("Timeout: the font names could not be loaded");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+
         return fontNames;
     }
 

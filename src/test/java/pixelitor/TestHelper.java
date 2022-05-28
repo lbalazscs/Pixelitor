@@ -405,6 +405,7 @@ public class TestHelper {
         AppContext.setUnitTestingMode();
 
         Utils.makeSureAssertionsAreEnabled();
+        Utils.preloadUnitTestFontNames();
 
         Language.setCurrent(Language.ENGLISH);
         Messages.setMsgHandler(new TestMessageHandler());

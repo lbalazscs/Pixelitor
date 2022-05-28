@@ -108,6 +108,7 @@ public final class AppPreferences {
     private static final String EXPERIMENTAL_KEY = "experimental";
 
     private static final String UI_FONT_SIZE_KEY = "ui_font_size";
+    private static final String UI_FONT_TYPE_KEY = "ui_font_type";
 
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
@@ -396,7 +397,7 @@ public final class AppPreferences {
         saveGuideStyles();
         saveCropGuideStyles();
         saveTheme();
-        saveUIFontSize();
+        saveUIFont();
         saveLanguage();
         saveMouseZoom();
         savePan();
@@ -486,15 +487,15 @@ public final class AppPreferences {
         toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getShortName());
     }
 
-    public static Theme getDefaultTheme() {
-        String code = mainNode.get(THEME_KEY, "Nimbus");
+    public static Theme loadTheme() {
+        String code = mainNode.get(THEME_KEY, Themes.DEFAULT.getSaveCode());
         Theme[] themes = Theme.values();
         for (Theme theme : themes) {
             if (code.equals(theme.getSaveCode())) {
                 return theme;
             }
         }
-        return Theme.NIMBUS;
+        return Themes.DEFAULT;
     }
 
     private static void saveTheme() {
@@ -505,10 +506,24 @@ public final class AppPreferences {
         return mainNode.getInt(UI_FONT_SIZE_KEY, 0);
     }
 
-    public static void saveUIFontSize() {
+    public static String loadUIFontType() {
+        return mainNode.get(UI_FONT_TYPE_KEY, "");
+    }
+
+    private static void saveUIFont() {
         Font font = UIManager.getFont("defaultFont");
-        int size = font == null ? 0 : font.getSize();
+        String type;
+        int size;
+        if (font == null) {
+            type = "";
+            size = 0;
+        } else {
+            type = font.getName();
+            size = font.getSize();
+        }
+
         mainNode.putInt(UI_FONT_SIZE_KEY, size);
+        mainNode.put(UI_FONT_TYPE_KEY, type);
     }
 
     public static String loadLanguageCode() {

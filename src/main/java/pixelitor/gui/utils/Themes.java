@@ -34,6 +34,7 @@ public class Themes {
     public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
     // this theme will be used for the unit tests, otherwise it's overwritten at startup
     private static Theme currentTheme = Theme.NIMBUS;
+    public static final Theme DEFAULT = Theme.NIMBUS;
 
     public static void install(Theme theme, boolean updateGUI, boolean force) {
         if (theme != currentTheme || force) {

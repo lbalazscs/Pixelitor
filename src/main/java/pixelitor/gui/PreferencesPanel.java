@@ -22,6 +22,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppContext;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
 import pixelitor.gui.utils.SliderSpinner.TextPosition;
@@ -33,6 +34,7 @@ import pixelitor.layers.LayerButtonLayout;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Language;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -71,43 +73,27 @@ public class PreferencesPanel extends JTabbedPane {
     private PreferencesPanel() {
         super(LEFT);
 
-        add("General", createGeneralPanel());
+        add("UI", createUIPanel());
         add("Mouse", createMousePanel());
         add("Guides", createGuidesPanel());
+        add("Advanced", createAdvancedPanel());
 
         setupRememberingTabSelection();
     }
 
-    private void setupRememberingTabSelection() {
-        if (lastSelectedTabIndex != 0) {
-            setSelectedIndex(lastSelectedTabIndex);
-        }
-        addChangeListener(e ->
-            lastSelectedTabIndex = getSelectedIndex());
-    }
+    private JPanel createUIPanel() {
+        var uiPanel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(uiPanel);
 
-    private JPanel createGeneralPanel() {
-        var generalPanel = new JPanel(new GridBagLayout());
-        var gbh = new GridBagHelper(generalPanel);
-
-        addUIChooser(gbh);
         addLanguageChooser(gbh);
-
-        if (AppContext.enableExperimentalFeatures) {
-            addThemeChooser(gbh);
-            addFontSizeChooser(gbh);
-        }
-
-        addUndoLevelsChooser(gbh);
+        addThemeChooser(gbh);
+        addFontChoosers(gbh);
+        addImageAreaChooser(gbh);
         addThumbSizeChooser(gbh);
-        addMagickDirField(gbh);
         addNativeChoosersCB(gbh);
-        addExperimentalCB(gbh);
 
-        generalPanel.setBorder(EMPTY_BORDER);
-        return generalPanel;
+        return uiPanel;
     }
-
 
     private void addLanguageChooser(GridBagHelper gbh) {
         var languages = new EnumComboBoxModel<>(Language.class);
@@ -149,7 +135,7 @@ public class PreferencesPanel extends JTabbedPane {
         });
     }
 
-    private void addFontSizeChooser(GridBagHelper gbh) {
+    private void addFontChoosers(GridBagHelper gbh) {
         Font font = UIManager.getFont("defaultFont");
         if (font == null) {
             return;
@@ -160,34 +146,44 @@ public class PreferencesPanel extends JTabbedPane {
         int maxSize = Math.max(30, currentSize);
 
         RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, TextPosition.NONE);
-        gbh.addLabelAndControl("UI Font Size: ", fontSize.createGUI());
+        gbh.addParam(fontSize);
+
+        ListParam<String> fontType = new ListParam<String>("Font Type", Utils.getAvailableFontNames(), font.getName());
+        gbh.addParam(fontType);
 
         fontSize.setAdjustmentListener(() -> {
-            setCursor(Cursors.BUSY);
+            Font currentFont = UIManager.getFont("defaultFont");
+            Font newFont = currentFont.deriveFont(fontSize.getValueAsFloat());
+            changeFont(newFont);
+        });
 
-            Font newFont = font.deriveFont(fontSize.getValueAsFloat());
-            UIManager.put("defaultFont", new FontUIResource(newFont));
+        fontType.setAdjustmentListener(() ->
+            changeFont(new Font(fontType.getSelected(), Font.PLAIN, fontSize.getValue())));
+    }
 
-            if (Themes.getCurrent().isNimbus()) {
-                try {
-                    NimbusLookAndFeel laf = new NimbusLookAndFeel();
-                    UIManager.setLookAndFeel(laf);
-                    laf.getDefaults().put("defaultFont", new FontUIResource(newFont));
-                } catch (UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
+    private void changeFont(Font newFont) {
+        setCursor(Cursors.BUSY);
+
+        UIManager.put("defaultFont", new FontUIResource(newFont));
+
+        if (Themes.getCurrent().isNimbus()) {
+            try {
+                NimbusLookAndFeel laf = new NimbusLookAndFeel();
+                UIManager.setLookAndFeel(laf);
+                laf.getDefaults().put("defaultFont", new FontUIResource(newFont));
+            } catch (UnsupportedLookAndFeelException e) {
+                e.printStackTrace();
             }
+        }
 
-            EventQueue.invokeLater(() -> {
-                Themes.updateAllUI();
-                SwingUtilities.getWindowAncestor(this).pack();
-                setCursor(Cursors.DEFAULT);
-            });
-
+        EventQueue.invokeLater(() -> {
+            Themes.updateAllUI();
+            SwingUtilities.getWindowAncestor(this).pack();
+            setCursor(Cursors.DEFAULT);
         });
     }
 
-    private static void addUIChooser(GridBagHelper gbh) {
+    private static void addImageAreaChooser(GridBagHelper gbh) {
         JComboBox<ImageArea.Mode> uiChooser = new JComboBox<>(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
@@ -196,15 +192,6 @@ public class PreferencesPanel extends JTabbedPane {
             ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
             ImageArea.changeUI(mode);
         });
-    }
-
-    private void addUndoLevelsChooser(GridBagHelper gbh) {
-        undoLevelsTF = new JTextField(3);
-        undoLevelsTF.setName("undoLevelsTF");
-        undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-        gbh.addLabelAndControl(UNDO_LEVELS_LABEL + ": ",
-            TextFieldValidator.createPositiveIntLayer(UNDO_LEVELS_LABEL,
-                undoLevelsTF, true));
     }
 
     private void addThumbSizeChooser(GridBagHelper gbh) {
@@ -223,23 +210,33 @@ public class PreferencesPanel extends JTabbedPane {
         thumbSizeCB.addActionListener(e -> updateThumbSize());
     }
 
-    private void addMagickDirField(GridBagHelper gbh) {
-        magickDirTF = new JTextField(AppPreferences.magickDirName);
-        magickDirTF.setColumns(10);
-        // don't let the textfield grow too large
-//        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
-        gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
-    }
-
     private void addNativeChoosersCB(GridBagHelper gbh) {
         nativeChoosersCB = new JCheckBox("", FileChoosers.useNativeDialogs());
         // no action listener, set only when OK is pressed
         gbh.addLabelAndControl("Use System File Choosers:", nativeChoosersCB);
     }
 
-    private void addExperimentalCB(GridBagHelper gbh) {
-        experimentalCB = new JCheckBox("", AppContext.enableExperimentalFeatures);
-        gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
+    private JPanel createMousePanel() {
+        var mousePanel = new JPanel(new BorderLayout());
+        // put the contents to the north of a border layout,
+        // so that it is not stretched vertically
+        var contents = new JPanel(new GridBagLayout());
+        mousePanel.add(contents, BorderLayout.NORTH);
+
+        var gbh = new GridBagHelper(contents);
+
+        zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
+        zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
+        zoomMethodCB.setName("zoomMethod");
+        gbh.addLabelAndControlNoStretch("Zoom with:", zoomMethodCB);
+
+        panMethodCB = new JComboBox<>(PanMethod.values());
+        panMethodCB.setSelectedItem(PanMethod.CURRENT);
+        panMethodCB.setName("panMethod");
+        gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
+
+        mousePanel.setBorder(EMPTY_BORDER);
+        return mousePanel;
     }
 
     private static JPanel createGuidesPanel() {
@@ -295,27 +292,38 @@ public class PreferencesPanel extends JTabbedPane {
         });
     }
 
-    private JPanel createMousePanel() {
-        var mousePanel = new JPanel(new BorderLayout());
-        // put the contents to the north of a border layout,
-        // so that it is not stretched vertically
-        var contents = new JPanel(new GridBagLayout());
-        mousePanel.add(contents, BorderLayout.NORTH);
+    private JPanel createAdvancedPanel() {
+        var generalPanel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(generalPanel);
 
-        var gbh = new GridBagHelper(contents);
+        addUndoLevelsChooser(gbh);
+        addMagickDirField(gbh);
+        addExperimentalCB(gbh);
 
-        zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
-        zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
-        zoomMethodCB.setName("zoomMethod");
-        gbh.addLabelAndControlNoStretch("Zoom with:", zoomMethodCB);
+        generalPanel.setBorder(EMPTY_BORDER);
+        return generalPanel;
+    }
 
-        panMethodCB = new JComboBox<>(PanMethod.values());
-        panMethodCB.setSelectedItem(PanMethod.CURRENT);
-        panMethodCB.setName("panMethod");
-        gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
+    private void addUndoLevelsChooser(GridBagHelper gbh) {
+        undoLevelsTF = new JTextField(3);
+        undoLevelsTF.setName("undoLevelsTF");
+        undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
+        gbh.addLabelAndControl(UNDO_LEVELS_LABEL + ": ",
+            TextFieldValidator.createPositiveIntLayer(UNDO_LEVELS_LABEL,
+                undoLevelsTF, true));
+    }
 
-        mousePanel.setBorder(EMPTY_BORDER);
-        return mousePanel;
+    private void addMagickDirField(GridBagHelper gbh) {
+        magickDirTF = new JTextField(AppPreferences.magickDirName);
+        magickDirTF.setColumns(10);
+        // don't let the textfield grow too large
+//        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
+        gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
+    }
+
+    private void addExperimentalCB(GridBagHelper gbh) {
+        experimentalCB = new JCheckBox("", AppContext.enableExperimentalFeatures);
+        gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
     private boolean validate(JDialog d) {
@@ -376,6 +384,14 @@ public class PreferencesPanel extends JTabbedPane {
     private void updateThumbSize() {
         int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
         LayerButtonLayout.setStaticThumbSize(newSize);
+    }
+
+    private void setupRememberingTabSelection() {
+        if (lastSelectedTabIndex != 0) {
+            setSelectedIndex(lastSelectedTabIndex);
+        }
+        addChangeListener(e ->
+            lastSelectedTabIndex = getSelectedIndex());
     }
 
     public static void showInDialog() {

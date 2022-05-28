@@ -119,14 +119,26 @@ public class Pixelitor {
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
-        Theme theme = AppPreferences.getDefaultTheme();
-        Themes.install(theme, false, true);
+        Theme theme = Themes.DEFAULT;
+        // if a LaF was set from the command line, then don't override it
+        if (System.getProperty("swing.defaultlaf") == null) {
+            theme = AppPreferences.loadTheme();
+            Themes.install(theme, false, true);
+        }
 
         int uiFontSize = AppPreferences.loadUIFontSize();
-        if (uiFontSize != 0) {
-            Font defaultFont = UIManager.getFont("defaultFont");
-            if (defaultFont != null) {
-                Font newFont = defaultFont.deriveFont((float) uiFontSize);
+        String uiFontType = AppPreferences.loadUIFontType();
+
+        Font defaultFont = UIManager.getFont("defaultFont");
+        if (defaultFont != null) { // if null, we don't know how to set the font
+            if (uiFontSize != 0 || !uiFontType.isEmpty()) {
+                Font newFont;
+                if (!uiFontType.isEmpty()) {
+                    newFont = new Font(uiFontType, Font.PLAIN, uiFontSize);
+                } else {
+                    newFont = defaultFont.deriveFont((float) uiFontSize);
+                }
+
                 FontUIResource fontUIResource = new FontUIResource(newFont);
                 UIManager.put("defaultFont", fontUIResource);
 

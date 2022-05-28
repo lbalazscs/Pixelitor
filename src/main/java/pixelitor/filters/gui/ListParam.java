@@ -41,6 +41,10 @@ public class ListParam<E>
         this(name, choices, RandomizePolicy.ALLOW_RANDOMIZE);
     }
 
+    public ListParam(String name, E[] choices, E defaultChoice) {
+        this(name, List.of(choices), defaultChoice, RandomizePolicy.ALLOW_RANDOMIZE);
+    }
+
     public ListParam(String name, E[] choices, RandomizePolicy randomizePolicy) {
         this(name, List.of(choices), choices[0], randomizePolicy);
     }
