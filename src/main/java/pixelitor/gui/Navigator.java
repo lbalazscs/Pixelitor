@@ -133,7 +133,7 @@ public class Navigator extends JComponent
         JDialog ancestor = GUIUtils.getDialogAncestor(this);
         ancestor.setTitle("Navigator - " + zoom);
 
-        exactZoom = zoom; // set the the exact zoom only temporarily
+        exactZoom = zoom; // set the exact zoom only temporarily
 
         // force pack() to use the current preferred
         // size instead of some cached value

@@ -54,7 +54,7 @@ import static pixelitor.tools.pen.BuildState.*;
 /**
  * A subpath within a {@link Path}.
  *
- * It is a composite Bezier curve: a series of Bezier curves
+ * It is a composite Bézier curve: a series of Bézier curves
  * joined end to end where the last point of one curve
  * coincides with the starting point of the next curve.
  *

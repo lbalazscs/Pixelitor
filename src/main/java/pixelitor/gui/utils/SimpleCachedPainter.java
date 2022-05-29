@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,10 @@
 package pixelitor.gui.utils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.Transparency;
 import java.awt.image.VolatileImage;
 import java.lang.ref.SoftReference;
 
@@ -75,7 +78,7 @@ public abstract class SimpleCachedPainter implements Painter<Object> {
                 // simplest case, just use the image
                 g.drawImage(vi, 0, 0, null);
             } else if (valCode == VolatileImage.IMAGE_RESTORED) {
-                // memory loss, but the the image object can be reused
+                // memory loss, but the image object can be reused
                 renderAndUseCachedImage(vi, g, width, height);
             } else if (valCode == VolatileImage.IMAGE_INCOMPATIBLE) {
                 // surface incompatibility: the image has to be recreated

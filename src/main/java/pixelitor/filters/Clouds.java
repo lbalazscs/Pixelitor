@@ -176,8 +176,8 @@ public class Clouds extends ParametrizedFilter {
     }
 
     /**
-     * Fill the permutation table is with all the values with between 1 to 256,
-     * in random order, and duplicate that
+     * Fill the permutation table is with all the values with
+     * between 1 and 256, in random order, and duplicate it
      */
     public static void reseed() {
         p = new int[512];

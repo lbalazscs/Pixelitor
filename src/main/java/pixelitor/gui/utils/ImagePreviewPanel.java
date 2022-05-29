@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -87,7 +87,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             return ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
         }
 
-        // Currently no thumb extraction is attempted for ora and pxc files.
+        // Currently, no thumb extraction is attempted for ora and pxc files.
         if (FileUtils.hasMultiLayerExtension(file)) {
             ThumbInfo fakeThumbInfo = ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
             thumbsCache.put(filePath, new SoftReference<>(fakeThumbInfo));

@@ -41,7 +41,7 @@ public interface PenToolMode {
 
     void mouseReleased(PMouseEvent e);
 
-    // return true if needs repainting
+    // return true if it needs repainting
     boolean mouseMoved(MouseEvent e, View view);
 
     void paint(Graphics2D g);

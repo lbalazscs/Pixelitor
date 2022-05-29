@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static pixelitor.filters.util.FilterUtils.getLastFilter;
 
 /**
  * The "Repeat" action, which repeats the last edit.
- * Currently only the filters can be repeated.
+ * Currently, only the filters can be repeated.
  */
 public class RepeatLast extends DrawableAction {
     public static final RepeatLast REPEAT_LAST_ACTION = new RepeatLast(false);

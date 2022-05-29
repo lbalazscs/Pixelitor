@@ -161,7 +161,7 @@ public class Pixelitor {
         MouseZoomMethod.load();
         PanMethod.load();
 
-        // The IO-intensive pre-loading of fonts is scheduled
+        // The IO-intensive preloading of fonts is scheduled
         // to run after all the files have been opened,
         // and on the same IO thread
         openCLFilesAsync(args)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class Grid extends ShapeFilter {
         double cellH = height / (double) verDiv;
 
         // Adding the line below just to relate stuff with Hexagonal Grid.
-        // Though i dont expect anyone to understand most of it...
+        // Though I don't expect anyone to understand most of it...
         //                          /\  /\  /\
         // Cell space is Width of  /  \/  \/  \
         //                        ^   ^
@@ -137,7 +137,7 @@ public class Grid extends ShapeFilter {
         // In extrema case, we draw just enough segments
         // to fill up 50% of view [height/width] from one side
         // while not drawing those from the other side as
-        // they'll placed outside.
+        // they'll be placed outside.
         double horShift = (center.getRelativeX() - 0.5) * width;
         double verShift = (center.getRelativeY() - 0.5) * height;
         int horSeg = (int) (horShift / cellW);

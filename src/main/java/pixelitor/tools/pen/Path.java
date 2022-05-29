@@ -320,7 +320,7 @@ public class Path implements Serializable {
         assert Tools.PEN.isActive();
 
         // create the edit before the actual removing
-        // so that it can it can remember the pen tool mode
+        // so that it can remember the pen tool mode
         PathEdit edit = new PathEdit("Delete Path", comp, this, null);
 
         Tools.PEN.removePath();

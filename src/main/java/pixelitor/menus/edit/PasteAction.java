@@ -57,7 +57,7 @@ public class PasteAction extends PAction implements ViewActivationListener {
     private void pasteImage(BufferedImage pastedImage) {
         // the pasted image could have an unexpected type
         // (such as RGB, without transparency ), but the
-        // later executing code is responsible for converting it.
+        // code executing later is responsible for converting it.
         destination.paste(pastedImage);
     }
 

@@ -89,7 +89,7 @@ public class ToneCurve {
         int lastIndex = curve.x.length - 1;
         int index = curve.findKnotPos(p.x);
 
-        // Can't add knot at first/last position
+        // Can't add a knot at the first/last position
         if (index <= 0 || index > lastIndex) {
             return -1;
         }
@@ -107,7 +107,6 @@ public class ToneCurve {
             }
         }
 
-        // check for max knot limit
         if (curve.x.length >= MAX_KNOTS) {
             return -1;
         }

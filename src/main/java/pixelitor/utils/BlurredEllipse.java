@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,7 +108,7 @@ public class BlurredEllipse implements BlurredShape {
         if (dy2 <= innerRadiusY2 - innerRadiusY2 * dx2 / innerRadiusX2) { // innermost region
             return 0.0;
         } else { // between the inner and outer radius
-            // we are on an ellipse with unknown a and b semi major/minor axes
+            // we are on an ellipse with unknown a and b semi major/minor axes,
             // but we know that a/b = outerRadiusX/outerRadiusY
             double ellipseDistortion = outerRadiusX / outerRadiusY;
             double b = Math.sqrt(ellipseDistortion * ellipseDistortion * dy2 + dx2) / ellipseDistortion;

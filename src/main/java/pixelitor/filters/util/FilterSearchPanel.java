@@ -232,7 +232,7 @@ public class FilterSearchPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    // double click on a selected filter starts it
+                    // double-clicking on a selected filter starts it
                     if (panel.hasSelection()) {
                         GUIUtils.closeDialog(dialog, true);
                         panel.startSelectedFilter();

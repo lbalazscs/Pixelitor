@@ -130,7 +130,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         private static final Border unselectedIconOnSelectedLayerBorder
             = createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
 
-        // the icon is unselected, and it is on a unselected layer
+        // the icon is unselected, and it is on an unselected layer
         private static final Border unselectedIconOnUnselectedLayerBorder
             = createLineBorder(UNSELECTED_COLOR, BORDER_WIDTH);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,7 +82,7 @@ public abstract class ComplexFractalImpl extends PointFilter {
         double cyZoomedMin = zoomCenterCY - zoomedRangeCY / 2;
         double cyZoomedMax = zoomCenterCY + zoomedRangeCY / 2;
 
-        // if the zoomed range would go outside of
+        // if the zoomed range would go outside
         // the default c range, then adjust it back
         if (cxZoomedMax > cxMax) {
             cxStart = cxZoomedMin - (cxZoomedMax - cxMax);
@@ -124,7 +124,7 @@ public abstract class ComplexFractalImpl extends PointFilter {
         return it;
     }
 
-    // the unoptimized version of the iterate, where the algorithm is more clear
+    // the unoptimized version of the "iterate" method, where the algorithm is more clear
     private static int iterateUnOpt(double x, double y, double cx, double cy, int maxIt) {
         int it = maxIt;
         while (x * x + y * y < 4 && it > 0) {

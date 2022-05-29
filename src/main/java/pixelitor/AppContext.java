@@ -36,7 +36,7 @@ public enum AppContext {
     FINAL_GUI() {
     },
     /**
-     * In this mode there are are additional menus and runtime checks.
+     * In this mode there are additional menus and runtime checks.
      */
     DEVELOPMENT_GUI() {
     },

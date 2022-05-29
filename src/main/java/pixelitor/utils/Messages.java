@@ -90,7 +90,7 @@ public class Messages {
     }
 
     /**
-     * Shows a HTML text message in the status bar.
+     * Shows an HTML text message in the status bar.
      */
     public static void showInStatusBar(String msg) {
         assert !msg.startsWith("<html>");

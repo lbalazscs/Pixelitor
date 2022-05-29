@@ -21,7 +21,6 @@ import pixelitor.tools.shapes.ShapesTool;
 
 /**
  * The possible states of a {@link DragTool}.
- * Currently used only for the shapes and crop tools.
  */
 public enum DragToolState {
     /**

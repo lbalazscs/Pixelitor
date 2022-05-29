@@ -34,7 +34,7 @@ public abstract class CopyBrush extends DabsBrush {
     protected BufferedImage brushImage;
     protected CopyBrushType type;
 
-    // can be set from the develop menu
+    // can be set from the "Develop" menu
     private static boolean debugBrushImage = false;
 
     protected CopyBrush(double radius, CopyBrushType type, Spacing spacing) {

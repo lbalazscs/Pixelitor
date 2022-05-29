@@ -237,7 +237,7 @@ public abstract class Filter implements Serializable, PresetOwner {
 
         // can be shared if there are no settings
         // TODO a few filters do have settings, but no preset support.
-        //  Currently this isn't a problem, because this is used for smart filters only
+        //  Currently, this isn't a problem, because this is used for smart filters only
         return this;
     }
 

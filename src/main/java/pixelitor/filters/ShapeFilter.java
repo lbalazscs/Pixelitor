@@ -174,7 +174,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
         // If there are effects and the foreground is set to transparent,
         // then the effects have to be run on a temporary image, because
-        // they also set the composite. Also inner glow is ignored.
+        // they also set the composite. Also, inner glow is ignored.
         if (!effects.isEmpty()) {
             if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
                 drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);

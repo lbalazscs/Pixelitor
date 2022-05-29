@@ -159,10 +159,10 @@ public class CropBox implements ToolWidget {
         aspectRatio = calcAspectRatio(rect.getCo());
 
         if (isResizeMode(dragStartCursor)) {
-            // if user clicked on the handle allow resize it
+            // if the user clicked on the handle, allow resizing
             transformMode = MODE_RESIZE;
         } else if (rect.containsCo(e.getPoint())) {
-            // if user clicked inside selection allow relocate it
+            // if the user clicked inside the rectangle, allow moving
             transformMode = MODE_MOVE;
         } else {
             transformMode = MODE_NONE;

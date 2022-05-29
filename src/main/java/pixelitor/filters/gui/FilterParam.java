@@ -96,9 +96,6 @@ public interface FilterParam extends FilterSetting, Resettable {
      */
     boolean allowRandomize();
 
-    /**
-     * Override the randomize policy
-     */
     @VisibleForTesting
     void setRandomizePolicy(RandomizePolicy policy);
 

@@ -25,7 +25,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
- * Inverts only some of the RGB or HSB channels
+ * Inverts only some RGB or HSB channels
  */
 public class ChannelInvert extends ParametrizedFilter {
     public static final String NAME = "Channel Invert";

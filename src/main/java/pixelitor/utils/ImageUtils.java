@@ -328,8 +328,8 @@ public class ImageUtils {
     }
 
     /**
-     * This methods returns the pixel array behind the given BufferedImage
-     * If the array data is modified, the image itself is modified
+     * Returns the pixel array behind the given BufferedImage.
+     * If the array data is modified, the image itself is modified.
      */
     public static int[] getPixelsAsArray(BufferedImage src) {
         assert src != null;
@@ -545,7 +545,7 @@ public class ImageUtils {
     }
 
     /**
-     * Shrinks the "src" image to match it's width to "size" and returns the new image.
+     * Shrinks the "src" image to match its width to "size" and returns the new image.
      */
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
@@ -776,8 +776,8 @@ public class ImageUtils {
         assert original != null;
         assert blurred != null;
 
-        // The blurred image is the low-pass filtered version of the image
-        // so we subtract it form the original by inverting it...
+        // The blurred image is the low-pass filtered version of the image,
+        // so we subtract it from the original by inverting it...
         blurred = Invert.invertImage(blurred);
         // ... and blending it at 50% with the original
         Graphics2D g = blurred.createGraphics();
@@ -1171,7 +1171,7 @@ public class ImageUtils {
         // change the transparency of the image.
         // It is important to use SrcIn, and not SrcAtop like in the
         // blog mentioned above, because the new content might also
-        // contain transparent pixels and we don't want to lose that information.
+        // contain transparent pixels, and we don't want to lose that information.
         tmpG.setComposite(AlphaComposite.SrcIn);
         tmpG.translate(selStartX, selStartY);
 

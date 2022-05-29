@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -126,7 +126,7 @@ public class TaperingStroke implements Stroke {
 
             // Our method?
             // We will first calculate the perpendiculars of P2P1 and P2P3 through P2
-            // Later we can just take the mid points to get the two points Q3 and Q4.
+            // Later we can just take the mid-points to get the two points Q3 and Q4.
 
             var perpendicularToP2P1_1 = new Point2D.Float();
             var perpendicularToP2P1_2 = new Point2D.Float();

@@ -309,8 +309,7 @@ public class AppRunner {
         var saveDialog = findSaveFileChooser();
         saveDialog.selectFile(new File(baseTestingDir, fileName));
         saveDialog.approve();
-        // say OK to the overwrite question
-        var optionPane = findJOptionPane();
+        var optionPane = findJOptionPane(); // overwrite question
         optionPane.yesButton().click();
     }
 

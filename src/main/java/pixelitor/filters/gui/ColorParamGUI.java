@@ -63,8 +63,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     }
 
     private void showColorDialog() {
-//        Color color = JColorChooser.showDialog(this, "Select Color", model.getColor());
-
         Colors.selectColorWithDialog(this, model.getName(),
             model.getColor(), model.allowTransparency(), this::updateColor);
     }

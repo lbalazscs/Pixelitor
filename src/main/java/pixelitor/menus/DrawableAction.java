@@ -74,7 +74,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
         // Invoke later, because this is typically called from a GUI listener
         // and showing a dialog right now can cause weird things (the combo box
         // remains opened, the dialog button has to be pressed twice).
-        // Also it is nice to be sure that the effects of original GUI change are done.
+        // Also, it is nice to be sure that the effects of original GUI change are done.
         EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 

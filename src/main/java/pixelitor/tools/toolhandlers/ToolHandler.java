@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public abstract class ToolHandler {
     }
 
     /**
-     * Returns true if the event was handled and it should
+     * Returns true if the event was handled, and it should
      * not be forwarded to the next handler
      */
     abstract boolean mousePressed(PMouseEvent e);
@@ -53,7 +53,7 @@ public abstract class ToolHandler {
     }
 
     /**
-     * Returns true if the event was handled and it should
+     * Returns true if the event was handled, and it should
      * not be forwarded to the next handler
      */
     abstract boolean mouseDragged(PMouseEvent e);
@@ -66,7 +66,7 @@ public abstract class ToolHandler {
     }
 
     /**
-     * Returns true if the event was handled and it should
+     * Returns true if the event was handled, and it should
      * not be forwarded to the next handler
      */
     abstract boolean mouseReleased(PMouseEvent e);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.filters.util.FilterAction;
 
 /**
  * Used when colors of all pixels have to be changed
- * uniformly and independently from each other
+ * uniformly and independently of each other
  */
 public interface RGBPixelOp {
     /**

@@ -1487,7 +1487,7 @@ public class Shapes {
     }
 
     /**
-     * Connects the given points smoothly with cubic Bezier curves.
+     * Connects the given points smoothly with cubic Bézier curves.
      * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
      */
     public static Path2D smoothConnect(List<Point2D> points) {
@@ -1591,7 +1591,7 @@ public class Shapes {
 
         // Every two alternate points represent a side. There are numPoints - 1 sides.
 
-        // Mid points of all those sides.
+        // Mid-points of all those sides.
         var centers = new Point2D.Float[numPoints - 1];
         // Length of all those sides.
         float[] lengths = new float[numPoints - 1];

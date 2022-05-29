@@ -476,7 +476,7 @@ public class CropTool extends DragTool {
             if (executeCropCommand()) {
                 e.consume();
             }
-            // otherwise the Enter might be used elsewhere,
+            // otherwise the "Enter" key event might be used elsewhere,
             // for example by the layer name editor
         } else if (e.getKeyCode() == KeyEvent.VK_O) {
             if (e.isControlDown()) {

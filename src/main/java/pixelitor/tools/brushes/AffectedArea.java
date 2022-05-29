@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,8 @@ public class AffectedArea {
     /**
      * Initialize the area with a brush position.
      *
-     * Currently there is only one {@link AffectedArea} object for each
-     * brush tool, and it gets reinitialized for each independent brush stroke.
+     * There is only one {@link AffectedArea} object for each brush tool,
+     * and it gets reinitialized for each independent brush stroke.
      */
     public void initAt(PPoint p) {
         double x = p.getImX();

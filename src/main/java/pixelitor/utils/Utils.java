@@ -410,7 +410,7 @@ public final class Utils {
     }
 
     /**
-     * Returns a new CompletableFuture that is completed when all of the
+     * Returns a new CompletableFuture that is completed when all the
      * CompletableFutures in the given list complete
      */
     public static CompletableFuture<Void> allOf(List<? extends CompletableFuture<?>> list) {

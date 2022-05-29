@@ -35,7 +35,7 @@ public class ComicBook extends ParametrizedFilter {
     // Essentially threshold is a value in the range [0-256]. For any value of
     // bias below the threshold, the corresponding color will be set to Black.
     // However, only values around [100-130] seems visually logical.
-    // Therefore this parameter focuses on picking fine values within that range.
+    // Therefore, this parameter focuses on picking fine values within that range.
     private final RangeParam thresholdParam = new RangeParam("Threshold", 0, 85, 100);
 
     public ComicBook() {

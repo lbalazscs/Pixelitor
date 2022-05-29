@@ -27,7 +27,7 @@ public interface Resettable {
 
     /**
      * @param trigger If true, then the resetting can trigger
-     *                some GUI update such as the recalculating
+     *                a GUI update such as the recalculating
      *                of a filter preview
      */
     void reset(boolean trigger);

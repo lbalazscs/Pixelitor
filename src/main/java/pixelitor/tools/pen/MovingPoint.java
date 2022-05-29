@@ -28,7 +28,7 @@ import java.awt.geom.Point2D;
 /**
  * A point which is at the mouse cursor when the mouse
  * is moving (as opposed to dragging) as the path is built.
- * It has an inverse mouse cycle: is is dragged when the mouse is
+ * It has an inverse mouse cycle: it is dragged when the mouse is
  * actually up, its mousePressed is called when the mouse is released, etc.
  * If Shift is pressed, it is constrained relative to the previous
  * anchor point.

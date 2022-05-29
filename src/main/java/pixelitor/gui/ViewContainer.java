@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import javax.swing.*;
 /**
  * A component that contains a {@link View} inside a JScrollPane.
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
- * Some of the methods make sense only for internal frames, not for tabs.
+ * Some methods make sense only for internal frames, not for tabs.
  */
 public interface ViewContainer {
     JScrollPane getScrollPane();

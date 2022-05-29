@@ -30,7 +30,7 @@ import java.awt.image.WritableRaster;
 import static java.awt.MultipleGradientPaint.CycleMethod.*;
 
 /**
- * A Paint that creates an "spiral gradient"
+ * A Paint that creates a "spiral gradient"
  */
 public record SpiralGradientPaint(boolean clockwise, Drag drag,
                                   Color startColor, Color endColor,

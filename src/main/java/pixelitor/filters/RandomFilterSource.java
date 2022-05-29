@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -86,7 +86,7 @@ public class RandomFilterSource {
         }
 
         if (hasNext()) {
-            // we went back in history and then started to generate again
+            // we went back in history and then started to generate again,
             // so we need to throw away the history after the current point
             history = new ArrayList<>(history.subList(0, nextIndex));
         }
