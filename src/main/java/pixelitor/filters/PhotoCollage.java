@@ -21,6 +21,7 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
+import pixelitor.tools.shapes.ShapeType;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -28,6 +29,7 @@ import pixelitor.utils.Utils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -48,6 +50,7 @@ public class PhotoCollage extends ParametrizedFilter {
     public static final String NAME = "Photo Collage";
 
     private final GroupedRangeParam size = new GroupedRangeParam("Photo Size", 40, 200, 999);
+    private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("Photo Shape", ShapeType.class);
     private final RangeParam marginSize = new RangeParam("Margin", 0, 5, 20);
     private final RangeParam numImagesParam = new RangeParam("Number of Images", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
@@ -73,6 +76,7 @@ public class PhotoCollage extends ParametrizedFilter {
         setParams(
             numImagesParam,
             allowOutside,
+            shapeTypeParam,
             size.withAdjustedRange(1.0),
             randomRotation,
             marginSize.withAdjustedRange(0.02),
@@ -99,17 +103,25 @@ public class PhotoCollage extends ParametrizedFilter {
         // fill with the background color
         Colors.fillWith(bgColor.getColor(), g, dest.getWidth(), dest.getHeight());
 
-        var photoRect = new Rectangle(0, 0, xSize, ySize);
+        ShapeType shapeType = shapeTypeParam.getSelected();
+        var photoShape = shapeType.createShape(0, 0, xSize, ySize);
         int margin = marginSize.getValue();
-        var photoWOMarginRect = new Rectangle(photoRect);
-        photoWOMarginRect.grow(-margin, -margin);
+
+        Shape photoWOMarginShape = photoShape;
+        if (margin > 0) {
+            Stroke marginStroke = new BasicStroke(2 * margin, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
+            Shape marginShape = marginStroke.createStrokedShape(photoShape);
+            Area woMarginArea = new Area(photoShape);
+            woMarginArea.subtract(new Area(marginShape));
+            photoWOMarginShape = woMarginArea;
+        }
 
         // the shadow image must be larger than the image size
         // so that there is room for soft shadows
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
 
-        BufferedImage shadowImage = createShadowImage(xSize, ySize, shadowSoftness, softShadowRoom);
+        BufferedImage shadowImage = createShadowImage(xSize, ySize, shadowSoftness, softShadowRoom, shapeType);
 
         Point2D offset = Utils.offsetFromPolar(
             shadowDistance.getValue(),
@@ -168,18 +180,18 @@ public class PhotoCollage extends ParametrizedFilter {
 
             // Draw the margin and the image
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
-            Shape transformedRect = imageTransform.createTransformedShape(photoRect);
-            Shape transformedImageRect;
+            Shape transformedShape = imageTransform.createTransformedShape(photoShape);
+            Shape transformedImageShape;
             if (margin > 0) {
-                transformedImageRect = imageTransform.createTransformedShape(photoWOMarginRect);
+                transformedImageShape = imageTransform.createTransformedShape(photoWOMarginShape);
                 g.setColor(marginColor.getColor());
-                g.fill(transformedRect);
+                g.fill(transformedShape);
             } else {
-                transformedImageRect = transformedRect;
+                transformedImageShape = transformedShape;
             }
 
             g.setPaint(imagePaint);
-            g.fill(transformedImageRect);
+            g.fill(transformedImageShape);
 
             pt.unitDone();
         }
@@ -189,7 +201,7 @@ public class PhotoCollage extends ParametrizedFilter {
         return dest;
     }
 
-    private static BufferedImage createShadowImage(int xSize, int ySize, int shadowSoftness, int softShadowRoom) {
+    private static BufferedImage createShadowImage(int xSize, int ySize, int shadowSoftness, int softShadowRoom, ShapeType shapeType) {
         int shadowImgWidth = xSize + 2 * softShadowRoom;
         int shadowImgHeight = ySize + 2 * softShadowRoom;
         BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
@@ -197,7 +209,8 @@ public class PhotoCollage extends ParametrizedFilter {
 
         Graphics2D gShadow = shadowImage.createGraphics();
         gShadow.setColor(BLACK);
-        gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);
+        Shape shape = shapeType.createShape(softShadowRoom, softShadowRoom, xSize, ySize);
+        gShadow.fill(shape);
         gShadow.dispose();
         if (shadowSoftness > 0) {
             shadowImage = new BoxBlurFilter(shadowSoftness, shadowSoftness, 1, NAME)

@@ -26,10 +26,13 @@ import java.util.List;
  * The settings for a line.
  */
 public class StarSettings extends ShapeTypeSettings {
+    public static int DEFAULT_NUM_BRANCHES = 5;
+    public static double DEFAULT_RADIUS_RATIO = 0.38;
+
     private final RangeParam numBranches = new RangeParam("Number of Branches",
-        3, 7, 12);
+        3, DEFAULT_NUM_BRANCHES, 12);
     private final RangeParam radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)",
-        1, 50, 100);
+        1, DEFAULT_RADIUS_RATIO * 100, 100);
     private final List<FilterParam> params = List.of(numBranches, radiusRatio);
 
     public StarSettings() {

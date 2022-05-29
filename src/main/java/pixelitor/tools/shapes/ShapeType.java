@@ -48,8 +48,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return new Rectangle2D.Double(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return new Rectangle2D.Double(x, y, width, height);
         }
 
         @Override
@@ -69,8 +69,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return new Ellipse2D.Double(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return new Ellipse2D.Double(x, y, width, height);
         }
 
         @Override
@@ -85,8 +85,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createDiamond(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createDiamond(x, y, width, height);
         }
 
         @Override
@@ -107,8 +107,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return new Rectangle2D.Double(x, y, size / 5.0, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return new Rectangle2D.Double(x, y, width / 5.0, height);
         }
 
         @Override
@@ -128,8 +128,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createHeart(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createHeart(x, y, width, height);
         }
     }, STAR("Star", false, true, false) {
         @Override
@@ -141,8 +141,8 @@ public enum ShapeType {
                 numBranches = starSettings.getNumBranches();
                 radiusRatio = starSettings.getRadiusRatio();
             } else {
-                numBranches = 7;
-                radiusRatio = 0.5;
+                numBranches = StarSettings.DEFAULT_NUM_BRANCHES;
+                radiusRatio = StarSettings.DEFAULT_RADIUS_RATIO;
             }
 
             Rectangle2D r = drag.createPositiveImRect();
@@ -151,8 +151,9 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createStar(7, x, y, size, size, 0.5);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createStar(StarSettings.DEFAULT_NUM_BRANCHES,
+                x, y, width, height, StarSettings.DEFAULT_RADIUS_RATIO);
         }
 
         @Override
@@ -162,7 +163,7 @@ public enum ShapeType {
 
         @Override
         public StarSettings createSettings() {
-            return new StarSettings(7, 50);
+            return new StarSettings();
         }
     }, RANDOM_STAR("Random Star", false, false, false) {
         private Drag lastDrag;
@@ -181,9 +182,9 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
+        public Shape createShape(double x, double y, double width, double height) {
             RandomStarShape.randomize();
-            return new RandomStarShape(x, y, size, size);
+            return new RandomStarShape(x, y, width, height);
         }
 
         @Override
@@ -215,12 +216,12 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            double middleY = y + size / 2.0;
+        public Shape createShape(double x, double y, double width, double height) {
+            double middleY = y + height / 2.0;
             Drag drag = new Drag(
                 x,
                 middleY,
-                x + size,
+                x + width,
                 middleY);
             return createShape(drag, null);
         }
@@ -237,8 +238,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createCat(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createCat(x, y, width, height);
         }
     }, KIWI("Kiwi", false, false, false) {
         @Override
@@ -248,8 +249,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createKiwi(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createKiwi(x, y, width, height);
         }
     }, BAT("Bat", false, false, true) {
         @Override
@@ -259,8 +260,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createBat(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createBat(x, y, width, height);
         }
     }, RABBIT("Rabbit", false, false, false) {
         @Override
@@ -270,8 +271,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double size) {
-            return Shapes.createRabbit(x, y, size, size);
+        public Shape createShape(double x, double y, double width, double height) {
+            return Shapes.createRabbit(x, y, width, height);
         }
 //    }, RND_ANIMAL_FACE("Random Animal Face", true, false) {
 //        final int[] codePoints = {
@@ -387,7 +388,11 @@ public enum ShapeType {
      */
     public abstract Shape createShape(Drag drag, ShapeTypeSettings settings);
 
-    public abstract Shape createShape(double x, double y, double size);
+    public final Shape createShape(double x, double y, double size) {
+        return createShape(x, y, size, size);
+    }
+
+    public abstract Shape createShape(double x, double y, double width, double height);
 
 //    /**
 //     * Return the directional shape that would result
