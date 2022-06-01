@@ -89,7 +89,7 @@ public class SmoothConnectTest extends JPanel {
         }
 
 //        Path2D path = Shapes.smoothConnect(points);
-        Path2D path = Shapes.smoothConnect(points, smoothness.getValue() / 100.0f);
+        Path2D path = Shapes.smoothConnect(points, smoothness.getValue() / 100.0);
 
         g2.setColor(Color.WHITE);
         g2.draw(path);

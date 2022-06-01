@@ -27,10 +27,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.AngleUnit;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
@@ -139,7 +136,7 @@ public class TransformBox implements ToolWidget, Serializable {
             swLoc, view, SW_OFFSET, SW_OFFSET_IO);
 
         // initialize the rotation handle
-        Point2D center = Shapes.calcCenter(ne, sw);
+        Point2D center = Geometry.midPoint(ne, sw);
         PPoint rotPos = PPoint.eagerFromCo(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE, view);
         rot = new RotationHandle("rot", this, rotPos, view);
 
@@ -335,7 +332,7 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     private void updateRotLocation() {
-        Point2D northCenter = Shapes.calcCenter(nw, ne);
+        Point2D northCenter = Geometry.midPoint(nw, ne);
 
         double rotDistX = ROT_HANDLE_DISTANCE * sin;
         double rotDistY = ROT_HANDLE_DISTANCE * cos;
@@ -353,7 +350,7 @@ public class TransformBox implements ToolWidget, Serializable {
     public void paint(Graphics2D g) {
         // paint the lines
         Shapes.drawVisibly(g, coBoxShape);
-        Shapes.drawVisibly(g, new Line2D.Double(Shapes.calcCenter(nw, ne), rot));
+        Shapes.drawVisibly(g, new Line2D.Double(Geometry.midPoint(nw, ne), rot));
 
         // paint the handles
         for (DraggablePoint handle : handles) {
@@ -544,7 +541,7 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     public Point2D getCenter() {
-        return Shapes.calcCenter(nw, se);
+        return Geometry.midPoint(nw, se);
     }
 
     @Override

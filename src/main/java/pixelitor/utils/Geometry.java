@@ -17,15 +17,19 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+/**
+ * Geometry-related static utility methods.
+ */
 public class Geometry {
     public static final double GOLDEN_RATIO = 1.618033988749895;
 
-    public static final double EPSILON = 0.0001;
+    private static final double EPSILON = 0.0001;
 
     private Geometry() {
         // utility class
@@ -53,8 +57,8 @@ public class Geometry {
      * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
-    public static void perpendiculars(Point2D a, Point2D b, float dist, Point2D outA, Point2D outB) {
-        Point2D temp2 = new Point2D.Float();
+    public static void perpendiculars(Point2D a, Point2D b, double dist, Point2D outA, Point2D outB) {
+        Point2D temp2 = new Point2D.Double();
 
         // direction with magnitude = B - A
         subtract(b, a, temp2);
@@ -93,7 +97,7 @@ public class Geometry {
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
     public static void perpendiculars(Point2D a, Point2D b, Point2D outA, Point2D outB) {
-        Point2D temp2 = new Point2D.Float();
+        Point2D temp2 = new Point2D.Double();
 
         // direction with magnitude = B - A
         subtract(b, a, temp2);
@@ -109,7 +113,7 @@ public class Geometry {
     }
 
     /**
-     * For a point A this function will set the values of outA and outB such that
+     * For a point A, this function will set the values of outA and outB such that
      * <OL>
      * <LI>
      * outA is the resulting point vector when A is rotated counter clock wise about origin.
@@ -151,47 +155,40 @@ public class Geometry {
      * @param n Later part of the ratio of division.
      * @param r A 2 valued empty array which will represent a point dividing AB.
      */
-    public static void sectionFormula(Point2D a, Point2D b, float m, float n, Point2D r) {
-        add(scale(a, n, new Point2D.Float()), scale(b, m, new Point2D.Float()), r);
+    public static void sectionFormula(Point2D a, Point2D b, double m, double n, Point2D r) {
+        add(scale(a, n, new Point2D.Double()), scale(b, m, new Point2D.Double()), r);
         deScale(r, (m + n));
     }
 
     public static Point2D newFrom(Point2D a) {
-        Point2D.Float b = new Point2D.Float();
+        Point2D.Double b = new Point2D.Double();
         b.setLocation(a);
         return b;
     }
 
     public static void normalize(Point2D a) {
-        deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
+        deScale(a, FastMath.hypot(a.getX(), a.getY()));
     }
 
-    public static void normalizeIfNonzero(Point2D a) {
-        if (a.getX() == 0 && a.getY() == 0) {
-            return;
-        }
-        deScale(a, (float) FastMath.hypot(a.getX(), a.getY()));
-    }
-
-    public static Point2D deScale(Point2D a, float factor) {
+    public static Point2D deScale(Point2D a, double factor) {
         deScale(a, factor, a);
         return a;
     }
 
-    public static void deScale(Point2D a, float factor, Point2D r) {
+    public static void deScale(Point2D a, double factor, Point2D r) {
         r.setLocation(a.getX() / factor, a.getY() / factor);
     }
 
-    public static Point2D scale(Point2D a, float factor) {
+    public static Point2D scale(Point2D a, double factor) {
         return scale(a, factor, a);
     }
 
-    public static Point2D scale(Point2D a, float factor, Point2D r) {
+    public static Point2D scale(Point2D a, double factor, Point2D r) {
         r.setLocation(a.getX() * factor, a.getY() * factor);
         return r;
     }
 
-    public static Point2D setMagnitude(Point2D a, float factor) {
+    public static Point2D setMagnitude(Point2D a, double factor) {
         normalize(a);
         scale(a, factor);
         return a;
@@ -209,19 +206,19 @@ public class Geometry {
         a.setLocation(b.getX(), b.getY());
     }
 
-    public static float distance(Point2D a, Point2D b) {
-        return (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+    public static double distance(Point2D a, Point2D b) {
+        return FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
     }
 
-    public static float distance(Point2D a) {
-        return (float) FastMath.hypot(a.getX(), a.getY());
+    public static double distance(Point2D a) {
+        return FastMath.hypot(a.getX(), a.getY());
     }
 
-    public static float distanceSq(Point2D a) {
-        return (float) (a.getX() * a.getX() + a.getY() + a.getY());
+    public static double distanceSq(Point2D a) {
+        return a.getX() * a.getX() + a.getY() + a.getY();
     }
 
-    public static Point2D add(Point2D a, float add) {
+    public static Point2D add(Point2D a, double add) {
         a.setLocation(a.getX() + add, a.getY() + add);
         return a;
     }
@@ -246,6 +243,20 @@ public class Geometry {
     public static void midPoint(Point2D a, Point2D b, Point2D r) {
         add(a, b, r);
         deScale(r, 2);
+    }
+
+    public static Point2D midPoint(Point2D p1, Point2D p2) {
+        return new Point2D.Double(
+            (p1.getX() + p2.getX()) / 2.0,
+            (p1.getY() + p2.getY()) / 2.0
+        );
+    }
+
+    public static Point2D interpolate(Point2D p1, Point2D p2, double t) {
+        return new Point2D.Double(
+            ImageMath.lerp(t, p1.getX(), p2.getX()),
+            ImageMath.lerp(t, p1.getY(), p2.getY())
+        );
     }
 
     public static void subtract(Point2D a, Point2D b, Point2D r) {
@@ -286,7 +297,7 @@ public class Geometry {
         return new Line2D.Double(p, projectPointOnLine(line, p));
     }
 
-    public static void toRange(Point2D pos, float x1, float y1, float x2, float y2) {
+    public static void toRange(Point2D pos, double x1, double y1, double x2, double y2) {
         pos.setLocation(
             FastMath.toRange(x1, x2, pos.getX()),
             FastMath.toRange(y1, y2, pos.getY())

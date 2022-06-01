@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import net.jafama.FastMath;
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
@@ -240,13 +239,6 @@ public class Shapes {
             }
         }
         return rect;
-    }
-
-    public static Point2D calcCenter(Point2D p1, Point2D p2) {
-        return new Point2D.Double(
-            (p1.getX() + p2.getX()) / 2.0,
-            (p1.getY() + p2.getY()) / 2.0
-        );
     }
 
     public static String toSVGPath(Shape shape) {
@@ -1482,10 +1474,6 @@ public class Shapes {
         return new Rectangle(x, y, width, height);
     }
 
-    private static double distance(Point2D start, Point2D end) {
-        return FastMath.hypot(start.getX() - end.getX(), start.getY() - end.getY());
-    }
-
     /**
      * Connects the given points smoothly with cubic Bézier curves.
      * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
@@ -1512,8 +1500,8 @@ public class Shapes {
         for (int i = 0; i < numPoints - 1; i++) {
             Point2D start = points.get(i);
             Point2D end = points.get(i + 1);
-            centers[i] = calcCenter(start, end);
-            lengths[i] = distance(start, end);
+            centers[i] = Geometry.midPoint(start, end);
+            lengths[i] = Geometry.distance(start, end);
         }
 
         for (int i = 1; i < numPoints; i++) {
@@ -1579,7 +1567,7 @@ public class Shapes {
      * Another version of the above method, which supports closed paths and
      * has a smoothness parameter
      */
-    public static Path2D smoothConnect(List<Point2D> points, float smoothness) {
+    public static Path2D smoothConnect(List<Point2D> points, double smoothness) {
         int numPoints = points.size();
         assert numPoints >= 3 : "There should be at least 3 points in the shape!!!";
 
@@ -1592,24 +1580,23 @@ public class Shapes {
         // Every two alternate points represent a side. There are numPoints - 1 sides.
 
         // Mid-points of all those sides.
-        var centers = new Point2D.Float[numPoints - 1];
+        Point2D[] centers = new Point2D.Double[numPoints - 1];
         // Length of all those sides.
-        float[] lengths = new float[numPoints - 1];
+        double[] lengths = new double[numPoints - 1];
 
         for (int i = 0; i < numPoints - 1; i++) {
             Point2D A = points.get(i);
             Point2D B = points.get(i + 1);
-            centers[i] = new Point2D.Float();
-            Geometry.midPoint(A, B, centers[i]);
+            centers[i] = Geometry.midPoint(A, B);
             lengths[i] = Geometry.distance(A, B);
         }
 
         // controlPoints[i] represents the 2 control points after and before points[i]
         // If the path is closed, last point == first point, so we make a less control point.
-        var controlPoints = new Point2D.Float[lastPointIndex + 1][2];
+        var controlPoints = new Point2D.Double[lastPointIndex + 1][2];
         for (int i = 0; i < controlPoints.length; i++) {
-            controlPoints[i][0] = new Point2D.Float();
-            controlPoints[i][1] = new Point2D.Float();
+            controlPoints[i][0] = new Point2D.Double();
+            controlPoints[i][1] = new Point2D.Double();
         }
 
         for (int i = 1; i < numPoints - 1; i++) {
@@ -1657,7 +1644,7 @@ public class Shapes {
     }
 
     private static void calculateControlPoint(Point2D B, Point2D P, Point2D Q,
-                                              float AB, float BC, float smoothness) {
+                                              double AB, double BC, double smoothness) {
         // A temporary point T calculated such that
         // * For A=points[i-1], B=points[i] and C = points[i+1]
         //   * For midpoint of AB, P=centers[i-1] and midpoint of BC, Q=centers[i]
@@ -1675,7 +1662,7 @@ public class Shapes {
         //   * T = P * AB / (AB + BC) + Q * BC / (AB + BC)
         //   * T = (P * AB + Q * BC) / (AB + BC)
         //
-        var T = new Point2D.Float();
+        var T = new Point2D.Double();
 
         Geometry.sectionFormula(P, Q, AB, BC, T);
 

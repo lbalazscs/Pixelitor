@@ -63,8 +63,8 @@ import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
-import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -2260,7 +2260,7 @@ public class AssertJSwingTest {
                         mouse.dragRandomlyWithinCanvas();
                     } else {
                         // drag the middle handle
-                        Point2D c = Shapes.calcCenter(start, end);
+                        Point2D c = Geometry.midPoint(start, end);
                         mouse.moveToScreen((int) c.getX(), (int) c.getY());
                         mouse.dragRandomlyWithinCanvas();
                     }
