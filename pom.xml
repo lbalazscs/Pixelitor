@@ -177,7 +177,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>2.2</version>
+            <version>2.3</version>
         </dependency>
 
         <!--from here test dependencies-->
