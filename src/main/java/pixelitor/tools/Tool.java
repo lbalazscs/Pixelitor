@@ -317,7 +317,10 @@ public abstract class Tool implements KeyListener, PresetOwner {
 
     public void activate() {
         if (toolButton != null) {
-            toolButton.doClick();
+            // this will also call Tools.start() indirectly via the event handlers.
+            ToolButton button = getButton();
+            button.setSelected(true);
+            button.requestFocus();
         } else {
             assert AppContext.isUnitTesting();
             Tools.start(this);

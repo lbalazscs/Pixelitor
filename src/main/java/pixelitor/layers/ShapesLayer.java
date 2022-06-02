@@ -67,12 +67,12 @@ public class ShapesLayer extends ContentLayer {
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Shape Layer")
             .add(layer);
-        Tools.startAndSelect(Tools.SHAPES);
+        Tools.SHAPES.activate();
     }
 
     @Override
     public void edit() {
-        Tools.startAndSelect(Tools.SHAPES);
+        Tools.SHAPES.activate();
     }
 
     @Override

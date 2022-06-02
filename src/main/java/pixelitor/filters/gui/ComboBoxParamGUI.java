@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
@@ -41,10 +40,10 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
         comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateIcon());
 
         // workaround for nimbus bug
-        var origPS = comboBox.getPreferredSize();
-        comboBox.setPreferredSize(new Dimension(
-            origPS.width + 3,
-            origPS.height));
+//        var origPS = comboBox.getPreferredSize();
+//        comboBox.setPreferredSize(new Dimension(
+//            origPS.width + 3,
+//            origPS.height));
 
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));

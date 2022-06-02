@@ -178,7 +178,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             app.runSlowly();
 
-            testMagick();
+            testPreferences();
         } else {
             runMenuCommand("Set Default Workspace");
 
@@ -831,10 +831,37 @@ public class AssertJSwingTest {
         runMenuCommand("Preferences...");
         var dialog = findDialogByTitle("Preferences");
         if (preferencesTested) {
-            dialog.tabbedPane().selectTab("General");
+            dialog.tabbedPane().selectTab("UI");
         }
 
         // Test "Images In"
+        testPreferencesUIChooser(dialog);
+
+        // Test "Layer/Mask Thumb Sizes"
+        var thumbSizeCB = dialog.comboBox("thumbSizeCB");
+        thumbSizeCB.selectItem(3);
+        thumbSizeCB.selectItem(0);
+
+        // Test the Mouse tab
+
+        // Test the Guides tab
+        dialog.tabbedPane().selectTab("Guides");
+        GuideStrokeType[] guideStyles = GuideStrokeType.values();
+        dialog.comboBox("guideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
+        dialog.comboBox("cropGuideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
+
+        // Test the Advanced tab
+        dialog.tabbedPane().selectTab("Advanced");
+        testpreferencesUndoLevels(dialog);
+
+        dialog.button("ok").click();
+        // this time the preferences dialog should close
+        dialog.requireNotVisible();
+
+        preferencesTested = true;
+    }
+
+    private void testPreferencesUIChooser(DialogFixture dialog) {
         var uiChooser = dialog.comboBox("uiChooser");
         if (EDT.call(() -> ImageArea.currentModeIs(FRAMES))) {
             uiChooser.requireSelection("Internal Windows");
@@ -845,13 +872,9 @@ public class AssertJSwingTest {
             uiChooser.selectItem("Internal Windows");
             uiChooser.selectItem("Tabs");
         }
+    }
 
-        // Test "Layer/Mask Thumb Sizes"
-        var thumbSizeCB = dialog.comboBox("thumbSizeCB");
-        thumbSizeCB.selectItem(3);
-        thumbSizeCB.selectItem(0);
-
-        // Test "Undo/Redo Levels"
+    private void testpreferencesUndoLevels(DialogFixture dialog) {
         var undoLevelsTF = dialog.textBox("undoLevelsTF");
         boolean undoWas5 = false;
         if (undoLevelsTF.text().equals("5")) {
@@ -869,18 +892,6 @@ public class AssertJSwingTest {
         } else {
             undoLevelsTF.deleteText().enterText("5");
         }
-
-        // Test the Guides tab
-        dialog.tabbedPane().selectTab("Guides");
-        GuideStrokeType[] guideStyles = GuideStrokeType.values();
-        dialog.comboBox("guideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
-        dialog.comboBox("cropGuideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
-
-        dialog.button("ok").click();
-        // this time the preferences dialog should close
-        dialog.requireNotVisible();
-
-        preferencesTested = true;
     }
 
     void testImageMenu() {

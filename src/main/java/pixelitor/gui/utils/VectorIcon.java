@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,8 @@ import static java.awt.RenderingHints.*;
  * An abstract superclass for vector icons which look good
  * on HiDPI screens with any scaling
  */
-public abstract class VectorIcon implements Icon {
-    private final Color color;
+public abstract class VectorIcon implements Icon, Cloneable {
+    protected Color color;
     private final int width;
     private final int height;
 
@@ -62,5 +62,20 @@ public abstract class VectorIcon implements Icon {
     @Override
     public final int getIconHeight() {
         return height;
+    }
+
+    public VectorIcon copy(Color color) {
+        VectorIcon copy = clone();
+        copy.color = color;
+        return copy;
+    }
+
+    @Override
+    public VectorIcon clone() {
+        try {
+            return (VectorIcon) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

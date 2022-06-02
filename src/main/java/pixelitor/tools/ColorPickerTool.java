@@ -20,7 +20,6 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.Themes;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
@@ -171,49 +170,52 @@ public class ColorPickerTool extends Tool {
     private static class ColorPickerToolIcon extends Tool.ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
-            boolean dark = Themes.getCurrent().isDark();
+//            boolean dark = Themes.getCurrent().isDark();
 
             // based on color_picker_tool.svg
-            Path2D shape = new Path2D.Float();
+            Path2D glassPath = new Path2D.Float();
 
-            shape.moveTo(15.487128, 10.694453);
-            shape.lineTo(1.8488811, 24.332703);
-            shape.curveTo(1.8488811, 24.332703, 0.9396646, 25.241873, 1.8488811, 26.151114);
-            shape.curveTo(2.7580976, 27.060343, 3.667314, 26.151114, 3.667314, 26.151114);
-            shape.lineTo(17.305561, 12.512863);
-            shape.closePath();
+            glassPath.moveTo(15.487128, 10.694453);
+            glassPath.lineTo(1.8488811, 24.332703);
+            glassPath.curveTo(1.8488811, 24.332703, 0.9396646, 25.241873, 1.8488811, 26.151114);
+            glassPath.curveTo(2.7580976, 27.060343, 3.667314, 26.151114, 3.667314, 26.151114);
+            glassPath.lineTo(17.305561, 12.512863);
+            glassPath.closePath();
 
-            g.setPaint(new Color(0x68_00_00_00, true));
-            g.fill(shape);
+            g.setColor(new Color(0x68_00_00_00, true));
+            g.fill(glassPath);
 
-            if (dark) {
-                g.setPaint(Themes.LIGHT_ICON_COLOR);
-            } else {
-                g.setPaint(new Color(0xA5_00_00_00, true));
-            }
+//            if (dark) {
+//                g.setPaint(Themes.LIGHT_ICON_COLOR);
+//            } else {
+//                g.setPaint(new Color(0xA5_00_00_00, true));
+//            }
+            g.setColor(color);
 
             g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(shape);
+            g.draw(glassPath);
 
-            shape = new Path2D.Float();
-            shape.moveTo(13.668696, 7.966804);
-            shape.lineTo(16.396345, 5.239154);
-            shape.lineTo(18.214779, 7.057564);
-            shape.curveTo(18.214779, 7.057564, 21.90847, 1.6428838, 22.76086, 1.6022639);
-            shape.curveTo(23.694431, 1.642764, 26.438318, 4.549124, 26.397728, 5.239154);
-            shape.curveTo(26.397728, 6.132134, 20.942429, 9.785213, 20.942429, 9.785213);
-            shape.lineTo(22.76086, 11.603653);
-            shape.lineTo(20.03321, 14.331303);
-            shape.closePath();
+            Path2D handlePath = new Path2D.Float();
+            handlePath.moveTo(13.668696, 7.966804);
+            handlePath.lineTo(16.396345, 5.239154);
+            handlePath.lineTo(18.214779, 7.057564);
+            handlePath.curveTo(18.214779, 7.057564, 21.90847, 1.6428838, 22.76086, 1.6022639);
+            handlePath.curveTo(23.694431, 1.642764, 26.438318, 4.549124, 26.397728, 5.239154);
+            handlePath.curveTo(26.397728, 6.132134, 20.942429, 9.785213, 20.942429, 9.785213);
+            handlePath.lineTo(22.76086, 11.603653);
+            handlePath.lineTo(20.03321, 14.331303);
+            handlePath.closePath();
 
-            if (dark) {
-                g.setPaint(Themes.LIGHTER_ICON_COLOR);
-            } else {
-                g.setPaint(Color.BLACK);
-            }
-            g.fill(shape);
+            g.setColor(color);
+
+//            if (dark) {
+//                g.setColor(Themes.LIGHTER_ICON_COLOR);
+//            } else {
+//                g.setColor(Color.BLACK);
+//            }
+            g.fill(handlePath);
             g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
-            g.draw(shape);
+            g.draw(handlePath);
         }
     }
 }

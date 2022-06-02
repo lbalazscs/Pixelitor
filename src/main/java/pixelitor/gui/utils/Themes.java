@@ -31,14 +31,15 @@ public class Themes {
     }
 
     public static final Color LIGHT_ICON_COLOR = new ColorUIResource(187, 187, 187);
-    public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
+//    public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
+
     // this theme will be used for the unit tests, otherwise it's overwritten at startup
     private static Theme currentTheme = Theme.NIMBUS;
     public static final Theme DEFAULT = Theme.NIMBUS;
 
     public static void install(Theme theme, boolean updateGUI, boolean force) {
         if (theme != currentTheme || force) {
-            setLookAndFeel(theme.getLAFClassName());
+            setLookAndFeel(theme);
             currentTheme = theme;
             if (updateGUI) {
                 LayerButtonLayout.themeChanged(theme);
@@ -55,11 +56,13 @@ public class Themes {
         }
     }
 
-    private static void setLookAndFeel(String lafClassName) {
+    private static void setLookAndFeel(Theme theme) {
         try {
+            // has an effect only for the flat lafs
+            UIManager.put("Component.focusWidth", 1);
+
 //            UIManager.put("defaultFont", new Font("Comic Neue", Font.PLAIN, 30) );
-            UIManager.setLookAndFeel(lafClassName);
-//
+            UIManager.setLookAndFeel(theme.getLAFClassName());
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }

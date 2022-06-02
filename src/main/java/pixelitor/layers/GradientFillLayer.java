@@ -59,12 +59,12 @@ public class GradientFillLayer extends ContentLayer {
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Gradient Fill Layer")
             .add(layer);
-        Tools.startAndSelect(Tools.GRADIENT);
+        Tools.GRADIENT.activate();
     }
 
     @Override
     public void edit() {
-        Tools.startAndSelect(Tools.GRADIENT);
+        Tools.GRADIENT.activate();
     }
 
     @Override

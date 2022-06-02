@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
@@ -76,8 +77,9 @@ public enum TweenWizardPage implements WizardPage {
     }, INITIAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html><b><font color=blue size=+1>Initial</font></b> settings for the <i>"
-                + getFilter(wizard).getName() + "</i> filter.";
+            String color = Themes.getCurrent().isDark() ? "#76ABFF" : "blue";
+            return "<html><b><font color=" + color + " size=+1>Initial</font></b> settings for the <i>"
+                   + getFilter(wizard).getName() + "</i> filter.";
         }
 
         @Override
@@ -106,8 +108,9 @@ public enum TweenWizardPage implements WizardPage {
     }, FINAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            String text = "<html><b><font color=green size=+1>Final</font></b> settings for the <i>"
-                + getFilter(wizard).getName() + "</i> filter.";
+            String color = Themes.getCurrent().isDark() ? "#5DCF6E" : "blue";
+            String text = "<html><b><font color=" + color + " size=+1>Final</font></b> settings for the <i>"
+                          + getFilter(wizard).getName() + "</i> filter.";
             boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
             if (hasGradient) {
                 text += "<br>Don't change the number of thumbs for the gradient, only their color or position.";

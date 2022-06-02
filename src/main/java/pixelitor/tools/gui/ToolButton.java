@@ -19,11 +19,15 @@ package pixelitor.tools.gui;
 
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.util.List;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
@@ -34,6 +38,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
  */
 public class ToolButton extends JToggleButton {
     public static final int TOOL_ICON_SIZE = 28;
+    private static final Color DARK_THEME_SELECTED_COLOR = new Color(117, 255, 136);
 
     private final Tool tool;
 
@@ -45,43 +50,26 @@ public class ToolButton extends JToggleButton {
         tool.setButton(this);
 
         // used for component lookup when testing
-        String buttonName = tool.getName() + " Button";
-        setName(buttonName);
+        setName(tool.getName() + " Button");
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        Icon icon = tool.createIcon();
-        setIcon(icon);
+        setIcons(tool);
 
-        assert icon.getIconWidth() == TOOL_ICON_SIZE;
-        assert icon.getIconHeight() == TOOL_ICON_SIZE;
+        setToolTipText("<html>" + tool.getName()
+                       + " (<b>" + tool.getActivationKey() + "</b>)");
 
-        char c = tool.getActivationKey();
-        setToolTipText("<html>" + tool.getName() + " (<b>" + c + "</b>)");
-
-        setMargin(new Insets(0, 0, 0, 0));
-        setBorderPainted(true);
-        setRolloverEnabled(false);
-        addActionListener(e -> Tools.start(tool));
+        // An item listener is better than an action listener because it
+        // is also triggered by keyboard focus traversal selections.
+        addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                Tools.start(tool);
+            }
+        });
+//        addActionListener(e -> Tools.start(tool));
 
         if (tool.canHaveUserPresets()) {
-            List<UserPreset> startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
-            numPresets = startupPresets.size();
-
-            popup = new JPopupMenu();
-            popup.add(tool.createSavePresetAction(this,
-                this::addPreset, this::removePreset));
-            if (!startupPresets.isEmpty()) {
-                if (GUIUtils.CAN_USE_FILE_MANAGER) {
-                    popup.add(tool.createManagePresetsAction());
-                }
-                popup.addSeparator();
-                for (UserPreset preset : startupPresets) {
-                    popup.add(preset.asAction(tool));
-                }
-            }
-
-            setComponentPopupMenu(popup);
+            createPresetsPopup(tool);
         }
 
         setPreferredSize(preferredSize);
@@ -90,9 +78,48 @@ public class ToolButton extends JToggleButton {
     @Override
     public void updateUI() {
         if (tool != null) { // changing the theme
-            setIcon(tool.createIcon());
+            setIcons(tool);
         }
         super.updateUI();
+    }
+
+    private void setIcons(Tool tool) {
+        Icon toolIcon = tool.createIcon();
+        setIcon(toolIcon);
+
+        if (Themes.getCurrent().isDark()) {
+            Icon selectedIcon;
+            if (tool == Tools.BRUSH) {
+                selectedIcon = Icons.loadThemed("brush_tool.png", 0x00_FF_FF_FF & DARK_THEME_SELECTED_COLOR.getRGB());
+            } else {
+                selectedIcon = ((VectorIcon) toolIcon).copy(DARK_THEME_SELECTED_COLOR);
+            }
+            setSelectedIcon(selectedIcon);
+        } else {
+            // set it explicitly, so that it's updated
+            // when the theme changes from dark to light
+            setSelectedIcon(toolIcon);
+        }
+    }
+
+    private void createPresetsPopup(Tool tool) {
+        List<UserPreset> startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
+        numPresets = startupPresets.size();
+
+        popup = new JPopupMenu();
+        popup.add(tool.createSavePresetAction(this,
+            this::addPreset, this::removePreset));
+        if (!startupPresets.isEmpty()) {
+            if (GUIUtils.CAN_USE_FILE_MANAGER) {
+                popup.add(tool.createManagePresetsAction());
+            }
+            popup.addSeparator();
+            for (UserPreset preset : startupPresets) {
+                popup.add(preset.asAction(tool));
+            }
+        }
+
+        setComponentPopupMenu(popup);
     }
 
     private void addPreset(UserPreset preset) {

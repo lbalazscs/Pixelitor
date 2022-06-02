@@ -43,6 +43,16 @@ public class SwingFilePicker implements FilePicker {
     private JFileChooser openChooser;
     private SaveFileChooser saveChooser;
 
+    public SwingFilePicker() {
+        UIManager.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals("lookAndFeel")) {
+                // force reinitialization of the cached file pickers
+                openChooser = null;
+                saveChooser = null;
+            }
+        });
+    }
+
     @Override
     public File getSupportedOpenFile() {
         initOpenChooser();
@@ -54,12 +64,6 @@ public class SwingFilePicker implements FilePicker {
             File selectedFile = openChooser.getSelectedFile();
             Dirs.setLastOpen(selectedFile.getParentFile());
             return selectedFile;
-        } else if (result == JFileChooser.CANCEL_OPTION) {
-            // cancelled
-            return null;
-        } else if (result == JFileChooser.ERROR_OPTION) {
-            // error or dismissed
-            return null;
         }
         return null;
     }
@@ -144,14 +148,13 @@ public class SwingFilePicker implements FilePicker {
 
         setDefaultOpenExtensions();
 
-        var p = new JPanel();
-        p.setLayout(new BorderLayout());
+        var accessoryPanel = new JPanel(new BorderLayout());
         var progressPanel = new ProgressPanel();
         var preview = new ImagePreviewPanel(progressPanel);
-        p.add(preview, CENTER);
-        p.add(progressPanel, SOUTH);
+        accessoryPanel.add(preview, CENTER);
+        accessoryPanel.add(progressPanel, SOUTH);
 
-        openChooser.setAccessory(p);
+        openChooser.setAccessory(accessoryPanel);
         openChooser.addPropertyChangeListener(preview);
     }
 
@@ -161,7 +164,6 @@ public class SwingFilePicker implements FilePicker {
         if (saveChooser == null) {
             File lastSaveDir = Dirs.getLastSave();
             saveChooser = new SaveFileChooser(lastSaveDir);
-//            saveChooser.setCurrentDirectory(lastSaveDir);
             saveChooser.setName("save");
             saveChooser.setDialogTitle(i18n("save_as"));
             setDefaultSaveExtensions();

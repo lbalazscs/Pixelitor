@@ -55,9 +55,10 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class PreferencesPanel extends JTabbedPane {
     private static final Border EMPTY_BORDER =
-        BorderFactory.createEmptyBorder(0, 10, 5, 0);
+        BorderFactory.createEmptyBorder(5, 10, 5, 0);
     private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
     private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
+
     private JTextField undoLevelsTF;
     private JComboBox<Item> thumbSizeCB;
     private JComboBox<MouseZoomMethod> zoomMethodCB;
@@ -90,8 +91,8 @@ public class PreferencesPanel extends JTabbedPane {
         addFontChoosers(gbh);
         addImageAreaChooser(gbh);
         addThumbSizeChooser(gbh);
-        addNativeChoosersCB(gbh);
 
+        uiPanel.setBorder(EMPTY_BORDER);
         return uiPanel;
     }
 
@@ -210,12 +211,6 @@ public class PreferencesPanel extends JTabbedPane {
         thumbSizeCB.addActionListener(e -> updateThumbSize());
     }
 
-    private void addNativeChoosersCB(GridBagHelper gbh) {
-        nativeChoosersCB = new JCheckBox("", FileChoosers.useNativeDialogs());
-        // no action listener, set only when OK is pressed
-        gbh.addLabelAndControl("Use System File Choosers:", nativeChoosersCB);
-    }
-
     private JPanel createMousePanel() {
         var mousePanel = new JPanel(new BorderLayout());
         // put the contents to the north of a border layout,
@@ -293,15 +288,22 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private JPanel createAdvancedPanel() {
-        var generalPanel = new JPanel(new GridBagLayout());
-        var gbh = new GridBagHelper(generalPanel);
+        var advancedPanel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(advancedPanel);
 
+        addNativeChoosersCB(gbh);
         addUndoLevelsChooser(gbh);
         addMagickDirField(gbh);
         addExperimentalCB(gbh);
 
-        generalPanel.setBorder(EMPTY_BORDER);
-        return generalPanel;
+        advancedPanel.setBorder(EMPTY_BORDER);
+        return advancedPanel;
+    }
+
+    private void addNativeChoosersCB(GridBagHelper gbh) {
+        nativeChoosersCB = new JCheckBox("", FileChoosers.useNativeDialogs());
+        // no action listener, set only when OK is pressed
+        gbh.addLabelAndControl("Use System File Choosers:", nativeChoosersCB);
     }
 
     private void addUndoLevelsChooser(GridBagHelper gbh) {

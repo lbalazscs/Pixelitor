@@ -84,12 +84,12 @@ public class Tools {
         for (Tool tool : allTools) {
             if (tool.getShortName().equals(lastToolName)) {
                 found = true;
-                startAndSelect(tool);
+                tool.activate();
                 break;
             }
         }
         if (!found) { // ui language changed
-            startAndSelect(BRUSH);
+            BRUSH.activate();
         }
     }
 
@@ -98,14 +98,9 @@ public class Tools {
         currentTool = newTool;
     }
 
-    public static void startAndSelect(Tool newTool) {
-        start(newTool);
-
-        // start doesn't select the button, because it is
-        // either called by the button event handler or by testing code
-        currentTool.getButton().setSelected(true);
-    }
-
+    // This doesn't select the button, because it is either
+    // called by the button event handler or by testing code!
+    // Normally the Tool's activate() method should be called instead.
     public static void start(Tool newTool) {
         // showing the message could be useful even if the tool didn't change
         Messages.showInStatusBar(newTool.getStatusBarMessage());
@@ -187,7 +182,7 @@ public class Tools {
         if (currentTool != MOVE) {
             Tool preferredTool = layer.getPreferredTool();
             if (preferredTool != null && preferredTool != currentTool) {
-                startAndSelect(preferredTool);
+                preferredTool.activate();
             }
         }
 

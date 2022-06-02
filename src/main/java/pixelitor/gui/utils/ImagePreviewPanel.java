@@ -24,7 +24,6 @@ import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.ProgressTracker;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -44,14 +43,12 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     public static final int EMPTY_SPACE_AT_LEFT = 5;
     private static final Map<String, SoftReference<ThumbInfo>> thumbsCache = new HashMap<>();
 
-    private final Color backgroundColor;
     private ThumbInfo thumbInfo;
     private final ProgressPanel progressPanel;
 
     public ImagePreviewPanel(ProgressPanel progressPanel) {
         this.progressPanel = progressPanel;
         setPreferredSize(new Dimension(SIZE, SIZE));
-        backgroundColor = getBackground();
 
         this.progressPanel.setVisible(true);
     }
@@ -116,7 +113,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
     @Override
     public void paintComponent(Graphics g) {
-        g.setColor(backgroundColor);
+        g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
 
         if (thumbInfo != null) {

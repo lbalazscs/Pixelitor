@@ -102,7 +102,7 @@ import static pixelitor.utils.Keys.*;
 import static pixelitor.utils.QuadrantAngle.*;
 
 /**
- * The menu bar of the app
+ * The main menu bar of the app window.
  */
 public class MenuBar extends JMenuBar {
     public MenuBar(PixelitorWindow pw) {

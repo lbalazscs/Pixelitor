@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import org.jdesktop.swingx.painter.TextPainter;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -34,22 +36,19 @@ public class ThumbInfo {
     public static final String PREVIEW_ERROR = "Preview Error";
     public static final String NO_PREVIEW = "No Preview";
 
-    private static final int SIZE_POS_X = 20;
-    private static final int SIZE_POS_Y = 10;
-
     private final BufferedImage thumb;
 
     // not null if the thumb wasn't generated successfully
     private final String errMsg;
 
     // these sizes refer to the original image, not to the thumb!
-    private final int origWidth;
-    private final int origHeight;
+    private final int fullWidth;
+    private final int fullHeight;
 
-    private ThumbInfo(BufferedImage thumb, int origWidth, int origHeight, String errMsg) {
+    private ThumbInfo(BufferedImage thumb, int fullWidth, int fullHeight, String errMsg) {
         this.thumb = thumb;
-        this.origWidth = origWidth;
-        this.origHeight = origHeight;
+        this.fullWidth = fullWidth;
+        this.fullHeight = fullHeight;
         this.errMsg = errMsg;
     }
 
@@ -73,7 +72,7 @@ public class ThumbInfo {
             g.fillRect(0, 0, width, height);
             new TextPainter(errMsg, panel.getFont(), Color.RED)
                 .paint(g, null, width, height);
-            paintImageSize(g);
+            paintImageSize(g, panel);
             return;
         }
 
@@ -81,20 +80,27 @@ public class ThumbInfo {
         int y = (height - thumb.getHeight()) / 2;
         g.drawImage(thumb, x, y, null);
 
-        paintImageSize(g);
+        paintImageSize(g, panel);
     }
 
-    private void paintImageSize(Graphics2D g) {
-        if (origWidth == -1 || origHeight == -1) {
+    private void paintImageSize(Graphics2D g, JPanel panel) {
+        if (fullWidth == -1 || fullHeight == -1) {
             return;
         }
 
-        String msg = "Size: " + origWidth + " x " + origHeight + " pixels";
+        String msg = "Size: " + fullWidth + " x " + fullHeight + " pixels";
+
+        Font font = panel.getFont();
+        FontMetrics fontMetrics = g.getFontMetrics(font);
+        int stringWidth = fontMetrics.stringWidth(msg);
+        int stringHeight = fontMetrics.getHeight();
+        int drawX = (panel.getWidth() - stringWidth) / 2;
+        int drawY = stringHeight + 3;
 
         g.setColor(BLACK);
-        g.drawString(msg, SIZE_POS_X, SIZE_POS_Y);
+        g.drawString(msg, drawX, drawY);
 
         g.setColor(WHITE);
-        g.drawString(msg, SIZE_POS_X - 1, SIZE_POS_Y - 1);
+        g.drawString(msg, drawX - 1, drawY - 1);
     }
 }

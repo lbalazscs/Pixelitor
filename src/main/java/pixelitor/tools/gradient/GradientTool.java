@@ -25,6 +25,7 @@ import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DropDownSlider;
+import pixelitor.gui.utils.Themes;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.GradientFillLayer;
@@ -650,8 +651,10 @@ public class GradientTool extends DragTool {
     private static class GradientToolIcon extends Tool.ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
-            Paint gradient = new GradientPaint(0, 0, Color.BLACK,
-                ToolButton.TOOL_ICON_SIZE, 0, Color.WHITE);
+            Color startColor = Color.BLACK;
+            Color endColor = Themes.getCurrent().isDark() ? color : Color.WHITE;
+            Paint gradient = new GradientPaint(0, 0, startColor,
+                ToolButton.TOOL_ICON_SIZE, 0, endColor);
             g.setPaint(gradient);
             g.fillRect(0, 0, ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
         }
