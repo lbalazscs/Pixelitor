@@ -21,13 +21,13 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Result;
+import pixelitor.utils.*;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -62,6 +62,14 @@ public class CopyAction extends OpenViewEnabledAction {
         // make a copy, because otherwise changing the image
         // will also change the clipboard contents
         BufferedImage copy = ImageUtils.copySubImage(activeImage);
+
+        ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard...", -1);
+        CompletableFuture.runAsync(() -> doCopy(copy))
+            .thenRunAsync(() -> afterCopyActions(progressHandler), Threads.onEDT)
+            .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    private void doCopy(BufferedImage copy) {
         Transferable imageTransferable = new ImageTransferable(copy);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
@@ -71,6 +79,11 @@ public class CopyAction extends OpenViewEnabledAction {
         } catch (IllegalStateException e) {
             // ignore, see issue #181
         }
+    }
+
+    private void afterCopyActions(ProgressHandler handler) {
+        handler.stopProgress();
+        Messages.showInStatusBar("Image copied to the clipboard.");
     }
 }
 
