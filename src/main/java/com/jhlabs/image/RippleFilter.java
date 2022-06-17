@@ -32,8 +32,8 @@ public class RippleFilter extends RotatedEffectFilter {
     private float xWavelength, yWavelength;
     private int waveType;
 
-    private float phaseX;
-    private float phaseY;
+    private double phaseX;
+    private double phaseY;
 
     /**
      * Construct a RippleFilter.
@@ -190,11 +190,11 @@ public class RippleFilter extends RotatedEffectFilter {
         return "Distort/Ripple...";
     }
 
-    public void setPhaseX(float phaseX) {
-        this.phaseX = (float) (phaseX * Math.PI * 2);
+    public void setPhaseX(double phaseX) {
+        this.phaseX = phaseX * Math.PI * 2;
     }
 
-    public void setPhaseY(float phaseY) {
-        this.phaseY = (float) (phaseY * Math.PI * 2);
+    public void setPhaseY(double phaseY) {
+        this.phaseY = phaseY * Math.PI * 2;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class Mirror extends ParametrizedFilter {
             filter = new MirrorFilter();
         }
 
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setAngle(angle.getValueInRadians());

@@ -133,7 +133,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     }
 
     public float getOpacity() {
-        return opacityRange.getPercentageValF();
+        return (float) opacityRange.getPercentage();
     }
 
     public void setOpacity(float opacity) {

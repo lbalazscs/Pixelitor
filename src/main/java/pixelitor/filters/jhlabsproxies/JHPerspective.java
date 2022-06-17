@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,14 +51,14 @@ public class JHPerspective extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float northWestX = northWest.getRelativeX();
-        float northWestY = northWest.getRelativeY();
-        float northEastX = northEast.getRelativeX();
-        float northEastY = northEast.getRelativeY();
-        float southWestX = southWest.getRelativeX();
-        float southWestY = southWest.getRelativeY();
-        float southEastX = southEast.getRelativeX();
-        float southEastY = southEast.getRelativeY();
+        float northWestX = (float) northWest.getRelativeX();
+        float northWestY = (float) northWest.getRelativeY();
+        float northEastX = (float) northEast.getRelativeX();
+        float northEastY = (float) northEast.getRelativeY();
+        float southWestX = (float) southWest.getRelativeX();
+        float southWestY = (float) southWest.getRelativeY();
+        float southEastX = (float) southEast.getRelativeX();
+        float southEastY = (float) southEast.getRelativeY();
 
         var filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
             southEastX, southEastY, southWestX, southWestY, NAME);

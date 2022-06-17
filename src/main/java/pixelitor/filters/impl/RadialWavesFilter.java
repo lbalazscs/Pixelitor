@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import java.awt.image.BufferedImage;
 public class RadialWavesFilter extends CenteredTransformFilter {
     private int angularDivision;
     private double radialAmplitude;
-    private float phase;
-    private float zoom;
+    private double phase;
+    private double zoom;
     private int waveType;
     private int maxSize;
 
@@ -47,8 +47,8 @@ public class RadialWavesFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - cx;
-        float dy = y - cy;
+        double dx = x - cx;
+        double dy = y - cy;
         double r = Math.sqrt(dx * dx + dy * dy);
         double angle = FastMath.atan2(dy, dx);
 
@@ -60,18 +60,18 @@ public class RadialWavesFilter extends CenteredTransformFilter {
         r += fr * radialAmplitude * r / maxSize;
 
         double zoomedR = r / zoom;
-        float u = (float) (zoomedR * FastMath.cos(angle));
-        float v = (float) (zoomedR * FastMath.sin(angle));
+        double u = zoomedR * FastMath.cos(angle);
+        double v = zoomedR * FastMath.sin(angle);
 
-        out[0] = u + cx;
-        out[1] = v + cy;
+        out[0] = (float) (u + cx);
+        out[1] = (float) (v + cy);
     }
 
-    public void setPhase(float phase) {
+    public void setPhase(double phase) {
         this.phase = phase;
     }
 
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,7 +85,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void onXSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeX(xSliderModel.getPercentageValF(),
+            model.setRelativeX(xSliderModel.getPercentage(),
                 xSliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
@@ -93,7 +93,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void onYSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeY(ySliderModel.getPercentageValF(),
+            model.setRelativeY(ySliderModel.getPercentage(),
                 ySliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
@@ -107,13 +107,13 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         slidersMovedByUser = false;
 
         int xValue = xSliderModel.getValue();
-        float modelXValue = model.getRelativeX() * 100;
+        double modelXValue = model.getRelativeX() * 100;
         if (modelXValue != xValue) {
             xSliderModel.setValue(modelXValue, true);
         }
 
         int yValue = ySliderModel.getValue();
-        float modelYValue = model.getRelativeY() * 100;
+        double modelYValue = model.getRelativeY() * 100;
         if (modelYValue != yValue) {
             ySliderModel.setValue(modelYValue, true);
         }

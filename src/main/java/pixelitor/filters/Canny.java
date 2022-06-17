@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,8 +88,8 @@ public class Canny extends ParametrizedFilter {
         // do not cache this object because it holds a lot of memory!
         var detector = new CannyEdgeDetector();
 
-        detector.setLowThreshold(lowThreshold.getPercentageValF());
-        detector.setHighThreshold(highThreshold.getPercentageValF());
+        detector.setLowThreshold((float) lowThreshold.getPercentage());
+        detector.setHighThreshold((float) highThreshold.getPercentage());
         detector.setContrastNormalized(contrastNormalized.isChecked());
         detector.setGaussianKernelRadius(gaussianKernelRadius.getValueAsFloat());
         detector.setGaussianKernelWidth(gaussianKernelWidth.getValue());

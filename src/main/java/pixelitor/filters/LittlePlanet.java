@@ -64,12 +64,12 @@ public class LittlePlanet extends ParametrizedFilter {
             filter = new LittlePlanetFilter();
         }
 
-        filter.setZoom(zoom.getPercentageValF());
-        filter.setInnerZoom(innerZoom.getPercentageValF());
+        filter.setZoom(zoom.getPercentage());
+        filter.setInnerZoom(innerZoom.getPercentage());
         filter.setRotateResult(rotateResult.getValueInIntuitiveRadians());
         filter.setInverted(invert.isChecked());
 
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

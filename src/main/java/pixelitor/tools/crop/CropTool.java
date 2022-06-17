@@ -64,7 +64,7 @@ public class CropTool extends DragTool {
     private final RangeParam maskOpacity = new RangeParam(
         "Mask Opacity (%)", 0, 75, 100, false, WEST);
     private Composite maskComposite = AlphaComposite.getInstance(
-        SRC_OVER, maskOpacity.getPercentageValF());
+        SRC_OVER, (float) maskOpacity.getPercentage());
 
     private final JButton cancelButton = new JButton(GUIText.CANCEL);
     private JButton cropButton;
@@ -126,7 +126,7 @@ public class CropTool extends DragTool {
     }
 
     private void maskOpacityChanged() {
-        float alpha = maskOpacity.getPercentageValF();
+        float alpha = (float) maskOpacity.getPercentage();
         // can the slider get out of range?
         if (alpha < 0.0f) {
             if (AppContext.isDevelopment()) {
@@ -535,7 +535,7 @@ public class CropTool extends DragTool {
     public DebugNode createDebugNode(String key) {
         var node = super.createDebugNode(key);
 
-        node.addFloat("mask opacity", maskOpacity.getPercentageValF());
+        node.addDouble("mask opacity", maskOpacity.getPercentage());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());
         node.addAsString("state", state);
 

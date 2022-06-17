@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,8 +77,8 @@ public class JHWaves extends ParametrizedFilter {
         filter.setYWavelength(yWavelength);
         filter.setAngle(angleParam.getValueInIntuitiveRadians());
         filter.setWaveType(waveType.getValue());
-        filter.setPhaseX(phaseParam.getValueAsPercentage(0));
-        filter.setPhaseY(phaseParam.getValueAsPercentage(1));
+        filter.setPhaseX(phaseParam.getPercentage(0));
+        filter.setPhaseY(phaseParam.getPercentage(1));
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

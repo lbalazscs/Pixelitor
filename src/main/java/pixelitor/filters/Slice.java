@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,8 +60,8 @@ public class Slice extends ParametrizedFilter {
 
         filter.setOffset(offset.getValue());
         filter.setSize(size.getValue());
-        filter.setShiftHorizontal(shift.getValueAsPercentage(0));
-        filter.setShiftVertical(shift.getValueAsPercentage(1));
+        filter.setShiftHorizontal(shift.getPercentage(0));
+        filter.setShiftVertical(shift.getPercentage(1));
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR); // no difference

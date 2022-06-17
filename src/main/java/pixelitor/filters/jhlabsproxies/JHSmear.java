@@ -84,9 +84,9 @@ public class JHSmear extends ParametrizedFilter {
         }
 
         filter.setDistance(distanceValue);
-        filter.setDensity(density.getPercentageValF());
+        filter.setDensity((float) density.getPercentage());
         filter.setAngle((float) angle.getValueInRadians());
-        filter.setMix(mix.getPercentageValF());
+        filter.setMix((float) mix.getPercentage());
         filter.setShape(shape.getValue());
         filter.setRandomGenerator(rand);
 

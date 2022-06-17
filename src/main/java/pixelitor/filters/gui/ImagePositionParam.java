@@ -21,6 +21,7 @@ import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static java.lang.String.format;
@@ -30,18 +31,18 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  * A filter parameter for selecting an image coordinate (relative to the image size)
  */
 public class ImagePositionParam extends AbstractFilterParam {
-    private float relativeX = 0.5f;
-    private float relativeY = 0.5f;
+    private double relativeX = 0.5;
+    private double relativeY = 0.5;
     private int decimalPlaces = 1;
 
-    private float defaultRelativeX = 0.5f;
-    private float defaultRelativeY = 0.5f;
+    private double defaultRelativeX = 0.5;
+    private double defaultRelativeY = 0.5;
 
     public ImagePositionParam(String name) {
         super(name, ALLOW_RANDOMIZE);
     }
 
-    public ImagePositionParam(String name, float relX, float relY) {
+    public ImagePositionParam(String name, double relX, double relY) {
         super(name, ALLOW_RANDOMIZE);
         relativeX = relX;
         relativeY = relY;
@@ -73,21 +74,29 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        float rx = (float) Math.random();
-        float ry = (float) Math.random();
+        double rx = Math.random();
+        double ry = Math.random();
 
         setRelativeValues(rx, ry, true, false, false);
     }
 
-    public float getRelativeX() {
+    public double getRelativeX() {
         return relativeX;
     }
 
-    public float getRelativeY() {
+    public double getRelativeY() {
         return relativeY;
     }
 
-    public void setRelativeValues(float relX, float relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
+    public Point2D getRelativePoint() {
+        return new Point2D.Double(relativeX, relativeY);
+    }
+
+    public Point2D getAbsolutePoint(BufferedImage src) {
+        return new Point2D.Double(relativeX * src.getWidth(), relativeY * src.getHeight());
+    }
+
+    public void setRelativeValues(double relX, double relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
         relativeX = relX;
         relativeY = relY;
         if (updateGUI && paramGUI != null) {
@@ -98,11 +107,11 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
     }
 
-    public void setRelativeX(float x, boolean isAdjusting) {
+    public void setRelativeX(double x, boolean isAdjusting) {
         setRelativeValues(x, relativeY, false, isAdjusting, true);
     }
 
-    public void setRelativeY(float y, boolean isAdjusting) {
+    public void setRelativeY(double y, boolean isAdjusting) {
         setRelativeValues(relativeX, y, false, isAdjusting, true);
     }
 
@@ -128,8 +137,8 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         ImagePositionParamState s = (ImagePositionParamState) state;
-        float newRelX = (float) s.relativeX;
-        float newRelY = (float) s.relativeY;
+        double newRelX = s.relativeX;
+        double newRelY = s.relativeY;
 
         if (updateGUI) {
             setRelativeValues(newRelX, newRelY, true, false, false);
@@ -142,14 +151,14 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(String savedValue) {
         int commaIndex = savedValue.indexOf(',');
-        float newRelX = Float.parseFloat(savedValue.substring(0, commaIndex));
-        float newRelY = Float.parseFloat(savedValue.substring(commaIndex + 1));
+        double newRelX = Double.parseDouble(savedValue.substring(0, commaIndex));
+        double newRelY = Double.parseDouble(savedValue.substring(commaIndex + 1));
         setRelativeValues(newRelX, newRelY, true, false, false);
     }
 
     @Override
     public Object getParamValue() {
-        return new Point2D.Float(getRelativeX(), getRelativeY());
+        return new Point2D.Double(getRelativeX(), getRelativeY());
     }
 
     @Override

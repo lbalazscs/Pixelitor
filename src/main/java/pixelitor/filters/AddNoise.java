@@ -85,9 +85,9 @@ public class AddNoise extends ParametrizedFilter {
         boolean fullSaturation = saturationParam.getValue() == 100;
         boolean fullOpacity = opacityParam.getValue() == 100;
 
-        float opacity = opacityParam.getPercentageValF();
-        float saturation = saturationParam.getPercentageValF();
-        double coverage = coverageParam.getPercentageValD();
+        float opacity = (float) opacityParam.getPercentage();
+        float saturation = (float) saturationParam.getPercentage();
+        double coverage = coverageParam.getPercentage();
 
         int workUnit = 100_000;
         int counter = 0;
@@ -173,7 +173,7 @@ public class AddNoise extends ParametrizedFilter {
 
         boolean fullOpacity = opacityParam.getValue() == 100;
         boolean fullCoverage = coverageParam.getValue() == 100;
-        double coveragePercentage = coverageParam.getPercentageValD();
+        double coveragePercentage = coverageParam.getPercentage();
 
         if (fullOpacity && fullCoverage) {
             return dest;
@@ -185,7 +185,7 @@ public class AddNoise extends ParametrizedFilter {
         int numWorkUnits = length / workUnit;
         var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
 
-        double destWeight = opacityParam.getPercentageValF();
+        double destWeight = opacityParam.getPercentage();
         double srcWeight = 1.0 - destWeight;
         for (int i = 0; i < length; i++) {
             // count at the beginning of the loop because of early returns

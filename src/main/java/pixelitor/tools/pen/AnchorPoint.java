@@ -68,7 +68,7 @@ public class AnchorPoint extends DraggablePoint {
         this(PPoint.eagerFromCo(coX, coY, view), view, subPath);
     }
 
-    public AnchorPoint(PPoint p, View view, SubPath subPath) {
+    private AnchorPoint(PPoint p, View view, SubPath subPath) {
         super("AP" + debugCounter++, p, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
 
         this.subPath = subPath;

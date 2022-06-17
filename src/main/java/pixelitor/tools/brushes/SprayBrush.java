@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class SprayBrush extends AbstractBrush {
         super.initDrawing(p);
 
         double shapeRadius = settings.getShapeRadius();
-        float radiusVariability = settings.getRadiusVariability();
+        double radiusVariability = settings.getRadiusVariability();
         minShapeRadius = shapeRadius - radiusVariability * shapeRadius;
         maxShapeRadius = shapeRadius + radiusVariability * shapeRadius;
 
@@ -103,7 +103,7 @@ public class SprayBrush extends AbstractBrush {
 
         ShapeType shapeType = settings.getShapeType();
         boolean useRandomOpacity = settings.randomOpacity();
-        float colorRandomness = settings.getColorRandomness();
+        float colorRandomness = (float) settings.getColorRandomness();
         int numSimultaneousShapes = settings.getFlow();
 
         for (int i = 0; i < numSimultaneousShapes; i++) {

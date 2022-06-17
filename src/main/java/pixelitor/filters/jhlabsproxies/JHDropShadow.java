@@ -75,7 +75,7 @@ public class JHDropShadow extends ParametrizedFilter {
 
         filter.setAddMargins(false);
         filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setOpacity(opacity.getPercentageValF());
+        filter.setOpacity((float) opacity.getPercentage());
         filter.setShadowColor(color.getColor().getRGB());
         filter.setShadowOnly(shadowOnly.isChecked());
 

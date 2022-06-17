@@ -81,7 +81,7 @@ public class Fade extends ParametrizedFilter {
             return after;
         }
 
-        float fadeFactor = opacity.getPercentageValF();
+        double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
         int[] srcData = ImageUtils.getPixelsAsArray(after);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -117,7 +117,7 @@ public class Fade extends ParametrizedFilter {
             return after;
         }
 
-        float fadeFactor = opacity.getPercentageValF();
+        double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
 
         byte[] srcData = ImageUtils.getGrayPixelsAsByteArray(after);

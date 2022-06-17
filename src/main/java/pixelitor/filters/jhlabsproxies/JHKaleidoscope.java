@@ -69,13 +69,12 @@ public class JHKaleidoscope extends ParametrizedFilter {
         }
         filter.setAngle((float) angle.getValueInRadians());
         filter.setAngle2((float) rotateResult.getValueInRadians());
-        filter.setCentreX(center.getRelativeX());
-        filter.setCentreY(center.getRelativeY());
+        filter.setCentre(center.getRelativePoint());
 //        filter.setRadius(radius.getValue());
         filter.setSides(sides.getValue());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setZoom(zoom.getPercentageValF());
+        filter.setZoom((float) zoom.getPercentage());
 
         return filter.filter(src, dest);
     }

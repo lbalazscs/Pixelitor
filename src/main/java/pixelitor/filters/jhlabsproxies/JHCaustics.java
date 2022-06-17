@@ -71,13 +71,13 @@ public class JHCaustics extends ParametrizedFilter {
             filter = new CausticsFilter(NAME);
         }
 
-        filter.setAmount(focus.getPercentageValF());
+        filter.setAmount((float) focus.getPercentage());
         filter.setBgColor(bgColor.getColor().getRGB());
         filter.setBrightness(brightness.getValue());
-        filter.setDispersion(dispersion.getPercentageValF());
+        filter.setDispersion((float) dispersion.getPercentage());
         filter.setSamples(samples.getValue());
         filter.setScale(zoom.getValueAsFloat());
-        filter.setTime(time.getPercentageValF());
+        filter.setTime((float) time.getPercentage());
         filter.setTurbulence(turbulence.getValueAsFloat() / 25.0f);
 
         return filter.filter(src, dest);

@@ -129,7 +129,7 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     private void initStroke(BufferedImage sourceImage, PPoint p) {
-        smudgeBrush.setupFirstPoint(sourceImage, p, strengthParam.getPercentageValF());
+        smudgeBrush.setupFirstPoint(sourceImage, p, (float) strengthParam.getPercentage());
     }
 
     @Override

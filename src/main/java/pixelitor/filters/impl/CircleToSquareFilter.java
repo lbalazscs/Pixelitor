@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,18 +50,18 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     }
 
     public Shape[] getAffectedAreaShapes() {
-        Shape rect = new Rectangle2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
+        Shape rect = new Rectangle2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
         Shape ellipse = Shapes.createEllipse(cx, cy, radiusX, radiusY);
         return new Shape[]{rect, ellipse};
     }
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - cx;
-        float dy = y - cy;
+        double dx = x - cx;
+        double dy = y - cy;
 
-        float xDist = Math.abs(dx);
-        float yDist = Math.abs(dy);
+        double xDist = Math.abs(dx);
+        double yDist = Math.abs(dy);
 
         if (xDist > radiusX || yDist > radiusY) { // out of the affected area
             out[0] = x;
@@ -69,7 +69,7 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
             return;
         }
 
-        float sdx, sdy, sXDist, sYDist;
+        double sdx, sdy, sXDist, sYDist;
         if (radiusX == radiusY) {
             sdx = dx;
             sdy = dy;
@@ -94,15 +94,15 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
 
         double magnificationInverse = FastMath.cos(angle);
 
-        float transformedX = cx + (float) (dx * magnificationInverse);
-        float transformedY = cy + (float) (dy * magnificationInverse);
+        double transformedX = cx + dx * magnificationInverse;
+        double transformedY = cy + dy * magnificationInverse;
 
         if (amount == 1.0f) {
-            out[0] = transformedX;
-            out[1] = transformedY;
+            out[0] = (float) transformedX;
+            out[1] = (float) transformedY;
         } else {
-            out[0] = x + amount * (transformedX - x);
-            out[1] = y + amount * (transformedY - y);
+            out[0] = (float) (x + amount * (transformedX - x));
+            out[1] = (float) (y + amount * (transformedY - y));
         }
     }
 }

@@ -90,7 +90,7 @@ public class Transition2D extends ParametrizedFilter {
         }
 
         filter.setType(type.getValue());
-        filter.setProgress(progress.getPercentageValF());
+        filter.setProgress((float) progress.getPercentage());
 
         return filter.filter(src, dest);
     }

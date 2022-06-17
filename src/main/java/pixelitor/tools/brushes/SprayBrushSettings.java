@@ -83,15 +83,15 @@ public class SprayBrushSettings extends BrushSettings {
         return flowModel.getValue();
     }
 
-    public float getRadiusVariability() {
-        return radiusVariabilityModel.getPercentageValF();
+    public double getRadiusVariability() {
+        return radiusVariabilityModel.getPercentage();
     }
 
     public boolean randomOpacity() {
         return randomOpacityModel.isChecked();
     }
 
-    public float getColorRandomness() {
-        return colorRandomnessModel.getPercentageValF();
+    public double getColorRandomness() {
+        return colorRandomnessModel.getPercentage();
     }
 }

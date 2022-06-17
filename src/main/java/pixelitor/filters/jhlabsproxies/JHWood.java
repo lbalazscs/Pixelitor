@@ -79,10 +79,10 @@ public class JHWood extends ParametrizedFilter {
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
         filter.setScale(scale.getValueAsFloat());
         filter.setStretch(stretch.getValueAsFloat() + 1.0f);
-        filter.setRings(rings.getPercentageValF());
-        filter.setTurbulence(turbulence.getPercentageValF());
-        filter.setFibres(fibres.getPercentageValF());
-        filter.setGain(gain.getPercentageValF());
+        filter.setRings((float) rings.getPercentage());
+        filter.setTurbulence((float) turbulence.getPercentage());
+        filter.setFibres((float) fibres.getPercentage());
+        filter.setGain((float) gain.getPercentage());
         filter.setColormap(gradient.getValue());
 
         return filter.filter(src, dest);

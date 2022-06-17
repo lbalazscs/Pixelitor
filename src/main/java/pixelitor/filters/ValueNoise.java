@@ -96,7 +96,7 @@ public class ValueNoise extends ParametrizedFilter {
         int height = dest.getHeight();
         float frequency = 1.0f / scale.getValueAsFloat();
 
-        float persistence = persistenceParam.getPercentageValF();
+        float persistence = (float) persistenceParam.getPercentage();
 
         var pt = new StatusBarProgressTracker(NAME, height);
         NoiseInterpolation interp = interpolation.getSelected();

@@ -143,7 +143,7 @@ public class AutoPaint {
         path.moveTo(start.getImX(), start.getImY());
         double controlPointX = (start.getImX() + end.getImX()) / 2.0;
         double controlPointY = (start.getImY() + end.getImY()) / 2.0;
-        float maxCurvature = settings.getMaxCurvature();
+        double maxCurvature = settings.getMaxCurvature();
         if (maxCurvature > 0) {
             double maxShift = start.imDist(end) * maxCurvature;
             controlPointX += (Rnd.nextDouble() - 0.5) * maxShift;

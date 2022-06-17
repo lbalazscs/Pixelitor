@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,9 +73,9 @@ public class JHGlint extends ParametrizedFilter {
             filter = new GlintFilter(NAME);
         }
 
-        filter.setThreshold(threshold.getPercentageValF());
-        filter.setCoverage(coverage.getPercentageValF());
-        filter.setAmount(intensity.getPercentageValF());
+        filter.setThreshold((float) threshold.getPercentage());
+        filter.setCoverage((float) coverage.getPercentage());
+        filter.setAmount((float) intensity.getPercentage());
         filter.setLength(length);
         filter.setBlur(blur.getValueAsFloat());
         filter.setColormap(colors.getValue());

@@ -57,7 +57,7 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float zoomValue = zoom.getPercentageValF();
+        float zoomValue = (float) zoom.getPercentage();
         float rotationValue = rotation.getValueInRadians();
         if (zoomValue == 0.0f && rotationValue == 0.0f) {
             return src;
@@ -65,8 +65,7 @@ public class JHSpinZoomBlur extends ParametrizedFilter {
 
         MotionBlur filter = quality.getSelected().createFilter(NAME, src);
 
-        filter.setCentreX(center.getRelativeX());
-        filter.setCentreY(center.getRelativeY());
+        filter.setCentre(center.getRelativePoint());
         filter.setRotation(rotationValue);
         filter.setZoom(zoomValue);
 

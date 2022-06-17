@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import pixelitor.utils.Utils;
  */
 public class LittlePlanetFilter extends CenteredTransformFilter {
     private double rotateResult;
-    private float zoom;
+    private double zoom;
     private float innerZoom;
     private boolean inverted = false;
 
@@ -37,8 +37,8 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - cx;
-        float dy = cy - y;
+        double dx = x - cx;
+        double dy = cy - y;
         double r = Math.sqrt(dx * dx + dy * dy);
 
         double radius = srcHeight * zoom / 2;
@@ -63,7 +63,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         rotateResult = turn;
     }
 
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 
@@ -71,7 +71,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         this.inverted = inverted;
     }
 
-    public void setInnerZoom(float innerZoom) {
-        this.innerZoom = 1 - innerZoom / 2.0f;
+    public void setInnerZoom(double innerZoom) {
+        this.innerZoom = (float) (1 - innerZoom / 2.0);
     }
 }

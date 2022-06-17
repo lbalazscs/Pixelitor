@@ -177,16 +177,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * Returns the value of a percentage parameter as a float ratio
+     * Returns the value as a percentage.
      */
-    public float getPercentageValF() {
-        return getValueAsFloat() / 100.0f;
-    }
-
-    /**
-     * Returns the value of a percentage parameter as a double ratio
-     */
-    public double getPercentageValD() {
+    public double getPercentage() {
         return getValueAsDouble() / 100.0;
     }
 

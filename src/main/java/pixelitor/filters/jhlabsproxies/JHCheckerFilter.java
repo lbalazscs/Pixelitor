@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,8 +77,8 @@ public class JHCheckerFilter extends ParametrizedFilter {
         filter.setForeground(color2.getColor().getRGB());
         filter.setXScale(size.getValue(0));
         filter.setYScale(size.getValue(1));
-        filter.setDistortion(distortion.getValueAsPercentage(0));
-        filter.setPhase(distortion.getValueAsPercentage(1) * ImageMath.TWO_PI);
+        filter.setDistortion(distortion.getPercentage(0));
+        filter.setPhase(distortion.getPercentage(1) * ImageMath.TWO_PI);
 
         // must be set after the distortion
         filter.setAngle((float) angle.getValueInRadians());

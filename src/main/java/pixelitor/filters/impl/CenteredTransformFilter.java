@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,24 +19,24 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.TransformFilter;
 
-import java.awt.image.BufferedImage;
+import java.awt.geom.Point2D;
 
 /**
  * Abstract superclass for transform filters with a center
  */
 public abstract class CenteredTransformFilter extends TransformFilter {
     // actual center coordinates in pixels
-    protected float cx;
-    protected float cy;
+    protected double cx;
+    protected double cy;
 
     protected CenteredTransformFilter(String filterName) {
         super(filterName);
     }
 
-    public void setCenter(float centerX, float centerY, BufferedImage src) {
-        // has to be calculated here, because some filter use these
+    public void setCenter(Point2D c) {
+        // needs absolute values, because some filters use these
         // values in other setters, before the filtering begins
-        cx = centerX * src.getWidth();
-        cy = centerY * src.getHeight();
+        cx = c.getX();
+        cy = c.getY();
     }
 }

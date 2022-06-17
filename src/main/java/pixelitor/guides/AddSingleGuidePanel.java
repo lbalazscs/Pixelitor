@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,7 +65,7 @@ public class AddSingleGuidePanel extends JPanel {
     }
 
     private void setup(Guides guides) {
-        float percentage = percents.getPercentageValF();
+        double percentage = percents.getPercentage();
         if (horizontal) {
             guides.addHorRelative(percentage);
             guides.setName(format("horizontal at %.2f", percentage));

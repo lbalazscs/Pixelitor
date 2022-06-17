@@ -383,6 +383,7 @@ public final class Utils {
     }
 
     public static void preloadFontNames() {
+        assert fontNamesLoaded.getCount() == 1;
         fontNames = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
@@ -390,6 +391,7 @@ public final class Utils {
     }
 
     public static void preloadUnitTestFontNames() {
+        assert fontNamesLoaded.getCount() == 1;
         fontNames = new String[]{Font.DIALOG, Font.DIALOG_INPUT,
             Font.MONOSPACED, Font.SANS_SERIF, Font.SERIF};
         fontNamesLoaded.countDown();

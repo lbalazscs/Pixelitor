@@ -127,13 +127,13 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape = createShape(srcWidth, srcHeight);
-        double scaleX = scale.getValueAsPercentage(0);
-        double scaleY = scale.getValueAsPercentage(1);
+        double scaleX = scale.getPercentage(0);
+        double scaleY = scale.getPercentage(1);
         boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;
 
-        float relX = center.getRelativeX();
-        float relY = center.getRelativeY();
-        boolean hasTranslation = relX != 0.5f || relY != 0.5f;
+        double relX = center.getRelativeX();
+        double relY = center.getRelativeY();
+        boolean hasTranslation = relX != 0.5 || relY != 0.5;
 
         boolean hasRotation = !rotate.isSetToDefault();
 

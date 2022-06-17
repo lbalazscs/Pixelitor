@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,7 +67,7 @@ public class DrunkVision extends ParametrizedFilter {
 
         Random rand = ReseedSupport.getLastSeedRandom();
 
-        int maxDistance = (int) (drunkenness.getPercentageValD() * 0.2 * (src.getWidth() + src.getHeight()));
+        int maxDistance = (int) (drunkenness.getPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
 
         Point2D[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
         for (int i = 0; i < numShiftedImages; i++) {

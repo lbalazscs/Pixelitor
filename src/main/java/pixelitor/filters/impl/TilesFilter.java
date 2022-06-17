@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ public class TilesFilter extends RotatedEffectFilter {
     private float sizeY;
     private float curvatureX;
     private float curvatureY;
-    private float shiftX;
-    private float shiftY;
+    private double shiftX;
+    private double shiftY;
 
     public TilesFilter(String filterName) {
         super(filterName);
@@ -59,11 +59,11 @@ public class TilesFilter extends RotatedEffectFilter {
         out[1] = y + curvatureY * tan(y * sizeY - shiftY / (double) sizeY);
     }
 
-    public void setShiftX(float shiftX) {
+    public void setShiftX(double shiftX) {
         this.shiftX = shiftX;
     }
 
-    public void setShiftY(float shiftY) {
+    public void setShiftY(double shiftY) {
         this.shiftY = shiftY;
     }
 }

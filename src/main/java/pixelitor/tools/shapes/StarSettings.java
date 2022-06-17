@@ -26,8 +26,8 @@ import java.util.List;
  * The settings for a line.
  */
 public class StarSettings extends ShapeTypeSettings {
-    public static int DEFAULT_NUM_BRANCHES = 5;
-    public static double DEFAULT_RADIUS_RATIO = 0.38;
+    public static final int DEFAULT_NUM_BRANCHES = 5;
+    public static final double DEFAULT_RADIUS_RATIO = 0.38;
 
     private final RangeParam numBranches = new RangeParam("Number of Branches",
         3, DEFAULT_NUM_BRANCHES, 12);
@@ -53,7 +53,7 @@ public class StarSettings extends ShapeTypeSettings {
     }
 
     public double getRadiusRatio() {
-        return radiusRatio.getPercentageValD();
+        return radiusRatio.getPercentage();
     }
 
     @Override

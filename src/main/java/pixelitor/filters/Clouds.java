@@ -73,7 +73,7 @@ public class Clouds extends ParametrizedFilter {
 
         renderClouds(dest,
             scaleParam.getValueAsFloat(),
-            roughnessParam.getPercentageValF(),
+            (float) roughnessParam.getPercentage(),
             color1.getColor(),
             color2.getColor(),
             pt);

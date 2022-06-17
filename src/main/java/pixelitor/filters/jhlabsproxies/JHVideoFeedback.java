@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,12 +63,11 @@ public class JHVideoFeedback extends ParametrizedFilter {
         }
 
         filter.setRotation(rotation.getValueInRadians());
-        filter.setZoom(zoom.getPercentageValF());
-        filter.setCentreX(center.getRelativeX());
-        filter.setCentreY(center.getRelativeY());
+        filter.setZoom((float) zoom.getPercentage());
+        filter.setCentre(center.getRelativePoint());
         filter.setIterations(iterations.getValue());
-        filter.setStartAlpha(startOpacity.getPercentageValF());
-        filter.setEndAlpha(endOpacity.getPercentageValF());
+        filter.setStartAlpha((float) startOpacity.getPercentage());
+        filter.setEndAlpha((float) endOpacity.getPercentage());
 
         return filter.filter(src, dest);
     }

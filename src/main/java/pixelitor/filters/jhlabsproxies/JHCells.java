@@ -92,7 +92,7 @@ public class JHCells extends ParametrizedFilter {
             filter = new CellularFilter(NAME);
         }
 
-        float tune = refineType.getPercentageValF();
+        float tune = (float) refineType.getPercentage();
         float f1, f2, f3;
 
         switch (type.getValue()) {
@@ -114,19 +114,19 @@ public class JHCells extends ParametrizedFilter {
             default -> throw new IllegalStateException("type.getValue() = " + type.getValue());
         }
 
-        float bw = darkLightBalance.getPercentageValF();
+        float bw = (float) darkLightBalance.getPercentage();
         f1 += bw;
         f2 += bw;
         f3 += bw;
 
         filter.setScale(scale.getValueAsFloat());
-        filter.setStretch(stretch.getPercentageValF());
+        filter.setStretch((float) stretch.getPercentage());
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
         filter.setF1(f1);
         filter.setF2(f2);
         filter.setF3(f3);
         filter.setGridType(gridType.getValue());
-        filter.setRandomness(gridRandomness.getPercentageValF());
+        filter.setRandomness((float) gridRandomness.getPercentage());
         filter.setColormap(gradient.getValue());
 
         return filter.filter(src, dest);

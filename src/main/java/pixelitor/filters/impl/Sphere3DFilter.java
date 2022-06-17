@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,9 @@ import pixelitor.filters.Sphere3D;
  * Not finished.
  */
 public class Sphere3DFilter extends CenteredTransformFilter {
-    private float alpha;
-    private float beta;
-    private float gamma;
+    private double alpha;
+    private double beta;
+    private double gamma;
 
     public Sphere3DFilter() {
         super(Sphere3D.NAME);
@@ -35,8 +35,8 @@ public class Sphere3DFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - cx;
-        float dy = y - cy;
+        double dx = x - cx;
+        double dy = y - cy;
         double r = Math.sqrt(dx * dx + dy * dy);
         double theta = FastMath.atan2(dy, dx) + Math.PI;
         double rd = 0.45 * Math.min(srcWidth, srcHeight);
@@ -70,15 +70,15 @@ public class Sphere3DFilter extends CenteredTransformFilter {
         out[1] = (float) (-phi1 / (Math.PI / 2) * Y);
     }
 
-    public void setAlpha(float alpha) {
-        this.alpha = (float) (2 * Math.PI * alpha);
+    public void setAlpha(double alpha) {
+        this.alpha = 2 * Math.PI * alpha;
     }
 
-    public void setBeta(float beta) {
-        this.beta = (float) (2 * Math.PI * beta);
+    public void setBeta(double beta) {
+        this.beta = 2 * Math.PI * beta;
     }
 
-    public void setGamma(float gamma) {
-        this.gamma = (float) (2 * Math.PI * gamma);
+    public void setGamma(double gamma) {
+        this.gamma = 2 * Math.PI * gamma;
     }
 }

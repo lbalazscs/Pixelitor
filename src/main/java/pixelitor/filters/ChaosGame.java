@@ -142,7 +142,7 @@ public class ChaosGame extends ParametrizedFilter {
 
         Random r = ThreadLocalRandom.current();
 
-        double factor = fraction.getPercentageValD();
+        double factor = fraction.getPercentage();
         double factor2 = 1 - factor;
 
         // start at a random location

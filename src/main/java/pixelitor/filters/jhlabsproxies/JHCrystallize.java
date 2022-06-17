@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,9 +69,9 @@ public class JHCrystallize extends ParametrizedFilter {
             filter = new CrystallizeFilter();
         }
 
-        filter.setEdgeThickness(edgeThickness.getPercentageValF());
+        filter.setEdgeThickness((float) edgeThickness.getPercentage());
         filter.setScale(size.getValueAsFloat());
-        filter.setRandomness(randomness.getPercentageValF());
+        filter.setRandomness((float) randomness.getPercentage());
         filter.setEdgeColor(edgeColor.getColor().getRGB());
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.isChecked());

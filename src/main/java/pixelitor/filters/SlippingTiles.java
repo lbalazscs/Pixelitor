@@ -22,7 +22,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -154,12 +154,12 @@ public class SlippingTiles extends ParametrizedFilter {
         var distributor = distributionParam.getSelected();
         int centerTileSize = isCenterTileSizeAutomaticallyCalculatedParam.isChecked() ?
             (int) (distributor.getNthSegment(2 * numberOfTiles + 1, 2 * numberOfTiles + 1, sizePerpCut)) :
-            ((int) (centerTileSizeParam.getPercentageValF() * sizePerpCut));
-        int finalSlipDisplacement = (int) (slipDisplacementParam.getPercentageValF() * sizeAlonCut);
+            ((int) (centerTileSizeParam.getPercentage() * sizePerpCut));
+        int finalSlipDisplacement = (int) (slipDisplacementParam.getPercentage() * sizeAlonCut);
         var slipDirection = slipDirectionParam.getSelected();
         var graphics = dest.createGraphics();
 
-        var shiftFactor = centerTilePositionParam.getPercentageValF();
+        var shiftFactor = centerTilePositionParam.getPercentage();
         int remainingSpaceOnOneSide = (int) ((sizePerpCut - centerTileSize) * shiftFactor);
         int remainingSpaceOnOtherSide = (int) ((sizePerpCut - centerTileSize) * (1 - shiftFactor));
 

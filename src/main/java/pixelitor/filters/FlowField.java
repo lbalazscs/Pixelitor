@@ -401,16 +401,16 @@ public class FlowField extends ParametrizedFilter {
         Color particleColor = particleColorParam.getColor();
         ColorSource colorSource = initialColorsParam.getSelected();
         boolean inheritSpawnPoints = startFlowFromSourceParam.isChecked();
-        float colorRandomness = colorRandomnessParam.getPercentageValF();
-        float widthRandomness = widthRandomnessParam.getPercentageValF();
+        float colorRandomness = (float) colorRandomnessParam.getPercentage();
+        float widthRandomness = (float) widthRandomnessParam.getPercentage();
 
         float quality = min(QUALITY, SMOOTHNESS / zoom);
         int tolerance = min(TOLERANCE, ((int) (iterationCount * ITERATION_TO_TOLERANCE_RATIO)));
         float force = min(FORCE_MAGNITUDE, iterationCount * ITERATION_TO_FORCE_RATIO);
 
-        float multiplierNoise = noiseParam.getPercentageValF() * force;
-        float multiplierSink = sinkParam.getPercentageValF() * force;
-        float multiplierRevolve = revolveParam.getPercentageValF() * force;
+        float multiplierNoise = (float) (noiseParam.getPercentage() * force);
+        float multiplierSink = (float) (sinkParam.getPercentage() * force);
+        float multiplierRevolve = (float) (revolveParam.getPercentage() * force);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

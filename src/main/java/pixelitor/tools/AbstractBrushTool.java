@@ -152,7 +152,7 @@ public abstract class AbstractBrushTool extends Tool {
         brushSettingsAction.setEnabled(brushType.hasSettings());
     }
 
-    public boolean hasBrushType() {
+    private boolean hasBrushType() {
         return typeCB != null;
     }
 

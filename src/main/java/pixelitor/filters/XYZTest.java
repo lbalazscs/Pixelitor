@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,9 +59,9 @@ public class XYZTest extends ParametrizedFilter {
         double[] rgb = {0.0, 0.0, 0.0};
         double[] xyz = {0.0, 0.0, 0.0};
 
-        float xVal = x.getPercentageValF();
-        float yVal = y.getPercentageValF();
-        float zVal = z.getPercentageValF();
+        double xVal = x.getPercentage();
+        double yVal = y.getPercentage();
+        double zVal = z.getPercentage();
         boolean linearize = linRGB.isChecked();
 
         int numPixels = pixels.length;

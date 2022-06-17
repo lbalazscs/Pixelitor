@@ -80,9 +80,9 @@ public class ColorWheel extends ParametrizedFilter {
         int cx = (int) (width * center.getRelativeX());
         int cy = (int) (height * center.getRelativeY());
 
-        float hueShift = (float) hueShiftParam.getValueInRadians();
-        float sat = satParam.getPercentageValF();
-        float brgLum = brgLumParam.getPercentageValF();
+        double hueShift = hueShiftParam.getValueInRadians();
+        double sat = satParam.getPercentage();
+        double brgLum = brgLumParam.getPercentage();
 
         var pt = new StatusBarProgressTracker(NAME, height);
 
@@ -90,7 +90,7 @@ public class ColorWheel extends ParametrizedFilter {
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(
-                    destData, width, finalY, cx, cy, hueShift, sat, brgLum, space);
+                destData, width, finalY, cx, cy, hueShift, sat, brgLum, space);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
@@ -100,15 +100,15 @@ public class ColorWheel extends ParametrizedFilter {
     }
 
     private static void calculateLine(int[] destData, int width, int y,
-                                      int cx, int cy, float hueShift,
-                                      float saturation, float brightness, ColorSpaceType model) {
+                                      int cx, int cy, double hueShift,
+                                      double saturation, double brightness, ColorSpaceType model) {
         for (int x = 0; x < width; x++) {
             int yDiff = cy - y;
             int xDiff = x - cx;
-            float angle = (float) FastMath.atan2(yDiff, xDiff) + hueShift;
-            float hue = (float) (angle / (2 * Math.PI));
+            double angle = FastMath.atan2(yDiff, xDiff) + hueShift;
+            double hue = angle / (2 * Math.PI);
 
-            destData[x + y * width] = model.toRGB(hue, saturation, brightness);
+            destData[x + y * width] = model.toRGB((float) hue, (float) saturation, (float) brightness);
         }
     }
 

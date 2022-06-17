@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,8 +64,8 @@ public class GlassTiles extends ParametrizedFilter {
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setShiftX(phase.getValueAsPercentage(0));
-        filter.setShiftY(phase.getValueAsPercentage(1));
+        filter.setShiftX(phase.getPercentage(0));
+        filter.setShiftY(phase.getPercentage(1));
 
         return filter.filter(src, dest);
     }

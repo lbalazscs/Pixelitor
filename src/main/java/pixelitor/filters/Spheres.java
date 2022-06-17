@@ -82,12 +82,12 @@ public class Spheres extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
         float r = radius.getValueAsFloat();
-        int numCircles = (int) (width * height * density.getPercentageValD() / (r * r));
+        int numCircles = (int) (width * height * density.getPercentage() / (r * r));
 
         var pt = new StatusBarProgressTracker(NAME, numCircles);
 
         Graphics2D g = dest.createGraphics();
-        g.setComposite(AlphaComposite.SrcOver.derive(opacity.getPercentageValF()));
+        g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         double angle = highlightAngleSelector.getValueInRadians() + Math.PI;

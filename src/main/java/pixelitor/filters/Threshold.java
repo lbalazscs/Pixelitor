@@ -49,7 +49,7 @@ public class Threshold extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         boolean dither = dithering.getValue() != 0;
-        double ditherStrength = dithering.getPercentageValD();
+        double ditherStrength = dithering.getPercentage();
         BufferedImage input;
         if (dither) {
             input = ImageUtils.copyImage(src);

@@ -68,10 +68,10 @@ public class JHPolarCoordinates extends ParametrizedFilter {
 
         filter.setType(type.getValue());
         filter.setEdgeAction(edgeAction.getValue());
-        filter.setRelativeCentreX(center.getRelativeX());
-        filter.setRelativeCentreY(center.getRelativeY());
+        filter.setRelativeCentreX((float) center.getRelativeX());
+        filter.setRelativeCentreY((float) center.getRelativeY());
         filter.setInterpolation(interpolation.getValue());
-        filter.setZoom(zoom.getPercentageValF());
+        filter.setZoom((float) zoom.getPercentage());
         filter.setAngle(angle.getValueInIntuitiveRadians());
 
         return filter.filter(src, dest);

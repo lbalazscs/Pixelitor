@@ -131,7 +131,7 @@ public class PhotoCollage extends ParametrizedFilter {
 
         // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
-            shadowOpacityParam.getPercentageValF());
+            (float) shadowOpacityParam.getPercentage());
 
         Paint imagePaint = new TexturePaint(src, new Rectangle2D.Float(
             0, 0, src.getWidth(), src.getHeight()));
@@ -163,7 +163,7 @@ public class PhotoCollage extends ParametrizedFilter {
             // step 1: rotate
             // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0;
             double theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
-            theta *= randomRotation.getPercentageValF();
+            theta *= randomRotation.getPercentage();
             imageTransform.rotate(theta, xSize / 2.0, ySize / 2.0);
 
             // Calculate the transform of the shadow

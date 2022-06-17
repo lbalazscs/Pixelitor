@@ -71,8 +71,8 @@ public class HueSat extends ParametrizedFilter {
             return src;
         }
 
-        float satShift = saturation.getPercentageValF();
-        float briShift = brightness.getPercentageValF();
+        float satShift = (float) saturation.getPercentage();
+        float briShift = (float) brightness.getPercentage();
         float hueShift = hue.getValueAsFloat() / 360.0f;
 
         dest = new Impl(hueShift, satShift, briShift).filter(src, dest);

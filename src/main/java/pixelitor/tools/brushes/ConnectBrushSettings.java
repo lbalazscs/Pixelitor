@@ -64,7 +64,7 @@ public class ConnectBrushSettings extends BrushSettings {
     }
 
     public double getDensity() {
-        return densityModel.getPercentageValF();
+        return densityModel.getPercentage();
     }
 
     public float getLineWidth() {

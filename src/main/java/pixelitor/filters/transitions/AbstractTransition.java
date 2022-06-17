@@ -47,7 +47,7 @@ public abstract class AbstractTransition extends ParametrizedFilter {
 
         Graphics2D g2 = dest.createGraphics();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        transition.paint(g2, frameA, frameB, progress.getPercentageValF());
+        transition.paint(g2, frameA, frameB, (float) progress.getPercentage());
         g2.dispose();
 
         return dest;

@@ -328,17 +328,17 @@ public class ChannelMixer extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float rfr = redFromRed.getPercentageValF();
-        float rfg = redFromGreen.getPercentageValF();
-        float rfb = redFromBlue.getPercentageValF();
+        float rfr = (float) redFromRed.getPercentage();
+        float rfg = (float) redFromGreen.getPercentage();
+        float rfb = (float) redFromBlue.getPercentage();
 
-        float gfr = greenFromRed.getPercentageValF();
-        float gfg = greenFromGreen.getPercentageValF();
-        float gfb = greenFromBlue.getPercentageValF();
+        float gfr = (float) greenFromRed.getPercentage();
+        float gfg = (float) greenFromGreen.getPercentage();
+        float gfb = (float) greenFromBlue.getPercentage();
 
-        float bfr = blueFromRed.getPercentageValF();
-        float bfg = blueFromGreen.getPercentageValF();
-        float bfb = blueFromBlue.getPercentageValF();
+        float bfr = (float) blueFromRed.getPercentage();
+        float bfg = (float) blueFromGreen.getPercentage();
+        float bfb = (float) blueFromBlue.getPercentage();
 
         if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f
             && gfr == 0.0f && gfg == 1.0f && gfb == 0.0f

@@ -23,8 +23,8 @@ public class OffsetFilter extends TransformFilter {
     private int xOffset, yOffset;
     private boolean wrap;
 
-    private float relativeX;
-    private float relativeY;
+    private double relativeX;
+    private double relativeY;
     private boolean useRelative = false;
 
     public OffsetFilter(String filterName) {
@@ -40,19 +40,19 @@ public class OffsetFilter extends TransformFilter {
         setEdgeAction(TRANSPARENT);
     }
 
-    public void setRelativeX(float relativeX) {
+    public void setRelativeX(double relativeX) {
         this.relativeX = relativeX;
     }
 
-    public void setRelativeY(float relativeY) {
+    public void setRelativeY(double relativeY) {
         this.relativeY = relativeY;
     }
 
-    public float getRelativeX() {
+    public double getRelativeX() {
         return relativeX;
     }
 
-    public float getRelativeY() {
+    public double getRelativeY() {
         return relativeY;
     }
 

@@ -40,7 +40,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
  * Arbitrary Rotate
  */
 public class TransformLayer extends ParametrizedFilter {
-    private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
+    private final ImagePositionParam center = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, USER_ONLY_TRANSPARENCY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 501);
@@ -52,7 +52,7 @@ public class TransformLayer extends ParametrizedFilter {
         bgColorParam.setPresetKey("Background Color");
 
         setParams(
-            centerParam,
+            center,
             angleParam,
             scaleParam,
             shearParam,
@@ -102,10 +102,8 @@ public class TransformLayer extends ParametrizedFilter {
             tx = -dr.getTx();
             ty = -dr.getTy();
         }
-        float relativeX = centerParam.getRelativeX();
-        float relativeY = centerParam.getRelativeY();
-        double centerShiftX = (tx + src.getWidth()) * relativeX;
-        double centerShiftY = (ty + src.getHeight()) * relativeY;
+        double centerShiftX = (tx + src.getWidth()) * center.getRelativeX();
+        double centerShiftY = (ty + src.getHeight()) * center.getRelativeY();
         return new Point2D.Double(centerShiftX, centerShiftY);
     }
 

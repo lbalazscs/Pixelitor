@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,15 +50,13 @@ public class SpiderWeb extends ShapeFilter {
 
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
-        double w = width / 2.0;
-        double h = height / 2.0;
 
         int numBranches = numBranchesParam.getValue();
-        double radius = Math.min(w, h);
+        double radius = Math.min(width / 2.0, height / 2.0);
         double angle = 2 * Math.PI / numBranches;
 
-        double[] cos = new double[numBranches];
         double[] sin = new double[numBranches];
+        double[] cos = new double[numBranches];
 
         // draw the branches
         for (int br = 0; br < numBranches; br++) {

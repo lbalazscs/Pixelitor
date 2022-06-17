@@ -62,8 +62,8 @@ public class Colorize extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float briShift = brightnessParam.getPercentageValF();
-        float opacity = opacityParam.getPercentageValF();
+        float briShift = (float) brightnessParam.getPercentage();
+        float opacity = (float) opacityParam.getPercentage();
 
         Color color = colorParam.getColor();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,10 +65,10 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
             filter = new MarbleFilter(NAME);
         }
 
-        filter.setTurbulence(turbulence.getPercentageValF());
+        filter.setTurbulence((float) turbulence.getPercentage());
         filter.setScale(scale.getValueAsFloat());
         filter.setAmount(amount.getValueAsFloat());
-        filter.setTime(time.getPercentageValF() * 5);
+        filter.setTime((float) (time.getPercentage() * 5));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class JHUnsharpMask extends ParametrizedFilter {
             filter = new UnsharpFilter(NAME);
         }
 
-        filter.setAmount(amount.getPercentageValF());
+        filter.setAmount((float) amount.getPercentage());
         filter.setThreshold(threshold.getValue());
         filter.setRadius(radius.getValueAsFloat());
 

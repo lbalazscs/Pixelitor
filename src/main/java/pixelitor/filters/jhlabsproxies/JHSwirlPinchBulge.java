@@ -71,12 +71,11 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
             filter = new PinchFilter();
         }
 
-        filter.setPinchBulgeAmount(pinchBulgeAmount.getPercentageValF());
+        filter.setPinchBulgeAmount((float) pinchBulgeAmount.getPercentage());
         filter.setSwirlAmount(swirlAmount.getValueInRadians());
         filter.setRadius(radius.getValueAsFloat());
-        filter.setCenterX(center.getRelativeX());
-        filter.setCenterY(center.getRelativeY());
-        filter.setZoom(zoom.getPercentageValF());
+        filter.setCenter(center.getRelativePoint());
+        filter.setZoom((float) zoom.getPercentage());
         filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

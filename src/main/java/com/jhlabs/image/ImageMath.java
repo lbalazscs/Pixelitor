@@ -379,6 +379,10 @@ public class ImageMath {
         return (int) (a + t * (b - a));
     }
 
+    public static int lerp(double t, int a, int b) {
+        return (int) (a + t * (b - a));
+    }
+
     /**
      * Linear interpolation of ARGB values.
      *

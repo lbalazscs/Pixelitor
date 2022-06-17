@@ -111,7 +111,7 @@ public class FractalTree extends ParametrizedFilter {
 
         leftFirst = true;
 
-        defaultLength = src.getHeight() * zoom.getPercentageValD() / 100.0;
+        defaultLength = src.getHeight() * zoom.getPercentage() / 100.0;
         double randPercent = randomnessParam.getValue() / 100.0;
         hasRandomness = randomnessParam.getValue() > 0;
         lengthDeviation = defaultLength * randPercent;
@@ -137,8 +137,8 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         for (int depth = 1; depth <= maxDepth; depth++) {
-            float w1 = depth * width.getValueAsPercentage(0);
-            double trunkWidth = width.getValueAsPercentage(1);
+            double w1 = depth * width.getPercentage(0);
+            double trunkWidth = width.getPercentage(1);
             double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);
@@ -154,7 +154,7 @@ public class FractalTree extends ParametrizedFilter {
             }
         }
 
-        float c = curvedness.getPercentageValF();
+        double c = curvedness.getPercentage();
         if (rand.nextBoolean()) {
             c = -c;
         }
@@ -176,7 +176,7 @@ public class FractalTree extends ParametrizedFilter {
     }
 
     private void drawTree(Graphics2D g, double x1, double y1,
-                          double angle, int depth, SplittableRandom rand, float c) {
+                          double angle, int depth, SplittableRandom rand, double c) {
         if (depth == 0) {
             return;
         }
@@ -254,7 +254,7 @@ public class FractalTree extends ParametrizedFilter {
 
     private static void connectPoints(Graphics2D g,
                                       double x1, double y1,
-                                      double x2, double y2, float c) {
+                                      double x2, double y2, double c) {
         if (c == 0) {
             g.draw(new Line2D.Double(x1, y1, x2, y2));
         } else {

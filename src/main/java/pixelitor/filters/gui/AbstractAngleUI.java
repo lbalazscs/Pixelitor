@@ -35,13 +35,13 @@ import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
     protected static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
-    protected static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
-    protected static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
+    private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
+    private static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
     private static final Color ENABLED_ARROW_DARK_COLOR = new Color(181, 181, 181);
     private static final Color DISABLED_ARROW_DARK_COLOR = new Color(95, 95, 95);
 
     protected final AngleParam model;
-    protected boolean enabled = true;
+    private boolean enabled = true;
 
     protected int cx;
     protected int cy;

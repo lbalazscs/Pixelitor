@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,8 +81,8 @@ public class Starburst extends ParametrizedFilter {
         Colors.fillWith(bgColor.getColor(), g, width, height);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        float cx = width * center.getRelativeX();
-        float cy = height * center.getRelativeY();
+        double cx = width * center.getRelativeX();
+        double cy = height * center.getRelativeY();
 
         int numberOfRays = numRaysParam.getValue();
 
@@ -90,7 +90,7 @@ public class Starburst extends ParametrizedFilter {
         double sliceAngle = rotate.getValueInRadians();
 
         double radius = width + height; // should be enough even if the center is outside the image
-        double spiral = spiralParam.getPercentageValD();
+        double spiral = spiralParam.getPercentage();
 
         Color[] rayColors = rayColorsParam.getColors();
         int numRayColors = rayColors.length;

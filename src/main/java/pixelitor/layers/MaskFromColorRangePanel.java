@@ -258,7 +258,7 @@ public class MaskFromColorRangePanel extends JPanel {
         int distType = ((Item) distTypeCombo.getSelectedItem()).getValue();
         filter.setDistType(distType);
         filter.setColor(c);
-        filter.setTolerance(tolerance.getValue(), softness.getPercentageValF());
+        filter.setTolerance(tolerance.getValue(), softness.getPercentage());
         filter.setInvert(invertCheckBox.isSelected());
 
         return filter;

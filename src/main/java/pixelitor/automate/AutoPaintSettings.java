@@ -33,7 +33,7 @@ import java.util.SplittableRandom;
 class AutoPaintSettings {
     private final Tool tool;
     private final int numStrokes;
-    private final float maxCurvature;
+    private final double maxCurvature;
     private final int minStrokeLength;
     private final int maxStrokeLength;
     private final boolean randomColors;
@@ -46,8 +46,8 @@ class AutoPaintSettings {
     private final int angleType;
 
     AutoPaintSettings(Tool tool, int numStrokes, int strokeLength,
-                      boolean randomColors, float lengthVariability,
-                      float maxCurvature, boolean interpolatedColors, int angleType) {
+                      boolean randomColors, double lengthVariability,
+                      double maxCurvature, boolean interpolatedColors, int angleType) {
         this.tool = tool;
         this.numStrokes = numStrokes;
         this.maxCurvature = maxCurvature;
@@ -91,7 +91,7 @@ class AutoPaintSettings {
             point.getImX() - center.getX());
     }
 
-    public float getMaxCurvature() {
+    public double getMaxCurvature() {
         return maxCurvature;
     }
 

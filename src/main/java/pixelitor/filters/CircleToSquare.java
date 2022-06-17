@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,10 +60,10 @@ public class CircleToSquare extends ParametrizedFilter {
             filter = new CircleToSquareFilter();
         }
 
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setRadiusX(radius.getValueAsFloat(0));
         filter.setRadiusY(radius.getValueAsFloat(1));
-        filter.setAmount(amount.getPercentageValF());
+        filter.setAmount((float) amount.getPercentage());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

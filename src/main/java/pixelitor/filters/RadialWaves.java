@@ -66,13 +66,13 @@ public class RadialWaves extends ParametrizedFilter {
             filter = new RadialWavesFilter();
         }
 
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
-        filter.setPhase(phase.getPercentageValF());
+        filter.setPhase(phase.getPercentage());
         filter.setAngularDivision(angularDivision.getValue());
         filter.setRadialAmplitude(radialAmplitude.getValueAsDouble());
-        filter.setZoom(zoom.getPercentageValF());
+        filter.setZoom(zoom.getPercentage());
         filter.setWaveType(waveType.getValue());
 
         return filter.filter(src, dest);

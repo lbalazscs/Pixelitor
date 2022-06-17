@@ -44,8 +44,8 @@ public class CheckFilter extends PointFilter {
     private float invAaRes;
 
     private boolean straight;
-    private float distortion;
-    private float phase;
+    private double distortion;
+    private double phase;
 
     private void setAaRes(int aaRes) {
         this.aaRes = aaRes;
@@ -211,11 +211,11 @@ public class CheckFilter extends PointFilter {
         return angle;
     }
 
-    public void setDistortion(float distortion) {
+    public void setDistortion(double distortion) {
         this.distortion = distortion;
     }
 
-    public void setPhase(float phase) {
+    public void setPhase(double phase) {
         this.phase = phase;
     }
 

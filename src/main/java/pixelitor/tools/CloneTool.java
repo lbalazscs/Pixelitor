@@ -188,7 +188,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private void startNewCloningStroke(PPoint strokeStart, boolean lineConnect) {
         state = CLONING;
 
-        float scaleAbs = scaleParam.getPercentageValF();
+        double scaleAbs = scaleParam.getPercentage();
         Mirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
             mirror.getScaleX(scaleAbs),
@@ -304,7 +304,7 @@ public class CloneTool extends BlendingModeBrushTool {
         node.addBoolean("sample all layers", sampleAllLayers);
         node.addBoolean("aligned", cloneBrush.isAligned());
 
-        node.addFloat("scale", scaleParam.getPercentageValF());
+        node.addDouble("scale", scaleParam.getPercentage());
         node.addInt("rotation", rotationParam.getValue());
         node.addAsString("mirror", mirrorParam.getSelected());
 

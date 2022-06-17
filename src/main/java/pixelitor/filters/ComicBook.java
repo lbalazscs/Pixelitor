@@ -58,7 +58,7 @@ public class ComicBook extends ParametrizedFilter {
         BufferedImage grayImg = gray(edgesImg);
         BufferedImage stairedImg = stairs(blurredImg, stepsParam.getValue());
 
-        int threshold = (int) (100 + 30 * thresholdParam.getPercentageValF());
+        int threshold = (int) (100 + 30 * thresholdParam.getPercentage());
         BufferedImage finalImg = threshold(grayImg, stairedImg, threshold);
 
         return finalImg;

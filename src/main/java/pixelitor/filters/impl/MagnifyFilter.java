@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,14 +29,14 @@ import java.awt.image.BufferedImage;
  * The implementation of the {@link Magnify} filter.
  */
 public class MagnifyFilter extends CenteredTransformFilter {
-    private float magnification;
+    private double magnification;
 
     private float innerRadiusX;
     private float innerRadiusY;
     private float outerRadiusX;
     private float outerRadiusY;
 
-    private float radiusRatio;
+    private double radiusRatio;
 
     private BlurredShape shape;
     private boolean invert;
@@ -61,7 +61,7 @@ public class MagnifyFilter extends CenteredTransformFilter {
         outerRadiusY = radius;
     }
 
-    public void setMagnification(float magnification) {
+    public void setMagnification(double magnification) {
         this.magnification = magnification;
     }
 
@@ -83,8 +83,8 @@ public class MagnifyFilter extends CenteredTransformFilter {
             out[0] = x;
             out[1] = y;
         } else if (outside == 0.0) { // 100% inside
-            out[0] = radiusRatio * x + (1 - radiusRatio) * cx;
-            out[1] = radiusRatio * y + (1 - radiusRatio) * cy;
+            out[0] = (float) (radiusRatio * x + (1 - radiusRatio) * cx);
+            out[1] = (float) (radiusRatio * y + (1 - radiusRatio) * cy);
         } else { // the blurred region between the inner and outer radius
             double movedX = radiusRatio * x + (1 - radiusRatio) * cx;
             double movedY = radiusRatio * y + (1 - radiusRatio) * cy;

@@ -72,17 +72,17 @@ public class JHRays extends ParametrizedFilter {
             filter = new RaysFilter(NAME);
         }
 
-        filter.setCentreX(center.getRelativeX());
-        filter.setCentreY(center.getRelativeY());
-        filter.setStrength(strength.getPercentageValF());
+        filter.setCentre(center.getRelativePoint());
+
+        filter.setStrength((float) strength.getPercentage());
         filter.setRotation(rotation.getValueInRadians());
 //        filter.setOpacity(opacity.getValueAsPercentage());
-        filter.setThreshold(threshold.getPercentageValF());
+        filter.setThreshold((float) threshold.getPercentage());
 //        filter.setRaysOnly(raysOnly.isChecked());
 
         // this value should not be divided by resizeFactor because
         // this is a scale and not really a length
-        filter.setZoom(length.getPercentageValF());
+        filter.setZoom((float) length.getPercentage());
 
         var helper = new ResizingFilterHelper(src);
         boolean shouldResize = helper.shouldResize();
@@ -113,7 +113,7 @@ public class JHRays extends ParametrizedFilter {
                 dest = filter.createCompatibleDestImage(src, null);
             }
             Graphics2D g = dest.createGraphics();
-            g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getPercentageValF()));
+            g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, (float) opacity.getPercentage()));
             g.drawRenderedImage(rays, null);
             g.dispose();
 
@@ -126,7 +126,7 @@ public class JHRays extends ParametrizedFilter {
         // add the rays on top of the source
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
-        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getPercentageValF()));
+        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, (float) opacity.getPercentage()));
         g.drawRenderedImage(rays, null);
         g.dispose();
 

@@ -331,12 +331,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return this;
     }
 
-    public float getValueAsPercentage(int index) {
-        return children[index].getPercentageValF();
-    }
-
-    public double getValueAsDPercentage(int index) {
-        return children[index].getPercentageValD();
+    public double getPercentage(int index) {
+        return children[index].getPercentage();
     }
 
     public int getNumParams() {

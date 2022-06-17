@@ -104,8 +104,8 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         boolean randomColors = colorsEnabled && colors.equals(COLOR_RANDOM);
         boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_INTERPOLATED);
 
-        float lengthRandomnessPercentage = lengthVariability.getPercentageValF();
-        float maxCurvaturePercentage = maxCurvature.getPercentageValF();
+        double lengthRandomnessPercentage = lengthVariability.getPercentage();
+        double maxCurvaturePercentage = maxCurvature.getPercentage();
 
         return new AutoPaintSettings(tool, numStrokes, strokeLength, randomColors,
             lengthRandomnessPercentage, maxCurvaturePercentage, interpolatedColors,

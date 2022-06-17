@@ -78,9 +78,9 @@ public class JHPointillize extends ParametrizedFilter {
 
         // there is an angle property, but it does not work as expected
         filter.setScale(gridSize.getValueAsFloat());
-        filter.setRandomness(randomness.getPercentageValF());
-        filter.setEdgeThickness(dotSize.getPercentageValF());
-        filter.setFuzziness(fuzziness.getPercentageValF());
+        filter.setRandomness((float) randomness.getPercentage());
+        filter.setEdgeThickness((float) dotSize.getPercentage());
+        filter.setFuzziness((float) fuzziness.getPercentage());
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.isChecked());
         filter.setEdgeColor(edgeColor.getColor().getRGB());

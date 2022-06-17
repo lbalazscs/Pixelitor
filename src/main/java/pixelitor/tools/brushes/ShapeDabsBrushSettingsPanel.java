@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
             1000, true, NONE);
         addSlider(spacing, "spacing");
         spacing.setAdjustmentListener(
-            () -> settings.changeSpacing(new RadiusRatioSpacing(spacing.getPercentageValF())));
+            () -> settings.changeSpacing(new RadiusRatioSpacing(spacing.getPercentage())));
     }
 
     private void addShapeTypeSelector(ShapeDabsBrushSettings settings) {

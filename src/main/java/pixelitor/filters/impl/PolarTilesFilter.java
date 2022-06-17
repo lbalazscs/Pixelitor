@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.filters.PolarTiles;
  * The implementation of the {@link PolarTiles} filter.
  */
 public class PolarTilesFilter extends CenteredTransformFilter {
-    private float zoom;
+    private double zoom;
     private double rotateResult;
     private float curvature;
     private double rotateEffect;
@@ -43,13 +43,13 @@ public class PolarTilesFilter extends CenteredTransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float dx = x - cx;
-        float dy = y - cy;
+        double dx = x - cx;
+        double dy = y - cy;
         double angle = FastMath.atan2(dy, dx);
 
         float randomShift = 0;
         if (randomness > 0) {
-            randomShift = randomness * Noise.noise2(dx / srcWidth, dy / srcHeight);
+            randomShift = randomness * Noise.noise2((float) (dx / srcWidth), (float) (dy / srcHeight));
         }
 
         double r = Math.sqrt(dx * dx + dy * dy);
@@ -77,14 +77,14 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         angle += rotateResult;
 
         double zoomedR = r / zoom;
-        float u = (float) (zoomedR * FastMath.cos(angle));
-        float v = (float) (zoomedR * FastMath.sin(angle));
+        double u = zoomedR * FastMath.cos(angle);
+        double v = zoomedR * FastMath.sin(angle);
 
-        out[0] = u + cx;
-        out[1] = v + cy;
+        out[0] = (float) (u + cx);
+        out[1] = (float) (v + cy);
     }
 
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 
@@ -108,7 +108,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         this.curvature = (float) (curvature * curvature / 10.0f);
     }
 
-    public void setRandomness(float randomness) {
+    public void setRandomness(double randomness) {
         this.randomness = (float) (randomness * Math.PI);
     }
 

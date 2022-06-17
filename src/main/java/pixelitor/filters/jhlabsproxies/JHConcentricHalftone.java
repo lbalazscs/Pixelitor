@@ -66,8 +66,8 @@ public class JHConcentricHalftone extends JHMaskedHalftone {
     protected BufferedImage createMaskImage(BufferedImage src) {
         BufferedImage stripes = ImageUtils.createImageWithSameCM(src);
         Graphics2D g = stripes.createGraphics();
-        float cx = src.getWidth() * center.getRelativeX();
-        float cy = src.getHeight() * center.getRelativeY();
+        float cx = (float) (src.getWidth() * center.getRelativeX());
+        float cy = (float) (src.getHeight() * center.getRelativeY());
         float radius = stripesDistance.getValueAsFloat() / distanceCorrection;
         int type = gradientType.getValue();
         Paint paint;

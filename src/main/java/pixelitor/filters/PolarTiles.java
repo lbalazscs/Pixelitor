@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,16 +77,16 @@ public class PolarTiles extends ParametrizedFilter {
         }
 
         filter.setMode(modeParam.getValue());
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());
-        filter.setZoom(zoom.getPercentageValF());
-        filter.setRotateEffect(rotateEffect.getPercentageValF());
+        filter.setZoom(zoom.getPercentage());
+        filter.setRotateEffect(rotateEffect.getPercentage());
         filter.setNumADivisions(numAngDivisions.getValue());
         filter.setNumRDivisions(numRadDivisions.getValue());
         filter.setCurvature(curvature.getValueAsDouble());
-        filter.setRandomness(randomness.getPercentageValF());
+        filter.setRandomness(randomness.getPercentage());
 
         return filter.filter(src, dest);
     }

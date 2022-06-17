@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,8 +74,8 @@ public class JHStamp extends ParametrizedFilter {
         filter.setBlack(darkColor.getColor().getRGB());
         filter.setWhite(brightColor.getColor().getRGB());
         filter.setRadius(smoothness.getValueAsFloat());
-        filter.setSoftness(soften.getPercentageValF());
-        filter.setThreshold(lightDarkBalance.getPercentageValF());
+        filter.setSoftness((float) soften.getPercentage());
+        filter.setThreshold((float) lightDarkBalance.getPercentage());
         filter.setBlurMethod(blurMethod.getValue());
 
         return filter.filter(src, dest);

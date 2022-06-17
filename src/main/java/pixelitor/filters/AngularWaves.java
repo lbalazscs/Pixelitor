@@ -67,15 +67,15 @@ public class AngularWaves extends ParametrizedFilter {
             filter = new AngularWavesFilter();
         }
 
-        filter.setCenter(center.getRelativeX(), center.getRelativeY(), src);
+        filter.setCenter(center.getAbsolutePoint(src));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        filter.setPhase(phase.getPercentageValF());
+        filter.setPhase(phase.getPercentage());
         filter.setRadialWL(radialWL.getValueAsDouble());
 
-        filter.setZoom(zoom.getPercentageValF());
-        filter.setAmount(amount.getPercentageValF());
+        filter.setZoom(zoom.getPercentage());
+        filter.setAmount(amount.getPercentage());
         filter.setWaveType(waveType.getValue());
 
         return filter.filter(src, dest);
