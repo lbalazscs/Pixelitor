@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,9 @@ import static pixelitor.colors.palette.PaletteConfig.createSlider;
  */
 public class HueSatPaletteConfig implements PaletteConfig {
     private float saturation;
-    private float hueShift;
     private JSlider satSlider;
+
+    private float hueShift;
     private JSlider hueSlider;
 
     public HueSatPaletteConfig(float hueShift, float saturation) {
@@ -49,7 +50,7 @@ public class HueSatPaletteConfig implements PaletteConfig {
 
     @Override
     public JPanel createConfigPanel(PalettePanel palettePanel) {
-        var p = new JPanel(new GridBagLayout());
+        JPanel p = new JPanel(new GridBagLayout());
 
         satSlider = createSlider(saturation, "Saturation of the colors");
         satSlider.addChangeListener(e -> satChanged(palettePanel));

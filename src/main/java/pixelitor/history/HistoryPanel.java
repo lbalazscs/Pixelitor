@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,8 @@ public class HistoryPanel extends JPanel {
     private final PixelitorUndoManager pum;
 
     public HistoryPanel(PixelitorUndoManager pum, JList<PixelitorEdit> historyList) {
+        super(new BorderLayout());
         this.pum = pum;
-        setLayout(new BorderLayout());
         add(new JScrollPane(historyList), CENTER);
         JPanel buttonsPanel = new JPanel(new FlowLayout());
 

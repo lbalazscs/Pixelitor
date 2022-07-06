@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -203,8 +203,8 @@ public class DialogBuilder {
      * When OK is pressed (and when canceled, if validateWhenCanceled is set),
      * the dialog will close only if the given predicate evaluates to true.
      * The predicate must show an error dialog if it is returning false.
-     * The argument of the predicate is the dialog which is built here,
-     * and should be used as the owner of the error dialog.
+     * The predicate will be evaluated with the built dialog,
+     * which should be used as the owner of the error dialog.
      */
     public DialogBuilder validator(Predicate<JDialog> p) {
         validator = p;

@@ -81,9 +81,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         newHeightInPercent = 100.0;
 
         sharedComboBoxModel = new DefaultComboBoxModel<>(COMBO_CHOICES);
-        var p = new JPanel();
-        p.setLayout(new GridBagLayout());
-
+        var p = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(p);
 
         widthTF = new JTextField(NUM_TF_COLUMNS);
@@ -110,11 +108,10 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         Box verticalBox = Box.createVerticalBox();
         verticalBox.add(p);
 
-        JPanel p2 = new JPanel();
+        JPanel p2 = new JPanel(new FlowLayout(LEFT));
         constrainProportionsCB = new JCheckBox("Keep Proportions");
         constrainProportionsCB.setSelected(true);
         p2.add(constrainProportionsCB);
-        p2.setLayout(new FlowLayout(LEFT));
         verticalBox.add(p2);
         add(verticalBox);
 

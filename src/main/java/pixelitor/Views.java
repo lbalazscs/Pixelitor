@@ -23,7 +23,9 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
-import pixelitor.layers.*;
+import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -496,20 +498,6 @@ public class Views {
         }
     }
 
-    public static void onActiveImageLayer(Consumer<ImageLayer> action) {
-        if (activeView != null) {
-            ImageLayer activeLayer = (ImageLayer) activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
-        }
-    }
-
-    public static void onActiveTextLayer(Consumer<TextLayer> action) {
-        if (activeView != null) {
-            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
-        }
-    }
-
     public static Drawable getActiveDrawable() {
         if (activeView != null) {
             var comp = activeView.getComp();
@@ -525,13 +513,6 @@ public class Views {
         }
 
         throw new IllegalStateException("no active view");
-    }
-
-    public static void onActiveDrawable(Consumer<Drawable> action) {
-        Drawable dr = getActiveDrawable();
-        if (dr != null) {
-            action.accept(dr);
-        }
     }
 
     public static Selection getActiveSelection() {

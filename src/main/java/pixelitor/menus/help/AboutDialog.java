@@ -55,7 +55,7 @@ public class AboutDialog {
     }
 
     private static JPanel createCreditsPanel() {
-        var p = new JPanel();
+        JPanel p = new JPanel();
         String text = "<html>Pixelitor was written by <b>L\u00e1szl\u00f3 Bal\u00e1zs-Cs\u00edki</b>." +
                       "<br><br><b>Anirudh Sharma</b> and <b>Łukasz Kurzaj</b> contributed many" +
                       "<br>improvements, see the release notes." +
@@ -84,7 +84,7 @@ public class AboutDialog {
         p.add(Box.createRigidArea(new Dimension(10, 20)));
         addLabel(p, "<html><center> Copyright \u00A9 2009-2022 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
                     "<br>and Contributors<br><br>");
-        addLabel(p, "lbalazscs\u0040gmail.com");
+        addLabel(p, "lbalazscs@gmail.com");
 
         p.add(createLinkButton(p));
         p.add(Box.createGlue());

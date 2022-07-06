@@ -34,8 +34,8 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     private ResetButton resetButton;
 
     public BooleanParamGUI(BooleanParam model, boolean addResetButton, FilterButtonModel extraAction) {
+        super(new FlowLayout(LEFT));
         this.model = model;
-        setLayout(new FlowLayout(LEFT));
         checkBox = new JCheckBox();
         checkBox.setSelected(model.isChecked());
         add(checkBox);

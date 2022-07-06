@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,10 +39,9 @@ import static javax.swing.BorderFactory.createTitledBorder;
  */
 public class StrokeSettingsPanel extends JPanel {
     public StrokeSettingsPanel(StrokeParam sp) {
+        super(new GridBagLayout());
+
         RangeParam strokeWidthParam = sp.getStrokeWidthParam();
-
-        setLayout(new GridBagLayout());
-
         JComponent strokeWidthGUI = strokeWidthParam.createGUI("width");
         GridBagConstraints gbc = new GridBagConstraints(
             0, 0, 1, 1,
@@ -71,9 +71,8 @@ public class StrokeSettingsPanel extends JPanel {
         EnumParam<StrokeCap> capParam = sp.getStrokeCapParam();
         EnumParam<StrokeJoin> joinParam = sp.getStrokeJoinParam();
 
-        var p = new JPanel();
+        JPanel p = new JPanel(new GridBagLayout());
         p.setBorder(createTitledBorder("Line Endpoints"));
-        p.setLayout(new GridBagLayout());
 
         var gbh = new GridBagHelper(p);
 
@@ -99,10 +98,8 @@ public class StrokeSettingsPanel extends JPanel {
         BooleanParam dashedParam = sp.getDashedParam();
         EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
 
-        var p = new JPanel();
+        JPanel p = new JPanel(new GridBagLayout());
         p.setBorder(createTitledBorder("Stroke Type"));
-
-        p.setLayout(new GridBagLayout());
 
         var gbh = new GridBagHelper(p);
         gbh.addLabelAndControl(strokeTypeParam, "strokeType");
@@ -118,9 +115,11 @@ public class StrokeSettingsPanel extends JPanel {
 
             @Override
             protected void paintComponent(Graphics g) {
+                boolean darkTheme = Themes.getCurrent().isDark();
+
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
+                g2.setColor(darkTheme ? Color.BLACK : Color.WHITE);
                 int width = getWidth();
                 int height = getHeight();
                 g2.fillRect(0, 0, width, height);
@@ -129,7 +128,7 @@ public class StrokeSettingsPanel extends JPanel {
                     width * 0.5, height * 0.8,
                     width * 0.9, height * 0.4
                 );
-                g2.setColor(Color.BLACK);
+                g2.setColor(darkTheme ? Color.WHITE : Color.BLACK);
                 g2.setStroke(sp.createStroke());
                 g2.draw(shape);
             }
@@ -146,7 +145,7 @@ public class StrokeSettingsPanel extends JPanel {
         };
         sp.setPreviewer(preview);
 
-        var p = new JPanel(new BorderLayout());
+        JPanel p = new JPanel(new BorderLayout());
         p.add(preview, CENTER);
         p.setBorder(createTitledBorder("Stroke Preview"));
 

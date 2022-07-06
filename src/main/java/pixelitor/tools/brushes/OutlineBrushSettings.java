@@ -37,7 +37,7 @@ public class OutlineBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        var p = new JPanel(new FlowLayout());
+        JPanel p = new JPanel(new FlowLayout());
         p.add(new JLabel(SPEED_TEXT));
         if (speedGUI == null) {
             speedGUI = dependsOnSpeedParam.createGUI("dependsOnSpeed");

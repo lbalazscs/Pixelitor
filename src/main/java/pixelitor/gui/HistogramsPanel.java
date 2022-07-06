@@ -56,7 +56,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
     private boolean logarithmic;
 
     private HistogramsPanel() {
-        setLayout(new BorderLayout());
+        super(new BorderLayout());
 
         red = new HistogramPainter(RED);
         green = new HistogramPainter(GREEN);

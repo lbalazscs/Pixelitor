@@ -68,8 +68,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     }
 
     private static JPanel initSouthPanel() {
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new FlowLayout(LEFT, 2, 0));
+        JPanel southPanel = new JPanel(new FlowLayout(LEFT, 2, 0));
 
         southPanel.add(new SouthButton(AddNewLayerAction.INSTANCE, "addLayer"));
         southPanel.add(new SouthButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));

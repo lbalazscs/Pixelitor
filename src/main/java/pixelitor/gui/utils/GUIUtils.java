@@ -73,7 +73,13 @@ public final class GUIUtils {
      * @return true if any app window has focus
      */
     public static boolean appHasFocus() {
-        return Utils.anyMatch(Window.getWindows(), Window::isActive);
+        Window[] windows = Window.getWindows();
+        for (Window window : windows) {
+            if (window.isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void showCopyTextToClipboardDialog(JComponent content,
@@ -92,27 +98,20 @@ public final class GUIUtils {
     }
 
     public static JPanel arrangeVertically(ParamSet paramSet) {
-        var p = new JPanel();
-        arrangeVertically(p, paramSet);
+        JPanel p = new JPanel(new GridBagLayout());
+        new GridBagHelper(p).arrangeVertically(paramSet.getParams());
         return p;
     }
 
-    public static void arrangeVertically(JPanel p, ParamSet paramSet) {
-        p.setLayout(new GridBagLayout());
-        var gbh = new GridBagHelper(p);
-        gbh.arrangeVertically(paramSet.getParams());
-    }
-
     public static JPanel arrangeVertically(Iterable<? extends FilterSetting> settings) {
-        var p = new JPanel();
+        JPanel p = new JPanel();
         arrangeVertically(p, settings);
         return p;
     }
 
     public static void arrangeVertically(JPanel p, Iterable<? extends FilterSetting> settings) {
         p.setLayout(new GridBagLayout());
-        var gbh = new GridBagHelper(p);
-        gbh.arrangeVertically(settings);
+        new GridBagHelper(p).arrangeVertically(settings);
     }
 
     public static Container getTopContainer(Container c) {
@@ -167,7 +166,7 @@ public final class GUIUtils {
         }
     }
 
-    public static void randomizeWidgetsOn(JPanel panel) {
+    public static void randomizeWidgets(JPanel panel) {
         int count = panel.getComponentCount();
 
         for (int i = 0; i < count; i++) {

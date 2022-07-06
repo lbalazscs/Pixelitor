@@ -41,6 +41,9 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private boolean slidersMovedByUser = true;
 
     public ImagePositionParamGUI(ImagePositionParam model, double defaultX, double defaultY) {
+        super(new BorderLayout(10, 0));
+        setBorder(createTitledBorder(model.getName()));
+
         this.model = model;
 
         xSliderModel = new RangeParam(
@@ -49,9 +52,6 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         ySliderModel = new RangeParam(
             "Vertical Position (%)", 0, defaultY, 100, true, NORTH);
         ySliderModel.setDecimalPlaces(model.getDecimalPlaces());
-
-        setBorder(createTitledBorder(model.getName()));
-        setLayout(new BorderLayout(10, 0));
 
         // add the image position selector
         imgPosSelector = new ImagePositionSelector(this, model, 100);

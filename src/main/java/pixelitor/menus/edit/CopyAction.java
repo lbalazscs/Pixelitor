@@ -69,7 +69,7 @@ public class CopyAction extends OpenViewEnabledAction {
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private void doCopy(BufferedImage copy) {
+    private static void doCopy(BufferedImage copy) {
         Transferable imageTransferable = new ImageTransferable(copy);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
@@ -81,7 +81,7 @@ public class CopyAction extends OpenViewEnabledAction {
         }
     }
 
-    private void afterCopyActions(ProgressHandler handler) {
+    private static void afterCopyActions(ProgressHandler handler) {
         handler.stopProgress();
         Messages.showInStatusBar("Image copied to the clipboard.");
     }

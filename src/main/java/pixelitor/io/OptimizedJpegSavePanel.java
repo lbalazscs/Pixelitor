@@ -57,12 +57,13 @@ public class OptimizedJpegSavePanel extends JPanel {
     private ProgressPanel progressPanel;
 
     private OptimizedJpegSavePanel(BufferedImage image) {
+        super(new BorderLayout(3, 3));
+
         this.image = image;
 
         JPanel controlsPanel = createControlsPanel();
         JPanel comparePanel = createComparePanel(image);
 
-        setLayout(new BorderLayout(3, 3));
         add(comparePanel, CENTER);
         add(controlsPanel, SOUTH);
 
@@ -70,8 +71,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JPanel createComparePanel(BufferedImage image) {
-        JPanel comparePanel = new JPanel();
-        comparePanel.setLayout(new GridLayout(1, 2, GRID_HOR_GAP, GRID_VER_GAP));
+        JPanel comparePanel = new JPanel(new GridLayout(1, 2, GRID_HOR_GAP, GRID_VER_GAP));
         var imageSize = new Dimension(image.getWidth(), image.getHeight());
 
         original = createViewPanel(imageSize);
@@ -112,7 +112,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JPanel createControlsPanel() {
-        var p = new JPanel(new FlowLayout(LEFT));
+        JPanel p = new JPanel(new FlowLayout(LEFT));
 
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);

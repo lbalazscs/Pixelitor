@@ -48,7 +48,7 @@ class ParamSetTest {
 
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
-        params.insertParamAtIndex(extraParam, 3);
+        params.insertParam(extraParam, 3);
         params.updateOptions(TestHelper.createEmptyImageLayer(TestHelper.createEmptyComp(), "layer"), true);
     }
 

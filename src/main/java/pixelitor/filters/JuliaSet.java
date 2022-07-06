@@ -39,7 +39,7 @@ public class JuliaSet extends ComplexFractal {
     public JuliaSet() {
         super(300, 0.22f);
 
-        insertParamAtIndex(cParam.notLinkable().withDecimalPlaces(2), 3);
+        insertParam(cParam.notLinkable().withDecimalPlaces(2), 3);
 
         helpURL = "https://en.wikipedia.org/wiki/Julia_set";
     }

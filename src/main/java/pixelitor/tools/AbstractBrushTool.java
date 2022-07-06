@@ -211,7 +211,7 @@ public abstract class AbstractBrushTool extends Tool {
             GUIUtils.showDialog(lazyMouseDialog, showLazyMouseDialogButton);
             return;
         }
-        var p = new JPanel(new GridBagLayout());
+        JPanel p = new JPanel(new GridBagLayout());
         p.setBorder(createEmptyBorder(5, 5, 5, 5));
         var gbh = new GridBagHelper(p);
 

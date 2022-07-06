@@ -18,14 +18,12 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RadialGradientPaint;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -72,7 +70,7 @@ public class Spheres extends ParametrizedFilter {
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
         "Highlight Elevation", 45, CCW_DEGREES);
 
-//    private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
+    private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 100, 100);
 
     public Spheres() {
         super(true);
@@ -82,7 +80,7 @@ public class Spheres extends ParametrizedFilter {
         addHighLightsCB.setupEnableOtherIfChecked(highlightAngleSelector);
         addHighLightsCB.setupEnableOtherIfChecked(highlightElevationSelector);
 
-//        opacity.setPresetKey("Opacity (%)");
+        opacity.setPresetKey("Opacity");
 
         FilterButtonModel reseedAction = ReseedSupport.createAction();
         layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == LayoutType.RANDOM);
@@ -92,7 +90,7 @@ public class Spheres extends ParametrizedFilter {
             minRadius.withAdjustedRange(0.1),
             maxRadius.withAdjustedRange(0.1),
             density,
-//            opacity,
+            opacity,
             addHighLightsCB,
             highlightAngleSelector,
             highlightElevationSelector
@@ -115,7 +113,7 @@ public class Spheres extends ParametrizedFilter {
         var pt = new StatusBarProgressTracker(NAME, numCircles);
 
         Graphics2D g = dest.createGraphics();
-//        g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
+        g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         double angle = highlightAngleSelector.getValueInRadians() + Math.PI;

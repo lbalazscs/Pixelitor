@@ -191,7 +191,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
     }
 
     public void randomize() {
-        GUIUtils.randomizeWidgetsOn(settingsPanel);
+        GUIUtils.randomizeWidgets(settingsPanel);
     }
 
     @Override

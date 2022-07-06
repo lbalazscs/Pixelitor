@@ -55,8 +55,7 @@ public class ScreenCaptureAction extends PAction {
     }
 
     private JPanel getSettingsPanel() {
-        var p = new JPanel();
-        p.setLayout(new GridBagLayout());
+        var p = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(p);
 
         hidePixelitorCB = new JCheckBox();
@@ -68,14 +67,14 @@ public class ScreenCaptureAction extends PAction {
 
     private void capture() {
         try {
-            tryToCapture();
+            tryCapture();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    private void tryToCapture() throws AWTException {
-        boolean hide = shouldHidePixelitor();
+    private void tryCapture() throws AWTException {
+        boolean hide = hidePixelitorCB.isSelected();
         if (hide) {
             hideApp();
         }
@@ -101,10 +100,6 @@ public class ScreenCaptureAction extends PAction {
 
     private static void unHideApp() {
         PixelitorWindow.get().deiconify();
-    }
-
-    private boolean shouldHidePixelitor() {
-        return hidePixelitorCB.isSelected();
     }
 
     private static void addAsNewComp(BufferedImage screenCapture) {

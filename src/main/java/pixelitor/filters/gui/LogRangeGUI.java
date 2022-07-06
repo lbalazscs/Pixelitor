@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,10 +37,10 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
         Pixelitor.SYS_LOCALE == null ? Locale.getDefault() : Pixelitor.SYS_LOCALE);
 
     public LogRangeGUI(LogZoomParam model) {
-        this.model = model;
-
-        setLayout(new GridBagLayout());
+        super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
+
+        this.model = model;
 
         slider = new SliderSpinner(model, TextPosition.NONE, true);
         slider.addChangeListener(e -> sliderChanged());

@@ -37,12 +37,12 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private final SliderSpinner[] sliders;
 
     public GroupedRangeParamGUI(GroupedRangeParam model) {
+        super(new GridBagLayout());
+        gbh = new GridBagHelper(this);
+
         this.model = model;
         numParams = model.getNumParams();
         sliders = new SliderSpinner[numParams];
-
-        setLayout(new GridBagLayout());
-        gbh = new GridBagHelper(this);
 
         addSliderSpinners();
 

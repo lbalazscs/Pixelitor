@@ -40,7 +40,7 @@ public class OnePixelBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        var p = new JPanel(new FlowLayout());
+        JPanel p = new JPanel(new FlowLayout());
         p.add(new JLabel(AA_TEXT));
         if (aaGUI == null) {
             aaGUI = aaParam.createGUI("aa");

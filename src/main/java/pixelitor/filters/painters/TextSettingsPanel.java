@@ -116,9 +116,7 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private JPanel createTextPanel(TextSettings settings) {
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new GridBagLayout());
-
+        JPanel textPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(textPanel);
 
         gbh.addLabel("Text:", 0, 0);
@@ -175,9 +173,8 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private JPanel createFontPanel(TextSettings settings) {
-        JPanel fontPanel = new JPanel();
+        JPanel fontPanel = new JPanel(new GridBagLayout());
         fontPanel.setBorder(createTitledBorder("Font"));
-        fontPanel.setLayout(new GridBagLayout());
 
         var gbh = new GridBagHelper(fontPanel);
 

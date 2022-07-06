@@ -19,7 +19,6 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.layers.Drawable;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.io.Serial;
@@ -262,8 +261,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return children[index].getValueAsDouble();
     }
 
-    public void setValue(int index, int newValue) {
-        children[index].setValue(newValue);
+    public void setValue(int childIndex, int newValue) {
+        children[childIndex].setValue(newValue);
         // if linked, the others will be set automatically
     }
 
@@ -291,7 +290,12 @@ public class GroupedRangeParam extends AbstractFilterParam {
         if (isLinked() != linkedByDefault) {
             return false;
         }
-        return Utils.allMatch(children, RangeParam::isSetToDefault);
+        for (RangeParam child : children) {
+            if (!child.isSetToDefault()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

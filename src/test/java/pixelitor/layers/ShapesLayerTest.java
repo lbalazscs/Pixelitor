@@ -20,7 +20,6 @@ package pixelitor.layers;
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.compactions.Resize;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolButton;
@@ -76,24 +75,18 @@ class ShapesLayerTest {
     void resize() {
         comp.addLayerInInitMode(layer.duplicate(false, false));
 
-        Composition smallComp = resizeComp(comp, 10, 5);
+        Composition smallComp = TestHelper.resize(comp, 10, 5);
         ShapesLayer smallLayer1 = (ShapesLayer) smallComp.getLayer(0);
         ShapesLayer smallLayer2 = (ShapesLayer) smallComp.getLayer(1);
 //        checkHalfSizeBoxPosition(smallLayer1.getTransformBox());
 //        checkHalfSizeBoxPosition(smallLayer2.getTransformBox());
 
         // resize back to the original size
-        Composition bigComp = resizeComp(smallComp, TestHelper.TEST_WIDTH, TestHelper.TEST_HEIGHT);
+        Composition bigComp = TestHelper.resize(smallComp, TestHelper.TEST_WIDTH, TestHelper.TEST_HEIGHT);
         ShapesLayer bigLayer1 = (ShapesLayer) bigComp.getLayer(0);
         ShapesLayer bigLayer2 = (ShapesLayer) bigComp.getLayer(1);
 //        checkOrigBoxPosition(bigLayer1.getTransformBox());
 //        checkOrigBoxPosition(bigLayer2.getTransformBox());
-    }
-
-    private Composition resizeComp(Composition comp, int testWidth, int testHeight) {
-        return new Resize(testWidth, testHeight, false)
-            .process(comp)
-            .join();
     }
 
     private static void checkOrigBoxPosition(TransformBox box) {

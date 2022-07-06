@@ -71,8 +71,8 @@ public class LayerAnimExport {
         private final JCheckBox pingPongCB;
 
         public ExportPanel(int nrLayers) {
+            super(new VerticalLayout(10));
             setBorder(createEmptyBorder(10, 10, 10, 10));
-            setLayout(new VerticalLayout(10));
 
             add(new JLabel(" Animation frames are based on the layers of the image. "));
 

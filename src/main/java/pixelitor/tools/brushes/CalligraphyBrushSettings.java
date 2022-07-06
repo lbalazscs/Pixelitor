@@ -36,7 +36,7 @@ public class CalligraphyBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        var p = new JPanel(new FlowLayout());
+        JPanel p = new JPanel(new FlowLayout());
         angleParam = new AngleParam("Angle", 45, CCW_DEGREES);
         p.add(angleParam.createGUI("angle"));
 

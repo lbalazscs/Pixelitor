@@ -21,12 +21,8 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Icons;
-import pixelitor.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
@@ -36,7 +32,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  * build the user interface of a {@link ParametrizedFilter}
  */
 public class ParamSet {
-    private List<FilterParam> paramList = new ArrayList<>();
+    private final List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable afterResetAction;
@@ -66,13 +62,10 @@ public class ParamSet {
      * Adds the given parameters before the existing ones
      */
     public void addParamsToFront(FilterParam[] params) {
-        List<FilterParam> old = paramList;
-        paramList = new ArrayList<>(params.length + old.size());
-        Collections.addAll(paramList, params);
-        paramList.addAll(old);
+        paramList.addAll(0, Arrays.asList(params));
     }
 
-    public void insertParamAtIndex(FilterParam param, int index) {
+    public void insertParam(FilterParam param, int index) {
         paramList.add(index, param);
     }
 
@@ -178,7 +171,12 @@ public class ParamSet {
      * one contained filter parameter can be
      */
     public boolean canBeAnimated() {
-        return Utils.anyMatch(paramList, FilterParam::canBeAnimated);
+        for (FilterParam param : paramList) {
+            if (param.canBeAnimated()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setFinalAnimationSettingMode(boolean b) {
@@ -191,7 +189,12 @@ public class ParamSet {
     }
 
     public boolean hasGradient() {
-        return Utils.anyMatch(paramList, p -> p instanceof GradientParam);
+        for (FilterParam param : paramList) {
+            if (param instanceof GradientParam) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<FilterButtonModel> getActions() {

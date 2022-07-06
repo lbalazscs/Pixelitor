@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,9 @@ class AddGridGuidesPanel extends JPanel {
     private final Guides.Builder builder;
 
     public AddGridGuidesPanel(Guides.Builder builder) {
+        super(new BorderLayout());
+
         this.builder = builder;
-        setLayout(new BorderLayout());
         add(guidesParam.createGUI(), CENTER);
 
         var southPanel = new JPanel(new FlowLayout(LEFT));

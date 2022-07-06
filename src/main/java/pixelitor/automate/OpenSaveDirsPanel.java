@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ import static java.lang.String.format;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
- * A panel for selecting an opening directory,
- * a saving directory, and a saving format
+ * A panel for selecting an input folder,
+ * an output folder, and a saving format.
  */
 class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport inputChooser
@@ -45,7 +45,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     private final FileFormatSelector outputFormatSelector;
 
     OpenSaveDirsPanel() {
-        setLayout(new GridBagLayout());
+        super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
         addDirChooser("Input Folder:", inputChooser, gbh);

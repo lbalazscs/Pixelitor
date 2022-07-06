@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,10 +30,12 @@ import static pixelitor.colors.palette.PaletteConfig.createSlider;
  */
 public class RGBPaletteConfig implements PaletteConfig {
     private float cyanRed = 0.5f;
-    private float magentaGreen = 0.5f;
-    private float yellowBlue = 0.5f;
     private JSlider crSlider;
+
+    private float magentaGreen = 0.5f;
     private JSlider mgSlider;
+
+    private float yellowBlue = 0.5f;
     private JSlider ybSlider;
 
     public RGBPaletteConfig() {
@@ -53,7 +55,7 @@ public class RGBPaletteConfig implements PaletteConfig {
 
     @Override
     public JPanel createConfigPanel(PalettePanel palettePanel) {
-        var p = new JPanel(new GridBagLayout());
+        JPanel p = new JPanel(new GridBagLayout());
 
         crSlider = createSlider(cyanRed, "Cyan-red shift");
         crSlider.addChangeListener(e -> redChanged(palettePanel));
@@ -61,7 +63,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         mgSlider = createSlider(magentaGreen, "Magenta-green shift");
         mgSlider.addChangeListener(e -> greenChanged(palettePanel));
 
-        ybSlider = createSlider(yellowBlue, "Yellow-Blue shift");
+        ybSlider = createSlider(yellowBlue, "Yellow-blue shift");
         ybSlider.addChangeListener(e -> blueChanged(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);

@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 /**
  * Represents either the result of a computation or an error.
- * Similar idea to Rust's Result or Haskell's Either.
  *
  * @param <V> the type of the successful result
  * @param <E> the type of the error details

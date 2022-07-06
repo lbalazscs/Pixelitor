@@ -87,10 +87,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                           TextPosition textPosition,
                           boolean addResetButton,
                           int orientation) {
+        super(new BorderLayout());
+
         this.textPosition = textPosition;
         this.orientation = orientation;
-
-        setLayout(new BorderLayout());
         this.model = model;
 
         this.leftColor = leftColor;

@@ -25,14 +25,7 @@ import com.bric.swing.ColorPickerPanel;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.plaf.basic.BasicSliderUI;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.awt.TexturePaint;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
@@ -137,17 +130,17 @@ public class ColorPickerSliderUI extends BasicSliderUI {
             int[] rgb = colorPicker.getRGB();
             if (mode == ColorPicker.RED) {
                 for (int y = 0; y < trackRect.height; y++) {
-                    int red = 255 - (int) (y * 255 / trackRect.height + 0.49);
+                    int red = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (red << 16) + (rgb[1] << 8) + rgb[2];
                 }
             } else if (mode == ColorPicker.GREEN) {
                 for (int y = 0; y < trackRect.height; y++) {
-                    int green = 255 - (int) (y * 255 / trackRect.height + 0.49);
+                    int green = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (rgb[0] << 16) + (green << 8) + rgb[2];
                 }
             } else if (mode == ColorPicker.BLUE) {
                 for (int y = 0; y < trackRect.height; y++) {
-                    int blue = 255 - (int) (y * 255 / trackRect.height + 0.49);
+                    int blue = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
                     intArray[y] = (rgb[0] << 16) + (rgb[1] << 8) + blue;
                 }
             }

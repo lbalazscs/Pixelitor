@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,19 +32,11 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
  * A panel that can be customized for configuring various brushes.
  */
 public class BrushSettingsPanel extends JPanel {
-    private final GridBagHelper gbh;
+    protected final GridBagHelper gbh;
 
     public BrushSettingsPanel() {
         super(new GridBagLayout());
         gbh = new GridBagHelper(this);
-    }
-
-    public void addLabelWithControl(String text, JComponent c) {
-        gbh.addLabelAndControl(text, c);
-    }
-
-    public void addLabelWithControlNoStretch(String text, JComponent c) {
-        gbh.addLabelAndControlNoStretch(text, c);
     }
 
     public void addSlider(RangeParam param, String name) {

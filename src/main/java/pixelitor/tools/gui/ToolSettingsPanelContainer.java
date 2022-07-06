@@ -31,7 +31,7 @@ public class ToolSettingsPanelContainer extends JPanel {
     private static ToolSettingsPanelContainer instance;
 
     private ToolSettingsPanelContainer() {
-        setLayout(new CardLayout());
+        super(new CardLayout());
 
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
@@ -65,7 +65,7 @@ public class ToolSettingsPanelContainer extends JPanel {
             ToolSettingsPanel tsp = (ToolSettingsPanel) getComponent(i);
             if (tsp.isVisible()) {
                 try {
-                    GUIUtils.randomizeWidgetsOn(tsp);
+                    GUIUtils.randomizeWidgets(tsp);
                 } catch (Throwable e) {
                     // assertj-swing sometimes loses the stack trace
                     // of Errors, this is a workaround

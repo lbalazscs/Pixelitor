@@ -48,7 +48,7 @@ public class BlendingModePanel extends JPanel {
     private final JLabel bmLabel;
 
     public BlendingModePanel(boolean forTools) {
-        setLayout(new FlowLayout(LEFT));
+        super(new FlowLayout(LEFT));
         opacityLabel = new JLabel(OPACITY);
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(0, 100, 100);

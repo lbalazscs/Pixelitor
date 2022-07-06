@@ -274,11 +274,10 @@ public class CropTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        var comp = e.getComp();
-        comp.update();
+        e.getComp().update();
 
         switch (state) {
-            case NO_INTERACTION:
+            case NO_INTERACTION, AFTER_FIRST_MOUSE_PRESS:
                 break;
             case INITIAL_DRAG:
                 if (cropBox != null) {

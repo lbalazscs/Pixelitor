@@ -37,7 +37,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
@@ -273,54 +272,6 @@ public final class Utils {
         copyNr++;
 
         return orig.substring(0, index + copyStringLength) + ' ' + copyNr;
-    }
-
-    /**
-     * Quick allMatch for arrays (without creating Streams)
-     */
-    public static <T> boolean allMatch(T[] array, Predicate<? super T> predicate) {
-        for (T element : array) {
-            if (!predicate.test(element)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Quick allMatch for lists (without creating Streams)
-     */
-    public static <T> boolean allMatch(List<T> list, Predicate<? super T> predicate) {
-        for (T element : list) {
-            if (!predicate.test(element)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Quick anyMatch for arrays (without creating Streams)
-     */
-    public static <T> boolean anyMatch(T[] array, Predicate<? super T> predicate) {
-        for (T element : array) {
-            if (predicate.test(element)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Quick anyMatch for lists (without creating Streams)
-     */
-    public static <T> boolean anyMatch(List<T> list, Predicate<? super T> predicate) {
-        for (T element : list) {
-            if (predicate.test(element)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static int getJavaMainVersion() {

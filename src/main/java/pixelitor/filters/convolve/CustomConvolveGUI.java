@@ -83,12 +83,11 @@ public class CustomConvolveGUI extends FilterGUI {
     }
 
     private void addTextFieldsPanel(Box leftVerticalBox) {
-        matrixPanel = new JPanel();
+        matrixPanel = new JPanel(new GridLayout(matrixOrder, matrixOrder));
         textFields = new JTextField[matrixOrder * matrixOrder];
         for (int i = 0; i < textFields.length; i++) {
             textFields[i] = new JTextField();
         }
-        matrixPanel.setLayout(new GridLayout(matrixOrder, matrixOrder));
         for (var textField : textFields) {
             setupTextField(textField);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,8 +56,7 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
         JComboBox<Channel> selector = new JComboBox<>(channelsModel);
         selector.addItemListener(this);
 
-        JPanel northPanel = new JPanel();
-        northPanel.setLayout(new FlowLayout());
+        JPanel northPanel = new JPanel(new FlowLayout());
         northPanel.add(new JLabel("Channel:"));
         northPanel.add(selector);
 
@@ -67,8 +66,7 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
 
         add(northPanel, NORTH);
 
-        cardPanel = new JPanel();
-        cardPanel.setLayout(new CardLayout());
+        cardPanel = new JPanel(new CardLayout());
 
         ChannelLevelsModel[] models = model.getSubModels();
         for (ChannelLevelsModel m : models) {

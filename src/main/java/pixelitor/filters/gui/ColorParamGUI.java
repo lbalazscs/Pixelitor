@@ -40,8 +40,9 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private ResetButton resetButton;
 
     public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addResetButton) {
+        super(new FlowLayout(LEFT));
+
         this.model = model;
-        setLayout(new FlowLayout(LEFT));
 
         Color color = model.getColor();
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);

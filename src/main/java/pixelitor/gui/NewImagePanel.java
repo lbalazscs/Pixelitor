@@ -46,7 +46,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
     private final JTextField nameTF;
 
     public NewImagePanel() {
-        setLayout(new GridBagLayout());
+        super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
         //noinspection SuspiciousNameCombination

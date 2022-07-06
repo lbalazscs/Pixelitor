@@ -20,6 +20,7 @@ package pixelitor;
 import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
+import pixelitor.compactions.Resize;
 import pixelitor.filters.Filter;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
@@ -315,6 +316,12 @@ public class TestHelper {
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore);
         }
+    }
+
+    public static Composition resize(Composition comp, int targetWidth, int targetHeight) {
+        return new Resize(targetWidth, targetHeight, false)
+            .process(comp)
+            .join();
     }
 
     public static PMouseEvent createPEvent(int x, int y, int id,

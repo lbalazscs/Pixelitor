@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,9 +54,8 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
         }
 
         // the central panel, with maximum MAX_GRID_PARAMS controls
-        JPanel gridPanel = new JPanel();
         int numCols = addGridLabels ? 4 : 2;
-        gridPanel.setLayout(new GridLayout(2, numCols, 5, 5));
+        JPanel gridPanel = new JPanel(new GridLayout(2, numCols, 5, 5));
 
         List<FilterParam> paramList = paramSet.getParams();
         int numParams = paramList.size();
@@ -87,7 +86,7 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
             return gridPanel;
         }
 
-        var p = new JPanel(new BorderLayout());
+        JPanel p = new JPanel(new BorderLayout());
         p.add(gridPanel, CENTER);
         p.add(extraParamsPanel, SOUTH);
         return p;

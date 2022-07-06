@@ -42,8 +42,6 @@ public class ZoomMenu extends PMenu {
         "Display the image at the largest zoom that can fit in the available space (%s)",
         Utils.keystrokeAsText(FIT_SPACE_KEY));
 
-    private static final ButtonGroup radioGroup = new ButtonGroup();
-
     private static final String ACTION_MAP_KEY_INCREASE = "increase";
     private static final String ACTION_MAP_KEY_DECREASE = "decrease";
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";

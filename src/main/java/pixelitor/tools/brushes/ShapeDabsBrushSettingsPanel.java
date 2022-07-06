@@ -67,7 +67,7 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
         typeModel.setAdjustmentListener(() ->
             settings.setShapeType(typeModel.getSelected()));
 
-        addLabelWithControlNoStretch("Shape:", typeCombo);
+        gbh.addLabelAndControlNoStretch("Shape:", typeCombo);
     }
 
     private void changeAngleSettings() {
