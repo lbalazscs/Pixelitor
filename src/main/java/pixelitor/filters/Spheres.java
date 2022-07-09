@@ -17,21 +17,21 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.GUIText;
+import pixelitor.filters.gui.*;
+import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.RadialGradientPaint;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.gui.GUIText.OPACITY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**
@@ -40,12 +40,29 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 public class Spheres extends ParametrizedFilter {
     public static final String NAME = "Spheres";
 
+    enum LayoutType {
+        PATTERN("Pattern"), RANDOM("Random");
+
+        private final String guiName;
+
+        LayoutType(String guiName) {
+            this.guiName = guiName;
+        }
+
+        @Override
+        public String toString() {
+            return guiName;
+        }
+    }
+
     // see http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
     private static final double PHI_2 = 1.324717957244746;
     private static final double a1 = 1.0 / PHI_2;
     private static final double a2 = 1.0 / (PHI_2 * PHI_2);
 
-    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 2, 10, 100);
+    private final EnumParam<LayoutType> layout = new EnumParam<>("Layout", LayoutType.class);
+    private final RangeParam minRadius = new RangeParam("Min Radius", 2, 10, 100);
+    private final RangeParam maxRadius = new RangeParam("Max Radius", 2, 10, 100);
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 100);
 
     private final BooleanParam addHighLightsCB = new BooleanParam(
@@ -55,7 +72,7 @@ public class Spheres extends ParametrizedFilter {
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
         "Highlight Elevation", 45, CCW_DEGREES);
 
-    private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
+//    private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
 
     public Spheres() {
         super(true);
@@ -65,47 +82,74 @@ public class Spheres extends ParametrizedFilter {
         addHighLightsCB.setupEnableOtherIfChecked(highlightAngleSelector);
         addHighLightsCB.setupEnableOtherIfChecked(highlightElevationSelector);
 
-        opacity.setPresetKey("Opacity (%)");
+//        opacity.setPresetKey("Opacity (%)");
+
+        FilterButtonModel reseedAction = ReseedSupport.createAction();
+        layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == LayoutType.RANDOM);
 
         setParams(
-            radius.withAdjustedRange(0.1),
+            layout.withAction(reseedAction),
+            minRadius.withAdjustedRange(0.1),
+            maxRadius.withAdjustedRange(0.1),
             density,
-            opacity,
+//            opacity,
             addHighLightsCB,
             highlightAngleSelector,
             highlightElevationSelector
         );
+
+        maxRadius.ensureHigherValueThan(minRadius);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int width = dest.getWidth();
         int height = dest.getHeight();
-        float r = radius.getValueAsFloat();
-        int numCircles = (int) (width * height * density.getPercentage() / (r * r));
+        double minR = minRadius.getValueAsDouble();
+        double maxR = maxRadius.getValueAsDouble();
+        double averageR = (minR + maxR) / 2.0;
+        int numCircles = (int) (width * height * density.getPercentage() / (averageR * averageR));
+
+        LayoutType type = this.layout.getSelected();
 
         var pt = new StatusBarProgressTracker(NAME, numCircles);
 
         Graphics2D g = dest.createGraphics();
-        g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
+//        g.setComposite(AlphaComposite.SrcOver.derive((float) opacity.getPercentage()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         double angle = highlightAngleSelector.getValueInRadians() + Math.PI;
 
         double elevation = highlightElevationSelector.getValueInRadians();
-        int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
-        int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
+        double cosAngle = Math.cos(angle);
+        double sinAngle = Math.sin(angle);
+        double cosElevation = Math.cos(elevation);
 
         Color[] colors = null;
 
         boolean addHighlights = addHighLightsCB.isChecked();
 
+        Random rand = ReseedSupport.getLastSeedRandom();
+        double deltaR = (maxR - minR) / numCircles;
         for (int i = 0; i < numCircles; i++) {
-//            int x = rand.nextInt(width);
-//            int y = rand.nextInt(height);
-            // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
-            int x = (int) (width * ((0.5 + a1 * (i + 1)) % 1));
-            int y = (int) (height * ((0.5 + a2 * (i + 1)) % 1));
+            double r;
+            if (minR != maxR) {
+                //r = minR + (maxR - minR) * rand.nextDouble();
+                r = maxR - i * deltaR;
+            } else {
+                r = minR;
+            }
+            int x, y;
+            if (type == LayoutType.PATTERN) {
+                // http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+                x = (int) (width * ((0.5 + a1 * (i + 1)) % 1));
+                y = (int) (height * ((0.5 + a2 * (i + 1)) % 1));
+            } else if (type == LayoutType.RANDOM) {
+                x = rand.nextInt(width);
+                y = rand.nextInt(height);
+            } else {
+                throw new IllegalStateException("type = " + type);
+            }
 
             // could be faster, but the main bottleneck is
             // the highlights' generation anyway
@@ -123,8 +167,12 @@ public class Spheres extends ParametrizedFilter {
             // setup paint
             if (addHighlights) {
                 float[] fractions = {0.0f, 1.0f};
+
+                float centerShiftX = (float) (r * cosAngle * cosElevation);
+                float centerShiftY = (float) (r * sinAngle * cosElevation);
+
                 Paint gradientPaint = new RadialGradientPaint(
-                    x + centerShiftX, y + centerShiftY, r,
+                    x + centerShiftX, y + centerShiftY, (float) r,
                     fractions, colors, NO_CYCLE);
 
                 g.setPaint(gradientPaint);

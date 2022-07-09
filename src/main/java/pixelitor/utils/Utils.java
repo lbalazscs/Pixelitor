@@ -443,5 +443,10 @@ public final class Utils {
         return article + s;
     }
 
+    // maps the interval [inStart,inEnd] onto the interval [outStart,outEnd]
+    public static double mapInterval(double inStart, double inEnd, double outStart, double outEnd, double x) {
+        double slope = (outEnd - outStart) / (inEnd - inStart);
+        return outStart + slope * (x - inStart);
+    }
 }
 
