@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.filters.ChannelMixer;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -33,9 +33,9 @@ import static javax.swing.BoxLayout.Y_AXIS;
  * The GUI for the "Channel Mixer"
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
-    public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr,
+    public ChannelMixerGUI(ParametrizedFilter filter, Filterable layer,
                            Action[] actions, boolean reset) {
-        super(filter, dr, true, reset, actions);
+        super(filter, layer, true, reset, actions);
     }
 
     @Override

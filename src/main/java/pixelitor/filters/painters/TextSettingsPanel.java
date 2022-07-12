@@ -25,7 +25,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Utils;
 
@@ -72,8 +72,8 @@ public class TextSettingsPanel extends FilterGUI
     /**
      * Used for the text filter on images
      */
-    public TextSettingsPanel(TextFilter textFilter, Drawable dr) {
-        super(textFilter, dr);
+    public TextSettingsPanel(TextFilter textFilter, Filterable layer) {
+        super(textFilter, layer);
         TextSettings settings = textFilter.getSettings();
         init(settings);
 
@@ -314,7 +314,7 @@ public class TextSettingsPanel extends FilterGUI
     private void updateApp(TextSettings settings) {
         if (isInFilterMode()) {
             ((TextFilter) filter).setSettings(settings);
-            runFilterPreview();
+            settingsChanged(false); // TODO currently always false
         } else {
             assert textLayer != null;
             textLayer.applySettings(settings);

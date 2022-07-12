@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -37,16 +37,16 @@ import static pixelitor.FilterContext.PREVIEWING;
  */
 public class RandomFilterGUI extends FilterGUI {
     private final JPanel realSettingsPanel;
-    private final Drawable dr;
+    private final Filterable layer;
     private JPanel lastFilterPanel;
     private final RandomFilterSource filterSource;
     private final JPanel northPanel;
     private final JButton backButton;
     private final JButton forwardButton;
 
-    protected RandomFilterGUI(Drawable dr) {
-        super(null, dr); // the actual filter will be determined bellow
-        this.dr = dr;
+    protected RandomFilterGUI(Filterable layer) {
+        super(null, layer); // the actual filter will be determined bellow
+        this.layer = layer;
         filterSource = new RandomFilterSource();
 
         setLayout(new BorderLayout());
@@ -91,16 +91,16 @@ public class RandomFilterGUI extends FilterGUI {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                dr.stopPreviewing(); // stop the last one
-                dr.startPreviewing(); // start the new one
+                layer.stopPreviewing(); // stop the last one
+                layer.startPreviewing(); // start the new one
             }
-            FilterGUI filterGUI = newFilterWithGUI.createGUI(dr, true);
+            FilterGUI filterGUI = newFilterWithGUI.createGUI(layer, true);
             realSettingsPanel.add(filterGUI);
             filterGUI.revalidate();
             lastFilterPanel = filterGUI;
         } else {
             lastFilterPanel = null;
-            filter.startOn(dr, PREVIEWING);
+            layer.startFilter(filter, PREVIEWING);
         }
     }
 }

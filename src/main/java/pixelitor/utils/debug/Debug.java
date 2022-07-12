@@ -360,7 +360,7 @@ public class Debug {
     }
 
     public static void startFilter(Filter filter) {
-        filter.startOn(Views.getActiveDrawableOrThrow(), true);
+        Views.getActiveDrawableOrThrow().startFilter(filter, true);
     }
 
     public static void addNewImageWithMask() {
@@ -530,10 +530,10 @@ public class Debug {
         if (filter instanceof FilterWithGUI guiFilter) {
             guiFilter.randomizeSettings();
             smartObject.startPreviewing();
-            filter.startOn(smartObject, PREVIEWING);
+            smartObject.startFilter(filter, PREVIEWING);
             smartObject.onFilterDialogAccepted(filter.getName());
         } else {
-            filter.startOn(smartObject, FILTER_WITHOUT_DIALOG);
+            smartObject.startFilter(filter, FILTER_WITHOUT_DIALOG);
         }
 
         smartObject.addSmartFilter(filter);

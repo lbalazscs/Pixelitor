@@ -67,7 +67,7 @@ class FilterHistoryTest {
 
         History.clear();
         ImageLayer layer = (ImageLayer) comp.getActiveLayer();
-        filter.startOn(layer, FilterContext.FILTER_WITHOUT_DIALOG, busyCursorParent);
+        layer.startFilter(filter, FilterContext.FILTER_WITHOUT_DIALOG, busyCursorParent);
 
         TestHelper.assertHistoryEditsAre("Invert");
 //        ImageEdit lastEdit = (ImageEdit) History.getLastEdit();

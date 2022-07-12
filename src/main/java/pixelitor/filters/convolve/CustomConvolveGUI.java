@@ -19,7 +19,7 @@ package pixelitor.filters.convolve;
 
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.FilterGUI;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
 import pixelitor.utils.Utils;
@@ -44,8 +44,8 @@ public class CustomConvolveGUI extends FilterGUI {
     private Box presetsBox;
     private final int matrixOrder;
 
-    public CustomConvolveGUI(Convolve filter, Drawable dr, boolean reset) {
-        super(filter, dr);
+    public CustomConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
+        super(filter, layer);
         setLayout(new BoxLayout(this, X_AXIS));
 
         matrixOrder = filter.getMatrixOrder();
@@ -62,7 +62,7 @@ public class CustomConvolveGUI extends FilterGUI {
                 reset(matrixOrder);
             } else {
                 setMatrix(kernelMatrix);
-                collectValuesAndRun(null);
+                collectValuesAndRun(null, true);
             }
         }
     }
@@ -103,7 +103,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
     private void addNormalizeButton(Box leftVerticalBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(this::collectValuesAndRun);
+        normalizeButton.addActionListener(e -> collectValuesAndRun(e, false));
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(normalizeButton);
     }
@@ -111,7 +111,7 @@ public class CustomConvolveGUI extends FilterGUI {
     private void addRunButton(Box leftVerticalBox) {
         JButton runButton = new JButton("Run");
         runButton.setToolTipText("Run the filter with the current values.");
-        runButton.addActionListener(this::collectValuesAndRun);
+        runButton.addActionListener(e -> collectValuesAndRun(e, false));
         leftVerticalBox.add(runButton);
     }
 
@@ -132,20 +132,19 @@ public class CustomConvolveGUI extends FilterGUI {
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
             setMatrix(Convolve.createRandomKernelMatrix(matrixOrder));
-            collectValuesAndRun(e);
+            collectValuesAndRun(e, false);
         });
         presetsBox.add(randomizeButton);
 
         JButton doNothingButton = new JButton("Do Nothing");
         doNothingButton.addActionListener(e -> {
             reset(matrixOrder);
-            collectValuesAndRun(e);
+            collectValuesAndRun(e, false);
         });
         presetsBox.add(doNothingButton);
 
         presetsBox.setMaximumSize(presetsBox.getPreferredSize());
         presetsBox.setAlignmentY(TOP_ALIGNMENT);
-
         add(presetsBox);
     }
 
@@ -153,7 +152,7 @@ public class CustomConvolveGUI extends FilterGUI {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             setMatrix(kernel);
-            collectValuesAndRun(e);
+            collectValuesAndRun(e, false);
         });
         presetsBox.add(button);
     }
@@ -287,10 +286,10 @@ public class CustomConvolveGUI extends FilterGUI {
 
     private void setupTextField(JTextField textField) {
         matrixPanel.add(textField);
-        textField.addActionListener(this::collectValuesAndRun);
+        textField.addActionListener(e -> collectValuesAndRun(e, false));
     }
 
-    private void collectValuesAndRun(ActionEvent e) {
+    private void collectValuesAndRun(ActionEvent e, boolean first) {
         float sum = 0;
         float[] values = new float[matrixOrder * matrixOrder];
         for (int i = 0; i < values.length; i++) {
@@ -315,7 +314,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
         Convolve convolve = (Convolve) this.filter;
         convolve.setKernelMatrix(values);
-        runFilterPreview();
+        settingsChanged(first);
     }
 
     private void setMatrix(float[] values) {

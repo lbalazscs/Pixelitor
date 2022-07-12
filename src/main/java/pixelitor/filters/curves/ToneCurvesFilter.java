@@ -23,7 +23,7 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.levels.Channel;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
 
@@ -49,14 +49,14 @@ public class ToneCurvesFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
         if (reset) {
             curves.reset();
             curves.setActiveChannel(Channel.RGB);
         }
-        lastGUI = new ToneCurvesGUI(this, dr);
+        lastGUI = new ToneCurvesGUI(this, layer);
         if (!reset) {
-            lastGUI.runFilterPreview();
+            lastGUI.settingsChanged(true);
         }
         return lastGUI;
     }

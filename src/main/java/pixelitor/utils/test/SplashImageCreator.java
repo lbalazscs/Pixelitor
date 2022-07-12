@@ -139,7 +139,7 @@ public class SplashImageCreator {
 
         layer = addNewLayer(comp, "rendered");
         var brushedMetal = new JHBrushedMetal();
-        brushedMetal.startOn(layer, FILTER_WITHOUT_DIALOG);
+        layer.startFilter(brushedMetal, FILTER_WITHOUT_DIALOG);
         layer.setBlendingMode(MULTIPLY, true);
 
         addTextLayers(comp);

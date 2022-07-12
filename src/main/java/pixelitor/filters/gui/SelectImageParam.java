@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -45,9 +45,9 @@ public class SelectImageParam extends ListParam<NamedImage> {
     }
 
     @Override
-    public void updateOptions(Drawable dr, boolean changeValue) {
+    public void updateOptions(Filterable layer, boolean changeValue) {
         this.choices = openImageInfos();
-        NamedImage activeImage = findActiveNamedImage(choices, dr);
+        NamedImage activeImage = findActiveNamedImage(choices, layer);
         // if there is more than one open image,
         // try to offer one of the inactive ones as the default
         boolean defaultSet = false;
@@ -75,8 +75,8 @@ public class SelectImageParam extends ListParam<NamedImage> {
             .toList();
     }
 
-    private static NamedImage findActiveNamedImage(List<NamedImage> images, Drawable dr) {
-        Composition comp = dr.getComp();
+    private static NamedImage findActiveNamedImage(List<NamedImage> images, Filterable layer) {
+        Composition comp = layer.getComp();
         for (NamedImage image : images) {
             if (image.getComp() == comp) {
                 return image;

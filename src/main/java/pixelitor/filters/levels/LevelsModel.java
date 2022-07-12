@@ -56,7 +56,7 @@ public class LevelsModel {
         this.lastGUI = lastGUI;
     }
 
-    public void settingsChanged() {
+    public void settingsChanged(boolean first) {
         GrayScaleLookup rgb = rgbModel.getLookup();
 
         GrayScaleLookup r = rModel.getLookup();
@@ -69,7 +69,7 @@ public class LevelsModel {
         if (lastGUI == null) {
             return; // it's null when loading a smart filter
         }
-        lastGUI.runFilterPreview();
+        lastGUI.settingsChanged(first);
     }
 
     public void resetAllToDefault() {
@@ -77,7 +77,7 @@ public class LevelsModel {
             model.resetToDefaults();
         }
 
-        settingsChanged();
+        settingsChanged(false);
     }
 
     public void resetChannelToDefault(Channel channel) {
@@ -88,7 +88,7 @@ public class LevelsModel {
             }
         }
 
-        settingsChanged();
+        settingsChanged(false);
     }
 
     public ChannelLevelsModel[] getSubModels() {
@@ -117,6 +117,6 @@ public class LevelsModel {
         for (ChannelLevelsModel model : subModels) {
             model.loadUserPreset(preset);
         }
-        settingsChanged();
+        settingsChanged(false);
     }
 }

@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.VisibleForTesting;
 
 /**
@@ -39,7 +39,7 @@ public interface FilterParam extends FilterSetting, Resettable {
      * Can be used to adapt the offered ranges/choices to the current
      * drawable, composition or the list of open compositions.
      */
-    default void updateOptions(Drawable dr, boolean changeValue) {
+    default void updateOptions(Filterable layer, boolean changeValue) {
         // by default does nothing, as most controls are unaffected
     }
 

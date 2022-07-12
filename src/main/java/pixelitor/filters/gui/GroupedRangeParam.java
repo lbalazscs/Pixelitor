@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.io.Serial;
@@ -322,9 +322,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void updateOptions(Drawable dr, boolean changeValue) {
+    public void updateOptions(Filterable layer, boolean changeValue) {
         for (RangeParam child : children) {
-            child.updateOptions(dr, changeValue);
+            child.updateOptions(layer, changeValue);
         }
     }
 

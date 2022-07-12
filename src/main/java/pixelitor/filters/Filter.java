@@ -17,32 +17,20 @@
 
 package pixelitor.filters;
 
-import pixelitor.FilterContext;
 import pixelitor.filters.gui.PresetOwner;
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.filters.util.FilterUtils;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.Layer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
 
-import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 
 /**
  * The superclass of all Pixelitor filters and color adjustments.
- * A filter always works on a {@link Drawable}. If there is a selection,
- * the filter modifies only the selection bounds, otherwise the whole
- * {@link Drawable} is modified, not just the part included in the canvas.
+ * A filter transforms an image into another image.
  */
 public abstract class Filter implements Serializable, PresetOwner {
     @Serial
@@ -71,77 +59,6 @@ public abstract class Filter implements Serializable, PresetOwner {
      */
     protected boolean createDefaultDestImg() {
         return true;
-    }
-
-    /**
-     * The normal starting point, used when called from the menu.
-     * Overwritten for filters with GUI.
-     * Filters that work normally without a dialog can still have a
-     * dialog when invoked from places like "Random Filter".
-     *
-     * @return true if the filter was not cancelled
-     */
-    public boolean startOn(Drawable dr, boolean reset) {
-        startOn(dr, FILTER_WITHOUT_DIALOG);
-        return true;
-    }
-
-    /**
-     * This method never shows a dialog.
-     */
-    public void startOn(Drawable dr, FilterContext context) {
-        startOn(dr, context, PixelitorWindow.get());
-    }
-
-    public void startOn(Drawable dr, FilterContext context, Component busyCursorParent) {
-        long startTime = System.nanoTime();
-
-        Runnable task = () -> runFilter(dr, context);
-        GUIUtils.runWithBusyCursor(busyCursorParent, task);
-
-        long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-        Messages.showPerformanceMessage(getName(), totalTime);
-
-        FilterUtils.setLastFilter(this);
-    }
-
-    private void runFilter(Drawable dr, FilterContext context) {
-        try {
-            if (dr == null) {
-                throw new IllegalStateException("not image layer or mask");
-            }
-
-            BufferedImage src = dr.getFilterSourceImage();
-            BufferedImage dest = transformImage(src);
-
-            assert dest != null;
-
-            if (context.isPreview()) {
-                dr.changePreviewImage(dest, getName(), context);
-            } else {
-                dr.filterWithoutDialogFinished(dest, context, getName());
-            }
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryDialog(e);
-        } catch (Throwable e) {
-            Layer layer = dr.getLayer();
-            String errorDetails = String.format(
-                "Error while running the filter '%s'%n" +
-                "composition = '%s'%n" +
-                "layer = '%s' (%s)%n" +
-                "hasMask = '%s'%n" +
-                "mask editing = '%b'%n" +
-                "params = %s",
-                getName(), layer.getComp().getName(),
-                layer.getName(), layer.getClass().getSimpleName(),
-                layer.hasMask(), layer.isMaskEditing(), paramsAsString());
-
-            var ise = new IllegalStateException(errorDetails, e);
-            if (RandomGUITest.isRunning()) {
-                throw ise; // we can debug the exact filter parameters only in RandomGUITest
-            }
-            Messages.showException(ise);
-        }
     }
 
     public BufferedImage transformImage(BufferedImage src) {

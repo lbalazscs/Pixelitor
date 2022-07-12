@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,13 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
 import pixelitor.FilterContext;
+import pixelitor.filters.Filter;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.utils.Messages;
+import pixelitor.utils.test.RandomGUITest;
 
+import java.awt.Component;
 import java.awt.Composite;
 import java.awt.image.BufferedImage;
 
@@ -28,7 +32,7 @@ import java.awt.image.BufferedImage;
  * consists of a bunch of pixels: an image layer or a layer mask.
  * Can be used with brush tools and filters.
  */
-public interface Drawable {
+public interface Drawable extends Filterable {
     BufferedImage getImage();
 
     /**
@@ -36,32 +40,11 @@ public interface Drawable {
      */
     void setImage(BufferedImage newImage);
 
-    /**
-     * Initializes a filter previewing session.
-     */
-    void startPreviewing();
+    void startTweening();
 
-    void stopPreviewing();
-
-    void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
-
-    void onFilterDialogAccepted(String filterName);
-
-    void onFilterDialogCanceled();
-
-    void tweenCalculatingStarted();
-
-    void tweenCalculatingEnded();
-
-    void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName);
+    void endTweening();
 
     void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection);
-
-    /**
-     * Returns the image from which the "image position" thumbnail is calculated.
-     * The canvas size is not considered, only the selection.
-     */
-    BufferedImage getImageForFilterDialogs();
 
     TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean softSelection);
 
@@ -77,13 +60,15 @@ public interface Drawable {
      */
     BufferedImage getSelectedSubImage(boolean copyIfNoSelection);
 
-    void setShowOriginal(boolean b);
+    /**
+     * Returns the image from which the "image position" thumbnail is calculated.
+     * The canvas size is not considered, only the selection.
+     */
+    BufferedImage getImageForFilterDialogs();
 
     void debugImages();
 
     void updateIconImage();
-
-    Composition getComp();
 
     int getTx();
 
@@ -97,4 +82,48 @@ public interface Drawable {
     Layer getLayer();
 
     String getName();
+
+    void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
+
+    @Override
+    default void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
+        startFilter(filter, FilterContext.PREVIEWING, busyCursorParent);
+//        runFilter(filter, FilterContext.PREVIEWING);
+    }
+
+    @Override
+    default void runFilter(Filter filter, FilterContext context) {
+        try {
+            BufferedImage src = getFilterSourceImage();
+            BufferedImage dest = filter.transformImage(src);
+
+            assert dest != null;
+
+            if (context.isPreview()) {
+                changePreviewImage(dest, filter.getName(), context);
+            } else {
+                filterWithoutDialogFinished(dest, context, filter.getName());
+            }
+        } catch (OutOfMemoryError e) {
+            Dialogs.showOutOfMemoryDialog(e);
+        } catch (Throwable e) {
+            Layer layer = getLayer();
+            String errorDetails = String.format(
+                "Error while running the filter '%s'%n" +
+                "composition = '%s'%n" +
+                "layer = '%s' (%s)%n" +
+                "hasMask = '%s'%n" +
+                "mask editing = '%b'%n" +
+                "params = %s",
+                filter.getName(), layer.getComp().getName(),
+                layer.getName(), layer.getClass().getSimpleName(),
+                layer.hasMask(), layer.isMaskEditing(), filter.paramsAsString());
+
+            var ise = new IllegalStateException(errorDetails, e);
+            if (RandomGUITest.isRunning()) {
+                throw ise; // we can debug the exact filter parameters only in RandomGUITest
+            }
+            Messages.showException(ise);
+        }
+    }
 }

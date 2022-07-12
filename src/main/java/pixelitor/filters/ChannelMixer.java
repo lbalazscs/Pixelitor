@@ -20,7 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.*;
 import pixelitor.gui.utils.PAction;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -322,8 +322,8 @@ public class ChannelMixer extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new ChannelMixerGUI(this, dr, presets, reset);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new ChannelMixerGUI(this, layer, presets, reset);
     }
 
     @Override

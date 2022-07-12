@@ -565,13 +565,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void tweenCalculatingStarted() {
+    public void startTweening() {
         assert state == NORMAL;
         startPreviewing();
     }
 
     @Override
-    public void tweenCalculatingEnded() {
+    public void endTweening() {
         assert state == PREVIEW;
         stopPreviewing();
     }

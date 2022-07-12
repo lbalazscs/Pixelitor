@@ -121,7 +121,7 @@ public class ChannelLevelsModel implements ParamAdjustmentListener {
     public void paramAdjusted() {
         updateLookup();
 
-        mainModel.settingsChanged();
+        mainModel.settingsChanged(false);
     }
 
     private void updateLookup() {

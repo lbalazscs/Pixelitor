@@ -57,9 +57,9 @@ public class RepeatLast extends DrawableAction {
     protected void process(Drawable dr) {
         Optional<Filter> lastFilter = getLastFilter();
         if (showDialog) {
-            lastFilter.ifPresent(filter -> filter.startOn(dr, false));
+            lastFilter.ifPresent(filter -> dr.startFilter(filter, false));
         } else {
-            lastFilter.ifPresent(filter -> filter.startOn(dr, FilterContext.REPEAT_LAST));
+            lastFilter.ifPresent(filter -> dr.startFilter(filter, FilterContext.REPEAT_LAST));
         }
     }
 

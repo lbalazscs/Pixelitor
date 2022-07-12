@@ -21,7 +21,7 @@ import com.jhlabs.image.ConvolveFilter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
@@ -69,8 +69,8 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new CustomConvolveGUI(this, dr, reset);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new CustomConvolveGUI(this, layer, reset);
     }
 
     @Override

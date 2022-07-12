@@ -196,7 +196,7 @@ public class ImageLayerTest {
             .stateIs(NORMAL)
             .previewImageIs(null);
 
-        layer.tweenCalculatingStarted();
+        layer.startTweening();
 
         assertThat(layer)
             .stateIs(PREVIEW)
@@ -208,14 +208,14 @@ public class ImageLayerTest {
     public void tweenCalculatingEnded_Fail() {
         // fails because the tween calculation was not started
         assertThrows(AssertionError.class, () ->
-            layer.tweenCalculatingEnded());
+            layer.endTweening());
     }
 
     @Test
     public void tweenCalculatingEnded_OK() {
-        layer.tweenCalculatingStarted(); // make sure that the layer is in PREVIEW mode
+        layer.startTweening(); // make sure that the layer is in PREVIEW mode
 
-        layer.tweenCalculatingEnded();
+        layer.endTweening();
 
         assertThat(layer)
             .stateIs(NORMAL)

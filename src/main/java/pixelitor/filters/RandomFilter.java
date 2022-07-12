@@ -18,7 +18,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
 
@@ -27,8 +27,8 @@ import java.awt.image.BufferedImage;
  */
 public class RandomFilter extends FilterWithGUI {
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new RandomFilterGUI(dr);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new RandomFilterGUI(layer);
     }
 
     @Override

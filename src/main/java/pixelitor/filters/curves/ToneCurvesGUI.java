@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.curves;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.levels.Channel;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -36,18 +36,18 @@ import static javax.swing.BoxLayout.PAGE_AXIS;
 public class ToneCurvesGUI extends FilterGUI {
     private final ToneCurvesPanel curvesPanel;
 
-    public ToneCurvesGUI(ToneCurvesFilter filter, Drawable dr) {
-        super(filter, dr);
+    public ToneCurvesGUI(ToneCurvesFilter filter, Filterable layer) {
+        super(filter, layer);
         setLayout(new BoxLayout(this, PAGE_AXIS));
         ToneCurves curves = filter.getCurves();
 
         add(createChannelPanel(curves.getActiveChannel()));
 
         curvesPanel = new ToneCurvesPanel(curves);
-        curvesPanel.addActionListener(e -> runFilterPreview());
+        curvesPanel.addActionListener(e -> settingsChanged(false));
         add(curvesPanel);
 
-        add(createButtonsPanel(dr, curvesPanel));
+        add(createButtonsPanel(layer, curvesPanel));
     }
 
     private JPanel createChannelPanel(Channel activeChannel) {
@@ -69,17 +69,17 @@ public class ToneCurvesGUI extends FilterGUI {
         return channelTypeCB;
     }
 
-    private static JPanel createButtonsPanel(Drawable dr, ToneCurvesPanel curvesPanel) {
+    private static JPanel createButtonsPanel(Filterable layer, ToneCurvesPanel curvesPanel) {
         JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
-        buttonsPanel.add(createShowOriginalCB(dr));
+        buttonsPanel.add(createShowOriginalCB(layer));
         buttonsPanel.add(GUIUtils.createResetAllButton(e -> curvesPanel.reset()));
         return buttonsPanel;
     }
 
-    private static JCheckBox createShowOriginalCB(Drawable dr) {
+    private static JCheckBox createShowOriginalCB(Filterable layer) {
         JCheckBox showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
         return showOriginalCB;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,9 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
-
-import static pixelitor.FilterContext.PREVIEWING;
 
 /**
  * The superclass of all filter configuration panels.
@@ -30,14 +28,15 @@ import static pixelitor.FilterContext.PREVIEWING;
  */
 public abstract class FilterGUI extends JPanel {
     protected Filter filter;
-    private final Drawable dr;
+    private final Filterable layer;
 
-    protected FilterGUI(Filter filter, Drawable dr) {
+    protected FilterGUI(Filter filter, Filterable layer) {
         this.filter = filter;
-        this.dr = dr;
+        this.layer = layer;
     }
 
-    public void runFilterPreview() {
-        filter.startOn(dr, PREVIEWING, this);
+    public void settingsChanged(boolean first) {
+        layer.previewingFilterSettingsChanged(filter, first, this);
+//        layer.startFilter(filter, PREVIEWING, this);
     }
 }

@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.util.Iterator;
@@ -72,9 +72,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void updateOptions(Drawable dr, boolean changeValue) {
+    public void updateOptions(Filterable layer, boolean changeValue) {
         for (FilterParam child : children) {
-            child.updateOptions(dr, changeValue);
+            child.updateOptions(layer, changeValue);
         }
     }
 

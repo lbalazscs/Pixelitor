@@ -24,7 +24,7 @@ import pixelitor.filters.levels.Channel;
 import pixelitor.filters.levels.ChannelLevelsModel;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -46,8 +46,8 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
     private final JCheckBox showOriginalCB;
 
     @SuppressWarnings("unchecked")
-    public LevelsGUI(Filter filter, Drawable dr, LevelsModel model) {
-        super(filter, dr);
+    public LevelsGUI(Filter filter, Filterable layer, LevelsModel model) {
+        super(filter, layer);
 
         model.setLastGUI(this);
 
@@ -80,7 +80,7 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
 
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
+        showOriginalCB.addActionListener(e -> layer.setShowOriginal(showOriginalCB.isSelected()));
         southPanel.add(showOriginalCB);
 
         JButton resetAllButton = GUIUtils.createResetAllButton(

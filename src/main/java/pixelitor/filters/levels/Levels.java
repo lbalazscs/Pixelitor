@@ -22,7 +22,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
@@ -45,12 +45,12 @@ public class Levels extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        LevelsGUI gui = new LevelsGUI(this, dr, levelsModel);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        LevelsGUI gui = new LevelsGUI(this, layer, levelsModel);
         if (reset) {
             levelsModel.resetAllToDefault();
         } else {
-            levelsModel.settingsChanged();
+            levelsModel.settingsChanged(true);
         }
         return gui;
     }

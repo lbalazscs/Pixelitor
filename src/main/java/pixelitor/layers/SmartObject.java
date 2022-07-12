@@ -444,7 +444,7 @@ public class SmartObject extends ImageLayer {
         assert smartFilters.isEmpty();
 
         lastFilterOutput = image;
-        boolean filterDialogAccepted = newFilter.startOn(this, false);
+        boolean filterDialogAccepted = startFilter(newFilter, false);
         if (filterDialogAccepted) {
             lastFilterOutput.flush();
             lastFilterOutput = null;
@@ -461,7 +461,7 @@ public class SmartObject extends ImageLayer {
         resetImageFromContent();
 
         // since this is a new filter instance, there is no need to reset it
-        boolean filterDialogAccepted = newFilter.startOn(this, false);
+        boolean filterDialogAccepted = startFilter(newFilter, false);
         if (filterDialogAccepted) {
             lastFilterOutput.flush();
             lastFilterOutput = null;
@@ -491,7 +491,7 @@ public class SmartObject extends ImageLayer {
             lastFilterState = pf.getParamSet().copyState(false);
         }
         resetImageFromContent();
-        boolean filterDialogAccepted = filter.startOn(this, false);
+        boolean filterDialogAccepted = startFilter(filter, false);
         if (filterDialogAccepted) {
             // these are no longer needed
             lastFilterOutput.flush();

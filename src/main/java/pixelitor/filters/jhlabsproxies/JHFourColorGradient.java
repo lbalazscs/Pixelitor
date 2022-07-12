@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.FilterButtonModel;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -92,7 +92,7 @@ public class JHFourColorGradient extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new GridAdjustmentPanel(this, dr, true, false, reset);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new GridAdjustmentPanel(this, layer, true, false, reset);
     }
 }

@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.Views;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -38,17 +38,17 @@ import static java.awt.BorderLayout.SOUTH;
 public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr,
+    public ParametrizedFilterGUI(ParametrizedFilter filter, Filterable layer,
                                  boolean addShowOriginal, boolean reset) {
-        this(filter, dr, addShowOriginal, reset, null);
+        this(filter, layer, addShowOriginal, reset, null);
     }
 
     public ParametrizedFilterGUI(ParametrizedFilter filter,
-                                 Drawable dr,
+                                 Filterable layer,
                                  boolean addShowOriginal,
                                  boolean reset,
                                  Object otherInfo) {
-        super(filter, dr);
+        super(filter, layer);
 
         ParamSet paramSet = filter.getParamSet();
         if (reset) {
@@ -56,14 +56,14 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
             // if the filter is not reset, then the ranges should
             // not be updated, even if the canvas size changed
-            paramSet.updateOptions(dr, true);
+            paramSet.updateOptions(layer, true);
         }
 
         paramSet.setAdjustmentListener(this);
 
         setupGUI(paramSet, addShowOriginal, otherInfo);
 
-        paramAdjusted(); // force running the first filter preview
+        settingsChanged(true); // force running the first filter preview
     }
 
     protected void setupGUI(ParamSet paramSet,
@@ -120,7 +120,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             // mode should be automatically stopped
             showOriginalCB.deselectWithoutTriggering();
         }
-        runFilterPreview();
+        settingsChanged(false);
     }
 
     private boolean hasShowOriginal() {

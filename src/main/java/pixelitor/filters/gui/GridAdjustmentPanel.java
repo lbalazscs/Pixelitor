@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.jhlabsproxies.JHFourColorGradient;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -39,9 +39,9 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
     private boolean addGridLabels;
 
-    public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr,
+    public GridAdjustmentPanel(ParametrizedFilter filter, Filterable layer,
                                boolean addGridLabels, boolean showOriginal, boolean reset) {
-        super(filter, dr, showOriginal, reset);
+        super(filter, layer, showOriginal, reset);
         this.addGridLabels = addGridLabels;
     }
 

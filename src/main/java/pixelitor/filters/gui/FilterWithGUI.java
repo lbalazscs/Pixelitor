@@ -18,16 +18,10 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.gui.MouseZoomMethod;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.layers.Drawable;
-import pixelitor.menus.view.ZoomMenu;
-import pixelitor.tools.Tools;
+import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.io.Serial;
-
-import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
 /**
  * A filter that has a GUI for customization
@@ -49,11 +43,11 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      * If the reset argument is false, then the GUI must be initialized
      * with the settings stored in this filter.
      */
-    public abstract FilterGUI createGUI(Drawable dr, boolean reset);
+    public abstract FilterGUI createGUI(Filterable layer, boolean reset);
 
     public abstract void randomizeSettings();
 
-    private JMenuBar getMenuBar() {
+    public JMenuBar getMenuBar() {
         boolean addPresets = canHaveUserPresets() || hasBuiltinPresets();
         if (!hasHelp() && !addPresets) {
             return null;
@@ -80,30 +74,5 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     @Override
     public String getHelpURL() {
         return helpURL;
-    }
-
-    @Override
-    public boolean startOn(Drawable dr, boolean reset) {
-        dr.startPreviewing();
-
-        Tools.forceFinish();
-
-        FilterGUI gui = createGUI(dr, reset);
-
-        MouseZoomMethod.CURRENT.installOnJComponent(gui, dr.getComp().getView());
-        ZoomMenu.setupZoomKeys(gui);
-
-        return new DialogBuilder()
-            .title(getName())
-            .menuBar(getMenuBar())
-            .name("filterDialog")
-            .content(gui)
-            .align(FRAME_RIGHT)
-            .withScrollbars()
-            .enableCopyVisibleShortcut()
-            .okAction(() -> dr.onFilterDialogAccepted(getName()))
-            .cancelAction(dr::onFilterDialogCanceled)
-            .show()
-            .wasAccepted();
     }
 }

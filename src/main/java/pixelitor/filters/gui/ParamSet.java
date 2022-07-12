@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.Icons;
 
 import java.util.*;
@@ -160,9 +160,9 @@ public class ParamSet {
         }
     }
 
-    public void updateOptions(Drawable dr, boolean changeValue) {
+    public void updateOptions(Filterable layer, boolean changeValue) {
         for (FilterParam param : paramList) {
-            param.updateOptions(dr, changeValue);
+            param.updateOptions(layer, changeValue);
         }
     }
 

@@ -83,12 +83,12 @@ public class FilterAction extends DrawableAction {
                 return;
             }
             Filter newFilter = createNewInstanceFilter();
-            if (newFilter.startOn(dr, true)) {
+            if (dr.startFilter(newFilter, true)) {
                 so.addSmartFilter(newFilter);
             }
             return;
         }
-        filter.startOn(dr, true);
+        dr.startFilter(filter, true);
     }
 
     private void handleExistingSmartFilters(SmartObject so) {

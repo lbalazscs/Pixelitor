@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Shape;
@@ -60,8 +60,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new ParametrizedFilterGUI(this, dr, addShowOriginal, reset);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new ParametrizedFilterGUI(this, layer, addShowOriginal, reset);
     }
 
     @Override

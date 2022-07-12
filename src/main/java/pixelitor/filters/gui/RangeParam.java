@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -352,9 +352,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void updateOptions(Drawable dr, boolean changeValue) {
+    public void updateOptions(Filterable layer, boolean changeValue) {
         if (adjustMaxAccordingToImage) {
-            Dimension size = dr.getComp().getCanvas().getSize();
+            Dimension size = layer.getComp().getCanvas().getSize();
             double defaultToMaxRatio = defaultValue / maxValue;
             maxValue = (int) (maxToImageSizeRatio * Math.max(size.width, size.height));
             if (maxValue <= minValue) { // can happen with very small images

@@ -23,7 +23,7 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
 
@@ -70,7 +70,7 @@ public class JHPerspective extends ParametrizedFilter {
     }
 
     @Override
-    public FilterGUI createGUI(Drawable dr, boolean reset) {
-        return new GridAdjustmentPanel(this, dr, false, true, reset);
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new GridAdjustmentPanel(this, layer, false, true, reset);
     }
 }

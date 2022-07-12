@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,7 +85,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         AnimationWriter animationWriter = animation.createAnimationWriter();
 
-        dr.tweenCalculatingStarted();
+        dr.startTweening();
 
         int numTotalFrames = numFrames;
         boolean pingPong = animation.isPingPong() && numFrames > 2;
@@ -146,7 +146,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         Runnable filterRunTask = () -> {
             FilterState intermediateState = animation.tween(time);
             filter.getParamSet().setState(intermediateState, true);
-            filter.startOn(dr, TWEEN_PREVIEW, busyCursorParent);
+            dr.startFilter(filter, TWEEN_PREVIEW, busyCursorParent);
         };
         GUIUtils.invokeAndWait(filterRunTask);
 
@@ -160,7 +160,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     }
 
     private void finishOnEDT(AnimationWriter animationWriter, boolean canceled) {
-        dr.tweenCalculatingEnded();
+        dr.endTweening();
         if (canceled) {
             animationWriter.cancel();
         } else {
