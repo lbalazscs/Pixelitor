@@ -645,6 +645,14 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        sub.add(new RestrictedLayerAction("Shallow Duplicate", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                SmartObject so = (SmartObject) layer;
+                layer.getComp().shallowDuplicate(so);
+            }
+        });
+
         return sub;
     }
 

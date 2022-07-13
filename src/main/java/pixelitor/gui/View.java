@@ -147,7 +147,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (comp.isSmartObjectContent()) {
             // owner is a transient field in Composition,
             // so it must be set even when reloading from pxc
-            comp.getOwner().setContent(newComp);
+
+            for (SmartObject owner : comp.getOwners()) {
+                owner.setContent(newComp);
+            }
         }
         comp.closeAllNestedComps();
 
@@ -203,7 +206,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         Tools.compReplaced(newComp, reloaded);
         if (newComp.isSmartObjectContent()) {
-            newComp.getOwner().propagateChanges(newComp, true);
+            for (SmartObject owner : newComp.getOwners()) {
+                owner.propagateChanges(newComp, true);
+            }
         }
 
         revalidate(); // update the scrollbars if the new comp has a different size

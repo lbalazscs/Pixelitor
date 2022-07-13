@@ -45,10 +45,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static java.awt.RenderingHints.*;
 import static pixelitor.utils.Keys.CTRL_SHIFT_E;
@@ -192,7 +190,7 @@ public class SmartObject extends ImageLayer {
             }
         } else {
             assert content != null;
-            content.setOwner(this);
+            content.addOwner(this);
         }
 
         recalculateImage(false);
@@ -334,6 +332,12 @@ public class SmartObject extends ImageLayer {
             @Override
             protected void onClick() {
                 edit();
+            }
+        });
+        popup.add(new PAction("Shallow Duplicate") {
+            @Override
+            protected void onClick() {
+                comp.shallowDuplicate(SmartObject.this);
             }
         });
         if (isContentLinked()) {
@@ -539,18 +543,6 @@ public class SmartObject extends ImageLayer {
         return img;
     }
 
-//    @Override
-//    public void startMovement() {
-//        Messages.showInfo("Not Supported Yet",
-//            "Moving a smart object is not implemented yet.");
-//    }
-//
-//    @Override
-//    public PixelitorEdit endMovement() {
-//        // do nothing, see startMovement()
-//        return null;
-//    }
-
     public View getParentView() {
         if (isContentOpen()) {
             return content.getView();
@@ -604,8 +596,10 @@ public class SmartObject extends ImageLayer {
     }
 
     public void setContent(Composition content) {
-        this.content = content;
-        content.setOwner(this);
+        if (this.content != content) {
+            this.content = content;
+            content.addOwner(this);
+        }
     }
 
     public boolean isContentOpen() {
@@ -632,10 +626,6 @@ public class SmartObject extends ImageLayer {
             "<html>The file <b>" + path + "</b> isn't used anymore.");
     }
 
-    public Stream<SmartObject> getParents() {
-        return Stream.iterate(this, Objects::nonNull, so -> so.getComp().getOwner());
-    }
-
     /**
      * Returns the composition that saves the contents of this smart object to its file
      */
@@ -647,7 +637,8 @@ public class SmartObject extends ImageLayer {
             }
             Composition parent = so.getComp();
             if (parent.isSmartObjectContent()) {
-                so = parent.getOwner();
+                // assumes that all owners are in the same comp
+                so = parent.getOwners().get(0);
             } else {
                 return parent;
             }
@@ -701,6 +692,15 @@ public class SmartObject extends ImageLayer {
         g.dispose();
 
         return img;
+    }
+
+    public SmartObject shallowDuplicate() {
+        SmartObject duplicate = new SmartObject(comp, content);
+        duplicate.setName(getName(), false);
+        if (linkedContentFile != null) {
+            duplicate.setLinkedContentFile(linkedContentFile);
+        }
+        return duplicate;
     }
 
     public boolean checkInvariant() {

@@ -56,10 +56,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
@@ -97,8 +95,10 @@ public class Composition implements Serializable {
     //
 
     // Not null if this is the content of a smart object.
-    // Transient because the parent composition should not be written out.
-    private transient SmartObject owner;
+    // A composition can have multiple smart object owners after
+    // "Shallow Duplicate", which belong to the same composition.
+    // Transient because the parent compositions should not be written out.
+    private transient List<SmartObject> owners;
 
     // useful for distinguishing between versions with the same name
     private transient String debugName;
@@ -222,7 +222,7 @@ public class Composition implements Serializable {
 
         compCopy.newLayerCount = newLayerCount;
         compCopy.mode = mode;
-        compCopy.owner = owner;
+        compCopy.owners = owners;
 
         if (copySelection && selection != null) {
             compCopy.setSelectionRef(new Selection(selection, forUndo));
@@ -292,28 +292,34 @@ public class Composition implements Serializable {
 
     public void deactivated() {
         if (isSmartObjectContent()) {
-            owner.propagateChanges(this, false);
+            for (SmartObject owner : owners) {
+                owner.propagateChanges(this, false);
+            }
         }
     }
 
-    public SmartObject getOwner() {
-        return owner;
+    public List<SmartObject> getOwners() {
+        return owners;
     }
 
-    public void setOwner(SmartObject owner) {
-        assert owner != null;
-        this.owner = owner;
+    public void addOwner(SmartObject newOwner) {
+        assert newOwner != null;
+        if (owners == null) {
+            owners = new ArrayList<>(1);
+        } else {
+            for (SmartObject owner : owners) {
+                if (owner == newOwner) {
+                    return;
+                }
+            }
+        }
+        owners.add(newOwner);
     }
 
     public boolean isSmartObjectContent() {
         // if a content file is open independently of its parent,
         // then this will  return false, even for pxc files!
-        return owner != null;
-    }
-
-    public Stream<Composition> getOwners() {
-        return Stream.iterate(this, Objects::nonNull, comp ->
-            comp.isSmartObjectContent() ? comp.getOwner().getComp() : null);
+        return owners != null;
     }
 
     public Canvas getCanvas() {
@@ -350,7 +356,14 @@ public class Composition implements Serializable {
             // then the dirty flag matters only if it's linked,
             // otherwise the parent composition saves it.
             if (isSmartObjectContent()) {
-                return owner.isContentLinked();
+                boolean savedByParent = false;
+                for (SmartObject owner : owners) {
+                    if (!owner.isContentLinked()) {
+                        savedByParent = true;
+                        break;
+                    }
+                }
+                return !savedByParent;
             } else {
                 return true;
             }
@@ -391,8 +404,10 @@ public class Composition implements Serializable {
             return view;
         }
         if (isSmartObjectContent()) {
-            // recursively search in the hierarchy of parents
-            return owner.getParentView();
+            // Recursively search in the hierarchy of parents.
+            // It checks only the first owner, because it assumes
+            // that all owners are in the same composition.
+            return owners.get(0).getParentView();
         }
 
         throw new IllegalStateException("no view for top-level comp " + getDebugName());
@@ -868,10 +883,12 @@ public class Composition implements Serializable {
         // recursively invalidate the image caches in the smart
         // objects and compositions until the top composition
         if (isSmartObjectContent()) {
-            owner.invalidateImageCache();
+            for (SmartObject owner : owners) {
+                owner.invalidateImageCache();
 
-            Composition parent = owner.getComp();
-            parent.smartObjectChanged(owner.isContentLinked());
+                Composition parent = owner.getComp();
+                parent.smartObjectChanged(owner.isContentLinked());
+            }
         }
     }
 
@@ -1548,14 +1565,16 @@ public class Composition implements Serializable {
         if (isSmartObjectContent()) {
             // otherwise the changes might not be propagated when deactivating,
             // because this is not dirty after saving even if it's changed
-            owner.propagateChanges(this, true);
+            for (SmartObject owner : owners) {
+                owner.propagateChanges(this, true);
 
-            if (!owner.isContentLinked()) {
-                boolean link = Messages.showYesNoQuestion("Link Smart Object to File",
-                    format("<html>Set <b>%s</b> as the linked contents of the smart object <b>%s</b>?",
-                        file.getName(), owner.getName()));
-                if (link) {
-                    owner.setLinkedContentFile(file);
+                if (!owner.isContentLinked()) {
+                    boolean link = Messages.showYesNoQuestion("Link Smart Object to File",
+                        format("<html>Set <b>%s</b> as the linked contents of the smart object <b>%s</b>?",
+                            file.getName(), owner.getName()));
+                    if (link) {
+                        owner.setLinkedContentFile(file);
+                    }
                 }
             }
         }
@@ -1724,6 +1743,18 @@ public class Composition implements Serializable {
         }
         BufferedImage calc = calculateCompositeImage();
         Debug.debugImage(calc, "calculated composite for " + getDebugName());
+    }
+
+    public void shallowDuplicate(SmartObject so) {
+        if (so != activeLayer) {
+            throw new IllegalStateException("Expected " + so.getName() + " to be the active layer");
+        }
+
+        SmartObject duplicate = so.shallowDuplicate();
+        new Composition.LayerAdder(this)
+            .withHistory("Shallow Duplicate")
+            .atPosition(ABOVE_ACTIVE)
+            .add(duplicate);
     }
 
     public enum UpdateActions {
