@@ -26,6 +26,7 @@ import pixelitor.filters.levels.Channel;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -36,6 +37,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ToneCurvesFilter extends FilterWithGUI {
     public static final String NAME = i18n("curves");
+
+    @Serial
+    private static final long serialVersionUID = 3679501445608294764L;
 
     private CurvesFilter filter;
     private final ToneCurves curves;

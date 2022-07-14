@@ -25,6 +25,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.Random;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
@@ -37,6 +38,9 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  */
 public class Spheres extends ParametrizedFilter {
     public static final String NAME = "Spheres";
+
+    @Serial
+    private static final long serialVersionUID = -2472078121608102477L;
 
     enum LayoutType {
         PATTERN("Pattern"), RANDOM("Random");

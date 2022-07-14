@@ -27,6 +27,7 @@ import pixelitor.layers.Filterable;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
@@ -35,6 +36,9 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENC
  */
 public class JHFourColorGradient extends ParametrizedFilter {
     public static final String NAME = "Four Color Gradient";
+
+    @Serial
+    private static final long serialVersionUID = -3344171912935129684L;
 
     private final ColorParam northWestParam =
         new ColorParam("Northwest", new Color(20, 128, 20), NO_TRANSPARENCY);

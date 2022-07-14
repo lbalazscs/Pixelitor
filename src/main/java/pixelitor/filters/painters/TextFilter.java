@@ -26,6 +26,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * A filter which adds a text to the current image layer.
@@ -33,6 +34,9 @@ import java.awt.image.BufferedImage;
  */
 public class TextFilter extends FilterWithGUI {
     private TextSettings settings;
+
+    @Serial
+    private static final long serialVersionUID = -2525209248829018779L;
 
     public TextFilter() {
         settings = new TextSettings();

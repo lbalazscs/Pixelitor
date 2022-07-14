@@ -33,6 +33,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -48,6 +49,9 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  */
 public class PhotoCollage extends ParametrizedFilter {
     public static final String NAME = "Photo Collage";
+
+    @Serial
+    private static final long serialVersionUID = 5651133864767266714L;
 
     private final GroupedRangeParam size = new GroupedRangeParam("Photo Size", 40, 200, 999);
     private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("Photo Shape", ShapeType.class);

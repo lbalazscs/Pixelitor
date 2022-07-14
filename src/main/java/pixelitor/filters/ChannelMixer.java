@@ -26,6 +26,7 @@ import pixelitor.utils.ImageUtils;
 import javax.swing.*;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.function.BooleanSupplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -37,6 +38,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ChannelMixer extends ParametrizedFilter {
     public static final String NAME = i18n("channel_mixer");
+
+    @Serial
+    private static final long serialVersionUID = 1226064290403623160L;
 
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;

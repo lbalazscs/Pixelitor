@@ -26,12 +26,16 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Perspective filter based on the JHLabs PerspectiveFilter
  */
 public class JHPerspective extends ParametrizedFilter {
     public static final String NAME = "Perspective";
+
+    @Serial
+    private static final long serialVersionUID = 8870217255458762368L;
 
     private final ImagePositionParam northWest = new ImagePositionParam("Northwest", 0.05f, 0.05f);
     private final ImagePositionParam northEast = new ImagePositionParam("Northeast", 0.95f, 0.05f);

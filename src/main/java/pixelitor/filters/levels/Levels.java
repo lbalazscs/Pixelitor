@@ -28,6 +28,7 @@ import pixelitor.utils.Rnd;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
+import java.io.Serial;
 import java.util.Objects;
 
 import static pixelitor.utils.Texts.i18n;
@@ -37,6 +38,10 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Levels extends FilterWithGUI {
     public static final String NAME = i18n("levels");
+
+    @Serial
+    private static final long serialVersionUID = 1780232770405846617L;
+
     private RGBLookup rgbLookup;
     private final LevelsModel levelsModel;
 

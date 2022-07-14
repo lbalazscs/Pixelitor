@@ -31,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.RenderingHints.*;
 import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
@@ -40,6 +41,9 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
  * Arbitrary Rotate
  */
 public class TransformLayer extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 9039647019976237114L;
+
     private final ImagePositionParam center = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, USER_ONLY_TRANSPARENCY);
