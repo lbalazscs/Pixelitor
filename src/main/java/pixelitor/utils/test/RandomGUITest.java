@@ -1249,7 +1249,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
         weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);
 
-        if (AppContext.enableAdjLayers) {
+        if (AppContext.enableExperimentalFeatures) {
             weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
         }
 

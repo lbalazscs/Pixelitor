@@ -372,11 +372,8 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerMaskSubmenu(texts));
         layersMenu.add(createTextLayerSubmenu(texts));
 
-        if (AppContext.enableAdjLayers) {
-            layersMenu.add(createAdjustmentLayersSubmenu());
-        }
-
         if (AppContext.enableExperimentalFeatures) {
+            layersMenu.add(createAdjustmentLayersSubmenu());
             layersMenu.add(createSmartObjectSubmenu());
             layersMenu.add(createColorFillLayerSubmenu());
             layersMenu.add(createGradientFillLayerSubmenu());

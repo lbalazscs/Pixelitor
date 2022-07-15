@@ -221,14 +221,14 @@ public class ToneCurve {
         this.active = active;
     }
 
-    public void draw(Graphics2D g) {
-        drawCurve(g);
+    public void draw(Graphics2D g, boolean darkTheme) {
+        drawCurve(g, darkTheme);
         if (active) {
-            drawKnots(g);
+            drawKnots(g, darkTheme);
         }
     }
 
-    private void drawCurve(Graphics2D g) {
+    private void drawCurve(Graphics2D g, boolean darkTheme) {
         initCurvePlotData();
         Path2D path = new Path2D.Float();
         path.moveTo(0, ((float) curvePlotData[0] / 255) * height);
@@ -238,22 +238,20 @@ public class ToneCurve {
             path.lineTo(x, y);
         }
 
-        g.setColor(channel.getDrawColor(active));
+        g.setColor(channel.getDrawColor(active, darkTheme));
         g.setStroke(curveStroke);
         g.draw(path);
     }
 
-    private void drawKnots(Graphics2D g) {
-        g.setColor(Color.black);
+    private void drawKnots(Graphics2D g, boolean darkTheme) {
+        g.setColor(darkTheme ? Color.WHITE : Color.BLACK);
         g.setStroke(pointStroke);
         int knotSize = 2 * KNOT_RADIUS_PX;
         for (int i = 0; i < curve.x.length; i++) {
             g.drawOval(
                 (int) (curve.x[i] * width) - KNOT_RADIUS_PX,
                 (int) (curve.y[i] * height) - KNOT_RADIUS_PX,
-                knotSize,
-                knotSize
-            );
+                knotSize, knotSize);
         }
     }
 

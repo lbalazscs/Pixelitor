@@ -49,7 +49,7 @@ public enum AppContext {
     // feature flags to avoid diverging branches
     public static boolean enableExperimentalFeatures = AppPreferences.loadExperimentalFeatures();
     public static final boolean enableFreeTransform = false;
-    public static final boolean enableAdjLayers = false;
+//    public static final boolean enableAdjLayers = false;
     public static final boolean enableImageMode = false;
 
     public static AppContext CURRENT = FINAL_GUI;

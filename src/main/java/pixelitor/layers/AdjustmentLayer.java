@@ -18,10 +18,14 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.io.TranslatedImage;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -34,11 +38,13 @@ import java.util.concurrent.CompletableFuture;
 /**
  * An adjustment layer is a filter that acts on the result of the layers bellow it.
  */
-public class AdjustmentLayer extends Layer {
+public class AdjustmentLayer extends Layer implements Filterable {
     @Serial
     private static final long serialVersionUID = 2L;
 
     private final Filter filter;
+
+    private transient FilterState lastFilterState;
 
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
         super(comp, name);
@@ -97,7 +103,7 @@ public class AdjustmentLayer extends Layer {
     @Override
     public void edit() {
         if (filter instanceof FilterWithGUI fwg) {
-            System.out.println("AdjustmentLayer::edit: CALLED");
+            runFilter(filter, FilterContext.PREVIEWING);
         }
     }
 
@@ -114,6 +120,51 @@ public class AdjustmentLayer extends Layer {
     @Override
     public TranslatedImage getTranslatedImage() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void startPreviewing() {
+        if (filter instanceof ParametrizedFilter pf) {
+            lastFilterState = pf.getParamSet().copyState(false);
+        }
+    }
+
+    @Override
+    public void stopPreviewing() {
+        // do nothing
+    }
+
+    @Override
+    public void setShowOriginal(boolean b) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
+        comp.update();
+    }
+
+    @Override
+    public void onFilterDialogAccepted(String filterName) {
+        // do nothing
+    }
+
+    @Override
+    public void onFilterDialogCanceled() {
+        if (filter instanceof ParametrizedFilter pf) {
+            pf.loadFilterState(lastFilterState, false);
+            comp.update();
+        }
+    }
+
+    @Override
+    public void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void runFilter(Filter filter, FilterContext context) {
+        startFilter(filter, false);
     }
 
     @Override

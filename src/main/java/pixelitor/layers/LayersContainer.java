@@ -76,7 +76,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         southPanel.add(new SouthButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
         southPanel.add(new SouthButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        if (AppContext.enableAdjLayers) {
+        if (AppContext.enableExperimentalFeatures) {
             southPanel.add(new SouthButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 

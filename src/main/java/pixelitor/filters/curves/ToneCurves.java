@@ -19,6 +19,7 @@ package pixelitor.filters.curves;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.levels.Channel;
+import pixelitor.gui.utils.Themes;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -107,10 +108,12 @@ public class ToneCurves {
     }
 
     public void draw(Graphics2D g) {
+        boolean darkTheme = Themes.getCurrent().isDark();
+
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         // clear background
-        Colors.fillWith(Color.WHITE, g, width, height);
+        Colors.fillWith(darkTheme ? Color.BLACK : Color.WHITE, g, width, height);
 
         // apply CURVE_PADDING, and prepare for y-axis up drawing
         var origTransform = g.getTransform();
@@ -121,7 +124,7 @@ public class ToneCurves {
         drawGrid(g);
         drawDiagonal(g);
         drawScales(g);
-        drawCurves(g);
+        drawCurves(g, darkTheme);
 
         g.setTransform(origTransform);
     }
@@ -157,7 +160,7 @@ public class ToneCurves {
         if (activeChannel == Channel.RGB) {
             gradientEndColor = Color.WHITE;
         } else {
-            gradientEndColor = activeChannel.getDrawColor(true);
+            gradientEndColor = activeChannel.getDrawColor(true, false);
         }
 
         // draw horizontal gradient
@@ -183,15 +186,15 @@ public class ToneCurves {
         g.drawLine(0, 0, curveWidth, curveHeight);
     }
 
-    private void drawCurves(Graphics2D g) {
+    private void drawCurves(Graphics2D g, boolean darkTheme) {
         // on back draw inactive curves
         for (var entry : curvesByChannel.entrySet()) {
             if (entry.getKey() != activeChannel) {
-                entry.getValue().draw(g);
+                entry.getValue().draw(g, darkTheme);
             }
         }
 
         // on top draw active curve
-        curvesByChannel.get(activeChannel).draw(g);
+        curvesByChannel.get(activeChannel).draw(g, darkTheme);
     }
 }

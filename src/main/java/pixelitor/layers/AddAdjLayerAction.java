@@ -19,7 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition.LayerAdder;
 import pixelitor.Views;
-import pixelitor.filters.curves.ToneCurvesFilter;
+import pixelitor.filters.Filter;
+import pixelitor.filters.GradientMap;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.ThemedImageIcon;
@@ -34,7 +35,7 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
 
     private AddAdjLayerAction() {
         super("Add Adjustment Layer",
-            Icons.loadThemed("add_adj_layer.png", ThemedImageIcon.WHITE));
+            Icons.loadThemed("add_adj_layer.png", ThemedImageIcon.GREEN));
         setToolTip("Adds a new adjustment layer.");
         setEnabled(false);
         Views.addActivationListener(this);
@@ -43,7 +44,9 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
     @Override
     protected void onClick() {
         var comp = Views.getActiveComp();
-        var adjustmentLayer = new AdjustmentLayer(comp, ToneCurvesFilter.NAME, new ToneCurvesFilter());
+        Filter filter = new GradientMap();
+        filter.setName(GradientMap.NAME);
+        var adjustmentLayer = new AdjustmentLayer(comp, GradientMap.NAME, filter);
 
         new LayerAdder(comp)
             .withHistory("New Adjustment Layer")

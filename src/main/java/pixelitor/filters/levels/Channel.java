@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,19 @@ public enum Channel {
         @Override
         public double getValue(int r, int g, int b) {
             return LuminanceLookup.from(r, g, b);
+        }
+
+        @Override
+        public Color getDrawColor(boolean active, boolean darkTheme) {
+            if (darkTheme) {
+                if (active) {
+                    return WHITE;
+                } else {
+                    return FADED_WHITE;
+                }
+            } else {
+                return super.getDrawColor(active, darkTheme);
+            }
         }
     }, RED(i18n("red"), "red", Color.RED) {
         @Override
@@ -93,6 +106,7 @@ public enum Channel {
         }
     };
 
+    private static final Color FADED_WHITE = new Color(0x64_FF_FF_FF, true);
     private static final Color LIGHT_PINK = new Color(255, 128, 128);
     private static final Color LIGHT_GREEN = new Color(128, 255, 128);
     private static final Color LIGHT_BLUE = new Color(128, 128, 255);
@@ -117,7 +131,7 @@ public enum Channel {
 
     public abstract Color getLightColor();
 
-    public Color getDrawColor(boolean active) {
+    public Color getDrawColor(boolean active, boolean darkTheme) {
         return active ? color : inactiveColor;
     }
 

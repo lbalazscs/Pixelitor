@@ -348,7 +348,7 @@ public class AssertJSwingTest {
         testTextLayers();
         testMaskFromColorRange();
 
-        if (AppContext.enableAdjLayers) {
+        if (AppContext.enableExperimentalFeatures) {
             testAdjLayers();
         }
 
