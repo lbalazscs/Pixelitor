@@ -121,9 +121,13 @@ public class SmartObject extends ImageLayer {
     }
 
     // the constructor used for duplication
-    private SmartObject(SmartObject orig, String name) {
+    private SmartObject(SmartObject orig, String name, boolean deepCopy) {
         super(orig.comp, name);
-        setContent(orig.content.copy(false, true));
+        if (deepCopy) {
+            setContent(orig.content.copy(false, true));
+        } else {
+            setContent(orig.getContent());
+        }
         image = orig.image;
         if (!orig.smartFilters.isEmpty()) {
             smartFilters.add(orig.smartFilters.get(0).copy());
@@ -324,7 +328,7 @@ public class SmartObject extends ImageLayer {
 
     @Override
     protected Layer createTypeSpecificDuplicate(String duplicateName) {
-        return new SmartObject(this, duplicateName);
+        return new SmartObject(this, duplicateName, true);
     }
 
     void addSmartObjectSpecificItems(JPopupMenu popup) {
@@ -334,7 +338,7 @@ public class SmartObject extends ImageLayer {
                 edit();
             }
         });
-        popup.add(new PAction("Shallow Duplicate") {
+        popup.add(new PAction("Clone") {
             @Override
             protected void onClick() {
                 comp.shallowDuplicate(SmartObject.this);
@@ -695,11 +699,7 @@ public class SmartObject extends ImageLayer {
     }
 
     public SmartObject shallowDuplicate() {
-        SmartObject duplicate = new SmartObject(comp, content);
-        duplicate.setName(getName(), false);
-        if (linkedContentFile != null) {
-            duplicate.setLinkedContentFile(linkedContentFile);
-        }
+        SmartObject duplicate = new SmartObject(this, getName() + " clone", false);
         return duplicate;
     }
 

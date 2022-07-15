@@ -1747,12 +1747,12 @@ public class Composition implements Serializable {
 
     public void shallowDuplicate(SmartObject so) {
         if (so != activeLayer) {
-            throw new IllegalStateException("Expected " + so.getName() + " to be the active layer");
+            setActiveLayer(so);
         }
 
         SmartObject duplicate = so.shallowDuplicate();
         new Composition.LayerAdder(this)
-            .withHistory("Shallow Duplicate")
+            .withHistory("Clone")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
     }
