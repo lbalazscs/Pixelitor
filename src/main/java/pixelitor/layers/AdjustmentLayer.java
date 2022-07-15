@@ -20,8 +20,6 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
-import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.io.TranslatedImage;
 
@@ -42,9 +40,12 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Serial
     private static final long serialVersionUID = 2L;
 
-    private final Filter filter;
+    private Filter filter;
 
-    private transient FilterState lastFilterState;
+    // A copy created at the beginning of editing,
+    // to support Cancel and Show Original.
+    private transient Filter lastFilter;
+    private transient boolean showOriginal = false;
 
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
         super(comp, name);
@@ -56,6 +57,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = true;
+        lastFilter = null;
+        showOriginal = false;
     }
 
     @Override
@@ -124,9 +127,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void startPreviewing() {
-        if (filter instanceof ParametrizedFilter pf) {
-            lastFilterState = pf.getParamSet().copyState(false);
-        }
+        lastFilter = filter.copy();
     }
 
     @Override
@@ -136,7 +137,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void setShowOriginal(boolean b) {
-        throw new UnsupportedOperationException("TODO");
+        showOriginal = b;
+
+        Filter tmp = filter;
+        filter = lastFilter;
+        lastFilter = tmp;
+
+        comp.update();
     }
 
     @Override
@@ -146,15 +153,22 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void onFilterDialogAccepted(String filterName) {
-        // do nothing
+        if (showOriginal) {
+            filter = lastFilter;
+            comp.update();
+        }
+        lastFilter = null;
+        showOriginal = false;
     }
 
     @Override
     public void onFilterDialogCanceled() {
-        if (filter instanceof ParametrizedFilter pf) {
-            pf.loadFilterState(lastFilterState, false);
+        if (!showOriginal) {
+            filter = lastFilter;
             comp.update();
         }
+        lastFilter = null;
+        showOriginal = false;
     }
 
     @Override

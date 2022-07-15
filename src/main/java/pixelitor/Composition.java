@@ -842,8 +842,19 @@ public class Composition implements Serializable {
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
-        if (activeLayer instanceof ImageLayer) {
-            return (ImageLayer) activeLayer;
+        if (activeLayer instanceof Drawable) {
+            return (Drawable) activeLayer;
+        }
+        return null;
+    }
+
+    public Filterable getActiveFilterable() {
+        assert classInvariant();
+        if (activeLayer.isMaskEditing()) {
+            return activeLayer.getMask();
+        }
+        if (activeLayer instanceof Filterable) {
+            return (Filterable) activeLayer;
         }
         return null;
     }

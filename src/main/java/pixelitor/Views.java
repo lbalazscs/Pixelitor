@@ -24,6 +24,7 @@ import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Filterable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -510,6 +511,14 @@ public class Views {
     public static Drawable getActiveDrawableOrThrow() {
         if (activeView != null) {
             return activeView.getComp().getActiveDrawableOrThrow();
+        }
+
+        throw new IllegalStateException("no active view");
+    }
+
+    public static Filterable getActiveFilterable() {
+        if (activeView != null) {
+            return activeView.getComp().getActiveFilterable();
         }
 
         throw new IllegalStateException("no active view");

@@ -554,13 +554,9 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAdjustmentLayersSubmenu() {
         PMenu sub = new PMenu("New Adjustment Layer");
 
-        // not called "Invert" because of assertj test lookup confusion
-        sub.add(new OpenViewEnabledAction("Invert Adjustment") {
-            @Override
-            protected void onClick() {
-                AddAdjLayerAction.INSTANCE.actionPerformed(null);
-            }
-        });
+        for (Action action : AddAdjLayerAction.actions) {
+            sub.add(action);
+        }
 
         return sub;
     }

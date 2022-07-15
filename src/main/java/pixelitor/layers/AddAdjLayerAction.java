@@ -19,19 +19,37 @@ package pixelitor.layers;
 
 import pixelitor.Composition.LayerAdder;
 import pixelitor.Views;
+import pixelitor.filters.Colorize;
 import pixelitor.filters.Filter;
 import pixelitor.filters.GradientMap;
+import pixelitor.filters.HueSat;
+import pixelitor.filters.curves.ToneCurvesFilter;
+import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
+
+import javax.swing.*;
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
 public class AddAdjLayerAction extends PAction implements ViewActivationListener {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
+
+    public static List<Action> actions = List.of(
+        createAction(ColorBalance::new, ColorBalance.NAME),
+        createAction(Colorize::new, Colorize.NAME),
+        createAction(ToneCurvesFilter::new, ToneCurvesFilter.NAME),
+        createAction(GradientMap::new, GradientMap.NAME),
+        createAction(HueSat::new, HueSat.NAME)
+//        createAction(Levels::new, Levels.NAME)
+    );
 
     private AddAdjLayerAction() {
         super("Add Adjustment Layer",
@@ -43,10 +61,23 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
 
     @Override
     protected void onClick() {
+        addAdjustmentLayer(GradientMap::new, GradientMap.NAME);
+    }
+
+    private static Action createAction(Supplier<Filter> factory, String name) {
+        return new OpenViewEnabledAction(name + " Adjustment") {
+            @Override
+            protected void onClick() {
+                addAdjustmentLayer(factory, name);
+            }
+        };
+    }
+
+    private static void addAdjustmentLayer(Supplier<Filter> factory, String name) {
+        Filter filter = factory.get();
+        filter.setName(name);
         var comp = Views.getActiveComp();
-        Filter filter = new GradientMap();
-        filter.setName(GradientMap.NAME);
-        var adjustmentLayer = new AdjustmentLayer(comp, GradientMap.NAME, filter);
+        var adjustmentLayer = new AdjustmentLayer(comp, name, filter);
 
         new LayerAdder(comp)
             .withHistory("New Adjustment Layer")
