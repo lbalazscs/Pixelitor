@@ -127,6 +127,12 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Shape shape = createShape(srcWidth, srcHeight);
+        if (shape == null) {
+            // can happen, for example with Spirograph at time=0
+            g2.dispose();
+            return dest;
+        }
+
         double scaleX = scale.getPercentage(0);
         double scaleY = scale.getPercentage(1);
         boolean hasScaling = scaleX != 1.0 || scaleY != 1.0;

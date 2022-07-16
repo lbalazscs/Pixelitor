@@ -26,20 +26,23 @@ import pixelitor.filters.HueSat;
 import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.OpenViewEnabledAction;
-import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
+import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.function.Supplier;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
-public class AddAdjLayerAction extends PAction implements ViewActivationListener {
+public class AddAdjLayerAction extends NamedAction implements ViewActivationListener {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     public static List<Action> actions = List.of(
@@ -60,8 +63,24 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
     }
 
     @Override
-    protected void onClick() {
-        addAdjustmentLayer(GradientMap::new, GradientMap.NAME);
+    public void actionPerformed(ActionEvent e) {
+        try {
+            JButton source = (JButton) e.getSource();
+            JPopupMenu popup = createActionsPopup();
+            Dimension size = popup.getPreferredSize();
+            popup.show(source, 0, -size.height);
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    private static JPopupMenu createActionsPopup() {
+        JPopupMenu popup = new JPopupMenu();
+        for (Action action : actions) {
+            popup.add(action);
+        }
+        popup.pack();
+        return popup;
     }
 
     private static Action createAction(Supplier<Filter> factory, String name) {
@@ -82,6 +101,8 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
         new LayerAdder(comp)
             .withHistory("New Adjustment Layer")
             .add(adjustmentLayer);
+
+        adjustmentLayer.edit();
     }
 
     @Override
