@@ -48,6 +48,7 @@ public class FilterSearchPanel extends JPanel {
     private JTextField searchTF;
     private JXList filtersList;
     private HighlightListCellRenderer highlighter;
+    private boolean dialogCanceled;
 
     public FilterSearchPanel(FilterAction[] filters) {
         super(new BorderLayout(GAP, GAP));
@@ -189,21 +190,23 @@ public class FilterSearchPanel extends JPanel {
         filtersList.ensureIndexIsVisible(filtersList.getSelectedIndex());
     }
 
-    private void startSelectedFilter() {
-        FilterAction action = getSelectedFilter();
-        if (action == null) {
-            if (numMatchingFilters() == 1) {
-                // nothing is selected, but there is only one remaining filter
-                action = (FilterAction) filtersList.getElementAt(0);
-            }
-        }
-        if (action != null) {
-            action.actionPerformed(null);
-        }
+    public void setDialogCanceled(boolean dialogCanceled) {
+        this.dialogCanceled = dialogCanceled;
     }
 
     public FilterAction getSelectedFilter() {
-        return (FilterAction) filtersList.getSelectedValue();
+        if (dialogCanceled) {
+            return null;
+        }
+        FilterAction selected = (FilterAction) filtersList.getSelectedValue();
+        if (selected != null) {
+            return selected;
+        }
+        if (numMatchingFilters() == 1) {
+            // nothing is selected, but there is only one remaining filter
+            return (FilterAction) filtersList.getElementAt(0);
+        }
+        return null;
     }
 
     public boolean hasSelection() {
@@ -214,12 +217,12 @@ public class FilterSearchPanel extends JPanel {
         filtersList.getSelectionModel().addListSelectionListener(listener);
     }
 
-    public static void showInDialog() {
+    public static FilterAction showInDialog() {
         FilterSearchPanel panel = new FilterSearchPanel(FilterUtils.getAllFiltersSorted());
         DialogBuilder builder = new DialogBuilder()
             .content(panel)
             .title("Filter Search")
-            .okAction(panel::startSelectedFilter);
+            .cancelAction(() -> panel.setDialogCanceled(true));
 
         JDialog dialog = builder.build();
 
@@ -235,13 +238,15 @@ public class FilterSearchPanel extends JPanel {
                     // double-clicking on a selected filter starts it
                     if (panel.hasSelection()) {
                         GUIUtils.closeDialog(dialog, true);
-                        panel.startSelectedFilter();
                     }
                 }
             }
         });
 
         GUIUtils.showDialog(dialog, SCREEN_CENTER);
+
+        // will get here only after the dialog is closed
+        return panel.getSelectedFilter();
     }
 
     private static class SearchIcon extends VectorIcon {

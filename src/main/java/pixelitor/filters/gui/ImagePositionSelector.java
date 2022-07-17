@@ -56,8 +56,14 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
             return;
         }
         Drawable dr = Views.getActiveDrawable();
-        BufferedImage actualImage = dr.getImageForFilterDialogs();
-        thumb = ImageUtils.createThumbnail(actualImage, size, null);
+        if (dr == null) {
+            // running as adjustment layer
+            thumb = ImageUtils.createSysCompatibleImage(size, size);
+        } else {
+            BufferedImage fullImage = dr.getImageForFilterDialogs();
+            thumb = ImageUtils.createThumbnail(fullImage, size, null);
+        }
+
         setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
     }
 

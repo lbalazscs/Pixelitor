@@ -25,6 +25,8 @@ import pixelitor.filters.GradientMap;
 import pixelitor.filters.HueSat;
 import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.filters.lookup.ColorBalance;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.OpenViewEnabledAction;
@@ -38,6 +40,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static java.awt.event.ActionEvent.CTRL_MASK;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
@@ -65,6 +69,16 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
+            boolean ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
+            if (ctrlPressed) {
+                FilterAction action = FilterSearchPanel.showInDialog();
+                if (action != null) {
+                    Filter filter = action.createNewInstanceFilter();
+                    addAdjustmentLayer(filter, filter.getName());
+                }
+                return;
+            }
+
             JButton source = (JButton) e.getSource();
             JPopupMenu popup = createActionsPopup();
             Dimension size = popup.getPreferredSize();
@@ -95,6 +109,10 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
     private static void addAdjustmentLayer(Supplier<Filter> factory, String name) {
         Filter filter = factory.get();
         filter.setName(name);
+        addAdjustmentLayer(filter, name);
+    }
+
+    private static void addAdjustmentLayer(Filter filter, String name) {
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, name, filter);
 

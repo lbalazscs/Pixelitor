@@ -99,7 +99,7 @@ public class FilterAction extends DrawableAction {
         }
     }
 
-    private Filter createNewInstanceFilter() {
+    public Filter createNewInstanceFilter() {
         Filter newFilter = factory.get();
         newFilter.setName(name);
         return newFilter;

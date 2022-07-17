@@ -46,6 +46,7 @@ import pixelitor.filters.transitions.BlindsTransition;
 import pixelitor.filters.transitions.CheckerboardTransition;
 import pixelitor.filters.transitions.GooTransition;
 import pixelitor.filters.transitions.ShapesGridTransition;
+import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
@@ -908,7 +909,10 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(new OpenViewEnabledAction("Filter Search...") {
             @Override
             protected void onClick() {
-                FilterSearchPanel.showInDialog();
+                FilterAction action = FilterSearchPanel.showInDialog();
+                if (action != null) {
+                    action.actionPerformed(null);
+                }
             }
         }, F3);
 
