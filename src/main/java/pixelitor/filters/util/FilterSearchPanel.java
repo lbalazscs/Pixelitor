@@ -217,11 +217,11 @@ public class FilterSearchPanel extends JPanel {
         filtersList.getSelectionModel().addListSelectionListener(listener);
     }
 
-    public static FilterAction showInDialog() {
+    public static FilterAction showInDialog(String title) {
         FilterSearchPanel panel = new FilterSearchPanel(FilterUtils.getAllFiltersSorted());
         DialogBuilder builder = new DialogBuilder()
             .content(panel)
-            .title("Filter Search")
+            .title(title)
             .cancelAction(() -> panel.setDialogCanceled(true));
 
         JDialog dialog = builder.build();

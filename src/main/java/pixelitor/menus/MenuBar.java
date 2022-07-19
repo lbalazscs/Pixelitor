@@ -433,6 +433,15 @@ public class MenuBar extends JMenuBar {
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
         sub.add(lowerLayerSelection, CTRL_SHIFT_L);
 
+        sub.addSeparator();
+
+        sub.add(new PAction("Isolate") {
+            @Override
+            protected void onClick() {
+                getActiveComp().isolateActive();
+            }
+        });
+
         return sub;
     }
 
@@ -906,10 +915,10 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFilterMenu(ResourceBundle texts) {
         PMenu filterMenu = new PMenu(texts.getString("filter"), 'T');
 
-        filterMenu.add(new OpenViewEnabledAction("Filter Search...") {
+        filterMenu.add(new OpenViewEnabledAction("Find Filter...") {
             @Override
             protected void onClick() {
-                FilterAction action = FilterSearchPanel.showInDialog();
+                FilterAction action = FilterSearchPanel.showInDialog("Find Filter");
                 if (action != null) {
                     action.actionPerformed(null);
                 }

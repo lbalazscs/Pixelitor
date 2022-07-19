@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,6 +60,7 @@ public class LayerTest {
     public WithMask withMask;
 
     private IconUpdateChecker iconUpdates;
+    private ImageLayer layer2;
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
@@ -89,7 +90,7 @@ public class LayerTest {
 
         comp.addLayerInInitMode(layer);
 
-        ImageLayer layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
+        layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
         comp.addLayerInInitMode(layer2);
 
         withMask.setupFor(layer);
@@ -109,39 +110,55 @@ public class LayerTest {
 
     @Test
     public void hidingAndShowing() {
-        checkLayerIsShown();
+        checkShown(layer);
 
         // hide the previously shown layer
-        layer.setVisible(false, true);
-        checkLayerIsHidden();
+        layer.setVisible(false, true, true);
+        checkHidden(layer);
 
         History.undo("Hide Layer");
-        checkLayerIsShown();
+        checkShown(layer);
 
         History.redo("Hide Layer");
-        checkLayerIsHidden();
+        checkHidden(layer);
 
         // show the previously hidden layer
-        layer.setVisible(true, true);
-        checkLayerIsShown();
+        layer.setVisible(true, true, true);
+        checkShown(layer);
 
         History.undo("Show Layer");
-        checkLayerIsHidden();
+        checkHidden(layer);
 
         History.redo("Show Layer");
-        checkLayerIsShown();
+        checkShown(layer);
 
         History.assertNumEditsIs(2);
         iconUpdates.check(0, 0);
     }
 
-    private void checkLayerIsShown() {
+    @Test
+    public void isolating() {
+        checkShown(layer);
+        checkShown(layer2);
+
+        layer.isolate();
+
+        checkShown(layer);
+        checkHidden(layer2);
+
+        layer.isolate();
+
+        checkShown(layer);
+        checkShown(layer2);
+    }
+
+    private void checkShown(Layer layer) {
         assertThat(layer)
             .isVisible()
             .uiIsVisible();
     }
 
-    private void checkLayerIsHidden() {
+    private void checkHidden(Layer layer) {
         assertThat(layer)
             .isNotVisible()
             .uiIsNotVisible();
@@ -182,7 +199,7 @@ public class LayerTest {
         assertThat(layer).opacityIs(oldValue);
 
         // change the opacity of the layer
-        layer.setOpacity(newValue, true);
+        layer.setOpacity(newValue, true, true);
         assertThat(layer).opacityIs(newValue);
         var lastEdit = (LayerOpacityEdit) History.getLastEdit();
         assertSame(layer, lastEdit.getLayer());
@@ -201,7 +218,7 @@ public class LayerTest {
     public void changingTheBlendingMode() {
         assertThat(layer).blendingModeIs(NORMAL);
 
-        layer.setBlendingMode(DIFFERENCE, true);
+        layer.setBlendingMode(DIFFERENCE, true, true);
         assertThat(layer).blendingModeIs(DIFFERENCE);
 
         History.undo("Blending Mode Change");

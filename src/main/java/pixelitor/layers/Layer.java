@@ -156,9 +156,9 @@ public abstract class Layer implements Serializable, Debuggable {
         String duplicateName = compCopy ? this.name : Utils.createCopyName(name);
         Layer d = createTypeSpecificDuplicate(duplicateName);
 
-        d.setOpacity(getOpacity(), false);
-        d.setBlendingMode(getBlendingMode(), false);
-        d.setVisible(isVisible(), false);
+        d.setOpacity(getOpacity());
+        d.setBlendingMode(getBlendingMode());
+        d.setVisible(isVisible());
 
         if (duplicateMask) {
             duplicateMask(d, compCopy);
@@ -187,13 +187,20 @@ public abstract class Layer implements Serializable, Debuggable {
         return visible;
     }
 
-    public void setVisible(boolean newVisibility, boolean addToHistory) {
+    public void setVisible(boolean newVisibility) {
+        setVisible(newVisibility, false, false);
+    }
+
+    public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
         if (visible == newVisibility) {
             return;
         }
 
         visible = newVisibility;
-        comp.update();
+
+        if (update) {
+            comp.update();
+        }
 
         if (hasUI()) {
             ui.setOpenEye(newVisibility);
@@ -208,11 +215,19 @@ public abstract class Layer implements Serializable, Debuggable {
         return isVisible() ? "visible" : "hidden";
     }
 
+    public void isolate() {
+        comp.isolate(this, true);
+    }
+
     public float getOpacity() {
         return opacity;
     }
 
-    public void setOpacity(float newOpacity, boolean addToHistory) {
+    public void setOpacity(float newOpacity) {
+        setOpacity(newOpacity, false, false);
+    }
+
+    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
@@ -224,8 +239,12 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (hasUI()) {
             LayerBlendingModePanel.get().setOpacityFromModel(newOpacity);
+        }
+
+        if (update) {
             comp.update();
         }
+
         if (addToHistory) {
             History.add(new LayerOpacityEdit(this, prevOpacity));
         }
@@ -235,7 +254,11 @@ public abstract class Layer implements Serializable, Debuggable {
         return blendingMode;
     }
 
-    public void setBlendingMode(BlendingMode newMode, boolean addToHistory) {
+    public void setBlendingMode(BlendingMode newMode) {
+        setBlendingMode(newMode, false, false);
+    }
+
+    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
         if (blendingMode == newMode) {
             return;
         }
@@ -245,6 +268,9 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (hasUI()) {
             LayerBlendingModePanel.get().setBlendingModeFromModel(newMode);
+        }
+
+        if (update) {
             comp.update();
         }
 
@@ -254,8 +280,8 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     protected void copyBlendingFrom(Layer other) {
-        setBlendingMode(other.getBlendingMode(), false);
-        setOpacity(other.getOpacity(), false);
+        setBlendingMode(other.getBlendingMode());
+        setOpacity(other.getOpacity());
     }
 
     public String getName() {

@@ -23,6 +23,7 @@ import pixelitor.ThreadPool;
 import pixelitor.filters.Filter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 
@@ -31,10 +32,14 @@ import javax.swing.border.Border;
 import javax.swing.plaf.ButtonUI;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -46,8 +51,6 @@ import static pixelitor.utils.Threads.threadInfo;
 public class LayerButton extends JToggleButton implements LayerUI {
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png", "eye_open_dark.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png", "eye_closed_dark.png");
-
-    private static final String uiClassID = "LayerButtonUI";
 
     public static final Color UNSELECTED_COLOR = new Color(214, 217, 223);
     public static final Color SELECTED_COLOR = new Color(48, 76, 111);
@@ -210,7 +213,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
                         lateDragHandler = true;
                     }
 
-                    smartFilterCB = createVisibilityCheckBox();
+                    smartFilterCB = createVisibilityCheckBox(true);
                     smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
                     smartFilterCB.setSelected(so.smartFilterIsVisible());
                     smartFilterCB.addItemListener(e ->
@@ -324,24 +327,44 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void initLayerVisibilityCB() {
-        visibilityCB = createVisibilityCheckBox();
+        visibilityCB = createVisibilityCheckBox(false);
 
         // when loading pxc files, the layer might not be visible
         visibilityCB.setSelected(layer.isVisible());
-        visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.");
+        visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.<br><b>Alt-click</b> to isolate this layer.");
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
-        visibilityCB.addItemListener(e ->
-            layer.setVisible(visibilityCB.isSelected(), true));
+//        visibilityCB.addItemListener(e ->
+//            layer.setVisible(visibilityCB.isSelected(), true));
     }
 
-    private JCheckBox createVisibilityCheckBox() {
+    private JCheckBox createVisibilityCheckBox(boolean smartFilter) {
         JCheckBox cb = new JCheckBox(CLOSED_EYE_ICON) {
             @Override
             public void setUI(ButtonUI ui) {
                 super.setUI(ui);
                 // after an LF change, it's necessary to reset the border to null
                 setBorder(null);
+            }
+
+            @Override
+            protected void processMouseEvent(MouseEvent e) {
+                // isolating works after a theme-change only if the
+                // mouse event processing is overridden at this level
+
+                if (smartFilter) {
+                    super.processMouseEvent(e);
+                } else if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+                    //String s = Debug.debugMouseEvent(e);
+                    boolean altDown = (e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK;
+                    if (altDown) {
+                        layer.isolate();
+                    } else {
+                        // normal behaviour
+                        boolean newVisibility = !visibilityCB.isSelected();
+                        layer.setVisible(newVisibility, true, true);
+                    }
+                }
             }
         };
         cb.setRolloverIcon(CLOSED_EYE_ICON);
@@ -384,6 +407,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     public void setOpenEye(boolean newVisibility) {
         visibilityCB.setSelected(newVisibility);
+        layer.setVisible(newVisibility, true, true);
     }
 
     @Override
@@ -623,13 +647,36 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public String getUIClassID() {
-        return uiClassID;
+    public void updateUI() {
+        // don't use any UI
     }
 
     @Override
-    public void updateUI() {
-        setUI(new LayerButtonUI());
+    protected void paintComponent(Graphics g) {
+//        super.paintComponent(g);
+        if (!isSelected()) {
+            return;
+        }
+
+        Graphics2D g2 = (Graphics2D) g;
+
+        // save Graphics settings
+        Color oldColor = g.getColor();
+        Object oldAA = g2.getRenderingHint(KEY_ANTIALIASING);
+
+        // paint a rounded rectangle with the selection color
+        // on the selected layer button
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        if (Themes.getCurrent().isDark()) {
+            g.setColor(SELECTED_DARK_COLOR);
+        } else {
+            g.setColor(SELECTED_COLOR);
+        }
+        g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+
+        // restore Graphics settings
+        g.setColor(oldColor);
+        g2.setRenderingHint(KEY_ANTIALIASING, oldAA);
     }
 
     @Override

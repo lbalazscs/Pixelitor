@@ -71,7 +71,7 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
         try {
             boolean ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
             if (ctrlPressed) {
-                FilterAction action = FilterSearchPanel.showInDialog();
+                FilterAction action = FilterSearchPanel.showInDialog("Find Adjustment Layer");
                 if (action != null) {
                     Filter filter = action.createNewInstanceFilter();
                     addAdjustmentLayer(filter, filter.getName());

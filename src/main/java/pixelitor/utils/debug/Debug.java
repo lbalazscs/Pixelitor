@@ -31,6 +31,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.pen.Path;
 import pixelitor.utils.*;
 
@@ -525,7 +526,7 @@ public class Debug {
         textLayer.updateLayerName();
 
         SmartObject smartObject = new SmartObject(textLayer);
-        smartObject.setOpacity(0.2f, false);
+        smartObject.setOpacity(0.2f, false, true);
         new Composition.LayerAdder(comp).add(smartObject);
         if (filter instanceof FilterWithGUI guiFilter) {
             guiFilter.randomize();
@@ -538,5 +539,33 @@ public class Debug {
 
         smartObject.addSmartFilter(filter);
         smartObject.updateIconImage();
+    }
+
+    public static String debugMouseEvent(MouseEvent e) {
+        String action = switch (e.getID()) {
+            case MouseEvent.MOUSE_CLICKED -> "CLICKED";
+            case MouseEvent.MOUSE_PRESSED -> "PRESSED";
+            case MouseEvent.MOUSE_RELEASED -> "RELEASED";
+            case MouseEvent.MOUSE_DRAGGED -> "DRAGGED";
+            case MouseEvent.MOUSE_MOVED -> "MOVED";
+            case MouseEvent.MOUSE_WHEEL -> "WHEEL";
+            case MouseEvent.MOUSE_ENTERED -> "ENTERED";
+            case MouseEvent.MOUSE_EXITED -> "EXITED";
+            default -> throw new IllegalStateException("Unexpected value: " + e.getID());
+        };
+        return modifiersAsString(e) + action + String.format(" at (%d, %d), click count = %d, c = %s",
+            e.getX(), e.getY(), e.getClickCount(),
+            debugComponent(e.getComponent()));
+    }
+
+    private static String debugComponent(Component c) {
+        String descr = c.getClass().getSimpleName();
+        if (c instanceof View) {
+            descr += "(name = " + c.getName() + ")";
+        } else if (c instanceof ToolButton b) {
+            descr += "(name = " + b.getTool().getName() + ")";
+        }
+
+        return descr;
     }
 }

@@ -186,7 +186,7 @@ class LayerBlendingModesTest {
 
     private void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
         // check that the blending mode is working as expected
-        upperLayer.setBlendingMode(blendingMode, true);
+        upperLayer.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the upper layer should change nothing
@@ -237,7 +237,7 @@ class LayerBlendingModesTest {
 
         // test the blending mode with an OneColorFilter that outputs the upper color
         comp.addLayerInInitMode(alwaysUpperColorAdjustment);
-        alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true);
+        alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with white mask
@@ -256,7 +256,7 @@ class LayerBlendingModesTest {
 
         // test with text layer
         comp.addLayerInInitMode(upperColorTextLayer);
-        upperColorTextLayer.setBlendingMode(blendingMode, true);
+        upperColorTextLayer.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with white mask
@@ -276,7 +276,7 @@ class LayerBlendingModesTest {
         // merging down the upper layer should result in the expected color
         comp.addLayerInInitMode(upperLayer);
         assertThat(comp).numLayersIs(2);
-        upperLayer.setBlendingMode(blendingMode, true);
+        upperLayer.setBlendingMode(blendingMode, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
         comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(expectedColor);

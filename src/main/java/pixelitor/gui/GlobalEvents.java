@@ -19,7 +19,6 @@ package pixelitor.gui;
 
 import pixelitor.gui.utils.PAction;
 import pixelitor.tools.Tools;
-import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.Keys;
@@ -244,7 +243,7 @@ public class GlobalEvents {
     public static void assertDialogNestingIs(int expected) {
         if (numModalDialogs != expected) {
             throw new AssertionError("numNestedDialogs = " + numModalDialogs
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 
@@ -261,49 +260,15 @@ public class GlobalEvents {
     public static void registerDebugMouseWatching(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
-            String msg = null;
-            if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                msg = "CLICKED" + describe(e);
-            } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
-                msg = "DRAGGED" + describe(e);
-            } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
-                msg = "PRESSED" + describe(e);
-            } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
-                msg = "RELEASED" + describe(e);
-            } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
-                msg = "WHEEL" + describe(e);
-            }
-            if (msg != null) {
-                msg = Tools.getCurrent().getName() + ": "
-                      + Debug.modifiersAsString(e)
-                      + msg;
-                if (postEvents) {
-                    Events.postMouseEvent(msg);
-                } else {
-                    System.out.println(msg);
-                }
+            String msg = Tools.getCurrent().getName() + ": " + Debug.debugMouseEvent(e);
+            if (postEvents) {
+                Events.postMouseEvent(msg);
+            } else {
+                System.out.println(msg);
             }
         }, AWTEvent.MOUSE_EVENT_MASK
-            | AWTEvent.MOUSE_MOTION_EVENT_MASK
-            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-    }
-
-    private static String describe(MouseEvent e) {
-        return String.format(" at (%d, %d), click count = %d, c = %s",
-            e.getX(), e.getY(), e.getClickCount(),
-            getComponentDescription(e));
-    }
-
-    private static String getComponentDescription(MouseEvent e) {
-        Component c = e.getComponent();
-        String descr = c.getClass().getSimpleName();
-        if (c instanceof View) {
-            descr += "(name = " + c.getName() + ")";
-        } else if (c instanceof ToolButton b) {
-            descr += "(name = " + b.getTool().getName() + ")";
-        }
-
-        return descr;
+           | AWTEvent.MOUSE_MOTION_EVENT_MASK
+           | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
     public static void setKeyListener(KeyListener keyListener) {

@@ -221,12 +221,12 @@ public class OpenRaster {
                 layer.setTranslation(tx, ty);
             }
 
-            layer.setVisible(visibility, false);
+            layer.setVisible(visibility);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
-            layer.setBlendingMode(blendingMode, false);
+            layer.setBlendingMode(blendingMode);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity, false);
+            layer.setOpacity(opacity);
 
             comp.addLayerInInitMode(layer);
         }

@@ -952,15 +952,15 @@ public class RandomGUITest {
             if (f > opacity) {
                 // always increase
                 log("increase opacity for " + layer.getName());
-                layer.setOpacity(f, true);
+                layer.setOpacity(f, true, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
                 log("decrease opacity for " + layer.getName());
-                layer.setOpacity(f, true);
+                layer.setOpacity(f, true, true);
             }
         } else {
             log("change layer blending mode for " + layer.getName());
             BlendingMode randomBM = Rnd.chooseFrom(BlendingMode.values());
-            layer.setBlendingMode(randomBM, true);
+            layer.setBlendingMode(randomBM, true, true);
         }
     }
 
@@ -970,13 +970,13 @@ public class RandomGUITest {
         if (rand.nextBoolean()) {
             if (!visible) {
                 log("show layer");
-                layer.setVisible(true, true);
+                layer.setVisible(true, true, true);
             }
         } else {
             if (visible) {
                 if (rand.nextFloat() > 0.8) { // sometimes hide
                     log("hide layer");
-                    layer.setVisible(false, true);
+                    layer.setVisible(false, true, true);
                 }
             }
         }

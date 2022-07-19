@@ -398,7 +398,7 @@ public class WorkflowTest {
     private void renderCaustics() {
         pw.pressKey(VK_F3);
 
-        var searchDialog = app.findDialogByTitle("Filter Search");
+        var searchDialog = app.findDialogByTitle("Find Filter");
         searchDialog.releaseKey(VK_F3);
 
         searchDialog.textBox()

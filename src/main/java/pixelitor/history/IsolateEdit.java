@@ -14,57 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
-import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-/**
- * A PixelitorEdit that represents the hiding or showing of a layer
- */
-public class LayerVisibilityChangeEdit extends PixelitorEdit {
-    private Layer layer;
-    private final boolean newVisibility;
+public class IsolateEdit extends PixelitorEdit {
+    private final Layer layer;
+    private final boolean[] backupVisibility;
 
-    public LayerVisibilityChangeEdit(Composition comp, Layer layer, boolean newVisibility) {
-        super(newVisibility ? "Show Layer" : "Hide Layer", comp);
-
-        this.newVisibility = newVisibility;
+    public IsolateEdit(Composition comp, Layer layer, boolean[] backupVisibility) {
+        super("Isolate", comp);
         this.layer = layer;
+        this.backupVisibility = backupVisibility;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.setVisible(!newVisibility, false, true);
+        int numLayers = comp.getNumLayers();
+        for (int i = 0; i < numLayers; i++) {
+            comp.getLayer(i).setVisible(backupVisibility[i]);
+        }
+        comp.update();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.setVisible(newVisibility, false, true);
+        comp.isolate(layer, false);
     }
 
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-    }
-
-    @Override
-    public DebugNode createDebugNode(String key) {
-        DebugNode node = super.createDebugNode(key);
-
-        node.add(layer.createDebugNode());
-        node.addBoolean("new visibility", newVisibility);
-
-        return node;
+    public Layer getLayer() {
+        return layer;
     }
 }

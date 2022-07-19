@@ -239,6 +239,10 @@ public class History {
         return undoManager.getLastEdit();
     }
 
+    public static PixelitorEdit getEditToBeUndone() {
+        return undoManager.getEditToBeUndone();
+    }
+
     /**
      * If the last edit in the history is a FadeableEdit for the given
      * image layer, return it, otherwise return an empty Optional

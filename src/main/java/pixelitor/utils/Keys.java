@@ -35,6 +35,7 @@ public class Keys {
     private static final int ALT = InputEvent.ALT_DOWN_MASK;
     private static final int SHIFT = InputEvent.SHIFT_DOWN_MASK;
 
+//    public static final KeyStroke CTRL_A = getKeyStroke('A', CTRL);
     public static final KeyStroke CTRL_B = getKeyStroke('B', CTRL);
     public static final KeyStroke CTRL_C = getKeyStroke('C', CTRL);
     public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);

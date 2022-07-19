@@ -759,6 +759,36 @@ public class Composition implements Serializable {
             .count();
     }
 
+    public void isolateActive() {
+        isolate(activeLayer, true);
+    }
+
+    public void isolate(Layer target, boolean addHistory) {
+        if (addHistory) { // currently not undoing an "isolate"
+            // check if we should undo the last isolate
+            if (History.getEditToBeUndone() instanceof IsolateEdit isolateEdit) {
+                if (isolateEdit.getLayer() == target) {
+                    History.undo();
+                    return;
+                }
+            }
+
+            int numLayers = layerList.size();
+            boolean[] backupVisibility = new boolean[numLayers];
+            for (int i = 0; i < numLayers; i++) {
+                backupVisibility[i] = layerList.get(i).isVisible();
+            }
+            History.add(new IsolateEdit(this, target, backupVisibility));
+
+            Messages.showInStatusBar("Layer <b>" + target.getName() + "</b> was isolated.");
+        }
+
+        for (Layer layer : layerList) {
+            layer.setVisible(layer == target);
+        }
+        update();
+    }
+
     public void forEachLayer(Consumer<Layer> action) {
         layerList.forEach(action);
     }
