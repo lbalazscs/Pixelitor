@@ -117,7 +117,7 @@ public class Tools {
 
         setCurrentTool(newTool);
         newTool.toolStarted();
-        ToolSettingsPanelContainer.get().showSettingsFor(newTool);
+        ToolSettingsPanelContainer.get().showSettingsOf(newTool);
     }
 
     public static Tool[] getAll() {

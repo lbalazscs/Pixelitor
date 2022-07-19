@@ -74,7 +74,7 @@ public class Convolve extends FilterWithGUI {
     }
 
     @Override
-    public void randomizeSettings() {
+    public void randomize() {
         kernelMatrix = createRandomKernelMatrix(matrixOrder);
     }
 

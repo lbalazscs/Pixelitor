@@ -41,7 +41,7 @@ public class JHFocus extends ParametrizedFilter {
     private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 0, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
     private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 48);
-    private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
+    private final RangeParam numIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
     private final IntChoiceParam shape = BlurredShape.getChoices();
@@ -57,7 +57,7 @@ public class JHFocus extends ParametrizedFilter {
             softness,
             shape,
             blurRadius,
-            numberOfIterations,
+            numIterations,
             invert,
             hpSharpening
         );
@@ -74,7 +74,7 @@ public class JHFocus extends ParametrizedFilter {
             if (invert.isChecked()) {
                 return src;
             }
-            return new BoxBlurFilter(hRadius, vRadius, numberOfIterations.getValue(), getName()).filter(src, dest);
+            return new BoxBlurFilter(hRadius, vRadius, numIterations.getValue(), getName()).filter(src, dest);
         }
 
         if (src.getWidth() == 1 || src.getHeight() == 1) {
@@ -102,7 +102,7 @@ public class JHFocus extends ParametrizedFilter {
         filter.setHRadius(blurRadius.getValueAsFloat(0));
         filter.setVRadius(blurRadius.getValueAsFloat(1));
 
-        filter.setIterations(numberOfIterations.getValue());
+        filter.setIterations(numIterations.getValue());
         filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
         filter.setShape(shape.getValue());
 

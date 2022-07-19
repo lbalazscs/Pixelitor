@@ -60,7 +60,7 @@ public class PixelitorWindow extends JFrame {
     private Rectangle savedNormalBounds; // the saved one
 
     private PixelitorWindow() {
-        super(AppContext.getPixelitorWindowFixTitle());
+        super(AppContext.getMainWindowFixTitle());
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
@@ -280,9 +280,9 @@ public class PixelitorWindow extends JFrame {
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.calcTitle() + " - " + AppContext.getPixelitorWindowFixTitle();
+            title = comp.calcTitle() + " - " + AppContext.getMainWindowFixTitle();
         } else {
-            title = AppContext.getPixelitorWindowFixTitle();
+            title = AppContext.getMainWindowFixTitle();
         }
         setTitle(title);
     }

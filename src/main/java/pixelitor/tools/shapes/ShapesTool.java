@@ -252,7 +252,7 @@ public class ShapesTool extends DragTool {
         return typeModel.getSelectedItem();
     }
 
-    public ShapeTypeSettings getSettingsFor(ShapeType shapeType) {
+    public ShapeTypeSettings getSettingsOf(ShapeType shapeType) {
         if (!shapeType.hasSettings()) {
             return null;
         }
@@ -300,7 +300,7 @@ public class ShapesTool extends DragTool {
             ShapeType shapeType = styledShape.getShapeType();
             typeModel.setSelectedItem(shapeType);
             if (shapeType.hasSettings()) {
-                getSettingsFor(shapeType).loadStateFrom(styledShape.getShapeTypeSettings());
+                getSettingsOf(shapeType).loadStateFrom(styledShape.getShapeTypeSettings());
             }
 
             fillPaintModel.setSelectedItem(styledShape.getFillPaint());
@@ -728,7 +728,7 @@ public class ShapesTool extends DragTool {
         }
 
         ShapeType selectedType = getSelectedType();
-        ShapeTypeSettings settings = getSettingsFor(selectedType);
+        ShapeTypeSettings settings = getSettingsOf(selectedType);
         JPanel configPanel = settings.getConfigPanel();
         shapeSettingsDialog = new DialogBuilder()
             .title("Settings for " + selectedType)
@@ -902,7 +902,7 @@ public class ShapesTool extends DragTool {
         preset.put(ShapeType.PRESET_KEY, type.toString());
 
         if (type.hasSettings()) {
-            getSettingsFor(type).saveStateTo(preset);
+            getSettingsOf(type).saveStateTo(preset);
         }
 
         preset.put("Fill", getSelectedFillPaint().toString());
@@ -926,7 +926,7 @@ public class ShapesTool extends DragTool {
         typeModel.setSelectedItem(type);
 
         if (type.hasSettings()) {
-            getSettingsFor(type).loadStateFrom(preset);
+            getSettingsOf(type).loadStateFrom(preset);
         }
 
         fillPaintModel.setSelectedItem(

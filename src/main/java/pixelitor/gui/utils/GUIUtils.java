@@ -394,17 +394,6 @@ public final class GUIUtils {
         return cb;
     }
 
-    public static Font createFont(String family, int size, boolean bold, boolean italic) {
-        int style = Font.PLAIN;
-        if (bold) {
-            style |= Font.BOLD;
-        }
-        if (italic) {
-            style |= Font.ITALIC;
-        }
-        return new Font(family, style, size);
-    }
-
     public static void removeAllMouseListeners(JComponent c) {
         MouseListener[] mouseListeners = c.getMouseListeners();
         for (MouseListener mouseListener : mouseListeners) {

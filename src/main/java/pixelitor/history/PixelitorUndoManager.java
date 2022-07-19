@@ -281,7 +281,8 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
     public DebugNode createDebugNode() {
         var node = new DebugNode("edits", this);
 
-        for (int i = 0; i < getSize(); i++) {
+        int numEdits = getSize();
+        for (int i = 0; i < numEdits; i++) {
             PixelitorEdit edit = getElementAt(i);
             node.add(edit.createDebugNode());
         }
@@ -291,7 +292,8 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
 
     @VisibleForTesting
     public void dump() {
-        for (int i = 0; i < getSize(); i++) {
+        int numEdits = getSize();
+        for (int i = 0; i < numEdits; i++) {
             PixelitorEdit edit = getElementAt(i);
             System.out.println(edit);
         }

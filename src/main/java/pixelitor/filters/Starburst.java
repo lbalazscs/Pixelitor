@@ -84,9 +84,9 @@ public class Starburst extends ParametrizedFilter {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
-        int numberOfRays = numRaysParam.getValue();
+        int numRays = numRaysParam.getValue();
 
-        double sliceWidthAngle = Math.PI / numberOfRays;
+        double sliceWidthAngle = Math.PI / numRays;
         double sliceAngle = rotate.getValueInRadians();
 
         double radius = width + height; // should be enough even if the center is outside the image
@@ -94,7 +94,7 @@ public class Starburst extends ParametrizedFilter {
 
         Color[] rayColors = rayColorsParam.getColors();
         int numRayColors = rayColors.length;
-        for (int i = 0; i < numberOfRays; i++) {
+        for (int i = 0; i < numRays; i++) {
             var slice = new Path2D.Double();
             slice.moveTo(cx, cy);
 

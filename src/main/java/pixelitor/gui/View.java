@@ -196,7 +196,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         oldComp.setView(null);
 
         if (isActive()) {
-            LayersContainer.showLayersFor(this);
+            LayersContainer.showLayersOf(this);
             Layers.activeCompChanged(newComp, false);
             newMaskViewMode.activate(this, newComp.getActiveLayer());
             repaintNavigator(true);
@@ -295,7 +295,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void showLayersUI() {
-        LayersContainer.showLayersFor(this);
+        LayersContainer.showLayersOf(this);
     }
 
     public double getScaling() {

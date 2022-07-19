@@ -73,7 +73,7 @@ public enum AppContext {
         return s;
     }
 
-    public static String getPixelitorWindowFixTitle() {
+    public static String getMainWindowFixTitle() {
         assert calledOnEDT() : threadInfo();
 
         return fixTitle.get();

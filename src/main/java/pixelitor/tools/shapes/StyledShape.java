@@ -279,7 +279,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         origDrag = drag;
 
         // during the initial drag it can use the tool's settings directly
-        ShapeTypeSettings settings = Tools.SHAPES.getSettingsFor(shapeType);
+        ShapeTypeSettings settings = Tools.SHAPES.getSettingsOf(shapeType);
         origShape = shapeType.createShape(drag, settings);
 
         // since there is no transform box yet
@@ -316,7 +316,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private void reloadTypeSettings(ShapesTool tool) {
         if (shapeType.hasSettings()) {
-            typeSettings = tool.getSettingsFor(shapeType).copyState();
+            typeSettings = tool.getSettingsOf(shapeType).copyState();
         } else {
             typeSettings = null;
         }
@@ -353,7 +353,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     private void recreateShape(ShapesTool tool, TransformBox box, String editName) {
         assert origDrag != null : "no origDrag, edit = " + editName;
 
-        ShapeTypeSettings settings = tool.getSettingsFor(shapeType);
+        ShapeTypeSettings settings = tool.getSettingsOf(shapeType);
         if (shapeType.isDirectional()) {
             // make sure that the new directional shape is drawn
             // along the direction of the existing box

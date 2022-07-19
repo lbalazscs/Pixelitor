@@ -38,7 +38,7 @@ public class JHBoxBlur extends ParametrizedFilter {
     private static final long serialVersionUID = -3687029298672175297L;
 
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 0, 100);
-    private final RangeParam numberOfIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
+    private final RangeParam numIterations = new RangeParam("Iterations (Quality)", 1, 3, 10);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private BoxBlurFilter filter;
@@ -48,7 +48,7 @@ public class JHBoxBlur extends ParametrizedFilter {
 
         setParams(
             radius,
-            numberOfIterations,
+            numIterations,
             hpSharpening
         );
     }
@@ -71,7 +71,7 @@ public class JHBoxBlur extends ParametrizedFilter {
 
         filter.setHRadius(hRadius);
         filter.setVRadius(vRadius);
-        filter.setIterations(numberOfIterations.getValue());
+        filter.setIterations(numIterations.getValue());
         filter.setPremultiplyAlpha(!src.isAlphaPremultiplied() && ImageUtils.hasPackedIntArray(src));
 
         dest = filter.filter(src, dest);

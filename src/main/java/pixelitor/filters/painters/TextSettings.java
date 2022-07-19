@@ -246,8 +246,7 @@ public class TextSettings implements Serializable, Debuggable {
         preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
         preset.putInt(PRESET_KEY_VER_ALIGN, verticalAlignment.ordinal());
 
-        FontInfo fontInfo = new FontInfo(font);
-        fontInfo.saveStateTo(preset);
+        new FontInfo(font).saveStateTo(preset);
 
         areaEffects.saveStateTo(preset);
 
@@ -261,8 +260,7 @@ public class TextSettings implements Serializable, Debuggable {
         horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
         verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
 
-        FontInfo fontInfo = new FontInfo(preset);
-        font = fontInfo.createFont();
+        font = new FontInfo(preset).createFont();
 
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
@@ -278,8 +276,13 @@ public class TextSettings implements Serializable, Debuggable {
             return;
         }
         String fontName = font.getName();
+
         int index = Arrays.binarySearch(Utils.getAvailableFontNames(), fontName);
         if (index < 0) {
+            if (fontName.equals("Default")) {
+                // TODO for some reason the "all smart filters" test file has this
+                return;
+            }
             EventQueue.invokeLater(() -> Messages.showError("Font Not Found",
                 "<html>The font <b>" + fontName + "</b> was not found on this computer." +
                 "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>."));

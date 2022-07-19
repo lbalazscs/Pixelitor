@@ -38,7 +38,7 @@ public class RandomFilter extends FilterWithGUI {
     }
 
     @Override
-    public void randomizeSettings() {
+    public void randomize() {
         throw new UnsupportedOperationException("this should not be called");
     }
 

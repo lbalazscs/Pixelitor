@@ -54,7 +54,7 @@ public class ToolSettingsPanelContainer extends JPanel {
         ToolSettingsPanelContainer.instance = instance;
     }
 
-    public void showSettingsFor(Tool tool) {
+    public void showSettingsOf(Tool tool) {
         CardLayout cl = (CardLayout) getLayout();
         cl.show(this, tool.getShortName());
     }

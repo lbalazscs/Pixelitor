@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,13 +55,13 @@ public class TrackedIO {
                 if (ios != null) {
                     writeToIOS(img, ios, formatName, tracker, customizer);
                 } else {
-                    throwNoIOSErrorFor(file);
+                    throwCouldNotSaveException(file);
                 }
             }
         }
     }
 
-    private static void throwNoIOSErrorFor(File file) throws IOException {
+    private static void throwCouldNotSaveException(File file) throws IOException {
         // createImageOutputStream swallows the original IO exception
         // for IO errors like "Access is denied" and returns null,
         // therefore throw a generic exception

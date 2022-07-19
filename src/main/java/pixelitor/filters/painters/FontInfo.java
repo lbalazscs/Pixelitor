@@ -18,7 +18,6 @@
 package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.UserPreset;
-import pixelitor.gui.utils.GUIUtils;
 
 import java.awt.Font;
 import java.awt.font.TextAttribute;
@@ -58,9 +57,9 @@ public class FontInfo {
             underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
             ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
 
-            Float trackingSetting = (Float) map.get(TRACKING);
-            if (trackingSetting != null) {
-                tracking = (int) (100 * trackingSetting);
+            Float trackingValue = (Float) map.get(TRACKING);
+            if (trackingValue != null) {
+                tracking = (int) (100 * trackingValue);
             }
         }
     }
@@ -108,7 +107,7 @@ public class FontInfo {
     }
 
     public Font createFont() {
-        Font font = GUIUtils.createFont(name, size, bold, italic);
+        Font font = createFont(name, size, bold, italic);
 
         Map<TextAttribute, Object> map = new HashMap<>();
         Boolean strikeThroughSetting = Boolean.FALSE;
@@ -138,6 +137,17 @@ public class FontInfo {
         map.put(TRACKING, tracking / 100.0f);
 
         return font.deriveFont(map);
+    }
+
+    private static Font createFont(String family, int size, boolean bold, boolean italic) {
+        int style = Font.PLAIN;
+        if (bold) {
+            style |= Font.BOLD;
+        }
+        if (italic) {
+            style |= Font.ITALIC;
+        }
+        return new Font(family, style, size);
     }
 
     public boolean hasStrikeThrough() {

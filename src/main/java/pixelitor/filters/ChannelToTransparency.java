@@ -25,12 +25,16 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.LuminanceLookup;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Makes pixels transparent proportionally to a channel value
  */
 public class ChannelToTransparency extends ParametrizedFilter {
     public static final String NAME = "Channel to Transparency";
+
+    @Serial
+    private static final long serialVersionUID = -8354668803636534983L;
 
     private static final int LUMINOSITY = 1;
     private static final int RED = 2;
@@ -97,7 +101,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
     }
 
     @Override
-    public void randomizeSettings() {
+    public void randomize() {
         // no settings
     }
 

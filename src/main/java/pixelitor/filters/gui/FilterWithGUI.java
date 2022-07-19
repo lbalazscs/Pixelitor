@@ -45,7 +45,7 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      */
     public abstract FilterGUI createGUI(Filterable layer, boolean reset);
 
-    public abstract void randomizeSettings();
+    public abstract void randomize();
 
     public JMenuBar getMenuBar() {
         boolean addPresets = canHaveUserPresets() || hasBuiltinPresets();

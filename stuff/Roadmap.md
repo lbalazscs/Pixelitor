@@ -5,8 +5,8 @@ The purpose of this document is to outline possible major future changes to Pixe
 ## Non-destructive Editing
 
 - A smart object should be able to have more than one smart filter.
-- Smart filters should be able to have their own layer masks.
-- Adjustment layers should be implemented.
+- Smart filters should be able to have their own layer mask, blending mode and opacity.
+- Adjustment layers should be implemented (done in the latest GitHub version).
 - A shape layer should be able to contain more than one shape.
 - At the moment, there are very few shapes to choose from, and they are encoded in the PXC files in a way that limits future extensibility. The PXC-encoding of the shapes should be changed to allow extending it to multiple shapes.
 
@@ -48,6 +48,8 @@ Pixelitor should be usable from the command line, without starting the GUI. The 
 The [Flat Look and Feel](https://github.com/JFormDesigner/FlatLaf) could be a theme option. This is how Pixelitor would look with it:
 
 ![Flat Dark Theme](roadmap_images/pixelitor_flat.png)
+
+(This is already implemented in the latest GitHub version)
 
 ## Seeds in Presets
 

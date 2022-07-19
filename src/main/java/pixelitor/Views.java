@@ -595,6 +595,7 @@ public class Views {
     }
 
     public static void appActivated() {
+        // Check if any views need to be automatically reloaded
         CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
         for (View view : views) {
             // make sure that the next reload is not started

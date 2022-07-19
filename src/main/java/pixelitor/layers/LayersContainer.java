@@ -70,20 +70,20 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     private static JPanel initSouthPanel() {
         JPanel southPanel = new JPanel(new FlowLayout(LEFT, 2, 0));
 
-        southPanel.add(new SouthButton(AddNewLayerAction.INSTANCE, "addLayer"));
-        southPanel.add(new SouthButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
-        southPanel.add(new SouthButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
-        southPanel.add(new SouthButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
-        southPanel.add(new SouthButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
+        southPanel.add(new LayerActionButton(AddNewLayerAction.INSTANCE, "addLayer"));
+        southPanel.add(new LayerActionButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
+        southPanel.add(new LayerActionButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
+        southPanel.add(new LayerActionButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
+        southPanel.add(new LayerActionButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
         if (AppContext.enableExperimentalFeatures) {
-            southPanel.add(new SouthButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+            southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 
         return southPanel;
     }
 
-    private void setLayersPanel(LayersPanel newLayersPanel) {
+    private void changeLayersPanel(LayersPanel newLayersPanel) {
         if (layersPanel == newLayersPanel) {
             return;
         }
@@ -110,8 +110,8 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         return INSTANCE.getParent() != null;
     }
 
-    public static void showLayersFor(View view) {
-        INSTANCE.setLayersPanel(view.getLayersPanel());
+    public static void showLayersOf(View view) {
+        INSTANCE.changeLayersPanel(view.getLayersPanel());
     }
 
     @VisibleForTesting
@@ -132,10 +132,10 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         return INSTANCE.getParent() == parent;
     }
 
-    static class SouthButton extends JButton {
+    static class LayerActionButton extends JButton {
         private static final Dimension SIZE = new Dimension(44, 28);
 
-        public SouthButton(Action a, String name) {
+        public LayerActionButton(Action a, String name) {
             super(a);
             setHideActionText(true);
             setName(name);

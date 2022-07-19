@@ -528,7 +528,7 @@ public class Debug {
         smartObject.setOpacity(0.2f, false);
         new Composition.LayerAdder(comp).add(smartObject);
         if (filter instanceof FilterWithGUI guiFilter) {
-            guiFilter.randomizeSettings();
+            guiFilter.randomize();
             smartObject.startPreviewing();
             smartObject.startFilter(filter, PREVIEWING);
             smartObject.onFilterDialogAccepted(filter.getName());

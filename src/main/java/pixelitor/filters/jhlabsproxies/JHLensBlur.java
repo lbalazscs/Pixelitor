@@ -35,7 +35,7 @@ public class JHLensBlur extends ParametrizedFilter {
     private static final long serialVersionUID = 788524159732735827L;
 
     private final RangeParam amount = new RangeParam("Amount (Radius)", 1, 2, 101);
-    private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
+    private final RangeParam numSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
     private final RangeParam bloomFactor = new RangeParam("Bloom Factor", 1, 1, 8);
     private final RangeParam bloomThreshold = new RangeParam("Bloom Threshold", 0, 200, 255);
 
@@ -48,7 +48,7 @@ public class JHLensBlur extends ParametrizedFilter {
 
         setParams(
             amount.withDecimalPlaces(1),
-            numberOfSides,
+            numSides,
             bloomFactor,
             bloomThreshold,
             hpSharpening
@@ -62,7 +62,7 @@ public class JHLensBlur extends ParametrizedFilter {
         }
 
         filter.setRadius(amount.getValueAsFloat());
-        filter.setSides(numberOfSides.getValue());
+        filter.setSides(numSides.getValue());
         filter.setBloom(bloomFactor.getValueAsFloat());
         filter.setBloomThreshold(bloomThreshold.getValueAsFloat());
 

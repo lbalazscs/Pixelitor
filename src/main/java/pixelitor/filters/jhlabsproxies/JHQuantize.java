@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Quantize filter based on the JHLabs QuantizeFilter
@@ -30,7 +31,10 @@ import java.awt.image.BufferedImage;
 public class JHQuantize extends ParametrizedFilter {
     public static final String NAME = "Quantize";
 
-    private final RangeParam numberOfColors = new RangeParam("Number of Colors", 2, 2, 256);
+    @Serial
+    private static final long serialVersionUID = 8187472652067667061L;
+
+    private final RangeParam numColors = new RangeParam("Number of Colors", 2, 2, 256);
     private final BooleanParam dither = new BooleanParam("Dither", false);
     private final BooleanParam serpentine = new BooleanParam("Dither with Serpentine", false);
 
@@ -43,7 +47,7 @@ public class JHQuantize extends ParametrizedFilter {
         dither.setupEnableOtherIfChecked(serpentine);
 
         setParams(
-            numberOfColors,
+            numColors,
             dither,
             serpentine
         );
@@ -55,7 +59,7 @@ public class JHQuantize extends ParametrizedFilter {
             filter = new QuantizeFilter(NAME);
         }
 
-        filter.setNumColors(numberOfColors.getValue());
+        filter.setNumColors(numColors.getValue());
         filter.setDither(dither.isChecked());
         filter.setSerpentine(serpentine.isChecked());
 
