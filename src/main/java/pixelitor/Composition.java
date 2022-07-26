@@ -70,7 +70,7 @@ import static pixelitor.utils.Utils.createCopyName;
 /**
  * An image composition consisting of multiple layers
  */
-public class Composition implements Serializable {
+public class Composition implements Serializable, ImageSource {
     // serialization is used for saving in the pxc format
     @Serial
     private static final long serialVersionUID = 1L;
@@ -572,7 +572,7 @@ public class Composition implements Serializable {
         History.add(new NotUndoableEdit("Flatten Image", this));
     }
 
-    public void addAllLayersToGUI() {
+    public void addAllLayersToUI() {
         assert classInvariant();
 
         Layer activeLayerBefore = activeLayer;
@@ -583,7 +583,7 @@ public class Composition implements Serializable {
         assert activeLayer == activeLayerBefore;
 
         // correct the selection
-        LayerButton ui = (LayerButton) activeLayer.getUI();
+        LayerGUI ui = (LayerGUI) activeLayer.getUI();
         if (!ui.isSelected()) {
             ui.setSelected(true);
         }
@@ -592,6 +592,15 @@ public class Composition implements Serializable {
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
         view.addLayerToGUI(layer, layerIndex);
+    }
+
+    public void removeAllLayersFromUI() {
+        for (Layer layer : layerList) {
+            LayerUI ui = layer.getUI();
+            if (ui != null) {
+                view.removeLayerUI(ui);
+            }
+        }
     }
 
     public boolean canMergeDown(Layer layer) {
@@ -1052,7 +1061,7 @@ public class Composition implements Serializable {
         layerList.remove(oldIndex);
         layerList.add(newIndex, layer);
 
-        view.changeLayerButtonOrder(oldIndex, newIndex);
+        view.changeLayerGUIOrder(oldIndex, newIndex);
         update();
         Layers.layerOrderChanged(this);
 
@@ -1439,6 +1448,11 @@ public class Composition implements Serializable {
             compositeImage = calculateCompositeImage();
         }
         return compositeImage;
+    }
+
+    @Override
+    public BufferedImage getImage() {
+        return getCompositeImage();
     }
 
     /**

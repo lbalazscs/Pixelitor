@@ -72,8 +72,18 @@ public class LayerTest {
             {ImageLayer.class, WithMask.YES},
             {TextLayer.class, WithMask.NO},
             {TextLayer.class, WithMask.YES},
+            {ShapesLayer.class, WithMask.NO},
+            {ShapesLayer.class, WithMask.YES},
+            {GradientFillLayer.class, WithMask.NO},
+            {GradientFillLayer.class, WithMask.YES},
+            {ColorFillLayer.class, WithMask.NO},
+            {ColorFillLayer.class, WithMask.YES},
+            {SmartObject.class, WithMask.NO},
+            {SmartObject.class, WithMask.YES},
             {AdjustmentLayer.class, WithMask.NO},
             {AdjustmentLayer.class, WithMask.YES},
+            {SmartFilter.class, WithMask.NO},
+            {SmartFilter.class, WithMask.YES},
         });
     }
 

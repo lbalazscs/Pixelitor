@@ -34,7 +34,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
@@ -443,7 +443,7 @@ public class RandomGUITest {
 
         Filter filter;
         if (preferredFilter == null) {
-            filter = FilterUtils.getRandomFilter(f ->
+            filter = Filters.getRandomFilter(f ->
                 (!(f instanceof RandomFilter)
                  && !(f instanceof FlowField))
             );
@@ -1125,7 +1125,7 @@ public class RandomGUITest {
             assert preferredTweenFilter.getParamSet().canBeAnimated();
             return preferredTweenFilter;
         }
-        FilterAction[] filterActions = FilterUtils.getAnimationFilters();
+        FilterAction[] filterActions = Filters.getAnimationFilters();
         FilterAction filterAction = Rnd.chooseFrom(filterActions);
         return (ParametrizedFilter) filterAction.getFilter();
     }

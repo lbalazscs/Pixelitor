@@ -35,7 +35,7 @@ import static java.util.Comparator.comparing;
 /**
  * A utility class with static methods for managing filters
  */
-public class FilterUtils {
+public class Filters {
     private static final List<FilterAction> allFilters = new ArrayList<>();
 
     // a performance optimization
@@ -43,7 +43,7 @@ public class FilterUtils {
 
     private static Filter lastFilter = null;
 
-    private FilterUtils() {
+    private Filters() {
     }
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
@@ -92,7 +92,7 @@ public class FilterUtils {
         if (lastFilter instanceof Fade) {
             return;
         }
-        FilterUtils.lastFilter = lastFilter;
+        Filters.lastFilter = lastFilter;
         RepeatLast.update(lastFilter);
     }
 
@@ -157,5 +157,14 @@ public class FilterUtils {
             }
         }
         problems.forEach(System.out::println);
+    }
+
+    public static FilterAction getFilterActionByName(String filterName) {
+        for (FilterAction filter : allFilters) {
+            if (filter.getName().equals(filterName)) {
+                return filter;
+            }
+        }
+        return null;
     }
 }

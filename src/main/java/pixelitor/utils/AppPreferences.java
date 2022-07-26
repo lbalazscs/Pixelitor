@@ -33,7 +33,7 @@ import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileFormat;
-import pixelitor.layers.LayerButtonLayout;
+import pixelitor.layers.LayerGUILayout;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.tools.BrushTool;
@@ -332,11 +332,11 @@ public final class AppPreferences {
     }
 
     public static int loadThumbSize() {
-        return mainNode.getInt(THUMB_SIZE_KEY, LayerButtonLayout.SMALL_THUMB_SIZE);
+        return mainNode.getInt(THUMB_SIZE_KEY, LayerGUILayout.SMALL_THUMB_SIZE);
     }
 
     private static void saveThumbSize() {
-        mainNode.putInt(THUMB_SIZE_KEY, LayerButtonLayout.getThumbSize());
+        mainNode.putInt(THUMB_SIZE_KEY, LayerGUILayout.getThumbSize());
     }
 
     public static GuideStyle getGuideStyle() {

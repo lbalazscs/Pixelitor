@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,10 @@ import java.awt.event.FocusEvent;
  * A JTextField for layer names that becomes editable only if double-clicked
  */
 public class LayerNameEditor extends JTextField {
-    private final LayerButton layerButton;
+    private final LayerGUI layerGUI;
 
-    public LayerNameEditor(LayerButton layerButton) {
-        super(layerButton.getLayer().getName());
+    public LayerNameEditor(LayerGUI layerGUI) {
+        super(layerGUI.getLayer().getName());
 
         // TODO setting up a tool tip would show an
         // annoying GRAY "disabled tooltip"
@@ -40,7 +40,7 @@ public class LayerNameEditor extends JTextField {
 
         // setToolTipText("Double-click to rename this layer.");
 
-        this.layerButton = layerButton;
+        this.layerGUI = layerGUI;
         disableEditing();
 
         addFocusListener(new FocusAdapter() {
@@ -56,7 +56,7 @@ public class LayerNameEditor extends JTextField {
 
     private void finishEditing() {
         disableEditing();
-        layerButton.getLayer().setName(getText(), true);
+        layerGUI.getLayer().setName(getText(), true);
     }
 
     public void enableEditing() {
@@ -72,7 +72,7 @@ public class LayerNameEditor extends JTextField {
         setEditable(false);
     }
 
-    public LayerButton getLayerButton() {
-        return layerButton;
+    public LayerGUI getLayerGUI() {
+        return layerGUI;
     }
 }

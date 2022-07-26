@@ -266,7 +266,7 @@ public class OpenRaster {
 
     private static String extractString(InputStream is) {
         String retVal;
-        try (Scanner s = new Scanner(is, UTF_8.name()).useDelimiter("\\A")) {
+        try (Scanner s = new Scanner(is, UTF_8).useDelimiter("\\A")) {
             retVal = s.hasNext() ? s.next() : "";
         }
         return retVal;

@@ -38,7 +38,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
+import static pixelitor.layers.LayerGUILayout.thumbSize;
 
 public class GradientFillLayer extends ContentLayer {
     @Serial
@@ -48,7 +48,7 @@ public class GradientFillLayer extends ContentLayer {
     private transient Gradient backupGradient;
     private transient BufferedImage cachedImage;
 
-    private GradientFillLayer(Composition comp, String name) {
+    public GradientFillLayer(Composition comp, String name) {
         super(comp, name);
     }
 

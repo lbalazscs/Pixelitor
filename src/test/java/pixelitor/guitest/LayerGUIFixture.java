@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,24 +19,24 @@ package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.fixture.JToggleButtonFixture;
-import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerGUI;
 
 /**
- * Helper class for testing {@link LayerButton} objects in
+ * Helper class for testing {@link LayerGUI} objects in
  * AssertJ Swing tests
  */
-public class LayerButtonFixture extends JToggleButtonFixture {
-    public LayerButtonFixture(Robot robot, LayerButton target) {
+public class LayerGUIFixture extends JToggleButtonFixture {
+    public LayerGUIFixture(Robot robot, LayerGUI target) {
         super(robot, target);
     }
 
     public void setOpenEye(boolean b) {
-        EDT.run(() -> ((LayerButton) target()).setOpenEye(b));
+        EDT.run(() -> ((LayerGUI) target()).setOpenEye(b));
         robot().waitForIdle();
     }
 
     private boolean isEyeOpen() {
-        return EDT.call(() -> ((LayerButton) target()).isEyeOpen());
+        return EDT.call(() -> ((LayerGUI) target()).isEyeOpen());
     }
 
     public void requireOpenEye() {

@@ -29,16 +29,17 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * The layout manager for a {@link LayerButton}
+ * The layout manager for a {@link LayerGUI}
  */
-public class LayerButtonLayout implements LayoutManager {
+public class LayerGUILayout implements LayoutManager {
     private Component nameEditor;
 
     private JCheckBox checkBox;
     private JLabel layerLabel;
     private JLabel maskLabel;
-    private JLabel sfLabel;
-    private JCheckBox sfCheckBox;
+    private JPanel sfPanel;
+//    private JLabel sfLabel;
+//    private JCheckBox sfCheckBox;
 
     private final boolean layerIconShowsThumbnail;
 
@@ -46,8 +47,7 @@ public class LayerButtonLayout implements LayoutManager {
     public static final String LAYER = "LAYER";
     public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
-    public static final String SMART_FILTER_LABEL = "SF_LABEL";
-    public static final String SMART_FILTER_CHECKBOX = "SF_CHECKBOX";
+    public static final String SMART_FILTERS = "FILTERS";
 
     // the size of the icon
     private static final int CHECKBOX_WIDTH = 24;
@@ -70,7 +70,7 @@ public class LayerButtonLayout implements LayoutManager {
         setStaticThumbSize(AppPreferences.loadThumbSize());
     }
 
-    public LayerButtonLayout(Layer layer) {
+    public LayerGUILayout(Layer layer) {
         layerIconShowsThumbnail = layer.hasIconThumbnail();
         thumbSizeChanged(thumbSize);
     }
@@ -81,7 +81,7 @@ public class LayerButtonLayout implements LayoutManager {
         } else {
             height = SMALL_THUMB_SIZE + 2 * GAP;
         }
-        labelSize = newThumbSize + 2 * LayerButton.BORDER_WIDTH;
+        labelSize = newThumbSize + 2 * LayerGUI.BORDER_WIDTH;
     }
 
     @Override
@@ -92,8 +92,7 @@ public class LayerButtonLayout implements LayoutManager {
                 case LAYER -> layerLabel = (JLabel) c;
                 case MASK -> maskLabel = (JLabel) c;
                 case NAME_EDITOR -> nameEditor = c;
-                case SMART_FILTER_LABEL -> sfLabel = (JLabel) c;
-                case SMART_FILTER_CHECKBOX -> sfCheckBox = (JCheckBox) c;
+                case SMART_FILTERS -> sfPanel = (JPanel) c;
                 default -> throw new IllegalStateException();
             }
         }
@@ -105,13 +104,9 @@ public class LayerButtonLayout implements LayoutManager {
             synchronized (c.getTreeLock()) {
                 maskLabel = null;
             }
-        } else if (c == sfLabel) {
+        } else if (c == sfPanel) {
             synchronized (c.getTreeLock()) {
-                sfLabel = null;
-            }
-        } else if (c == sfCheckBox) {
-            synchronized (c.getTreeLock()) {
-                sfCheckBox = null;
+                sfPanel = null;
             }
         } else {
             throw new IllegalStateException();
@@ -119,10 +114,11 @@ public class LayerButtonLayout implements LayoutManager {
     }
 
     public int getPreferredHeight() {
-        if (sfLabel == null) {
+        if (sfPanel == null) {
             return height;
         } else {
-            return height + 26;
+            // TODO the preferred height is 26 * num_filters?
+            return height + sfPanel.getPreferredSize().height;
         }
     }
 
@@ -144,16 +140,16 @@ public class LayerButtonLayout implements LayoutManager {
             int startX = GAP;
 
             // lay out the checkbox
-            Dimension preferred = checkBox.getPreferredSize();
-            if (preferred.width != CHECKBOX_WIDTH || preferred.height != CHECKBOX_HEIGHT) {
-                throw new IllegalStateException("width = " + preferred.width + ", height = " + preferred.height);
+            Dimension cbPrefSize = checkBox.getPreferredSize();
+            if (cbPrefSize.width != CHECKBOX_WIDTH || cbPrefSize.height != CHECKBOX_HEIGHT) {
+                throw new IllegalStateException("width = " + cbPrefSize.width + ", height = " + cbPrefSize.height);
             }
             checkBox.setBounds(startX, (height - CHECKBOX_HEIGHT) / 2, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
-            startX += (CHECKBOX_WIDTH + GAP - LayerButton.BORDER_WIDTH);
+            startX += (CHECKBOX_WIDTH + GAP - LayerGUI.BORDER_WIDTH);
 
             // lay out the layer icon
             int layerIconStartX = startX;
-            int labelStartY = GAP - LayerButton.BORDER_WIDTH;
+            int labelStartY = GAP - LayerGUI.BORDER_WIDTH;
             if (layerIconShowsThumbnail) {
                 layerLabel.setBounds(startX, labelStartY, labelSize, labelSize);
                 startX += labelSize;
@@ -179,11 +175,13 @@ public class LayerButtonLayout implements LayoutManager {
             int adjustment = isNimbus ? 2 : 0;
             nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
 
-            if (sfLabel != null) {
-                sfCheckBox.setBounds(layerIconStartX - adjustment, height, CHECKBOX_WIDTH, CHECKBOX_HEIGHT);
-                int fullCBSize = CHECKBOX_WIDTH + GAP;
-                remainingWidth = parent.getWidth() - layerIconStartX - fullCBSize;
-                sfLabel.setBounds(layerIconStartX + fullCBSize, height, remainingWidth, CHECKBOX_HEIGHT);
+            if (sfPanel != null) {
+                Dimension sfSize = sfPanel.getPreferredSize();
+                int sfX = layerIconStartX - adjustment;
+                int sfY = height;
+                int sfWidth = parent.getWidth() - sfX;
+                int sfHeight = sfSize.height;
+                sfPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
             }
         }
     }

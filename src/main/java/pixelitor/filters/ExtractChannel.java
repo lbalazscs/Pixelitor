@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.FastLookupOp;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -103,7 +103,7 @@ public class ExtractChannel extends ParametrizedFilter {
             };
             default -> throw new IllegalStateException("should not het here");
         };
-        return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
+        return Filters.runRGBPixelOp(rgbOp, src, dest);
     }
 
     private static BufferedImage colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {

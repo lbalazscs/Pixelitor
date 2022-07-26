@@ -64,7 +64,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private double scaling = 1.0f;
 
     private ViewContainer viewContainer = null;
-    private LayersPanel layersPanel;
+    private final LayersPanel layersPanel;
     private MaskViewMode maskViewMode;
     private Navigator navigator;
 
@@ -190,9 +190,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         newComp.createLayerUIs();
         canvas = newComp.getCanvas();
 
-        // recreate the layer buttons
-        layersPanel = new LayersPanel();
-        newComp.addAllLayersToGUI();
+        // recreate the layer GUIs
+//        layersPanel = new LayersPanel();
+        newComp.addAllLayersToUI();
+        oldComp.removeAllLayersFromUI();
         oldComp.setView(null);
 
         if (isActive()) {
@@ -318,7 +319,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void removeLayerUI(LayerUI ui) {
-        layersPanel.removeLayerButton((LayerButton) ui);
+        layersPanel.removeLayerGUI((LayerGUI) ui);
     }
 
     public void thumbSizeChanged(int newThumbSize) {
@@ -335,8 +336,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return comp.getName();
     }
 
-    public void changeLayerButtonOrder(int oldIndex, int newIndex) {
-        layersPanel.changeLayerButtonOrder(oldIndex, newIndex);
+    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
+        layersPanel.changeLayerGUIOrder(oldIndex, newIndex);
     }
 
     @Override
@@ -784,15 +785,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert calledOnEDT() : threadInfo();
 
         // can be cast outside unit tests
-        LayerButton layerButton = (LayerButton) newLayer.createUI();
+        LayerGUI layerGUI = (LayerGUI) newLayer.createUI();
 
         try {
             // otherwise loading multi-layer files makes the comp dirty
-            layerButton.setUserInteraction(false);
-            layersPanel.addLayerButton(layerButton, newLayerIndex);
-            layerButton.updateSelectionState();
+            layerGUI.setUserInteraction(false);
+            layersPanel.addLayerGUI(layerGUI, newLayerIndex);
+            layerGUI.updateSelectionState();
         } finally {
-            layerButton.setUserInteraction(true);
+            layerGUI.setUserInteraction(true);
         }
 
         if (isActive()) {

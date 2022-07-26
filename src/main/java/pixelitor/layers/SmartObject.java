@@ -20,8 +20,6 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.Filter;
-import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
@@ -47,9 +45,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static java.awt.RenderingHints.*;
-import static pixelitor.utils.Keys.CTRL_SHIFT_E;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -59,7 +57,6 @@ import static pixelitor.utils.Threads.onEDT;
 public class SmartObject extends ImageLayer {
     private static final String NAME_PREFIX = "smart ";
     private Composition content;
-    private boolean smartFilterIsVisible = true;
 
     // only used for deserialization
     private final boolean newVersion = true;
@@ -72,20 +69,22 @@ public class SmartObject extends ImageLayer {
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
 
-    /**
-     * Smart filters allow non-destructive editing, but unlike adjustment layers,
-     * they don't have to run every time some other layer is edited.
-     */
-    private final List<Filter> smartFilters = new ArrayList<>();
+    // "Legacy" fields from Pixelitor 4.3.0, they are used only for
+// automatic migration of old pxc files
+    private boolean smartFilterIsVisible = true;
+    private List<Filter> smartFilters = new ArrayList<>();
+
+    // the real list of smart filters
+    private List<SmartFilter> filters = new ArrayList<>();
 
     private AffineTransform contentTransform;
 
     // The following two fields are used only during editing of smart filters
     // to restore the image and filter state if the user cancels the dialog.
-    private transient BufferedImage lastFilterOutput;
-    private transient FilterState lastFilterState;
+//    private transient BufferedImage lastFilterOutput;
+//    private transient FilterState lastFilterState;
 
-    private int indexOfLastSmartFilter = -1;
+//    private int indexOfLastSmartFilter = -1;
 
     private transient boolean imageNeedsRefresh = false;
 
@@ -120,7 +119,7 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
-    // the constructor used for duplication
+    // The constructor used for duplication.
     private SmartObject(SmartObject orig, String name, boolean deepCopy) {
         super(orig.comp, name);
         if (deepCopy) {
@@ -129,13 +128,15 @@ public class SmartObject extends ImageLayer {
             setContent(orig.getContent());
         }
         image = orig.image;
-        if (!orig.smartFilters.isEmpty()) {
-            smartFilters.add(orig.smartFilters.get(0).copy());
+
+        if (!orig.filters.isEmpty()) {
+            filters = new ArrayList<>(orig.filters.size());
+            SmartFilter filter = orig.filters.get(0).copy(content, this);
+            do {
+                filters.add(filter);
+            } while ((filter = filter.getNext()) != null);
         }
-        lastFilterState = orig.lastFilterState;
-        lastFilterOutput = orig.lastFilterOutput;
-        indexOfLastSmartFilter = orig.indexOfLastSmartFilter;
-        smartFilterIsVisible = orig.smartFilterIsVisible;
+
         linkedContentFile = orig.linkedContentFile;
         linkedContentFileTime = orig.linkedContentFileTime;
         if (orig.contentTransform != null) {
@@ -154,8 +155,17 @@ public class SmartObject extends ImageLayer {
             smartFilterIsVisible = true;
         }
         imageNeedsRefresh = true;
-        lastFilterOutput = null;
-        lastFilterState = null;
+
+        // migration from 4.3.0 serialization format
+        if (filters == null) { // new field, will be null in old pxc files
+            filters = new ArrayList<>();
+            for (Filter filter : smartFilters) {
+                SmartFilter newFilter = new SmartFilter(filter, content, this);
+                newFilter.setVisible(smartFilterIsVisible);
+                filters.add(newFilter);
+            }
+            smartFilters = null; // no longer needed
+        }
     }
 
     @Serial
@@ -172,10 +182,8 @@ public class SmartObject extends ImageLayer {
     }
 
     public void afterDeserialization() {
-        for (Filter filter : smartFilters) {
-            if (filter instanceof ParametrizedFilter pf) {
-                pf.getParamSet().updateOptions(this, false);
-            }
+        for (SmartFilter filter : filters) {
+            filter.updateOptions(this);
         }
 
         if (isContentLinked()) {
@@ -234,16 +242,16 @@ public class SmartObject extends ImageLayer {
         return false;
     }
 
-    private void recalculateImage(boolean updateIcon) {
+    public void recalculateImage(boolean updateIcon) {
         recalculateImage(comp.getCanvasWidth(), comp.getCanvasHeight(), updateIcon);
     }
 
     private void recalculateImage(int targetWidth, int targetHeight, boolean updateIcon) {
         resetImageFromContent(targetWidth, targetHeight);
-        if (smartFilterIsVisible) {
-            for (Filter filter : smartFilters) {
-                image = filter.transformImage(image);
-            }
+
+        int numFilters = filters.size();
+        if (numFilters > 0) {
+            image = filters.get(numFilters - 1).getImage();
         }
         if (updateIcon) {
             updateIconImage();
@@ -358,13 +366,13 @@ public class SmartObject extends ImageLayer {
                 }
             });
         }
-        boolean hasSmartFilter = !smartFilters.isEmpty();
+        boolean hasSmartFilter = !filters.isEmpty();
         if (hasSmartFilter) {
-            Filter smartFilter = smartFilters.get(0);
+            SmartFilter smartFilter = filters.get(0);
             popup.add(new PAction("Copy " + smartFilter.getName()) {
                 @Override
                 protected void onClick() {
-                    Filter.copiedSmartFilter = smartFilter.copy();
+                    Filter.copiedSmartFilter = smartFilter.getFilter().copy();
                 }
             });
         }
@@ -379,24 +387,21 @@ public class SmartObject extends ImageLayer {
         }
         if (hasSmartFilter) {
             popup.addSeparator();
-            for (int i = 0; i < smartFilters.size(); i++) {
-                int finalI = i;
-                Filter smartFilter = smartFilters.get(i);
-                PAction editAction = new PAction("Edit " + smartFilter.getName()) {
+            for (SmartFilter filter : filters) {
+                PAction editAction = new PAction("Edit " + filter.getName()) {
                     @Override
                     protected void onClick() {
-                        editSmartFilter(finalI);
+                        editSmartFilter(filter);
                     }
                 };
 
                 var editMenuItem = new JMenuItem(editAction);
-                editMenuItem.setAccelerator(CTRL_SHIFT_E);
                 popup.add(editMenuItem);
 
-                popup.add(new PAction("Delete " + smartFilter.getName()) {
+                popup.add(new PAction("Delete " + filter.getName()) {
                     @Override
                     protected void onClick() {
-                        deleteSmartFilter();
+                        deleteSmartFilter(filter);
                     }
                 });
             }
@@ -422,112 +427,94 @@ public class SmartObject extends ImageLayer {
     }
 
     public boolean hasSmartFilters() {
-        return !smartFilters.isEmpty();
+        return !filters.isEmpty();
     }
 
-    public boolean smartFilterIsVisible() {
-        return smartFilterIsVisible;
+    public int getNumStartFilters() {
+        return filters.size();
     }
 
-    public void setSmartFilterVisibility(boolean b) {
-        boolean changed = smartFilterIsVisible != b;
-        smartFilterIsVisible = b;
-        if (changed) {
-            recalculateImage(true);
-            comp.update();
-        }
-    }
-
-    public Filter getSmartFilter(int index) {
-        return smartFilters.get(index);
+    public SmartFilter getSmartFilter(int index) {
+        return filters.get(index);
     }
 
     public void addSmartFilter(Filter filter) {
-        smartFilters.add(filter);
-        smartFilterIsVisible = true;
+        int numFilters = filters.size();
+        SmartFilter newFilter;
+        if (numFilters == 0) {
+            newFilter = new SmartFilter(filter, content, this);
+        } else {
+            SmartFilter last = filters.get(numFilters - 1);
+            newFilter = new SmartFilter(filter, last, this);
+            last.setNext(newFilter);
+        }
+
+        filters.add(newFilter);
         updateSmartFilterUI();
     }
 
     private void runAndAddSmartFilter(Filter newFilter) {
-        assert smartFilters.isEmpty();
+        assert filters.isEmpty();
 
-        lastFilterOutput = image;
         boolean filterDialogAccepted = startFilter(newFilter, false);
         if (filterDialogAccepted) {
-            lastFilterOutput.flush();
-            lastFilterOutput = null;
             addSmartFilter(newFilter);
-        } else {
-            image = lastFilterOutput;
-        }
-    }
-
-    public void replaceSmartFilter(Filter newFilter) {
-        Filter prevFilter = smartFilters.get(0);
-        lastFilterOutput = image;
-        smartFilters.clear();
-        resetImageFromContent();
-
-        // since this is a new filter instance, there is no need to reset it
-        boolean filterDialogAccepted = startFilter(newFilter, false);
-        if (filterDialogAccepted) {
-            lastFilterOutput.flush();
-            lastFilterOutput = null;
-            addSmartFilter(newFilter);
-        } else {
-            image = lastFilterOutput;
-            addSmartFilter(prevFilter);
         }
     }
 
     private void pasteSmartFilter(Filter newFilter) {
-        if (hasSmartFilters()) {
-            boolean replace = Dialogs.showReplaceSmartFilterQuestion(this, newFilter.getName());
-            if (replace) {
-                replaceSmartFilter(newFilter);
-            }
-        } else {
-            runAndAddSmartFilter(newFilter);
-        }
+        runAndAddSmartFilter(newFilter);
     }
 
     public void editSmartFilter(int index) {
-        indexOfLastSmartFilter = index;
-        Filter filter = smartFilters.get(index);
-        lastFilterOutput = image;
-        if (filter instanceof ParametrizedFilter pf) {
-            lastFilterState = pf.getParamSet().copyState(false);
-        }
-        resetImageFromContent();
-        boolean filterDialogAccepted = startFilter(filter, false);
-        if (filterDialogAccepted) {
-            // these are no longer needed
-            lastFilterOutput.flush();
-            lastFilterOutput = null;
-            lastFilterState = null;
-        } else {
-            // restore to the result of the previous run
-            image = lastFilterOutput;
-            lastFilterOutput = null;
-            // restore the previous filter state
-            Filter sf = smartFilters.get(indexOfLastSmartFilter);
-            if (sf instanceof ParametrizedFilter pf) {
-                pf.getParamSet().setState(lastFilterState, false);
-                lastFilterState = null;
-            }
-        }
+        editSmartFilter(filters.get(index));
+    }
+
+    private void editSmartFilter(SmartFilter filter) {
+        filter.edit();
         updateSmartFilterUI();
     }
 
-    private void deleteSmartFilter() {
-        smartFilters.clear();
-        resetImageFromContent();
+    public void deleteSmartFilter(int index) {
+        deleteSmartFilter(filters.get(index));
+    }
+
+    private void deleteSmartFilter(SmartFilter filter) {
+        int numFilters = filters.size();
+        for (int i = 0; i < numFilters; i++) {
+            if (filters.get(i) == filter) {
+                SmartFilter previous = null;
+                SmartFilter next = null;
+                if (i > 0) {
+                    previous = filters.get(i - 1);
+                }
+                if (i < numFilters - 1) {
+                    next = filters.get(i + 1);
+                }
+                if (previous != null) {
+                    previous.setNext(next);
+                }
+                if (next != null) {
+                    next.invalidateChain();
+                    if (previous != null) {
+                        next.setImageSource(previous);
+                    } else {
+                        next.setImageSource(content);
+                    }
+                }
+                filters.remove(i);
+                break;
+            }
+        }
+        recalculateImage(true);
         comp.update();
-        updateIconImage();
         updateSmartFilterUI();
     }
 
     private void updateSmartFilterUI() {
+        if (ui == null) { // in unit tests
+            return;
+        }
         ui.updateSmartFilterPanel();
         EventQueue.invokeLater(() ->
             comp.getView().getLayersPanel().revalidate());
@@ -654,7 +641,7 @@ public class SmartObject extends ImageLayer {
         double sx = newSize.getWidth() / comp.getCanvasWidth();
         double sy = newSize.getHeight() / comp.getCanvasHeight();
 
-        setTranslation((int)(getTx() * sx), (int)(getTy() * sy));
+        setTranslation((int) (getTx() * sx), (int) (getTy() * sy));
         AffineTransform newScaling = AffineTransform.getScaleInstance(sx, sy);
         if (contentTransform == null) {
             contentTransform = newScaling;
@@ -714,6 +701,13 @@ public class SmartObject extends ImageLayer {
     @Override
     public String getTypeString() {
         return "Smart Object";
+    }
+
+    public String debugSmartFilters() {
+        return "Filters of " + getName() + ":\n"
+               + filters.stream()
+                   .map(SmartFilter::toString)
+                   .collect(Collectors.joining("\n"));
     }
 
     public void debugAllImages() {

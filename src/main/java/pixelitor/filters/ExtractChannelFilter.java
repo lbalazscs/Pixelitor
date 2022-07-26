@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -41,7 +41,7 @@ public class ExtractChannelFilter extends Filter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
+        return Filters.runRGBPixelOp(rgbOp, src, dest);
     }
 
     @Override

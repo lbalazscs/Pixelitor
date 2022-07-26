@@ -40,7 +40,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Serial
     private static final long serialVersionUID = 2L;
 
-    private Filter filter;
+    protected Filter filter;
 
     // A copy created at the beginning of editing,
     // to support Cancel and Show Original.
@@ -63,8 +63,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     protected Layer createTypeSpecificDuplicate(String duplicateName) {
-        // TODO the filter should be copied so that it can be adjusted independently
-        return new AdjustmentLayer(comp, duplicateName, filter);
+        return new AdjustmentLayer(comp, duplicateName, filter.copy());
     }
 
     @Override
@@ -148,7 +147,9 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
-        comp.update();
+        if (!first) {
+            comp.update();
+        }
     }
 
     @Override
@@ -173,12 +174,16 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName) {
-        throw new UnsupportedOperationException();
+        throw new IllegalStateException();
     }
 
     @Override
     public void runFilter(Filter filter, FilterContext context) {
         startFilter(filter, false);
+    }
+
+    public Filter getFilter() {
+        return filter;
     }
 
     @Override

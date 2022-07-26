@@ -542,9 +542,9 @@ public class ImageLayerTest {
         ImageLayer duplicate = (ImageLayer) layer.duplicate(false, true);
 
         assertThat(duplicate)
+            .contentBoundsIsEqualTo(layer.getContentBounds())
             .blendingModeIs(layer.getBlendingMode())
-            .opacityIs(layer.getOpacity())
-            .contentBoundsIsEqualTo(layer.getContentBounds());
+            .opacityIs(layer.getOpacity());
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();

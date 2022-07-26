@@ -175,7 +175,10 @@ public class Tools {
      * Called when a new layer or mask is being edited.
      */
     public static void editingTargetChanged(Layer layer) {
-        assert currentTool != null || AppContext.isUnitTesting();
+        if (AppContext.isUnitTesting()) {
+            return;
+        }
+        assert currentTool != null;
 
         // don't switch from the Move Tool, because it's confusing and
         // bug-prone if the tool is changed during an auto-select

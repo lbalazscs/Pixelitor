@@ -24,7 +24,8 @@ import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -360,8 +361,9 @@ public class Debug {
         MaskViewMode.SHOW_MASK.activate(view, layer);
     }
 
-    public static void startFilter(Filter filter) {
-        Views.getActiveDrawableOrThrow().startFilter(filter, true);
+    public static void startFilter(String filterName) {
+        FilterAction action = Filters.getFilterActionByName(filterName);
+        action.actionPerformed(null);
     }
 
     public static void addNewImageWithMask() {
@@ -457,11 +459,11 @@ public class Debug {
     }
 
     public static void serializeAllFilters() {
-        FilterUtils.forEachSmartFilter(Debug::serialize);
+        Filters.forEachSmartFilter(Debug::serialize);
     }
 
     public static void deserializeAllFilters() {
-        FilterUtils.forEachSmartFilter(Debug::deserialize);
+        Filters.forEachSmartFilter(Debug::deserialize);
     }
 
     private static void serialize(Filter filter) {
@@ -511,7 +513,7 @@ public class Debug {
     }
 
     public static void addAllSmartFilters(Composition comp) {
-        FilterUtils.forEachSmartFilter(filter ->
+        Filters.forEachSmartFilter(filter ->
             addSmartFilter(comp, filter));
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerGUI;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -102,9 +102,9 @@ public class ColorSwatchButton extends JComponent {
             g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, raised);
         }
         if (marked) {
-            g.setColor(LayerButton.SELECTED_COLOR);
+            g.setColor(LayerGUI.SELECTED_COLOR);
             g.fillRect(1, 1, 7, 7);
-            g.setColor(LayerButton.UNSELECTED_COLOR);
+            g.setColor(LayerGUI.UNSELECTED_COLOR);
             g.fillRect(3, 3, 3, 3);
         }
     }

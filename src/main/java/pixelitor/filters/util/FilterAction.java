@@ -22,7 +22,6 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.SmartObject;
@@ -55,7 +54,7 @@ public class FilterAction extends DrawableAction {
         this.factory = factory;
 
         if (!name.equals(Fade.NAME)) {
-            FilterUtils.addFilter(this);
+            Filters.addFilter(this);
         }
     }
 
@@ -78,10 +77,6 @@ public class FilterAction extends DrawableAction {
                 return;
             }
 
-            if (so.hasSmartFilters()) {
-                handleExistingSmartFilters(so);
-                return;
-            }
             Filter newFilter = createNewInstanceFilter();
             if (dr.startFilter(newFilter, true)) {
                 so.addSmartFilter(newFilter);
@@ -89,14 +84,6 @@ public class FilterAction extends DrawableAction {
             return;
         }
         dr.startFilter(filter, true);
-    }
-
-    private void handleExistingSmartFilters(SmartObject so) {
-        boolean replace = Dialogs.showReplaceSmartFilterQuestion(so, name);
-        if (replace) {
-            Filter newFilter = createNewInstanceFilter();
-            so.replaceSmartFilter(newFilter);
-        }
     }
 
     public Filter createNewInstanceFilter() {

@@ -251,6 +251,10 @@ public class Pixelitor {
         }
 
 //        GradientFillLayer.createNew();
-//        Debug.startFilter(new Marble());
+
+//        Views.onActiveLayer(Layer::replaceWithSmartObject);
+//        Debug.startFilter(ColorBalance.NAME);
+
+//        new Flip(HORIZONTAL).actionPerformed(null);
     }
 }

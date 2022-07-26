@@ -37,7 +37,7 @@ import java.io.Serial;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
+import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**

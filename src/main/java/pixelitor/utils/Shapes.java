@@ -168,6 +168,63 @@ public class Shapes {
         return unitArrow;
     }
 
+    public static Shape createTextLayerIconShape() {
+        Path2D path = new Path2D.Double();
+        path.moveTo(6, 4);
+        path.lineTo(18, 4);
+        path.lineTo(18, 8);
+        path.lineTo(14, 8);
+        path.lineTo(14, 21);
+        path.lineTo(10, 21);
+        path.lineTo(10, 8);
+        path.lineTo(6, 8);
+        path.closePath();
+
+        return path;
+    }
+
+    public static Shape createAdjLayerIconShape() {
+        Path2D path = new Path2D.Double();
+        path.moveTo(9.5, 4);
+        path.lineTo(14.5, 4);
+        path.lineTo(20.5, 21);
+        path.lineTo(16, 21);
+        path.lineTo(15.5, 18);
+        path.lineTo(8.5, 18);
+        path.lineTo(8, 21);
+        path.lineTo(3.5, 21);
+        path.closePath();
+
+        // go in the counter-clockwise direction
+        // to cut a WIND_NON_ZERO hole
+        path.moveTo(11, 10);
+        path.lineTo(10, 15);
+        path.lineTo(14, 15);
+        path.lineTo(13, 10);
+        path.closePath();
+
+        return path;
+    }
+
+    public static Shape createSmartFilterIconShape() {
+        Path2D path = new Path2D.Double();
+
+        path.moveTo(7, 4);
+        path.lineTo(18, 4);
+        path.lineTo(18, 8);
+        path.lineTo(11, 8);
+        path.lineTo(11, 11);
+        path.lineTo(17, 11);
+        path.lineTo(17, 15);
+        path.lineTo(11, 15);
+        path.lineTo(11, 20);
+        path.lineTo(7, 20);
+        path.closePath();
+
+        return path;
+    }
+
+
     // makes sure that the returned rectangle has positive width, height
     public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
         int topX, topY, width, height;

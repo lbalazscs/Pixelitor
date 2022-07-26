@@ -33,49 +33,51 @@ import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
 import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
 
 /**
- * The GUI container for {@link LayerButton} objects.
+ * The GUI container for {@link LayerGUI} objects.
  * Each {@link View} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
-    private final List<LayerButton> layerButtons = new ArrayList<>();
+    private final List<LayerGUI> layerGUIS = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final DragReorderHandler dragReorderHandler;
-    private LayerButton draggedButton;
+    private LayerGUI draggedGUI;
 
     public LayersPanel() {
         dragReorderHandler = new DragReorderHandler(this);
     }
 
-    public void addLayerButton(LayerButton button, int index) {
-        buttonGroup.add(Objects.requireNonNull(button));
-        layerButtons.add(index, button);
+    public void addLayerGUI(LayerGUI gui, int index) {
+        assert gui != null;
 
-        add(button, JLayeredPane.DEFAULT_LAYER);
+        buttonGroup.add(gui);
+        layerGUIS.add(index, gui);
+
+        add(gui, JLayeredPane.DEFAULT_LAYER);
 
         // the new layer always becomes the selected layer
-        button.setUserInteraction(false); // this selection should not go into history
-        button.setSelected(true);
-        button.setUserInteraction(true);
+        gui.setUserInteraction(false); // this selection should not go into history
+        gui.setSelected(true);
+        gui.setUserInteraction(true);
 
         revalidate();
         repaint();
 
-        button.addDragReorderHandler(dragReorderHandler);
+        gui.addDragReorderHandler(dragReorderHandler);
     }
 
-    public void removeLayerButton(LayerButton button) {
-        buttonGroup.remove(button);
-        layerButtons.remove(button);
-        remove(button);
+    public void removeLayerGUI(LayerGUI gui) {
+        buttonGroup.remove(gui);
+        layerGUIS.remove(gui);
+        remove(gui);
         revalidate();
         repaint();
 
-        button.removeDragReorderHandler(dragReorderHandler);
+        gui.removeDragReorderHandler(dragReorderHandler);
     }
 
-    public void changeLayerButtonOrder(int oldIndex, int newIndex) {
-        LayerButton button = layerButtons.remove(oldIndex);
-        layerButtons.add(newIndex, button);
+    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
+        LayerGUI layerGUI = layerGUIS.remove(oldIndex);
+        layerGUIS.add(newIndex, layerGUI);
 
         revalidate();
     }
@@ -83,63 +85,63 @@ public class LayersPanel extends JLayeredPane {
     /**
      * @param firstUpdate true if called for the first time during this drag
      */
-    public void updateDrag(LayerButton newDraggedButton, int dragY, boolean firstUpdate) {
-        assert newDraggedButton != null;
+    public void updateDrag(LayerGUI newDraggedGUI, int dragY, boolean firstUpdate) {
+        assert newDraggedGUI != null;
 
         if (firstUpdate) {
             // put it into the drag layer so that it is always visible
-            setLayer(newDraggedButton, JLayeredPane.DRAG_LAYER);
-            draggedButton = newDraggedButton;
+            setLayer(newDraggedGUI, JLayeredPane.DRAG_LAYER);
+            draggedGUI = newDraggedGUI;
         }
         swapIfNecessary(dragY);
     }
 
     /**
      * Override doLayout() so that when the whole window is
-     * resized, the layer buttons are still laid out correctly
+     * resized, the layer GUIs are still laid out correctly
      */
     @Override
     public void doLayout() {
         int parentHeight = getHeight();
         int y = parentHeight;
-        for (LayerButton button : layerButtons) {
-            int buttonHeight = button.getPreferredHeight();
-            y -= buttonHeight;
-            if (button != draggedButton) {
-                button.setSize(getWidth(), buttonHeight);
-                button.setLocation(0, y);
+        for (LayerGUI layerGUI : layerGUIS) {
+            int guiHeight = layerGUI.getPreferredHeight();
+            y -= guiHeight;
+            if (layerGUI != draggedGUI) {
+                layerGUI.setSize(getWidth(), guiHeight);
+                layerGUI.setLocation(0, y);
             }
-            button.setStaticY(y);
+            layerGUI.setStaticY(y);
         }
     }
 
     /**
-     * Change the order of buttons while dragging
+     * Change the order of layer GUIs while dragging
      */
     private void swapIfNecessary(int dragY) {
-        int staticY = draggedButton.getStaticY();
+        int staticY = draggedGUI.getStaticY();
         int deltaY = dragY - staticY;
-        int draggedIndex = layerButtons.indexOf(draggedButton);
+        int draggedIndex = layerGUIS.indexOf(draggedGUI);
         if (deltaY > 0) {  // dragging downwards
             int indexBellow = draggedIndex - 1;
             if (indexBellow < 0) {
                 return;
             }
-            int swapDistance = layerButtons.get(indexBellow).getPreferredHeight() / 2;
+            int swapDistance = layerGUIS.get(indexBellow).getPreferredHeight() / 2;
             if (deltaY >= swapDistance) {
                 if (draggedIndex > 0) {
-                    Collections.swap(layerButtons, indexBellow, draggedIndex);
+                    Collections.swap(layerGUIS, indexBellow, draggedIndex);
                 }
             }
         } else { // dragging upwards
             int indexAbove = draggedIndex + 1;
-            if (indexAbove >= layerButtons.size()) {
+            if (indexAbove >= layerGUIS.size()) {
                 return;
             }
-            int swapDistance = layerButtons.get(indexAbove).getPreferredHeight() / 2;
+            int swapDistance = layerGUIS.get(indexAbove).getPreferredHeight() / 2;
             if (deltaY <= -swapDistance) {
-                if (draggedIndex < layerButtons.size() - 1) {
-                    Collections.swap(layerButtons, indexAbove, draggedIndex);
+                if (draggedIndex < layerGUIS.size() - 1) {
+                    Collections.swap(layerGUIS, indexAbove, draggedIndex);
                 }
             }
         }
@@ -147,13 +149,13 @@ public class LayersPanel extends JLayeredPane {
 
     // drag finished, put the last dragged back to the default JLayeredPane layer
     public void dragFinished() {
-        if (draggedButton != null) {
-            setLayer(draggedButton, JLayeredPane.DEFAULT_LAYER);
-            draggedButton.dragFinished(layerButtons.indexOf(draggedButton)); // notify the composition
+        if (draggedGUI != null) {
+            setLayer(draggedGUI, JLayeredPane.DEFAULT_LAYER);
+            draggedGUI.dragFinished(layerGUIS.indexOf(draggedGUI)); // notify the composition
         } else {
             throw new IllegalStateException();
         }
-        draggedButton = null;
+        draggedGUI = null;
         doLayout();
 
         // notify the raise/lower layer menu items
@@ -164,28 +166,28 @@ public class LayersPanel extends JLayeredPane {
 
     @Override
     public Dimension getPreferredSize() {
-        int totalButtonHeight = 0;
-        for (LayerButton button : layerButtons) {
-            totalButtonHeight += button.getPreferredHeight();
+        int totalHeight = 0;
+        for (LayerGUI gui : layerGUIS) {
+            totalHeight += gui.getPreferredHeight();
         }
-        return new Dimension(10, totalButtonHeight);
+        return new Dimension(10, totalHeight);
     }
 
     @VisibleForTesting
-    public int getNumLayerButtons() {
-        return layerButtons.size();
+    public int getNumLayerGUIs() {
+        return layerGUIS.size();
     }
 
     @VisibleForTesting
     public List<String> getLayerNames() {
-        return layerButtons.stream()
-            .map(LayerButton::getLayerName)
+        return layerGUIS.stream()
+            .map(LayerGUI::getLayerName)
             .collect(toList());
     }
 
     public void thumbSizeChanged(int newThumbSize) {
-        for (LayerButton button : layerButtons) {
-            button.thumbSizeChanged(newThumbSize);
+        for (LayerGUI gui : layerGUIS) {
+            gui.thumbSizeChanged(newThumbSize);
         }
     }
 }

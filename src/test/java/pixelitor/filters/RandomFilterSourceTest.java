@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Mockito.mock;
@@ -47,7 +47,7 @@ class RandomFilterSourceTest {
             when(filter.getName()).thenReturn(filterName);
             when(filterAction.getFilter()).thenReturn(filter);
 
-            FilterUtils.addFilter(filterAction);
+            Filters.addFilter(filterAction);
         }
     }
 

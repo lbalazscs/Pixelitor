@@ -39,7 +39,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerButtonLayout.thumbSize;
+import static pixelitor.layers.LayerGUILayout.thumbSize;
 
 public class ColorFillLayer extends Layer {
     @Serial
@@ -47,7 +47,7 @@ public class ColorFillLayer extends Layer {
 
     private Color color;
 
-    private ColorFillLayer(Composition comp, String name, Color color) {
+    public ColorFillLayer(Composition comp, String name, Color color) {
         super(comp, name);
         this.color = color;
     }

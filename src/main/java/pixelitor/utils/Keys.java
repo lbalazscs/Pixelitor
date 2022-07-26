@@ -77,7 +77,7 @@ public class Keys {
     public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
 
     public static final KeyStroke CTRL_SHIFT_C = getKeyStroke('C', CTRL | SHIFT);
-    public static final KeyStroke CTRL_SHIFT_E = getKeyStroke('E', CTRL | SHIFT);
+//    public static final KeyStroke CTRL_SHIFT_E = getKeyStroke('E', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_F = getKeyStroke('F', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL | SHIFT);

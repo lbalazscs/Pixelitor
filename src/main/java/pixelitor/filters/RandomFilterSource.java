@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,9 +77,9 @@ public class RandomFilterSource {
     }
 
     public Filter choose() {
-        Filter randomFilter = FilterUtils.getRandomFilter(filter ->
+        Filter randomFilter = Filters.getRandomFilter(filter ->
             filter != lastFilter
-                && !(filter instanceof RandomFilter));
+            && !(filter instanceof RandomFilter));
 
         if (lastFilter != null) { // not the first call
             previousIndex++;

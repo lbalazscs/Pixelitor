@@ -67,7 +67,7 @@ public class LayerMaskActions {
             if (e.isPopupTrigger()) {
                 popup(e);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
-                LayerButton.selectLayerIfIconClicked(e);
+                LayerGUI.selectLayerIfIconClicked(e);
             }
         }
 

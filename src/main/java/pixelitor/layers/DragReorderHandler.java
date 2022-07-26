@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,14 +25,14 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 
 /**
- * The MouseListener and MouseMotionListener for the layer buttons for the drag-reordering
+ * The MouseListener and MouseMotionListener for the layer GUIs for the drag-reordering
  */
 public class DragReorderHandler extends MouseInputAdapter {
     private static final int DRAG_X_INDENT = 10;
     private final LayersPanel layersPanel;
-    private int dragStartYInButton;
+    private int dragStartYInLayerGUI;
     private boolean dragging = false;
-    private long lastNameEditorPressesMillis;
+    private long lastNameEditorPressedMillis;
 
     public DragReorderHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
@@ -44,75 +44,83 @@ public class DragReorderHandler extends MouseInputAdapter {
         Component c = e.getComponent();
         if (c instanceof LayerNameEditor) {
             long when = e.getWhen();
-            long diffMillis = when - lastNameEditorPressesMillis;
+            long diffMillis = when - lastNameEditorPressedMillis;
             if (diffMillis < 250) {
                 LayerNameEditor editor = (LayerNameEditor) c;
                 editor.enableEditing();
             }
-            lastNameEditorPressesMillis = when;
+            lastNameEditorPressedMillis = when;
         }
 
-        layerButtonForEvent(e); // the call is necessary for translating the mouse event
-        dragStartYInButton = e.getY();
+        layerGUIForEvent(e); // the call is necessary for translating the mouse event
+        dragStartYInLayerGUI = e.getY();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        LayerButton layerButton = layerButtonForEvent(e);
-        if (!dragging && Math.abs(dragStartYInButton - e.getY()) < 5) {
+        LayerGUI layerGUI = layerGUIForEvent(e);
+        if (!dragging && Math.abs(dragStartYInLayerGUI - e.getY()) < 5) {
             // it seems that on Mac we get mouseDragged events even when the mouse is not moved
             return;
         }
-        if (layerButton.isNameEditing()) {
+        if (layerGUI.isNameEditing()) {
             return;
         }
 
-        // since the LayerButton is continuously relocated, e.getY() returns
-        // the mouse relative to the last LayerButton position
-        int newY = layerButton.getY() + e.getY() - dragStartYInButton;
-        layerButton.setLocation(DRAG_X_INDENT, newY);
+        // since the LayerGUI is continuously relocated, e.getY()
+        // returns the mouse relative to the last LayerGUI position
+        int newY = layerGUI.getY() + e.getY() - dragStartYInLayerGUI;
+        layerGUI.setLocation(DRAG_X_INDENT, newY);
 
-        layersPanel.updateDrag(layerButton, newY, !dragging);
+        layersPanel.updateDrag(layerGUI, newY, !dragging);
         dragging = true;
 
-        layerButton.setCursor(Cursors.HAND);
+        layerGUI.setCursor(Cursors.HAND);
         layersPanel.doLayout();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        LayerButton layerButton = layerButtonForEvent(e);
+        LayerGUI layerGUI = layerGUIForEvent(e);
         if (dragging) {
-            layerButton.setCursor(Cursors.DEFAULT);
+            layerGUI.setCursor(Cursors.DEFAULT);
             layersPanel.dragFinished();
         } else {
             // necessary on Mac so that the layer gets selected
             // even if the user clicks on the name field
-            layerButton.setSelected(true);
+            layerGUI.setSelected(true);
         }
         dragging = false;
     }
 
     /**
-     * Returns the layer button for the mouse event and also translate
-     * the coordinates of the argument into the layer button's space
+     * Returns the layer GUI for the mouse event and also translate
+     * the coordinates of the argument into the layer GUI's space
      */
-    private static LayerButton layerButtonForEvent(MouseEvent e) {
-        LayerButton layerButton;
+    private static LayerGUI layerGUIForEvent(MouseEvent e) {
+        LayerGUI layerGUI;
         Component c = e.getComponent();
-        // the source of the event must be either the layer button
-        // or the textfield inside it
+        // the source of the event must be either the
+        // layer GUI or the textfield inside it
         if (c instanceof LayerNameEditor nameEditor) {
-            layerButton = nameEditor.getLayerButton();
-            // translate into the LayerButton coordinate system
+            layerGUI = nameEditor.getLayerGUI();
+            // translate into the LayerGUI coordinate system
             e.translatePoint(nameEditor.getX(), nameEditor.getY());
         } else if (c instanceof JLabel) {
-            layerButton = (LayerButton) c.getParent();
+            layerGUI = (LayerGUI) c.getParent();
             e.translatePoint(c.getX(), c.getY());
         } else {
-            layerButton = (LayerButton) c;
+            layerGUI = (LayerGUI) c;
         }
-        return layerButton;
+
+        // ensure that mouse drags on smart filter
+        // guis move the whole smart object
+        if (layerGUI.isSmartFilterGUI()) {
+            e.translatePoint(layerGUI.getX(), layerGUI.getY());
+            layerGUI = layerGUI.getOwner();
+        }
+
+        return layerGUI;
     }
 
     public void attachTo(JComponent c) {

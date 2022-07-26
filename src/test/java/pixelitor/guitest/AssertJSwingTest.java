@@ -660,12 +660,12 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-    private LayerButtonFixture findLayerButton(String layerName) {
-        return new LayerButtonFixture(robot, robot.finder()
-            .find(new GenericTypeMatcher<>(LayerButton.class) {
+    private LayerGUIFixture findLayerButton(String layerName) {
+        return new LayerGUIFixture(robot, robot.finder()
+            .find(new GenericTypeMatcher<>(LayerGUI.class) {
                 @Override
-                protected boolean isMatching(LayerButton layerButton) {
-                    return layerButton.getLayerName().equals(layerName);
+                protected boolean isMatching(LayerGUI layerGUI) {
+                    return layerGUI.getLayerName().equals(layerName);
                 }
 
                 @Override

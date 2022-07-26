@@ -22,7 +22,7 @@ import org.jdesktop.swingx.JXTextField;
 import org.jdesktop.swingx.prompt.BuddySupport;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import pixelitor.gui.utils.*;
-import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerGUI;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -218,7 +218,7 @@ public class FilterSearchPanel extends JPanel {
     }
 
     public static FilterAction showInDialog(String title) {
-        FilterSearchPanel panel = new FilterSearchPanel(FilterUtils.getAllFiltersSorted());
+        FilterSearchPanel panel = new FilterSearchPanel(Filters.getAllFiltersSorted());
         DialogBuilder builder = new DialogBuilder()
             .content(panel)
             .title(title)
@@ -251,7 +251,7 @@ public class FilterSearchPanel extends JPanel {
 
     private static class SearchIcon extends VectorIcon {
         public SearchIcon() {
-            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : LayerButton.SELECTED_COLOR, 20, 14);
+            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : LayerGUI.SELECTED_COLOR, 20, 14);
         }
 
         @Override

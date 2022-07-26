@@ -36,10 +36,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Language;
-import pixelitor.utils.Messages;
-import pixelitor.utils.TestMessageHandler;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,15 +67,17 @@ public class TestHelper {
     }
 
     public static Composition createEmptyComp() {
-        return createEmptyComp(TEST_WIDTH, TEST_HEIGHT);
+        return createEmptyComp(TEST_WIDTH, TEST_HEIGHT, true);
     }
 
-    public static Composition createEmptyComp(int width, int height) {
+    public static Composition createEmptyComp(int width, int height, boolean addMockView) {
         var comp = Composition.createEmpty(width, height, ImageMode.RGB);
         comp.setName("Test");
         comp.createDebugName();
 
-        setupMockViewFor(comp);
+        if (addMockView) {
+            setupMockViewFor(comp);
+        }
 
         return comp;
     }
@@ -117,7 +116,11 @@ public class TestHelper {
     }
 
     public static Composition createComp(int numLayers, boolean addMasks) {
-        var comp = createEmptyComp();
+        return createComp(numLayers, addMasks, true);
+    }
+
+    public static Composition createComp(int numLayers, boolean addMasks, boolean addMockView) {
+        var comp = createEmptyComp(TEST_WIDTH, TEST_HEIGHT, addMockView);
 
         for (int i = 0; i < numLayers; i++) {
             var layer = createEmptyImageLayer(comp, "layer " + (i + 1));
@@ -141,16 +144,33 @@ public class TestHelper {
 
     public static Layer createLayerOfClass(Class<?> layerClass, Composition comp) {
         Layer layer;
-        if (layerClass.equals(ImageLayer.class)) {
+        if (layerClass == ImageLayer.class) {
             layer = createEmptyImageLayer(comp, "layer 1");
-        } else if (layerClass.equals(TextLayer.class)) {
+        } else if (layerClass == TextLayer.class) {
             layer = createTextLayer(comp, "layer 1");
-        } else if (layerClass.equals(AdjustmentLayer.class)) {
+        } else if (layerClass == AdjustmentLayer.class) {
             layer = createAdjustmentLayer(comp, "layer 1", new Invert());
+        } else if (layerClass == ColorFillLayer.class) {
+            layer = createColorFillLayer(comp, "layer 1");
+        } else if (layerClass == GradientFillLayer.class) {
+            layer = createGradientFillLayer(comp, "layer 1");
+        } else if (layerClass == ShapesLayer.class) {
+            layer = createShapesLayer(comp, "layer 1");
+        } else if (layerClass == SmartObject.class) {
+            layer = createSmartObject(comp, "layer 1");
+        } else if (layerClass == SmartFilter.class) {
+            layer = createSmartFilter(comp, "layer 1");
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("unexpected class " + layerClass.getSimpleName());
+        }
+        if (!layer.hasUI()) {
+            layer.createUI();
         }
         return layer;
+    }
+
+    private static Layer createShapesLayer(Composition comp, String name) {
+        return new ShapesLayer(comp, name);
     }
 
     public static ImageLayer createEmptyImageLayer(Composition comp, String name) {
@@ -183,6 +203,28 @@ public class TestHelper {
         var layer = new AdjustmentLayer(comp, name, filter);
         layer.createUI();
         return layer;
+    }
+
+    public static SmartObject createSmartObject(Composition comp, String name) {
+        Composition content = createComp(0, false, false);
+        SmartObject layer = new SmartObject(comp, content);
+        layer.setName(name, false);
+        layer.createUI();
+        return layer;
+    }
+
+    public static ColorFillLayer createColorFillLayer(Composition comp, String name) {
+        return new ColorFillLayer(comp, name, Color.WHITE);
+    }
+
+    public static GradientFillLayer createGradientFillLayer(Composition comp, String name) {
+        return new GradientFillLayer(comp, name);
+    }
+
+    public static SmartFilter createSmartFilter(Composition comp, String name) {
+        SmartFilter smartFilter = new SmartFilter(new Invert(), comp, createSmartObject(comp, ""));
+        smartFilter.setName(name, false);
+        return smartFilter;
     }
 
     public static ShapesLayer createEmptyShapesLayer(Composition comp, String name) {
@@ -270,6 +312,10 @@ public class TestHelper {
         when(view.getMaskViewMode()).thenReturn(NORMAL);
 
         return view;
+    }
+
+    public static MockFilter createMockFilter(String name) {
+        return new MockFilter(name);
     }
 
     public static void setSelection(Composition comp, Shape shape) {

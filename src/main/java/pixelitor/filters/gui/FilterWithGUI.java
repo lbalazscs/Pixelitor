@@ -24,7 +24,10 @@ import javax.swing.*;
 import java.io.Serial;
 
 /**
- * A filter that has a GUI for customization
+ * A filter that has a GUI for customization.
+ *
+ * Note that filters without a GUI can still use dialogs if
+ * they are started from places like "Random Filter".
  */
 public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     @Serial

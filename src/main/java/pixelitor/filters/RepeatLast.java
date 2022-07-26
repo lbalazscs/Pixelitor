@@ -19,13 +19,13 @@ package pixelitor.filters;
 
 import pixelitor.FilterContext;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
 import java.util.Optional;
 
-import static pixelitor.filters.util.FilterUtils.getLastFilter;
+import static pixelitor.filters.util.Filters.getLastFilter;
 
 /**
  * The "Repeat" action, which repeats the last edit.
@@ -69,9 +69,9 @@ public class RepeatLast extends DrawableAction {
         if (newValue) {
             boolean hasLast;
             if (showDialog) {
-                hasLast = FilterUtils.hasLastGUIFilter();
+                hasLast = Filters.hasLastGUIFilter();
             } else {
-                hasLast = FilterUtils.hasLastFilter();
+                hasLast = Filters.hasLastFilter();
             }
             super.setEnabled(hasLast);
         } else {

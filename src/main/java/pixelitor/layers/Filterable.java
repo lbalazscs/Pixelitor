@@ -22,7 +22,7 @@ import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
@@ -78,15 +78,13 @@ public interface Filterable {
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
         Messages.showPerformanceMessage(filter.getName(), totalTime);
 
-        FilterUtils.setLastFilter(filter);
+        Filters.setLastFilter(filter);
     }
 
     void runFilter(Filter filter, FilterContext context);
 
     /**
      * This method is used when the filter is started from the menu.
-     * Filters without a GUI can still have dialogs if
-     * they are started from places like "Random Filter".
      *
      * @return true if the filter was not cancelled
      */

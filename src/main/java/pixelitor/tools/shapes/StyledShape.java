@@ -29,7 +29,7 @@ import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
-import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerGUI;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.RasterizeShapeEdit;
 import pixelitor.tools.shapes.history.StyledShapeEdit;
@@ -186,9 +186,9 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     public void paintIconThumbnail(Graphics2D g2, int thumbSize) {
-        g2.setColor(LayerButton.UNSELECTED_COLOR);
+        g2.setColor(LayerGUI.UNSELECTED_COLOR);
         g2.fillRect(0, 0, thumbSize, thumbSize);
-        g2.setColor(LayerButton.SELECTED_COLOR);
+        g2.setColor(LayerGUI.SELECTED_COLOR);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Drag drag;
         if (shapeType.isDirectional()) {

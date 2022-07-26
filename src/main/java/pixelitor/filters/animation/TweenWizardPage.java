@@ -22,7 +22,7 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.ValidationResult;
@@ -51,7 +51,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            searchPanel = new FilterSearchPanel(FilterUtils.getAnimationFiltersSorted());
+            searchPanel = new FilterSearchPanel(Filters.getAnimationFiltersSorted());
             return searchPanel;
         }
 

@@ -20,7 +20,6 @@ package pixelitor.layers;
 import com.bric.util.JVM;
 import pixelitor.AppContext;
 import pixelitor.ThreadPool;
-import pixelitor.filters.Filter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.Themes;
@@ -30,13 +29,14 @@ import pixelitor.utils.ImageUtils;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ButtonUI;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -48,7 +48,7 @@ import static pixelitor.utils.Threads.threadInfo;
  * The selectable and draggable component representing
  * a layer in the "Layers" part of the GUI.
  */
-public class LayerButton extends JToggleButton implements LayerUI {
+public class LayerGUI extends JToggleButton implements LayerUI {
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png", "eye_open_dark.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png", "eye_closed_dark.png");
 
@@ -59,14 +59,18 @@ public class LayerButton extends JToggleButton implements LayerUI {
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
 
+    private LayerGUI owner;
+    private List<LayerGUI> children = new ArrayList<>();
+
     // Most often false, but when opening serialized pxc files,
     // the mask/smart filter label might be added before the drag handler
     // and in unit tests the drag handler is not added at all.
     private boolean lateDragHandler;
 
-    // for debugging only: each layer button has a different id
+    // for debugging only: each layer GUI has a different id
     private static int idCounter = 0;
     private final int id;
+    private JPanel sfPanel;
 
     /**
      * Represents the selection state of the layer and mask icons.
@@ -147,7 +151,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private SelectionState selectionState;
 
     private Layer layer;
-    private final LayerButtonLayout layout;
+    private final LayerGUILayout layout;
     private boolean userInteraction = true;
 
     private JCheckBox visibilityCB;
@@ -155,21 +159,18 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private JLabel layerIconLabel;
     private JLabel maskIconLabel;
 
-    private JCheckBox smartFilterCB;
-    private JLabel smartFilterLabel;
-
     /**
      * The Y coordinate in the parent when it is not dragging
      */
     private int staticY;
 
-    public LayerButton(Layer layer) {
+    public LayerGUI(Layer layer) {
         assert calledOnEDT() : threadInfo();
         assert !AppContext.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
 
-        layout = new LayerButtonLayout(layer);
+        layout = new LayerGUILayout(layer);
         setLayout(layout);
 
         initLayerVisibilityCB();
@@ -188,56 +189,35 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void updateSmartFilterPanel() {
-        boolean removeSFLabel = false;
         if (layer.isSmartObject()) {
             SmartObject so = (SmartObject) layer;
-            if (so.hasSmartFilters()) {
-                Filter smartFilter = so.getSmartFilter(0);
-                String filterName = smartFilter.getName();
-                if (smartFilterLabel == null) {
-                    smartFilterLabel = new JLabel(filterName);
-                    smartFilterLabel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            setSelected(true);
-                            if (e.getClickCount() >= 2) {
-                                so.editSmartFilter(0);
-                            }
-                        }
-                    });
-                    if (dragReorderHandler != null) {
-                        // can be null for freshly loaded pxc files
-                        dragReorderHandler.attachTo(smartFilterLabel);
-                        lateDragHandler = false;
-                    } else {
-                        lateDragHandler = true;
-                    }
-
-                    smartFilterCB = createVisibilityCheckBox(true);
-                    smartFilterCB.setToolTipText("<html><b>Click</b> to hide/show the effect of " + filterName + ".");
-                    smartFilterCB.setSelected(so.smartFilterIsVisible());
-                    smartFilterCB.addItemListener(e ->
-                        so.setSmartFilterVisibility(smartFilterCB.isSelected()));
-
-                    add(smartFilterLabel, LayerButtonLayout.SMART_FILTER_LABEL);
-                    add(smartFilterCB, LayerButtonLayout.SMART_FILTER_CHECKBOX);
+            int numFilters = so.getNumStartFilters();
+            if (numFilters > 0) {
+                GridLayout gridLayout = new GridLayout(numFilters, 1);
+                if (sfPanel == null) {
+                    sfPanel = new JPanel(gridLayout);
                 } else {
-                    smartFilterCB.setSelected(so.smartFilterIsVisible());
-                    smartFilterLabel.setText(filterName);
+                    sfPanel.removeAll();
+                    sfPanel.setLayout(gridLayout);
                 }
-            } else {
-                removeSFLabel = true;
             }
-        } else {
-            removeSFLabel = true;
-        }
-        if (removeSFLabel && smartFilterLabel != null) {
-            remove(smartFilterLabel);
-            remove(smartFilterCB);
-            GUIUtils.removeAllMouseListeners(smartFilterLabel);
-            dragReorderHandler.detachFrom(smartFilterLabel);
-            smartFilterLabel = null;
-            smartFilterCB = null;
+            for (int i = 0; i < numFilters; i++) {
+                SmartFilter sf = so.getSmartFilter(i);
+                LayerGUI sfUI = (LayerGUI) sf.createUI();
+                sfUI.setOwner(this);
+                children.add(sfUI);
+
+                // TODO when duplicating a smart object with filters
+                //   this is null, and it's only set later
+                if (dragReorderHandler != null) {
+                    sfUI.setDragReorderHandler(dragReorderHandler);
+                }
+                assert sfUI != null;
+                sfPanel.add(sfUI);
+            }
+            if (numFilters > 0) {
+                add(sfPanel, LayerGUILayout.SMART_FILTERS);
+            }
         }
     }
 
@@ -268,14 +248,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
         });
 
         layerIconLabel.setName("layerIcon");
-        add(layerIconLabel, LayerButtonLayout.LAYER);
+        add(layerIconLabel, LayerGUILayout.LAYER);
     }
 
     private static Icon createLayerIcon(Layer layer) {
         if (layer instanceof TextLayer) {
             return Icons.getTextLayerIcon();
-        } else if (layer instanceof AdjustmentLayer) {
+        } else if (layer.getClass() == AdjustmentLayer.class) {
             return Icons.getAdjLayerIcon();
+        } else if (layer.getClass() == SmartFilter.class) {
+            return Icons.getSmartFilterIcon();
         } else {
             return null;
         }
@@ -286,7 +268,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         int clickCount = e.getClickCount();
         if (clickCount == 1) {
-            MaskViewMode.NORMAL.activate(layer);
+            if (owner == null) {
+                MaskViewMode.NORMAL.activate(layer);
+            }
         } else {
             layer.edit();
         }
@@ -322,8 +306,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
         // parent, and therefore the layer cannot be selected anymore
         // by left-clicking on this label. This is the workaround.
         JLabel source = (JLabel) e.getSource();
-        LayerButton layerButton = (LayerButton) source.getParent();
-        layerButton.setSelected(true);
+        LayerGUI layerGUI = (LayerGUI) source.getParent();
+        layerGUI.setSelected(true);
     }
 
     private void initLayerVisibilityCB() {
@@ -332,7 +316,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         // when loading pxc files, the layer might not be visible
         visibilityCB.setSelected(layer.isVisible());
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.<br><b>Alt-click</b> to isolate this layer.");
-        add(visibilityCB, LayerButtonLayout.CHECKBOX);
+        add(visibilityCB, LayerGUILayout.CHECKBOX);
 
 //        visibilityCB.addItemListener(e ->
 //            layer.setVisible(visibilityCB.isSelected(), true));
@@ -380,7 +364,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     private void initLayerNameEditor() {
         nameEditor = new LayerNameEditor(this);
-        add(nameEditor, LayerButtonLayout.NAME_EDITOR);
+        add(nameEditor, LayerGUILayout.NAME_EDITOR);
         addPropertyChangeListener("name", evt -> updateName());
     }
 
@@ -419,7 +403,17 @@ public class LayerButton extends JToggleButton implements LayerUI {
         this.userInteraction = userInteraction;
     }
 
+    public void setDragReorderHandler(DragReorderHandler handler) {
+        if (dragReorderHandler != null) {
+            return; // don't attach twice
+        }
+        addDragReorderHandler(handler);
+    }
+
     public void addDragReorderHandler(DragReorderHandler handler) {
+        assert dragReorderHandler == null;
+        assert handler != null;
+
         dragReorderHandler = handler;
         handler.attachTo(this);
         handler.attachTo(nameEditor);
@@ -429,13 +423,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
             if (maskIconLabel != null) {
                 handler.attachTo(maskIconLabel);
             }
-            if (smartFilterLabel != null) {
-                handler.attachTo(smartFilterLabel);
-            }
+//            if (smartFilterLabel != null) {
+//                handler.attachTo(smartFilterLabel);
+//            }
         }
     }
 
     public void removeDragReorderHandler(DragReorderHandler handler) {
+        assert dragReorderHandler != null;
+        assert dragReorderHandler == handler;
+
         handler.detachFrom(this);
         handler.detachFrom(nameEditor);
         handler.detachFrom(layerIconLabel);
@@ -443,6 +440,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (hasMaskIcon()) {
             handler.detachFrom(maskIconLabel);
         }
+
+        dragReorderHandler = null;
     }
 
     @Override
@@ -526,7 +525,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         maskIconLabel.setName("maskIcon");
-        add(maskIconLabel, LayerButtonLayout.MASK);
+        add(maskIconLabel, LayerGUILayout.MASK);
 
         // there is another mouse listener for the right-click popups
         maskIconLabel.addMouseListener(new MouseAdapter() {
@@ -654,7 +653,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     @Override
     protected void paintComponent(Graphics g) {
 //        super.paintComponent(g);
-        if (!isSelected()) {
+        if (!isSelected() || owner != null) {
             return;
         }
 
@@ -664,8 +663,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
         Color oldColor = g.getColor();
         Object oldAA = g2.getRenderingHint(KEY_ANTIALIASING);
 
-        // paint a rounded rectangle with the selection color
-        // on the selected layer button
+        // paint a rounded rectangle with the
+        // selection color on the selected layer GUI
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         if (Themes.getCurrent().isDark()) {
             g.setColor(SELECTED_DARK_COLOR);
@@ -692,9 +691,25 @@ public class LayerButton extends JToggleButton implements LayerUI {
         layout.thumbSizeChanged(newThumbSize);
     }
 
+    public void setOwner(LayerGUI owner) {
+        this.owner = owner;
+    }
+
+    public LayerGUI getOwner() {
+        return owner;
+    }
+
+    public List<LayerGUI> getChildren() {
+        return children;
+    }
+
+    public boolean isSmartFilterGUI() {
+        return owner != null;
+    }
+
     @Override
     public String toString() {
-        return "LayerButton{" +
+        return "LayerGUI{" +
                "name='" + getLayerName() + '\'' +
                "id='" + getId() + '\'' +
                "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +

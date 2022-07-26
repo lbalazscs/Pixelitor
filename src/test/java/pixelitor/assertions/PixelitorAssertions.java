@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,7 @@ import pixelitor.filters.RandomFilterSource;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.tools.SelectionTool;
 import pixelitor.tools.pen.Path;
@@ -90,12 +87,26 @@ public class PixelitorAssertions extends Assertions {
         return new ContentLayerAssert<>(actual, ContentLayerAssert.class);
     }
 
+    @SuppressWarnings("unchecked")
     public static ImageLayerAssert assertThat(ImageLayer actual) {
-        return new ImageLayerAssert(actual);
+        return new ImageLayerAssert<>(actual, ImageLayerAssert.class);
     }
 
     public static TextLayerAssert assertThat(TextLayer actual) {
         return new TextLayerAssert(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static AdjustmentLayerAssert assertThat(AdjustmentLayer actual) {
+        return new AdjustmentLayerAssert<>(actual, AdjustmentLayerAssert.class);
+    }
+
+    public static SmartObjectAssert assertThat(SmartObject actual) {
+        return new SmartObjectAssert(actual);
+    }
+
+    public static SmartFilterAssert assertThat(SmartFilter actual) {
+        return new SmartFilterAssert(actual);
     }
 
     public static BufferedImageAssert assertThat(BufferedImage actual) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,16 +27,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Custom AssertJ assertions for {@link ImageLayer} objects.
  */
-public class ImageLayerAssert extends ContentLayerAssert<ImageLayerAssert, ImageLayer> {
-    public ImageLayerAssert(ImageLayer actual) {
-        super(actual, ImageLayerAssert.class);
+public class ImageLayerAssert<S extends ImageLayerAssert<S, T>, T extends ImageLayer> extends ContentLayerAssert<S, ImageLayer> {
+    public ImageLayerAssert(ImageLayer actual, Class<S> selfType) {
+        super(actual, selfType);
     }
 
     public ImageLayerAssert stateIs(ImageLayer.State expected) {
         isNotNull();
         if (actual.getState() != expected) {
             throw new AssertionError("Expected " + expected +
-                    ", found " + actual.getState());
+                                     ", found " + actual.getState());
         }
         return this;
     }

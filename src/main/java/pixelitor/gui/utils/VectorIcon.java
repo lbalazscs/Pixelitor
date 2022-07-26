@@ -18,10 +18,7 @@
 package pixelitor.gui.utils;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 import static java.awt.RenderingHints.*;
 
@@ -33,6 +30,10 @@ public abstract class VectorIcon implements Icon, Cloneable {
     protected Color color;
     private final int width;
     private final int height;
+
+    private static final Color LIGHT_BG = new Color(214, 217, 223);
+    private static final Color DARK_BG = new Color(42, 42, 42);
+    private static final Color LIGHT_FG = new Color(19, 30, 43);
 
     protected VectorIcon(Color color, int width, int height) {
         this.color = color;
@@ -77,5 +78,20 @@ public abstract class VectorIcon implements Icon, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public static VectorIcon createNonTransparentThemed(Shape shape) {
+        return new VectorIcon(Color.WHITE, 24, 24) {
+            @Override
+            protected void paintIcon(Graphics2D g) {
+                boolean darkTheme = Themes.getCurrent().isDark();
+                g.setColor(darkTheme ? DARK_BG : LIGHT_BG);
+                g.fillRect(0, 0, 24, 24);
+
+                g.setColor(darkTheme ? Themes.LIGHT_ICON_COLOR : LIGHT_FG);
+
+                g.fill(shape);
+            }
+        };
     }
 }

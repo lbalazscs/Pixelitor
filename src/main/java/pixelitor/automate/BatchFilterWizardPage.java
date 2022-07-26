@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterSearchPanel;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.layers.Drawable;
 
@@ -54,7 +54,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            searchPanel = new FilterSearchPanel(FilterUtils.getAllFiltersSorted());
+            searchPanel = new FilterSearchPanel(Filters.getAllFiltersSorted());
             searchPanel.setBorder(BorderFactory.createTitledBorder("Select Filter"));
 
             var mainPanel = new JPanel(new VerticalLayout());

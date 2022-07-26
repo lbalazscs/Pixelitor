@@ -30,7 +30,7 @@ import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
-import pixelitor.layers.LayerButtonLayout;
+import pixelitor.layers.LayerGUILayout;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Language;
@@ -204,7 +204,7 @@ public class PreferencesPanel extends JTabbedPane {
         });
         thumbSizeCB.setName("thumbSizeCB");
 
-        int currentSize = LayerButtonLayout.getThumbSize();
+        int currentSize = LayerGUILayout.getThumbSize();
         thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
 
         gbh.addLabelAndControlNoStretch("Layer/Mask Thumb Sizes: ", thumbSizeCB);
@@ -385,7 +385,7 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void updateThumbSize() {
         int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
-        LayerButtonLayout.setStaticThumbSize(newSize);
+        LayerGUILayout.setStaticThumbSize(newSize);
     }
 
     private void setupRememberingTabSelection() {

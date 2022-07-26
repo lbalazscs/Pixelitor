@@ -50,7 +50,7 @@ class PenToolTest {
         Tools.setCurrentTool(Tools.PEN);
 
         // a real composition that can store paths
-        comp = TestHelper.createEmptyComp(300, 300);
+        comp = TestHelper.createEmptyComp(300, 300, true);
         view = comp.getView(); // a mock view
         PenTool.path = null;
         Tools.PEN.startBuilding(false);

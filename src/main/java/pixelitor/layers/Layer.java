@@ -92,7 +92,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     // unit tests use a different LayerUI implementation
     // by assigning a different UI factory
-    public static Function<Layer, LayerUI> uiFactory = LayerButton::new;
+    public static Function<Layer, LayerUI> uiFactory = LayerGUI::new;
 
     protected static final CheckerboardPainter thumbCheckerBoardPainter
         = ImageUtils.createCheckerboardPainter();

@@ -452,7 +452,7 @@ public class Views {
             assert comp.getView() == null : "already has a view";
 
             View view = new View(comp);
-            comp.addAllLayersToGUI();
+            comp.addAllLayersToUI();
             view.setCursor(Tools.getCurrent().getStartingCursor());
             views.add(view);
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
@@ -587,7 +587,7 @@ public class Views {
     }
 
     public static void thumbSizeChanged(int newThumbSize) {
-        // since the layer buttons are cached, all views have
+        // since the layer GUIs are cached, all views have
         // to be notified to update their buttons
         for (View view : views) {
             view.thumbSizeChanged(newThumbSize);

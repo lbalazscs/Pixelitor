@@ -115,8 +115,8 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     }
 
     @VisibleForTesting
-    public int getNumLayerButtons() {
-        return layersPanel.getNumLayerButtons();
+    public int getNumLayerGUIs() {
+        return layersPanel.getNumLayerGUIs();
     }
 
     @VisibleForTesting

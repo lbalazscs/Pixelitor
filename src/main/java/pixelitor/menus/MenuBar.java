@@ -48,7 +48,7 @@ import pixelitor.filters.transitions.GooTransition;
 import pixelitor.filters.transitions.ShapesGridTransition;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
-import pixelitor.filters.util.FilterUtils;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.gui.utils.PAction;
@@ -620,18 +620,18 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_ALT_O);
 
-        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
-            @Override
-            public void onActiveLayer(Layer layer) {
-                SmartObject so = (SmartObject) layer;
-                if (so.hasSmartFilters()) {
-                    so.editSmartFilter(0);
-                } else {
-                    Messages.showInfo("No Smart Filters",
-                        "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");
-                }
-            }
-        }, CTRL_SHIFT_E);
+//        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
+//            @Override
+//            public void onActiveLayer(Layer layer) {
+//                SmartObject so = (SmartObject) layer;
+//                if (so.hasSmartFilters()) {
+//                    so.editSmartFilter(so.getSmartFilter(0));
+//                } else {
+//                    Messages.showInfo("No Smart Filters",
+//                        "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");
+//                }
+//            }
+//        }, CTRL_SHIFT_E);
 
         sub.add(new OpenViewEnabledAction("Add Linked...") {
             @Override
@@ -1370,6 +1370,47 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createSplashSubmenu());
         developMenu.add(createTestSubmenu());
 
+        Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
+        abstract class ActiveSmartObjectAction extends RestrictedLayerAction {
+            protected ActiveSmartObjectAction(String name) {
+                super(name, isSmartObject);
+            }
+
+            @Override
+            protected void onActiveLayer(Layer layer) {
+                onActiveSO((SmartObject) layer);
+            }
+
+            protected abstract void onActiveSO(SmartObject so);
+        }
+
+        developMenu.add(new ActiveSmartObjectAction("Edit 0") {
+            @Override
+            protected void onActiveSO(SmartObject so) {
+                so.getSmartFilter(0).edit();
+            }
+        });
+        developMenu.add(new ActiveSmartObjectAction("Edit 1") {
+            @Override
+            protected void onActiveSO(SmartObject so) {
+                so.getSmartFilter(1).edit();
+            }
+        });
+        developMenu.add(new ActiveSmartObjectAction("Edit 2") {
+            @Override
+            protected void onActiveSO(SmartObject so) {
+                so.getSmartFilter(2).edit();
+            }
+        });
+
+        developMenu.add(new ActiveSmartObjectAction("Print Smart Filters") {
+            @Override
+            protected void onActiveSO(SmartObject so) {
+                String s = so.debugSmartFilters();
+                System.out.printf("%s%n", s);
+            }
+        });
+
         return developMenu;
     }
 
@@ -1599,7 +1640,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new PAction("Create All Filters") {
             @Override
             protected void onClick() {
-                FilterUtils.createAllFilters();
+                Filters.createAllFilters();
             }
         });
 
@@ -1632,7 +1673,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("Test Filter Constructors") {
             @Override
             protected void onClick() {
-                FilterUtils.testFilterConstructors();
+                Filters.testFilterConstructors();
             }
         });
 
