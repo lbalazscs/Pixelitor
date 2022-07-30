@@ -38,7 +38,7 @@ import static pixelitor.colors.Colors.TRANSPARENT_BLACK;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
- * Arbitrary Rotate
+ * A filter for arbitrary affine transforms.
  */
 public class TransformLayer extends ParametrizedFilter {
     @Serial
@@ -47,7 +47,7 @@ public class TransformLayer extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
     private final ColorParam bgColorParam = new ColorParam(GUIText.BG_COLOR, TRANSPARENT_BLACK, USER_ONLY_TRANSPARENCY);
-    private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 501);
+    private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", -500, 100, 500);
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 
     public TransformLayer() {
