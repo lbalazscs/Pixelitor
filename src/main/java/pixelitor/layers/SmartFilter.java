@@ -20,10 +20,15 @@ package pixelitor.layers;
 import pixelitor.ImageSource;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.gui.utils.PAction;
 
+import javax.swing.*;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Smart filters allow non-destructive editing, but unlike
@@ -38,7 +43,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     private static final long serialVersionUID = 1L;
 
     private ImageSource imageSource;
-    private BufferedImage cachedImage;
+    private transient BufferedImage cachedImage;
     private final SmartObject smartObject;
     private SmartFilter next;
 
@@ -86,11 +91,20 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         return cachedImage;
     }
 
+    public ImageSource getImageSource() {
+        return imageSource;
+    }
+
+    public void setImageSource(ImageSource imageSource) {
+        this.imageSource = imageSource;
+    }
+
     public SmartFilter getNext() {
         return next;
     }
 
     public void setNext(SmartFilter next) {
+        assert next != this;
         this.next = next;
     }
 
@@ -102,6 +116,17 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (next != null) {
             next.invalidateChain();
         }
+    }
+
+    public Stream<SmartFilter> getChain() {
+        return Stream.iterate(this, Objects::nonNull, SmartFilter::getNext);
+    }
+
+    public String debugChain() {
+        return getChain()
+            .limit(5) // prevent infinite recursion
+            .map(SmartFilter::toString)
+            .collect(Collectors.joining(", ", "[", "]"));
     }
 
     private void invalidateCache() {
@@ -139,16 +164,56 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         smartObject.activate(addToHistory);
     }
 
-    public void setImageSource(ImageSource imageSource) {
-        this.imageSource = imageSource;
-    }
-
     @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
             settingsChanged();
             comp.update();
         }
+    }
+
+    @Override
+    public JPopupMenu createLayerIconPopupMenu() {
+        // just create the popup menu from scratch, since the
+        // superclasses don't add anything to it
+        JPopupMenu popup = new JPopupMenu();
+
+        popup.add(new PAction("Edit " + getName()) {
+            @Override
+            protected void onClick() {
+                edit();
+            }
+        });
+        popup.add(new PAction("Delete " + getName()) {
+            @Override
+            protected void onClick() {
+                smartObject.deleteSmartFilter(SmartFilter.this);
+            }
+        });
+        popup.add(new PAction("Copy " + getName()) {
+            @Override
+            protected void onClick() {
+                Filter.copiedSmartFilter = getFilter().copy();
+            }
+        });
+
+        popup.addSeparator();
+        if (smartObject.getNumStartFilters() > 1) {
+            popup.add(new PAction("Move Up") {
+                @Override
+                protected void onClick() {
+                    smartObject.moveUp(SmartFilter.this);
+                }
+            });
+            popup.add(new PAction("Move Down") {
+                @Override
+                protected void onClick() {
+                    smartObject.moveDown(SmartFilter.this);
+                }
+            });
+        }
+
+        return popup;
     }
 
     public void updateOptions(SmartObject layer) {
@@ -160,6 +225,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     @Override
     public String toString() {
         return "SmartFilter(name=" + getName()
-               + ", visibility = " + isVisible() + ")";
+               + ", visibility = " + isVisible()
+               + ", next = " + (next != null ? next.getName() : "null")
+               + ", cached = " + (cachedImage != null)
+               + ")";
     }
 }

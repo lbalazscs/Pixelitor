@@ -30,8 +30,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ButtonUI;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -60,7 +58,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private DragReorderHandler dragReorderHandler;
 
     private LayerGUI owner;
-    private List<LayerGUI> children = new ArrayList<>();
+    private final List<LayerGUI> children = new ArrayList<>();
 
     // Most often false, but when opening serialized pxc files,
     // the mask/smart filter label might be added before the drag handler
@@ -200,8 +198,16 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                     sfPanel.removeAll();
                     sfPanel.setLayout(gridLayout);
                 }
+            } else {
+                if (sfPanel != null) {
+                    // all smart filters have been removed
+                    remove(sfPanel);
+                    sfPanel = null;
+                }
             }
-            for (int i = 0; i < numFilters; i++) {
+
+            // smart filters are applied from the bottom up
+            for (int i = numFilters - 1; i >= 0; i--) {
                 SmartFilter sf = so.getSmartFilter(i);
                 LayerGUI sfUI = (LayerGUI) sf.createUI();
                 sfUI.setOwner(this);

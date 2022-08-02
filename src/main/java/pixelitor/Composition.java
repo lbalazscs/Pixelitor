@@ -1452,7 +1452,12 @@ public class Composition implements Serializable, ImageSource {
 
     @Override
     public BufferedImage getImage() {
-        return getCompositeImage();
+        BufferedImage image = getCompositeImage();
+        if (image.isAlphaPremultiplied()) {
+            image = ImageUtils.copyTo(BufferedImage.TYPE_INT_ARGB, image);
+        }
+
+        return image;
     }
 
     /**

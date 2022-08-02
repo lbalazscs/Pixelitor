@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.ImageSource;
 import pixelitor.Views;
 import pixelitor.filters.Filter;
 import pixelitor.gui.View;
@@ -42,6 +43,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -366,16 +368,6 @@ public class SmartObject extends ImageLayer {
                 }
             });
         }
-        boolean hasSmartFilter = !filters.isEmpty();
-        if (hasSmartFilter) {
-            SmartFilter smartFilter = filters.get(0);
-            popup.add(new PAction("Copy " + smartFilter.getName()) {
-                @Override
-                protected void onClick() {
-                    Filter.copiedSmartFilter = smartFilter.getFilter().copy();
-                }
-            });
-        }
         if (Filter.copiedSmartFilter != null) {
             popup.add(new PAction("Paste " + Filter.copiedSmartFilter.getName()) {
                 @Override
@@ -384,27 +376,6 @@ public class SmartObject extends ImageLayer {
                     pasteSmartFilter(Filter.copiedSmartFilter.copy());
                 }
             });
-        }
-        if (hasSmartFilter) {
-            popup.addSeparator();
-            for (SmartFilter filter : filters) {
-                PAction editAction = new PAction("Edit " + filter.getName()) {
-                    @Override
-                    protected void onClick() {
-                        editSmartFilter(filter);
-                    }
-                };
-
-                var editMenuItem = new JMenuItem(editAction);
-                popup.add(editMenuItem);
-
-                popup.add(new PAction("Delete " + filter.getName()) {
-                    @Override
-                    protected void onClick() {
-                        deleteSmartFilter(filter);
-                    }
-                });
-            }
         }
     }
 
@@ -454,8 +425,6 @@ public class SmartObject extends ImageLayer {
     }
 
     private void runAndAddSmartFilter(Filter newFilter) {
-        assert filters.isEmpty();
-
         boolean filterDialogAccepted = startFilter(newFilter, false);
         if (filterDialogAccepted) {
             addSmartFilter(newFilter);
@@ -479,7 +448,7 @@ public class SmartObject extends ImageLayer {
         deleteSmartFilter(filters.get(index));
     }
 
-    private void deleteSmartFilter(SmartFilter filter) {
+    public void deleteSmartFilter(SmartFilter filter) {
         int numFilters = filters.size();
         for (int i = 0; i < numFilters; i++) {
             if (filters.get(i) == filter) {
@@ -732,5 +701,62 @@ public class SmartObject extends ImageLayer {
         node.add(new CompositionNode("content", content));
 
         return node;
+    }
+
+    public void moveUp(SmartFilter smartFilter) {
+        int index = filters.indexOf(smartFilter);
+        if (index == filters.size() - 1) {
+            return; // already the last filter
+        }
+        swapSmartFilters(index, index + 1);
+    }
+
+    public void moveDown(SmartFilter smartFilter) {
+        int index = filters.indexOf(smartFilter);
+        if (index == 0) {
+            return; // already the first filter
+        }
+        swapSmartFilters(index - 1, index);
+    }
+
+    private void swapSmartFilters(int indexA, int indexB) {
+        assert indexB == indexA + 1;
+        SmartFilter filterA = filters.get(indexA);
+        SmartFilter filterB = filters.get(indexB);
+
+        // handle the filter bellow them
+        SmartFilter bellow = null;
+        if (indexA != 0) {
+            bellow = filters.get(indexA - 1);
+            assert bellow.getNext() == filterA;
+            bellow.setNext(filterB);
+        }
+
+        // handle the swap
+        assert filterA.getNext() == filterB;
+        assert filterB.getImageSource() == filterA;
+        ImageSource origSource = filterA.getImageSource();
+        SmartFilter above = filterB.getNext(); // keep the reference
+        filterB.setNext(filterA);
+        filterA.setImageSource(filterB);
+        filterB.setImageSource(origSource);
+        Collections.swap(filters, indexA, indexB);
+
+        // handle the filter above them
+        if (above != null) {
+            filterA.setNext(above);
+            above.setImageSource(filterA);
+        } else {
+            filterA.setNext(null);
+        }
+
+        // update the GUI
+        updateSmartFilterUI();
+
+        // update the image
+        SmartFilter lowestChanged = bellow != null ? bellow : filterB;
+        lowestChanged.invalidateChain();
+        recalculateImage(false);
+        comp.update();
     }
 }
