@@ -481,12 +481,18 @@ public class SmartObject extends ImageLayer {
     }
 
     private void updateSmartFilterUI() {
-        if (ui == null) { // in unit tests
+        if (ui == null) { // in some unit tests
             return;
         }
         ui.updateSmartFilterPanel();
-        EventQueue.invokeLater(() ->
-            comp.getView().getLayersPanel().revalidate());
+        EventQueue.invokeLater(this::revalidateUI);
+    }
+
+    private void revalidateUI() {
+        LayersPanel layersPanel = comp.getView().getLayersPanel();
+        if (layersPanel != null) { // null in unit tests
+            layersPanel.revalidate();
+        }
     }
 
     @Override
@@ -749,6 +755,7 @@ public class SmartObject extends ImageLayer {
         } else {
             filterA.setNext(null);
         }
+        assert checkConsistency();
 
         // update the GUI
         updateSmartFilterUI();
@@ -758,5 +765,17 @@ public class SmartObject extends ImageLayer {
         lowestChanged.invalidateChain();
         recalculateImage(false);
         comp.update();
+    }
+
+    public boolean checkConsistency() {
+        if (!content.getOwners().contains(this)) {
+            throw new AssertionError(getName() + " not owner of its content");
+        }
+        for (SmartFilter filter : filters) {
+            if (!filter.checkConsistency()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

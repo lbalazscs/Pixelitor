@@ -27,6 +27,7 @@ import javax.swing.*;
 import java.awt.Composite;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static pixelitor.utils.Texts.i18n;
@@ -47,7 +48,7 @@ public class BlendingModePanel extends JPanel {
     private final JLabel opacityLabel;
     private final JLabel bmLabel;
 
-    public BlendingModePanel(boolean forTools) {
+    public BlendingModePanel(boolean longForm) {
         super(new FlowLayout(LEFT));
         opacityLabel = new JLabel(OPACITY);
         add(opacityLabel);
@@ -55,7 +56,7 @@ public class BlendingModePanel extends JPanel {
 
         add(opacityDDSlider);
 
-        if (forTools) {
+        if (longForm) {
             bmLabel = new JLabel("%, Blending Mode:", SwingConstants.LEFT);
         } else {
             bmLabel = new JLabel("%", SwingConstants.LEFT);
@@ -109,6 +110,14 @@ public class BlendingModePanel extends JPanel {
     public void addActionListener(ActionListener al) {
         opacityDDSlider.addActionListener(al);
         bmCombo.addActionListener(al);
+    }
+
+    public void addOpacityListener(Consumer<Float> listener) {
+        opacityDDSlider.addActionListener(e -> listener.accept(getOpacity()));
+    }
+
+    public void addBlendingModeListener(Consumer<BlendingMode> listener) {
+        bmCombo.addActionListener(e -> listener.accept(getBlendingMode()));
     }
 
     public boolean isNormalAndOpaque() {

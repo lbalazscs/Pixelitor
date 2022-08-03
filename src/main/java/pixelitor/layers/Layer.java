@@ -68,8 +68,8 @@ public abstract class Layer implements Serializable, Debuggable {
     protected String name;
 
     private boolean visible = true;
-    private float opacity = 1.0f;
-    private BlendingMode blendingMode = BlendingMode.NORMAL;
+    protected float opacity = 1.0f;
+    protected BlendingMode blendingMode = BlendingMode.NORMAL;
 
     protected LayerMask mask;
     private boolean maskEnabled = true;
@@ -618,8 +618,8 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
-                                                          boolean isFirstVisibleLayer) {
+    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
+                                                            boolean isFirstVisibleLayer) {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }

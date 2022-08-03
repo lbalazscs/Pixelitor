@@ -20,10 +20,19 @@ package pixelitor.layers;
 import pixelitor.ImageSource;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.PAction;
+import pixelitor.history.History;
+import pixelitor.history.LayerBlendingEdit;
+import pixelitor.history.LayerOpacityEdit;
+import pixelitor.utils.Icons;
+import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.Component;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.Objects;
@@ -45,6 +54,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     private ImageSource imageSource;
     private transient BufferedImage cachedImage;
     private final SmartObject smartObject;
+
+    // the next smart filter in the chain of smart filters
     private SmartFilter next;
 
     public SmartFilter(Filter filter, ImageSource imageSource, SmartObject smartObject) {
@@ -83,11 +94,47 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             return prevImage;
         }
 
+        return adjustImageWithMasksAndBlending(prevImage, false);
+    }
+
+    @Override
+    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
+                                                            boolean isFirstVisibleLayer) {
+        if (isFirstVisibleLayer) {
+            return imgSoFar; // there's nothing we can do
+        }
+        BufferedImage transformed = applyOnImage(imgSoFar);
+
+        if (usesMask()) {
+            mask.applyTo(transformed);
+        }
+        if (!usesMask() && isNormalAndOpaque()) {
+            return transformed;
+        } else {
+            // unlike an adjustment layer, this makes sure that imgSoFar
+            // (which could be cached in the image source is not modified
+            BufferedImage copy = ImageUtils.copyImage(imgSoFar);
+
+            Graphics2D g = copy.createGraphics();
+            setupDrawingComposite(g, isFirstVisibleLayer);
+            g.drawImage(transformed, 0, 0, null);
+            g.dispose();
+            return copy;
+        }
+    }
+
+    @Override
+    public BufferedImage applyOnImage(BufferedImage src) {
         if (cachedImage != null) {
             return cachedImage;
         }
+        cachedImage = filter.transformImage(src);
 
-        cachedImage = applyLayer(null, prevImage, false);
+        // TODO this check should not be necessary
+        if (cachedImage == src) {
+            cachedImage = ImageUtils.copyImage(cachedImage);
+        }
+
         return cachedImage;
     }
 
@@ -145,18 +192,66 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
         super.setVisible(newVisibility, addToHistory, false);
         if (update) {
-            // invalidate only starting from the next one
-            if (next != null) {
-                next.invalidateChain();
-            }
-            smartObject.recalculateImage(false);
-            comp.update();
+            layerLevelSettingsChanged();
         }
     }
 
-    public void settingsChanged() {
+    @Override
+    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
+        assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
+        assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
+
+        if (opacity == newOpacity) {
+            return;
+        }
+        float prevOpacity = opacity;
+        opacity = newOpacity;
+
+        if (update) {
+            layerLevelSettingsChanged();
+        }
+
+        if (addToHistory) {
+            History.add(new LayerOpacityEdit(this, prevOpacity));
+        }
+    }
+
+    @Override
+    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
+        if (blendingMode == newMode) {
+            return;
+        }
+
+        BlendingMode prevMode = blendingMode;
+        blendingMode = newMode;
+
+        if (update) {
+            layerLevelSettingsChanged();
+        }
+
+        if (addToHistory) {
+            History.add(new LayerBlendingEdit(this, prevMode));
+        }
+    }
+
+    public void filterSettingsChanged() {
         invalidateChain();
         smartObject.recalculateImage(false);
+    }
+
+    private void layerLevelSettingsChanged() {
+        // invalidate only starting from the next one
+        if (next != null) {
+            next.invalidateChain();
+        }
+        smartObject.recalculateImage(true);
+        comp.update();
+    }
+
+    @Override
+    public void onFilterDialogAccepted(String filterName) {
+        super.onFilterDialogAccepted(filterName);
+        smartObject.updateIconImage();
     }
 
     @Override
@@ -167,7 +262,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
-            settingsChanged();
+            filterSettingsChanged();
             comp.update();
         }
     }
@@ -178,12 +273,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         // superclasses don't add anything to it
         JPopupMenu popup = new JPopupMenu();
 
-        popup.add(new PAction("Edit " + getName()) {
-            @Override
-            protected void onClick() {
-                edit();
-            }
-        });
+        if (filter instanceof FilterWithGUI) {
+            popup.add(new PAction("Edit " + getName() + "...") {
+                @Override
+                protected void onClick() {
+                    edit();
+                }
+            });
+        }
         popup.add(new PAction("Delete " + getName()) {
             @Override
             protected void onClick() {
@@ -197,15 +294,22 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             }
         });
 
-        popup.addSeparator();
+        popup.add(new PAction("Blending Options...") {
+            @Override
+            protected void onClick() {
+                showBlendingOptions();
+            }
+        });
+
         if (smartObject.getNumStartFilters() > 1) {
-            popup.add(new PAction("Move Up") {
+            popup.addSeparator();
+            popup.add(new PAction("Move Up", Icons.getNorthArrowIcon()) {
                 @Override
                 protected void onClick() {
                     smartObject.moveUp(SmartFilter.this);
                 }
             });
-            popup.add(new PAction("Move Down") {
+            popup.add(new PAction("Move Down", Icons.getSouthArrowIcon()) {
                 @Override
                 protected void onClick() {
                     smartObject.moveDown(SmartFilter.this);
@@ -216,10 +320,42 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         return popup;
     }
 
+    public void showBlendingOptions() {
+        BlendingModePanel panel = new BlendingModePanel(true);
+
+        panel.setOpacity(getOpacity());
+        panel.setBlendingMode(getBlendingMode());
+
+        panel.addOpacityListener(newOpacity ->
+            setOpacity(newOpacity, true, true));
+        panel.addBlendingModeListener(newBlendingMode ->
+            setBlendingMode(newBlendingMode, true, true));
+
+        new DialogBuilder()
+            .title("Blending Options for " + getName())
+            .content(panel)
+            .parentComponent((LayerGUI) ui)
+            .noCancelButton()
+            .okText("Close")
+            .show();
+    }
+
     public void updateOptions(SmartObject layer) {
         if (filter instanceof ParametrizedFilter pf) {
             pf.getParamSet().updateOptions(layer, false);
         }
+    }
+
+    public boolean checkConsistency() {
+        if (next != null) {
+            if (next.getImageSource() != this) {
+                throw new AssertionError("image source of " + next.getName() + " is not " + getName());
+            }
+            ;
+            //noinspection TailRecursion
+            return next.checkConsistency();
+        }
+        return true;
     }
 
     @Override

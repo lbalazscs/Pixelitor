@@ -34,17 +34,17 @@ import static javax.swing.BoxLayout.Y_AXIS;
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
     public ChannelMixerGUI(ParametrizedFilter filter, Filterable layer,
-                           Action[] actions, boolean reset) {
-        super(filter, layer, true, reset, actions);
+                           Action[] presets, boolean reset) {
+        super(filter, layer, true, reset, presets);
     }
 
     @Override
     protected void setupGUI(ParamSet paramSet,
                             boolean addShowOriginal,
-                            Object otherInfo) {
+                            Action[] presets) {
         var upperPanel = new JPanel(new BorderLayout());
         var leftPanel = GUIUtils.arrangeVertically(paramSet);
-        var rightPanel = createPresetsPanel((Action[]) otherInfo);
+        var rightPanel = createPresetsPanel(presets);
 
         // This is a right place to do this, because when this code is
         // called, the default adjustment listener is already set.
@@ -61,12 +61,12 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         add(buttonsPanel, SOUTH);
     }
 
-    private static JPanel createPresetsPanel(Action[] actions) {
+    private static JPanel createPresetsPanel(Action[] presets) {
         var rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
         rightPanel.setBorder(createTitledBorder(DialogMenuBar.BUILT_IN_PRESETS));
-        for (Action action : actions) {
-            JComponent b = new JButton(action);
+        for (Action preset : presets) {
+            JComponent b = new JButton(preset);
             b.setAlignmentX(LEFT_ALIGNMENT);
             rightPanel.add(b);
         }

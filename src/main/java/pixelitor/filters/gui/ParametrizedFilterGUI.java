@@ -47,7 +47,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
                                  Filterable layer,
                                  boolean addShowOriginal,
                                  boolean reset,
-                                 Object otherInfo) {
+                                 Action[] presets) {
         super(filter, layer);
 
         ParamSet paramSet = filter.getParamSet();
@@ -61,14 +61,14 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
         paramSet.setAdjustmentListener(this);
 
-        setupGUI(paramSet, addShowOriginal, otherInfo);
+        setupGUI(paramSet, addShowOriginal, presets);
 
         settingsChanged(true); // force running the first filter preview
     }
 
     protected void setupGUI(ParamSet paramSet,
                             boolean addShowOriginal,
-                            Object otherInfo) {
+                            Action[] presets) {
         JPanel filterParamsPanel = createFilterParamsPanel(paramSet);
         JPanel filterActionsPanel = createFilterActionsPanel(
             paramSet.getActions(), addShowOriginal, 3);

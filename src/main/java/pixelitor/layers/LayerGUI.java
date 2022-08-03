@@ -224,6 +224,13 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             if (numFilters > 0) {
                 add(sfPanel, LayerGUILayout.SMART_FILTERS);
             }
+        } else {
+            if (sfPanel != null) {
+                // The layer isn't a smart object, but it has a smart filter
+                // panel: can happen after a smart object rasterization.
+                remove(sfPanel);
+                sfPanel = null;
+            }
         }
     }
 

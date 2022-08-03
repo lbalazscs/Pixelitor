@@ -40,6 +40,8 @@ class SmartObjectTest {
         Composition comp = TestHelper.createEmptyComp();
         smartObject = new SmartObject(comp, content);
         comp.addLayerInInitMode(smartObject);
+
+        assertThat(smartObject).isConsistent();
     }
 
     @Test

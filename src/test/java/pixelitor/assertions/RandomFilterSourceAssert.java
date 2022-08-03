@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,12 +97,6 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         return this;
     }
 
-    /**
-     * Verifies that the actual RandomFilterSource has next.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual RandomFilterSource does not have next.
-     */
     public RandomFilterSourceAssert hasNext() {
         isNotNull();
 
@@ -113,12 +107,6 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         return this;
     }
 
-    /**
-     * Verifies that the actual RandomFilterSource does not have next.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual RandomFilterSource has next.
-     */
     public RandomFilterSourceAssert doesNotHaveNext() {
         isNotNull();
 
@@ -129,12 +117,6 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         return this;
     }
 
-    /**
-     * Verifies that the actual RandomFilterSource has previous.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual RandomFilterSource does not have previous.
-     */
     public RandomFilterSourceAssert hasPrevious() {
         isNotNull();
 
@@ -145,12 +127,6 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         return this;
     }
 
-    /**
-     * Verifies that the actual RandomFilterSource does not have previous.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual RandomFilterSource has previous.
-     */
     public RandomFilterSourceAssert doesNotHavePrevious() {
         isNotNull();
 

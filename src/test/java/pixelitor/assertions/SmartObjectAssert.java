@@ -18,6 +18,7 @@
 package pixelitor.assertions;
 
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.SmartFilter;
 import pixelitor.layers.SmartObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +34,43 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
     public SmartObjectAssert hasNumSmartFilters(int expected) {
         isNotNull();
         assertThat(((SmartObject) actual).getNumStartFilters()).isEqualTo(expected);
+        return myself;
+    }
+
+    public SmartObjectAssert smartFilterNamesAre(String... expected) {
+        isNotNull();
+
+        SmartObject so = (SmartObject) actual;
+        int numFilters = so.getNumStartFilters();
+        assertThat(numFilters == expected.length);
+        for (int i = 0; i < numFilters; i++) {
+            SmartFilter smartFilter = so.getSmartFilter(i);
+            assertThat(smartFilter.getName()).isEqualTo(expected[i]);
+        }
+
+        return myself;
+    }
+
+    public SmartObjectAssert smartFilterVisibilitiesAre(boolean... expected) {
+        isNotNull();
+
+        SmartObject so = (SmartObject) actual;
+        int numFilters = so.getNumStartFilters();
+        assertThat(numFilters == expected.length);
+        for (int i = 0; i < numFilters; i++) {
+            SmartFilter smartFilter = so.getSmartFilter(i);
+            assertThat(smartFilter.isVisible()).isEqualTo(expected[i]);
+        }
+
+        return myself;
+    }
+
+    public SmartObjectAssert isConsistent() {
+        isNotNull();
+
+        SmartObject so = (SmartObject) actual;
+        assertThat(so.checkConsistency()).isTrue();
+
         return myself;
     }
 }
