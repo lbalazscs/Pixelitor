@@ -33,7 +33,7 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
 
     public SmartObjectAssert hasNumSmartFilters(int expected) {
         isNotNull();
-        assertThat(((SmartObject) actual).getNumStartFilters()).isEqualTo(expected);
+        assertThat(((SmartObject) actual).getNumSmartFilters()).isEqualTo(expected);
         return myself;
     }
 
@@ -41,8 +41,8 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
         isNotNull();
 
         SmartObject so = (SmartObject) actual;
-        int numFilters = so.getNumStartFilters();
-        assertThat(numFilters == expected.length);
+        int numFilters = so.getNumSmartFilters();
+        assertThat(numFilters).isEqualTo(expected.length);
         for (int i = 0; i < numFilters; i++) {
             SmartFilter smartFilter = so.getSmartFilter(i);
             assertThat(smartFilter.getName()).isEqualTo(expected[i]);
@@ -55,8 +55,8 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
         isNotNull();
 
         SmartObject so = (SmartObject) actual;
-        int numFilters = so.getNumStartFilters();
-        assertThat(numFilters == expected.length);
+        int numFilters = so.getNumSmartFilters();
+        assertThat(numFilters).isEqualTo(expected.length);
         for (int i = 0; i < numFilters; i++) {
             SmartFilter smartFilter = so.getSmartFilter(i);
             assertThat(smartFilter.isVisible()).isEqualTo(expected[i]);

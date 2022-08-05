@@ -17,8 +17,10 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppContext;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -59,6 +61,16 @@ public class LayerMaskActions {
             // masks can be linked only to content layers
             if (layer instanceof ContentLayer) {
                 menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
+            }
+
+            if (AppContext.isDevelopment()) {
+                menu.add(new PAction("Debug Mask Image") {
+                    @Override
+                    protected void onClick() {
+                        Debug.debugImage(layer.getMask().getImage(),
+                            "Mask Image of " + layer.getName());
+                    }
+                });
             }
         }
 

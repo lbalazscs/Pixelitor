@@ -126,4 +126,6 @@ public interface Drawable extends Filterable {
             Messages.showException(ise);
         }
     }
+
+    void update();
 }

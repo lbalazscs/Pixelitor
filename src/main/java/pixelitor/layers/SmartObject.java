@@ -208,6 +208,8 @@ public class SmartObject extends ImageLayer {
         }
 
         recalculateImage(false);
+
+        assert checkConsistency();
     }
 
     private void handleMissingContentLater() {
@@ -401,7 +403,7 @@ public class SmartObject extends ImageLayer {
         return !filters.isEmpty();
     }
 
-    public int getNumStartFilters() {
+    public int getNumSmartFilters() {
         return filters.size();
     }
 
@@ -665,50 +667,6 @@ public class SmartObject extends ImageLayer {
         return duplicate;
     }
 
-    public boolean checkInvariant() {
-        if (!content.isSmartObjectContent()) {
-            throw new IllegalStateException("content of %s (%s) is broken"
-                .formatted(getName(), content.getDebugName()));
-        }
-        return true;
-    }
-
-    @Override
-    public String getTypeString() {
-        return "Smart Object";
-    }
-
-    public String debugSmartFilters() {
-        return "Filters of " + getName() + ":\n"
-               + filters.stream()
-                   .map(SmartFilter::toString)
-                   .collect(Collectors.joining("\n"));
-    }
-
-    public void debugAllImages() {
-        BufferedImage soImage = image;
-        BufferedImage contentImage = content.getCompositeImage();
-//        BufferedImage calcContentImage = content.calculateCompositeImage();
-
-        Debug.debugImage(soImage, "soImage");
-        Debug.debugImage(contentImage, "contentImage");
-//        Debug.debugImage(calcContentImage, "calcContentImage");
-    }
-
-    @Override
-    public DebugNode createDebugNode(String key) {
-        DebugNode node = super.createDebugNode(key);
-
-        boolean linked = isContentLinked();
-        node.addBoolean("linked", linked);
-        if (linked) {
-            node.addString("link file", linkedContentFile.getAbsolutePath());
-        }
-        node.add(new CompositionNode("content", content));
-
-        return node;
-    }
-
     public void moveUp(SmartFilter smartFilter) {
         int index = filters.indexOf(smartFilter);
         if (index == filters.size() - 1) {
@@ -767,6 +725,55 @@ public class SmartObject extends ImageLayer {
         comp.update();
     }
 
+    public boolean containsSmartFilter(SmartFilter filter) {
+        return filters.contains(filter);
+    }
+
+    @Override
+    public Drawable getActiveDrawable() {
+        if (isMaskEditing()) {
+            return getMask();
+        }
+        for (SmartFilter filter : filters) {
+            if (filter.isMaskEditing()) {
+                return filter.getMask();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isEditingAnyMask() {
+        if (isMaskEditing()) {
+            return true;
+        }
+        for (SmartFilter filter : filters) {
+            if (filter.isMaskEditing()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void setMaskEditing(boolean newValue) {
+        super.setMaskEditing(newValue);
+        if (newValue) {
+            for (SmartFilter filter : filters) {
+                filter.setMaskEditing(false);
+            }
+        }
+    }
+
+    public void setFilterMaskEditing(SmartFilter edited) {
+        setMaskEditing(false);
+        for (SmartFilter filter : filters) {
+            if (filter != edited) {
+                filter.setMaskEditing(false);
+            }
+        }
+    }
+
     public boolean checkConsistency() {
         if (!content.getOwners().contains(this)) {
             throw new AssertionError(getName() + " not owner of its content");
@@ -777,5 +784,53 @@ public class SmartObject extends ImageLayer {
             }
         }
         return true;
+    }
+
+    public boolean checkInvariant() {
+        if (!content.isSmartObjectContent()) {
+            throw new IllegalStateException("content of %s (%s) is broken"
+                .formatted(getName(), content.getDebugName()));
+        }
+        return true;
+    }
+
+    @Override
+    public String getTypeString() {
+        return "Smart Object";
+    }
+
+    public String debugSmartFilters() {
+        return "Filters of " + getName() + ":\n"
+               + filters.stream()
+                   .map(SmartFilter::toString)
+                   .collect(Collectors.joining("\n"));
+    }
+
+    public void debugAllImages() {
+        BufferedImage soImage = image;
+        BufferedImage contentImage = content.getCompositeImage();
+//        BufferedImage calcContentImage = content.calculateCompositeImage();
+
+        Debug.debugImage(soImage, "soImage");
+        Debug.debugImage(contentImage, "contentImage");
+//        Debug.debugImage(calcContentImage, "calcContentImage");
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        boolean linked = isContentLinked();
+        node.addBoolean("linked", linked);
+        if (linked) {
+            node.addString("link file", linkedContentFile.getAbsolutePath());
+        }
+        node.add(new CompositionNode("content", content));
+
+        for (SmartFilter filter : filters) {
+            node.add(filter.createDebugNode("smart filter"));
+        }
+
+        return node;
     }
 }

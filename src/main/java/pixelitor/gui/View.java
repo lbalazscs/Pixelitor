@@ -512,7 +512,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // it is important not to call this directly,
         // it should be a part of a mask activation
         assert Assertions.callingClassIs("MaskViewMode");
-        assert maskViewMode.canBeAssignedTo(comp.getActiveLayer());
 
         MaskViewMode oldMode = this.maskViewMode;
         this.maskViewMode = maskViewMode;

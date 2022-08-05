@@ -106,11 +106,13 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer) {
         assert view != null;
-        assert layer.isActive();
+        assert layer.isActive() || layer.isSmartFilter();
 
         if (AppContext.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
         }
+
+        assert canBeAssignedTo(layer);
 
         boolean change = view.setMaskViewMode(this);
         layer.setMaskEditing(editMask);
@@ -152,13 +154,13 @@ public enum MaskViewMode {
     }
 
     // used in asserts
-    public boolean canBeAssignedTo(Layer layer) {
+    private boolean canBeAssignedTo(Layer layer) {
         if (editMask || showMask) {
             boolean hasMask = layer.hasMask();
             if (!hasMask) {
                 throw new AssertionError("layer " + layer.getName()
-                    + " has no mask, view mode = " + this
-                    + ", mask icon = " + layer.getUI().hasMaskIcon());
+                                         + " has no mask, view mode = " + this
+                                         + ", mask icon = " + layer.getUI().hasMaskIcon());
             }
             return hasMask;
         }

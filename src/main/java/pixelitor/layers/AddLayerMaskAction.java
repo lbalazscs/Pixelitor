@@ -32,7 +32,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import static java.awt.event.ActionEvent.CTRL_MASK;
-import static pixelitor.layers.LayerMaskAddType.*;
 
 /**
  * An {@link Action} that adds a new layer mask
@@ -72,19 +71,7 @@ public class AddLayerMaskAction extends NamedAction
         var layer = comp.getActiveLayer();
         assert !layer.hasMask();
 
-        if (comp.hasSelection()) {
-            if (ctrlPressed) {
-                layer.addMask(HIDE_SELECTION);
-            } else {
-                layer.addMask(REVEAL_SELECTION);
-            }
-        } else { // there is no selection
-            if (ctrlPressed) {
-                layer.addMask(HIDE_ALL);
-            } else {
-                layer.addMask(REVEAL_ALL);
-            }
-        }
+        layer.addMask(ctrlPressed);
     }
 
     @Override
@@ -101,7 +88,9 @@ public class AddLayerMaskAction extends NamedAction
     @Override
     public void maskAddedTo(Layer layer) {
         assert layer.hasMask();
-        setEnabled(false);
+        if (!layer.isSmartFilter()) {
+            setEnabled(false);
+        }
     }
 
     @Override

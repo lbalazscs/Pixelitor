@@ -40,8 +40,6 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
     protected boolean hasDialog;
     private final boolean allowSmartObjects;
 
-    private final boolean allowMasks;
-
     protected DrawableAction(String name) {
         this(name, true, false);
     }
@@ -53,7 +51,6 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
     protected DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
         this.hasDialog = hasDialog;
         this.allowSmartObjects = allowSmartObjects;
-        this.allowMasks = true;
         assert name != null;
 
         this.name = name;
@@ -92,20 +89,28 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
 
     private void startOnLayer(Layer layer) {
         if (layer.isMaskEditing()) {
-            if (allowMasks) {
-                process(layer.getMask());
-            } else {
-                Dialogs.showErrorDialog("Mask is active",
-                    name + " cannot be applied to masks.");
-            }
+            process(layer.getMask());
         } else if (layer instanceof ImageLayer imageLayer) {
-            if (!allowSmartObjects && imageLayer instanceof SmartObject so) {
-                boolean rasterize = showRasterizeDialog(layer);
-                if (rasterize) {
-                    ImageLayer newImageLayer = so.replaceWithRasterized();
-                    process(newImageLayer);
+            if (imageLayer instanceof SmartObject so) {
+                Drawable soMask = so.getActiveDrawable();
+                if (allowSmartObjects) {
+                    if (soMask != null) {
+                        process(soMask);
+                    } else {
+                        process(so);
+                    }
+                } else {
+                    if (soMask != null) {
+                        process(soMask);
+                        return;
+                    }
+                    boolean rasterize = showRasterizeDialog(layer);
+                    if (rasterize) {
+                        ImageLayer newImageLayer = so.replaceWithRasterized();
+                        process(newImageLayer);
+                    }
                 }
-            } else {
+            } else { // plain image layer
                 process(imageLayer);
             }
         } else if (layer.isRasterizable()) {

@@ -859,7 +859,7 @@ public class Composition implements Serializable, ImageSource {
         if (activeLayer.getClass() == ImageLayer.class) { // but not smart objects
             return true;
         }
-        if (activeLayer.isMaskEditing()) {
+        if (activeLayer.isEditingAnyMask()) {
             return true;
         }
 
@@ -878,13 +878,7 @@ public class Composition implements Serializable, ImageSource {
      */
     public Drawable getActiveDrawable() {
         assert classInvariant();
-        if (activeLayer.isMaskEditing()) {
-            return activeLayer.getMask();
-        }
-        if (activeLayer instanceof Drawable) {
-            return (Drawable) activeLayer;
-        }
-        return null;
+        return activeLayer.getActiveDrawable();
     }
 
     public Filterable getActiveFilterable() {

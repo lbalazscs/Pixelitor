@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.layers.Filterable;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.Debuggable;
 
 /**
  * The model for a filter parameter, which (unlike a button) holds
@@ -28,7 +29,7 @@ import pixelitor.utils.VisibleForTesting;
  * outside filters as models of GUI elements, but then only
  * a subset of their functionality is used.
  */
-public interface FilterParam extends FilterSetting, Resettable {
+public interface FilterParam extends FilterSetting, Resettable, Debuggable {
 
     /**
      * Sets a random value without triggering the filter

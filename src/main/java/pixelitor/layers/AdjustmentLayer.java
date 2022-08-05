@@ -22,6 +22,7 @@ import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.io.TranslatedImage;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -189,6 +190,15 @@ public class AdjustmentLayer extends Layer implements Filterable {
     @Override
     public String getTypeString() {
         return "Adjustment Layer";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(filter.createDebugNode("filter"));
+
+        return node;
     }
 
     @Override

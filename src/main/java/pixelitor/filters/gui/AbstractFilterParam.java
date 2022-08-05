@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.debug.DebugNode;
+
 import java.util.Objects;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -151,5 +153,15 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getResetToolTip() {
         return "<html>Reset the value of <b>" + name + "</b>";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addString("name", name);
+        node.addString("value", getParamValue().toString());
+
+        return node;
     }
 }

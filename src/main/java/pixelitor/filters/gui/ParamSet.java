@@ -21,6 +21,8 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.Icons;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.util.*;
 
@@ -31,7 +33,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  * All the information needed to automatically
  * build the user interface of a {@link ParametrizedFilter}
  */
-public class ParamSet {
+public class ParamSet implements Debuggable {
     private final List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
@@ -291,5 +293,16 @@ public class ParamSet {
     @Override
     public String toString() {
         return "ParamSet {" + paramList.toString() + "}";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        for (FilterParam param : paramList) {
+            node.add(param.createDebugNode("param"));
+        }
+
+        return node;
     }
 }

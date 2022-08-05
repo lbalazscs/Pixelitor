@@ -1201,6 +1201,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
+    public void update() {
+        comp.update();
+    }
+
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 

@@ -243,6 +243,14 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
+    public void update() {
+        if (owner.isSmartFilter()) {
+            ((SmartFilter) owner).maskUpdated();
+        }
+        super.update();
+    }
+
+    @Override
     public String getTypeString() {
         return "Layer Mask";
     }

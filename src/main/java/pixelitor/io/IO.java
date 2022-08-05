@@ -35,7 +35,10 @@ import java.awt.EventQueue;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,6 +47,7 @@ import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.isWritable;
 import static pixelitor.io.FileChoosers.svgFilter;
 import static pixelitor.utils.Threads.*;
@@ -350,9 +354,9 @@ public class IO {
                 svgPath, svgFillRule, strokeDescr);
         }
 
-        try (PrintWriter out = new PrintWriter(file)) {
+        try (PrintWriter out = new PrintWriter(file, UTF_8)) {
             out.println(svg);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             Messages.showException(e);
         }
         Messages.showFileSavedMessage(file);

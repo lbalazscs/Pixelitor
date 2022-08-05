@@ -21,6 +21,8 @@ import pixelitor.filters.gui.PresetOwner;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -32,7 +34,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
  * The superclass of all Pixelitor filters and color adjustments.
  * A filter transforms an image into another image.
  */
-public abstract class Filter implements Serializable, PresetOwner {
+public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -156,6 +158,15 @@ public abstract class Filter implements Serializable, PresetOwner {
         // TODO a few filters do have settings, but no preset support.
         //  Currently, this isn't a problem, because this is used for smart filters only
         return this;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addString("name", getName());
+
+        return node;
     }
 
     /**

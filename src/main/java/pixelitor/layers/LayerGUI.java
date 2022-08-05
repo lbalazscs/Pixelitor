@@ -189,7 +189,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public void updateSmartFilterPanel() {
         if (layer.isSmartObject()) {
             SmartObject so = (SmartObject) layer;
-            int numFilters = so.getNumStartFilters();
+            int numFilters = so.getNumSmartFilters();
             if (numFilters > 0) {
                 GridLayout gridLayout = new GridLayout(numFilters, 1);
                 if (sfPanel == null) {
@@ -555,7 +555,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             lateDragHandler = true;
         }
 
-        layer.getMask().updateIconImage();
+        // don't call layer.getMask().updateIconImage(); because
+        // it requires an ui, which could be constructed right now.
+        updateLayerIconImageAsync(layer.getMask());
         revalidate();
     }
 
@@ -618,18 +620,17 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateSelectionState() {
-        SelectionState newSelectionState;
-
+//        boolean isSmartFilter = isSmartFilterGUI();
         if (!isSelected()) {
-            newSelectionState = SelectionState.UNSELECTED;
+            setSelectionState(SelectionState.UNSELECTED);
+        } else if (layer.isMaskEditing()) {
+            setSelectionState(SelectionState.MASK_SELECTED);
         } else {
-            if (layer.isMaskEditing()) {
-                newSelectionState = SelectionState.MASK_SELECTED;
-            } else {
-                newSelectionState = SelectionState.LAYER_SELECTED;
-            }
+            setSelectionState(SelectionState.LAYER_SELECTED);
         }
+    }
 
+    private void setSelectionState(SelectionState newSelectionState) {
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;
             selectionState.show(layerIconLabel, maskIconLabel);

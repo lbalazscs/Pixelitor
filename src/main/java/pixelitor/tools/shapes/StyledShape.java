@@ -488,7 +488,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         if (imageEdit != null) {
             paintOnDrawable(dr);
-            comp.update();
+            dr.update();
             dr.updateIconImage();
         } else {
             // a repaint is necessary even if the box is outside the canvas

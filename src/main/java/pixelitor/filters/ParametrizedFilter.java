@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.*;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -186,5 +187,14 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         }
 
         return false;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(paramSet.createDebugNode("paramSet"));
+
+        return node;
     }
 }

@@ -53,6 +53,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
+import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
@@ -334,6 +335,22 @@ public abstract class Layer implements Serializable, Debuggable {
         return mask;
     }
 
+    public void addMask(boolean ctrlPressed) {
+        if (comp.hasSelection()) {
+            if (ctrlPressed) {
+                addMask(HIDE_SELECTION);
+            } else {
+                addMask(REVEAL_SELECTION);
+            }
+        } else { // there is no selection
+            if (ctrlPressed) {
+                addMask(HIDE_ALL);
+            } else {
+                addMask(REVEAL_ALL);
+            }
+        }
+    }
+
     public void addMask(LayerMaskAddType addType) {
         if (hasMask()) {
             RestrictedLayerAction.Condition.NO_LAYER_MASK.showErrorMessage(this);
@@ -468,6 +485,13 @@ public abstract class Layer implements Serializable, Debuggable {
         //noinspection SimplifiableConditionalExpression
         assert maskEditing ? hasMask() : true;
 
+        return maskEditing;
+    }
+
+    /**
+     * This also returns true if a smart filter's mask is edited.
+     */
+    public boolean isEditingAnyMask() {
         return maskEditing;
     }
 
@@ -922,6 +946,21 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public Tool getPreferredTool() {
+        return null;
+    }
+
+
+    public boolean isSmartFilter() {
+        return this instanceof SmartFilter;
+    }
+
+    public Drawable getActiveDrawable() {
+        if (isMaskEditing()) {
+            return getMask();
+        }
+        if (this instanceof Drawable) {
+            return (Drawable) this;
+        }
         return null;
     }
 

@@ -34,6 +34,8 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -53,7 +55,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     private ImageSource imageSource;
     private transient BufferedImage cachedImage;
-    private final SmartObject smartObject;
+    private SmartObject smartObject;
 
     // the next smart filter in the chain of smart filters
     private SmartFilter next;
@@ -72,10 +74,19 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public SmartFilter copy(ImageSource imageSource, SmartObject newSmartObject) {
         SmartFilter copy = (SmartFilter) duplicate(false, true);
         copy.setImageSource(imageSource);
+        copy.setSmartObject(newSmartObject);
         if (next != null) {
             copy.setNext(next.copy(this, newSmartObject));
         }
         return copy;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // defaults for transient fields
+        cachedImage = null;
+
+        in.defaultReadObject();
     }
 
     @Override
@@ -106,6 +117,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         BufferedImage transformed = applyOnImage(imgSoFar);
 
         if (usesMask()) {
+            // copy, because otherwise different masks
+            // are applied to the same cached image
+            transformed = ImageUtils.copyImage(transformed);
+
             mask.applyTo(transformed);
         }
         if (!usesMask() && isNormalAndOpaque()) {
@@ -144,6 +159,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     public void setImageSource(ImageSource imageSource) {
         this.imageSource = imageSource;
+    }
+
+    public void setSmartObject(SmartObject smartObject) {
+        this.smartObject = smartObject;
     }
 
     public SmartFilter getNext() {
@@ -260,11 +279,26 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
+    public void setMaskEditing(boolean newValue) {
+        super.setMaskEditing(newValue);
+        if (newValue) {
+            smartObject.setFilterMaskEditing(this);
+        }
+    }
+
+    @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
             filterSettingsChanged();
             comp.update();
         }
+    }
+
+    public void maskUpdated() {
+        if (next != null) {
+            next.invalidateChain();
+        }
+        smartObject.recalculateImage(false);
     }
 
     @Override
@@ -301,7 +335,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             }
         });
 
-        if (smartObject.getNumStartFilters() > 1) {
+        popup.add(new PAction("Add Layer Mask") {
+            @Override
+            protected void onClick() {
+                addMask(false);
+            }
+        });
+
+        if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();
             popup.add(new PAction("Move Up", Icons.getNorthArrowIcon()) {
                 @Override
@@ -347,6 +388,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public boolean checkConsistency() {
+        if (!smartObject.containsSmartFilter(this)) {
+            throw new AssertionError("smart object '%s' doesn't contain '%s'"
+                .formatted(smartObject.getName(), getName()));
+        }
+
         if (next != null) {
             if (next.getImageSource() != this) {
                 throw new AssertionError("image source of " + next.getName() + " is not " + getName());

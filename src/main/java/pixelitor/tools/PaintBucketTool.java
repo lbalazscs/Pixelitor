@@ -172,7 +172,7 @@ public class PaintBucketTool extends Tool {
             } else if (grayScale) {
                 dr.setImage(ImageUtils.convertToGrayScaleImage(workingImage));
             }
-            comp.update();
+            dr.update();
             dr.updateIconImage();
         }
     }

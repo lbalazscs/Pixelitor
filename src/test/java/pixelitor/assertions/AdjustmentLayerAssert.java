@@ -34,7 +34,7 @@ public class AdjustmentLayerAssert<S extends AdjustmentLayerAssert<S, T>, T exte
     public S filterClassIs(Class<? extends Filter> clazz) {
         isNotNull();
 
-        assertThat(actual.getFilter().getClass() == clazz);
+        assertThat(actual.getFilter().getClass()).isEqualTo(clazz);
 
         return myself;
     }

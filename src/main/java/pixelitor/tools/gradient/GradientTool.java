@@ -440,7 +440,7 @@ public class GradientTool extends DragTool {
         }
 
         gradient.drawOn(dr);
-        dr.getComp().update();
+        dr.update();
         lastGradient = gradient;
     }
 
