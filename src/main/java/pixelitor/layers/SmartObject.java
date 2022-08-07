@@ -743,16 +743,21 @@ public class SmartObject extends ImageLayer {
     }
 
     @Override
-    public boolean isEditingAnyMask() {
+    public LayerMask getActiveMask() {
         if (isMaskEditing()) {
-            return true;
+            return getMask();
         }
         for (SmartFilter filter : filters) {
             if (filter.isMaskEditing()) {
-                return true;
+                return filter.getMask();
             }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean isEditingAnyMask() {
+        return getActiveMask() != null;
     }
 
     @Override

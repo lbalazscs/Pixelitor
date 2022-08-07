@@ -193,8 +193,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // recreate the layer GUIs
 //        layersPanel = new LayersPanel();
         newComp.addAllLayersToUI();
-        oldComp.removeAllLayersFromUI();
-        oldComp.setView(null);
+        oldComp.dispose();
 
         if (isActive()) {
             LayersContainer.showLayersOf(this);
@@ -288,11 +287,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public void close() {
         if (viewContainer != null) {
-            // this will also cause the calling of Views.imageClosed via
+            // this will also cause the calling of Views.viewClosed via
             // ImageFrame.internalFrameClosed
             viewContainer.close();
         }
-        comp.dispose();
     }
 
     public void showLayersUI() {
@@ -370,14 +368,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // after the translation and scaling, we are in "image space"
 
         if (showMask) {
-            LayerMask mask = comp.getActiveLayer().getMask();
+            LayerMask mask = comp.getActiveLayer().getActiveMask();
             assert mask != null : "no mask in " + maskViewMode;
             mask.paintLayerOnGraphics(g2, true);
         } else {
             g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 
             if (maskViewMode.showRuby()) {
-                LayerMask mask = comp.getActiveLayer().getMask();
+                LayerMask mask = comp.getActiveLayer().getActiveMask();
                 assert mask != null : "no mask in " + maskViewMode;
                 mask.paintAsRubylith(g2);
             }

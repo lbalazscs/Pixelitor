@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.history.AdjustmentLayerChangedEdit;
+import pixelitor.history.History;
 import pixelitor.io.TranslatedImage;
 import pixelitor.utils.debug.DebugNode;
 
@@ -158,7 +160,10 @@ public class AdjustmentLayer extends Layer implements Filterable {
         if (showOriginal) {
             filter = lastFilter;
             comp.update();
+        } else {
+            History.add(new AdjustmentLayerChangedEdit(this, lastFilter));
         }
+
         lastFilter = null;
         showOriginal = false;
     }
@@ -185,6 +190,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     public Filter getFilter() {
         return filter;
+    }
+
+    // used only for undo/redo
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+
+        comp.update();
     }
 
     @Override

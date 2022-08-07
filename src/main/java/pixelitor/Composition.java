@@ -286,10 +286,6 @@ public class Composition implements Serializable, ImageSource {
         return view.getDialogParent();
     }
 
-    public void closed() {
-        setView(null);
-    }
-
     public void deactivated() {
         if (isSmartObjectContent()) {
             for (SmartObject owner : owners) {
@@ -394,6 +390,18 @@ public class Composition implements Serializable, ImageSource {
         if (isOpen()) {
             view.close();
         }
+    }
+
+    /**
+     * Called when this composition is no longer needed because it was closed or replaced.
+     */
+    public void dispose() {
+        if (selection != null) {
+            // stop the timer thread
+            selection.die();
+        }
+        removeAllLayersFromUI();
+        setView(null);
     }
 
     /**
@@ -1164,13 +1172,6 @@ public class Composition implements Serializable, ImageSource {
         if (view != null) { // during reload image it can be null
             view.repaintRegion(area);
             view.repaintNavigator(false);
-        }
-    }
-
-    public void dispose() {
-        if (selection != null) {
-            // stop the timer thread
-            selection.die();
         }
     }
 

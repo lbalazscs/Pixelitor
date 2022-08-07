@@ -964,6 +964,13 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
+    public LayerMask getActiveMask() {
+        if (isMaskEditing()) {
+            return getMask();
+        }
+        return null;
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key + " - " + getName(), this);

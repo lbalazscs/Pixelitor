@@ -216,6 +216,18 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
+    public void setMaskEnabled(boolean maskEnabled, boolean addToHistory) {
+        super.setMaskEnabled(maskEnabled, addToHistory);
+        layerLevelSettingsChanged();
+    }
+
+    @Override
+    public void deleteMask(boolean addToHistory) {
+        super.deleteMask(addToHistory);
+        layerLevelSettingsChanged();
+    }
+
+    @Override
     public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
@@ -335,12 +347,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             }
         });
 
-        popup.add(new PAction("Add Layer Mask") {
-            @Override
-            protected void onClick() {
-                addMask(false);
-            }
-        });
+        if (!hasMask()) {
+            popup.add(new PAction("Add Layer Mask") {
+                @Override
+                protected void onClick() {
+                    addMask(false);
+                }
+            });
+        }
 
         if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();

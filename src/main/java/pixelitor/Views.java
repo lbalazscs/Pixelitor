@@ -106,7 +106,7 @@ public class Views {
     public static void viewClosed(View view) {
         Composition comp = view.getComp();
         History.compClosed(comp);
-        comp.closed();
+        comp.dispose();
 
         views.remove(view);
         if (views.isEmpty()) {

@@ -436,9 +436,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             if (maskIconLabel != null) {
                 handler.attachTo(maskIconLabel);
             }
-//            if (smartFilterLabel != null) {
-//                handler.attachTo(smartFilterLabel);
-//            }
         }
     }
 
