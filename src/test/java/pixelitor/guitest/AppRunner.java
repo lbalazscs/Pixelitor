@@ -29,7 +29,6 @@ import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.FgBgColorSelector;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
@@ -38,6 +37,7 @@ import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ColorFillLayer;
+import pixelitor.layers.LayerGUI;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
@@ -66,6 +66,8 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.*;
 import static pixelitor.tools.BrushType.*;
 import static pixelitor.tools.Tools.ERASER;
+import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
+import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -80,6 +82,8 @@ public class AppRunner {
         DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMAT_HMS =
         DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    private static boolean newImageValidationTested = false;
 
     private final Robot robot;
     private final Mouse mouse;
@@ -270,13 +274,17 @@ public class AppRunner {
             dialog.textBox("nameTF").deleteText().enterText(title);
         }
         dialog.textBox("widthTF").deleteText().enterText(String.valueOf(width));
-        dialog.textBox("heightTF").deleteText().enterText("e");
 
-        // try to accept the dialog
-        dialog.button("ok").click();
-        expectAndCloseErrorDialog();
+        if (!newImageValidationTested) {
+            dialog.textBox("heightTF").deleteText().enterText("e");
 
-        // correct the error
+            // try to accept the dialog
+            dialog.button("ok").click();
+            expectAndCloseErrorDialog();
+
+            newImageValidationTested = true;
+        }
+
         dialog.textBox("heightTF").deleteText().enterText(String.valueOf(height));
 
         // try again
@@ -436,7 +444,11 @@ public class AppRunner {
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
-        AJSUtils.findPopupMenuFixtureByText(popupMenu, text)
+        clickPopupMenu(popupMenu, text, true);
+    }
+
+    static void clickPopupMenu(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
+        AJSUtils.findPopupMenuFixtureByText(popupMenu, text, onlyIfVisible)
             .requireEnabled()
             .click();
     }
@@ -529,6 +541,25 @@ public class AppRunner {
 
     public JButtonFixture findButtonByText(String text) {
         return AJSUtils.findButtonByText(pw, text);
+    }
+
+    public JLabelFixture findLayerIconByLayerName(String layerName) {
+        return findIconByLayerName(layerName, "layerIcon");
+    }
+
+    public JLabelFixture findMaskIconByLayerName(String layerName) {
+        return findIconByLayerName(layerName, "maskIcon");
+    }
+
+    private JLabelFixture findIconByLayerName(String layerName, String iconType) {
+        return pw.label(new GenericTypeMatcher<JLabel>(JLabel.class) {
+            @Override
+            protected boolean isMatching(JLabel label) {
+                return (label.getParent() instanceof LayerGUI layerGUI)
+                       && label.getName().equals(iconType)
+                       && layerGUI.getLayer().getName().equals(layerName);
+            }
+        });
     }
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
@@ -646,21 +677,6 @@ public class AppRunner {
         assert EDT.activeLayerHasMask();
     }
 
-    public void drawGradient(String gradientType) {
-        // draw a radial gradient
-        pw.toggleButton("Gradient Tool Button").click();
-        pw.comboBox("typeCB").selectItem(gradientType);
-        pw.checkBox("revertCB").check();
-
-        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
-            // otherwise location on screen can lead to crazy results
-            runMenuCommand("Actual Pixels");
-        }
-
-        mouse.dragFromCanvasCenterToTheRight();
-        keyboard.pressEsc(); // hide the gradient handles
-    }
-
     private void undoRedoNewLayer(int numLayersBefore, String editName) {
         checkNumLayersIs(numLayersBefore + 1);
 
@@ -765,13 +781,38 @@ public class AppRunner {
         undoRedoNewLayer(numLayersBefore, "Add Gradient Fill Layer");
 
         EDT.assertActiveToolIs(Tools.GRADIENT);
-        pw.comboBox("typeCB").selectItem(gradientType.toString());
-        EDT.run(() -> FgBgColors.setFGColor(new Color(68, 152, 115)));
-        EDT.run(() -> FgBgColors.setBGColor(new Color(185, 56, 177)));
-        mouse.moveToCanvas(100, 100);
-        mouse.dragToCanvas(200, 200);
+        CanvasDrag dragLocation = new CanvasDrag(100, 100, 100);
+        drawGradient(gradientType, dragLocation,
+            new Color(68, 152, 115),
+            new Color(185, 56, 177));
 
         keyboard.undoRedo("Gradient Fill Layer Change");
+    }
+
+    public void drawGradient(GradientType gradientType, CanvasDrag dragLocation, Color fgColor, Color bgColor) {
+        clickTool(Tools.GRADIENT);
+
+        pw.comboBox("typeCB").selectItem(gradientType.toString());
+        EDT.setFgBgColors(fgColor, bgColor);
+        mouse.drag(dragLocation);
+
+        keyboard.pressEsc(); // hide the gradient handles
+    }
+
+    public void drawGradient(String gradientType) {
+        clickTool(Tools.GRADIENT);
+
+        // draw a radial gradient
+        pw.comboBox("typeCB").selectItem(gradientType);
+        pw.checkBox("revertCB").check();
+
+        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
+            // otherwise location on screen can lead to crazy results
+            runMenuCommand("Actual Pixels");
+        }
+
+        mouse.dragFromCanvasCenterToTheRight();
+        keyboard.pressEsc(); // hide the gradient handles
     }
 
     public void addShapesLayer(ShapeType shapeType, int canvasX, int canvasY) {
@@ -781,14 +822,26 @@ public class AppRunner {
         undoRedoNewLayer(numLayersBefore, "Add Shape Layer");
 
         EDT.assertActiveToolIs(Tools.SHAPES);
-        pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
-        pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.RADIAL_GRADIENT.toString());
-        EDT.run(() -> FgBgColors.setFGColor(new Color(248, 199, 25)));
-        EDT.run(() -> FgBgColors.setBGColor(new Color(39, 81, 39)));
-        mouse.moveToCanvas(canvasX, canvasY);
-        mouse.dragToCanvas(canvasX + 100, canvasY + 100);
 
+        EDT.setFgBgColors(new Color(248, 199, 25), new Color(39, 81, 39));
+        drawShape(shapeType, RADIAL_GRADIENT, NONE, new CanvasDrag(canvasX, canvasY, 100), false);
+    }
+
+    public void drawShape(ShapeType type,
+                          TwoPointPaintType fillPaint,
+                          TwoPointPaintType strokePaint,
+                          CanvasDrag shapeLocation, boolean rasterize) {
+        clickTool(Tools.SHAPES);
+        pw.comboBox("shapeTypeCB").selectItem(type.toString());
+        pw.comboBox("fillPaintCB").selectItem(fillPaint.toString());
+        pw.comboBox("strokePaintCB").selectItem(strokePaint.toString());
+        mouse.drag(shapeLocation);
         keyboard.undoRedo("Create Shape");
+
+        if (rasterize) {
+            keyboard.pressEsc();
+            keyboard.undoRedo("Rasterize Shape");
+        }
     }
 
     public void changeLayerBlendingMode(BlendingMode blendingMode) {

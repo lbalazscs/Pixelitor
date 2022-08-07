@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,13 +37,13 @@ public class AJSUtils {
         return container.button(matcher);
     }
 
-    static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
+    static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
         return popupMenu.menuItem(
             new GenericTypeMatcher<>(JMenuItem.class) {
                 @Override
                 protected boolean isMatching(JMenuItem menuItem) {
-                    if (!menuItem.isShowing()) {
-                        return false; // not interested in menuItems that are not currently displayed
+                    if (onlyIfVisible && !menuItem.isShowing()) {
+                        return false;
                     }
                     String menuItemText = menuItem.getText();
                     if (menuItemText == null) {

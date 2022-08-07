@@ -286,6 +286,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+
+        filterSettingsChanged();
+        comp.update();
+    }
+
+    @Override
     public void activate(boolean addToHistory) {
         smartObject.activate(addToHistory);
     }

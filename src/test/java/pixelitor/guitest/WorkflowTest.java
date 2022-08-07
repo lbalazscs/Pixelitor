@@ -33,9 +33,7 @@ import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.GradientType;
-import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.StrokeType;
-import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
@@ -46,9 +44,12 @@ import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
+import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
+import static pixelitor.tools.shapes.ShapeType.*;
+import static pixelitor.tools.shapes.TwoPointPaintType.*;
 
 /**
  * A workflow test is an Assertj-Swing regression test, where an
@@ -84,7 +85,7 @@ public class WorkflowTest {
     }
 
     private WorkflowTest() {
-        boolean expWasEnabled = EDT.call(() -> AppContext.enableExperimentalFeatures);
+        boolean experimentalWasEnabled = EDT.call(() -> AppContext.enableExperimentalFeatures);
         // enable it before building the menus so that shortcuts work
         EDT.run(() -> AppContext.enableExperimentalFeatures = true);
 
@@ -97,8 +98,9 @@ public class WorkflowTest {
         wfTest1();
         wfTest2();
         wfTest3();
+        wfTest4();
 
-        if (!expWasEnabled) {
+        if (!experimentalWasEnabled) {
             EDT.run(() -> AppContext.enableExperimentalFeatures = false);
         }
     }
@@ -147,7 +149,7 @@ public class WorkflowTest {
         flipHorizontal();
         clearGuides();
         app.clickTool(Tools.BRUSH);
-        loadReferenceImage("wf1_reference.png");
+        loadReferenceImage("wf1_ref.png");
     }
 
     private void wfTest2() {
@@ -217,7 +219,7 @@ public class WorkflowTest {
         duplicateLayerThenUndo(SmartObject.class);
         rasterizeThenUndo(SmartObject.class);
 
-        app.addShapesLayer(ShapeType.CAT, 20, 380);
+        app.addShapesLayer(CAT, 20, 380);
         duplicateLayerThenUndo(ShapesLayer.class);
         rasterizeThenUndo(ShapesLayer.class);
 
@@ -225,7 +227,7 @@ public class WorkflowTest {
         app.runMenuCommand("Lower Layer Selection");
         app.runMenuCommand("Lower Layer Selection");
 
-        loadReferenceImage("wf2_reference.png");
+        loadReferenceImage("wf2_ref.png");
     }
 
     private void wfTest3() {
@@ -253,7 +255,43 @@ public class WorkflowTest {
 
         app.closeCurrentView();
 
-        loadReferenceImage("wf3_reference.png");
+        loadReferenceImage("wf3_ref.png");
+    }
+
+    private void wfTest4() {
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 4");
+        runFilterWithDialog("Checker Pattern", dialog -> {
+            dialog.slider("Width").slideTo(25);
+            dialog.slider("Amount").slideTo(17);
+        });
+
+        // add a layer mask with a kiwi image
+        app.addLayerMask();
+        CanvasDrag kiwiSize = new CanvasDrag(150, 50, 400);
+        app.drawShape(KIWI, FOREGROUND, NONE, kiwiSize, true);
+        app.runMenuCommand("Invert");
+
+        // add a smart object bellow it
+        app.addColorFillLayer(Color.BLUE);
+        convertLayerToSmartObject();
+        app.runMenuCommand("Lower Layer");
+
+        // add a smart filter to the smart object
+        runFilterWithDialog("Caustics", dialog -> {
+            dialog.slider("Zoom (%)").slideTo(50);
+            dialog.slider("Samples (Quality)").slideTo(10);
+        });
+
+        // add a layer mask with a vertical gradient to the smart filter
+        var popup = app.findLayerIconByLayerName("Caustics").showPopupMenu();
+        clickPopupMenu(popup, "Add Layer Mask");
+
+        // this shouldn't be necessary, mask edit mode should be set by default
+        var popup2 = app.findMaskIconByLayerName("Caustics").showPopupMenu();
+        clickPopupMenu(popup2, "Show Layer, but Edit Mask", false);
+
+        app.drawGradient(GradientType.LINEAR, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
+        loadReferenceImage("wf4_ref.png");
     }
 
     private void addTextLayer(String text, String vAlignment, String hAlignment) {
@@ -367,9 +405,9 @@ public class WorkflowTest {
         app.runMenuCommand("Actual Pixels");
         mouse.recalcCanvasBounds();
 
-        pw.comboBox("shapeTypeCB").selectItem(ShapeType.RECTANGLE.toString());
-        pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.NONE.toString());
-        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.TRANSPARENT.toString());
+        pw.comboBox("shapeTypeCB").selectItem(RECTANGLE.toString());
+        pw.comboBox("fillPaintCB").selectItem(NONE.toString());
+        pw.comboBox("strokePaintCB").selectItem(TRANSPARENT.toString());
         EDT.assertShapesToolStateIs(NO_INTERACTION);
         pw.button("convertToSelection").requireDisabled();
 
@@ -429,15 +467,8 @@ public class WorkflowTest {
     private void addHeartShapedHoleToTheWoodLayer() {
         app.setDefaultColors();
         app.addLayerMask();
-        app.clickTool(Tools.SHAPES);
-
-        pw.comboBox("shapeTypeCB").selectItem(ShapeType.HEART.toString());
-        pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.FOREGROUND.toString());
-        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.NONE.toString());
-        mouse.moveToCanvas(340, 100);
-        mouse.dragToCanvas(440, 200);
-        keyboard.undoRedo("Create Shape");
-        keyboard.pressEsc(); // rasterize the shape
+        CanvasDrag heartLocation = new CanvasDrag(340, 100, 100);
+        app.drawShape(HEART, FOREGROUND, NONE, heartLocation, true);
 
         app.runMenuCommand("Delete");
         keyboard.undoRedoUndo("Delete Layer Mask");

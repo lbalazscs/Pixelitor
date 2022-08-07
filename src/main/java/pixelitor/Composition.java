@@ -289,7 +289,7 @@ public class Composition implements Serializable, ImageSource {
     public void deactivated() {
         if (isSmartObjectContent()) {
             for (SmartObject owner : owners) {
-                owner.propagateChanges(this, false);
+                owner.propagateContentChanges(this, false);
             }
         }
     }
@@ -1621,7 +1621,7 @@ public class Composition implements Serializable, ImageSource {
             // otherwise the changes might not be propagated when deactivating,
             // because this is not dirty after saving even if it's changed
             for (SmartObject owner : owners) {
-                owner.propagateChanges(this, true);
+                owner.propagateContentChanges(this, true);
 
                 if (!owner.isContentLinked()) {
                     boolean link = Messages.showYesNoQuestion("Link Smart Object to File",

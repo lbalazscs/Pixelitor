@@ -22,6 +22,7 @@ import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
@@ -40,6 +41,7 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.test.Events;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -244,5 +246,12 @@ public class EDT {
         if (actual != expected) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }
+    }
+
+    public static void setFgBgColors(Color fgColor, Color bgColor) {
+        run(() -> {
+            FgBgColors.setFGColor(fgColor);
+            FgBgColors.setBGColor(bgColor);
+        });
     }
 }

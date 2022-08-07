@@ -28,7 +28,7 @@ public class AdjustmentLayerChangedEdit extends PixelitorEdit {
     private Filter backupFilter;
 
     public AdjustmentLayerChangedEdit(AdjustmentLayer layer, Filter backupFilter) {
-        super("Adjustment Changed", layer.getComp());
+        super(backupFilter.getName() + " Changed", layer.getComp());
         this.layer = layer;
         this.backupFilter = backupFilter;
     }

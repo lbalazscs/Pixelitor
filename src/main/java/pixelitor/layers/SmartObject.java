@@ -303,7 +303,7 @@ public class SmartObject extends ImageLayer {
      * Ensures that all parents will reflect the changes in this
      * smart object when they are repainted.
      */
-    public void propagateChanges(Composition content, boolean force) {
+    public void propagateContentChanges(Composition content, boolean force) {
         // the reference might have been changed during editing
         setContent(content);
 
@@ -312,6 +312,10 @@ public class SmartObject extends ImageLayer {
         }
 
         invalidateImageCache();
+        if (!filters.isEmpty()) {
+            filters.get(0).invalidateChain();
+        }
+
         comp.smartObjectChanged(isContentLinked());
     }
 
@@ -551,7 +555,7 @@ public class SmartObject extends ImageLayer {
                 recalculateImage(true);
 
                 // only a grandparent composition might be opened
-                propagateChanges(loaded, true);
+                propagateContentChanges(loaded, true);
                 getParentView().repaint();
                 return loaded;
             }, onEDT)

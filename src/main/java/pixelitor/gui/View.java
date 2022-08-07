@@ -207,7 +207,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Tools.compReplaced(newComp, reloaded);
         if (newComp.isSmartObjectContent()) {
             for (SmartObject owner : newComp.getOwners()) {
-                owner.propagateChanges(newComp, true);
+                owner.propagateContentChanges(newComp, true);
             }
         }
 

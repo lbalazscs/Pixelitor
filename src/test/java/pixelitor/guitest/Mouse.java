@@ -84,6 +84,11 @@ public class Mouse {
         dragToScreen(x + canvasBounds.x, y + canvasBounds.y);
     }
 
+    public void drag(CanvasDrag drag) {
+        moveToCanvas(drag.getStartX(), drag.getStartY());
+        dragToCanvas(drag.getEndX(), drag.getEndY());
+    }
+
     // move relative to the given dialog
     void moveTo(DialogFixture dialog, int x, int y) {
         Dialog c = dialog.target();
