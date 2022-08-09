@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.Debuggable;
 
@@ -96,7 +96,7 @@ public interface Brush extends Debuggable {
      * Sets the Composition and the Graphics2D object
      * on which this brush will draw
      */
-    void setTarget(Composition comp, Graphics2D g);
+    void setTarget(Drawable dr, Graphics2D g);
 
     /**
      * Sets the radius of the brush

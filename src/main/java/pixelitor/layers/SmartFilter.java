@@ -62,8 +62,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     public SmartFilter(Filter filter, ImageSource imageSource, SmartObject smartObject) {
         super(smartObject.getComp(), filter.getName(), filter);
-        this.imageSource = imageSource;
-        this.smartObject = smartObject;
+        setImageSource(imageSource);
+        setSmartObject(smartObject);
     }
 
     /**
@@ -158,11 +158,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public void setImageSource(ImageSource imageSource) {
-        this.imageSource = imageSource;
+        this.imageSource = Objects.requireNonNull(imageSource);
     }
 
     public void setSmartObject(SmartObject smartObject) {
-        this.smartObject = smartObject;
+        this.smartObject = Objects.requireNonNull(smartObject);
     }
 
     public SmartFilter getNext() {
@@ -314,7 +314,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
-    public void maskUpdated() {
+    public void maskChanged() {
         if (next != null) {
             next.invalidateChain();
         }

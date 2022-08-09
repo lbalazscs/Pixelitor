@@ -22,6 +22,8 @@ import pixelitor.colors.Colors;
 import pixelitor.history.History;
 import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -138,6 +140,9 @@ public class LayerMask extends ImageLayer {
     @Override
     protected void imageRefChanged() {
         updateTransparencyImage();
+        if (owner instanceof SmartFilter sf) {
+            sf.maskChanged();
+        }
     }
 
     /**
@@ -244,10 +249,26 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public void update() {
-        if (owner.isSmartFilter()) {
-            ((SmartFilter) owner).maskUpdated();
+        if (owner instanceof SmartFilter sf) {
+            sf.maskChanged();
         }
-        super.update();
+        comp.update();
+    }
+
+    @Override
+    public void repaintRegion(PPoint start, PPoint end, double thickness) {
+        if (owner instanceof SmartFilter sf) {
+            sf.maskChanged();
+        }
+        comp.repaintRegion(start, end, thickness);
+    }
+
+    @Override
+    public void repaintRegion(PRectangle area) {
+        if (owner instanceof SmartFilter sf) {
+            sf.maskChanged();
+        }
+        comp.repaintRegion(area);
     }
 
     @Override

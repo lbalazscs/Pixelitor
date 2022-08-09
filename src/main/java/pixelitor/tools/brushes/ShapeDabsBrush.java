@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
@@ -37,8 +37,8 @@ public class ShapeDabsBrush extends DabsBrush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        super.setTarget(comp, g);
+    public void setTarget(Drawable dr, Graphics2D g) {
+        super.setTarget(dr, g);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
     }
 

@@ -421,7 +421,7 @@ public abstract class AbstractBrushTool extends Tool {
         initGraphics(g);
         comp.applySelectionClipping(g);
 
-        brush.setTarget(comp, g);
+        brush.setTarget(dr, g);
         return g;
     }
 

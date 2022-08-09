@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
@@ -30,7 +30,7 @@ import java.awt.Graphics2D;
  */
 public abstract class AbstractBrush implements Brush {
     protected Graphics2D targetG;
-    protected Composition comp;
+    protected Drawable dr;
 
     protected double radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected double diameter;
@@ -60,14 +60,14 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        this.comp = comp;
+    public void setTarget(Drawable dr, Graphics2D g) {
+        this.dr = dr;
         targetG = g;
     }
 
     // always call it before rememberPrevious!
     protected void repaintComp(PPoint p) {
-        comp.repaintRegion(previous, p, diameter);
+        dr.repaintRegion(previous, p, diameter);
     }
 
     // A simple setter, but with a more expressive name.

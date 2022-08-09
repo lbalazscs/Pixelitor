@@ -101,7 +101,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         backupRasterRef = new SoftReference<>(tmpRaster);
 
-        comp.update();
+        dr.update();
         dr.updateIconImage();
 
         return true;

@@ -28,6 +28,8 @@ import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.QuadrantAngle;
@@ -1203,6 +1205,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public void update() {
         comp.update();
+    }
+
+    @Override
+    public void repaintRegion(PPoint start, PPoint end, double thickness) {
+        comp.repaintRegion(start, end, thickness);
+    }
+
+    @Override
+    public void repaintRegion(PRectangle area) {
+        comp.repaintRegion(area);
     }
 
     @Override

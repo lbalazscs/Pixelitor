@@ -157,17 +157,6 @@ public class SmartObject extends ImageLayer {
             smartFilterIsVisible = true;
         }
         imageNeedsRefresh = true;
-
-        // migration from 4.3.0 serialization format
-        if (filters == null) { // new field, will be null in old pxc files
-            filters = new ArrayList<>();
-            for (Filter filter : smartFilters) {
-                SmartFilter newFilter = new SmartFilter(filter, content, this);
-                newFilter.setVisible(smartFilterIsVisible);
-                filters.add(newFilter);
-            }
-            smartFilters = null; // no longer needed
-        }
     }
 
     @Serial
@@ -184,10 +173,6 @@ public class SmartObject extends ImageLayer {
     }
 
     public void afterDeserialization() {
-        for (SmartFilter filter : filters) {
-            filter.updateOptions(this);
-        }
-
         if (isContentLinked()) {
             if (linkedContentFile.exists()) {
                 updateLinkedContentTime();
@@ -207,9 +192,31 @@ public class SmartObject extends ImageLayer {
             content.addOwner(this);
         }
 
+        // Migration from 4.3.0 serialization format.
+        // It's done here, to make sure that even
+        // linked contents are not null.
+        migratePXCFormat();
+
+        // has to be done after the migration
+        for (SmartFilter filter : filters) {
+            filter.updateOptions(this);
+        }
+
         recalculateImage(false);
 
         assert checkConsistency();
+    }
+
+    private void migratePXCFormat() {
+        if (filters == null) { // new field, will be null in old pxc files
+            filters = new ArrayList<>();
+            for (Filter filter : smartFilters) {
+                SmartFilter newFilter = new SmartFilter(filter, content, this);
+                newFilter.setVisible(smartFilterIsVisible);
+                filters.add(newFilter);
+            }
+            smartFilters = null; // no longer needed
+        }
     }
 
     private void handleMissingContentLater() {

@@ -17,9 +17,9 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
 import pixelitor.colors.Colors;
 import pixelitor.gui.View;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
@@ -51,8 +51,8 @@ public class SprayBrush extends AbstractBrush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        super.setTarget(comp, g);
+    public void setTarget(Drawable dr, Graphics2D g) {
+        super.setTarget(dr, g);
         AlphaComposite ac = (AlphaComposite) g.getComposite();
         isEraser = ac.getRule() == AlphaComposite.DST_OUT;
         baseColor = g.getColor();
@@ -90,7 +90,7 @@ public class SprayBrush extends AbstractBrush {
     }
 
     private void sprayOnce() {
-        View view = comp.getView();
+        View view = dr.getComp().getView();
         if (view == null) {
             // can happen if the composition was reloaded while spraying
             return;
@@ -147,7 +147,7 @@ public class SprayBrush extends AbstractBrush {
             maxX - minX + 2 * maxShapeRadius + 2,
             maxY - minY + 2 * maxShapeRadius + 2, view);
 
-        comp.repaintRegion(area);
+        dr.repaintRegion(area);
     }
 
     private void setOpacityRandomly() {

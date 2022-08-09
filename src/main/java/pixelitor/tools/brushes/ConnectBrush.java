@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.BasicStroke;
@@ -49,11 +49,11 @@ public class ConnectBrush extends AbstractBrush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        if (comp != this.comp) {
+    public void setTarget(Drawable dr, Graphics2D g) {
+        if (dr != this.dr) {
             deleteHistory();
         }
-        super.setTarget(comp, g);
+        super.setTarget(dr, g);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
     }
 

@@ -381,7 +381,7 @@ public class AssertJSwingTest {
         layer2Button.requireSelected();
         maskMode.set(this);
 
-        app.drawGradient("CW Spiral");
+        app.drawGradient(GradientType.SPIRAL_CW);
     }
 
     private void testChangeLayerOpacityAndBM() {
@@ -904,7 +904,7 @@ public class AssertJSwingTest {
         // add more layer types
         app.addGradientFillLayer(GradientType.ANGLE);
         app.addColorFillLayer(Color.BLUE);
-        app.addShapesLayer(ShapeType.BAT, 20, 380);
+        app.addShapesLayer(ShapeType.BAT, new CanvasDrag(20, 380, 100));
 
         testDuplicateImage();
 
@@ -3001,7 +3001,7 @@ public class AssertJSwingTest {
             }
         } else {
             app.addLayerMask();
-            app.drawGradient("Radial");
+            app.drawGradient(GradientType.RADIAL);
         }
     }
 

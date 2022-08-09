@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
@@ -58,9 +58,9 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
+    public void setTarget(Drawable dr, Graphics2D g) {
         for (int i = 0; i < numBrushes; i++) {
-            brushes[i].setTarget(comp, g);
+            brushes[i].setTarget(dr, g);
         }
     }
 

@@ -32,7 +32,6 @@ import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
-import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.Utils;
 
@@ -47,6 +46,8 @@ import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
+import static pixelitor.tools.gradient.GradientType.*;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
 import static pixelitor.tools.shapes.ShapeType.*;
 import static pixelitor.tools.shapes.TwoPointPaintType.*;
@@ -171,7 +172,7 @@ public class WorkflowTest {
         app.changeLayerBlendingMode(BlendingMode.HARD_LIGHT);
         app.mergeDown();
 
-        app.addGradientFillLayer(GradientType.SPIRAL_CW);
+        app.addGradientFillLayer(SPIRAL_CW);
         app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
         duplicateLayerThenUndo(GradientFillLayer.class);
         rasterizeThenUndo(GradientFillLayer.class);
@@ -207,7 +208,7 @@ public class WorkflowTest {
             .enterText("WARPED TEXT"));
 
         app.addLayerMask();
-        app.drawGradient("Radial");
+        app.drawGradient(RADIAL);
         app.closeCurrentView();
 
         runFilterWithDialog("Magnify",
@@ -219,9 +220,16 @@ public class WorkflowTest {
         duplicateLayerThenUndo(SmartObject.class);
         rasterizeThenUndo(SmartObject.class);
 
-        app.addShapesLayer(CAT, 20, 380);
+        int catMargin = 20;
+        int catSize = 100;
+        CanvasDrag firstCatShapeLoc = new CanvasDrag(catMargin, INITIAL_HEIGHT - catMargin - catSize, catSize);
+
+        app.addShapesLayer(CAT, firstCatShapeLoc);
         duplicateLayerThenUndo(ShapesLayer.class);
         rasterizeThenUndo(ShapesLayer.class);
+
+        CanvasDrag secondCatLoc = new CanvasDrag(INITIAL_WIDTH - catMargin, INITIAL_HEIGHT - catMargin - catSize, INITIAL_WIDTH - catMargin - catSize, INITIAL_HEIGHT - catMargin);
+        app.addShapesLayer(CAT, secondCatLoc);
 
         // ensure that the first layer is selected and the box is not shown
         app.runMenuCommand("Lower Layer Selection");
@@ -290,7 +298,7 @@ public class WorkflowTest {
         var popup2 = app.findMaskIconByLayerName("Caustics").showPopupMenu();
         clickPopupMenu(popup2, "Show Layer, but Edit Mask", false);
 
-        app.drawGradient(GradientType.LINEAR, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
+        app.drawGradient(LINEAR, FG_TO_BG, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
         loadReferenceImage("wf4_ref.png");
     }
 

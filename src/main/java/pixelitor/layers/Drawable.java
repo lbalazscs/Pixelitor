@@ -20,6 +20,8 @@ package pixelitor.layers;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -128,4 +130,8 @@ public interface Drawable extends Filterable {
     }
 
     void update();
+
+    void repaintRegion(PPoint start, PPoint end, double thickness);
+
+    public void repaintRegion(PRectangle area);
 }

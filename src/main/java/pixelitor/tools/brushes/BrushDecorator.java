@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -85,8 +85,8 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        delegate.setTarget(comp, g);
+    public void setTarget(Drawable dr, Graphics2D g) {
+        delegate.setTarget(dr, g);
     }
 
     @Override

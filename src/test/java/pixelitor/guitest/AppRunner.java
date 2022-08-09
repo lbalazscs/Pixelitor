@@ -43,6 +43,7 @@ import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
@@ -782,28 +783,31 @@ public class AppRunner {
 
         EDT.assertActiveToolIs(Tools.GRADIENT);
         CanvasDrag dragLocation = new CanvasDrag(100, 100, 100);
-        drawGradient(gradientType, dragLocation,
+        drawGradient(gradientType, GradientColorType.FG_TO_BG, dragLocation,
             new Color(68, 152, 115),
             new Color(185, 56, 177));
 
         keyboard.undoRedo("Gradient Fill Layer Change");
     }
 
-    public void drawGradient(GradientType gradientType, CanvasDrag dragLocation, Color fgColor, Color bgColor) {
+    public void drawGradient(GradientType gradientType, GradientColorType colorType, CanvasDrag dragLocation, Color fgColor, Color bgColor) {
         clickTool(Tools.GRADIENT);
 
         pw.comboBox("typeCB").selectItem(gradientType.toString());
+        pw.comboBox("colorTypeCB").selectItem(colorType.toString());
+        pw.checkBox("revertCB").uncheck();
+
         EDT.setFgBgColors(fgColor, bgColor);
         mouse.drag(dragLocation);
 
         keyboard.pressEsc(); // hide the gradient handles
     }
 
-    public void drawGradient(String gradientType) {
+    public void drawGradient(GradientType gradientType) {
         clickTool(Tools.GRADIENT);
 
         // draw a radial gradient
-        pw.comboBox("typeCB").selectItem(gradientType);
+        pw.comboBox("typeCB").selectItem(gradientType.toString());
         pw.checkBox("revertCB").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
@@ -815,7 +819,7 @@ public class AppRunner {
         keyboard.pressEsc(); // hide the gradient handles
     }
 
-    public void addShapesLayer(ShapeType shapeType, int canvasX, int canvasY) {
+    public void addShapesLayer(ShapeType shapeType, CanvasDrag shapeLocation) {
         int numLayersBefore = EDT.getNumLayersInActiveComp();
 
         keyboard.ctrlAltPress(VK_S);
@@ -824,7 +828,7 @@ public class AppRunner {
         EDT.assertActiveToolIs(Tools.SHAPES);
 
         EDT.setFgBgColors(new Color(248, 199, 25), new Color(39, 81, 39));
-        drawShape(shapeType, RADIAL_GRADIENT, NONE, new CanvasDrag(canvasX, canvasY, 100), false);
+        drawShape(shapeType, RADIAL_GRADIENT, NONE, shapeLocation, false);
     }
 
     public void drawShape(ShapeType type,

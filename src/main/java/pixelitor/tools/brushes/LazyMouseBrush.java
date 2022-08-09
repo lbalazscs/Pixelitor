@@ -17,10 +17,10 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
@@ -75,10 +75,10 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        delegate.setTarget(comp, g);
+    public void setTarget(Drawable dr, Graphics2D g) {
+        delegate.setTarget(dr, g);
 
-        view = comp.getView();
+        view = dr.getComp().getView();
     }
 
     @Override
