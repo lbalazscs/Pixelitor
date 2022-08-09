@@ -24,7 +24,7 @@ import pixelitor.filters.Filter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
-import pixelitor.history.ContentLayerMoveEdit;
+import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
@@ -422,25 +422,10 @@ public class SmartObject extends ImageLayer {
         return filters.get(index);
     }
 
-    public void addSmartFilter(Filter filter) {
-        int numFilters = filters.size();
-        SmartFilter newFilter;
-        if (numFilters == 0) {
-            newFilter = new SmartFilter(filter, content, this);
-        } else {
-            SmartFilter last = filters.get(numFilters - 1);
-            newFilter = new SmartFilter(filter, last, this);
-            last.setNext(newFilter);
-        }
-
-        filters.add(newFilter);
-        updateSmartFilterUI();
-    }
-
     private void runAndAddSmartFilter(Filter newFilter) {
         boolean filterDialogAccepted = startFilter(newFilter, false);
         if (filterDialogAccepted) {
-            addSmartFilter(newFilter);
+            addSmartFilter(newFilter, true, false);
         }
     }
 
@@ -448,23 +433,76 @@ public class SmartObject extends ImageLayer {
         runAndAddSmartFilter(newFilter);
     }
 
-    public void editSmartFilter(int index) {
-        editSmartFilter(filters.get(index));
+    public void tryAddingSmartFilter(Filter filter) {
+        // adds a smart filter, and triggers an edit,
+        // but if the user cancels the first edit,
+        // then the filter is removed.
     }
 
-    private void editSmartFilter(SmartFilter filter) {
-        filter.edit();
+    public void addSmartFilter(Filter filter, boolean addToHistory, boolean updateImage) {
+        addSmartFilter(new SmartFilter(filter, content, this), addToHistory, updateImage);
+    }
+
+    public void addSmartFilter(SmartFilter newFilter, boolean addToHistory, boolean updateImage) {
+        int numFilters = filters.size();
+        if (numFilters != 0) {
+            SmartFilter last = filters.get(numFilters - 1);
+            newFilter.setImageSource(last);
+            last.setNext(newFilter);
+        }
+
+        filters.add(newFilter);
+
+        if (addToHistory) {
+            History.add(new NewSmartFilterEdit(this, newFilter));
+        }
+
+        if (updateImage) {
+            recalculateImage(true);
+            comp.update();
+        }
+
         updateSmartFilterUI();
     }
 
-    public void deleteSmartFilter(int index) {
-        deleteSmartFilter(filters.get(index));
+    public void insertSmartFilter(SmartFilter filter, int index) {
+        SmartFilter previous = null;
+        if (index > 0) {
+            previous = filters.get(index - 1);
+        }
+
+        int numFilters = filters.size();
+        SmartFilter next = null;
+        if (index < numFilters) {
+            next = filters.get(index);
+        }
+
+        filters.add(index, filter);
+
+        if (previous != null) {
+            previous.setNext(filter);
+            filter.setImageSource(previous);
+        } else {
+            filter.setImageSource(content);
+        }
+
+        if (next != null) {
+            filter.setNext(next);
+            next.setImageSource(filter);
+            next.invalidateChain();
+        }
+
+        recalculateImage(true);
+        comp.update();
+        updateSmartFilterUI();
     }
 
-    public void deleteSmartFilter(SmartFilter filter) {
+    public void deleteSmartFilter(SmartFilter filter, boolean addToHistory) {
         int numFilters = filters.size();
+        int index = -1;
         for (int i = 0; i < numFilters; i++) {
             if (filters.get(i) == filter) {
+                index = i;
                 SmartFilter previous = null;
                 SmartFilter next = null;
                 if (i > 0) {
@@ -488,6 +526,15 @@ public class SmartObject extends ImageLayer {
                 break;
             }
         }
+
+        if (index == -1) {
+            throw new IllegalStateException(filter.getName() + " not found in " + getName());
+        }
+
+        if (addToHistory) {
+            History.add(new DeleteSmartFilterEdit(this, filter, index));
+        }
+
         recalculateImage(true);
         comp.update();
         updateSmartFilterUI();
@@ -683,7 +730,7 @@ public class SmartObject extends ImageLayer {
         if (index == filters.size() - 1) {
             return; // already the last filter
         }
-        swapSmartFilters(index, index + 1);
+        swapSmartFilters(index, index + 1, "Move " + smartFilter.getName() + " Up");
     }
 
     public void moveDown(SmartFilter smartFilter) {
@@ -691,10 +738,10 @@ public class SmartObject extends ImageLayer {
         if (index == 0) {
             return; // already the first filter
         }
-        swapSmartFilters(index - 1, index);
+        swapSmartFilters(index - 1, index, "Move " + smartFilter.getName() + " Down");
     }
 
-    private void swapSmartFilters(int indexA, int indexB) {
+    public void swapSmartFilters(int indexA, int indexB, String editName) {
         assert indexB == indexA + 1;
         SmartFilter filterA = filters.get(indexA);
         SmartFilter filterB = filters.get(indexB);
@@ -725,6 +772,10 @@ public class SmartObject extends ImageLayer {
             filterA.setNext(null);
         }
         assert checkConsistency();
+
+        if (editName != null) {
+            History.add(new SwapSmartFiltersEdit(editName, this, indexA, indexB));
+        }
 
         // update the GUI
         updateSmartFilterUI();

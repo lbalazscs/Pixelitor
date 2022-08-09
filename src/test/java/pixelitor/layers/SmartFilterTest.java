@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Filter;
+import pixelitor.history.History;
 import pixelitor.utils.MockFilter;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
@@ -53,17 +54,21 @@ class SmartFilterTest {
         Filter middleFilter = TestHelper.createMockFilter("Filter 2");
         Filter lastFilter = TestHelper.createMockFilter("Filter 3");
 
-        smartObject.addSmartFilter(firstFilter);
-        smartObject.addSmartFilter(middleFilter);
-        smartObject.addSmartFilter(lastFilter);
+        History.clear();
 
-        assertThat(smartObject).hasNumSmartFilters(3);
+        smartObject.addSmartFilter(firstFilter, true, true);
+        smartObject.addSmartFilter(middleFilter, true, true);
+        smartObject.addSmartFilter(lastFilter, true, true);
 
         first = smartObject.getSmartFilter(0);
         middle = smartObject.getSmartFilter(1);
         last = smartObject.getSmartFilter(2);
 
         smartObject.recalculateImage(false);
+
+        History.assertNumEditsIs(3);
+        History.clear();
+
         checkCaches(true, true, true);
         assertThat(smartObject)
             .hasNumSmartFilters(3)
@@ -73,6 +78,37 @@ class SmartFilterTest {
 
         smartObject.createUI();
         soIconUpdates = new IconUpdateChecker(smartObject, null, 0, 0);
+    }
+
+    @Test
+    void addSmartFilter() {
+        Filter newFilter = TestHelper.createMockFilter("Filter 4");
+
+        smartObject.addSmartFilter(newFilter, true, true);
+
+        assertThat(smartObject)
+            .hasNumSmartFilters(4)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3", "Filter 4")
+            .smartFilterVisibilitiesAre(true, true, true, true)
+            .isConsistent();
+        History.assertNumEditsIs(1);
+        soIconUpdates.check(1, 0);
+
+        History.undo("Add Smart Filter 4");
+        assertThat(smartObject)
+            .hasNumSmartFilters(3)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+        soIconUpdates.check(2, 0);
+
+        History.redo("Add Smart Filter 4");
+        assertThat(smartObject)
+            .hasNumSmartFilters(4)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3", "Filter 4")
+            .smartFilterVisibilitiesAre(true, true, true, true)
+            .isConsistent();
+        soIconUpdates.check(3, 0);
     }
 
     @Test
@@ -101,10 +137,25 @@ class SmartFilterTest {
 
     @Test
     void hideFirst() {
-        first.setVisible(false, false, true);
+        first.setVisible(false, true, true);
 
         checkNumFilterRuns(0, 1, 1);
         soIconUpdates.check(1, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(false, true, true)
+            .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Hide Smart Filter");
+        checkNumFilterRuns(0, 2, 2);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Hide Smart Filter");
+        checkNumFilterRuns(0, 3, 3);
+        soIconUpdates.check(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(false, true, true)
             .isConsistent();
@@ -112,10 +163,25 @@ class SmartFilterTest {
 
     @Test
     void hideMiddle() {
-        middle.setVisible(false, false, true);
+        middle.setVisible(false, true, true);
 
         checkNumFilterRuns(0, 0, 1);
         soIconUpdates.check(1, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(true, false, true)
+            .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Hide Smart Filter");
+        checkNumFilterRuns(0, 0, 2);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Hide Smart Filter");
+        checkNumFilterRuns(0, 0, 3);
+        soIconUpdates.check(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, false, true)
             .isConsistent();
@@ -123,10 +189,25 @@ class SmartFilterTest {
 
     @Test
     void hideLast() {
-        last.setVisible(false, false, true);
+        last.setVisible(false, true, true);
 
         checkNumFilterRuns(0, 0, 0);
         soIconUpdates.check(1, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(true, true, false)
+            .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Hide Smart Filter");
+        checkNumFilterRuns(0, 0, 0);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Hide Smart Filter");
+        checkNumFilterRuns(0, 0, 0);
+        soIconUpdates.check(3, 0);
         assertThat(smartObject)
             .smartFilterVisibilitiesAre(true, true, false)
             .isConsistent();
@@ -160,31 +241,83 @@ class SmartFilterTest {
 
     @Test
     void deleteFirst() {
-        smartObject.deleteSmartFilter(0);
+        smartObject.deleteSmartFilter(first, true);
 
         checkNumFilterRuns(0, 1, 1);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true)
+            .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Delete Smart Filter 1");
+        checkNumFilterRuns(0, 2, 2);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Delete Smart Filter 1");
+        checkNumFilterRuns(0, 3, 3);
+        soIconUpdates.check(3, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true)
             .isConsistent();
     }
 
     @Test
     void deleteMiddle() {
-        smartObject.deleteSmartFilter(1);
+        smartObject.deleteSmartFilter(middle, true);
 
         checkNumFilterRuns(0, 0, 1);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 3")
             .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Delete Smart Filter 2");
+        checkNumFilterRuns(0, 0, 2);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Delete Smart Filter 2");
+        checkNumFilterRuns(0, 0, 3);
+        soIconUpdates.check(3, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true)
+            .isConsistent();
     }
 
     @Test
     void deleteLast() {
-        smartObject.deleteSmartFilter(2);
+        smartObject.deleteSmartFilter(last, true);
 
         checkNumFilterRuns(0, 0, 0);
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 1", "Filter 2")
+            .isConsistent();
+        History.assertNumEditsIs(1);
+
+        History.undo("Delete Smart Filter 3");
+        checkNumFilterRuns(0, 0, 0);
+        soIconUpdates.check(2, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .smartFilterVisibilitiesAre(true, true, true)
+            .isConsistent();
+
+        History.redo("Delete Smart Filter 3");
+        checkNumFilterRuns(0, 0, 0);
+        soIconUpdates.check(3, 0);
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2")
+            .smartFilterVisibilitiesAre(true, true)
             .isConsistent();
     }
 
@@ -204,8 +337,30 @@ class SmartFilterTest {
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .isConsistent();
+        History.assertNumEditsIs(2);
 
         smartObject.moveUp(filter1); // nothing should happen
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
+            .isConsistent();
+        History.assertNumEditsIs(2);
+
+        History.undo("Move Filter 1 Up");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 2", "Filter 1", "Filter 3")
+            .isConsistent();
+
+        History.undo("Move Filter 1 Up");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .isConsistent();
+
+        History.redo("Move Filter 1 Up");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 2", "Filter 1", "Filter 3")
+            .isConsistent();
+
+        History.redo("Move Filter 1 Up");
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .isConsistent();
@@ -227,8 +382,30 @@ class SmartFilterTest {
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .isConsistent();
+        History.assertNumEditsIs(2);
 
         smartObject.moveDown(filter3); // nothing should happen
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
+            .isConsistent();
+        History.assertNumEditsIs(2);
+
+        History.undo("Move Filter 3 Down");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 3", "Filter 2")
+            .isConsistent();
+
+        History.undo("Move Filter 3 Down");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
+            .isConsistent();
+
+        History.redo("Move Filter 3 Down");
+        assertThat(smartObject)
+            .smartFilterNamesAre("Filter 1", "Filter 3", "Filter 2")
+            .isConsistent();
+
+        History.redo("Move Filter 3 Down");
         assertThat(smartObject)
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .isConsistent();

@@ -126,20 +126,22 @@ public class LayerTest {
         layer.setVisible(false, true, true);
         checkHidden(layer);
 
-        History.undo("Hide Layer");
+        String expectedEditName = layer.isSmartFilter() ? "Hide Smart Filter" : "Hide Layer";
+        History.undo(expectedEditName);
         checkShown(layer);
 
-        History.redo("Hide Layer");
+        History.redo(expectedEditName);
         checkHidden(layer);
 
         // show the previously hidden layer
         layer.setVisible(true, true, true);
         checkShown(layer);
 
-        History.undo("Show Layer");
+        expectedEditName = layer.isSmartFilter() ? "Show Smart Filter" : "Show Layer";
+        History.undo(expectedEditName);
         checkHidden(layer);
 
-        History.redo("Show Layer");
+        History.redo(expectedEditName);
         checkShown(layer);
 
         History.assertNumEditsIs(2);

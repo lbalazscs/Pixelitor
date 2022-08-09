@@ -286,6 +286,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
+    public void onFilterDialogCanceled() {
+        super.onFilterDialogCanceled();
+        filterSettingsChanged();
+    }
+
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
 
@@ -338,7 +344,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         popup.add(new PAction("Delete " + getName()) {
             @Override
             protected void onClick() {
-                smartObject.deleteSmartFilter(SmartFilter.this);
+                smartObject.deleteSmartFilter(SmartFilter.this, true);
             }
         });
         popup.add(new PAction("Copy " + getName()) {

@@ -327,7 +327,10 @@ public class WorkflowTest {
 
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
         app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
-        keyboard.undoRedo(filterName);
+
+        boolean activeIsSmart = EDT.activeLayer(layer -> layer instanceof SmartObject);
+        String expectedEditName = activeIsSmart ? "Add Smart " + filterName : filterName;
+        keyboard.undoRedo(expectedEditName);
     }
 
     private void duplicateLayerThenUndo(Class<? extends Layer> expectedLayerType) {

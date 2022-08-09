@@ -31,7 +31,9 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
     private final boolean newVisibility;
 
     public LayerVisibilityChangeEdit(Composition comp, Layer layer, boolean newVisibility) {
-        super(newVisibility ? "Show Layer" : "Hide Layer", comp);
+        super(layer.isSmartFilter()
+            ? (newVisibility ? "Show Smart Filter" : "Hide Smart Filter")
+            : (newVisibility ? "Show Layer" : "Hide Layer"), comp);
 
         this.newVisibility = newVisibility;
         this.layer = layer;

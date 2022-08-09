@@ -518,8 +518,6 @@ public class Debug {
     }
 
     private static void addSmartFilter(Composition comp, Filter filter) {
-        System.out.println("Debug::addOneSmartFilter: adding " + filter.getName());
-
         TextSettings settings = new TextSettings();
         settings.randomize();
         settings.setText(filter.getName());
@@ -539,7 +537,7 @@ public class Debug {
             smartObject.startFilter(filter, FILTER_WITHOUT_DIALOG);
         }
 
-        smartObject.addSmartFilter(filter);
+        smartObject.addSmartFilter(filter, true, true);
         smartObject.updateIconImage();
     }
 

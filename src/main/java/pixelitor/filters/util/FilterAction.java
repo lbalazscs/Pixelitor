@@ -79,7 +79,7 @@ public class FilterAction extends DrawableAction {
 
             Filter newFilter = createNewInstanceFilter();
             if (dr.startFilter(newFilter, true)) {
-                so.addSmartFilter(newFilter);
+                so.addSmartFilter(newFilter, true, false);
             }
             return;
         }
