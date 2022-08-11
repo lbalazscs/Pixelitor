@@ -143,6 +143,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (cachedImage != null) {
             return cachedImage;
         }
+        assert src != null;
         cachedImage = filter.transformImage(src);
 
         // TODO this check should not be necessary
@@ -163,6 +164,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     public void setSmartObject(SmartObject smartObject) {
         this.smartObject = Objects.requireNonNull(smartObject);
+    }
+
+    @Override
+    public Layer getOwner() {
+        return smartObject;
     }
 
     public SmartFilter getNext() {
@@ -301,7 +307,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public void activate(boolean addToHistory) {
+        comp.setEditingTarget(this);
         smartObject.activate(addToHistory);
+    }
+
+    @Override
+    public boolean isActive() {
+        return smartObject.isActive();
     }
 
     @Override
@@ -412,6 +424,16 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void updateOptions(SmartObject layer) {
         if (filter instanceof ParametrizedFilter pf) {
             pf.getParamSet().updateOptions(layer, false);
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        if (ui != null) {
+            ui.updateSelectionState();
+
+            // the whole GUI must be repainted when switching to another layer
+            smartObject.getUI().repaint();
         }
     }
 

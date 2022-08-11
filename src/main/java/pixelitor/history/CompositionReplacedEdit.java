@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tools;
-import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -173,7 +172,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
         Composition backupComp = backupCompRef.get();
         if (backupComp != null) {
-            node.add(new CompositionNode("backup comp", backupComp));
+            node.add(backupComp.createDebugNode("backup comp"));
         }
         return node;
     }

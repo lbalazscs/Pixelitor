@@ -42,4 +42,9 @@ public class BlindsTransition extends AbstractTransition {
     Transition createTransition() {
         return new BlindsTransition2D(type.getValue(), numBlinds.getValue());
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

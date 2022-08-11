@@ -226,12 +226,8 @@ public class LayerMask extends ImageLayer {
         this.ui = owner.ui;
     }
 
-    public Layer getOwner() {
-        return owner;
-    }
-
     @Override
-    public Layer getLayer() {
+    public Layer getOwner() {
         return owner;
     }
 

@@ -153,6 +153,13 @@ public abstract class Layer implements Serializable, Debuggable {
         ui.setSelected(true);
     }
 
+    public void updateUI() {
+        if (ui != null) {
+            ui.updateSelectionState();
+            ui.repaint();
+        }
+    }
+
     public final Layer duplicate(boolean compCopy, boolean duplicateMask) {
         String duplicateName = compCopy ? this.name : Utils.createCopyName(name);
         Layer d = createTypeSpecificDuplicate(duplicateName);
@@ -323,8 +330,16 @@ public abstract class Layer implements Serializable, Debuggable {
         return comp.isActive(this);
     }
 
+    public boolean isEditingTarget() {
+        return comp.isEditingTarget(this);
+    }
+
     public void activate(boolean addToHistory) {
         comp.setActiveLayer(this, addToHistory, null);
+    }
+
+    public void setAsEditingTarget() {
+        comp.setEditingTarget(this);
     }
 
     public boolean hasMask() {
@@ -587,6 +602,13 @@ public abstract class Layer implements Serializable, Debuggable {
         }
         newOwner.ui.changeLayer(newOwner);
         this.ui = null;
+    }
+
+    /**
+     * Return the current layer or the owner if this is a mask or smart filter.
+     */
+    public Layer getOwner() {
+        return this;
     }
 
     /**
@@ -978,6 +1000,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addQuotedString("name", getName());
         node.addClass();
         node.addBoolean("active", isActive());
+        node.addBoolean("edited", isEditingTarget());
 
         if (hasMask()) {
             node.addString("has mask", "yes");

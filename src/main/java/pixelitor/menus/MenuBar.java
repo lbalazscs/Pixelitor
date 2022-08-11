@@ -620,18 +620,12 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_ALT_O);
 
-//        sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject) {
-//            @Override
-//            public void onActiveLayer(Layer layer) {
-//                SmartObject so = (SmartObject) layer;
-//                if (so.hasSmartFilters()) {
-//                    so.editSmartFilter(so.getSmartFilter(0));
-//                } else {
-//                    Messages.showInfo("No Smart Filters",
-//                        "<html>There are no smart filters in the smart object <b>" + so.getName() + "</>.");
-//                }
-//            }
-//        }, CTRL_SHIFT_E);
+        sub.add(new RestrictedLayerAction("Edit Selected Smart Filter", isSmartObject) {
+            @Override
+            public void onActiveLayer(Layer layer) {
+                ((SmartObject) layer).editSelectedSmartFilter();
+            }
+        }, CTRL_SHIFT_E);
 
         sub.add(new OpenViewEnabledAction("Add Linked...") {
             @Override

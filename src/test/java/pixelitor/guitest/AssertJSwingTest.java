@@ -1619,22 +1619,23 @@ public class AssertJSwingTest {
             }
         }
 
-        testFiltersColor(squashImage);
-        testFiltersBlurSharpen();
-        testFiltersDistort();
-        testFiltersDislocate();
-        testFiltersLight();
-        testFiltersNoise();
-        testFiltersRender();
-        testFiltersArtistic();
-        testFiltersEdgeDetection();
-        testFiltersOther();
+        testColorFilters(squashImage);
+        testArtisticFilters();
+        testBlurSharpenFilters();
+        testDisplaceFilters();
+        testDistortFilters();
+        testFindEdgesFilters();
+        testLightFilters();
+        testNoiseFilters();
+        testOtherFilters();
+        testRenderFilters();
+        testTransitionsFilters();
         testText();
 
         checkConsistency();
     }
 
-    private void testFiltersColor(boolean squashedImage) {
+    private void testColorFilters(boolean squashedImage) {
         testColorBalance(squashedImage);
         testFilterWithDialog(HueSat.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog(Colorize.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1669,7 +1670,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Four Color Gradient", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
-    private void testFiltersBlurSharpen() {
+    private void testBlurSharpenFilters() {
         testFilterWithDialog("Box Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Focus", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gaussian Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1680,7 +1681,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Unsharp Mask", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersDistort() {
+    private void testDistortFilters() {
         testFilterWithDialog("Swirl, Pinch, Bulge", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Circle to Square", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Perspective", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1700,7 +1701,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Wrap Around Arc", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersDislocate() {
+    private void testDisplaceFilters() {
         testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog(JHKaleidoscope.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1710,7 +1711,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Video Feedback", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersLight() {
+    private void testLightFilters() {
         testFilterWithDialog("Bump Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Flashlight", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Glint", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1719,14 +1720,14 @@ public class AssertJSwingTest {
         testFilterWithDialog("Sparkle", Randomize.YES, Reseed.YES, ShowOriginal.YES);
     }
 
-    private void testFiltersNoise() {
+    private void testNoiseFilters() {
         testNoDialogFilter("Reduce Single Pixel Noise");
         testNoDialogFilter("3x3 Median Filter");
         testFilterWithDialog("Add Noise", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Pixelate", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersRender() {
+    private void testRenderFilters() {
         testFilterWithDialog("Clouds", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
@@ -1755,7 +1756,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
-    private void testFiltersArtistic() {
+    private void testArtisticFilters() {
         testFilterWithDialog("Comic Book", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Crystallize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
@@ -1773,19 +1774,18 @@ public class AssertJSwingTest {
         testFilterWithDialog("Color Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersEdgeDetection() {
+    private void testFindEdgesFilters() {
         testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
         testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Canny", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
-    private void testFiltersOther() {
+    private void testOtherFilters() {
         testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 //        testRandomFilter();
         testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         testFilterWithDialog("Custom 3x3 Convolution", Randomize.NO,
             Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
@@ -1800,6 +1800,14 @@ public class AssertJSwingTest {
 
         testFilterWithDialog("Channel to Transparency", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Invert Transparency");
+    }
+
+    private void testTransitionsFilters() {
+        testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Blinds Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Checkerboard Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Goo Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Shapes Grid Transition", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testColorBalance(boolean squashedImage) {

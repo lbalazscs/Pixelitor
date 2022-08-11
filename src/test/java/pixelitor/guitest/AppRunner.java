@@ -34,6 +34,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
+import pixelitor.io.FileChoosers;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ColorFillLayer;
@@ -117,16 +118,21 @@ public class AppRunner {
         keyboard = new Keyboard(pw, robot, this);
         layersContainer = new LayersContainerFixture(robot);
 
+        if (Language.getCurrent() != Language.ENGLISH) {
+            throw new IllegalStateException("language is " + Language.getCurrent());
+        }
+
+        boolean nativeChoosers = EDT.call(FileChoosers::useNativeDialogs);
+        if (nativeChoosers) {
+            EDT.run(() -> FileChoosers.setUseNativeDialogs(false));
+        }
+
         if (fileNames.length == 0) {
             return;
         }
 
         waitForImageLoading();
         mouse.recalcCanvasBounds();
-
-        if (Language.getCurrent() != Language.ENGLISH) {
-            throw new IllegalStateException("language is " + Language.getCurrent());
-        }
     }
 
     private static void waitForImageLoading() {

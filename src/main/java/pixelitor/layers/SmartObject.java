@@ -31,7 +31,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
-import pixelitor.utils.debug.CompositionNode;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
@@ -49,7 +48,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static java.awt.RenderingHints.*;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -90,6 +88,7 @@ public class SmartObject extends ImageLayer {
 
     private transient boolean imageNeedsRefresh = false;
 
+    // constructor for converting a layer into a smart object
     public SmartObject(Layer layer) {
         super(layer.getComp(), NAME_PREFIX + layer.getName());
 
@@ -106,6 +105,7 @@ public class SmartObject extends ImageLayer {
         recalculateImage(false);
     }
 
+    // constructor for creating a smart object with a given content
     public SmartObject(Composition parent, Composition content) {
         super(parent, "Smart " + content.getName());
         setContent(content);
@@ -157,6 +157,8 @@ public class SmartObject extends ImageLayer {
             smartFilterIsVisible = true;
         }
         imageNeedsRefresh = true;
+
+        // more initialization will happen later in afterDeserialization()
     }
 
     @Serial
@@ -210,6 +212,10 @@ public class SmartObject extends ImageLayer {
     private void migratePXCFormat() {
         if (filters == null) { // new field, will be null in old pxc files
             filters = new ArrayList<>();
+            if (smartFilters.size() > 1) {
+                // there can be only one smart filter in the old pxc format
+                throw new IllegalStateException("# filters = " + smartFilters.size());
+            }
             for (Filter filter : smartFilters) {
                 SmartFilter newFilter = new SmartFilter(filter, content, this);
                 newFilter.setVisible(smartFilterIsVisible);
@@ -258,11 +264,13 @@ public class SmartObject extends ImageLayer {
     }
 
     private void recalculateImage(int targetWidth, int targetHeight, boolean updateIcon) {
-        resetImageFromContent(targetWidth, targetHeight);
+//        resetImageFromContent(targetWidth, targetHeight);
 
         int numFilters = filters.size();
         if (numFilters > 0) {
             image = filters.get(numFilters - 1).getImage();
+        } else {
+            image = content.getCompositeImage();
         }
         if (updateIcon) {
             updateIconImage();
@@ -278,17 +286,7 @@ public class SmartObject extends ImageLayer {
         image = content.getCompositeImage();
         boolean imageConverted = false;
         if (contentTransform != null) {
-            BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = newImage.createGraphics();
-            g.setTransform(contentTransform);
-            if (targetWidth > image.getWidth() || targetHeight > image.getHeight()) {
-                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-            } else {
-                g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
-            }
-            g.drawImage(image, 0, 0, null);
-            g.dispose();
-            image = newImage;
+            image = ImageUtils.applyTransform(image, contentTransform, targetWidth, targetHeight);
             imageConverted = true;
         }
         if (!imageConverted && image.isAlphaPremultiplied()) {
@@ -625,6 +623,13 @@ public class SmartObject extends ImageLayer {
         if (this.content != content) {
             this.content = content;
             content.addOwner(this);
+
+            // if there are smart filters, the first one references the content
+            if (filters != null) { // this check is required by the migration support
+                if (!filters.isEmpty()) {
+                    filters.get(0).setImageSource(content);
+                }
+            }
         }
     }
 
@@ -705,8 +710,10 @@ public class SmartObject extends ImageLayer {
         int ty = getTy();
         BufferedImage visibleImage = getVisibleImage();
         if (tx == 0 && ty == 0) {
-            assert visibleImage.getWidth() == comp.getCanvasWidth();
-            assert visibleImage.getHeight() == comp.getCanvasHeight();
+            assert visibleImage.getWidth() == comp.getCanvasWidth()
+                : "visible width = " + visibleImage.getWidth() + ", canvas width = " + comp.getCanvasWidth();
+            assert visibleImage.getHeight() == comp.getCanvasHeight()
+                : "visible height = " + visibleImage.getHeight() + ", canvas height = " + comp.getCanvasHeight();
             return visibleImage;
         }
 
@@ -793,15 +800,7 @@ public class SmartObject extends ImageLayer {
 
     @Override
     public Drawable getActiveDrawable() {
-        if (isMaskEditing()) {
-            return getMask();
-        }
-        for (SmartFilter filter : filters) {
-            if (filter.isMaskEditing()) {
-                return filter.getMask();
-            }
-        }
-        return null;
+        return getActiveMask();
     }
 
     @Override
@@ -809,10 +808,9 @@ public class SmartObject extends ImageLayer {
         if (isMaskEditing()) {
             return getMask();
         }
-        for (SmartFilter filter : filters) {
-            if (filter.isMaskEditing()) {
-                return filter.getMask();
-            }
+        SmartFilter sf = getSelectedSmartFilter();
+        if (sf != null && sf.isMaskEditing()) {
+            return sf.getMask();
         }
         return null;
     }
@@ -839,6 +837,31 @@ public class SmartObject extends ImageLayer {
                 filter.setMaskEditing(false);
             }
         }
+    }
+
+    public void editSelectedSmartFilter() {
+        if (filters.isEmpty()) {
+            Messages.showInfo("No Smart Filters",
+                "<html>There are no smart filters in the smart object <b>" + getName() + "</>.");
+            return;
+        }
+
+        SmartFilter selected = getSelectedSmartFilter();
+        if (selected != null) {
+            selected.edit();
+        } else { // the smart object as a whole is selected
+            // edit the last smart filter
+            filters.get(filters.size() - 1).edit();
+        }
+    }
+
+    private SmartFilter getSelectedSmartFilter() {
+        for (SmartFilter filter : filters) {
+            if (filter.isEditingTarget()) {
+                return filter;
+            }
+        }
+        return null;
     }
 
     public boolean checkConsistency() {
@@ -892,7 +915,7 @@ public class SmartObject extends ImageLayer {
         if (linked) {
             node.addString("link file", linkedContentFile.getAbsolutePath());
         }
-        node.add(new CompositionNode("content", content));
+        node.add(content.createDebugNode("content"));
 
         for (SmartFilter filter : filters) {
             node.add(filter.createDebugNode("smart filter"));

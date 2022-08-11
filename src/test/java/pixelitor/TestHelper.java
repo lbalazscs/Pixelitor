@@ -222,7 +222,9 @@ public class TestHelper {
     }
 
     public static SmartFilter createSmartFilter(Composition comp, String name) {
-        SmartFilter smartFilter = new SmartFilter(new Invert(), comp, createSmartObject(comp, ""));
+        SmartObject so = createSmartObject(comp, "smart object");
+        SmartFilter smartFilter = new SmartFilter(new Invert(), comp, so);
+        so.addSmartFilter(smartFilter, false, false);
         smartFilter.setName(name, false);
         return smartFilter;
     }

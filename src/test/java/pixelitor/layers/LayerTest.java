@@ -98,7 +98,8 @@ public class LayerTest {
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
-        comp.addLayerInInitMode(layer);
+        // for smart filters add their smart object
+        comp.addLayerInInitMode(layer.getOwner());
 
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
         comp.addLayerInInitMode(layer2);
@@ -111,7 +112,7 @@ public class LayerTest {
 
         iconUpdates = new IconUpdateChecker(layer, mask, 0, 0);
 
-        comp.setActiveLayer(layer, true, null);
+        comp.setActiveLayer(layer.getOwner(), true, null);
 
         assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
 
@@ -297,9 +298,10 @@ public class LayerTest {
 
     @Test
     public void changeStackIndex() {
-        assertThat(comp.getLayerIndex(layer)).isEqualTo(0);
-        layer.changeStackIndex(1);
-        assertThat(comp.getLayerIndex(layer)).isEqualTo(1);
+        Layer topLevelLayer = layer.getOwner();
+        assertThat(comp.getLayerIndex(topLevelLayer)).isEqualTo(0);
+        topLevelLayer.changeStackIndex(1);
+        assertThat(comp.getLayerIndex(topLevelLayer)).isEqualTo(1);
         iconUpdates.check(0, 0);
     }
 

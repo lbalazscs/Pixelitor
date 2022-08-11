@@ -69,7 +69,7 @@ public class DebugNodes {
     public static DebugNode createViewNode(String name, View view) {
         var node = new DebugNode(name, view);
 
-        node.add(new CompositionNode(view.getComp()));
+        node.add(view.getComp().createDebugNode("composition"));
         node.addNullableChild("canvas", view.getCanvas());
         node.addAsString("zoom level", view.getZoomLevel());
 

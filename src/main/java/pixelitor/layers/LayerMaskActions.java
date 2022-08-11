@@ -17,10 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
-import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -63,21 +61,21 @@ public class LayerMaskActions {
                 menu.add(new JMenuItem(new LinkUnlinkMaskAction(layer)));
             }
 
-            if (AppContext.isDevelopment()) {
-                menu.add(new PAction("Debug Mask Image") {
-                    @Override
-                    protected void onClick() {
-                        Debug.debugImage(layer.getMask().getImage(),
-                            "Mask Image of " + layer.getName());
-                    }
-                });
-            }
+//            if (AppContext.isDevelopment()) {
+//                menu.add(new PAction("Debug Mask Image") {
+//                    @Override
+//                    protected void onClick() {
+//                        Debug.debugImage(layer.getMask().getImage(),
+//                            "Mask Image of " + layer.getName());
+//                    }
+//                });
+//            }
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
             if (e.isPopupTrigger()) {
-                popup(e);
+                showPopup(e);
             } else if (SwingUtilities.isLeftMouseButton(e)) {
                 LayerGUI.selectLayerIfIconClicked(e);
             }
@@ -86,11 +84,11 @@ public class LayerMaskActions {
         @Override
         public void mouseReleased(MouseEvent e) {
             if (e.isPopupTrigger()) {
-                popup(e);
+                showPopup(e);
             }
         }
 
-        private void popup(MouseEvent e) {
+        private void showPopup(MouseEvent e) {
             menu.show(e.getComponent(), e.getX(), e.getY());
         }
     }

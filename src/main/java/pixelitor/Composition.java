@@ -44,6 +44,9 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -66,11 +69,12 @@ import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.Utils.createCopyName;
+import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
 /**
  * An image composition consisting of multiple layers
  */
-public class Composition implements Serializable, ImageSource {
+public class Composition implements Serializable, ImageSource, Debuggable {
     // serialization is used for saving in the pxc format
     @Serial
     private static final long serialVersionUID = 1L;
@@ -81,6 +85,9 @@ public class Composition implements Serializable, ImageSource {
 
     private final List<Layer> layerList = new ArrayList<>();
     private Layer activeLayer;
+
+    // Can be a layer or a smart filter inside a smart object
+    private transient Layer editingTarget;
 
     // a counter for the names of new layers
     private int newLayerCount = 1;
@@ -303,10 +310,8 @@ public class Composition implements Serializable, ImageSource {
         if (owners == null) {
             owners = new ArrayList<>(1);
         } else {
-            for (SmartObject owner : owners) {
-                if (owner == newOwner) {
-                    return;
-                }
+            if (owners.contains(newOwner)) {
+                return;
             }
         }
         owners.add(newOwner);
@@ -702,6 +707,7 @@ public class Composition implements Serializable, ImageSource {
      */
     public void replaceLayer(Layer before, Layer after) {
         boolean wasActive = before == activeLayer;
+        boolean wasEditingTarget = before == editingTarget;
 
         before.transferMaskAndUITo(after);
 
@@ -712,7 +718,9 @@ public class Composition implements Serializable, ImageSource {
         if (wasActive) {
             activeLayer = after;
         }
-        Tools.editingTargetChanged(activeLayer);
+        if (wasEditingTarget) {
+            setEditingTarget(after);
+        }
     }
 
     public void setActiveLayer(Layer layer) {
@@ -739,9 +747,7 @@ public class Composition implements Serializable, ImageSource {
             History.add(new LayerSelectionChangeEdit(editName, this, oldLayer, layer));
         }
 
-        if (view != null) {  // shouldn't run while loading the composition
-            Tools.editingTargetChanged(activeLayer);
-        }
+        setEditingTarget(activeLayer);
 
         assert classInvariant();
     }
@@ -756,6 +762,26 @@ public class Composition implements Serializable, ImageSource {
 
     public int getActiveLayerIndex() {
         return layerList.indexOf(activeLayer);
+    }
+
+    public void setEditingTarget(Layer editingTarget) {
+        if (this.editingTarget == editingTarget) {
+            return;
+        }
+        Layer oldTarget = this.editingTarget;
+        this.editingTarget = editingTarget;
+        if (view != null) {  // shouldn't run while loading the composition
+            Tools.editingTargetChanged(activeLayer);
+
+            if (oldTarget != null) {
+                oldTarget.updateUI();
+            }
+            editingTarget.updateUI();
+        }
+    }
+
+    public boolean isEditingTarget(Layer layer) {
+        return editingTarget == layer;
     }
 
     public int getLayerIndex(Layer layer) {
@@ -1792,14 +1818,6 @@ public class Composition implements Serializable, ImageSource {
         view.replaceComp(newMainComp);
     }
 
-    public void debugImages() {
-        if (compositeImage != null) {
-            Debug.debugImage(compositeImage, "cached composite for " + getDebugName());
-        }
-        BufferedImage calc = calculateCompositeImage();
-        Debug.debugImage(calc, "calculated composite for " + getDebugName());
-    }
-
     public void shallowDuplicate(SmartObject so) {
         if (so != activeLayer) {
             setActiveLayer(so);
@@ -1810,6 +1828,65 @@ public class Composition implements Serializable, ImageSource {
             .withHistory("Clone")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
+    }
+
+    public void debugImages() {
+        if (compositeImage != null) {
+            Debug.debugImage(compositeImage, "cached composite for " + getDebugName());
+        }
+        BufferedImage calc = calculateCompositeImage();
+        Debug.debugImage(calc, "calculated composite for " + getDebugName());
+    }
+
+    @Override
+    public DebugNode createDebugNode(String name) {
+        DebugNode node = new DebugNode(name, this);
+
+        node.add(activeLayer.createDebugNode("active layer"));
+        node.add(editingTarget.createDebugNode("editing target"));
+
+        forEachLayer(layer -> node.add(layer.createDebugNode()));
+
+        node.add(createBufferedImageNode("composite image", getCompositeImage()));
+
+        if (paths == null) {
+            node.addBoolean("has paths", false);
+        } else {
+            node.add(DebugNodes.createPathsNode(paths));
+        }
+
+        if (guides == null) {
+            node.addBoolean("has guides", false);
+        } else {
+            node.add(DebugNodes.createGuidesNode("guides", guides));
+        }
+
+        node.addInt("num layers", getNumLayers());
+        node.addQuotedString("name", getName());
+        node.addQuotedString("debug name", getDebugName());
+
+        String filePath = "";
+        File file = getFile();
+        if (file != null) {
+            filePath = file.getAbsolutePath();
+        }
+        node.addQuotedString("file", filePath);
+        node.addBoolean("is smart object content", isSmartObjectContent());
+        node.addBoolean("dirty", isDirty());
+
+        if (hasBuiltSelection()) {
+            node.add(getBuiltSelection().createDebugNode("built selection"));
+        } else {
+            node.addBoolean("has built selection", false);
+        }
+
+        if (hasSelection()) {
+            node.add(getSelection().createDebugNode("selection"));
+        } else {
+            node.addBoolean("has selection", false);
+        }
+
+        return node;
     }
 
     public enum UpdateActions {

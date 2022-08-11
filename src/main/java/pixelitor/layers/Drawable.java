@@ -78,10 +78,7 @@ public interface Drawable extends Filterable {
 
     boolean isMaskEditing();
 
-    /**
-     * Return the current layer (the owner if this is a mask)
-     */
-    Layer getLayer();
+    Layer getOwner();
 
     String getName();
 
@@ -109,7 +106,7 @@ public interface Drawable extends Filterable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) {
-            Layer layer = getLayer();
+            Layer layer = getOwner();
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +
                 "composition = '%s'%n" +

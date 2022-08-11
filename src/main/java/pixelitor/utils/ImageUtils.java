@@ -1222,4 +1222,18 @@ public class ImageUtils {
         }
         return dest;
     }
+
+    public static BufferedImage applyTransform(BufferedImage src, AffineTransform at, int targetWidth, int targetHeight) {
+        BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, TYPE_INT_ARGB);
+        Graphics2D g = newImage.createGraphics();
+        g.setTransform(at);
+        if (targetWidth > src.getWidth() || targetHeight > src.getHeight()) {
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+        } else {
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+        }
+        g.drawImage(src, 0, 0, null);
+        g.dispose();
+        return newImage;
+    }
 }

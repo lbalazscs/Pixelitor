@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.colors.FgBgColors;
 import pixelitor.layers.LayerGUILayout;
+import pixelitor.layers.SelectionState;
 
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
@@ -43,6 +44,7 @@ public class Themes {
             currentTheme = theme;
             if (updateGUI) {
                 LayerGUILayout.themeChanged(theme);
+                SelectionState.setupBorders(theme.isDark());
                 FgBgColors.getGUI().themeChanged();
                 updateAllUI();
             }

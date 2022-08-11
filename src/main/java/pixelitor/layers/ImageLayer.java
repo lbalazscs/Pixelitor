@@ -377,7 +377,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             case PREVIEW -> previewImage;
         };
 
-        assert visibleImage != null;
+        assert visibleImage != null : "state = " + state;
         return visibleImage;
     }
 
@@ -1198,11 +1198,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public String getTypeString() {
         return "Image Layer";
-    }
-
-    @Override
-    public Layer getLayer() {
-        return this;
     }
 
     @Override
