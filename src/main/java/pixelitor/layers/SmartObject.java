@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.ImageSource;
 import pixelitor.Views;
+import pixelitor.compactions.Flip;
 import pixelitor.filters.Filter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
@@ -27,10 +28,7 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Threads;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
@@ -55,22 +53,23 @@ import static pixelitor.utils.Threads.onEDT;
  * The cached result image behaves like the image of a regular {@link ImageLayer}.
  */
 public class SmartObject extends ImageLayer {
-    private static final String NAME_PREFIX = "smart ";
-    private Composition content;
-
-    // only used for deserialization
-    private final boolean newVersion = true;
-
-    // null if the content is not linked
-    // this is the same the content's file, but this one is not transient
-    private File linkedContentFile;
-    private transient long linkedContentFileTime;
-
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
 
-    // "Legacy" fields from Pixelitor 4.3.0, they are used only for
-// automatic migration of old pxc files
+    private static final String NAME_PREFIX = "smart ";
+    private Composition content;
+
+    // Only used for a deserialization check.
+    // The field is not present in very old pxc versions.
+    private final boolean newVersion = true;
+
+    // Null if the content is not linked.
+    // This is the same object as the content's file field, but it's not transient.
+    private File linkedContentFile;
+    private transient long linkedContentFileTime;
+
+    // "Legacy" fields from Pixelitor 4.3.0, they are only
+    // used for automatic migration of old pxc files
     private boolean smartFilterIsVisible = true;
     private List<Filter> smartFilters = new ArrayList<>();
 
@@ -78,13 +77,6 @@ public class SmartObject extends ImageLayer {
     private List<SmartFilter> filters = new ArrayList<>();
 
     private AffineTransform contentTransform;
-
-    // The following two fields are used only during editing of smart filters
-    // to restore the image and filter state if the user cancels the dialog.
-//    private transient BufferedImage lastFilterOutput;
-//    private transient FilterState lastFilterState;
-
-//    private int indexOfLastSmartFilter = -1;
 
     private transient boolean imageNeedsRefresh = false;
 
@@ -103,6 +95,8 @@ public class SmartObject extends ImageLayer {
         copyBlendingFrom(layer);
 
         recalculateImage(false);
+
+        assert checkConsistency();
     }
 
     // constructor for creating a smart object with a given content
@@ -110,6 +104,8 @@ public class SmartObject extends ImageLayer {
         super(parent, "Smart " + content.getName());
         setContent(content);
         recalculateImage(false);
+
+        assert checkConsistency();
     }
 
     // constructor called for "Add Linked"
@@ -119,9 +115,11 @@ public class SmartObject extends ImageLayer {
         updateLinkedContentTime();
         setContent(content);
         recalculateImage(false);
+
+        assert checkConsistency();
     }
 
-    // The constructor used for duplication.
+    // The constructor used for duplication (same composition).
     private SmartObject(SmartObject orig, String name, boolean deepCopy) {
         super(orig.comp, name);
         if (deepCopy) {
@@ -131,12 +129,10 @@ public class SmartObject extends ImageLayer {
         }
         image = orig.image;
 
-        if (!orig.filters.isEmpty()) {
-            filters = new ArrayList<>(orig.filters.size());
-            SmartFilter filter = orig.filters.get(0).copy(content, this);
-            do {
-                filters.add(filter);
-            } while ((filter = filter.getNext()) != null);
+        for (SmartFilter origFilter : orig.filters) {
+            SmartFilter copy = (SmartFilter) origFilter.duplicate(false, true);
+            copy.setSmartObject(this);
+            addSmartFilter(copy, false, false);
         }
 
         linkedContentFile = orig.linkedContentFile;
@@ -145,6 +141,8 @@ public class SmartObject extends ImageLayer {
             contentTransform = new AffineTransform(orig.contentTransform);
         }
         forceTranslation(orig.getTx(), orig.getTy());
+
+        assert checkConsistency();
     }
 
     @Serial
@@ -158,12 +156,12 @@ public class SmartObject extends ImageLayer {
         }
         imageNeedsRefresh = true;
 
-        // more initialization will happen later in afterDeserialization()
+        // more initialization happens later in afterDeserialization()
     }
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
-        Composition tmp = content;
+        Composition backup = content;
         if (isContentLinked()) {
             // if the content is linked, then don't write it
             content = null;
@@ -171,7 +169,7 @@ public class SmartObject extends ImageLayer {
 
         out.defaultWriteObject();
 
-        content = tmp;
+        content = backup;
     }
 
     public void afterDeserialization() {
@@ -187,7 +185,7 @@ public class SmartObject extends ImageLayer {
                 setContent(Composition.createTransparent(
                     comp.getCanvasWidth(), comp.getCanvasHeight()));
 
-                EventQueue.invokeLater(this::handleMissingContentLater);
+                EventQueue.invokeLater(this::handleMissingContent);
             }
         } else {
             assert content != null;
@@ -225,7 +223,7 @@ public class SmartObject extends ImageLayer {
         }
     }
 
-    private void handleMissingContentLater() {
+    private void handleMissingContent() {
         assert Threads.calledOnEDT();
 
         String title = linkedContentFile.getName() + " not found.";
@@ -461,6 +459,7 @@ public class SmartObject extends ImageLayer {
         }
 
         updateSmartFilterUI();
+        assert checkConsistency();
     }
 
     public void insertSmartFilter(SmartFilter filter, int index) {
@@ -493,6 +492,7 @@ public class SmartObject extends ImageLayer {
         recalculateImage(true);
         comp.update();
         updateSmartFilterUI();
+        assert checkConsistency();
     }
 
     public void deleteSmartFilter(SmartFilter filter, boolean addToHistory) {
@@ -536,6 +536,7 @@ public class SmartObject extends ImageLayer {
         recalculateImage(true);
         comp.update();
         updateSmartFilterUI();
+        assert checkConsistency();
     }
 
     private void updateSmartFilterUI() {
@@ -620,17 +621,21 @@ public class SmartObject extends ImageLayer {
     }
 
     public void setContent(Composition content) {
-        if (this.content != content) {
-            this.content = content;
-            content.addOwner(this);
+        if (this.content == content) {
+            return;
+        }
+        this.content = content;
+        content.addOwner(this);
 
-            // if there are smart filters, the first one references the content
-            if (filters != null) { // this check is required by the migration support
-                if (!filters.isEmpty()) {
-                    filters.get(0).setImageSource(content);
-                }
+        // if there are smart filters, the first one references the content
+        if (filters != null) { // this check is required by the migration support
+            if (!filters.isEmpty()) {
+                SmartFilter first = filters.get(0);
+                first.setImageSource(content);
+                first.invalidateChain();
             }
         }
+        assert checkConsistency();
     }
 
     public boolean isContentOpen() {
@@ -690,6 +695,28 @@ public class SmartObject extends ImageLayer {
         }
         return CompletableFuture.runAsync(() ->
             recalculateImage(newSize.width, newSize.height, false));
+    }
+
+    @Override
+    public void flip(Flip.Direction direction) {
+        AffineTransform flipTransform = direction.createImageTransform(image);
+        if (contentTransform == null) {
+            contentTransform = flipTransform;
+        } else {
+            contentTransform.concatenate(flipTransform);
+        }
+        recalculateImage(image.getWidth(), image.getHeight(), false);
+    }
+
+    @Override
+    public void rotate(QuadrantAngle angle) {
+        AffineTransform rotation = angle.createImageTransform(image);
+        if (contentTransform == null) {
+            contentTransform = rotation;
+        } else {
+            contentTransform.concatenate(rotation);
+        }
+        recalculateImage(image.getWidth(), image.getHeight(), false);
     }
 
     @Override
@@ -868,9 +895,11 @@ public class SmartObject extends ImageLayer {
         if (!content.getOwners().contains(this)) {
             throw new AssertionError(getName() + " not owner of its content");
         }
-        for (SmartFilter filter : filters) {
-            if (!filter.checkConsistency()) {
-                return false;
+        if (filters != null) { // pxc might not be migrated yet
+            for (SmartFilter filter : filters) {
+                if (!filter.checkConsistency()) {
+                    return false;
+                }
             }
         }
         return true;

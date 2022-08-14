@@ -66,21 +66,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         setSmartObject(smartObject);
     }
 
-    /**
-     * Creates a deep copy of the chain of smart filters.
-     * This method must be invoked on the first smart filter,
-     * and the rest is added recursively.
-     */
-    public SmartFilter copy(ImageSource imageSource, SmartObject newSmartObject) {
-        SmartFilter copy = (SmartFilter) duplicate(false, true);
-        copy.setImageSource(imageSource);
-        copy.setSmartObject(newSmartObject);
-        if (next != null) {
-            copy.setNext(next.copy(this, newSmartObject));
-        }
-        return copy;
-    }
-
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
@@ -437,7 +422,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
+    @Override
     public boolean checkConsistency() {
+        if (!super.checkConsistency()) {
+            return false;
+        }
+
         if (!smartObject.containsSmartFilter(this)) {
             throw new AssertionError("smart object '%s' doesn't contain '%s'"
                 .formatted(smartObject.getName(), getName()));
@@ -447,10 +437,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             if (next.getImageSource() != this) {
                 throw new AssertionError("image source of " + next.getName() + " is not " + getName());
             }
-            ;
-            //noinspection TailRecursion
-            return next.checkConsistency();
         }
+
         return true;
     }
 

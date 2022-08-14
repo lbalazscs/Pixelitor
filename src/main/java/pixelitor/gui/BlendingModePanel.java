@@ -66,6 +66,11 @@ public class BlendingModePanel extends JPanel {
         BlendingMode[] blendingModes = BlendingMode.values();
         bmCombo = GUIUtils.createComboBox(blendingModes);
         bmCombo.setFocusable(false);
+
+        // This generic name is only useful if the panel is in a
+        // dialog, the layer subclass sets another name for layers.
+        bmCombo.setName("bm");
+
         add(bmCombo);
     }
 

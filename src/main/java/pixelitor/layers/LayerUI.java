@@ -29,6 +29,9 @@ public interface LayerUI {
 
     String getLayerName();
 
+    @VisibleForTesting
+    Layer getLayer();
+
     void setOpenEye(boolean newVisibility);
 
     @VisibleForTesting

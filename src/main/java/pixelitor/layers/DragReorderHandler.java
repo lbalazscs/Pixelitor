@@ -42,11 +42,10 @@ public class DragReorderHandler extends MouseInputAdapter {
     public void mousePressed(MouseEvent e) {
         // a manual double-click watch - necessary on Mac?
         Component c = e.getComponent();
-        if (c instanceof LayerNameEditor) {
+        if (c instanceof LayerNameEditor editor) {
             long when = e.getWhen();
             long diffMillis = when - lastNameEditorPressedMillis;
             if (diffMillis < 250) {
-                LayerNameEditor editor = (LayerNameEditor) c;
                 editor.enableEditing();
             }
             lastNameEditorPressedMillis = when;

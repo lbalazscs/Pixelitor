@@ -279,6 +279,22 @@ public class WorkflowTest {
         app.drawShape(KIWI, FOREGROUND, NONE, kiwiSize, true);
         app.runMenuCommand("Invert");
 
+        // edit the checkers pattern inside a smart object's contents
+        convertLayerToSmartObject();
+        app.runMenuCommand("Edit Contents");
+        app.addGradientFillLayer(SPIRAL_CW);
+        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
+        app.closeCurrentView();
+
+        // add some smart filters to the checkers kiwi image
+        keyboard.pressCtrlOne(); // go back to layer editing mode
+        runFilterWithDialog("Glass Tiles");
+        runFilterWithDialog("Color Balance", dialog ->
+            dialog.slider("Yellow-Blue").slideTo(-45));
+
+        duplicateLayerThenUndo(SmartObject.class);
+        cloneSmartObjectThenUndo();
+
         // add a smart object bellow it
         app.addColorFillLayer(Color.BLUE);
         convertLayerToSmartObject();
@@ -299,6 +315,8 @@ public class WorkflowTest {
         clickPopupMenu(popup2, "Show Layer, but Edit Mask", false);
 
         app.drawGradient(LINEAR, FG_TO_BG, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
+        app.changeSmartFilterBlendingMode("Caustics", BlendingMode.DIFFERENCE);
+
         loadReferenceImage("wf4_ref.png");
     }
 
@@ -346,6 +364,21 @@ public class WorkflowTest {
 
         EDT.assertNumLayersIs(numLayers);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
+    }
+
+    private void cloneSmartObjectThenUndo() {
+        int numLayers = EDT.getNumLayersInActiveComp();
+        EDT.assertActiveLayerTypeIs(SmartObject.class);
+
+        app.runMenuCommand("Clone");
+
+        EDT.assertNumLayersIs(numLayers + 1);
+        EDT.assertActiveLayerTypeIs(SmartObject.class);
+
+        keyboard.undoRedoUndo("Clone");
+
+        EDT.assertNumLayersIs(numLayers);
+        EDT.assertActiveLayerTypeIs(SmartObject.class);
     }
 
     private void rasterizeThenUndo(Class<? extends Layer> expectedLayerType) {

@@ -550,6 +550,14 @@ public class AppRunner {
         return AJSUtils.findButtonByText(pw, text);
     }
 
+    public void changeSmartFilterBlendingMode(String smartFilterName, BlendingMode newMode) {
+        JPopupMenuFixture popup = findLayerIconByLayerName(smartFilterName).showPopupMenu();
+        clickPopupMenu(popup, "Blending Options...");
+        DialogFixture dialog = findDialogByTitle("Blending Options for " + smartFilterName);
+        dialog.comboBox("bm").selectItem(newMode.toString());
+        dialog.button("ok").click();
+    }
+
     public JLabelFixture findLayerIconByLayerName(String layerName) {
         return findIconByLayerName(layerName, "layerIcon");
     }

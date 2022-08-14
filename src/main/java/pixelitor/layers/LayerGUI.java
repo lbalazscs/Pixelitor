@@ -136,8 +136,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 sfUI.setOwner(this);
                 children.add(sfUI);
 
-                // TODO when duplicating a smart object with filters
-                //   this is null, and it's only set later
+                // when duplicating a smart object with filters
+                // this is null, and it's only set later
                 if (dragReorderHandler != null) {
                     sfUI.setDragReorderHandler(dragReorderHandler);
                 }
@@ -216,7 +216,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    // called when one of the icons is clicked
+    // Called when one of the icons is clicked
     private void activateLayerNow() {
         // the layer would be activated anyway, but only in an invokeLayer,
         // and the mask activation expects events to be coming from the active layer
@@ -367,6 +367,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 handler.attachTo(maskIconLabel);
             }
         }
+
+        for (LayerGUI child : children) {
+            // if it was already set, then the call will be ignored
+            child.setDragReorderHandler(handler);
+        }
     }
 
     public void removeDragReorderHandler(DragReorderHandler handler) {
@@ -379,6 +384,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         if (hasMaskIcon()) {
             handler.detachFrom(maskIconLabel);
+        }
+
+        for (LayerGUI child : children) {
+            child.removeDragReorderHandler(handler);
         }
 
         dragReorderHandler = null;
@@ -401,6 +410,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         layer.changeStackIndex(newLayerIndex);
     }
 
+    @Override
     public Layer getLayer() {
         return layer;
     }

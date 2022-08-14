@@ -53,6 +53,11 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
+    public Layer getLayer() {
+        return layer;
+    }
+
+    @Override
     public void setOpenEye(boolean newVisibility) {
         showVisibility = newVisibility;
     }

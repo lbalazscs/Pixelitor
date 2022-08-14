@@ -993,6 +993,15 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
+    public boolean checkConsistency() {
+        if (ui != null) {
+            if (ui.getLayer() != this) {
+                throw new AssertionError("ui has bad layer reference for " + getName());
+            }
+        }
+        return true;
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key + " - " + getName(), this);

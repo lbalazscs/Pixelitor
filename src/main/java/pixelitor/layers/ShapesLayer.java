@@ -275,7 +275,12 @@ public class ShapesLayer extends ContentLayer {
         return "Shape Layer";
     }
 
+    @Override
     public boolean checkConsistency() {
+        if (!super.checkConsistency()) {
+            return false;
+        }
+
         if (styledShape != null) {
             return styledShape.checkConsistency();
         }
