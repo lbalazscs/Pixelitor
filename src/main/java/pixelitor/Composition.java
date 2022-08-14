@@ -784,6 +784,10 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         return editingTarget == layer;
     }
 
+    public Layer getEditingTarget() {
+        return editingTarget;
+    }
+
     public int getLayerIndex(Layer layer) {
         return layerList.indexOf(layer);
     }
