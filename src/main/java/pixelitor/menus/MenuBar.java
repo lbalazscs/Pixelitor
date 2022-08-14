@@ -1059,6 +1059,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(Clouds.NAME, Clouds::new);
         sub.addFilter(JHPlasma.NAME, JHPlasma::new);
+        sub.addFilter(OrganicNoise.NAME, OrganicNoise::new);
         sub.addFilter(ValueNoise.NAME, ValueNoise::new);
 
         sub.addSeparator();
