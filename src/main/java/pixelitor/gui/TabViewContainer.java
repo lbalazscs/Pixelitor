@@ -17,9 +17,11 @@
 
 package pixelitor.gui;
 
+import pixelitor.AppContext;
 import pixelitor.Views;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -105,28 +107,16 @@ public class TabViewContainer extends JComponent implements ViewContainer {
     private void showPopup(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
 
-        popup.add(new PAction("Rename...") {
-            @Override
-            protected void onClick() {
-                view.getComp().rename(TabViewContainer.this);
-            }
-        });
+        popup.add(new PAction("Rename...", () ->
+            view.getComp().rename(this)));
 
         popup.addSeparator();
 
         // close the clicked one, even if it is not the active!
-        popup.add(new PAction(i18n("close")) {
-            @Override
-            protected void onClick() {
-                Views.warnAndClose(view);
-            }
-        });
-        popup.add(new PAction("Close Others") {
-            @Override
-            protected void onClick() {
-                Views.warnAndCloseAllBut(view);
-            }
-        });
+        popup.add(new PAction(i18n("close"), () ->
+            Views.warnAndClose(view)));
+        popup.add(new PAction("Close Others", () ->
+            Views.warnAndCloseAllBut(view)));
         popup.add(Views.CLOSE_UNMODIFIED_ACTION);
         popup.add(Views.CLOSE_ALL_ACTION);
 
@@ -146,6 +136,11 @@ public class TabViewContainer extends JComponent implements ViewContainer {
 
         popup.addSeparator();
         popup.add(tabsUI.getTabPlacementMenu());
+
+        if (AppContext.isDevelopment()) {
+            popup.add(new PAction("Debug View...", () ->
+                Debug.showTree(view, "View " + view.getName())));
+        }
 
         popup.show(e.getComponent(), e.getX(), e.getY());
     }

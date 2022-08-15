@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,13 +15,10 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
-import pixelitor.layers.ActiveCompositionListener;
-import pixelitor.layers.ActiveMaskListener;
-import pixelitor.layers.Layer;
-import pixelitor.layers.MaskViewMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +27,14 @@ import java.util.List;
  * Static methods related to layer listeners
  */
 public class Layers {
-    // Listeners observing (the active layer of) the active composition
-    private static final List<ActiveCompositionListener> compListeners = new ArrayList<>();
+    private static final List<ActiveLayerHolderListener> lhListeners = new ArrayList<>();
     private static final List<ActiveMaskListener> maskListeners = new ArrayList<>();
 
     private Layers() {
     }
 
-    public static void addCompositionListener(ActiveCompositionListener listener) {
-        compListeners.add(listener);
+    public static void addLayerHolderListener(ActiveLayerHolderListener listener) {
+        lhListeners.add(listener);
     }
 
     public static void addMaskListener(ActiveMaskListener listener) {
@@ -58,26 +54,26 @@ public class Layers {
     }
 
     // used for GUI updates
-    public static void numLayersChanged(Composition comp, int newLayerCount) {
-        for (var listener : compListeners) {
-            listener.numLayersChanged(comp, newLayerCount);
+    public static void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+        for (var listener : lhListeners) {
+            listener.numLayersChanged(layerHolder, newLayerCount);
         }
     }
 
     public static void activeCompChanged(Composition newComp, boolean viewChanged) {
-        layerActivated(newComp.getActiveLayer(), viewChanged);
+        layerTargeted(newComp.getEditingTarget(), viewChanged);
     }
 
-    public static void layerActivated(Layer newActiveLayer, boolean viewChanged) {
-        assert newActiveLayer != null;
-        assert newActiveLayer.isActive();
-        assert newActiveLayer.getComp().isActive();
+    public static void layerTargeted(Layer newEditingTarget, boolean viewChanged) {
+        assert newEditingTarget != null;
+        assert newEditingTarget.isEditingTarget();
+        assert newEditingTarget.getComp().isActive();
 
-        for (var listener : compListeners) {
-            listener.layerActivated(newActiveLayer);
+        for (var listener : lhListeners) {
+            listener.layerTargeted(newEditingTarget);
         }
 
-        View view = newActiveLayer.getComp().getView();
+        View view = newEditingTarget.getComp().getView();
         if (view == null) {
             // can happen when adding a new image:
             // the active layer changes, but there is no view yet
@@ -86,13 +82,13 @@ public class Layers {
         if (!viewChanged) {
             // go to normal mask-viewing mode on the activated layer,
             // except if we got here because of a view change
-            MaskViewMode.NORMAL.activate(view, newActiveLayer);
+            MaskViewMode.NORMAL.activate(view, newEditingTarget);
         }
     }
 
-    public static void layerOrderChanged(Composition comp) {
-        for (var listener : compListeners) {
-            listener.layerOrderChanged(comp);
+    public static void layerOrderChanged(LayerHolder layerHolder) {
+        for (var listener : lhListeners) {
+            listener.layerOrderChanged(layerHolder);
         }
     }
 }

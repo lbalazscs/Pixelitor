@@ -36,6 +36,7 @@ import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import java.awt.Cursor;
@@ -52,7 +53,7 @@ import static java.awt.Color.BLACK;
  * A tool defines the interaction between the
  * mouse and key events and a {@link Composition}
  */
-public abstract class Tool implements KeyListener, PresetOwner {
+public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
     private final String toolMessage;
@@ -311,7 +312,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
      * The change in image coords implies a change in component coords,
      * therefore the component space coordinates also have to be recalculated.
      */
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         // empty by default
     }
 
@@ -355,6 +356,7 @@ public abstract class Tool implements KeyListener, PresetOwner {
         return null;
     }
 
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode toolNode = new DebugNode(key, this);
         toolNode.addString("name", getName());

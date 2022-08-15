@@ -300,7 +300,7 @@ public class ParamSet implements Debuggable {
         DebugNode node = new DebugNode(key, this);
 
         for (FilterParam param : paramList) {
-            node.add(param.createDebugNode("param"));
+            node.add(param.createDebugNode(param.getName()));
         }
 
         return node;

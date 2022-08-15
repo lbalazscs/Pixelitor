@@ -25,26 +25,29 @@ import java.awt.event.ActionEvent;
 /**
  * The "Pixelitor action" is the common superclass of most actions.
  */
-public abstract class PAction extends NamedAction {
-    protected PAction() {
+public class PAction extends NamedAction {
+    private final Runnable task;
+
+    public PAction(Runnable task) {
+        this.task = task;
     }
 
-    protected PAction(String name) {
+    public PAction(String name, Runnable task) {
         super(name);
+        this.task = task;
     }
 
-    protected PAction(String name, Icon icon) {
+    public PAction(String name, Icon icon, Runnable task) {
         super(name, icon);
+        this.task = task;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            onClick();
+            task.run();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
-
-    protected abstract void onClick();
 }

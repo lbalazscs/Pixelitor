@@ -24,10 +24,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
-import pixelitor.TestHelper;
+import pixelitor.*;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
@@ -539,7 +536,7 @@ public class ImageLayerTest {
 
     @Test
     public void duplicate() {
-        ImageLayer duplicate = (ImageLayer) layer.duplicate(false, true);
+        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.LAYER_DUPLICATE, true);
 
         assertThat(duplicate)
             .contentBoundsIsEqualTo(layer.getContentBounds())

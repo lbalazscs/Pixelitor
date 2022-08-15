@@ -78,9 +78,7 @@ public class FilterAction extends DrawableAction {
             }
 
             Filter newFilter = createNewInstanceFilter();
-            if (dr.startFilter(newFilter, true)) {
-                so.addSmartFilter(newFilter, true, false);
-            }
+            so.tryAddingSmartFilter(newFilter);
             return;
         }
         dr.startFilter(filter, true);

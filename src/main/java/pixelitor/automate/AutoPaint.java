@@ -37,7 +37,6 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
-import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.*;
 import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.Texts.i18n;
@@ -70,7 +69,7 @@ public class AutoPaint {
         assert calledOnEDT() : threadInfo();
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
-        String msg = format("Auto Paint with %s: ", settings.getTool().getName());
+        String msg = "Auto Paint with " + settings.getTool().getName();
         ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
 
         try {

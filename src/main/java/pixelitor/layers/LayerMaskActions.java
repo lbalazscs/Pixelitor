@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.utils.Messages;
 
@@ -94,43 +95,29 @@ public class LayerMaskActions {
     }
 
     private static class DeleteMaskAction extends PAction {
-        private final Layer layer;
-
         protected DeleteMaskAction(Layer layer) {
-            super("Delete");
-            this.layer = layer;
-        }
-
-        @Override
-        protected void onClick() {
-            layer.deleteMask(true);
+            super("Delete", () -> layer.deleteMask(true));
         }
     }
 
     private static class ApplyMaskAction extends PAction {
-        private final Layer layer;
-
         protected ApplyMaskAction(Layer layer) {
-            super("Apply");
-            this.layer = layer;
-        }
+            super("Apply", () -> {
+                if (!(layer instanceof ImageLayer)) {
+                    // actually we should never get here because the popup menu
+                    // is enabled only for image layers
+                    Messages.showNotImageLayerError(layer);
+                    return;
+                }
 
-        @Override
-        protected void onClick() {
-            if (!(layer instanceof ImageLayer)) {
-                // actually we should never get here because the popup menu
-                // is enabled only for image layers
-                Messages.showNotImageLayerError(layer);
-                return;
-            }
+                ((ImageLayer) layer).applyLayerMask(true);
 
-            ((ImageLayer) layer).applyLayerMask(true);
-
-            layer.getComp().update();
+                layer.getComp().update();
+            });
         }
     }
 
-    static class EnableDisableMaskAction extends PAction implements LayerListener {
+    static class EnableDisableMaskAction extends NamedAction.Checked implements LayerListener {
         private final Layer layer;
 
         public EnableDisableMaskAction(Layer layer) {
@@ -160,7 +147,7 @@ public class LayerMaskActions {
         }
     }
 
-    static class LinkUnlinkMaskAction extends PAction implements LayerListener {
+    static class LinkUnlinkMaskAction extends NamedAction.Checked implements LayerListener {
         private final Layer layer;
 
         public LinkUnlinkMaskAction(Layer layer) {

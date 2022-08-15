@@ -123,7 +123,7 @@ class GradientHandlesTest {
         int dx = 10;
         int dy = 20;
         var at = AffineTransform.getTranslateInstance(dx, dy);
-        handles.imCoordsChanged(at, view.getComp());
+        handles.imCoordsChanged(at, view);
 
         assertThat(start)
             .isAt(START_X_INIT + dx, START_Y_INIT + dy)
@@ -140,7 +140,7 @@ class GradientHandlesTest {
     @DisplayName("zoom handles after image coordinates change")
     void imCoordsChanged_scale() {
         var at = AffineTransform.getScaleInstance(0.5, 0.5);
-        handles.imCoordsChanged(at, view.getComp());
+        handles.imCoordsChanged(at, view);
 
         assertThat(start)
             .isAt(START_X_INIT * 0.5, START_Y_INIT * 0.5)

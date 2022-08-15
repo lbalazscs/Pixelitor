@@ -54,50 +54,46 @@ public interface PresetOwner {
     String getPresetDirName();
 
     public default PAction createManagePresetsAction() {
-        return new PAction("Manage Presets...") {
-            @Override
-            protected void onClick() {
-                try {
-                    String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();
-                    Desktop.getDesktop().open(new File(dirPath));
-                } catch (IOException ex) {
-                    Messages.showException(ex);
-                }
+        return new PAction("Manage Presets...", () -> {
+            try {
+                String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();
+                Desktop.getDesktop().open(new File(dirPath));
+            } catch (IOException ex) {
+                Messages.showException(ex);
             }
-        };
+        });
     }
 
     default Action createSavePresetAction(Component parent,
                                           Consumer<UserPreset> menuAdder,
                                           Consumer<UserPreset> menuRemover) {
-        Action savePresetAction = new PAction("Save Preset...") {
-            @Override
-            protected void onClick() {
-                String presetName = Dialogs.showInputDialog(
-                    parent, "Preset Name", "Preset Name:");
-                if (presetName == null || presetName.isBlank()) {
-                    return;
-                }
+        return new PAction("Save Preset...", () ->
+            savePreset(parent, menuRemover, menuAdder));
+    }
 
-                presetName = FileUtils.toFileName(presetName);
-                UserPreset preset = createUserPreset(presetName);
+    private void savePreset(Component parent, Consumer<UserPreset> menuRemover, Consumer<UserPreset> menuAdder) {
+        String presetName = Dialogs.showInputDialog(
+            parent, "Preset Name", "Preset Name:");
+        if (presetName == null || presetName.isBlank()) {
+            return;
+        }
 
-                if (preset.fileExists()) {
-                    String title = "Preset exists";
-                    String msg = String.format("The preset \"%s\" already exists. Overwrite?",
-                        preset.getName());
-                    int msgType = JOptionPane.WARNING_MESSAGE;
-                    if (!Dialogs.showYesNoDialog(parent, title, msg, msgType)) {
-                        return;
-                    }
-                    // remove the old preset from the menus
-                    menuRemover.accept(preset);
-                }
-                preset.save();
+        presetName = FileUtils.toFileName(presetName);
+        UserPreset preset = createUserPreset(presetName);
 
-                menuAdder.accept(preset);
+        if (preset.fileExists()) {
+            String title = "Preset exists";
+            String msg = String.format("The preset \"%s\" already exists. Overwrite?",
+                preset.getName());
+            int msgType = JOptionPane.WARNING_MESSAGE;
+            if (!Dialogs.showYesNoDialog(parent, title, msg, msgType)) {
+                return;
             }
-        };
-        return savePresetAction;
+            // remove the old preset from the menus
+            menuRemover.accept(preset);
+        }
+        preset.save();
+
+        menuAdder.accept(preset);
     }
 }

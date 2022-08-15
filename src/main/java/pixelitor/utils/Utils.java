@@ -241,7 +241,7 @@ public final class Utils {
     }
 
     /**
-     * Creates the name of the duplicated layers and compositions
+     * Creates names of type "something copy", "something copy 2"
      */
     public static String createCopyName(String orig) {
         String copyString = "copy";

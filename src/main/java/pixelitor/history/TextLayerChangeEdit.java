@@ -79,7 +79,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addNullableChild("backup text settings", backupSettings);
+        node.addNullableDebuggable("backup text settings", backupSettings);
         node.add(layer.createDebugNode());
 
         return node;

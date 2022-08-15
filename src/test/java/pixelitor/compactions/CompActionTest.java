@@ -130,7 +130,7 @@ public class CompActionTest {
             .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
             .activeLayerTranslationIs(origTX, origTY)
             .allLayerUIsAreOK()
-            .invariantIsOK();
+            .invariantsAreOK();
 
         if (withSelection.isTrue()) {
             assertThat(origComp).selectionBoundsIs(origSelection);
@@ -170,7 +170,7 @@ public class CompActionTest {
         var newComp = view.getComp();
 
         assertThat(newComp)
-            .invariantIsOK()
+            .invariantsAreOK()
             .canvasSizeIs(newCanvasWidth, newCanvasHeight)
             .activeLayerTranslationIs(
                 Math.min(0, origTX + west),
@@ -194,7 +194,7 @@ public class CompActionTest {
 
         int targetWidth = ORIG_CANVAS_WIDTH / 2;
         int targetHeight = ORIG_CANVAS_HEIGHT / 2;
-        Composition resized = new Resize(targetWidth, targetHeight, false).process(view.getComp()).join();
+        Composition resized = new Resize(targetWidth, targetHeight).process(view.getComp()).join();
         assert resized != origComp;
         assert view.getComp() == resized;
 
@@ -225,7 +225,7 @@ public class CompActionTest {
         int newCanvasHeight = ORIG_CANVAS_HEIGHT / 2;
 
         assertThat(newComp)
-            .invariantIsOK()
+            .invariantsAreOK()
             .canvasSizeIs(newCanvasWidth, newCanvasHeight)
             .activeLayerAndMaskImageSizeIs(
                 newCanvasWidth - origTX / 2,
@@ -320,7 +320,7 @@ public class CompActionTest {
             assertThat(newComp).selectionBoundsIs(rotatedSelectionBounds);
         }
 
-        assertThat(newComp).invariantIsOK();
+        assertThat(newComp).invariantsAreOK();
     }
 
     @Test
@@ -355,7 +355,7 @@ public class CompActionTest {
         var newComp = view.getComp();
 
         assertThat(newComp)
-            .invariantIsOK()
+            .invariantsAreOK()
             .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
             .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 

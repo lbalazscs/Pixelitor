@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.gui.utils.PAction;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -30,15 +31,10 @@ public class UndoAction extends PAction implements UndoableEditListener {
     public static final Action INSTANCE = new UndoAction();
 
     private UndoAction() {
-        super(UNDO_TEXT);
+        super(UNDO_TEXT, Icons.getUndoIcon(), History::undo);
 
         History.addUndoableEditListener(this);
         setEnabled(false);
-    }
-
-    @Override
-    protected void onClick() {
-        History.undo();
     }
 
     @Override

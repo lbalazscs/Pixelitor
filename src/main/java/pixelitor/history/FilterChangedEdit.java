@@ -23,14 +23,19 @@ import pixelitor.layers.AdjustmentLayer;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-public class AdjustmentLayerChangedEdit extends PixelitorEdit {
+public class FilterChangedEdit extends PixelitorEdit {
     private final AdjustmentLayer layer;
     private Filter backupFilter;
+    private String backupName;
 
-    public AdjustmentLayerChangedEdit(AdjustmentLayer layer, Filter backupFilter) {
-        super(backupFilter.getName() + " Changed", layer.getComp());
+    public FilterChangedEdit(AdjustmentLayer layer, Filter backupFilter, String backupName) {
+        super(layer.getName() + " Changed", layer.getComp());
         this.layer = layer;
         this.backupFilter = backupFilter;
+        this.backupName = backupName;
+
+        // a backup name is needed only if the new filter has a different type
+        assert (backupName != null) ^ (backupFilter.getClass().equals(layer.getFilter().getClass()));
     }
 
     @Override
@@ -48,8 +53,14 @@ public class AdjustmentLayerChangedEdit extends PixelitorEdit {
     }
 
     private void swapFilters() {
-        Filter tmp = layer.getFilter();
+        Filter tmpFilter = layer.getFilter();
         layer.setFilter(backupFilter);
-        backupFilter = tmp;
+        backupFilter = tmpFilter;
+
+        if (backupName != null) {
+            String tmpName = layer.getName();
+            layer.setName(backupName, false);
+            backupName = tmpName;
+        }
     }
 }

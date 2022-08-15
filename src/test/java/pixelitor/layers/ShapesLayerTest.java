@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
@@ -66,14 +67,14 @@ class ShapesLayerTest {
 
     @Test
     void duplicate() {
-        ShapesLayer duplicate = (ShapesLayer) layer.duplicate(false, true);
+        ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyType.LAYER_DUPLICATE, true);
 //        TransformBox duplicateBox = duplicate.getTransformBox();
 //        checkOrigBoxPosition(duplicateBox);
     }
 
     @Test
     void resize() {
-        comp.addLayerInInitMode(layer.duplicate(false, false));
+        comp.addLayerInInitMode(layer.copy(CopyType.LAYER_DUPLICATE, false));
 
         Composition smallComp = TestHelper.resize(comp, 10, 5);
         ShapesLayer smallLayer1 = (ShapesLayer) smallComp.getLayer(0);

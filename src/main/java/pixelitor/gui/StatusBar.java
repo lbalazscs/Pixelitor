@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -100,7 +100,7 @@ public class StatusBar extends JPanel {
                 progressBar = new JProgressBar(0, 100);
                 progressBar.setIndeterminate(true);
             }
-            msgLabel = new JLabel(msg);
+            msgLabel = new JLabel(msg + ":");
 
             container.add(msgLabel);
             container.add(progressBar);

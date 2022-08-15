@@ -19,6 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
@@ -47,6 +48,10 @@ public class Resize implements CompAction {
     // if true, resizes an image so that the proportions
     // are kept and the result fits into the given dimensions
     private final boolean resizeInBox;
+
+    public Resize(int targetWidth, int targetHeight) {
+        this(targetWidth, targetHeight, false);
+    }
 
     public Resize(int targetWidth, int targetHeight, boolean resizeInBox) {
         this.targetWidth = targetWidth;
@@ -85,7 +90,7 @@ public class Resize implements CompAction {
         // can update and multiple resizing operations can run in parallel
         var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
-            .supplyAsync(() -> oldComp.copy(true, true), onPool)
+            .supplyAsync(() -> oldComp.copy(CopyType.UNDO, true), onPool)
             .thenCompose(newComp -> resizeLayers(newComp, targetSize))
             .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler), onEDT)
             .handle((newComp, ex) -> {
@@ -102,11 +107,13 @@ public class Resize implements CompAction {
                                                   ProgressHandler progressHandler) {
         assert calledOnEDT() : threadInfo();
 
+        View view = oldComp.getView();
+        assert view != null;
+
         Canvas newCanvas = newComp.getCanvas();
         var canvasTransform = newCanvas.createImTransformToSize(newCanvasSize);
-        newComp.imCoordsChanged(canvasTransform, false);
+        newComp.imCoordsChanged(canvasTransform, false, view);
 
-        View view = newComp.getView();
         newCanvas.changeSize(newCanvasSize.width, newCanvasSize.height, view, false);
 
         History.add(new CompositionReplacedEdit("Resize",
@@ -133,7 +140,7 @@ public class Resize implements CompAction {
         newComp.updateAllIconImages();
 
         newComp.update(REPAINT, true);
-        newComp.getView().revalidate(); // make sure the scrollbars are OK
+        view.revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();
         Messages.showInStatusBar(format("<b>%s</b> was resized to %dx%d pixels.",

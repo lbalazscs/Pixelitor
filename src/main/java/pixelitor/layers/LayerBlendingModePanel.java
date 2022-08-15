@@ -17,20 +17,18 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
-import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.View;
 import pixelitor.utils.ViewActivationListener;
 
-import static pixelitor.Views.onActiveLayer;
+import static pixelitor.Views.onEditingTarget;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
  */
 public class LayerBlendingModePanel extends BlendingModePanel
-    implements ViewActivationListener, ActiveCompositionListener {
+    implements ViewActivationListener, ActiveLayerHolderListener {
 
     private boolean userInteractionChange = true;
 
@@ -47,7 +45,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
         bmCombo.setName("layerBM");
 
         Views.addActivationListener(this);
-        Layers.addCompositionListener(this);
+        Layers.addLayerHolderListener(this);
 
         opacityDDSlider.addActionListener(e -> {
             if (userInteractionChange) {
@@ -65,12 +63,12 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     private void opacityChanged() {
-        onActiveLayer(layer ->
+        onEditingTarget(layer ->
             layer.setOpacity(getOpacity(), true, true));
     }
 
     private void blendingModeChanged() {
-        onActiveLayer(layer ->
+        onEditingTarget(layer ->
             layer.setBlendingMode(getBlendingMode(), true, true));
     }
 
@@ -85,19 +83,19 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void numLayersChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
     }
 
     @Override
-    public void layerOrderChanged(Composition comp) {
+    public void layerOrderChanged(LayerHolder layerHolder) {
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        float floatOpacity = newActiveLayer.getOpacity();
+    public void layerTargeted(Layer newEditingTarget) {
+        float floatOpacity = newEditingTarget.getOpacity();
         int intOpacity = (int) (floatOpacity * 100);
 
-        BlendingMode bm = newActiveLayer.getBlendingMode();
+        BlendingMode bm = newEditingTarget.getBlendingMode();
         try {
             userInteractionChange = false;
             opacityDDSlider.setValue(intOpacity);

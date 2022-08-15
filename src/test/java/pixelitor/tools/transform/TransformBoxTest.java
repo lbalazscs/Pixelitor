@@ -360,7 +360,7 @@ class TransformBoxTest {
 
         // rotate around NW 90 degrees
         var at = AffineTransform.getQuadrantRotateInstance(1, 200, 100);
-        box.imCoordsChanged(at, view.getComp());
+        box.imCoordsChanged(at, view);
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
         assertThat(sw).isAt(100, 100).isAtIm(100, 100);
@@ -387,7 +387,7 @@ class TransformBoxTest {
 
         // rotate back
         at = at.createInverse();
-        box.imCoordsChanged(at, view.getComp());
+        box.imCoordsChanged(at, view);
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
         assertThat(sw).isAt(200, 200).isAtIm(200, 200);

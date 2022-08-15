@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     private final Container topContainer;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
-        super(100);
+        super(100, null);
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
 

@@ -109,12 +109,7 @@ public class FilterState implements Preset {
 
     @Override
     public Action asAction(PresetOwner owner) {
-        return new PAction(name) {
-            @Override
-            protected void onClick() {
-                owner.loadFilterState(FilterState.this, reset);
-            }
-        };
+        return new PAction(name, () -> owner.loadFilterState(this, reset));
     }
 
     public String toDebugString() {

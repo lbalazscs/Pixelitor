@@ -21,9 +21,12 @@ import pixelitor.AppContext;
 import pixelitor.ThreadPool;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.Debug;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.plaf.ButtonUI;
@@ -66,8 +69,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     // for debugging only: each layer GUI has a different id
     private static int idCounter = 0;
-    private final int id;
-    private JPanel sfPanel;
+    private final int uniqueId;
+    private JPanel childrenPanel;
 
     private SelectionState selectionState;
 
@@ -96,7 +99,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         initLayerVisibilityCB();
         initLayerNameEditor();
-        updateSmartFilterPanel();
+        updateChildrenPanel();
 
         configureLayerIcon();
 
@@ -105,54 +108,55 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
 
         wireSelectionWithLayerActivation();
-        id = idCounter++;
+        uniqueId = idCounter++;
     }
 
     @Override
-    public void updateSmartFilterPanel() {
-        if (layer.isSmartObject()) {
-            SmartObject so = (SmartObject) layer;
-            int numFilters = so.getNumSmartFilters();
-            if (numFilters > 0) {
-                GridLayout gridLayout = new GridLayout(numFilters, 1);
-                if (sfPanel == null) {
-                    sfPanel = new JPanel(gridLayout);
+    public void updateChildrenPanel() {
+        if (layer instanceof LayerHolder layerHolder) {
+            int numChildren = layerHolder.getNumLayers();
+            if (numChildren > 0) {
+                GridLayout gridLayout = new GridLayout(numChildren, 1);
+                if (childrenPanel == null) {
+                    childrenPanel = new JPanel(gridLayout);
                 } else {
-                    sfPanel.removeAll();
-                    sfPanel.setLayout(gridLayout);
+                    childrenPanel.removeAll();
+                    childrenPanel.setLayout(gridLayout);
                 }
             } else {
-                if (sfPanel != null) {
-                    // all smart filters have been removed
-                    remove(sfPanel);
-                    sfPanel = null;
+                if (childrenPanel != null) {
+                    // all children have been removed
+                    remove(childrenPanel);
+                    childrenPanel = null;
                 }
             }
 
-            // smart filters are applied from the bottom up
-            for (int i = numFilters - 1; i >= 0; i--) {
-                SmartFilter sf = so.getSmartFilter(i);
-                LayerGUI sfUI = (LayerGUI) sf.createUI();
-                sfUI.setOwner(this);
-                children.add(sfUI);
+            children.clear();
+            // children are added from the bottom up
+            for (int i = numChildren - 1; i >= 0; i--) {
+                Layer child = layerHolder.getLayer(i);
+                LayerGUI childUI = (LayerGUI) child.createUI();
+                childUI.setOwner(this);
+                assert !children.contains(childUI);
+                children.add(childUI);
 
                 // when duplicating a smart object with filters
                 // this is null, and it's only set later
                 if (dragReorderHandler != null) {
-                    sfUI.setDragReorderHandler(dragReorderHandler);
+                    childUI.setDragReorderHandler(dragReorderHandler);
                 }
-                assert sfUI != null;
-                sfPanel.add(sfUI);
+                assert childUI != null;
+                childrenPanel.add(childUI);
             }
-            if (numFilters > 0) {
-                add(sfPanel, LayerGUILayout.SMART_FILTERS);
+            if (numChildren > 0) {
+                add(childrenPanel, LayerGUILayout.CHILDREN);
             }
         } else {
-            if (sfPanel != null) {
+            if (childrenPanel != null) {
                 // The layer isn't a smart object, but it has a smart filter
                 // panel: can happen after a smart object rasterization.
-                remove(sfPanel);
-                sfPanel = null;
+                remove(childrenPanel);
+                childrenPanel = null;
             }
         }
     }
@@ -230,14 +234,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void layerPopupTriggered(MouseEvent e) {
         JPopupMenu popup = layer.createLayerIconPopupMenu();
         if (popup != null) {
-//            if (AppContext.isDevelopment()) {
-//                popup.add(new PAction("updateSelectionState();") {
-//                    @Override
-//                    protected void onClick() {
-//                        updateSelectionState();
-//                    }
-//                });
-//            }
+            if (AppContext.isDevelopment()) {
+                popup.add(new PAction("Internal State...", () ->
+                    Debug.showTree(layer, layer.getTypeString())));
+            }
 
             popup.show(this, e.getX(), e.getY());
         }
@@ -562,9 +562,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public void updateSelectionState() {
 //        boolean isSmartFilter = isSmartFilterGUI();
-        boolean selected = isSelected();
-        boolean editingTarget = layer.isEditingTarget();
-        if (!selected || !editingTarget) {
+
+//        System.out.printf("LayerGUI::updateSelectionState: layer = %s '%s', editingTarget = %s, selected = %s, maskEditing = %s%n",
+//            layer.getClass().getSimpleName(), layer.getName(), layer.isEditingTarget(), isSelected(), layer.isMaskEditing());
+
+        if (!layer.isEditingTarget()) {
             setSelectionState(SelectionState.UNSELECTED);
         } else if (layer.isMaskEditing()) {
             setSelectionState(SelectionState.MASK_SELECTED);
@@ -574,7 +576,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private void setSelectionState(SelectionState newSelectionState) {
-//        System.out.println("LayerGUI::setSelectionState(" + newSelectionState + ") for " + layer.getName());
+//        System.out.printf("LayerGUI::setSelectionState(%s) for %s '%s'%n",
+//            newSelectionState, layer.getClass().getSimpleName(), layer.getName());
+
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;
             selectionState.show(layerIconLabel, maskIconLabel);
@@ -599,7 +603,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             addMaskIcon();
         }
         selectionState.show(layerIconLabel, maskIconLabel);
-        updateSmartFilterPanel();
+        updateChildrenPanel();
     }
 
     @Override
@@ -653,7 +657,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public int getId() {
-        return id;
+        return uniqueId;
     }
 
     public int getPreferredHeight() {
@@ -678,6 +682,25 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public boolean isSmartFilterGUI() {
         return owner != null;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+        node.addInt("unique id", uniqueId);
+
+        node.addNullableProperty("dragReorderHandler", dragReorderHandler);
+        node.addNullableProperty("owner", owner);
+
+        for (LayerGUI child : children) {
+            node.add(child.createDebugNode("child " + child.getLayer().getName()));
+        }
+
+        node.addBoolean("lateDragHandler", lateDragHandler);
+        node.addAsString("selectionState", selectionState);
+        node.addString("layer name", layer.getName());
+
+        return node;
     }
 
     @Override

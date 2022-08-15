@@ -54,19 +54,10 @@ public class GlobalEvents {
 
     private static KeyListener keyListener;
 
-    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
-        @Override
-        protected void onClick() {
-            Tools.increaseActiveBrushSize();
-        }
-    };
-
-    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new PAction() {
-        @Override
-        protected void onClick() {
-            Tools.decreaseActiveBrushSize();
-        }
-    };
+    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION =
+        new PAction(Tools::increaseActiveBrushSize);
+    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION =
+        new PAction(Tools::decreaseActiveBrushSize);
 
     private static final Map<KeyStroke, Action> hotKeyMap = new HashMap<>();
 

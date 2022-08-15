@@ -74,7 +74,7 @@ import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 /**
  * An image composition consisting of multiple layers
  */
-public class Composition implements Serializable, ImageSource, Debuggable {
+public class Composition implements Serializable, ImageSource, Debuggable, LayerHolder {
     // serialization is used for saving in the pxc format
     @Serial
     private static final long serialVersionUID = 1L;
@@ -198,6 +198,8 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
         in.defaultReadObject();
 
+        editingTarget = activeLayer;
+
         for (Layer layer : layerList) {
             if (layer instanceof SmartObject so) {
                 // things that need a full canvas and also
@@ -213,52 +215,85 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     /**
      * Creates and returns a deep copy of this composition.
      */
-    public Composition copy(boolean forUndo, boolean copySelection) {
+    public Composition copy(CopyType copyType, boolean copySelection) {
         var compCopy = new Composition(canvas.copy(), mode);
+
+        int editingTargetIndex = -1;
+        if (editingTarget != activeLayer) {
+            // must be a smart filter inside a smart object
+            SmartObject so = (SmartObject) activeLayer;
+            SmartFilter sf = (SmartFilter) editingTarget;
+            editingTargetIndex = so.indexOf(sf);
+        }
 
         // copy layers
         for (Layer layer : layerList) {
-            var layerCopy = layer.duplicate(true, true);
+            var layerCopy = layer.copy(copyType, true);
             layerCopy.setComp(compCopy);
-
             compCopy.layerList.add(layerCopy);
             if (layer == activeLayer) {
                 compCopy.activeLayer = layerCopy;
+                if (editingTargetIndex == -1) {
+                    compCopy.editingTarget = layerCopy;
+                } else {
+                    SmartObject so = (SmartObject) layerCopy;
+                    compCopy.editingTarget = so.getSmartFilter(editingTargetIndex);
+                }
             }
         }
 
         compCopy.newLayerCount = newLayerCount;
         compCopy.mode = mode;
-        compCopy.owners = owners;
 
         if (copySelection && selection != null) {
-            compCopy.setSelectionRef(new Selection(selection, forUndo));
+            compCopy.setSelectionRef(new Selection(selection, copyType == CopyType.UNDO));
         }
         if (paths != null) {
             compCopy.paths = paths.deepCopy(compCopy);
         }
-        if (forUndo) {
+
+        // In the case of undo the view will be transferred later.
+        // At no time should two comps point to the same view.
+        compCopy.view = null;
+
+        if (copyType == CopyType.UNDO) {
             compCopy.dirty = dirty;
             compCopy.file = file;
             compCopy.fileTime = fileTime;
             compCopy.name = name;
-            compCopy.view = view;
             // the new guides are set in the action that needed undo
-        } else { // duplicate
+        } else {
             compCopy.dirty = false;
             compCopy.file = null;
             compCopy.fileTime = 0;
             compCopy.name = createCopyName(stripExtension(name));
-            compCopy.view = null;
             if (guides != null) {
                 compCopy.guides = guides.copyForNewComp(view);
             }
         }
         compCopy.createDebugName();
 
-        assert compCopy.classInvariant();
+        assert checkInvariants();
+        assert compCopy.checkInvariants();
 
         return compCopy;
+    }
+
+    @Override
+    public Composition getComp() {
+        return this;
+    }
+
+    public LayerHolder getActiveLayerHolder() {
+        if (activeLayer == editingTarget) {
+            // If the holder as a whole is the target,
+            // then it is treated as an ordinary layer.
+            return this;
+        }
+        if (activeLayer instanceof LayerHolder layerHolder) {
+            return layerHolder;
+        }
+        return this;
     }
 
     public View getView() {
@@ -315,6 +350,19 @@ public class Composition implements Serializable, ImageSource, Debuggable {
             }
         }
         owners.add(newOwner);
+    }
+
+    // this method could be used if it was decided that smart object
+    // contents must be copied for CompAction undo support
+    public void transferOwners(Composition other) {
+        assert other.owners == null;
+        if (owners != null) {
+            other.owners = owners;
+            for (SmartObject owner : owners) {
+                owner.setContent(other);
+            }
+            owners = null;
+        }
     }
 
     public boolean isSmartObjectContent() {
@@ -426,6 +474,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         throw new IllegalStateException("no view for top-level comp " + getDebugName());
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -467,6 +516,8 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
     public void createDebugName() {
         assert name != null;
+        assert debugName == null;
+
         this.debugName = name + " " + debugCounter++;
     }
 
@@ -549,7 +600,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     }
 
     public void duplicateActiveLayer() {
-        Layer duplicate = activeLayer.duplicate(false, true);
+        Layer duplicate = activeLayer.copy(CopyType.LAYER_DUPLICATE, true);
         if (duplicate == null) {
             // there was an out of memory error
             return;
@@ -558,7 +609,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
             .withHistory("Duplicate Layer")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
-        assert classInvariant();
+        assert checkInvariants();
     }
 
     public void flattenImage() {
@@ -586,7 +637,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     }
 
     public void addAllLayersToUI() {
-        assert classInvariant();
+        assert checkInvariants();
 
         Layer activeLayerBefore = activeLayer;
 
@@ -620,13 +671,14 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         int index = layerList.indexOf(layer);
         if (index > 0 && layer.isVisible()) {
             Layer bellow = layerList.get(index - 1);
-            return bellow instanceof ImageLayer && bellow.isVisible();
+            // An instanceof check would be incorrect, because it should not merge on smart objects
+            return bellow.getClass() == ImageLayer.class && bellow.isVisible();
         }
         return false;
     }
 
     public void mergeActiveLayerDown() {
-        assert classInvariant();
+        assert checkInvariants();
 
         if (canMergeDown(activeLayer)) {
             mergeDown(activeLayer);
@@ -663,6 +715,15 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         deleteLayer(activeLayer, addToHistory);
     }
 
+    public void deleteEditingTarget(boolean addToHistory) {
+        if (isEditingTargetTopLevel()) {
+            deleteLayer(activeLayer, addToHistory);
+        } else {
+            editingTarget.getHolder().deleteLayer(editingTarget, addToHistory);
+        }
+    }
+
+    @Override
     public void deleteLayer(Layer layer, boolean addToHistory) {
         deleteLayer(layer, addToHistory, true);
     }
@@ -702,6 +763,11 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         }
     }
 
+    @Override
+    public boolean allowZeroLayers() {
+        return false;
+    }
+
     /**
      * Replaces a layer with another, while keeping its position, mask, ui
      */
@@ -719,7 +785,8 @@ public class Composition implements Serializable, ImageSource, Debuggable {
             activeLayer = after;
         }
         if (wasEditingTarget) {
-            setEditingTarget(after);
+            // don't call setEditingTarget, because it would set the mask view mode to NORMAL
+            editingTarget = after;
         }
     }
 
@@ -740,16 +807,15 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
         if (activeLayer.hasUI()) {
             activeLayer.activateUI();
-            Layers.layerActivated(layer, false);
         }
+
+        setEditingTarget(activeLayer);
 
         if (addToHistory) {
             History.add(new LayerSelectionChangeEdit(editName, this, oldLayer, layer));
         }
 
-        setEditingTarget(activeLayer);
-
-        assert classInvariant();
+        assert checkInvariants();
     }
 
     public boolean isActive(Layer layer) {
@@ -760,6 +826,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         return activeLayer;
     }
 
+    @Override
     public int getActiveLayerIndex() {
         return layerList.indexOf(activeLayer);
     }
@@ -768,10 +835,12 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         if (this.editingTarget == editingTarget) {
             return;
         }
+        assert editingTarget.getComp() == this;
         Layer oldTarget = this.editingTarget;
         this.editingTarget = editingTarget;
-        if (view != null) {  // shouldn't run while loading the composition
-            Tools.editingTargetChanged(activeLayer);
+        if (editingTarget.hasUI() && isActive()) {  // shouldn't run while loading the composition
+            Tools.editingTargetChanged(editingTarget);
+            Layers.layerTargeted(editingTarget, false);
 
             if (oldTarget != null) {
                 oldTarget.updateUI();
@@ -788,14 +857,20 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         return editingTarget;
     }
 
+    public boolean isEditingTargetTopLevel() {
+        return editingTarget == activeLayer;
+    }
+
     public int getLayerIndex(Layer layer) {
         return layerList.indexOf(layer);
     }
 
+    @Override
     public Layer getLayer(int i) {
         return layerList.get(i);
     }
 
+    @Override
     public int getNumLayers() {
         return layerList.size();
     }
@@ -915,12 +990,12 @@ public class Composition implements Serializable, ImageSource, Debuggable {
      * Returns the active mask or image layer or null
      */
     public Drawable getActiveDrawable() {
-        assert classInvariant();
+        assert checkInvariants();
         return activeLayer.getActiveDrawable();
     }
 
     public Filterable getActiveFilterable() {
-        assert classInvariant();
+        assert checkInvariants();
         if (activeLayer.isMaskEditing()) {
             return activeLayer.getMask();
         }
@@ -1038,16 +1113,18 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         }
     }
 
+    @Override
     public void moveActiveLayerUp() {
-        assert classInvariant();
+        assert checkInvariants();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex + 1,
             true, LayerMoveAction.RAISE_LAYER);
     }
 
+    @Override
     public void moveActiveLayerDown() {
-        assert classInvariant();
+        assert checkInvariants();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex - 1,
@@ -1055,7 +1132,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     }
 
     public void moveActiveLayerToTop() {
-        assert classInvariant();
+        assert checkInvariants();
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
@@ -1064,7 +1141,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     }
 
     public void moveActiveLayerToBottom() {
-        assert classInvariant();
+        assert checkInvariants();
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, 0,
@@ -1437,9 +1514,10 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
     /**
      * Called when the image-space coordinates have been changed by the
-     * given transform (resize, crop, etc.)
+     * given transform (resize, crop, etc.).
+     * The View argument is because at this point it might not have a view
      */
-    public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
+    public void imCoordsChanged(AffineTransform at, boolean isUndoRedo, View view) {
         // The selection is explicitly reset to a backup shape
         // when something is undone/redone
         if (selection != null && !isUndoRedo) {
@@ -1452,7 +1530,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
         if (paths != null) {
             paths.imCoordsChanged(at);
         }
-        Tools.imCoordsChanged(this, at);
+        Tools.imCoordsChanged(at, view);
     }
 
     /**
@@ -1570,20 +1648,48 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
     // called from assertions and unit tests
     @SuppressWarnings("SameReturnValue")
-    public boolean classInvariant() {
+    public boolean checkInvariants() {
         if (layerList.isEmpty()) {
             if (AppContext.isUnitTesting()) {
                 return true;
             }
-            throw new IllegalStateException("no layer in " + getName());
+            throw new AssertionError("no layer in " + getName());
         }
         if (activeLayer == null) {
-            throw new IllegalStateException("no active layer in " + getName());
+            throw new AssertionError("no active layer in " + getName());
+        }
+        if (editingTarget == null) {
+            throw new AssertionError("no editing target in " + getName());
         }
         if (!layerList.contains(activeLayer)) {
-            throw new IllegalStateException(format(
+            throw new AssertionError(format(
                 "active layer (%s) not in list (%s)",
                 activeLayer.getName(), layerList));
+        }
+
+        boolean editingTargetContained = false;
+        for (Layer layer : layerList) {
+            if (layer.contains(editingTarget)) {
+                editingTargetContained = true;
+                break;
+            }
+        }
+        if (!editingTargetContained) {
+            throw new AssertionError("Editing target '%s' not contained in '%s'"
+                .formatted(editingTarget.getName(), getDebugName()));
+        }
+
+        if (view != null && !view.isMock()) {
+            if (view.getComp() != this) {
+                throw new AssertionError("bad view reference for " + getDebugName());
+            }
+        }
+        if (owners != null) {
+            for (SmartObject owner : owners) {
+                if (owner.getContent() != this) {
+                    throw new AssertionError("bad owner reference for " + getDebugName());
+                }
+            }
         }
         return true;
     }
@@ -1765,7 +1871,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
     }
 
     private boolean checkAllSOInvariants() {
-        forAllNestedSmartObjects(SmartObject::checkInvariant);
+        forAllNestedSmartObjects(SmartObject::checkInvariants);
         return true;
     }
 
@@ -1803,7 +1909,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
         Composition content = new Composition(canvas.copy(), mode);
         content.setName("visible");
-        Composition newMainComp = copy(true, true);
+        Composition newMainComp = copy(CopyType.UNDO, true);
 
         List<Layer> visibleLayers = newMainComp.layerList.stream()
             .filter(Layer::isVisible)
@@ -1925,7 +2031,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
 
     @Override
     public String toString() {
-        return "Composition{name='" + name + '\''
+        return "Composition{debugName='" + debugName + '\''
                + ", active = " + isActive()
                + ", path = " + getActivePath()
                + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
@@ -2037,7 +2143,7 @@ public class Composition implements Serializable, ImageSource, Debuggable {
                 History.add(new NewLayerEdit(editName,
                     comp, newLayer, activeLayerBefore, oldViewMode));
             }
-            assert comp.classInvariant();
+            assert comp.checkInvariants();
         }
 
         private boolean needsHistory() {

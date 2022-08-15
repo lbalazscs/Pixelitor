@@ -86,10 +86,10 @@ enum MaskMode {
                 if (EDT.activeLayerIsMaskEditing()) {
                     assertMaskViewModeIs(EDIT_MASK);
                 } else {
-                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
+                    throw new AssertionError("Not mask editing in '%s'".formatted(EDT.activeLayerName()));
                 }
             } else {
-                throw new AssertionError("No mask found in " + EDT.activeLayerName());
+                throw new AssertionError("No mask found in '%s'".formatted(EDT.activeLayerName()));
             }
         }
 
@@ -168,11 +168,11 @@ enum MaskMode {
         return viewMode.editMask();
     }
 
-    protected static void assertMaskViewModeIs(MaskViewMode expected) {
+    private static void assertMaskViewModeIs(MaskViewMode expected) {
         MaskViewMode actual = Views.getActive().getMaskViewMode();
         if (actual != expected) {
             throw new AssertionError("expected mask view mode " + expected
-                    + ", found " + actual);
+                                     + ", found " + actual);
         }
     }
 

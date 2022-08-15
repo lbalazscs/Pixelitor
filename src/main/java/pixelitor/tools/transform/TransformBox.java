@@ -29,6 +29,7 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -555,7 +556,7 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         // move the corners
         for (CornerHandle corner : corners) {
             corner.imTransformOnlyThis(at, false);
@@ -702,13 +703,7 @@ public class TransformBox implements ToolWidget, Serializable {
         node.addDouble("scale Y", calcScaleY());
 
         AffineTransform at = calcImTransform();
-        DebugNode transformNode = new DebugNode("transform", at);
-        transformNode.addDouble("scaleX (m00)", at.getScaleX());
-        transformNode.addDouble("scaleY (m11)", at.getScaleY());
-        transformNode.addDouble("shearX (m01)", at.getShearX());
-        transformNode.addDouble("shearY (m10)", at.getShearY());
-        transformNode.addDouble("translateX (m02)", at.getTranslateX());
-        transformNode.addDouble("translateY (m12)", at.getTranslateY());
+        DebugNode transformNode = DebugNodes.createTransformNode(at, "transform");
         node.add(transformNode);
 
         return node;

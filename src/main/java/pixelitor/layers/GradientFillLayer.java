@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Views;
+import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
 import pixelitor.history.GradientFillLayerChangeEdit;
 import pixelitor.history.History;
@@ -52,8 +52,7 @@ public class GradientFillLayer extends ContentLayer {
         super(comp, name);
     }
 
-    public static void createNew() {
-        var comp = Views.getActiveComp();
+    public static void createNew(Composition comp) {
         var layer = new GradientFillLayer(comp, "gradient fill");
         new Composition.LayerAdder(comp)
             .atPosition(ABOVE_ACTIVE)
@@ -63,12 +62,14 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void edit() {
+    public boolean edit() {
         Tools.GRADIENT.activate();
+        return true;
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected GradientFillLayer createTypeSpecificCopy(CopyType copyType) {
+        String duplicateName = copyType.createLayerDuplicateName(name);
         var duplicate = new GradientFillLayer(comp, duplicateName);
         if (gradient != null) {
             // could be shared, because it is overwritten

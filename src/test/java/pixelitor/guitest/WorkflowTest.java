@@ -24,6 +24,8 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.filters.Starburst;
+import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.Randomize;
@@ -44,6 +46,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
+import static pixelitor.layers.MaskViewMode.*;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
@@ -78,14 +81,14 @@ public class WorkflowTest {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
 
-        assert args.length == 1;
+        assert args.length == 2;
         referenceImagesDir = new File(args[0]);
         assert referenceImagesDir.exists();
 
-        new WorkflowTest();
+        new WorkflowTest(args[1]);
     }
 
-    private WorkflowTest() {
+    private WorkflowTest(String arg) {
         boolean experimentalWasEnabled = EDT.call(() -> AppContext.enableExperimentalFeatures);
         // enable it before building the menus so that shortcuts work
         EDT.run(() -> AppContext.enableExperimentalFeatures = true);
@@ -96,10 +99,19 @@ public class WorkflowTest {
         keyboard = app.getKeyboard();
 //        app.runSlowly();
 
-        wfTest1();
-        wfTest2();
-        wfTest3();
-        wfTest4();
+        switch (arg) {
+            case "all" -> {
+                wfTest1();
+                wfTest2();
+                wfTest3();
+                wfTest4();
+            }
+            case "1" -> wfTest1();
+            case "2" -> wfTest2();
+            case "3" -> wfTest3();
+            case "4" -> wfTest4();
+            default -> throw new IllegalArgumentException("arg = " + arg);
+        }
 
         if (!experimentalWasEnabled) {
             EDT.run(() -> AppContext.enableExperimentalFeatures = false);
@@ -121,7 +133,7 @@ public class WorkflowTest {
         duplicateLayerThenUndo(TextLayer.class);
         rasterizeThenUndo(TextLayer.class);
         selectionFromText();
-        deleteTextLayer();
+        deleteEditingTarget(TextLayer.class, true);
         rotate90();
         invertSelection();
         deselect();
@@ -130,7 +142,7 @@ public class WorkflowTest {
         enlargeCanvas();
         app.addEmptyImageLayer(true);
         renderCaustics();
-        selectWoodLayer();
+        app.selectLayerAbove(); // select the wood layer
         addHeartShapedHoleToTheWoodLayer();
         runFilterWithDialog("Drop Shadow");
         app.mergeDown();
@@ -216,6 +228,14 @@ public class WorkflowTest {
                 dialog.slider("Magnification (%)").slideTo(250);
                 dialog.slider("Horizontal").slideTo(250);
             });
+        runFilterWithDialog("Frosted Glass");
+
+        app.runMenuCommand("Lower Layer");
+        app.runMenuCommand("Raise Layer");
+        keyboard.undo("Move Frosted Glass Up");
+        keyboard.undo("Move Frosted Glass Down");
+        keyboard.redo("Move Frosted Glass Down");
+        keyboard.redo("Move Frosted Glass Up");
 
         duplicateLayerThenUndo(SmartObject.class);
         rasterizeThenUndo(SmartObject.class);
@@ -232,8 +252,8 @@ public class WorkflowTest {
         app.addShapesLayer(CAT, secondCatLoc);
 
         // ensure that the first layer is selected and the box is not shown
-        app.runMenuCommand("Lower Layer Selection");
-        app.runMenuCommand("Lower Layer Selection");
+        app.selectLayerBellow();
+        app.selectLayerBellow();
 
         loadReferenceImage("wf2_ref.png");
     }
@@ -253,15 +273,45 @@ public class WorkflowTest {
         keyboard.undoRedo("Lower Layer");
 
         runFilterWithDialog("Plasma");
-        app.runMenuCommand("Raise Layer Selection");
-        keyboard.undoRedo("Raise Layer Selection");
+
+        // select the text layer
+        app.selectLayerAbove();
+
+        // set the text layer's blending mode to erase
         app.changeLayerBlendingMode(BlendingMode.ERASE);
+
+        app.addAdjustmentLayer(ColorBalance.NAME, dialog ->
+            dialog.slider("Cyan-Red").slideTo(50));
+        app.addLayerMask();
+        runFilterWithDialog(Starburst.NAME, dialog ->
+            dialog.slider("Spiral").slideTo(100));
 
 //        app.addShapesLayer(ShapeType.HEART, 300, 70);
 //        app.runMenuCommand("Rasterize Shape Layer");
 //        app.changeLayerBlendingMode(BlendingMode.ERASE);
 
         app.closeCurrentView();
+
+        // duplicate the whole smart object
+        app.runMenuCommand("Duplicate Layer");
+
+        // add a smart filter to the original smart object and copy it
+        app.selectLayerBellow();
+        runFilterWithDialog("Colorize");
+        app.clickLayerPopup("Colorize", "Copy Colorize");
+
+        // paste the smart filter into the copy of the smart object
+        app.selectLayerAbove();
+        app.clickLayerPopup("smart Cutout copy", "Paste Colorize");
+        keyboard.undoRedoUndo("Add Smart Colorize copy");
+
+        // rasterize, then delete the copy of the smart object
+        rasterizeThenUndo(SmartObject.class);
+        deleteEditingTarget(SmartObject.class, true);
+
+        // delete the Colorize smart object
+        app.findLayerIconByLayerName("Colorize").click();
+        deleteEditingTarget(SmartFilter.class, false);
 
         loadReferenceImage("wf3_ref.png");
     }
@@ -310,12 +360,26 @@ public class WorkflowTest {
         var popup = app.findLayerIconByLayerName("Caustics").showPopupMenu();
         clickPopupMenu(popup, "Add Layer Mask");
 
-        // this shouldn't be necessary, mask edit mode should be set by default
-        var popup2 = app.findMaskIconByLayerName("Caustics").showPopupMenu();
-        clickPopupMenu(popup2, "Show Layer, but Edit Mask", false);
-
         app.drawGradient(LINEAR, FG_TO_BG, new CanvasDrag(100, 0, 100, INITIAL_HEIGHT), Color.BLACK, Color.WHITE);
-        app.changeSmartFilterBlendingMode("Caustics", BlendingMode.DIFFERENCE);
+
+        app.setMaskViewModeViaRightClick("Caustics", NORMAL);
+        app.setMaskViewModeViaRightClick("Caustics", RUBYLITH);
+        app.setMaskViewModeViaRightClick("Caustics", SHOW_MASK);
+        app.setMaskViewModeViaRightClick("Caustics", EDIT_MASK);
+
+        app.deleteMaskViaRightClick("Caustics", true);
+        app.disableMaskViaRightClick("Caustics");
+        app.enableMaskViaRightClick("Caustics");
+
+        app.changeLayerBlendingMode(BlendingMode.DIFFERENCE);
+
+//        app.runMenuCommand("Raise Layer Selection");
+//        app.runMenuCommand("Delete Layer");
+
+        app.resize(300);
+        app.resize(5);
+        keyboard.undoRedoUndo("Resize");
+        keyboard.undoRedoUndo("Resize");
 
         loadReferenceImage("wf4_ref.png");
     }
@@ -410,17 +474,35 @@ public class WorkflowTest {
         EDT.assertThereIsSelection();
     }
 
-    private void deleteTextLayer() {
-        app.checkNumLayersIs(2);
+    private void deleteEditingTarget(Class<? extends Layer> expectedLayerType, boolean expectedTopLevel) {
+        int numLayers = EDT.getNumLayersInActiveComp();
+        EDT.assertEditingTargetTypeIs(expectedLayerType);
+        boolean actualTopLevel = EDT.active(Composition::isEditingTargetTopLevel);
+        assert expectedTopLevel == actualTopLevel;
+        app.checkNumLayersIs(numLayers);
+
+        String expectedEditName = "Delete Layer";
+        if (expectedLayerType.equals(SmartFilter.class)) {
+            SmartFilter sf = (SmartFilter) EDT.active(Composition::getEditingTarget);
+            expectedEditName = "Delete Smart " + sf.getFilter().getName();
+        }
 
         pw.button("deleteLayer").click();
-        app.checkNumLayersIs(1);
+        if (expectedTopLevel) {
+            app.checkNumLayersIs(numLayers - 1);
+        } else {
+            app.checkNumLayersIs(numLayers);
+        }
 
-        keyboard.undo("Delete Layer");
-        app.checkNumLayersIs(2);
+        keyboard.undo(expectedEditName);
+        app.checkNumLayersIs(numLayers);
 
-        keyboard.redo("Delete Layer");
-        app.checkNumLayersIs(1);
+        keyboard.redo(expectedEditName);
+        if (expectedTopLevel) {
+            app.checkNumLayersIs(numLayers - 1);
+        } else {
+            app.checkNumLayersIs(numLayers);
+        }
     }
 
     private void rotate90() {
@@ -503,21 +585,16 @@ public class WorkflowTest {
         keyboard.undoRedo("Caustics");
     }
 
-    private void selectWoodLayer() {
-        app.runMenuCommand("Raise Layer Selection");
-        keyboard.undoRedo("Raise Layer Selection");
-    }
-
     private void addHeartShapedHoleToTheWoodLayer() {
         app.setDefaultColors();
         app.addLayerMask();
         CanvasDrag heartLocation = new CanvasDrag(340, 100, 100);
         app.drawShape(HEART, FOREGROUND, NONE, heartLocation, true);
 
-        app.runMenuCommand("Delete");
+        app.runMenuCommand("Delete"); // in the Layer Mask submenu
         keyboard.undoRedoUndo("Delete Layer Mask");
 
-        app.runMenuCommand("Apply");
+        app.runMenuCommand("Apply"); // in the Layer Mask submenu
         keyboard.undoRedo("Apply Layer Mask");
     }
 

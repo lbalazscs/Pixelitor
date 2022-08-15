@@ -22,12 +22,12 @@ import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.Filters;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
@@ -57,8 +57,6 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
-import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.Views.addAsNewComp;
 import static pixelitor.Views.findCompByName;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
@@ -396,6 +394,21 @@ public class Debug {
         GUIUtils.showCopyTextToClipboardDialog(form, text, title);
     }
 
+    public static void showTree(Debuggable debuggable, String name) {
+        DebugNode node = debuggable.createDebugNode(name);
+        JTree tree = new JTree(node);
+        new DialogBuilder()
+            .title("Internal State")
+            .content(new JScrollPane(tree))
+            .okText("Copy")
+            .cancelText("Close")
+            .validator(d -> {
+                Utils.copyStringToClipboard(node.toJSON());
+                return false; // prevents the dialog from closing
+            })
+            .show();
+    }
+
     public static String pageFormatAsString(PageFormat pageFormat) {
         int orientation = pageFormat.getOrientation();
         String orientationString = switch (orientation) {
@@ -501,14 +514,12 @@ public class Debug {
         return new File("ser", fileName);
     }
 
-    public static void debugAllImages() {
-        // make a copy, because this will add new views
+    public static void debugAllDebugNames() {
+        // make a copy, because this could add new views in the future
         List<View> origViews = List.copyOf(Views.getAll());
         for (View view : origViews) {
-            view.getComp().forAllNestedSmartObjects(SmartObject::debugAllImages);
-        }
-        for (View view : origViews) {
-            view.getComp().debugImages();
+            String debugName = view.getComp().getDebugName();
+            System.out.println("Debug::debugAllImages: debugName = " + debugName);
         }
     }
 
@@ -528,16 +539,9 @@ public class Debug {
         SmartObject smartObject = new SmartObject(textLayer);
         smartObject.setOpacity(0.2f, false, true);
         new Composition.LayerAdder(comp).add(smartObject);
-        if (filter instanceof FilterWithGUI guiFilter) {
-            guiFilter.randomize();
-            smartObject.startPreviewing();
-            smartObject.startFilter(filter, PREVIEWING);
-            smartObject.onFilterDialogAccepted(filter.getName());
-        } else {
-            smartObject.startFilter(filter, FILTER_WITHOUT_DIALOG);
-        }
+        SmartFilter sf = new SmartFilter(filter, smartObject.getContent(), smartObject);
+        smartObject.addSmartFilter(sf, false, true);
 
-        smartObject.addSmartFilter(filter, true, true);
         smartObject.updateIconImage();
     }
 

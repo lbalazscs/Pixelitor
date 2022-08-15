@@ -92,14 +92,11 @@ public class ToolsPanel extends JPanel {
     }
 
     private static void setupKeyboardShortcut(Tool tool) {
-        Action activateAction = new PAction() {
-            @Override
-            protected void onClick() {
-                if (Tools.currentTool != tool) {
-                    tool.activate();
-                }
+        Action activateAction = new PAction(() -> {
+            if (Tools.currentTool != tool) {
+                tool.activate();
             }
-        };
+        });
 
         GlobalEvents.addHotKey(tool.getActivationKey(), activateAction);
     }

@@ -18,7 +18,7 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
-import pixelitor.Views;
+import pixelitor.Composition;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
@@ -117,22 +117,17 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     public static Action getAction() {
-        return new OpenViewEnabledAction("Enlarge Canvas...") {
-            @Override
-            protected void onClick() {
-                showInDialog();
-            }
-        };
+        return new OpenViewEnabledAction("Enlarge Canvas...",
+            EnlargeCanvas::showInDialog);
     }
 
-    private static void showInDialog() {
+    private static void showInDialog(Composition comp) {
         var p = new EnlargeCanvasPanel();
         new DialogBuilder()
             .title(NAME)
             .menuBar(new DialogMenuBar(p))
             .content(p)
             .okAction(() -> {
-                var comp = Views.getActiveComp();
                 p.getCompAction(comp.getCanvas()).process(comp);
             })
             .show();

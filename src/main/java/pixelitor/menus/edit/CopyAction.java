@@ -18,7 +18,6 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
-import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.*;
@@ -39,19 +38,11 @@ public class CopyAction extends OpenViewEnabledAction {
     public static final CopyAction COPY_LAYER = new CopyAction(CopySource.LAYER_OR_MASK);
     public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
 
-    private final CopySource source;
-
     private CopyAction(CopySource source) {
-        super(i18n(source.toResourceKey()));
-        this.source = source;
+        super(i18n(source.toResourceKey()), comp -> copyToClipboard(comp, source));
     }
 
-    @Override
-    protected void onClick() {
-        Views.onActiveComp(this::copyToClipboard);
-    }
-
-    private void copyToClipboard(Composition comp) {
+    private static void copyToClipboard(Composition comp, CopySource source) {
         Result<BufferedImage, String> result = source.getImage(comp);
         if (!result.isOK()) {
             String msg = "Could not copy because " + result.errorDetail();
@@ -63,7 +54,7 @@ public class CopyAction extends OpenViewEnabledAction {
         // will also change the clipboard contents
         BufferedImage copy = ImageUtils.copySubImage(activeImage);
 
-        ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard...", -1);
+        ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard", -1);
         CompletableFuture.runAsync(() -> doCopy(copy))
             .thenRunAsync(() -> afterCopyActions(progressHandler), Threads.onEDT)
             .exceptionally(Messages::showExceptionOnEDT);

@@ -255,19 +255,16 @@ public class UserPreset implements Preset {
 
     @Override
     public Action asAction(PresetOwner owner) {
-        return new PAction(name) {
-            @Override
-            protected void onClick() {
-                if (!loaded) {
-                    try {
-                        load();
-                    } catch (IOException ex) {
-                        throw new UncheckedIOException(ex);
-                    }
+        return new PAction(name, () -> {
+            if (!loaded) {
+                try {
+                    load();
+                } catch (IOException ex) {
+                    throw new UncheckedIOException(ex);
                 }
-                owner.loadUserPreset(UserPreset.this);
             }
-        };
+            owner.loadUserPreset(this);
+        });
     }
 
     public static List<UserPreset> loadPresets(String presetDirName) {

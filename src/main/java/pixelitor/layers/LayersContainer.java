@@ -57,7 +57,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         scrollPane = new JScrollPane();
         add(scrollPane, CENTER);
 
-        JPanel southPanel = initSouthPanel();
+        JPanel southPanel = createSouthPanel();
         add(southPanel, SOUTH);
 
         setBorder(createTitledBorder(i18n("layers")));
@@ -67,7 +67,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         new DropTarget(this, new DropListener(NEW_LAYERS));
     }
 
-    private static JPanel initSouthPanel() {
+    private static JPanel createSouthPanel() {
         JPanel southPanel = new JPanel(new FlowLayout(LEFT, 2, 0));
 
         southPanel.add(new LayerActionButton(AddNewLayerAction.INSTANCE, "addLayer"));
@@ -78,6 +78,9 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
 
         if (AppContext.enableExperimentalFeatures) {
             southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+
+//            southPanel.add(new LayerActionButton(LayerMoveAction.MOVE_LAYER_UP, "moveLayerUp"));
+//            southPanel.add(new LayerActionButton(LayerMoveAction.MOVE_LAYER_DOWN, "moveLayerDown"));
         }
 
         return southPanel;

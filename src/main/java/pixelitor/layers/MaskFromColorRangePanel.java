@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
@@ -328,8 +327,7 @@ public class MaskFromColorRangePanel extends JPanel {
         return lastColor;
     }
 
-    public static void showInDialog() {
-        var comp = Views.getActiveComp();
+    public static void showInDialog(Composition comp) {
         var layer = comp.getActiveLayer();
         var panel = new MaskFromColorRangePanel(comp, layer);
 

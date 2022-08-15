@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.Views;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.menus.view.ZoomMenu;
 
@@ -69,12 +68,8 @@ public enum AutoZoom {
     public abstract double selectRatio(double hor, double ver);
 
     private Action asAction() {
-        var action = new OpenViewEnabledAction(guiName) {
-            @Override
-            protected void onClick() {
-                Views.fitActive(AutoZoom.this);
-            }
-        };
+        var action = new OpenViewEnabledAction(guiName,
+            comp -> comp.getView().setZoom(this));
         action.setToolTip(toolTip);
         return action;
     }

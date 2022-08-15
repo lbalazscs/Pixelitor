@@ -39,6 +39,7 @@ import pixelitor.io.IOTasks;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ColorFillLayer;
 import pixelitor.layers.LayerGUI;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
@@ -320,6 +321,16 @@ public class AppRunner {
         Utils.sleep(200, MILLISECONDS);
     }
 
+    public void selectLayerBellow() {
+        runMenuCommand("Lower Layer Selection");
+        keyboard.undoRedo("Lower Layer Selection");
+    }
+
+    public void selectLayerAbove() {
+        runMenuCommand("Raise Layer Selection");
+        keyboard.undoRedo("Raise Layer Selection");
+    }
+
     void saveWithOverwrite(File baseTestingDir, String fileName) {
         var saveDialog = findSaveFileChooser();
         saveDialog.selectFile(new File(baseTestingDir, fileName));
@@ -455,7 +466,7 @@ public class AppRunner {
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
-        AJSUtils.findPopupMenuFixtureByText(popupMenu, text, onlyIfVisible)
+        AJSUtils.findPopupMenuItemByText(popupMenu, text, onlyIfVisible)
             .requireEnabled()
             .click();
     }
@@ -550,12 +561,52 @@ public class AppRunner {
         return AJSUtils.findButtonByText(pw, text);
     }
 
-    public void changeSmartFilterBlendingMode(String smartFilterName, BlendingMode newMode) {
-        JPopupMenuFixture popup = findLayerIconByLayerName(smartFilterName).showPopupMenu();
-        clickPopupMenu(popup, "Blending Options...");
-        DialogFixture dialog = findDialogByTitle("Blending Options for " + smartFilterName);
-        dialog.comboBox("bm").selectItem(newMode.toString());
-        dialog.button("ok").click();
+//    public void changeSmartFilterBlendingMode(String smartFilterName, BlendingMode newMode) {
+//        JPopupMenuFixture popup = findLayerIconByLayerName(smartFilterName).showPopupMenu();
+//        clickPopupMenu(popup, "Blending Options...");
+//        DialogFixture dialog = findDialogByTitle("Blending Options for " + smartFilterName);
+//        dialog.comboBox("bm").selectItem(newMode.toString());
+//        dialog.button("ok").click();
+//    }
+
+    public void setMaskViewModeViaRightClick(String layerName, MaskViewMode maskViewMode) {
+        clickMaskPopup(layerName, maskViewMode.toString());
+    }
+
+    public void deleteMaskViaRightClick(String layerName, boolean undo) {
+        clickMaskPopup(layerName, "Delete");
+
+        if (undo) {
+            keyboard.undoRedoUndo("Delete Layer Mask");
+        } else {
+            keyboard.undoRedo("Delete Layer Mask");
+        }
+    }
+
+    public void disableMaskViaRightClick(String layerName) {
+        clickMaskPopup(layerName, "Disable");
+
+        keyboard.undo("Disable Layer Mask");
+        keyboard.redo("Disable Layer Mask");
+    }
+
+    public void enableMaskViaRightClick(String layerName) {
+        clickMaskPopup(layerName, "Enable");
+
+        keyboard.undo("Enable Layer Mask");
+        keyboard.redo("Enable Layer Mask");
+    }
+
+    public void clickLayerPopup(String layerName, String menuName) {
+        // this shouldn't be necessary, mask edit mode should be set by default
+        var popup = findLayerIconByLayerName(layerName).showPopupMenu();
+        clickPopupMenu(popup, menuName, false);
+    }
+
+    public void clickMaskPopup(String layerName, String menuName) {
+        // this shouldn't be necessary, mask edit mode should be set by default
+        var popup = findMaskIconByLayerName(layerName).showPopupMenu();
+        clickPopupMenu(popup, menuName, false);
     }
 
     public JLabelFixture findLayerIconByLayerName(String layerName) {
@@ -689,7 +740,7 @@ public class AppRunner {
             .requireEnabled()
             .click()
             .requireDisabled();
-        assert EDT.activeLayerHasMask();
+        assert EDT.editingTargetHasMask();
     }
 
     private void undoRedoNewLayer(int numLayersBefore, String editName) {
@@ -860,6 +911,15 @@ public class AppRunner {
             keyboard.pressEsc();
             keyboard.undoRedo("Rasterize Shape");
         }
+    }
+
+    public void addAdjustmentLayer(String filterName, Consumer<DialogFixture> customizer) {
+        pw.button("addAdjLayer").click();
+        JPopupMenuFixture popup = new JPopupMenuFixture(robot, robot.findActivePopupMenu());
+        clickPopupMenu(popup, filterName + " Adjustment", true);
+        DialogFixture dialog = findDialogByTitle(filterName);
+        customizer.accept(dialog);
+        dialog.button("ok").click();
     }
 
     public void changeLayerBlendingMode(BlendingMode blendingMode) {

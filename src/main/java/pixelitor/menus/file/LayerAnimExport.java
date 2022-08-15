@@ -19,7 +19,6 @@ package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
-import pixelitor.Views;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimation;
@@ -38,12 +37,11 @@ public class LayerAnimExport {
     private LayerAnimExport() {
     }
 
-    public static void start() {
-        var comp = Views.getActiveComp();
+    public static void start(Composition comp) {
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
                 "Animation frames are based on the layers of the image.\n" +
-                    comp.getName() + " has only one layer.");
+                comp.getName() + " has only one layer.");
             return;
         }
 

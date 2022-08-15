@@ -17,18 +17,18 @@
 
 package pixelitor.layers;
 
-import pixelitor.ImageSource;
+import pixelitor.CopyType;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.gui.BlendingModePanel;
-import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.gui.utils.PAction;
+import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
-import pixelitor.history.LayerBlendingEdit;
-import pixelitor.history.LayerOpacityEdit;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -60,6 +60,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     // the next smart filter in the chain of smart filters
     private SmartFilter next;
 
+    // static field for the copy-paste of smart filters
+    public static SmartFilter copiedSmartFilter;
+
     public SmartFilter(Filter filter, ImageSource imageSource, SmartObject smartObject) {
         super(smartObject.getComp(), filter.getName(), filter);
         setImageSource(imageSource);
@@ -75,8 +78,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected SmartFilter createTypeSpecificCopy(CopyType copyType) {
         SmartFilter duplicate = new SmartFilter(filter.copy(), imageSource, smartObject);
+        String duplicateName = copyType.createLayerDuplicateName(name);
         duplicate.setName(duplicateName, false);
         return duplicate;
     }
@@ -156,6 +160,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         return smartObject;
     }
 
+    @Override
+    public LayerHolder getHolder() {
+        return smartObject;
+    }
+
     public SmartFilter getNext() {
         return next;
     }
@@ -219,22 +228,19 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
-        assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
-        assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
+    public void addConfiguredMask(LayerMask mask) {
+        super.addConfiguredMask(mask);
+        layerLevelSettingsChanged();
+    }
 
+    @Override
+    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
         if (opacity == newOpacity) {
             return;
         }
-        float prevOpacity = opacity;
-        opacity = newOpacity;
-
+        super.setOpacity(newOpacity, addToHistory, false);
         if (update) {
             layerLevelSettingsChanged();
-        }
-
-        if (addToHistory) {
-            History.add(new LayerOpacityEdit(this, prevOpacity));
         }
     }
 
@@ -243,31 +249,26 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (blendingMode == newMode) {
             return;
         }
-
-        BlendingMode prevMode = blendingMode;
-        blendingMode = newMode;
-
+        super.setBlendingMode(newMode, addToHistory, false);
         if (update) {
             layerLevelSettingsChanged();
-        }
-
-        if (addToHistory) {
-            History.add(new LayerBlendingEdit(this, prevMode));
         }
     }
 
     public void filterSettingsChanged() {
         invalidateChain();
-        smartObject.recalculateImage(false);
+        smartObject.invalidateImageCache();
     }
 
+    // "layer level" = not related to the filter settings
     private void layerLevelSettingsChanged() {
         // invalidate only starting from the next one
         if (next != null) {
             next.invalidateChain();
         }
-        smartObject.recalculateImage(true);
+        smartObject.invalidateImageCache();
         comp.update();
+        smartObject.updateIconImage();
     }
 
     @Override
@@ -321,7 +322,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (next != null) {
             next.invalidateChain();
         }
-        smartObject.recalculateImage(false);
+        smartObject.invalidateImageCache();
     }
 
     @Override
@@ -331,79 +332,45 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         JPopupMenu popup = new JPopupMenu();
 
         if (filter instanceof FilterWithGUI) {
-            popup.add(new PAction("Edit " + getName() + "...") {
-                @Override
-                protected void onClick() {
-                    edit();
-                }
-            });
+            popup.add(new PAction("Edit " + getName() + "...", this::edit));
         }
-        popup.add(new PAction("Delete " + getName()) {
-            @Override
-            protected void onClick() {
-                smartObject.deleteSmartFilter(SmartFilter.this, true);
-            }
-        });
-        popup.add(new PAction("Copy " + getName()) {
-            @Override
-            protected void onClick() {
-                Filter.copiedSmartFilter = getFilter().copy();
-            }
-        });
-
-        popup.add(new PAction("Blending Options...") {
-            @Override
-            protected void onClick() {
-                showBlendingOptions();
-            }
-        });
+        popup.add(new PAction("Delete " + getName(), () ->
+            smartObject.deleteSmartFilter(SmartFilter.this, true)));
+        popup.add(new PAction("Copy " + getName(), () ->
+            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true)));
 
         if (!hasMask()) {
-            popup.add(new PAction("Add Layer Mask") {
-                @Override
-                protected void onClick() {
-                    addMask(false);
-                }
-            });
+            popup.add(new PAction("Add Layer Mask", () -> addMask(false)));
         }
+
+        popup.add(new PAction("Change Filter Type...", this::replaceFilter));
 
         if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();
-            popup.add(new PAction("Move Up", Icons.getNorthArrowIcon()) {
-                @Override
-                protected void onClick() {
-                    smartObject.moveUp(SmartFilter.this);
-                }
-            });
-            popup.add(new PAction("Move Down", Icons.getSouthArrowIcon()) {
-                @Override
-                protected void onClick() {
-                    smartObject.moveDown(SmartFilter.this);
-                }
-            });
+            popup.add(new PAction("Move Up", Icons.getNorthArrowIcon(), () ->
+                smartObject.moveUp(SmartFilter.this)));
+            popup.add(new PAction("Move Down", Icons.getSouthArrowIcon(), () ->
+                smartObject.moveDown(SmartFilter.this)));
         }
 
         return popup;
     }
 
-    public void showBlendingOptions() {
-        BlendingModePanel panel = new BlendingModePanel(true);
+    private void replaceFilter() {
+        FilterAction action = FilterSearchPanel.showInDialog("Replace " + filter.getName());
+        if (action != null) {
+            Filter oldFilter = filter;
+            String oldName = getName();
 
-        panel.setOpacity(getOpacity());
-        panel.setBlendingMode(getBlendingMode());
+            filter = action.createNewInstanceFilter();
+            setName(filter.getName(), false);
 
-        panel.addOpacityListener(newOpacity ->
-            setOpacity(newOpacity, true, true));
-        panel.addBlendingModeListener(newBlendingMode ->
-            setBlendingMode(newBlendingMode, true, true));
+            History.add(new FilterChangedEdit(this, oldFilter, oldName));
 
-        new DialogBuilder()
-            .title("Blending Options for " + getName())
-            .content(panel)
-            .parentComponent((LayerGUI) ui)
-            .noCancelButton()
-            .okText("Close")
-            .show();
+            filterSettingsChanged();
+            comp.update();
+            edit();
+        }
     }
 
     public void updateOptions(SmartObject layer) {
@@ -422,9 +389,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
+    public BufferedImage getCachedImage() {
+        return cachedImage;
+    }
+
     @Override
-    public boolean checkConsistency() {
-        if (!super.checkConsistency()) {
+    public boolean checkInvariants() {
+        if (!super.checkInvariants()) {
             return false;
         }
 
@@ -440,6 +411,21 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
 
         return true;
+    }
+
+    @Override
+    public String getTypeString() {
+        return "Smart Filter";
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.addString("imageSource class", imageSource.getClass().getSimpleName());
+        node.add(imageSource.createDebugNode("imageSource"));
+
+        return node;
     }
 
     @Override

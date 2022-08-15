@@ -53,4 +53,8 @@ public class MockFilter extends FilterWithGUI {
     public void randomize() {
 
     }
+
+    public void resetNumTransformCalls() {
+        numTransformCalls = 0;
+    }
 }

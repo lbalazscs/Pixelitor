@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,15 +19,14 @@ package pixelitor.layers;
 import pixelitor.Composition;
 
 /**
- * A listener for changes in layer number, selection and order.
- * It does not observe a specific
- * composition, but rather the active composition.
+ * A listener for changes in layer number, selection and order within
+ * the active {@link LayerHolder} of the active {@link Composition}.
+ * It doesn't observe a specific {@link LayerHolder},but rather the active one.
  */
-public interface ActiveCompositionListener {
+public interface ActiveLayerHolderListener {
+    void numLayersChanged(LayerHolder layerHolder, int newLayerCount);
 
-    void numLayersChanged(Composition comp, int newLayerCount);
+    void layerTargeted(Layer newEditingTarget);
 
-    void layerActivated(Layer newActiveLayer);
-
-    void layerOrderChanged(Composition comp);
+    void layerOrderChanged(LayerHolder layerHolder);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -474,7 +474,7 @@ class CompositionTest {
         assertThat(comp.generateNewLayerName()).isEqualTo("layer 3");
         assertThat(comp)
             .numLayersIs(2) // didn't change
-            .invariantIsOK();
+            .invariantsAreOK();
     }
 
     @Test
@@ -586,7 +586,7 @@ class CompositionTest {
 
         comp.setActiveLayer(layer1);
 
-        assertThat(comp).activeLayerIs(layer1).invariantIsOK();
+        assertThat(comp).activeLayerIs(layer1).invariantsAreOK();
         assertThat(comp.isActive(layer1)).isTrue();
         assertThat(comp.isActive(layer2)).isFalse();
     }
@@ -635,7 +635,7 @@ class CompositionTest {
         assertThat(comp)
             .hasSelection()
             .selectionShapeIs(rect)
-            .invariantIsOK();
+            .invariantsAreOK();
     }
 
     @Test
@@ -647,7 +647,7 @@ class CompositionTest {
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")
-            .invariantIsOK();
+            .invariantsAreOK();
 
         History.undo("Layer Reordering");
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
@@ -834,7 +834,7 @@ class CompositionTest {
             .selectionBoundsIs(new Rectangle(4, 4, 2, 2));
 
         var tx = Crop.createCanvasTransform(cropRect);
-        comp.imCoordsChanged(tx, false);
+        comp.imCoordsChanged(tx, false, comp.getView());
 
         assertThat(comp)
             .hasSelection()

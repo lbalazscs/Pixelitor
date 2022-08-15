@@ -35,11 +35,10 @@ import java.awt.print.*;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Views.getActiveComp;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
 
-public class PrintAction extends OpenViewEnabledAction implements Printable {
+public class PrintAction extends OpenViewEnabledAction.Checked implements Printable {
     private static final float DPI = 72.0f;
 
     private BufferedImage img;
@@ -51,10 +50,9 @@ public class PrintAction extends OpenViewEnabledAction implements Printable {
     }
 
     @Override
-    protected void onClick() {
+    protected void onClick(Composition comp) {
         // The printed image will be the image at the start,
         // although it is editable during the asynchronous printing
-        Composition comp = getActiveComp();
         img = comp.getCompositeImage();
         compName = comp.getName();
 

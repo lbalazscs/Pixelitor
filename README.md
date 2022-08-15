@@ -1,6 +1,6 @@
 [![Latest Release](https://img.shields.io/github/v/release/lbalazscs/pixelitor?include_prereleases)](https://github.com/lbalazscs/Pixelitor/releases)
 [![Build Status](https://github.com/lbalazscs/Pixelitor/actions/workflows/build.yml/badge.svg)](https://github.com/lbalazscs/Pixelitor/actions/workflows/build.yml)
-<a href="https://discord.gg/SXaxYnBSTv"><img alt="Join us on Discord" src="https://img.shields.io/discord/887584993994481664?color=5865F2&logo=discord&logoColor=white"></a>
+
 
 This is the source code of [Pixelitor](https://pixelitor.sourceforge.io/) - an advanced Java image editor with layers, layer masks, text layers, 110+ image filters and color adjustments, multiple undo etc.
 

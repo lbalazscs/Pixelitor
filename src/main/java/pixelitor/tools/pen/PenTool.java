@@ -80,31 +80,20 @@ public class PenTool extends Tool {
     private static final Action traceWithSmudgeAction = new TraceAction(
         "Stroke with Smudge", Tools.SMUDGE);
 
-    private static final Action deletePath = new PAction("Delete Path") {
+    private static final Action deletePath = new PAction("Delete Path", new Runnable() {
         @Override
-        protected void onClick() {
+        public void run() {
             path.delete();
         }
-    };
+    });
 
     public PenTool() {
         super("Pen", 'P',
             "", // getStatusBarMessage() is overridden
             Cursors.DEFAULT);
 
-        toSelectionAction = new PAction("Convert to Selection") {
-            @Override
-            protected void onClick() {
-                convertToSelection();
-            }
-        };
-
-        exportSVGAction = new PAction("Export SVG...") {
-            @Override
-            protected void onClick() {
-                exportSVG();
-            }
-        };
+        toSelectionAction = new PAction("Convert to Selection", this::convertToSelection);
+        exportSVGAction = new PAction("Export SVG...", PenTool::exportSVG);
 
         enableActions(false);
     }
@@ -319,9 +308,9 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (hasPath()) {
-            mode.imCoordsChanged(at, comp);
+            mode.imCoordsChanged(at, view);
         }
     }
 

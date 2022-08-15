@@ -23,10 +23,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
 import pixelitor.io.IO;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.Filterable;
-import pixelitor.layers.Layer;
-import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -67,26 +64,14 @@ public class Views {
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final Action CLOSE_ALL_ACTION = new OpenViewEnabledAction(i18n("close_all")) {
-        @Override
-        protected void onClick() {
-            warnAndCloseAll();
-        }
-    };
+    public static final Action CLOSE_ALL_ACTION = new OpenViewEnabledAction(
+        i18n("close_all"), comp -> warnAndCloseAll());
 
-    public static final Action CLOSE_ACTIVE_ACTION = new OpenViewEnabledAction(i18n("close")) {
-        @Override
-        protected void onClick() {
-            warnAndCloseActive();
-        }
-    };
+    public static final Action CLOSE_ACTIVE_ACTION = new OpenViewEnabledAction(
+        i18n("close"), comp -> warnAndClose(comp.getView()));
 
-    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction("Close Unmodified") {
-        @Override
-        protected void onClick() {
-            warnAndCloseUnmodified();
-        }
-    };
+    public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction(
+        "Close Unmodified", comp -> warnAndCloseUnmodified());
 
     private Views() {
     }
@@ -236,10 +221,6 @@ public class Views {
         }
     }
 
-    public static void reloadActiveAsync() {
-        activeView.reloadAsync();
-    }
-
     public static void onActiveView(Consumer<View> action) {
         if (activeView != null) {
             action.accept(activeView);
@@ -297,10 +278,6 @@ public class Views {
         return views.stream()
             .map(View::getName)
             .collect(joining(", ", "[", "]"));
-    }
-
-    private static void warnAndCloseActive() {
-        warnAndClose(activeView);
     }
 
     public static void warnAndClose(View view) {
@@ -421,15 +398,6 @@ public class Views {
             .collect(toList());
     }
 
-    public static void duplicateActiveComp() {
-        assert activeView != null;
-
-        Composition activeComp = activeView.getComp();
-        Composition duplicate = activeComp.copy(false, true);
-
-        addAsNewComp(duplicate);
-    }
-
     public static Composition addJustLoadedComp(Composition comp) {
         assert comp != null;
 
@@ -492,10 +460,25 @@ public class Views {
         return null;
     }
 
+    public static Layer getEditingTarget() {
+        if (activeView != null) {
+            return activeView.getComp().getEditingTarget();
+        }
+
+        return null;
+    }
+
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeView != null) {
             Layer activeLayer = activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
+        }
+    }
+
+    public static void onEditingTarget(Consumer<Layer> action) {
+        if (activeView != null) {
+            Layer editingTarget = activeView.getComp().getEditingTarget();
+            action.accept(editingTarget);
         }
     }
 

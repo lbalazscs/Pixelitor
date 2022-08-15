@@ -1224,6 +1224,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage applyTransform(BufferedImage src, AffineTransform at, int targetWidth, int targetHeight) {
+        assert targetWidth > 0 && targetHeight > 0 : "target = " + targetWidth + "x" + targetHeight;
         BufferedImage newImage = new BufferedImage(targetWidth, targetHeight, TYPE_INT_ARGB);
         Graphics2D g = newImage.createGraphics();
         g.setTransform(at);

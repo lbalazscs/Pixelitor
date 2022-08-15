@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.AppContext;
+import pixelitor.utils.debug.DebugNode;
 
 /**
  * The {@link LayerUI} implementation used in unit tests
@@ -103,7 +104,7 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateSmartFilterPanel() {
+    public void updateChildrenPanel() {
     }
 
     @Override
@@ -124,5 +125,12 @@ public class TestLayerUI implements LayerUI {
     @Override
     public void repaint() {
 
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+        node.addString("name", name);
+        return node;
     }
 }

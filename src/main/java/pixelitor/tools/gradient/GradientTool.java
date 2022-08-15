@@ -317,9 +317,9 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (handles != null) {
-            handles.imCoordsChanged(at, comp);
+            handles.imCoordsChanged(at, view);
         }
     }
 

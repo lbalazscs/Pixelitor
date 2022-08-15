@@ -21,7 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
-import pixelitor.Views;
+import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
@@ -88,12 +88,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         settings.checkFontIsInstalled(this);
     }
 
-    public static TextLayer createNew() {
-        return createNew(new TextSettings());
+    public static TextLayer createNew(Composition comp) {
+        return createNew(comp, new TextSettings());
     }
 
-    public static TextLayer createNew(TextSettings settings) {
-        var comp = Views.getActiveComp();
+    public static TextLayer createNew(Composition comp, TextSettings settings) {
         if (comp == null) {
             // It is possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77
@@ -131,11 +130,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void edit() {
+    public boolean edit() {
         TextSettings oldSettings = getSettings();
         var settingsPanel = new TextSettingsPanel(this);
 
-        new DialogBuilder()
+        return new DialogBuilder()
             .title("Edit Text Layer")
             .menuBar(getMenuBar())
             .content(settingsPanel)
@@ -143,7 +142,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .align(FRAME_RIGHT)
             .okAction(() -> commitSettings(oldSettings))
             .cancelAction(() -> resetOldSettings(oldSettings))
-            .show();
+            .show()
+            .wasAccepted();
     }
 
     public void commitSettings(TextSettings oldSettings) {
@@ -166,7 +166,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected TextLayer createTypeSpecificCopy(CopyType copyType) {
+        String duplicateName = copyType.createLayerDuplicateName(name);
         TextLayer d = new TextLayer(comp, duplicateName, settings.copy());
         d.setTranslation(getTx(), getTy());
         return d;
@@ -357,12 +358,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 
-        popup.add(new PAction("Selection from Text") {
-            @Override
-            protected void onClick() {
-                createSelectionFromText();
-            }
-        });
+        popup.add(new PAction("Selection from Text", this::createSelectionFromText));
 
         return popup;
     }

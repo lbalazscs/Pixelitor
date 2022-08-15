@@ -19,7 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
@@ -36,7 +36,7 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * Pastes an image from the system clipboard
  */
-public class PasteAction extends PAction implements ViewActivationListener {
+public class PasteAction extends NamedAction.Checked implements ViewActivationListener {
     private final PasteDestination destination;
 
     public PasteAction(PasteDestination destination) {

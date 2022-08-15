@@ -172,7 +172,7 @@ class CompositionIOTest {
             .canvasSizeIs(10, 10)
             .hasGuides()
             .hasPath()
-            .invariantIsOK();
+            .invariantsAreOK();
         checkAsyncReadResult(future);
     }
 
@@ -205,7 +205,7 @@ class CompositionIOTest {
         assertThat(comp)
             .numLayersIs(1)
             .canvasSizeIs(10, 10)
-            .invariantIsOK();
+            .invariantsAreOK();
 
         checkAsyncReadResult(future);
     }
@@ -224,7 +224,7 @@ class CompositionIOTest {
         assertThat(comp)
             .numLayersIs(2)
             .canvasSizeIs(10, 10)
-            .invariantIsOK();
+            .invariantsAreOK();
         checkAsyncReadResult(future);
 
         var secondLayer = comp.getLayer(1);

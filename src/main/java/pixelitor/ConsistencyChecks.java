@@ -55,7 +55,7 @@ public final class ConsistencyChecks {
     }
 
     public static boolean shapeLayersAreOK(Composition comp) {
-        comp.forEachLayer(ShapesLayer.class, ShapesLayer::checkConsistency);
+        comp.forEachLayer(ShapesLayer.class, ShapesLayer::checkInvariants);
         return true;
     }
 
@@ -235,17 +235,29 @@ public final class ConsistencyChecks {
             return true;
         }
 
+        LayerHolder parent = comp.getActiveLayerHolder();
+
         boolean enabled = action.isEnabled();
-        int numLayers = comp.getNumLayers();
+        int numLayers = parent.getNumLayers();
         if (enabled) {
-            if (numLayers <= 1) {
-                throw new IllegalStateException("delete layer enabled for "
-                    + comp.getName() + ", but numLayers = " + numLayers);
+            int minValue = 1;
+            if (parent.allowZeroLayers()) {
+                minValue = 0;
+            }
+            if (numLayers <= minValue) {
+                String msg = "delete layer enabled for %s '%s', but numLayers = %d";
+                throw new IllegalStateException(msg.formatted(
+                    parent.getClass().getSimpleName(), parent.getName(), numLayers));
             }
         } else { // disabled
-            if (numLayers >= 2) {
-                throw new IllegalStateException("delete layer disabled for "
-                    + comp.getName() + ", but numLayers = " + numLayers);
+            int maxValue = 2;
+            if (parent.allowZeroLayers()) {
+                maxValue = 1;
+            }
+            if (numLayers >= maxValue) {
+                String msg = "delete layer disabled for %s '%s', but numLayers = %d";
+                throw new IllegalStateException(msg.formatted(
+                    parent.getClass().getSimpleName(), parent.getName(), numLayers));
             }
         }
         return true;
@@ -263,7 +275,7 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        Layer layer = comp.getActiveLayer();
+        Layer layer = comp.getEditingTarget();
         String msg = checkLayerMaskAndUI(layer);
         if (msg != null) {
             throw new IllegalStateException(

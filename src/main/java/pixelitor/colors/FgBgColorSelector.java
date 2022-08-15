@@ -129,37 +129,22 @@ public class FgBgColorSelector extends JLayeredPane {
         String selectorName = fg ? "Foreground" : "Background";
         String otherName = fg ? "Background" : "Foreground";
 
-        popup.add(new PAction(selectorName + " Color Variations...") {
-            @Override
-            protected void onClick() {
-                if (fg) {
-                    PalettePanel.showFGVariationsDialog(pw);
-                } else {
-                    PalettePanel.showBGVariationsDialog(pw);
-                }
+        popup.add(new PAction(selectorName + " Color Variations...", () -> {
+            if (fg) {
+                PalettePanel.showFGVariationsDialog(pw);
+            } else {
+                PalettePanel.showBGVariationsDialog(pw);
             }
-        });
+        }));
 
-        popup.add(new PAction("HSB Mix with " + otherName + "...") {
-            @Override
-            protected void onClick() {
-                PalettePanel.showHSBMixDialog(pw, fg);
-            }
-        });
+        popup.add(new PAction("HSB Mix with " + otherName + "...", () ->
+            PalettePanel.showHSBMixDialog(pw, fg)));
 
-        popup.add(new PAction("RGB Mix with " + otherName + "...") {
-            @Override
-            protected void onClick() {
-                PalettePanel.showRGBMixDialog(pw, fg);
-            }
-        });
+        popup.add(new PAction("RGB Mix with " + otherName + "...", () ->
+            PalettePanel.showRGBMixDialog(pw, fg)));
 
-        popup.add(new PAction("Color History...") {
-            @Override
-            protected void onClick() {
-                ColorHistory.INSTANCE.showDialog(pw, ColorSwatchClickHandler.STANDARD, false);
-            }
-        });
+        popup.add(new PAction("Color History...", () ->
+            ColorHistory.INSTANCE.showDialog(pw, ColorSwatchClickHandler.STANDARD, false)));
 
         popup.addSeparator();
 
@@ -178,12 +163,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initResetDefaultsButton() {
-        resetToDefaultAction = new PAction() {
-            @Override
-            protected void onClick() {
-                setDefaultColors();
-            }
-        };
+        resetToDefaultAction = new PAction(this::setDefaultColors);
+
         JButton defaultsButton = new JButton();
         initButton(defaultsButton, "Reset Default Colors (D)",
             SMALL_BUTTON_SIZE, 1, DEFAULTS_BUTTON_NAME,
@@ -197,12 +178,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initSwapColorsButton() {
-        swapColorsAction = new PAction() {
-            @Override
-            protected void onClick() {
-                swapColors();
-            }
-        };
+        swapColorsAction = new PAction(this::swapColors);
+
         JButton swapButton = new JButton();
         initButton(swapButton, "Swap Colors (X)",
             SMALL_BUTTON_SIZE, 1, SWAP_BUTTON_NAME, swapColorsAction);
@@ -222,12 +199,7 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initRandomizeButton() {
-        randomizeColorsAction = new PAction() {
-            @Override
-            protected void onClick() {
-                randomizeColors();
-            }
-        };
+        randomizeColorsAction = new PAction(this::randomizeColors);
 
         JButton randomizeButton = new JButton();
         initButton(randomizeButton, "Randomize Colors (R)",

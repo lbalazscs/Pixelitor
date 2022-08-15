@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ class NewImageTest {
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
         var comp = NewImage.createNewComposition(fillType, 20, 20, "New Image");
-        assert comp.classInvariant();
+        assert comp.checkInvariants();
         assertThat(comp)
                 .numLayersIs(1)
                 .canvasSizeIs(20, 20);

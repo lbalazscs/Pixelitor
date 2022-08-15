@@ -87,7 +87,7 @@ public class SplashImageCreator {
             return;
         }
 
-        String msg = format("Save %d Splash Images: ", numImages);
+        String msg = format("Save %d Splash Images", numImages);
         var progressHandler = Messages.startProgress(msg, numImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);

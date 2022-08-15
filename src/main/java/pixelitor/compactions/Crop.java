@@ -19,6 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -93,7 +94,7 @@ public class Crop implements CompAction {
         var canvasTransform = createCanvasTransform(cropRect);
 
         View view = oldComp.getView();
-        Composition newComp = oldComp.copy(true, !selectionCrop);
+        Composition newComp = oldComp.copy(CopyType.UNDO, !selectionCrop);
         Canvas newCanvas = newComp.getCanvas();
 
         Guides guides = oldComp.getGuides();
@@ -121,7 +122,7 @@ public class Crop implements CompAction {
         // into the coordinate system of the new, cropped image.
         // It is important to call this only AFTER the actual canvas size was changed
         // so that the component coords are calculated correctly from the new image coords.
-        newComp.imCoordsChanged(canvasTransform, false);
+        newComp.imCoordsChanged(canvasTransform, false, view);
 
         if (addHidingMask) {
             assert selectionCrop;

@@ -19,7 +19,6 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Views;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
@@ -355,21 +354,15 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return newHeight;
     }
 
-    private static void showInDialog(Composition comp) {
+    public static void showInDialog(Composition comp) {
         ResizePanel p = new ResizePanel(comp.getCanvas());
         new DialogBuilder()
             .validatedContent(p)
             .title("Resize")
             .menuBar(new DialogMenuBar(p))
-            .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
+            .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight())
                 .process(comp))
             .show();
-    }
-
-    public static void resizeActiveImage() {
-        var comp = Views.getActiveCompOpt()
-            .orElseThrow(() -> new IllegalStateException("no active image"));
-        showInDialog(comp);
     }
 
     @Override

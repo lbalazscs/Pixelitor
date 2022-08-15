@@ -85,8 +85,7 @@ public class DragReorderHandler extends MouseInputAdapter {
             layerGUI.setCursor(Cursors.DEFAULT);
             layersPanel.dragFinished();
         } else {
-            // necessary on Mac so that the layer gets selected
-            // even if the user clicks on the name field
+            // select the layer if the user clicks on the name field
             layerGUI.setSelected(true);
         }
         dragging = false;

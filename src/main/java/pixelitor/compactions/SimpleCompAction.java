@@ -19,7 +19,7 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Views;
+import pixelitor.CopyType;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.guides.Guides;
@@ -40,7 +40,7 @@ import static pixelitor.Composition.UpdateActions.REPAINT;
  * A {@link CompAction} where the processing can be simplified
  * by using the template method pattern.
  */
-public abstract class SimpleCompAction extends OpenViewEnabledAction implements CompAction {
+public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked implements CompAction {
     private final boolean affectsCanvasSize;
 
     SimpleCompAction(String name, boolean affectsCanvasSize) {
@@ -50,8 +50,8 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction implements 
     }
 
     @Override
-    protected void onClick() {
-        Views.onActiveComp(this::process);
+    protected void onClick(Composition comp) {
+        process(comp);
     }
 
     @Override
@@ -62,12 +62,12 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction implements 
         }
 
         View view = oldComp.getView();
-        Composition newComp = oldComp.copy(true, true);
+        Composition newComp = oldComp.copy(CopyType.UNDO, true);
         Canvas newCanvas = newComp.getCanvas();
         Canvas oldCanvas = oldComp.getCanvas();
 
         var canvasAT = createCanvasTransform(newCanvas);
-        newComp.imCoordsChanged(canvasAT, false);
+        newComp.imCoordsChanged(canvasAT, false, view);
 
         newComp.forEachLayer(this::processLayer);
 

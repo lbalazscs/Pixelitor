@@ -37,7 +37,7 @@ public class AJSUtils {
         return container.button(matcher);
     }
 
-    static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
+    static JMenuItemFixture findPopupMenuItemByText(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
         return popupMenu.menuItem(
             new GenericTypeMatcher<>(JMenuItem.class) {
                 @Override

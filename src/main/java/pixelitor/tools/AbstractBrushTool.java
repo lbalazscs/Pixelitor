@@ -173,12 +173,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addBrushSettingsButton() {
-        brushSettingsAction = new PAction("Settings...") {
-            @Override
-            protected void onClick() {
-                brushSettingsButtonPressed();
-            }
-        };
+        brushSettingsAction = new PAction("Settings...",
+            this::brushSettingsButtonPressed);
         brushSettingsDialogButton = settingsPanel.addButton(brushSettingsAction,
             "brushSettingsDialogButton", "Configure the selected brush");
 

@@ -30,8 +30,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
-import static pixelitor.Views.getActiveComp;
-
 public enum ImageMode {
     RGB {
         @Override
@@ -75,12 +73,8 @@ public enum ImageMode {
     private final Lazy<JMenuItem> menuItem = Lazy.of(this::createMenuItem);
 
     private JMenuItem createMenuItem() {
-        Action action = new OpenViewEnabledAction(toString()) {
-            @Override
-            protected void onClick() {
-                getActiveComp().changeMode(ImageMode.this);
-            }
-        };
+        Action action = new OpenViewEnabledAction(toString(),
+            comp -> comp.changeMode(ImageMode.this));
 
         return new JRadioButtonMenuItem(action);
     }

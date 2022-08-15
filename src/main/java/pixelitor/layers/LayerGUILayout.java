@@ -37,7 +37,7 @@ public class LayerGUILayout implements LayoutManager {
     private JCheckBox checkBox;
     private JLabel layerLabel;
     private JLabel maskLabel;
-    private JPanel sfPanel;
+    private JPanel childrenPanel;
 //    private JLabel sfLabel;
 //    private JCheckBox sfCheckBox;
 
@@ -47,7 +47,7 @@ public class LayerGUILayout implements LayoutManager {
     public static final String LAYER = "LAYER";
     public static final String MASK = "MASK";
     public static final String NAME_EDITOR = "NAME_EDITOR";
-    public static final String SMART_FILTERS = "FILTERS";
+    public static final String CHILDREN = "FILTERS";
 
     // the size of the icon
     private static final int CHECKBOX_WIDTH = 24;
@@ -92,7 +92,7 @@ public class LayerGUILayout implements LayoutManager {
                 case LAYER -> layerLabel = (JLabel) c;
                 case MASK -> maskLabel = (JLabel) c;
                 case NAME_EDITOR -> nameEditor = c;
-                case SMART_FILTERS -> sfPanel = (JPanel) c;
+                case CHILDREN -> childrenPanel = (JPanel) c;
                 default -> throw new IllegalStateException();
             }
         }
@@ -104,9 +104,9 @@ public class LayerGUILayout implements LayoutManager {
             synchronized (c.getTreeLock()) {
                 maskLabel = null;
             }
-        } else if (c == sfPanel) {
+        } else if (c == childrenPanel) {
             synchronized (c.getTreeLock()) {
-                sfPanel = null;
+                childrenPanel = null;
             }
         } else {
             throw new IllegalStateException();
@@ -114,11 +114,11 @@ public class LayerGUILayout implements LayoutManager {
     }
 
     public int getPreferredHeight() {
-        if (sfPanel == null) {
+        if (childrenPanel == null) {
             return height;
         } else {
             // TODO the preferred height is 26 * num_filters?
-            return height + sfPanel.getPreferredSize().height;
+            return height + childrenPanel.getPreferredSize().height;
         }
     }
 
@@ -175,13 +175,13 @@ public class LayerGUILayout implements LayoutManager {
             int adjustment = isNimbus ? 2 : 0;
             nameEditor.setBounds(startX - adjustment, (height - editorHeight) / 2, remainingWidth - GAP + 2 * adjustment, editorHeight);
 
-            if (sfPanel != null) {
-                Dimension sfSize = sfPanel.getPreferredSize();
+            if (childrenPanel != null) {
+                Dimension sfSize = childrenPanel.getPreferredSize();
                 int sfX = layerIconStartX - adjustment;
                 int sfY = height;
                 int sfWidth = parent.getWidth() - sfX;
                 int sfHeight = sfSize.height;
-                sfPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
+                childrenPanel.setBounds(sfX, sfY, sfWidth, sfHeight);
             }
         }
     }

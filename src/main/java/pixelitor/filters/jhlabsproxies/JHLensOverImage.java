@@ -39,6 +39,7 @@ public class JHLensOverImage extends ParametrizedFilter {
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 150, 300);
 
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
+//    private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
     private SphereFilter filter;
 
@@ -51,7 +52,7 @@ public class JHLensOverImage extends ParametrizedFilter {
             center,
             radius.withAdjustedRange(1.0),
             refractionIndex,
-//                edgeAction,  // edge action doesn't create anything usable in this case
+//            edgeAction,  // edge action doesn't create anything usable in this case
             interpolation
         );
     }
@@ -77,7 +78,7 @@ public class JHLensOverImage extends ParametrizedFilter {
 
         filter.setRefractionIndex(refraction);
 
-//        filter.setEdgeAction(edgeAction.getCurrentInt());
+//        filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);

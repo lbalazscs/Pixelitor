@@ -18,11 +18,12 @@
 package pixelitor.layers;
 
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.Debuggable;
 
 /**
  * The user interface of a {@link Layer}
  */
-public interface LayerUI {
+public interface LayerUI extends Debuggable {
     void updateName();
 
     boolean hasMaskIcon();
@@ -48,7 +49,7 @@ public interface LayerUI {
      */
     void updateSelectionState();
 
-    void updateSmartFilterPanel();
+    void updateChildrenPanel();
 
     void setSelected(boolean b);
 

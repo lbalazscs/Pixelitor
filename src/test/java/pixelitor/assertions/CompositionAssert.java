@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class CompositionAssert extends AbstractAssert<CompositionAssert, Composition> {
     public CompositionAssert(Composition actual) {
         super(actual, CompositionAssert.class);
-        assert actual.classInvariant();
+        assert actual.checkInvariants();
     }
 
     public CompositionAssert isEmpty() {
@@ -282,10 +282,10 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert invariantIsOK() {
+    public CompositionAssert invariantsAreOK() {
         isNotNull();
 
-        assert actual.classInvariant();
+        assert actual.checkInvariants();
 
         return this;
     }
@@ -359,6 +359,22 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         assertThat(actual.getActivePath()).isNotNull();
+
+        return this;
+    }
+
+    public CompositionAssert editingTargetIs(Layer expected) {
+        isNotNull();
+
+        assertThat(actual.getEditingTarget()).isSameAs(expected);
+
+        return this;
+    }
+
+    public CompositionAssert editingTargetNameIs(String expected) {
+        isNotNull();
+
+        assertThat(actual.getEditingTarget().getName()).isEqualTo(expected);
 
         return this;
     }

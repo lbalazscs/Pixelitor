@@ -17,9 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
@@ -38,17 +36,17 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
  * to the active layer of the active composition.
  */
 public class AddLayerMaskAction extends NamedAction
-    implements ViewActivationListener, ActiveMaskListener, ActiveCompositionListener {
+    implements ViewActivationListener, ActiveMaskListener, ActiveLayerHolderListener {
 
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
         super("Add Layer Mask", Icons.loadThemed("add_layer_mask.png", ThemedImageIcon.GREEN));
         setToolTip("<html>Adds a layer mask to the active layer. " +
-            "<br><b>Ctrl-click</b> to add an inverted layer mask.");
+                   "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         Views.addActivationListener(this);
-        Layers.addCompositionListener(this);
+        Layers.addLayerHolderListener(this);
         Layers.addMaskListener(this);
     }
 
@@ -68,7 +66,7 @@ public class AddLayerMaskAction extends NamedAction
 
     private void onClick(boolean ctrlPressed) {
         var comp = Views.getActiveComp();
-        var layer = comp.getActiveLayer();
+        var layer = comp.getEditingTarget();
         assert !layer.hasMask();
 
         layer.addMask(ctrlPressed);
@@ -81,16 +79,14 @@ public class AddLayerMaskAction extends NamedAction
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        boolean hasMask = newView.getComp().getActiveLayer().hasMask();
+        boolean hasMask = newView.getComp().getEditingTarget().hasMask();
         setEnabled(!hasMask);
     }
 
     @Override
     public void maskAddedTo(Layer layer) {
         assert layer.hasMask();
-        if (!layer.isSmartFilter()) {
-            setEnabled(false);
-        }
+        setEnabled(false);
     }
 
     @Override
@@ -100,16 +96,16 @@ public class AddLayerMaskAction extends NamedAction
     }
 
     @Override
-    public void numLayersChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        setEnabled(!newActiveLayer.hasMask());
+    public void layerTargeted(Layer newEditingTarget) {
+        setEnabled(!newEditingTarget.hasMask());
     }
 
     @Override
-    public void layerOrderChanged(Composition comp) {
+    public void layerOrderChanged(LayerHolder layerHolder) {
     }
 
     @Override

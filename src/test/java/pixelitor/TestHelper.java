@@ -87,7 +87,7 @@ public class TestHelper {
         var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
         when(comp.isOpen()).thenReturn(true);
-        when(comp.classInvariant()).thenReturn(true); // for assertions
+        when(comp.checkInvariants()).thenReturn(true); // for assertions
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasBounds()).thenReturn(
             new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
@@ -116,7 +116,9 @@ public class TestHelper {
     }
 
     public static Composition createComp(int numLayers, boolean addMasks) {
-        return createComp(numLayers, addMasks, true);
+        Composition comp = createComp(numLayers, addMasks, true);
+        assert comp.checkInvariants();
+        return comp;
     }
 
     public static Composition createComp(int numLayers, boolean addMasks, boolean addMockView) {
@@ -135,7 +137,7 @@ public class TestHelper {
             assert layer == comp.getLayer(i);
         }
         assert comp.getNumLayers() == numLayers;
-        assert comp.classInvariant();
+        assert comp.checkInvariants();
 
         comp.setDirty(false);
 
@@ -248,20 +250,23 @@ public class TestHelper {
 
 //        when(view.getComp()).thenReturn(comp);
 
-        // the view should be able to return the *new* composition
+        // The view should be able to return the *new* composition
         // after a replaceComp call, therefore it always returns the
-        // currentComp field, which initially is set to comp
+        // currentComp field, which initially is set to comp.
+        // This trick works only if there's a single comp per test!
         currentComp = comp;
 
         // when replaceComp() is called on the mock, then store the received
         // Composition argument in the currentComp field
         doAnswer(invocation -> {
             currentComp = (Composition) invocation.getArguments()[0];
+            currentComp.setView(view);
             return null;
         }).when(view).replaceComp(any(Composition.class));
 
         doAnswer(invocation -> {
             currentComp = (Composition) invocation.getArguments()[0];
+            currentComp.setView(view);
             return null;
         }).when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
 
@@ -367,7 +372,8 @@ public class TestHelper {
     }
 
     public static Composition resize(Composition comp, int targetWidth, int targetHeight) {
-        return new Resize(targetWidth, targetHeight, false)
+        assert comp.getView() != null;
+        return new Resize(targetWidth, targetHeight)
             .process(comp)
             .join();
     }

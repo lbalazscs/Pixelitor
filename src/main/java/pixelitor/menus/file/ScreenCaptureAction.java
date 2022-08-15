@@ -22,7 +22,7 @@ import pixelitor.Views;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -36,7 +36,7 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * The {@link Action} for creating a screen capture.
  */
-public class ScreenCaptureAction extends PAction {
+public class ScreenCaptureAction extends NamedAction.Checked {
     private static final String SCREEN_CAPTURE_STRING = i18n("screen_capture");
     private JCheckBox hidePixelitorCB;
     private static int captureCount = 1;

@@ -56,8 +56,8 @@ public class GradientFillLayerChangeEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(layer.createDebugNode());
-        node.addNullableChild("before", before);
-        node.addNullableChild("after", after);
+        node.addNullableDebuggable("before", before);
+        node.addNullableDebuggable("after", after);
 
         return node;
     }

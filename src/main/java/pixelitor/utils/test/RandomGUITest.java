@@ -143,26 +143,20 @@ public class RandomGUITest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new PAction() {
-                @Override
-                protected void onClick() {
-                    System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
-                    stopRunning = true;
-                }
-            }
+        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new PAction(() -> {
+                System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
+                stopRunning = true;
+            })
         );
         stopRunning = false;
 
         // This key not only stops the testing, but also exits the app
-        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new PAction() {
-            @Override
-            protected void onClick() {
-                System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
-                    EXIT_KEY_CHAR);
-                // no need to reset the GUI here, because preferences won't be saved
-                System.exit(1);
-            }
-        });
+        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new PAction(() -> {
+            System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
+                EXIT_KEY_CHAR);
+            // no need to reset the GUI here, because preferences won't be saved
+            System.exit(1);
+        }));
 
         System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
             DATE_FORMAT.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
@@ -316,8 +310,8 @@ public class RandomGUITest {
         if (maxX <= 0 || maxY <= 0) {
             // probably the mouse was moved, and the window is too small
             System.out.printf("RandomGUITest::generateRandomPoint: " +
-                    "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
-                    "windowBounds = %s%n",
+                              "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
+                              "windowBounds = %s%n",
                 minX, minY, maxX, maxY,
                 windowBounds);
             stop();
@@ -499,7 +493,7 @@ public class RandomGUITest {
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                 "runCountBefore = " + runCountBefore
-                    + ", runCountAfter = " + runCountAfter);
+                + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -542,8 +536,8 @@ public class RandomGUITest {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
                 "Exception in random tween: filter name = %s, " +
-                    "srcWidth = %d, srcHeight = %d, " +
-                    "isMaskEditing = %b, params = %s",
+                "srcWidth = %d, srcHeight = %d, " +
+                "isMaskEditing = %b, params = %s",
                 filterName, src.getWidth(), src.getHeight(),
                 dr.isMaskEditing(), paramSet);
             throw new IllegalStateException(msg, e);
@@ -555,7 +549,7 @@ public class RandomGUITest {
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                 "runCountBefore = " + runCountBefore
-                    + ", runCountAfter = " + runCountAfter);
+                + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -1012,7 +1006,7 @@ public class RandomGUITest {
 
         TextSettings settings = new TextSettings();
         settings.randomize();
-        TextLayer textLayer = TextLayer.createNew(settings);
+        TextLayer textLayer = TextLayer.createNew(comp, settings);
 
         // has to be called explicitly, since no dialog will be shown
         textLayer.finalizeCreation(comp, activeLayerBefore, oldMaskViewMode);
@@ -1022,17 +1016,17 @@ public class RandomGUITest {
 
     private static void newColorFillLayer() {
         log("new color fill layer");
-        ColorFillLayer.createNew();
+        ColorFillLayer.createNew(Views.getActiveComp());
     }
 
     private static void newGradientFillLayer() {
         log("new gradient fill layer");
-        GradientFillLayer.createNew();
+        GradientFillLayer.createNew(Views.getActiveComp());
     }
 
     private static void newShapesLayer() {
         log("new shapes layer");
-        ShapesLayer.createNew();
+        ShapesLayer.createNew(Views.getActiveComp());
     }
 
     private static void convertToSmartObject() {

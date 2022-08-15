@@ -48,7 +48,7 @@ public interface PenToolMode {
 
     void coCoordsChanged(View view);
 
-    void imCoordsChanged(AffineTransform at, Composition comp);
+    void imCoordsChanged(AffineTransform at, View view);
 
     default void compReplaced(Composition newComp) {
         // do nothing by default

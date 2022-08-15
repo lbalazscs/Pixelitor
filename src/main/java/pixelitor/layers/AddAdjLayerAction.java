@@ -29,7 +29,7 @@ import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
@@ -98,12 +98,8 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
     }
 
     private static Action createAction(Supplier<Filter> factory, String name) {
-        return new OpenViewEnabledAction(name + " Adjustment") {
-            @Override
-            protected void onClick() {
-                addAdjustmentLayer(factory, name);
-            }
-        };
+        return new PAction(name + " Adjustment", () ->
+            addAdjustmentLayer(factory, name));
     }
 
     private static void addAdjustmentLayer(Supplier<Filter> factory, String name) {

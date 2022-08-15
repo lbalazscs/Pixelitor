@@ -17,13 +17,16 @@
 
 package pixelitor.tools.gui;
 
+import pixelitor.AppContext;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Icons;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.*;
@@ -107,6 +110,13 @@ public class ToolButton extends JToggleButton {
         numPresets = startupPresets.size();
 
         popup = new JPopupMenu();
+
+        if (AppContext.isDevelopment()) {
+            popup.add(new PAction("Internal State...", () ->
+                Debug.showTree(tool, tool.getName())));
+            popup.addSeparator();
+        }
+
         popup.add(tool.createSavePresetAction(this,
             this::addPreset, this::removePreset));
         if (!startupPresets.isEmpty()) {

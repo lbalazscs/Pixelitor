@@ -18,8 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.Layers;
-import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Icons;
@@ -32,8 +30,8 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends OpenViewEnabledAction
-    implements ActiveCompositionListener {
+public class LayerMoveAction extends OpenViewEnabledAction.Checked
+    implements ActiveLayerHolderListener {
 
     // menu and history names (also for selection movements)
     public static final String RAISE_LAYER = i18n("raise_layer");
@@ -53,29 +51,29 @@ public class LayerMoveAction extends OpenViewEnabledAction
         this.up = up;
         setToolTip(up ? i18n("raise_layer_tt") : i18n("lower_layer_tt"));
         setEnabled(false);
-        Layers.addCompositionListener(this);
+        Layers.addLayerHolderListener(this);
     }
 
     @Override
-    protected void onClick() {
-        var comp = Views.getActiveComp();
+    protected void onClick(Composition comp) {
+        LayerHolder layerHolder = comp.getActiveLayerHolder();
         if (up) {
-            comp.moveActiveLayerUp();
+            layerHolder.moveActiveLayerUp();
         } else {
-            comp.moveActiveLayerDown();
+            layerHolder.moveActiveLayerDown();
         }
     }
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        enableDisable(newView.getComp());
+        enableDisable(newView.getComp().getActiveLayerHolder());
     }
 
-    public void enableDisable(Composition comp) {
-        if (comp != null) {
-            int activeLayerIndex = comp.getActiveLayerIndex();
+    public void enableDisable(LayerHolder layerHolder) {
+        if (layerHolder != null) {
+            int activeLayerIndex = layerHolder.getActiveLayerIndex();
             if (up) {
-                int numLayers = comp.getNumLayers();
+                int numLayers = layerHolder.getNumLayers();
                 setEnabled(activeLayerIndex < numLayers - 1);
             } else {
                 setEnabled(activeLayerIndex > 0);
@@ -84,19 +82,18 @@ public class LayerMoveAction extends OpenViewEnabledAction
     }
 
     @Override
-    public void numLayersChanged(Composition comp, int newLayerCount) {
-        enableDisable(comp);
+    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+        enableDisable(layerHolder);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        var comp = newActiveLayer.getComp();
-        enableDisable(comp);
+    public void layerTargeted(Layer newEditingTarget) {
+        enableDisable(newEditingTarget.getHolder());
     }
 
     @Override
-    public void layerOrderChanged(Composition comp) {
-        enableDisable(comp);
+    public void layerOrderChanged(LayerHolder layerHolder) {
+        enableDisable(layerHolder);
     }
 
     private static Icon getIcon(boolean up) {

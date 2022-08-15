@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.NamedAction;
 
 import javax.swing.*;
 
@@ -25,7 +25,7 @@ import javax.swing.*;
  * An abstract {@link Action} that either shows or hides something,
  * depending on the current visibility
  */
-public abstract class ShowHideAction extends PAction {
+public abstract class ShowHideAction extends NamedAction.Checked {
     private final String showText;
     private final String hideText;
 

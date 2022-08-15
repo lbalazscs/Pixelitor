@@ -17,12 +17,13 @@
 
 package pixelitor.history;
 
+import pixelitor.AppContext;
 import pixelitor.utils.Icons;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -46,26 +47,43 @@ public class HistoryPanel extends JPanel {
         redoButton = createButton(Icons.getRedoIcon(), "redo",
             "AbstractUndoableEdit.redoText", RedoAction.INSTANCE);
 
-        History.addUndoableEditListener(e -> updateButtonsEnabledState());
-        updateButtonsEnabledState();
+        History.addUndoableEditListener(e -> updateHistoryButtons());
+        updateHistoryButtons();
 
         buttonsPanel.add(undoButton);
         buttonsPanel.add(redoButton);
+
+        if (AppContext.isDevelopment()) {
+            JButton debugButton = new JButton("Debug...");
+            debugButton.addActionListener(e -> {
+                PixelitorEdit edit = History.getEditToBeUndone();
+                Debug.showTree(edit, edit.getName());
+            });
+            buttonsPanel.add(debugButton);
+        }
+
         add(buttonsPanel, SOUTH);
     }
 
     private static JButton createButton(Icon icon, String name,
                                         String tooltipResource,
-                                        ActionListener actionListener) {
+                                        Action action) {
         JButton b = new JButton(icon);
         b.setName(name);
         b.setToolTipText(UIManager.getString(tooltipResource));
-        b.addActionListener(actionListener);
+
+        // Uses the action as a mere action listener in order
+        // to avoid changing the button's text all the time.
+        // The button's tooltip is updated instead.
+        b.addActionListener(action);
         return b;
     }
 
-    private void updateButtonsEnabledState() {
+    private void updateHistoryButtons() {
         undoButton.setEnabled(pum.canUndo());
         redoButton.setEnabled(pum.canRedo());
+
+        undoButton.setToolTipText(pum.getUndoPresentationName());
+        redoButton.setToolTipText(pum.getRedoPresentationName());
     }
 }

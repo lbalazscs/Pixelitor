@@ -65,11 +65,11 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
         return myself;
     }
 
-    public SmartObjectAssert isConsistent() {
+    public SmartObjectAssert invariantsAreOK() {
         isNotNull();
 
         SmartObject so = (SmartObject) actual;
-        assertThat(so.checkConsistency()).isTrue();
+        assertThat(so.checkInvariants()).isTrue();
 
         return myself;
     }

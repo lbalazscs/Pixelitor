@@ -15,12 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.layers;
+
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.image.BufferedImage;
 
-public interface ImageSource {
-    // TODO if this is the only method, then this interface
-    //   could be replaced by a Supplier<BufferedImage>
+public interface ImageSource extends Debuggable {
     public BufferedImage getImage();
 }

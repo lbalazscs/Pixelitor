@@ -403,7 +403,7 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         // do nothing
     }
 

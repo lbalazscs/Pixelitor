@@ -80,12 +80,12 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         // the path will be transformed by the box, which is unnecessary,
         // since it was already transformed in Composition, but not a
         // problem, because the box uses reference-point based transformations
         for (TransformBox box : boxes) {
-            box.imCoordsChanged(at, comp);
+            box.imCoordsChanged(at, view);
         }
     }
 

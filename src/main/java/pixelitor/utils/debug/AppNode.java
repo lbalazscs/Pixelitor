@@ -20,7 +20,6 @@ package pixelitor.utils.debug;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.history.History;
 import pixelitor.tools.Tools;
 
 /**
@@ -33,7 +32,7 @@ public class AppNode extends DebugNode {
         addQuotedString("version", Pixelitor.VERSION_NUMBER);
         add(DebugNodes.createSystemNode());
         add(Tools.getCurrent().createDebugNode("active tool"));
-        add(History.createDebugNode());
+//        add(History.createDebugNode());
 
         addImageNodes();
     }
@@ -43,7 +42,7 @@ public class AppNode extends DebugNode {
 
         Views.forEachView(view -> {
             String prefix = view.isActive() ? "active view - " : "view - ";
-            add(DebugNodes.createViewNode(prefix + view.getName(), view));
+            add(view.createDebugNode(prefix + view.getName()));
         });
     }
 }

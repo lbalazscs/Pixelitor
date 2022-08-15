@@ -17,7 +17,6 @@
 
 package pixelitor.tools.crop;
 
-import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
 import pixelitor.tools.util.ArrowKey;
@@ -229,8 +228,8 @@ public class CropBox implements ToolWidget {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
-        rect.imCoordsChanged(comp.getView(), at);
+    public void imCoordsChanged(AffineTransform at, View view) {
+        rect.imCoordsChanged(at, view);
         updateHandles();
     }
 

@@ -17,9 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
@@ -35,22 +33,19 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that deletes the active layer from the active composition.
  */
 public class DeleteActiveLayerAction extends PAction
-    implements ViewActivationListener, ActiveCompositionListener {
+    implements ViewActivationListener, ActiveLayerHolderListener {
 
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
-        super(i18n("delete_layer"), Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED));
+        super(i18n("delete_layer"),
+            Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED),
+            () -> Views.getActiveComp().deleteEditingTarget(true));
+
         setToolTip("Deletes the active layer.");
         setEnabled(false);
         Views.addActivationListener(this);
-        Layers.addCompositionListener(this);
-    }
-
-    @Override
-    protected void onClick() {
-        var comp = Views.getActiveComp();
-        comp.deleteActiveLayer(true);
+        Layers.addLayerHolderListener(this);
     }
 
     @Override
@@ -64,18 +59,27 @@ public class DeleteActiveLayerAction extends PAction
     }
 
     @Override
-    public void numLayersChanged(Composition comp, int newLayerCount) {
-        setEnabled(newLayerCount > 1);
+    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+        enableDisable(layerHolder, newLayerCount);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-
+    public void layerTargeted(Layer newEditingTarget) {
+        LayerHolder holder = newEditingTarget.getHolder();
+        enableDisable(holder, holder.getNumLayers());
     }
 
     @Override
-    public void layerOrderChanged(Composition comp) {
+    public void layerOrderChanged(LayerHolder layerHolder) {
 
+    }
+
+    private void enableDisable(LayerHolder layerHolder, int layerCount) {
+        if (layerHolder.allowZeroLayers()) {
+            setEnabled(layerCount > 0);
+        } else {
+            setEnabled(layerCount > 1);
+        }
     }
 
     @Override

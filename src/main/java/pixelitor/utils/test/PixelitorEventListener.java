@@ -18,13 +18,9 @@
 package pixelitor.utils.test;
 
 import pixelitor.AppContext;
-import pixelitor.Composition;
-import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
-import pixelitor.layers.ActiveCompositionListener;
-import pixelitor.layers.ActiveMaskListener;
-import pixelitor.layers.Layer;
+import pixelitor.layers.*;
 import pixelitor.utils.ViewActivationListener;
 
 import static java.lang.String.format;
@@ -33,7 +29,7 @@ import static java.lang.String.format;
  * Used for tracking what happens in long-running automatic tests.
  * Listens to changes and generates events.
  */
-public class PixelitorEventListener implements ActiveCompositionListener,
+public class PixelitorEventListener implements ActiveLayerHolderListener,
     ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
@@ -43,26 +39,26 @@ public class PixelitorEventListener implements ActiveCompositionListener,
     }
 
     public void register() {
-        Layers.addCompositionListener(this);
+        Layers.addLayerHolderListener(this);
         Layers.addMaskListener(this);
         Views.addActivationListener(this);
     }
 
     @Override
-    public void numLayersChanged(Composition comp, int newLayerCount) {
+    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
         String type = "#layers changed, newCount = " + newLayerCount;
-        Events.postListenerEvent(type, comp, null);
+        Events.postListenerEvent(type, layerHolder.getComp(), null);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        String type = "layer activated: " + newActiveLayer.getName();
-        Events.postListenerEvent(type, newActiveLayer.getComp(), newActiveLayer);
+    public void layerTargeted(Layer newEditingTarget) {
+        String type = "layer targeted: " + newEditingTarget.getName();
+        Events.postListenerEvent(type, newEditingTarget.getComp(), newEditingTarget);
     }
 
     @Override
-    public void layerOrderChanged(Composition comp) {
-        Events.postListenerEvent("layer order changed", comp, null);
+    public void layerOrderChanged(LayerHolder layerHolder) {
+        Events.postListenerEvent("layer order changed", layerHolder.getComp(), null);
     }
 
     @Override

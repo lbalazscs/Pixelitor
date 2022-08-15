@@ -77,12 +77,7 @@ public final class NewImage {
     }
 
     public static Action getAction() {
-        return new PAction(NEW_IMAGE_STRING + "...") {
-            @Override
-            protected void onClick() {
-                showInDialog();
-            }
-        };
+        return new PAction(NEW_IMAGE_STRING + "...", NewImage::showInDialog);
     }
 
     public static Dimension getLastSize() {

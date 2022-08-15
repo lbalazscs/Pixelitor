@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -49,7 +48,7 @@ public interface ToolWidget {
      */
     void coCoordsChanged(View view);
 
-    void imCoordsChanged(AffineTransform at, Composition comp);
+    void imCoordsChanged(AffineTransform at, View view);
 
     void arrowKeyPressed(ArrowKey key, View view);
 }

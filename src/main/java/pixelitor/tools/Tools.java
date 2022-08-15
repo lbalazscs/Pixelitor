@@ -163,8 +163,8 @@ public class Tools {
         currentTool.coCoordsChanged(view);
     }
 
-    public static void imCoordsChanged(Composition comp, AffineTransform at) {
-        currentTool.imCoordsChanged(at, comp);
+    public static void imCoordsChanged(AffineTransform at, View view) {
+        currentTool.imCoordsChanged(at, view);
     }
 
     public static void compReplaced(Composition newComp, boolean reloaded) {

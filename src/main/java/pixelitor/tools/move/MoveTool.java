@@ -188,9 +188,9 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (transformBox != null) {
-            transformBox.imCoordsChanged(at, comp);
+            transformBox.imCoordsChanged(at, view);
         }
     }
 

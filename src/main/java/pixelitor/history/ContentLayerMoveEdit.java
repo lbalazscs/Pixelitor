@@ -97,7 +97,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         var node = super.createDebugNode(key);
 
         node.add(translationEdit.createDebugNode("translationEdit"));
-        node.addNullableChild("image edit", imageEdit);
+        node.addNullableDebuggable("image edit", imageEdit);
         node.add(layer.createDebugNode("layer"));
 
         return node;

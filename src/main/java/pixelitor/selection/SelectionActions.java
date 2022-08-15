@@ -52,51 +52,25 @@ import static pixelitor.utils.Texts.i18n;
 public final class SelectionActions {
     private static Shape copiedSelShape = null;
 
-    private static final Action crop = new PAction("Crop Selection") {
-        @Override
-        protected void onClick() {
-            Crop.selectionCropActiveImage();
-        }
-    };
+    private static final Action crop = new PAction("Crop Selection",
+        Crop::selectionCropActiveImage);
 
-    private static final Action deselect = new PAction(i18n("deselect")) {
-        @Override
-        protected void onClick() {
-            getActiveComp().deselect(true);
-        }
-    };
+    private static final Action deselect = new PAction(i18n("deselect"), () ->
+        getActiveComp().deselect(true));
 
-    private static final Action invert = new PAction(i18n("invert_sel")) {
-        @Override
-        protected void onClick() {
-            getActiveComp().invertSelection();
-        }
-    };
+    private static final Action invert = new PAction(i18n("invert_sel"), () ->
+        getActiveComp().invertSelection());
 
     private static final ShowHideSelectionAction showHide = new ShowHideSelectionAction();
 
-    private static final Action convertToPath = new PAction("Convert to Path") {
-        @Override
-        protected void onClick() {
-            var comp = getActiveComp();
-            selectionToPath(comp, true);
-        }
-    };
+    private static final Action convertToPath = new PAction("Convert to Path", () ->
+        selectionToPath(getActiveComp(), true));
 
-    private static final Action copySel = new PAction(i18n("copy_sel")) {
-        @Override
-        protected void onClick() {
-            copiedSelShape = getActiveComp().getSelectionShape();
-            pasteSel.setEnabled(true);
-        }
-    };
+    private static final Action copySel = new PAction(i18n("copy_sel"),
+        SelectionActions::copySelection);
 
-    private static final Action pasteSel = new PAction(i18n("paste_sel")) {
-        @Override
-        protected void onClick() {
-            getActiveComp().changeSelection(copiedSelShape);
-        }
-    };
+    private static final Action pasteSel = new PAction(i18n("paste_sel"), () ->
+        getActiveComp().changeSelection(copiedSelShape));
 
     static {
         pasteSel.setEnabled(false);
@@ -111,6 +85,11 @@ public final class SelectionActions {
                 pasteSel.setEnabled(false);
             }
         });
+    }
+
+    private static void copySelection() {
+        copiedSelShape = getActiveComp().getSelectionShape();
+        pasteSel.setEnabled(true);
     }
 
     public static void selectionToPath(Composition comp, boolean addToHistory) {
@@ -128,32 +107,29 @@ public final class SelectionActions {
         }
     }
 
-    private static final Action modify = new PAction(i18n("modify_sel") + "...") {
-        @Override
-        protected void onClick() {
-            JPanel panel = new JPanel(new GridBagLayout());
-            var gbh = new GridBagHelper(panel);
-            RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
-            EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
+    private static final Action modify = new PAction(i18n("modify_sel") + "...", () -> {
+        JPanel panel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(panel);
+        RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
+        EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
-            gbh.addOnlyControl(amount.createGUI("amount"));
-            gbh.addLabelAndControl(GUIText.TYPE + ":", type.createGUI("type"));
+        gbh.addOnlyControl(amount.createGUI("amount"));
+        gbh.addLabelAndControl(GUIText.TYPE + ":", type.createGUI("type"));
 
-            new DialogBuilder()
-                .content(panel)
-                .title(i18n("modify_sel"))
-                .okText("Change!")
-                .cancelText(CLOSE_DIALOG)
-                .validator(d -> {
-                    modifySelection(type, amount);
+        new DialogBuilder()
+            .content(panel)
+            .title(i18n("modify_sel"))
+            .okText("Change!")
+            .cancelText(CLOSE_DIALOG)
+            .validator(d -> {
+                modifySelection(type, amount);
 
-                    // always return false so that
-                    // the Change button does not close it
-                    return false;
-                })
-                .show();
-        }
-    };
+                // always return false so that
+                // the Change button does not close it
+                return false;
+            })
+            .show();
+    });
 
     private static void modifySelection(EnumParam<SelectionModifyType> type,
                                         RangeParam amount) {

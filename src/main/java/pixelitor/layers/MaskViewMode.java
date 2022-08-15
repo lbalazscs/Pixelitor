@@ -84,13 +84,8 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the given layer and its image
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
-        var action = new PAction(guiName) {
-            @Override
-            protected void onClick() {
-                activate(layer);
-            }
-        };
-        var menuItem = new JMenuItem(action);
+        var menuItem = new JMenuItem(new PAction(guiName, () ->
+            activate(layer)));
         menuItem.setAccelerator(keyStroke);
         menu.add(menuItem);
     }

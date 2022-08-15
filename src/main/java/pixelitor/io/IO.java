@@ -131,11 +131,6 @@ public class IO {
         }
     }
 
-    public static void save(boolean saveAs) {
-        var comp = Views.getActiveComp();
-        save(comp, saveAs);
-    }
-
     /**
      * Returns true if the file was saved,
      * false if the user cancels the saving or if it could not be saved
@@ -221,15 +216,13 @@ public class IO {
         }
     }
 
-    public static void exportLayersToPNGAsync() {
+    public static void exportLayersToPNGAsync(Composition comp) {
         assert calledOnEDT() : threadInfo();
 
         boolean okPressed = SingleDirChooser.selectOutputDir();
         if (!okPressed) {
             return;
         }
-
-        var comp = Views.getActiveComp();
 
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
@@ -266,14 +259,13 @@ public class IO {
         saveImageToFile(image, new SaveSettings(FileFormat.PNG, file));
     }
 
-    public static void saveCurrentImageInAllFormats() {
+    public static void saveInAllFormats(Composition comp) {
         boolean canceled = !SingleDirChooser.selectOutputDir();
         if (canceled) {
             return;
         }
         File saveDir = Dirs.getLastSave();
         if (saveDir != null) {
-            var comp = Views.getActiveComp();
             FileFormat[] fileFormats = FileFormat.values();
             for (FileFormat format : fileFormats) {
                 File f = new File(saveDir, "all_formats." + format);

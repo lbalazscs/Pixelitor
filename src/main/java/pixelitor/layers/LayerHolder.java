@@ -18,23 +18,27 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.utils.OpenViewEnabledAction;
-import pixelitor.gui.utils.ThemedImageIcon;
-import pixelitor.utils.Icons;
-
-import static pixelitor.utils.Texts.i18n;
 
 /**
- * An Action that duplicates the active layer of the active composition
+ * Something that has an ordered collection of layers inside it.
  */
-public class DuplicateLayerAction extends OpenViewEnabledAction {
-    public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
+public interface LayerHolder {
 
-    private DuplicateLayerAction() {
-        super(
-            i18n("duplicate_layer"),
-            Icons.loadThemed("duplicate_layer.png", ThemedImageIcon.GREEN),
-            Composition::duplicateActiveLayer);
-        setToolTip(i18n("duplicate_layer_tt"));
-    }
+    int getActiveLayerIndex();
+
+    int getNumLayers();
+
+    Layer getLayer(int index);
+
+    Composition getComp();
+
+    String getName();
+
+    void moveActiveLayerUp();
+
+    void moveActiveLayerDown();
+
+    void deleteLayer(Layer layer, boolean addToHistory);
+
+    boolean allowZeroLayers();
 }

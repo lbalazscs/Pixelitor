@@ -96,12 +96,7 @@ public enum AnchorPointType {
 
     static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {
         public AnchorPointTypeMenuItem(AnchorPoint ap, AnchorPointType type) {
-            super(new PAction(type.toString()) {
-                @Override
-                protected void onClick() {
-                    ap.setType(type);
-                }
-            });
+            super(new PAction(type.toString(), () -> ap.setType(type)));
             if (ap.getType() == type) {
                 setSelected(true);
             }

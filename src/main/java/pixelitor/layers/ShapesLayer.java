@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.Flip;
@@ -60,8 +61,7 @@ public class ShapesLayer extends ContentLayer {
         super(comp, name);
     }
 
-    public static void createNew() {
-        var comp = Views.getActiveComp();
+    public static void createNew(Composition comp) {
         var layer = new ShapesLayer(comp, "shape layer " + (++count));
         new Composition.LayerAdder(comp)
             .atPosition(ABOVE_ACTIVE)
@@ -71,18 +71,20 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void edit() {
+    public boolean edit() {
         Tools.SHAPES.activate();
+        return true;
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected ShapesLayer createTypeSpecificCopy(CopyType copyType) {
+        String duplicateName = copyType.createLayerDuplicateName(name);
         var duplicate = new ShapesLayer(comp, duplicateName);
         if (styledShape != null) {
             duplicate.setStyledShape(styledShape.clone());
             if (transformBox != null) {
                 View view = comp.getView();
-                if (transformBox.needsInitialization(view)) {
+                if (view != null && transformBox.needsInitialization(view)) {
                     // can't be copied without a view
                     transformBox.reInitialize(view, styledShape);
                 }
@@ -172,7 +174,7 @@ public class ShapesLayer extends ContentLayer {
         if (hasShape()) {
             if (transformBox != null) {
                 // the box will also transform the shape
-                transformBox.imCoordsChanged(at, comp);
+                transformBox.imCoordsChanged(at, comp.getView());
             } else {
                 // This case should never happen, because an
                 // initialized shape should always have a box.
@@ -276,8 +278,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public boolean checkConsistency() {
-        if (!super.checkConsistency()) {
+    public boolean checkInvariants() {
+        if (!super.checkInvariants()) {
             return false;
         }
 

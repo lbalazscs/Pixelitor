@@ -18,10 +18,11 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.history.AdjustmentLayerChangedEdit;
+import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
 import pixelitor.io.TranslatedImage;
 import pixelitor.utils.debug.DebugNode;
@@ -50,6 +51,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
     private transient Filter lastFilter;
     private transient boolean showOriginal = false;
 
+    private transient boolean tentative = false;
+
     public AdjustmentLayer(Composition comp, String name, Filter filter) {
         super(comp, name);
         this.filter = filter;
@@ -62,10 +65,12 @@ public class AdjustmentLayer extends Layer implements Filterable {
         isAdjustment = true;
         lastFilter = null;
         showOriginal = false;
+        tentative = false;
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected AdjustmentLayer createTypeSpecificCopy(CopyType copyType) {
+        String duplicateName = copyType.createLayerDuplicateName(name);
         return new AdjustmentLayer(comp, duplicateName, filter.copy());
     }
 
@@ -106,10 +111,11 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public void edit() {
+    public boolean edit() {
         if (filter instanceof FilterWithGUI fwg) {
-            runFilter(filter, FilterContext.PREVIEWING);
+            return startFilter(filter, false);
         }
+        return true;
     }
 
     @Override
@@ -155,13 +161,19 @@ public class AdjustmentLayer extends Layer implements Filterable {
         }
     }
 
+    public void setTentative(boolean tentative) {
+        this.tentative = tentative;
+    }
+
     @Override
     public void onFilterDialogAccepted(String filterName) {
         if (showOriginal) {
             filter = lastFilter;
             comp.update();
         } else {
-            History.add(new AdjustmentLayerChangedEdit(this, lastFilter));
+            if (!tentative) {
+                History.add(new FilterChangedEdit(this, lastFilter, null));
+            }
         }
 
         lastFilter = null;

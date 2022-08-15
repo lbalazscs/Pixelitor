@@ -321,31 +321,28 @@ public final class GUIUtils {
 
     public static AbstractAction createPrintFileAction(Composition comp,
                                                        File file, Component parent) {
-        return new PAction("Print...") {
-            @Override
-            protected void onClick() {
-                if (comp.isDirty()) {
-                    String msg = "<html>The file <i>" + file.getName() +
-                                 "</i> contains unsaved changes.<br>" +
-                                 "Only the saved changes can be printed.<br>" +
-                                 "Do you want to save your changes now?";
+        return new PAction("Print...", () -> {
+            if (comp.isDirty()) {
+                String msg = "<html>The file <i>" + file.getName() +
+                             "</i> contains unsaved changes.<br>" +
+                             "Only the saved changes can be printed.<br>" +
+                             "Do you want to save your changes now?";
 
-                    String[] options = {"Save and Print", GUIText.CANCEL};
-                    boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,
-                        "Unsaved Changes", options, 0, QUESTION_MESSAGE);
-                    if (!saveAndPrint) {
-                        return;
-                    }
+                String[] options = {"Save and Print", GUIText.CANCEL};
+                boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,
+                    "Unsaved Changes", options, 0, QUESTION_MESSAGE);
+                if (!saveAndPrint) {
+                    return;
+                }
 
-                    IO.save(comp, false);
-                }
-                try {
-                    Desktop.getDesktop().print(file);
-                } catch (IOException ex) {
-                    Messages.showException(ex);
-                }
+                IO.save(comp, false);
             }
-        };
+            try {
+                Desktop.getDesktop().print(file);
+            } catch (IOException ex) {
+                Messages.showException(ex);
+            }
+        });
     }
 
     public static void showTaskbarProgress(int progressPercent) {

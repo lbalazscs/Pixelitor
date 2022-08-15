@@ -240,51 +240,26 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        popup.add(new PAction("Retract Handles") {
-            @Override
-            protected void onClick() {
-                retractHandles();
-            }
-        });
+        popup.add(new PAction("Retract Handles", this::retractHandles));
 
         popup.addSeparator();
 
         if (AppContext.isDevelopment()) {
-            popup.add(new PAction("Dump") {
-                @Override
-                protected void onClick() {
-                    dump();
-                }
-            });
+            popup.add(new PAction("Dump", this::dump));
         }
 
         boolean singleSubPath = subPath.isSingle();
         boolean isLastPoint = singleSubPath && subPath.getNumAnchors() == 1;
 
         if (!isLastPoint) {
-            popup.add(new PAction("Delete Point") {
-                @Override
-                protected void onClick() {
-                    delete();
-                }
-            });
+            popup.add(new PAction("Delete Point", this::delete));
         }
 
         if (!singleSubPath) {
-            popup.add(new PAction("Delete Subpath") {
-                @Override
-                protected void onClick() {
-                    subPath.delete();
-                }
-            });
+            popup.add(new PAction("Delete Subpath", subPath::delete));
         }
 
-        popup.add(new PAction("Delete Path") {
-            @Override
-            protected void onClick() {
-                subPath.deletePath();
-            }
-        });
+        popup.add(new PAction("Delete Path", subPath::deletePath));
 
         try {
             popup.show(view, x, y);

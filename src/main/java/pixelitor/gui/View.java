@@ -35,6 +35,8 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
@@ -57,7 +59,7 @@ import static pixelitor.utils.Threads.*;
 /**
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
  */
-public class View extends JComponent implements MouseListener, MouseMotionListener {
+public class View extends JComponent implements MouseListener, MouseMotionListener, Debuggable {
     private Composition comp;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
@@ -87,9 +89,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert !AppContext.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
-        this.comp = comp;
-        canvas = comp.getCanvas();
-        comp.setView(this);
+        setComp(comp);
 
         ZoomLevel fitZoom = ZoomLevel.calcZoom(canvas, null, false);
         setZoom(fitZoom);
@@ -139,6 +139,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             .whenComplete((v, e) -> IO.checkForReadingProblems(e));
     }
 
+    private void setComp(Composition comp) {
+        assert comp != null;
+        assert comp.getView() == null;
+
+        this.comp = comp;
+        this.canvas = comp.getCanvas();
+
+        comp.setView(this);
+    }
+
     private Composition replaceJustReloadedComp(Composition newComp) {
         assert calledOnEDT() : threadInfo();
         assert newComp != comp;
@@ -184,21 +194,23 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert newComp != null;
 
         Composition oldComp = comp;
-        comp = newComp;
+        setComp(newComp);
 
-        newComp.setView(this);
         newComp.createLayerUIs();
-        canvas = newComp.getCanvas();
 
-        // recreate the layer GUIs
-//        layersPanel = new LayersPanel();
+        // Evaluates all smart objects. It's better to do it here than
+        // have it triggered by async updateIconImage calls when the layers
+        // are added to the GUI, which could trigger multiple
+        // parallel evaluations of a smart object.
+        newComp.getCompositeImage();
+
         newComp.addAllLayersToUI();
         oldComp.dispose();
 
         if (isActive()) {
             LayersContainer.showLayersOf(this);
             Layers.activeCompChanged(newComp, false);
-            newMaskViewMode.activate(this, newComp.getActiveLayer());
+            newMaskViewMode.activate(this, newComp.getEditingTarget());
             repaintNavigator(true);
             HistogramsPanel.updateFrom(newComp);
             PixelitorWindow.get().updateTitle(newComp);
@@ -866,6 +878,28 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      */
     public Component getDialogParent() {
         return (Component) viewContainer;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.add(getComp().createDebugNode("composition"));
+        node.addNullableDebuggable("canvas", getCanvas());
+        node.addAsString("zoom level", getZoomLevel());
+
+        node.addInt("view width", getWidth());
+        node.addInt("view height", getHeight());
+
+        var viewContainer = getViewContainer();
+        if (viewContainer instanceof ImageFrame frame) {
+            node.addInt("frame width", frame.getWidth());
+            node.addInt("frame height", frame.getHeight());
+        }
+
+        node.addQuotedString("mask view mode", getMaskViewMode().toString());
+
+        return node;
     }
 
     @Override

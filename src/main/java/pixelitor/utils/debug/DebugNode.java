@@ -102,12 +102,16 @@ public class DebugNode extends DefaultMutableTreeNode {
     /**
      * A null-safe version of adding the DebugNode created by an object
      */
-    public void addNullableChild(String name, Debuggable debuggable) {
+    public void addNullableDebuggable(String name, Debuggable debuggable) {
         if (debuggable == null) {
             addString(name, "null");
         } else {
             add(debuggable.createDebugNode(name));
         }
+    }
+
+    public void addNullableProperty(String name, Object nullable) {
+        addString("has " + name, nullable == null ? "no" : "yes");
     }
 
     public void addQuotedString(String name, String s) {

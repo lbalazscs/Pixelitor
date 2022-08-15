@@ -65,7 +65,7 @@ class LayerBlendingModesTest {
         lowerLayer = (ImageLayer) comp.getLayer(0);
         lowerLayer.createUI();
 
-        assert lowerLayer.getComp().classInvariant();
+        assert lowerLayer.getComp().checkInvariants();
         assert lowerLayer.getComp() == upperLayer.getComp();
         assert upperLayer == comp.getActiveLayer();
 

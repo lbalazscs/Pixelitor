@@ -20,7 +20,7 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.Layers;
+import pixelitor.CopyType;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -103,7 +103,7 @@ public abstract class Layer implements Serializable, Debuggable {
         assert comp != null;
         assert name != null;
 
-        setComp(comp);
+        this.comp = comp;
         this.name = name;
         opacity = 1.0f;
 
@@ -160,28 +160,27 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public final Layer duplicate(boolean compCopy, boolean duplicateMask) {
-        String duplicateName = compCopy ? this.name : Utils.createCopyName(name);
-        Layer d = createTypeSpecificDuplicate(duplicateName);
+    public final Layer copy(CopyType copyType, boolean duplicateMask) {
+        Layer d = createTypeSpecificCopy(copyType);
 
         d.setOpacity(getOpacity());
         d.setBlendingMode(getBlendingMode());
         d.setVisible(isVisible());
 
         if (duplicateMask) {
-            duplicateMask(d, compCopy);
+            duplicateMask(d, copyType);
         }
 
         return d;
     }
 
-    protected abstract Layer createTypeSpecificDuplicate(String duplicateName);
+    protected abstract Layer createTypeSpecificCopy(CopyType copyType);
 
     // Duplicates the mask of a duplicated layer.
-    private void duplicateMask(Layer duplicate, boolean compCopy) {
+    protected void duplicateMask(Layer duplicate, CopyType copyType) {
         if (hasMask()) {
             LayerMask newMask = mask.duplicate(duplicate);
-            if (compCopy) {
+            if (copyType == CopyType.UNDO) {
                 // this could be running outside the EDT, and anyway it is
                 // not necessary to add the duplicate to the GUI
                 duplicate.mask = newMask;
@@ -316,6 +315,13 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public Composition getComp() {
+        return comp;
+    }
+
+    /**
+     * Return the {@link LayerHolder} that contains this layer.
+     */
+    public LayerHolder getHolder() {
         return comp;
     }
 
@@ -467,11 +473,17 @@ public abstract class Layer implements Serializable, Debuggable {
         assert mask.getOwner() == this;
 
         this.mask = mask;
-        comp.update();
         if (hasUI() && !ui.hasMaskIcon()) {
             ui.addMaskIcon();
         }
-        Layers.maskAddedTo(this);
+        if (comp.isActive()) {
+            comp.update();
+            if (isEditingTarget()) {
+                Layers.maskAddedTo(this);
+            }
+        } else {
+            comp.invalidateCompositeCache();
+        }
     }
 
     public void deleteMask(boolean addToHistory) {
@@ -835,16 +847,13 @@ public abstract class Layer implements Serializable, Debuggable {
         JPopupMenu popup = null;
         if (comp.canMergeDown(this)) {
             popup = new JPopupMenu();
-            var mergeDownAction = new PAction(GUIText.MERGE_DOWN) {
-                @Override
-                protected void onClick() {
-                    // check again to be sure that the layer bellow
-                    // this didn't change in the meantime
-                    if (comp.canMergeDown(Layer.this)) {
-                        comp.mergeDown(Layer.this);
-                    }
+            var mergeDownAction = new PAction(GUIText.MERGE_DOWN, () -> {
+                // check again to be sure that the layer bellow
+                // this didn't change in the meantime
+                if (comp.canMergeDown(Layer.this)) {
+                    comp.mergeDown(Layer.this);
                 }
-            };
+            });
             mergeDownAction.setToolTip(GUIText.MERGE_DOWN_TT);
             popup.add(mergeDownAction);
         }
@@ -853,12 +862,7 @@ public abstract class Layer implements Serializable, Debuggable {
             if (popup == null) {
                 popup = new JPopupMenu();
             }
-            popup.add(new PAction("Rasterize") {
-                @Override
-                protected void onClick() {
-                    replaceWithRasterized();
-                }
-            });
+            popup.add(new PAction("Rasterize", this::replaceWithRasterized));
         }
 
         if (AppContext.enableExperimentalFeatures) {
@@ -869,12 +873,7 @@ public abstract class Layer implements Serializable, Debuggable {
             if (this instanceof SmartObject so) {
                 so.addSmartObjectSpecificItems(popup);
             } else if (canExportImage()) {
-                popup.add(new PAction("Convert to Smart Object") {
-                    @Override
-                    protected void onClick() {
-                        replaceWithSmartObject();
-                    }
-                });
+                popup.add(new PAction("Convert to Smart Object", this::replaceWithSmartObject));
             }
         }
 
@@ -931,8 +930,12 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
-    public void edit() {
+    /**
+     * Returns true if the user accepted the edit
+     */
+    public boolean edit() {
         // by default does nothing, but overridden for non-image layers
+        return true;
     }
 
     public boolean isRasterizable() {
@@ -963,10 +966,6 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public abstract String getTypeString();
 
-    public final DebugNode createDebugNode() {
-        return createDebugNode(getTypeStringLC());
-    }
-
     public Tool getPreferredTool() {
         return null;
     }
@@ -993,13 +992,21 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
-    public boolean checkConsistency() {
+    public boolean contains(Layer layer) {
+        return layer == this;
+    }
+
+    public boolean checkInvariants() {
         if (ui != null) {
             if (ui.getLayer() != this) {
                 throw new AssertionError("ui has bad layer reference for " + getName());
             }
         }
         return true;
+    }
+
+    public final DebugNode createDebugNode() {
+        return createDebugNode(getTypeStringLC());
     }
 
     @Override
@@ -1010,6 +1017,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addClass();
         node.addBoolean("active", isActive());
         node.addBoolean("edited", isEditingTarget());
+        node.addQuotedString("comp debug name", comp.getDebugName());
 
         if (hasMask()) {
             node.addString("has mask", "yes");
@@ -1023,6 +1031,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addBoolean("visible", isVisible());
         node.addFloat("opacity", getOpacity());
         node.addQuotedString("blending mode", getBlendingMode().toString());
+        node.addNullableDebuggable("ui", ui);
 
         return node;
     }

@@ -18,7 +18,6 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.AppContext;
-import pixelitor.Composition;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
@@ -131,7 +130,7 @@ public class GradientHandles implements ToolWidget {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         start.imTransformOnlyThis(at, false);
         end.imTransformOnlyThis(at, false);
         middle.imTransformOnlyThis(at, false);

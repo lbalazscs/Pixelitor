@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Views;
+import pixelitor.CopyType;
 import pixelitor.colors.Colors;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.PixelitorWindow;
@@ -52,9 +52,8 @@ public class ColorFillLayer extends Layer {
         this.color = color;
     }
 
-    public static void createNew() {
+    public static void createNew(Composition comp) {
         Tools.forceFinish();
-        var comp = Views.getActiveComp();
         ColorFillLayer layer = new ColorFillLayer(comp, "color fill", null);
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
@@ -76,14 +75,16 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    public void edit() {
+    public boolean edit() {
         String title = "Edit Color Fill Layer";
         Color oldColor = color;
         if (Colors.selectColorWithDialog(PixelitorWindow.get(), title,
             color, true, c -> changeColor(c, false))) {
             // adds an edit to the history only after the dialog is accepted
             History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
+            return true;
         }
+        return false;
     }
 
     public void changeColor(Color color, boolean addHistory) {
@@ -124,8 +125,9 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected ColorFillLayer createTypeSpecificCopy(CopyType copyType) {
         Color colorCopy = new Color(this.color.getRGB(), true);
+        String duplicateName = copyType.createLayerDuplicateName(name);
         return new ColorFillLayer(comp, duplicateName, colorCopy);
     }
 

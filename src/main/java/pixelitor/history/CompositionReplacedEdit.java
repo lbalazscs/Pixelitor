@@ -116,7 +116,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             if (inverseCanvasTransform != null) { // successful inversion
                 // the path of the composition was restored together with
                 // the old comp, but the tool widgets need updating
-                Tools.imCoordsChanged(comp, inverseCanvasTransform);
+                Tools.imCoordsChanged(inverseCanvasTransform, view);
             }
         }
     }
@@ -149,7 +149,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         assert !oldComp.hasSelection();
 
         if (canvasTransform != null) { // there was a transform
-            Tools.imCoordsChanged(comp, canvasTransform);
+            Tools.imCoordsChanged(canvasTransform, view);
         }
     }
 

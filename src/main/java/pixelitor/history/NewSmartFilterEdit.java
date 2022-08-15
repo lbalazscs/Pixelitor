@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.layers.SmartFilter;
 import pixelitor.layers.SmartObject;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -46,5 +47,15 @@ public class NewSmartFilterEdit extends PixelitorEdit {
         super.redo();
 
         smartObject.addSmartFilter(smartFilter, false, true);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(smartObject.createDebugNode());
+        node.add(smartFilter.createDebugNode());
+
+        return node;
     }
 }

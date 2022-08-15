@@ -115,7 +115,7 @@ public class PRectangle {
         coRect = view.imageToComponentSpace(imRect);
     }
 
-    public void imCoordsChanged(View view, AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         Point2D upperLeft = new Point2D.Double(
             imRect.getX(), imRect.getY());
         Point2D lowerRight = new Point2D.Double(

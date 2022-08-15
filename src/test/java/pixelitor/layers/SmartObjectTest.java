@@ -41,7 +41,7 @@ class SmartObjectTest {
         smartObject = new SmartObject(comp, content);
         comp.addLayerInInitMode(smartObject);
 
-        assertThat(smartObject).isConsistent();
+        assertThat(smartObject).invariantsAreOK();
     }
 
     @Test

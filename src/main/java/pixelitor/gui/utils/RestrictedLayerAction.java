@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.Views;
+import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -27,7 +27,7 @@ import static java.lang.String.format;
 /**
  * An action that can run only when the active layer has a specific type
  */
-public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
+public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checked {
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
@@ -120,8 +120,8 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction {
     }
 
     @Override
-    protected void onClick() {
-        Layer activeLayer = Views.getActiveLayer();
+    protected void onClick(Composition comp) {
+        Layer activeLayer = comp.getActiveLayer();
         if (layerType.isAllowed(activeLayer)) {
             onActiveLayer(activeLayer);
         } else {

@@ -17,8 +17,6 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.Views;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
@@ -47,19 +45,13 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
-    private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(i18n("zoom_in")) {
-        @Override
-        protected void onClick() {
-            Views.onActiveView(View::increaseZoom);
-        }
-    };
+    private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(
+        i18n("zoom_in"),
+        comp -> comp.getView().increaseZoom());
 
-    private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(i18n("zoom_out")) {
-        @Override
-        protected void onClick() {
-            Views.onActiveView(View::decreaseZoom);
-        }
-    };
+    private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(
+        i18n("zoom_out"),
+        comp -> comp.getView().decreaseZoom());
 
     // it is important to initialize this after other static fields
     public static final ZoomMenu INSTANCE = new ZoomMenu();

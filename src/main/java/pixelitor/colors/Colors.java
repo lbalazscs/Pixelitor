@@ -341,10 +341,10 @@ public class Colors {
     }
 
     public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
-                                                  Supplier<Color> colorSupplier,
+                                                  Supplier<Color> colorSource,
                                                   Consumer<Color> colorSetter) {
         Lazy<JPopupMenu> popupHolder = Lazy.of(() ->
-            createFilterColorPopup(parent, colorSupplier, colorSetter));
+            createFilterColorPopup(parent, colorSource, colorSetter));
 
         // swatch.setComponentPopupMenu doesn't consider the disabled state
         swatch.addMouseListener(new MouseAdapter() {
@@ -371,30 +371,22 @@ public class Colors {
     }
 
     private static JPopupMenu createFilterColorPopup(JComponent parent,
-                                                     Supplier<Color> colorSupplier,
+                                                     Supplier<Color> colorSource,
                                                      Consumer<Color> colorSetter) {
         JPopupMenu popup = new JPopupMenu();
 
         ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
         Window window = SwingUtilities.windowForComponent(parent);
 
-        popup.add(new PAction("Color Variations...") {
-            @Override
-            protected void onClick() {
-                PalettePanel.showFilterVariationsDialog(window, colorSupplier.get(), clickHandler);
-            }
-        });
+        popup.add(new PAction("Color Variations...", () ->
+            PalettePanel.showFilterVariationsDialog(window, colorSource.get(), clickHandler)));
 
-        popup.add(new PAction("Color History...") {
-            @Override
-            protected void onClick() {
-                ColorHistory.INSTANCE.showDialog(window, clickHandler, true);
-            }
-        });
+        popup.add(new PAction("Color History...", () ->
+            ColorHistory.INSTANCE.showDialog(window, clickHandler, true)));
 
         popup.addSeparator();
 
-        setupCopyColorPopupMenu(popup, colorSupplier);
+        setupCopyColorPopupMenu(popup, colorSource);
 
         setupPasteColorPopupMenu(popup, window, colorSetter);
 
@@ -404,42 +396,27 @@ public class Colors {
         return popup;
     }
 
-    public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {
-        popup.add(new PAction("Copy Color") {
-            @Override
-            protected void onClick() {
-                copyColorToClipboard(colorSupplier.get());
-            }
-        });
+    public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSource) {
+        popup.add(new PAction("Copy Color", () ->
+            copyColorToClipboard(colorSource.get())));
     }
 
     public static void setupPasteColorPopupMenu(JPopupMenu popup, Window window, Consumer<Color> colorSetter) {
-        popup.add(new PAction("Paste Color") {
-            @Override
-            protected void onClick() {
-                Color color = getColorFromClipboard();
-                if (color == null) {
-                    Dialogs.showNotAColorOnClipboardDialog(window);
-                } else {
-                    colorSetter.accept(color);
-                }
+        popup.add(new PAction("Paste Color", () -> {
+            Color color = getColorFromClipboard();
+            if (color == null) {
+                Dialogs.showNotAColorOnClipboardDialog(window);
+            } else {
+                colorSetter.accept(color);
             }
-        });
+        }));
     }
 
     private static void setupSetToFgBgColorMenus(JPopupMenu popup, Consumer<Color> colorSetter) {
-        popup.add(new PAction("Set to Foreground Color") {
-            @Override
-            protected void onClick() {
-                colorSetter.accept(FgBgColors.getFGColor());
-            }
-        });
-        popup.add(new PAction("Set to Background Color") {
-            @Override
-            protected void onClick() {
-                colorSetter.accept(FgBgColors.getBGColor());
-            }
-        });
+        popup.add(new PAction("Set to Foreground Color", () ->
+            colorSetter.accept(FgBgColors.getFGColor())));
+        popup.add(new PAction("Set to Background Color", () ->
+            colorSetter.accept(FgBgColors.getBGColor())));
     }
 
     public static void fillWith(Color color, Graphics2D g2, int width, int height) {

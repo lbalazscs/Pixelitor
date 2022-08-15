@@ -17,9 +17,7 @@
 
 package pixelitor.utils.debug;
 
-import pixelitor.gui.ImageFrame;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
@@ -27,6 +25,7 @@ import pixelitor.utils.Utils;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.util.List;
 
@@ -62,27 +61,6 @@ public class DebugNodes {
 
         node.add(createColorModelNode("default color model",
             device.getDefaultConfiguration().getColorModel()));
-
-        return node;
-    }
-
-    public static DebugNode createViewNode(String name, View view) {
-        var node = new DebugNode(name, view);
-
-        node.add(view.getComp().createDebugNode("composition"));
-        node.addNullableChild("canvas", view.getCanvas());
-        node.addAsString("zoom level", view.getZoomLevel());
-
-        node.addInt("view width", view.getWidth());
-        node.addInt("view height", view.getHeight());
-
-        var viewContainer = view.getViewContainer();
-        if (viewContainer instanceof ImageFrame frame) {
-            node.addInt("frame width", frame.getWidth());
-            node.addInt("frame height", frame.getHeight());
-        }
-
-        node.addQuotedString("mask view mode", view.getMaskViewMode().toString());
 
         return node;
     }
@@ -208,6 +186,19 @@ public class DebugNodes {
             var subPath = path.getSubPath(i);
             node.add(subPath.createDebugNode());
         }
+
+        return node;
+    }
+
+    public static DebugNode createTransformNode(AffineTransform at, String name) {
+        DebugNode node = new DebugNode(name, at);
+
+        node.addDouble("scaleX (m00)", at.getScaleX());
+        node.addDouble("scaleY (m11)", at.getScaleY());
+        node.addDouble("shearX (m01)", at.getShearX());
+        node.addDouble("shearY (m10)", at.getShearY());
+        node.addDouble("translateX (m02)", at.getTranslateX());
+        node.addDouble("translateY (m12)", at.getTranslateY());
 
         return node;
     }

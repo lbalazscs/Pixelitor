@@ -163,9 +163,9 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (box != null && state == TRANSFORM) {
-            box.imCoordsChanged(comp.getView(), at);
+            box.imCoordsChanged(at, view);
         }
     }
 

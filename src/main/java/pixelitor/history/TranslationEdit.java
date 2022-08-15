@@ -116,7 +116,7 @@ public class TranslationEdit extends PixelitorEdit {
         node.addInt("backup tx", backupTx);
         node.addInt("backup ty", backupTy);
         node.add(layer.createDebugNode("layer"));
-        node.addNullableChild("mask edit", maskEdit);
+        node.addNullableDebuggable("mask edit", maskEdit);
         return node;
     }
 }

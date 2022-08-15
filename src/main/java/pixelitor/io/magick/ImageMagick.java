@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Views.getActiveComp;
 import static pixelitor.utils.AppPreferences.magickDirName;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -52,13 +51,12 @@ public class ImageMagick {
     private static final boolean installed = checkInstalled();
     private static File magickCommand;
 
-    public static void exportActiveComp() {
+    public static void export(Composition comp) {
         if (!isInstalled()) {
             showNotInstalledDialog();
             return;
         }
 
-        Composition comp = getActiveComp();
         BufferedImage image = comp.getCompositeImage();
         File file = FileChoosers.showSaveDialog(FileChooserInfo.forMagickExport(comp));
         if (file == null) { // canceled

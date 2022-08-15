@@ -18,9 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.FilterContext;
-import pixelitor.ImageMode;
+import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.Dialogs;
@@ -282,13 +280,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    protected Layer createTypeSpecificDuplicate(String duplicateName) {
+    protected ImageLayer createTypeSpecificCopy(CopyType copyType) {
         BufferedImage imageCopy = copyImage(image);
         if (imageCopy == null) {
             // there was an out of memory error
             return null;
         }
 
+        String duplicateName = copyType.createLayerDuplicateName(name);
         return new ImageLayer(comp, imageCopy, duplicateName, getTx(), getTy());
     }
 
@@ -1010,6 +1009,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
+//        System.out.printf("ImageLayer::resize: CALLED on '%s', newSize = %dx%d, thread = %s%n",
+//            getName(), newSize.width, newSize.height, Thread.currentThread().getName());
+
         boolean bigLayer = isBigLayer();
 
         int imgTargetWidth = newSize.width;

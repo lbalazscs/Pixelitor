@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,13 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     private boolean showingProgress = false;
     private final boolean runningOnEDT;
 
-    protected ThresholdProgressTracker(int numComputationUnits) {
+    // In this class this field is used only for debugging.
+    // The status bar progress tracker uses it to label the progress bar.
+    protected final String name;
+
+    protected ThresholdProgressTracker(int numComputationUnits, String name) {
         this.numComputationUnits = numComputationUnits;
+        this.name = name;
         startTime = System.currentTimeMillis();
         runningOnEDT = Threads.calledOnEDT();
     }

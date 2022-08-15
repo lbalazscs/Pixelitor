@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.AppContext;
-import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -65,7 +64,7 @@ public class PathEditor implements PenToolMode {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         // do nothing
     }
 

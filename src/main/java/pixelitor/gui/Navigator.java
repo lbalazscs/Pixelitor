@@ -101,22 +101,14 @@ public class Navigator extends JComponent
         popup = new JPopupMenu();
         ZoomLevel[] levels = {ZoomLevel.Z100, ZoomLevel.Z50, ZoomLevel.Z25, ZoomLevel.Z12};
         for (ZoomLevel level : levels) {
-            popup.add(new PAction("Navigator Zoom: " + level) {
-                @Override
-                protected void onClick() {
-                    setNavigatorSizeFromZoom(level);
-                }
-            });
+            popup.add(new PAction("Navigator Zoom: " + level, () ->
+                setNavigatorSizeFromZoom(level)));
         }
         popup.addSeparator();
-        popup.add(new PAction("View Box Color...") {
-            @Override
-            protected void onClick() {
-                Colors.selectColorWithDialog(Navigator.this,
-                    "View Box Color", viewBoxColor, true,
-                    Navigator.this::setNewViewBoxColor);
-            }
-        });
+        popup.add(new PAction("View Box Color...", () ->
+            Colors.selectColorWithDialog(Navigator.this,
+                "View Box Color", viewBoxColor, true,
+                this::setNewViewBoxColor)));
     }
 
     private void setNewViewBoxColor(Color newColor) {
@@ -163,13 +155,13 @@ public class Navigator extends JComponent
         ZoomMenu.setupZoomKeys(this);
     }
 
-    public static void showInDialog() {
+    public static void showInDialog(View view) {
         if (dialog != null && dialog.isVisible()) {
             dialog.setVisible(false);
             dialog.dispose();
         }
 
-        View view = Views.getActive();
+        assert view.isActive();
         navigatorPanel = new Navigator(view);
 
         dialog = new DialogBuilder()

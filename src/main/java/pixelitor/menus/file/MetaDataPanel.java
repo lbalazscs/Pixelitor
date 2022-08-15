@@ -21,9 +21,8 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
-import pixelitor.Views;
+import pixelitor.Composition;
 import pixelitor.gui.GUIText;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
@@ -63,32 +62,20 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         JPanel northPanel = new JPanel(new BorderLayout());
         JPanel northLeftPanel = new JPanel(new FlowLayout(LEFT));
 
-        JButton expandButton = new JButton(new PAction("Expand All") {
-            @Override
-            protected void onClick() {
-                treeTable.expandAll();
-            }
-        });
+        JButton expandButton = new JButton(new PAction(
+            "Expand All", treeTable::expandAll));
         expandButton.setName("expandButton");
 
-        JButton collapseButton = new JButton(new PAction("Collapse All") {
-            @Override
-            protected void onClick() {
-                treeTable.collapseAll();
-            }
-        });
+        JButton collapseButton = new JButton(new PAction(
+            "Collapse All", treeTable::collapseAll));
         collapseButton.setName("collapseButton");
 
         northLeftPanel.add(expandButton);
         northLeftPanel.add(collapseButton);
         northPanel.add(northLeftPanel, WEST);
 
-        JButton helpButton = new JButton(new PAction(GUIText.HELP) {
-            @Override
-            protected void onClick() {
-                showHelp();
-            }
-        });
+        JButton helpButton = new JButton(new PAction(
+            GUIText.HELP, this::showHelp));
 
         JPanel northRightPanel = new JPanel();
         northRightPanel.add(helpButton);
@@ -195,27 +182,25 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         return metadata;
     }
 
-    public static void showInDialog() {
-        View view = Views.getActive();
-        var comp = view.getComp();
+    public static void showInDialog(Composition comp) {
         File file = comp.getFile();
         if (file == null) {
-            Dialogs.showInfoDialog(view.getDialogParent(), "No file", format(
+            Dialogs.showInfoDialog(comp.getDialogParent(), "No file", format(
                 "<html>There is no file for <b>%s</b>.", comp.getName()));
             return;
         }
         if (!file.exists()) {
             String msg = format(
                 "<html>The metadata for <b>%s</b> cannot be shown because the file<br>" +
-                    "<b>%s</b><br>" +
+                "<b>%s</b><br>" +
                     "doesn't exist anymore.",
                 comp.getName(), file.getAbsolutePath());
-            Messages.showError("File not found", msg, view.getDialogParent());
+            Messages.showError("File not found", msg, comp.getDialogParent());
             return;
         }
         if (FileUtils.hasTGAExtension(file.getName())) {
             String msg = "Metadata for TGA files is not supported yet.";
-            Messages.showError("TGA File", msg, view.getDialogParent());
+            Messages.showError("TGA File", msg, comp.getDialogParent());
             return;
         }
         Metadata metadata = extractMetadata(file);

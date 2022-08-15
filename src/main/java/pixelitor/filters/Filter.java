@@ -38,8 +38,6 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public static Filter copiedSmartFilter;
-
     private transient String name;
 
     // used for making sure that there are no

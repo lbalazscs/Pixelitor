@@ -17,7 +17,7 @@
 
 package pixelitor.menus;
 
-import pixelitor.Views;
+import pixelitor.Composition;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
@@ -34,7 +34,7 @@ import static java.lang.String.format;
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
  */
-public abstract class DrawableAction extends OpenViewEnabledAction {
+public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
@@ -83,8 +83,8 @@ public abstract class DrawableAction extends OpenViewEnabledAction {
     protected abstract void process(Drawable dr);
 
     @Override
-    protected void onClick() {
-        Views.onActiveLayer(this::startOnLayer);
+    protected void onClick(Composition comp) {
+        startOnLayer(comp.getActiveLayer());
     }
 
     private void startOnLayer(Layer layer) {

@@ -93,12 +93,8 @@ public class ShapesTool extends DragTool {
         = new EnumComboBoxModel<>(TwoPointPaintType.class);
 
     private JButton showShapeSettingsButton;
-    private final Action shapeSettingsAction = new PAction("Settings...") {
-        @Override
-        protected void onClick() {
-            showShapeSettingsDialog();
-        }
-    };
+    private final Action shapeSettingsAction = new PAction(
+        "Settings...", this::showShapeSettingsDialog);
 
     private final JComboBox<TwoPointPaintType> fillPaintCombo
         = createFillPaintCombo();
@@ -129,12 +125,8 @@ public class ShapesTool extends DragTool {
 
     private ShapesLayer shapesLayer;
 
-    private final Action convertToSelectionAction = new PAction("Convert to Selection") {
-        @Override
-        protected void onClick() {
-            convertToSelection();
-        }
-    };
+    private final Action convertToSelectionAction = new PAction(
+        "Convert to Selection", this::convertToSelection);
 
     public ShapesTool() {
         super("Shapes", 'U',
@@ -161,12 +153,8 @@ public class ShapesTool extends DragTool {
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
-        strokeSettingsAction = new PAction("Stroke Settings...") {
-            @Override
-            protected void onClick() {
-                initAndShowStrokeSettingsDialog();
-            }
-        };
+        strokeSettingsAction = new PAction("Stroke Settings...",
+            this::initAndShowStrokeSettingsDialog);
         showStrokeDialogButton = settingsPanel.addButton(strokeSettingsAction,
             "strokeSettingsButton",
             "Configure the stroke");
@@ -608,12 +596,12 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (transformBox != null && !isEditingShapesLayer()) {
             // A shapes layer will manage the transformation of the box itself.
             // In the case of a CompAction, the transformBox reference belongs
             // to the old composition anyway.
-            transformBox.imCoordsChanged(at, comp);
+            transformBox.imCoordsChanged(at, view);
         }
     }
 

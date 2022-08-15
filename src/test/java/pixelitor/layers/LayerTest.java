@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.CopyType;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
 import pixelitor.history.LayerOpacityEdit;
@@ -179,17 +180,17 @@ public class LayerTest {
 
     @Test
     public void duplicating() {
-        Layer copy = layer.duplicate(false, true);
+        Layer copy = layer.copy(CopyType.LAYER_DUPLICATE, true);
         checkCopy(copy, "layer 1 copy");
 
-        Layer copy2 = copy.duplicate(false, true);
+        Layer copy2 = copy.copy(CopyType.LAYER_DUPLICATE, true);
         checkCopy(copy2, "layer 1 copy 2");
 
-        Layer copy3 = copy2.duplicate(false, true);
+        Layer copy3 = copy2.copy(CopyType.LAYER_DUPLICATE, true);
         checkCopy(copy3, "layer 1 copy 3");
 
         // in this case the name shouldn't change
-        Layer exactCopy = layer.duplicate(true, true);
+        Layer exactCopy = layer.copy(CopyType.UNDO, true);
         checkCopy(exactCopy, "layer 1");
 
         iconUpdates.check(0, 0);

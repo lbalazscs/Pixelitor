@@ -19,7 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.Composition;
 import pixelitor.Views;
-import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.utils.Messages;
@@ -29,7 +29,7 @@ import java.awt.Shape;
 /**
  * Strokes a shape with an {@link AbstractBrushTool}
  */
-public class TraceAction extends PAction {
+public class TraceAction extends NamedAction.Checked {
     private final AbstractBrushTool brushTool;
 
     public TraceAction(String name, AbstractBrushTool brushTool) {

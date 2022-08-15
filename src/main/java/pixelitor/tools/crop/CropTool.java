@@ -420,9 +420,9 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at, Composition comp) {
+    public void imCoordsChanged(AffineTransform at, View view) {
         if (cropBox != null && state == TRANSFORM) {
-            cropBox.imCoordsChanged(at, comp);
+            cropBox.imCoordsChanged(at, view);
         }
     }
 

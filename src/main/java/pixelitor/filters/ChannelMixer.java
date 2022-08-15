@@ -66,222 +66,87 @@ public class ChannelMixer extends ParametrizedFilter {
     private final BooleanParam autoBWParam = new BooleanParam(
         "Allow only Black and White", false, IGNORE_RANDOMIZE);
 
-    private final Action swapRedGreen = new PAction("Swap Red-Green") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(0);
-                redFromGreen.setValueNoTrigger(100);
-                redFromBlue.setValueNoTrigger(0);
+    private final Action swapRedGreen = new PAction("Swap Red-Green", () -> withoutNormalization(() -> {
+        setRedSource(0, 100, 0);
+        setGreenSource(100, 0, 0);
+        setBlueSource(0, 0, 100);
+    }));
 
-                greenFromRed.setValueNoTrigger(100);
-                greenFromGreen.setValueNoTrigger(0);
-                greenFromBlue.setValueNoTrigger(0);
+    private final Action swapRedBlue = new PAction("Swap Red-Blue", () -> withoutNormalization(() -> {
+        setRedSource(0, 0, 100);
+        setGreenSource(0, 100, 0);
+        setBlueSource(100, 0, 0);
+    }));
 
-                blueFromRed.setValueNoTrigger(0);
-                blueFromGreen.setValueNoTrigger(0);
-                blueFromBlue.setValueNoTrigger(100);
-            });
-        }
-    };
+    private final Action swapGreenBlue = new PAction("Swap Green-Blue", () -> withoutNormalization(() -> {
+        setRedSource(100, 0, 0);
+        setGreenSource(0, 0, 100);
+        setBlueSource(0, 100, 0);
+    }));
 
-    private final Action swapRedBlue = new PAction("Swap Red-Blue") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(0);
-                redFromGreen.setValueNoTrigger(0);
-                redFromBlue.setValueNoTrigger(100);
+    private final Action shiftRGBR = new PAction("R -> G -> B -> R", () -> withoutNormalization(() -> {
+        setRedSource(0, 0, 100);
+        setGreenSource(100, 0, 0);
+        setBlueSource(0, 100, 0);
+    }));
 
-                greenFromRed.setValueNoTrigger(0);
-                greenFromGreen.setValueNoTrigger(100);
-                greenFromBlue.setValueNoTrigger(0);
+    private final Action shiftRBGR = new PAction("R -> B -> G -> R", () -> withoutNormalization(() -> {
+        setRedSource(0, 100, 0);
+        setGreenSource(0, 0, 100);
+        setBlueSource(100, 0, 0);
+    }));
 
-                blueFromRed.setValueNoTrigger(100);
-                blueFromGreen.setValueNoTrigger(0);
-                blueFromBlue.setValueNoTrigger(0);
-            });
-        }
-    };
+    private final Action removeRed = new PAction("Remove Red", () -> {
+        assert !preserveBrightnessParam.isChecked();
 
-    private final Action swapGreenBlue = new PAction("Swap Green-Blue") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(100);
-                redFromGreen.setValueNoTrigger(0);
-                redFromBlue.setValueNoTrigger(0);
+        setRedSource(0, 0, 0);
+        setGreenSource(0, 100, 0);
+        setBlueSource(0, 0, 100);
 
-                greenFromRed.setValueNoTrigger(0);
-                greenFromGreen.setValueNoTrigger(0);
-                greenFromBlue.setValueNoTrigger(100);
+        getParamSet().runFilter();
+    });
 
-                blueFromRed.setValueNoTrigger(0);
-                blueFromGreen.setValueNoTrigger(100);
-                blueFromBlue.setValueNoTrigger(0);
-            });
-        }
-    };
+    private final Action removeGreen = new PAction("Remove Green", () -> {
+        assert !preserveBrightnessParam.isChecked();
 
-    private final Action shiftRGBR = new PAction("R -> G -> B -> R") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(0);
-                redFromGreen.setValueNoTrigger(0);
-                redFromBlue.setValueNoTrigger(100);
+        setRedSource(100, 0, 0);
+        setGreenSource(0, 0, 0);
+        setBlueSource(0, 0, 100);
 
-                greenFromRed.setValueNoTrigger(100);
-                greenFromGreen.setValueNoTrigger(0);
-                greenFromBlue.setValueNoTrigger(0);
+        getParamSet().runFilter();
+    });
 
-                blueFromRed.setValueNoTrigger(0);
-                blueFromGreen.setValueNoTrigger(100);
-                blueFromBlue.setValueNoTrigger(0);
-            });
-        }
-    };
+    private final Action removeBlue = new PAction("Remove Blue", () -> {
+        assert !preserveBrightnessParam.isChecked();
 
-    private final Action shiftRBGR = new PAction("R -> B -> G -> R") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(0);
-                redFromGreen.setValueNoTrigger(100);
-                redFromBlue.setValueNoTrigger(0);
+        setRedSource(100, 0, 0);
+        setGreenSource(0, 100, 0);
+        setBlueSource(0, 0, 0);
 
-                greenFromRed.setValueNoTrigger(0);
-                greenFromGreen.setValueNoTrigger(0);
-                greenFromBlue.setValueNoTrigger(100);
+        getParamSet().runFilter();
+    });
 
-                blueFromRed.setValueNoTrigger(100);
-                blueFromGreen.setValueNoTrigger(0);
-                blueFromBlue.setValueNoTrigger(0);
-            });
-        }
-    };
+    private final Action averageBW = new PAction("Average BW", () -> withoutNormalization(() -> {
+        setRedSource(33, 33, 33);
+        setGreenSource(33, 33, 33);
+        setBlueSource(33, 33, 33);
+    }));
 
-    private final Action removeRed = new PAction("Remove Red") {
-        @Override
-        public void onClick() {
-            assert !preserveBrightnessParam.isChecked();
+    private final Action luminosityBW = new PAction("Luminosity BW", () -> withoutNormalization(() -> {
+        setRedSource(22, 71, 7);
+        setGreenSource(22, 71, 7);
+        setBlueSource(22, 71, 7);
+    }));
 
-            redFromRed.setValueNoTrigger(0);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(0);
+    private final Action sepia = new PAction("Sepia", () -> {
+        assert !preserveBrightnessParam.isChecked();
 
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(100);
-            greenFromBlue.setValueNoTrigger(0);
+        setRedSource(39, 77, 19);
+        setGreenSource(35, 69, 17);
+        setBlueSource(27, 53, 13);
 
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(100);
-
-            getParamSet().runFilter();
-        }
-    };
-
-    private final Action removeGreen = new PAction("Remove Green") {
-        @Override
-        public void onClick() {
-            assert !preserveBrightnessParam.isChecked();
-
-            redFromRed.setValueNoTrigger(100);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(0);
-
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(0);
-            greenFromBlue.setValueNoTrigger(0);
-
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(100);
-
-            getParamSet().runFilter();
-        }
-    };
-
-    private final Action removeBlue = new PAction("Remove Blue") {
-        @Override
-        public void onClick() {
-            assert !preserveBrightnessParam.isChecked();
-
-            redFromRed.setValueNoTrigger(100);
-            redFromGreen.setValueNoTrigger(0);
-            redFromBlue.setValueNoTrigger(0);
-
-            greenFromRed.setValueNoTrigger(0);
-            greenFromGreen.setValueNoTrigger(100);
-            greenFromBlue.setValueNoTrigger(0);
-
-            blueFromRed.setValueNoTrigger(0);
-            blueFromGreen.setValueNoTrigger(0);
-            blueFromBlue.setValueNoTrigger(0);
-
-            getParamSet().runFilter();
-        }
-    };
-
-    private final Action averageBW = new PAction("Average BW") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(33);
-                redFromGreen.setValueNoTrigger(33);
-                redFromBlue.setValueNoTrigger(33);
-
-                greenFromRed.setValueNoTrigger(33);
-                greenFromGreen.setValueNoTrigger(33);
-                greenFromBlue.setValueNoTrigger(33);
-
-                blueFromRed.setValueNoTrigger(33);
-                blueFromGreen.setValueNoTrigger(33);
-                blueFromBlue.setValueNoTrigger(33);
-            });
-        }
-    };
-
-    private final Action luminosityBW = new PAction("Luminosity BW") {
-        @Override
-        public void onClick() {
-            runWithDisabledNormalization(() -> {
-                redFromRed.setValueNoTrigger(22);
-                redFromGreen.setValueNoTrigger(71);
-                redFromBlue.setValueNoTrigger(7);
-
-                greenFromRed.setValueNoTrigger(22);
-                greenFromGreen.setValueNoTrigger(71);
-                greenFromBlue.setValueNoTrigger(7);
-
-                blueFromRed.setValueNoTrigger(22);
-                blueFromGreen.setValueNoTrigger(71);
-                blueFromBlue.setValueNoTrigger(7);
-            });
-        }
-    };
-
-    private final Action sepia = new PAction("Sepia") {
-        @Override
-        public void onClick() {
-            assert !preserveBrightnessParam.isChecked();
-
-            redFromRed.setValueNoTrigger(39);
-            redFromGreen.setValueNoTrigger(77);
-            redFromBlue.setValueNoTrigger(19);
-
-            greenFromRed.setValueNoTrigger(35);
-            greenFromGreen.setValueNoTrigger(69);
-            greenFromBlue.setValueNoTrigger(17);
-
-            blueFromRed.setValueNoTrigger(27);
-            blueFromGreen.setValueNoTrigger(53);
-            blueFromBlue.setValueNoTrigger(13);
-
-            getParamSet().runFilter();
-        }
-    };
+        getParamSet().runFilter();
+    });
 
     private final Action[] presets = {swapRedGreen, swapRedBlue, swapGreenBlue,
         shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
@@ -485,7 +350,7 @@ public class ChannelMixer extends ParametrizedFilter {
         return param;
     }
 
-    private void runWithDisabledNormalization(Runnable task) {
+    private void withoutNormalization(Runnable task) {
         boolean wasNormalized = preserveBrightnessParam.isChecked();
         if (wasNormalized) {
             temporarilyEnableNormalization(false);
@@ -497,6 +362,24 @@ public class ChannelMixer extends ParametrizedFilter {
             temporarilyEnableNormalization(true);
         }
         getParamSet().runFilter();
+    }
+
+    private void setRedSource(int fromRed, int fromGreen, int fromBlue) {
+        redFromRed.setValueNoTrigger(fromRed);
+        redFromGreen.setValueNoTrigger(fromGreen);
+        redFromBlue.setValueNoTrigger(fromBlue);
+    }
+
+    private void setGreenSource(int fromRed, int fromGreen, int fromBlue) {
+        greenFromRed.setValueNoTrigger(fromRed);
+        greenFromGreen.setValueNoTrigger(fromGreen);
+        greenFromBlue.setValueNoTrigger(fromBlue);
+    }
+
+    private void setBlueSource(int fromRed, int fromGreen, int fromBlue) {
+        blueFromRed.setValueNoTrigger(fromRed);
+        blueFromGreen.setValueNoTrigger(fromGreen);
+        blueFromBlue.setValueNoTrigger(fromBlue);
     }
 
     @Override

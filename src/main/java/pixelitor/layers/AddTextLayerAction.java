@@ -33,15 +33,12 @@ public class AddTextLayerAction extends PAction implements ViewActivationListene
     public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
 
     private AddTextLayerAction() {
-        super("Add Text Layer", Icons.loadThemed("add_text_layer.png", ThemedImageIcon.GREEN));
+        super("Add Text Layer",
+            Icons.loadThemed("add_text_layer.png", ThemedImageIcon.GREEN),
+            () -> TextLayer.createNew(Views.getActiveComp()));
         setToolTip("Adds a new text layer.");
         setEnabled(false);
         Views.addActivationListener(this);
-    }
-
-    @Override
-    protected void onClick() {
-        TextLayer.createNew();
     }
 
     @Override
