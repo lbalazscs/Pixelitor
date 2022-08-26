@@ -60,29 +60,27 @@ public class Layers {
         }
     }
 
-    public static void activeCompChanged(Composition newComp, boolean viewChanged) {
-        layerTargeted(newComp.getEditingTarget(), viewChanged);
+    public static void activeCompChanged(Composition newComp, boolean resetMaskViewMode) {
+        layerActivated(newComp.getActiveLayer(), resetMaskViewMode);
     }
 
-    public static void layerTargeted(Layer newEditingTarget, boolean viewChanged) {
-        assert newEditingTarget != null;
-        assert newEditingTarget.isEditingTarget();
-        assert newEditingTarget.getComp().isActive();
+    public static void layerActivated(Layer newActiveLayer, boolean resetMaskViewMode) {
+        assert newActiveLayer != null;
+        assert newActiveLayer.isActive();
+        assert newActiveLayer.getComp().isActive();
 
         for (var listener : lhListeners) {
-            listener.layerTargeted(newEditingTarget);
+            listener.layerActivated(newActiveLayer);
         }
 
-        View view = newEditingTarget.getComp().getView();
+        View view = newActiveLayer.getComp().getView();
         if (view == null) {
             // can happen when adding a new image:
             // the active layer changes, but there is no view yet
             return;
         }
-        if (!viewChanged) {
-            // go to normal mask-viewing mode on the activated layer,
-            // except if we got here because of a view change
-            MaskViewMode.NORMAL.activate(view, newEditingTarget);
+        if (resetMaskViewMode) {
+            MaskViewMode.NORMAL.activate(view, newActiveLayer);
         }
     }
 

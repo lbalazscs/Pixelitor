@@ -157,11 +157,4 @@ public abstract class ContentLayer extends Layer {
 
         return node;
     }
-
-    @Override
-    public String toString() {
-        return "{tx=" + translationX
-               + ", ty=" + translationY
-               + ", super=" + super.toString() + '}';
-    }
 }

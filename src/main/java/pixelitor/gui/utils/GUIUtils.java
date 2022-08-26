@@ -147,8 +147,9 @@ public final class GUIUtils {
         Point loc = lastDialogLocationsByTitle.get(d.getTitle());
         if (loc != null) {
             d.setLocation(loc);
+            Screens.position(d, null, loc);
         } else {
-            Screens.position(d, align);
+            Screens.position(d, align, null);
         }
 
         d.setVisible(true);

@@ -171,10 +171,7 @@ public class Tools {
         currentTool.compReplaced(newComp, reloaded);
     }
 
-    /**
-     * Called when a new layer or mask is being edited.
-     */
-    public static void editingTargetChanged(Layer layer) {
+    public static void activeLayerChanged(Layer layer) {
         if (AppContext.isUnitTesting()) {
             return;
         }
@@ -190,7 +187,7 @@ public class Tools {
         }
 
         if (currentTool != null) {
-            currentTool.editingTargetChanged(layer);
+            currentTool.activeLayerChanged(layer);
         }
     }
 

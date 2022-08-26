@@ -39,7 +39,7 @@ public class NewSmartFilterEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        smartObject.deleteSmartFilter(smartFilter, false);
+        smartObject.deleteSmartFilter(smartFilter, false, true);
     }
 
     @Override

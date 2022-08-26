@@ -71,7 +71,7 @@ public class TextLayerTest {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, 0, 0);
+        iconUpdates = new IconUpdateChecker(layer, mask);
 
         assert layer.getComp().checkInvariants();
         History.clear();

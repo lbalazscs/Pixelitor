@@ -39,7 +39,7 @@ public class Screens {
     /**
      * Positions the given window in the screen in which Pixelitor is running.
      */
-    public static void position(Window window, Align align) {
+    public static void position(Window window, Align align, Point loc) {
         PixelitorWindow pw = PixelitorWindow.get();
         Rectangle screenBounds;
         if (MULTI_MONITORS) {
@@ -58,6 +58,14 @@ public class Screens {
             windowBounds.width = screenBounds.width;
         }
 
+        // if it was bigger than the screen, restrict it to screen size
+        window.setSize(windowBounds.width, windowBounds.height);
+
+        if (loc != null) {
+            // the presence of a non-null loc argument indicates
+            // that the location of the window was already set
+            return;
+        }
         // position it
         if (align == SCREEN_CENTER) {
             int locX = screenBounds.x + (screenBounds.width - windowBounds.width) / 2;
@@ -91,9 +99,6 @@ public class Screens {
         } else {
             throw new IllegalStateException();
         }
-
-        // if it was bigger than the screen, restrict it to screen size
-        window.setSize(windowBounds.width, windowBounds.height);
     }
 
     public static Dimension getMaxWindowSize() {

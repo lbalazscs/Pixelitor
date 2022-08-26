@@ -360,8 +360,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
             .validatedContent(p)
             .title("Resize")
             .menuBar(new DialogMenuBar(p))
-            .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight())
-                .process(comp))
+            .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight()).process(comp))
             .show();
     }
 

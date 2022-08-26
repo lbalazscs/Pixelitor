@@ -341,7 +341,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void editingTargetChanged(Layer layer) {
+    public void activeLayerChanged(Layer layer) {
         layerActivated(layer);
     }
 
@@ -584,7 +584,7 @@ public class GradientTool extends DragTool {
         cycleMethodCB.setSelectedItem(cycleMethodToString(gradient.getCycleMethod()));
         revertCB.setSelected(gradient.isReverted());
         if (blendingModePanel.isEnabled()) {
-            blendingModePanel.setBlendingMode(gradient.getBlendingMode());
+            blendingModePanel.setBlendingMode(gradient.getBlendingMode(), null);
             blendingModePanel.setOpacity(gradient.getOpacity());
         }
 

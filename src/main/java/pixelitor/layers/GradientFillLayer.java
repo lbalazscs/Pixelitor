@@ -54,7 +54,7 @@ public class GradientFillLayer extends ContentLayer {
 
     public static void createNew(Composition comp) {
         var layer = new GradientFillLayer(comp, "gradient fill");
-        new Composition.LayerAdder(comp)
+        new Composition.LayerAdder(comp.getHolderForNewLayers())
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Gradient Fill Layer")
             .add(layer);
@@ -68,15 +68,15 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    protected GradientFillLayer createTypeSpecificCopy(CopyType copyType) {
-        String duplicateName = copyType.createLayerDuplicateName(name);
-        var duplicate = new GradientFillLayer(comp, duplicateName);
+    protected GradientFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        String copyName = copyType.createLayerCopyName(name);
+        var copy = new GradientFillLayer(comp, copyName);
         if (gradient != null) {
             // could be shared, because it is overwritten
             // when editing, but make a copy for safety
-            duplicate.gradient = gradient.copy();
+            copy.gradient = gradient.copy();
         }
-        return duplicate;
+        return copy;
     }
 
     @Override
@@ -182,7 +182,7 @@ public class GradientFillLayer extends ContentLayer {
 
         this.gradient = gradient;
         cachedImage = null;
-        comp.update();
+        holder.update();
         updateIconImage();
 
         if (addHistory) {

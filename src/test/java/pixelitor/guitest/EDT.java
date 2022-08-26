@@ -186,8 +186,8 @@ public class EDT {
         run(() -> Views.assertNumViewsIsAtLeast(expected));
     }
 
-    public static int getNumLayersInActiveComp() {
-        return call(Views::getNumLayersInActiveComp);
+    public static int getNumLayersInActiveHolder() {
+        return call(Views::getNumLayersInActiveHolder);
     }
 
     public static void assertNumLayersIs(int expected) {
@@ -212,24 +212,15 @@ public class EDT {
         return call(() -> fun.apply(Views.getActiveLayer()));
     }
 
-    /**
-     * Returns the given property of the editing target.
-     */
-    public static <T> T editingTarget(Function<Layer, T> fun) {
-        return call(() -> fun.apply(Views.getEditingTarget()));
+    public static <T> T activeView(Function<View, T> fun) {
+        return call(() -> fun.apply(Views.getActive()));
     }
 
     public static void assertActiveLayerTypeIs(Class<? extends Layer> expected) {
         Class<? extends Layer> actual = activeLayer((Function<Layer, Class<? extends Layer>>) Layer::getClass);
         if (expected != actual) {
-            throw new AssertionError("expected " + expected + ", found " + actual);
-        }
-    }
-
-    public static void assertEditingTargetTypeIs(Class<? extends Layer> expected) {
-        Class<? extends Layer> actual = editingTarget((Function<Layer, Class<? extends Layer>>) Layer::getClass);
-        if (expected != actual) {
-            throw new AssertionError("expected " + expected + ", found " + actual);
+            throw new AssertionError("expected " + expected.getSimpleName()
+                                     + ", found " + actual.getSimpleName());
         }
     }
 
@@ -243,10 +234,6 @@ public class EDT {
 
     public static boolean activeLayerHasMask() {
         return activeLayer(Layer::hasMask);
-    }
-
-    public static boolean editingTargetHasMask() {
-        return editingTarget(Layer::hasMask);
     }
 
     public static void assertCanvasSizeIs(int expectedWidth, int expectedHeight) {

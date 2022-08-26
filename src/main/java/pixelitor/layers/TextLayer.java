@@ -105,7 +105,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
-        new LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(textLayer);
+        LayerHolder holder = comp.getHolderForNewLayers();
+        new LayerAdder(holder)
+            .atPosition(ABOVE_ACTIVE)
+            .add(textLayer);
 
         var settingsPanel = new TextSettingsPanel(textLayer);
         new DialogBuilder()
@@ -115,18 +118,18 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() ->
-                textLayer.finalizeCreation(comp, activeLayerBefore, oldViewMode))
-            .cancelAction(() -> comp.deleteLayer(textLayer, false))
+                textLayer.finalizeCreation(holder, activeLayerBefore, oldViewMode))
+            .cancelAction(() -> holder.deleteLayer(textLayer, false))
             .show();
         return textLayer;
     }
 
-    public void finalizeCreation(Composition comp, Layer activeLayerBefore, MaskViewMode oldViewMode) {
+    public void finalizeCreation(LayerHolder holder, Layer activeLayerBefore, MaskViewMode oldViewMode) {
         updateLayerName();
 
         // now it is safe to add it to the history
         History.add(new NewLayerEdit("Add Text Layer",
-            comp, this, activeLayerBefore, oldViewMode));
+            holder, this, activeLayerBefore, oldViewMode));
     }
 
     @Override
@@ -162,12 +165,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     private void resetOldSettings(TextSettings oldSettings) {
         applySettings(oldSettings);
-        comp.update();
+        holder.update();
     }
 
     @Override
-    protected TextLayer createTypeSpecificCopy(CopyType copyType) {
-        String duplicateName = copyType.createLayerDuplicateName(name);
+    protected TextLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        String duplicateName = copyType.createLayerCopyName(name);
         TextLayer d = new TextLayer(comp, duplicateName, settings.copy());
         d.setTranslation(getTx(), getTy());
         return d;
@@ -342,7 +345,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public boolean hasIconThumbnail() {
+    public boolean hasRasterThumbnail() {
         return false;
     }
 
@@ -416,12 +419,5 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         }
 
         return node;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName()
-               + "{text=" + (settings == null ? "null settings" : settings.getText())
-               + ", super=" + super.toString() + '}';
     }
 }

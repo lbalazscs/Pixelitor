@@ -47,6 +47,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.awt.AlphaComposite.DstIn;
@@ -84,6 +85,11 @@ public abstract class Layer implements Serializable, Debuggable {
 
     protected boolean isAdjustment = false;
 
+    /**
+     * The {@link LayerHolder} that contains this layer.
+     */
+    protected LayerHolder holder;
+
     // transient or static variables from here
 
     // A mask uses the UI of its owner.
@@ -108,6 +114,8 @@ public abstract class Layer implements Serializable, Debuggable {
         opacity = 1.0f;
 
         listeners = new ArrayList<>();
+
+        holder = comp;
     }
 
     // can be called on any thread
@@ -125,6 +133,11 @@ public abstract class Layer implements Serializable, Debuggable {
             // the mask's owner at the Layer level
             mask.changeOwner(this);
         }
+
+        // migrate old pxc files
+        if (holder == null) {
+            holder = comp;
+        }
     }
 
     public LayerUI createUI() {
@@ -133,8 +146,10 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         ui = uiFactory.apply(this);
+        updateIconImage();
         if (hasMask()) {
             mask.ui = ui;
+            mask.updateIconImage();
         }
 
         return ui;
@@ -160,26 +175,31 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public final Layer copy(CopyType copyType, boolean duplicateMask) {
-        Layer d = createTypeSpecificCopy(copyType);
+    public final Layer copy(CopyType copyType, boolean duplicateMask, Composition newComp) {
+        Layer d = createTypeSpecificCopy(copyType, newComp);
 
         d.setOpacity(getOpacity());
         d.setBlendingMode(getBlendingMode());
         d.setVisible(isVisible());
 
+        d.comp = newComp;
+        if (newComp != comp && isActive()) {
+            newComp.setActiveLayerRef(d);
+        }
+
         if (duplicateMask) {
-            duplicateMask(d, copyType);
+            duplicateMask(d, copyType, newComp);
         }
 
         return d;
     }
 
-    protected abstract Layer createTypeSpecificCopy(CopyType copyType);
+    protected abstract Layer createTypeSpecificCopy(CopyType copyType, Composition newComp);
 
     // Duplicates the mask of a duplicated layer.
-    protected void duplicateMask(Layer duplicate, CopyType copyType) {
+    protected void duplicateMask(Layer duplicate, CopyType copyType, Composition newComp) {
         if (hasMask()) {
-            LayerMask newMask = mask.duplicate(duplicate);
+            LayerMask newMask = mask.duplicate(duplicate, newComp);
             if (copyType == CopyType.UNDO) {
                 // this could be running outside the EDT, and anyway it is
                 // not necessary to add the duplicate to the GUI
@@ -206,7 +226,7 @@ public abstract class Layer implements Serializable, Debuggable {
         visible = newVisibility;
 
         if (update) {
-            comp.update();
+            holder.update();
         }
 
         if (hasUI()) {
@@ -245,11 +265,11 @@ public abstract class Layer implements Serializable, Debuggable {
         opacity = newOpacity;
 
         if (hasUI()) {
-            LayerBlendingModePanel.get().setOpacityFromModel(newOpacity);
+            LayerBlendingModePanel.get().opacityChangedForLayer(newOpacity);
         }
 
         if (update) {
-            comp.update();
+            holder.update();
         }
 
         if (addToHistory) {
@@ -274,11 +294,11 @@ public abstract class Layer implements Serializable, Debuggable {
         blendingMode = newMode;
 
         if (hasUI()) {
-            LayerBlendingModePanel.get().setBlendingModeFromModel(newMode);
+            LayerBlendingModePanel.get().blendingModeChangedForLayer(newMode, this);
         }
 
         if (update) {
-            comp.update();
+            holder.update();
         }
 
         if (addToHistory) {
@@ -318,11 +338,13 @@ public abstract class Layer implements Serializable, Debuggable {
         return comp;
     }
 
-    /**
-     * Return the {@link LayerHolder} that contains this layer.
-     */
+    public void setHolder(LayerHolder holder) {
+        assert holder != this;
+        this.holder = holder;
+    }
+
     public LayerHolder getHolder() {
-        return comp;
+        return holder;
     }
 
     public void setComp(Composition comp) {
@@ -332,20 +354,49 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
+    public boolean isActiveRoot() {
+        return comp.isActiveRoot(this);
+    }
+
     public boolean isActive() {
-        return comp.isActive(this);
+        return comp.isActiveLayer(this);
     }
 
-    public boolean isEditingTarget() {
-        return comp.isEditingTarget(this);
+    public Layer getTopLevelLayer() {
+        Layer root = this;
+        while (root.holder != comp) {
+            if (!(root.holder instanceof Layer)) {
+                throw new IllegalStateException("this = " + getName() + ", root.holder = " + root.holder.getName());
+            }
+
+            root = (Layer) root.holder;
+        }
+
+        if (root instanceof SmartFilter) {
+            throw new IllegalStateException();
+        }
+
+        return root;
     }
 
-    public void activate(boolean addToHistory) {
-        comp.setActiveLayer(this, addToHistory, null);
+    public boolean isTopLevel() {
+        return comp == holder;
     }
 
-    public void setAsEditingTarget() {
-        comp.setEditingTarget(this);
+    /**
+     * Return the current layer or the owner if this is a mask.
+     */
+    public Layer getLayer() {
+        return this;
+    }
+
+//    public void activate(boolean addToHistory) {
+//        assert isTopLevel();
+//        comp.setActiveLayer(this, addToHistory, null);
+//    }
+
+    public void activate() {
+        comp.setActiveLayer(this);
     }
 
     public boolean hasMask() {
@@ -427,7 +478,7 @@ public abstract class Layer implements Serializable, Debuggable {
             return null;
         }
 
-        comp.update();
+        holder.update();
 
         Layers.maskAddedTo(this);
 
@@ -471,14 +522,15 @@ public abstract class Layer implements Serializable, Debuggable {
     public void addConfiguredMask(LayerMask mask) {
         assert mask != null;
         assert mask.getOwner() == this;
+        assert mask.getComp() == comp;
 
         this.mask = mask;
         if (hasUI() && !ui.hasMaskIcon()) {
             ui.addMaskIcon();
         }
         if (comp.isActive()) {
-            comp.update();
-            if (isEditingTarget()) {
+            holder.update();
+            if (isActive()) {
                 Layers.maskAddedTo(this);
             }
         } else {
@@ -505,7 +557,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
         }
-        comp.update();
+        holder.update();
     }
 
     public boolean isMaskEditing() {
@@ -529,7 +581,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (maskEditing != newValue) {
             maskEditing = newValue;
             ui.updateSelectionState();
-            Tools.editingTargetChanged(this);
+            Tools.activeLayerChanged(this);
         }
     }
 
@@ -581,7 +633,7 @@ public abstract class Layer implements Serializable, Debuggable {
         assert hasMask();
         this.maskEnabled = maskEnabled;
 
-        comp.update();
+        holder.update();
         mask.updateIconImage();
         notifyListeners();
 
@@ -614,13 +666,6 @@ public abstract class Layer implements Serializable, Debuggable {
         }
         newOwner.ui.changeLayer(newOwner);
         this.ui = null;
-    }
-
-    /**
-     * Return the current layer or the owner if this is a mask or smart filter.
-     */
-    public Layer getOwner() {
-        return this;
     }
 
     /**
@@ -845,13 +890,13 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = null;
-        if (comp.canMergeDown(this)) {
+        if (holder.canMergeDown(this)) {
             popup = new JPopupMenu();
             var mergeDownAction = new PAction(GUIText.MERGE_DOWN, () -> {
                 // check again to be sure that the layer bellow
                 // this didn't change in the meantime
-                if (comp.canMergeDown(Layer.this)) {
-                    comp.mergeDown(Layer.this);
+                if (holder.canMergeDown(this)) {
+                    holder.mergeDown(this);
                 }
             });
             mergeDownAction.setToolTip(GUIText.MERGE_DOWN_TT);
@@ -903,28 +948,26 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         SmartObject so = new SmartObject(this);
-        History.add(new ReplaceLayerEdit(comp, this, so, "Convert to Smart Object"));
-        comp.replaceLayer(this, so);
+        so.setHolder(holder);
+        History.add(new ReplaceLayerEdit(holder, this, so, "Convert to Smart Object"));
+        holder.replaceLayer(this, so);
         Messages.showInStatusBar(format(
             "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
     }
 
     public void updateIconImage() {
-        assert hasIconThumbnail();
+        assert hasRasterThumbnail();
         if (ui != null) {
             ui.updateLayerIconImageAsync(this);
         }
     }
 
-    /**
-     * Whether this layer has a custom thumbnail.
-     */
-    public boolean hasIconThumbnail() {
+    public boolean hasRasterThumbnail() {
         return true;
     }
 
     /**
-     * Returns non-null if hasIconThumbnail() returns true.
+     * Returns non-null if hasRasterThumbnail() returns true.
      */
     public BufferedImage createIconThumbnail() {
         return null;
@@ -951,9 +994,10 @@ public abstract class Layer implements Serializable, Debuggable {
 
         var rasterizedImage = asImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
+        newImageLayer.setHolder(holder);
         newImageLayer.copyBlendingFrom(this);
-        History.add(new ReplaceLayerEdit(comp, this, newImageLayer, "Rasterize " + getTypeString()));
-        comp.replaceLayer(this, newImageLayer);
+        History.add(new ReplaceLayerEdit(holder, this, newImageLayer, "Rasterize " + getTypeString()));
+        holder.replaceLayer(this, newImageLayer);
         Messages.showInStatusBar(format(
             "The %s <b>\"%s\"</b> was rasterized.", getTypeStringLC(), getName()));
 
@@ -996,6 +1040,17 @@ public abstract class Layer implements Serializable, Debuggable {
         return layer == this;
     }
 
+    public boolean containsClass(Class<? extends Layer> clazz) {
+        return getClass() == clazz;
+    }
+
+    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
+        action.accept(this);
+        if (hasMask()) {
+            action.accept(getMask());
+        }
+    }
+
     public boolean checkInvariants() {
         if (ui != null) {
             if (ui.getLayer() != this) {
@@ -1015,9 +1070,11 @@ public abstract class Layer implements Serializable, Debuggable {
 
         node.addQuotedString("name", getName());
         node.addClass();
-        node.addBoolean("active", isActive());
-        node.addBoolean("edited", isEditingTarget());
         node.addQuotedString("comp debug name", comp.getDebugName());
+        node.addQuotedString("holder name", holder.getName());
+
+        node.addBoolean("active root", isActiveRoot());
+        node.addBoolean("active", isActive());
 
         if (hasMask()) {
             node.addString("has mask", "yes");
@@ -1038,11 +1095,15 @@ public abstract class Layer implements Serializable, Debuggable {
 
     @Override
     public String toString() {
-        return "{name='" + name + '\''
-               + ", visible=" + visible
-               + ", mask=" + mask
-               + ", maskEditing=" + maskEditing
-               + ", maskEnabled=" + maskEnabled
-               + ", isAdjustment=" + isAdjustment + '}';
+        return "'" + name + "' (" + getClass().getSimpleName() + ")";
+    }
+
+    public void unGroup() {
+        if (holder instanceof LayerGroup group) {
+            group.replaceWithUnGrouped();
+        } else {
+            Messages.showError("Can't ungroup",
+                "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));
+        }
     }
 }

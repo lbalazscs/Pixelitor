@@ -41,7 +41,7 @@ public class Keys {
     public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);
     public static final KeyStroke CTRL_E = getKeyStroke('E', CTRL);
     public static final KeyStroke CTRL_F = getKeyStroke('F', CTRL);
-//    public static final KeyStroke CTRL_G = getKeyStroke('G', CTRL);
+    public static final KeyStroke CTRL_G = getKeyStroke('G', CTRL);
     public static final KeyStroke CTRL_H = getKeyStroke('H', CTRL);
     public static final KeyStroke CTRL_I = getKeyStroke('I', CTRL);
     public static final KeyStroke CTRL_J = getKeyStroke('J', CTRL);
@@ -95,6 +95,7 @@ public class Keys {
     public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(VK_0, CTRL | ALT);
     public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(VK_0, CTRL);
 
+    public static final KeyStroke DELETE = getKeyStroke(VK_DELETE, 0);
     public static final KeyStroke CTRL_BACKSPACE = getKeyStroke(VK_BACK_SPACE, CTRL);
     public static final KeyStroke ALT_BACKSPACE = getKeyStroke(VK_BACK_SPACE, ALT);
 

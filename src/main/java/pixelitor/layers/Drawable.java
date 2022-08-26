@@ -78,8 +78,6 @@ public interface Drawable extends Filterable {
 
     boolean isMaskEditing();
 
-    Layer getOwner();
-
     String getName();
 
     void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
@@ -106,17 +104,15 @@ public interface Drawable extends Filterable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) {
-            Layer layer = getOwner();
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +
                 "composition = '%s'%n" +
                 "layer = '%s' (%s)%n" +
-                "hasMask = '%s'%n" +
-                "mask editing = '%b'%n" +
                 "params = %s",
-                filter.getName(), layer.getComp().getName(),
-                layer.getName(), layer.getClass().getSimpleName(),
-                layer.hasMask(), layer.isMaskEditing(), filter.paramsAsString());
+                filter.getName(),
+                getComp().getDebugName(),
+                getName(), getClass().getSimpleName(),
+                filter.paramsAsString());
 
             var ise = new IllegalStateException(errorDetails, e);
             if (RandomGUITest.isRunning()) {

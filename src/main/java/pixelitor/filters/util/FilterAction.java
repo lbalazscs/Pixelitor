@@ -18,14 +18,15 @@
 package pixelitor.filters.util;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.Composition;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
+import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.history.History;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.SmartObject;
-import pixelitor.menus.DrawableAction;
+import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 
 import java.io.IOException;
@@ -34,21 +35,28 @@ import java.io.Serial;
 import java.util.function.Supplier;
 
 /**
- * An action that runs a filter on the active Drawable.
+ * An action that tries to run a filter on editing target.
  */
-public class FilterAction extends DrawableAction {
+public class FilterAction extends OpenViewEnabledAction.Checked {
     @Serial
     private static final long serialVersionUID = 1L;
 
     private final Supplier<Filter> factory;
     private transient Filter filter;
+    private final String name;
+    private String menuName;
+    private boolean hasDialog;
 
     public FilterAction(String name, Supplier<Filter> factory) {
         this(name, true, factory);
     }
 
     public FilterAction(String name, boolean hasDialog, Supplier<Filter> factory) {
-        super(name, hasDialog);
+        super(name);
+        this.name = name;
+        this.hasDialog = hasDialog;
+        menuName = hasDialog ? name + "..." : name;
+        setText(menuName);
 
         assert factory != null;
         this.factory = factory;
@@ -66,21 +74,54 @@ public class FilterAction extends DrawableAction {
     }
 
     @Override
-    protected void process(Drawable dr) {
-        createCachedFilter();
-        if (dr instanceof SmartObject so) {
-            // this logic is here and not in Filter because for
-            // smart objects a new Filter instance is created
-            if (!filter.canBeSmart()) {
-                String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
-                Messages.showInfo("Dumb Filter", msg);
-                return;
+    protected void onClick(Composition comp) {
+        Layer layer = comp.getActiveLayer();
+        if (layer.isMaskEditing()) {
+            processFilterable(layer.getMask());
+        } else if (layer instanceof SmartFilter smartFilter) {
+            // Smart filters are Filterables, but the filter should be started on their smart object
+            processSmartObject(smartFilter.getSmartObject());
+        } else if (layer instanceof Filterable filterable) {
+            processFilterable(filterable);
+        } else if (layer instanceof SmartObject so) {
+            processSmartObject(so);
+        } else if (layer.isRasterizable()) {
+            boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
+            if (rasterize) {
+                ImageLayer newImageLayer = layer.replaceWithRasterized();
+                processFilterable(newImageLayer);
             }
+        } else if (layer instanceof AdjustmentLayer) {
+            Dialogs.showErrorDialog("Adjustment Layer",
+                name + " cannot be applied to adjustment layers.");
+        } else if (layer instanceof LayerGroup group) {
+            // this must be a pass through group,
+            // because isolated groups are rasterizable
+            assert group.isPassThrough();
+            Dialogs.showErrorDialog("Layer Group",
+                name + " cannot be applied to layer groups.\n" +
+                "Pass through groups can't even be rasterized.");
+        } else {
+            throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
+        }
+    }
 
-            Filter newFilter = createNewInstanceFilter();
-            so.tryAddingSmartFilter(newFilter);
+    private void processSmartObject(SmartObject so) {
+        createCachedFilter();
+        // this logic is here and not in Filter because for
+        // smart objects a new Filter instance is created
+        if (!filter.canBeSmart()) {
+            String msg = "<html>The filter <b>" + name + "</b> can't be used as a smart filter.";
+            Messages.showInfo("Dumb Filter", msg);
             return;
         }
+
+        Filter newFilter = createNewInstanceFilter();
+        so.tryAddingSmartFilter(newFilter);
+    }
+
+    private void processFilterable(Filterable dr) {
+        createCachedFilter();
         dr.startFilter(filter, true);
     }
 
@@ -143,7 +184,7 @@ public class FilterAction extends DrawableAction {
         }
 
         FilterAction filterAction = (FilterAction) o;
-        if (!getName().equals(filterAction.getName())) {
+        if (!name.equals(filterAction.name)) {
             return false;
         }
 
@@ -152,7 +193,7 @@ public class FilterAction extends DrawableAction {
 
     @Override
     public int hashCode() {
-        return getName().hashCode();
+        return name.hashCode();
     }
 
     @Serial
@@ -160,8 +201,12 @@ public class FilterAction extends DrawableAction {
         throw new IOException("should not be serialized");
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
-        return getName();
+        return name;
     }
 }

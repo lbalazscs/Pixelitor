@@ -388,4 +388,28 @@ public class Dialogs {
             showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         }
     }
+
+    public static boolean showRasterizeDialog(Layer layer, String actionName) {
+        if (RandomGUITest.isRunning()) {
+            return true;
+        }
+
+        boolean isNoun = actionName.contains("Tool");
+        String firstName = isNoun ? "The " + actionName : actionName;
+        String secondName = isNoun ? "the " + actionName : actionName;
+
+        String typeStringLC = layer.getTypeStringLC();
+        String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
+                            "%s cannot be used on %ss.<br>" +
+                            "If you rasterize this %s, you can use %s,<br>" +
+                            "but the layer will become a regular image layer.",
+            layer.getName(), typeStringLC, firstName,
+            typeStringLC, typeStringLC, secondName);
+
+        String[] options = {"Rasterize", GUIText.CANCEL};
+
+        boolean rasterize = showOKCancelWarningDialog(msg,
+            layer.getTypeString(), options, 1);
+        return rasterize;
+    }
 }

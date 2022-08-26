@@ -49,7 +49,7 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 public class AddAdjLayerAction extends NamedAction implements ViewActivationListener {
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
-    public static List<Action> actions = List.of(
+    public static final List<Action> actions = List.of(
         createAction(ColorBalance::new, ColorBalance.NAME),
         createAction(Colorize::new, Colorize.NAME),
         createAction(ToneCurvesFilter::new, ToneCurvesFilter.NAME),
@@ -112,7 +112,7 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, name, filter);
 
-        new LayerAdder(comp)
+        new LayerAdder(comp.getHolderForNewLayers())
             .withHistory("New Adjustment Layer")
             .add(adjustmentLayer);
 

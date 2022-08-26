@@ -38,6 +38,7 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -177,7 +178,8 @@ public class Views {
             listener.viewActivated(oldView, view);
         }
 
-        Layers.activeCompChanged(comp, true);
+        // assume that the new view has a proper mask view mode set up
+        Layers.activeCompChanged(comp, false);
 
         boolean maskEditing = view.getMaskViewMode().editMask();
         Tools.setupMaskEditing(maskEditing);
@@ -189,10 +191,10 @@ public class Views {
 //        // Invoke only later, when the view can correctly
 //        // translate between image and component spaces.
 //        // Important when loading serialized compositions with active shape layers.
-//        EventQueue.invokeLater(() -> Tools.editingTargetChanged(comp.getActiveLayer()));
+//        EventQueue.invokeLater(() -> Tools.activeLayerChanged(comp.getActiveLayer()));
         // Invoking later can lead to situations where the comp has no view,
         // and it's not necessary anymore?
-        Tools.editingTargetChanged(comp.getActiveLayer());
+        Tools.activeLayerChanged(comp.getActiveLayer());
     }
 
     public static void repaintActive() {
@@ -407,6 +409,10 @@ public class Views {
         RecentFilesMenu.INSTANCE.addFile(file);
         Messages.showFileOpenedMessage(comp);
 
+        // TODO this is a workaround hack because adj layer filters running
+        //  outside the EDT during the loading process mess up the tabs
+        EventQueue.invokeLater(() -> PixelitorWindow.get().repaint());
+
         return comp;
     }
 
@@ -428,7 +434,7 @@ public class Views {
             setActiveView(view, false);
 
 // commented out, because ImageArea.addNewView(view); should always call this anyway
-//            Tools.editingTargetChanged(comp.getActiveLayer());
+//            Tools.activeLayerChanged(comp.getActiveLayer());
         } catch (Exception e) {
             Messages.showException(e);
         }
@@ -436,20 +442,28 @@ public class Views {
 
     @VisibleForTesting
     public static void assertNumLayersIs(int expected) {
-        int found = getNumLayersInActiveComp();
+        int found = getNumLayersInActiveHolder();
         if (found != expected) {
             throw new AssertionError("expected " + expected + ", found = " + found);
         }
     }
 
     @VisibleForTesting
-    public static int getNumLayersInActiveComp() {
+    public static int getNumLayersInActiveHolder() {
         var comp = getActiveComp();
         if (comp == null) {
             throw new AssertionError("no open images");
         }
 
-        return comp.getNumLayers();
+        return comp.getActiveLayerHolder().getNumLayers();
+    }
+
+    public static Layer getActiveRoot() {
+        if (activeView != null) {
+            return activeView.getComp().getActiveRoot();
+        }
+
+        return null;
     }
 
     public static Layer getActiveLayer() {
@@ -460,25 +474,10 @@ public class Views {
         return null;
     }
 
-    public static Layer getEditingTarget() {
-        if (activeView != null) {
-            return activeView.getComp().getEditingTarget();
-        }
-
-        return null;
-    }
-
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeView != null) {
             Layer activeLayer = activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
-        }
-    }
-
-    public static void onEditingTarget(Consumer<Layer> action) {
-        if (activeView != null) {
-            Layer editingTarget = activeView.getComp().getEditingTarget();
-            action.accept(editingTarget);
         }
     }
 

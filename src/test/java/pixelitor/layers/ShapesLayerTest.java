@@ -67,14 +67,14 @@ class ShapesLayerTest {
 
     @Test
     void duplicate() {
-        ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyType.LAYER_DUPLICATE, true);
+        ShapesLayer duplicate = (ShapesLayer) layer.copy(CopyType.LAYER_DUPLICATE, true, comp);
 //        TransformBox duplicateBox = duplicate.getTransformBox();
 //        checkOrigBoxPosition(duplicateBox);
     }
 
     @Test
     void resize() {
-        comp.addLayerInInitMode(layer.copy(CopyType.LAYER_DUPLICATE, false));
+        comp.addLayerInInitMode(layer.copy(CopyType.LAYER_DUPLICATE, false, comp));
 
         Composition smallComp = TestHelper.resize(comp, 10, 5);
         ShapesLayer smallLayer1 = (ShapesLayer) smallComp.getLayer(0);

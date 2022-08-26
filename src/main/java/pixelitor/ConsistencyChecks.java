@@ -174,12 +174,9 @@ public final class ConsistencyChecks {
     @SuppressWarnings("SameReturnValue")
     public static boolean imageCoversCanvas(Composition comp) {
         // doesn't call Composition.forEachDrawable in order to exclude smart objects
-        comp.forEachLayer(layer -> {
-            if (layer.getClass() == ImageLayer.class) {
-                imageCoversCanvas((ImageLayer) layer);
-            }
-            if (layer.hasMask()) {
-                imageCoversCanvas(layer.getMask());
+        comp.forEachNestedLayerAndMask(layer -> {
+            if (layer instanceof ImageLayer imageLayer) {
+                imageCoversCanvas(imageLayer);
             }
         });
         return true;
@@ -240,24 +237,24 @@ public final class ConsistencyChecks {
         boolean enabled = action.isEnabled();
         int numLayers = parent.getNumLayers();
         if (enabled) {
-            int minValue = 1;
+            int minValue = 2;
             if (parent.allowZeroLayers()) {
-                minValue = 0;
+                minValue = 1;
             }
-            if (numLayers <= minValue) {
-                String msg = "delete layer enabled for %s '%s', but numLayers = %d";
+            if (numLayers < minValue) {
+                String msg = "delete layer enabled for %s '%s', but numLayers = %d (minValue=%d)";
                 throw new IllegalStateException(msg.formatted(
-                    parent.getClass().getSimpleName(), parent.getName(), numLayers));
+                    parent.getClass().getSimpleName(), parent.getName(), numLayers, minValue));
             }
         } else { // disabled
-            int maxValue = 2;
+            int maxValue = 1;
             if (parent.allowZeroLayers()) {
-                maxValue = 1;
+                maxValue = 0;
             }
-            if (numLayers >= maxValue) {
-                String msg = "delete layer disabled for %s '%s', but numLayers = %d";
+            if (numLayers > maxValue) {
+                String msg = "delete layer disabled for %s '%s', but numLayers = %d (maxValue=%d)";
                 throw new IllegalStateException(msg.formatted(
-                    parent.getClass().getSimpleName(), parent.getName(), numLayers));
+                    parent.getClass().getSimpleName(), parent.getName(), numLayers, maxValue));
             }
         }
         return true;
@@ -275,8 +272,8 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        Layer layer = comp.getEditingTarget();
-        String msg = checkLayerMaskAndUI(layer);
+        Layer layer = comp.getActiveLayer();
+        String msg = checkLayerMask(layer);
         if (msg != null) {
             throw new IllegalStateException(
                 msg.formatted(layer.getTypeStringLC(), layer.getName()));
@@ -285,24 +282,20 @@ public final class ConsistencyChecks {
         return true;
     }
 
-    private static String checkLayerMaskAndUI(Layer layer) {
-        LayerUI ui = layer.getUI();
-        if (ui == null) {
-            return "No ui in %s '%s'";
-        }
+    private static String checkLayerMask(Layer layer) {
         boolean addMaskEnabled = AddLayerMaskAction.INSTANCE.isEnabled();
         if (layer.hasMask()) {
             if (addMaskEnabled) {
                 return "The %s '%s' has mask, but the add mask action is enabled";
             }
-            if (!ui.hasMaskIcon()) {
+            if (layer.hasUI() && !layer.getUI().hasMaskIcon()) {
                 return "The %s '%s' has mask, but no mask icon";
             }
         } else { // no mask
             if (!addMaskEnabled) {
                 return "The %s '%s' has no mask, but the add mask action is not enabled";
             }
-            if (ui.hasMaskIcon()) {
+            if (layer.hasUI() && layer.getUI().hasMaskIcon()) {
                 return "The %s '%s' has no mask, but it has mask icon";
             }
         }

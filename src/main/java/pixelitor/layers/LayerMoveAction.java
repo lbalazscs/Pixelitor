@@ -87,8 +87,8 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
     }
 
     @Override
-    public void layerTargeted(Layer newEditingTarget) {
-        enableDisable(newEditingTarget.getHolder());
+    public void layerActivated(Layer newActiveLayer) {
+        enableDisable(newActiveLayer.getHolder());
     }
 
     @Override

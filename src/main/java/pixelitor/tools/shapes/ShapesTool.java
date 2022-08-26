@@ -631,7 +631,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void editingTargetChanged(Layer layer) {
+    public void activeLayerChanged(Layer layer) {
         layerActivated(layer);
     }
 

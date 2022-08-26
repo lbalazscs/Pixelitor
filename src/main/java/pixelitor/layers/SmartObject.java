@@ -30,32 +30,34 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
-import pixelitor.utils.*;
+import pixelitor.utils.Messages;
+import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.Threads;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static pixelitor.layers.LayerGUILayout.thumbSize;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
  * A "smart object" that contains an embedded composition and allows "smart filters".
  * The cached result image behaves like the image of a regular {@link ImageLayer}.
  */
-public class SmartObject extends ImageLayer implements LayerHolder {
+public class SmartObject extends CompositeLayer {
     @Serial
     private static final long serialVersionUID = 8594248957749192719L;
 
@@ -88,6 +90,13 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     private ImageTransformer imageTransformer;
 
     private transient boolean imageNeedsRefresh = false;
+
+    // the cached image of this smart object
+    private transient BufferedImage image = null;
+
+    // It's important to call updateIconImage() only when we are
+    // sure that the smart object's image is up-to-date, because otherwise
+    // the filters could be started concurrently on different threads.
     private transient boolean iconImageNeedsRefresh = false;
 
     // constructor for converting a layer into a smart object
@@ -96,19 +105,15 @@ public class SmartObject extends ImageLayer implements LayerHolder {
 
         Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
         // the mask stays outside the content, and will become the mask of the smart object
-        Layer contentLayer = layer.copy(CopyType.UNDO, false);
+        Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
         contentLayer.setName("original content", false);
-        contentLayer.setComp(newContent);
+        contentLayer.setHolder(newContent);
         newContent.addLayerInInitMode(contentLayer);
         newContent.setName(getName());
         newContent.createDebugName();
         setContent(newContent);
 
         copyBlendingFrom(layer);
-
-        baseSource = content;
-
-        invalidateImageCache();
 
         assert checkInvariants();
     }
@@ -117,8 +122,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     public SmartObject(Composition parent, Composition content) {
         super(parent, "Smart " + content.getName());
         setContent(content);
-        baseSource = content;
-        invalidateImageCache();
 
         assert checkInvariants();
     }
@@ -129,17 +132,14 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         linkedContentFile = file;
         updateLinkedContentTime();
         setContent(content);
-        baseSource = content;
-
-        invalidateImageCache();
 
         assert checkInvariants();
     }
 
     // The constructor used for duplication.
-    // This in itself doesn't change the reference to the parent composition.
-    private SmartObject(SmartObject orig, CopyType copyType) {
-        super(orig.comp, copyType.createLayerDuplicateName(orig.getName()));
+    private SmartObject(SmartObject orig, CopyType copyType, Composition newComp) {
+        super(orig.comp, copyType.createLayerCopyName(orig.getName()));
+        assert orig.content.checkInvariants();
         if (copyType.doDeepContentCopy()) {
             Composition origContent = orig.content;
             Composition newContent = origContent.copy(copyType, true);
@@ -151,7 +151,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         image = orig.image;
 
         for (SmartFilter origFilter : orig.filters) {
-            SmartFilter copy = (SmartFilter) origFilter.copy(copyType, true);
+            SmartFilter copy = (SmartFilter) origFilter.copy(copyType, true, newComp);
             copy.setSmartObject(this);
             addSmartFilter(copy, false, false);
         }
@@ -162,7 +162,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             imageTransformer = orig.imageTransformer.copy(content);
             setBaseSource(imageTransformer);
         }
-        forceTranslation(orig.getTx(), orig.getTy());
+        setTranslation(orig.getTx(), orig.getTy());
 
         assert checkInvariants();
     }
@@ -229,8 +229,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         recalculateImage();
 
         assert checkInvariants();
-//        System.out.printf("SmartObject::afterDeserialization: '%s' FINISHED on '%s'%n",
-//            getName(), Thread.currentThread().getName());
     }
 
     private void migratePXCFormat() {
@@ -277,19 +275,13 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             IO.loadCompAsync(linkedContentFile)
                 .thenAcceptAsync(loadedComp -> {
                     setContent(loadedComp);
-                    invalidateImageCache();
-                    comp.update();
-                    updateIconImage();
+                    iconImageNeedsRefresh = true;
+                    holder.update();
                 }, onEDT);
         } else {
             // give up and use the previously created transparent image
             linkedContentFile = null;
         }
-    }
-
-    @Override
-    boolean serializeImage() {
-        return false;
     }
 
     private void recalculateImage() {
@@ -300,6 +292,14 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             image = baseSource.getImage();
         }
         imageNeedsRefresh = false;
+    }
+
+    @Override
+    public void update() {
+        if (imageNeedsRefresh) {
+            recalculateImage();
+        }
+        holder.update();
     }
 
     public void invalidateImageCache() {
@@ -318,9 +318,14 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             return;
         }
 
+        // invalidate everything because if the content reference
+        // didn't change, then setContent didn't do it
         iconImageNeedsRefresh = true;
         invalidateImageCache();
         invalidateAllFilterCaches();
+        if (imageTransformer != null) {
+            imageTransformer.invalidateCache();
+        }
 
         comp.smartObjectChanged(isContentLinked());
     }
@@ -331,7 +336,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         }
     }
 
-    @Override
     public BufferedImage getVisibleImage() {
         if (imageNeedsRefresh) {
             recalculateImage();
@@ -341,16 +345,11 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                 iconImageNeedsRefresh = false;
             }
         }
-        return super.getVisibleImage();
+        return image;
     }
 
     @Override
     protected boolean isSmartObject() {
-        return true;
-    }
-
-    @Override
-    public boolean isRasterizable() {
         return true;
     }
 
@@ -360,14 +359,14 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     }
 
     @Override
-    protected SmartObject createTypeSpecificCopy(CopyType copyType) {
-        return new SmartObject(this, copyType);
+    protected SmartObject createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        return new SmartObject(this, copyType, newComp);
     }
 
     void addSmartObjectSpecificItems(JPopupMenu popup) {
         popup.add(new PAction("Edit Contents", this::edit));
         popup.add(new PAction("Clone", () ->
-            comp.shallowDuplicate(SmartObject.this)));
+            comp.shallowDuplicate(this)));
         if (isContentLinked()) {
             popup.add(new PAction("Embed Contents", this::embedLinkedContent));
             popup.add(new PAction("Reload Contents", this::reloadLinkedContent));
@@ -375,8 +374,8 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         if (SmartFilter.copiedSmartFilter != null) {
             popup.add(new PAction("Paste " + SmartFilter.copiedSmartFilter.getName(), () -> {
                 // copy again, because it could be pasted multiple times
-                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.LAYER_DUPLICATE, true);
-                newSF.setSmartObject(SmartObject.this);
+                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.LAYER_DUPLICATE, true, comp);
+                newSF.setSmartObject(this);
                 addSmartFilter(newSF, true, true);
             }));
         }
@@ -429,7 +428,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                 smartFilter.setTentative(false);
                 History.add(new NewSmartFilterEdit(this, smartFilter));
             } else {
-                deleteSmartFilter(smartFilter, false);
+                deleteSmartFilter(smartFilter, false, true);
             }
         } else {
             addSmartFilter(smartFilter, true, true);
@@ -446,15 +445,20 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             }
         }
 
-        insertSmartFilter(newFilter, numFilters, update);
+        insertSmartFilter(newFilter, numFilters, update, update);
 
         if (addToHistory) {
             History.add(new NewSmartFilterEdit(this, newFilter));
         }
     }
 
-    public void insertSmartFilter(SmartFilter newFilter, int index, boolean update) {
-        assert newFilter.getOwner() == this;
+    @Override
+    public void insertLayer(Layer layer, int index, boolean update) {
+        insertSmartFilter((SmartFilter) layer, index, update, true);
+    }
+
+    private void insertSmartFilter(SmartFilter newFilter, int index, boolean update, boolean activate) {
+        assert newFilter.getHolder() == this;
 
         SmartFilter previous = null;
         if (index > 0) {
@@ -483,19 +487,23 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         }
 
         if (update) {
-            updateSmartFilterUI();
-            comp.setEditingTarget(newFilter); // after creating the ui
+            updateChildrenUI();
+            if (activate) {
+                comp.setActiveLayer(newFilter); // after creating the ui
+            }
 
             invalidateImageCache();
-            comp.update();
-            updateIconImage();
+            iconImageNeedsRefresh = true;
+            holder.update();
             numFiltersChanged();
+        } else if (activate) {
+            comp.setActiveLayer(newFilter);
         }
 
         assert checkInvariants();
     }
 
-    public void deleteSmartFilter(SmartFilter filter, boolean addToHistory) {
+    public void deleteSmartFilter(SmartFilter filter, boolean addToHistory, boolean update) {
         int numFilters = filters.size();
         int index = -1;
         for (int i = 0; i < numFilters; i++) {
@@ -519,11 +527,11 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                     } else {
                         next.setImageSource(baseSource);
                     }
-                    comp.setEditingTarget(next);
+                    comp.setActiveLayer(next);
                 } else if (previous != null) {
-                    comp.setEditingTarget(previous);
+                    comp.setActiveLayer(previous);
                 } else {
-                    comp.setEditingTarget(this);
+                    comp.setActiveLayer(this);
                 }
                 filters.remove(i);
                 break;
@@ -534,54 +542,48 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             throw new IllegalStateException(filter.getName() + " not found in " + getName());
         }
 
+        filter.setNext(null);
+
         numFiltersChanged();
         if (addToHistory) {
-            History.add(new DeleteSmartFilterEdit(this, filter, index));
+            History.add(new DeleteLayerEdit(this, filter, index));
         }
 
         invalidateImageCache();
-        comp.update();
-        updateIconImage();
-        updateSmartFilterUI();
+        iconImageNeedsRefresh = true;
+        if (update) {
+            holder.update();
+            updateChildrenUI();
+        }
         assert checkInvariants();
+    }
+
+    @Override
+    public void deleteTemporarily(Layer layer) {
+        deleteSmartFilter((SmartFilter) layer, false, false);
     }
 
     private void numFiltersChanged() {
         // notify the delete action only if not the whole
         // smart object is selected and not during construction
-        if (!isEditingTarget() && hasUI()) {
+        if (!isActive() && hasUI()) {
             Layers.numLayersChanged(this, filters.size());
         }
     }
 
-    private void updateSmartFilterUI() {
-        if (ui == null) { // in some unit tests
-            return;
-        }
-        ui.updateChildrenPanel();
-        EventQueue.invokeLater(this::revalidateUI);
-    }
-
-    private void revalidateUI() {
-        LayersPanel layersPanel = comp.getView().getLayersPanel();
-        if (layersPanel != null) { // null in unit tests
-            layersPanel.revalidate();
-        }
-    }
-
-    @Override
-    public BufferedImage getCanvasSizedSubImage() {
-        // workaround for moved layers
-        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-        Graphics2D g = img.createGraphics();
-
-        // don't call applyLayer, because the mask should NOT be considered
-        setupDrawingComposite(g, true);
-        paintLayerOnGraphics(g, true);
-
-        g.dispose();
-        return img;
-    }
+//    @Override
+//    public BufferedImage getCanvasSizedSubImage() {
+//        // workaround for moved layers
+//        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+//        Graphics2D g = img.createGraphics();
+//
+//        // don't call applyLayer, because the mask should NOT be considered
+//        setupDrawingComposite(g, true);
+//        paintLayerOnGraphics(g, true);
+//
+//        g.dispose();
+//        return img;
+//    }
 
     public View getParentView() {
         if (isContentOpen()) {
@@ -620,7 +622,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         return IO.loadCompAsync(file)
             .thenApplyAsync(loaded -> {
                 setContent(loaded);
-                invalidateImageCache();
 
                 // only a grandparent composition might be opened
                 propagateContentChanges(loaded, true);
@@ -645,7 +646,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             baseSource = content;
         } else {
             imageTransformer.setContent(content);
-            assert baseSource == imageTransformer;
+            baseSource = imageTransformer;
         }
 
         // if there are smart filters, the first one references the content
@@ -656,6 +657,8 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                 first.invalidateChain();
             }
         }
+        invalidateImageCache();
+
         assert checkInvariants();
     }
 
@@ -713,9 +716,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-//        System.out.printf("%nSmartObject::resize: CALLED on '%s', newSize = %dx%d, thread = %s%n",
-//            getName(), newSize.width, newSize.height, Thread.currentThread().getName());
-
         double sx = newSize.getWidth() / comp.getCanvasWidth();
         double sy = newSize.getHeight() / comp.getCanvasHeight();
 
@@ -794,38 +794,32 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
     }
 
-    @Override
-    public void setTranslation(int x, int y) {
-        // positive translation values are allowed for smart objects
-        forceTranslation(x, y);
-    }
-
-    @Override
-    public BufferedImage getCanvasSizedVisibleImage() {
-        int tx = getTx();
-        int ty = getTy();
-        BufferedImage visibleImage = getVisibleImage();
-        if (tx == 0 && ty == 0) {
-            assert visibleImage.getWidth() == comp.getCanvasWidth()
-                : "visible width = " + visibleImage.getWidth() + ", canvas width = " + comp.getCanvasWidth();
-            assert visibleImage.getHeight() == comp.getCanvasHeight()
-                : "visible height = " + visibleImage.getHeight() + ", canvas height = " + comp.getCanvasHeight();
-            return visibleImage;
-        }
-
-        // the image of a moved layer might not cover the canvas,
-        // therefore (unlike in the superclass) here we can't use subimage
-        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-        Graphics2D g = img.createGraphics();
-        g.drawImage(visibleImage, tx, ty, null);
-        g.dispose();
-
-        return img;
-    }
+//    @Override
+//    public BufferedImage getCanvasSizedVisibleImage() {
+//        int tx = getTx();
+//        int ty = getTy();
+//        BufferedImage visibleImage = getVisibleImage();
+//        if (tx == 0 && ty == 0) {
+//            assert visibleImage.getWidth() == comp.getCanvasWidth()
+//                : "visible width = " + visibleImage.getWidth() + ", canvas width = " + comp.getCanvasWidth();
+//            assert visibleImage.getHeight() == comp.getCanvasHeight()
+//                : "visible height = " + visibleImage.getHeight() + ", canvas height = " + comp.getCanvasHeight();
+//            return visibleImage;
+//        }
+//
+//        // the image of a moved layer might not cover the canvas,
+//        // therefore (unlike in the superclass) here we can't use subimage
+//        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+//        Graphics2D g = img.createGraphics();
+//        g.drawImage(visibleImage, tx, ty, null);
+//        g.dispose();
+//
+//        return img;
+//    }
 
     public SmartObject shallowDuplicate() {
-        SmartObject d = new SmartObject(this, CopyType.SMART_OBJECT_CLONE);
-        duplicateMask(d, CopyType.SMART_OBJECT_CLONE);
+        SmartObject d = new SmartObject(this, CopyType.SMART_OBJECT_CLONE, comp);
+        duplicateMask(d, CopyType.SMART_OBJECT_CLONE, comp);
         return d;
     }
 
@@ -835,7 +829,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             return; // already the last filter
         }
         swapSmartFilters(index, index + 1, "Move " + smartFilter.getName() + " Up");
-        comp.setEditingTarget(smartFilter);
+        comp.setActiveLayer(smartFilter);
     }
 
     public void moveDown(SmartFilter smartFilter) {
@@ -844,7 +838,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
             return; // already the first filter
         }
         swapSmartFilters(index - 1, index, "Move " + smartFilter.getName() + " Down");
-        comp.setEditingTarget(smartFilter);
+        comp.setActiveLayer(smartFilter);
     }
 
     public void swapSmartFilters(int indexA, int indexB, String editName) {
@@ -884,13 +878,13 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         }
 
         // update the GUI
-        updateSmartFilterUI();
+        updateChildrenUI();
 
         // update the image
         SmartFilter lowestChanged = bellow != null ? bellow : filterB;
         lowestChanged.invalidateChain();
         invalidateImageCache();
-        comp.update();
+        holder.update();
 
         Layers.layerOrderChanged(this);
     }
@@ -901,6 +895,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
 
     @Override
     public Drawable getActiveDrawable() {
+        // TODO should not be needed
         return getActiveMask();
     }
 
@@ -958,7 +953,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
 
     private SmartFilter getSelectedSmartFilter() {
         for (SmartFilter filter : filters) {
-            if (filter.isEditingTarget()) {
+            if (filter.isActive()) {
                 return filter;
             }
         }
@@ -966,7 +961,25 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     }
 
     @Override
+    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
+        action.accept(this);
+        if (hasMask()) {
+            action.accept(getMask());
+        }
+        for (SmartFilter filter : filters) {
+            action.accept(filter);
+            if (filter.hasMask()) {
+                action.accept(filter.getMask());
+            }
+        }
+    }
+
+    @Override
     public boolean checkInvariants() {
+        if (!super.checkInvariants()) {
+            return false;
+        }
+
         if (!content.isSmartObjectContent()) {
             throw new IllegalStateException("content of %s (%s) is broken"
                 .formatted(getName(), content.getDebugName()));
@@ -985,20 +998,20 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                 }
                 if (i == 0) {
                     if (filter.getImageSource() != baseSource) {
-                        throw new AssertionError();
+                        throw new AssertionError("first filter (%s) doesn't use baseSource".formatted(filter.getName()));
                     }
                 } else {
                     if (filter.getImageSource() != filters.get(i - 1)) {
-                        throw new AssertionError();
+                        throw new AssertionError("bad source in " + filter.getName());
                     }
                 }
                 if (i == filters.size() - 1) {
                     if (filter.getNext() != null) {
-                        throw new AssertionError();
+                        throw new AssertionError("last filter has next");
                     }
                 } else {
                     if (filter.getNext() != filters.get(i + 1)) {
-                        throw new AssertionError();
+                        throw new AssertionError("bad next in " + filter.getName());
                     }
                 }
             }
@@ -1035,7 +1048,6 @@ public class SmartObject extends ImageLayer implements LayerHolder {
                    .collect(Collectors.joining("\n"));
     }
 
-    @Override
     public void debugImages() {
         BufferedImage soImage = image;
         BufferedImage contentImage = content.getCompositeImage();
@@ -1072,6 +1084,11 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     }
 
     @Override
+    public int indexOf(Layer layer) {
+        return filters.indexOf((SmartFilter) layer);
+    }
+
+    @Override
     public int getNumLayers() {
         return filters.size();
     }
@@ -1079,6 +1096,12 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     @Override
     public SmartFilter getLayer(int index) {
         return filters.get(index);
+    }
+
+    @Override
+    public void addLayerToList(int index, Layer newLayer) {
+        // TODO is this ever called?
+        filters.add(index, (SmartFilter) newLayer);
     }
 
     @Override
@@ -1099,7 +1122,7 @@ public class SmartObject extends ImageLayer implements LayerHolder {
 
     @Override
     public void deleteLayer(Layer layer, boolean addToHistory) {
-        deleteSmartFilter((SmartFilter) layer, addToHistory);
+        deleteSmartFilter((SmartFilter) layer, addToHistory, true);
     }
 
     @Override
@@ -1121,6 +1144,65 @@ public class SmartObject extends ImageLayer implements LayerHolder {
     }
 
     @Override
+    protected BufferedImage applyOnImage(BufferedImage src) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
+        BufferedImage visibleImage = getVisibleImage();
+        paintLayerOnGraphicsWOTmpLayer(g, visibleImage, firstVisibleLayer);
+    }
+
+    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
+                                                  BufferedImage visibleImage,
+                                                  boolean firstVisibleLayer) {
+        g.drawImage(visibleImage, getTx(), getTy(), null);
+    }
+
+    /**
+     * Returns the image bounds relative to the canvas
+     */
+    @Override
+    public Rectangle getContentBounds() {
+        return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
+    }
+
+    @Override
+    public int getPixelAtPoint(Point p) {
+        return 0; // TODO
+    }
+
+    @Override
+    public void enlargeCanvas(int north, int east, int south, int west) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void replaceLayer(Layer before, Layer after) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void changeLayerGUIOrder(int oldIndex, int newIndex) {
+        updateChildrenUI();
+    }
+
+    @Override
+    public void removeLayerFromList(Layer layer) {
+        // it's not enough to remove it from the list,
+        // invariants have to be preserved
+        deleteSmartFilter((SmartFilter) layer, false, false);
+    }
+
+    @Override
+    public BufferedImage createIconThumbnail() {
+//        BufferedImage bigImg = getCanvasSizedSubImage();
+        // TODO is the image always canvas-sized?
+        return createThumbnail(getVisibleImage(), thumbSize, thumbCheckerBoardPainter);
+    }
+
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
@@ -1139,12 +1221,5 @@ public class SmartObject extends ImageLayer implements LayerHolder {
         }
 
         return node;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SmartObject.class.getSimpleName() + "[", "]")
-            .add("name='" + name + "'")
-            .toString();
     }
 }

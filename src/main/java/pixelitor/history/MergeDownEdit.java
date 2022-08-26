@@ -17,10 +17,10 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerHolder;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.debug.DebugNode;
 
@@ -38,13 +38,13 @@ public class MergeDownEdit extends PixelitorEdit {
     private final Layer layer;
     private final ImageLayer bellowLayer;
 
-    public MergeDownEdit(Composition comp,
+    public MergeDownEdit(LayerHolder holder,
                          Layer layer,
                          ImageLayer bellowLayer,
                          BufferedImage backupImage,
                          MaskViewMode maskViewMode,
                          int activeIndex) {
-        super(GUIText.MERGE_DOWN, comp, true);
+        super(GUIText.MERGE_DOWN, holder.getComp(), true);
 
         this.layer = layer;
         this.maskViewMode = maskViewMode;
@@ -52,7 +52,7 @@ public class MergeDownEdit extends PixelitorEdit {
 
         imageEdit = new ImageEdit("", comp, bellowLayer, backupImage, true);
         imageEdit.setEmbedded(true);
-        deleteLayerEdit = new DeleteLayerEdit(comp, layer, activeIndex);
+        deleteLayerEdit = new DeleteLayerEdit(holder, layer, activeIndex);
         deleteLayerEdit.setEmbedded(true);
     }
 

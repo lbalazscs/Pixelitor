@@ -21,14 +21,13 @@ import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
-import pixelitor.utils.debug.Debuggable;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
-public class ImageTransformer implements ImageSource, Serializable, Debuggable {
+public class ImageTransformer implements ImageSource, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -49,12 +48,18 @@ public class ImageTransformer implements ImageSource, Serializable, Debuggable {
     }
 
     public ImageTransformer copy(Composition newContent) {
-        return new ImageTransformer(newContent, new AffineTransform(transform), targetWidth, targetHeight);
+        ImageTransformer copy = new ImageTransformer(newContent, new AffineTransform(transform), targetWidth, targetHeight);
+
+        // should be safe to share because the new content
+        // is either identical to the old one or a copy of it
+        copy.cachedImage = cachedImage;
+
+        return copy;
     }
 
     public void setContent(Composition content) {
         this.content = content;
-        cachedImage = null;
+        invalidateCache();
     }
 
     private void setTargetSize(int targetWidth, int targetHeight) {
@@ -78,7 +83,7 @@ public class ImageTransformer implements ImageSource, Serializable, Debuggable {
         transform.concatenate(newScaling);
 //        debug(transform, "transform after");
         setTargetSize(targetWidth, targetHeight);
-        cachedImage = null;
+        invalidateCache();
     }
 
     private static void debug(AffineTransform at, String msg) {
@@ -89,6 +94,10 @@ public class ImageTransformer implements ImageSource, Serializable, Debuggable {
 
     public BufferedImage getCachedImage() {
         return cachedImage;
+    }
+
+    public void invalidateCache() {
+        cachedImage = null;
     }
 
     @Override

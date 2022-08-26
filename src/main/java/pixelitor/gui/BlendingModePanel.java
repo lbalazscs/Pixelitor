@@ -19,8 +19,8 @@ package pixelitor.gui;
 
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DropDownSlider;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.BlendingMode;
+import pixelitor.layers.Layer;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -40,13 +40,14 @@ public class BlendingModePanel extends JPanel {
     private static final String OPACITY = i18n("opacity") + ":";
 
     // the value above which the opacity is considered fully opaque
-    // (in order to avoid exact float comparisons with 1.0f)
     public static final float CRITICAL_OPACITY = 0.999f;
 
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> bmCombo;
     private final JLabel opacityLabel;
     private final JLabel bmLabel;
+
+    protected final ComboBoxModel<BlendingMode> layerModel;
 
     public BlendingModePanel(boolean longForm) {
         super(new FlowLayout(LEFT));
@@ -63,8 +64,12 @@ public class BlendingModePanel extends JPanel {
         }
         add(bmLabel);
 
-        BlendingMode[] blendingModes = BlendingMode.values();
-        bmCombo = GUIUtils.createComboBox(blendingModes);
+        layerModel = new DefaultComboBoxModel<>(BlendingMode.LAYER_MODES);
+        bmCombo = new JComboBox<>(layerModel);
+
+        // make sure all values are visible without a scrollbar
+        bmCombo.setMaximumRowCount(layerModel.getSize() + 1);
+
         bmCombo.setFocusable(false);
 
         // This generic name is only useful if the panel is in a
@@ -86,7 +91,7 @@ public class BlendingModePanel extends JPanel {
         return (BlendingMode) bmCombo.getSelectedItem();
     }
 
-    public void setBlendingMode(BlendingMode bm) {
+    public void setBlendingMode(BlendingMode bm, Layer newLayer) {
         bmCombo.setSelectedItem(bm);
     }
 
@@ -137,6 +142,6 @@ public class BlendingModePanel extends JPanel {
 
     public void loadStateFrom(UserPreset preset) {
         setOpacity(preset.getFloat("Opacity", 1.0f));
-        setBlendingMode(preset.getEnum("Blending Mode", BlendingMode.class));
+        setBlendingMode(preset.getEnum("Blending Mode", BlendingMode.class), null);
     }
 }

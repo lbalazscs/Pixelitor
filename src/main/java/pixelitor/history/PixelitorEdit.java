@@ -47,6 +47,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
     protected PixelitorEdit(String name, Composition comp, boolean isHeavy) {
         assert comp != null;
         assert name != null;
+        assert comp.checkInvariants();
 
         this.comp = comp;
         this.name = name;

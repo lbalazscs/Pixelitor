@@ -128,12 +128,12 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         }
         state = State.DESERIALIZED;
         changeListener = null;
-        assert checkConsistency();
+        assert checkInvariants();
     }
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
-        assert checkConsistency();
+        assert checkInvariants();
         out.defaultWriteObject();
     }
 
@@ -287,7 +287,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         shape = origShape;
 
         state = State.SHAPE_SET;
-        assert checkConsistency();
+        assert checkInvariants();
     }
 
     @Override
@@ -296,7 +296,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         transformedDrag = origDrag.imTransformedCopy(at);
 
         notifyChangeListener();
-        assert checkConsistency();
+        assert checkInvariants();
     }
 
     @Override
@@ -377,7 +377,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         origDrag = transformedDrag;
         origShape = shape;
 
-        assert checkConsistency();
+        assert checkInvariants();
     }
 
     /**
@@ -466,7 +466,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     public void rasterizeTo(Composition comp, TransformBox transformBox, ShapesTool tool) {
-        assert checkConsistency();
+        assert checkInvariants();
 
         PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawable();
@@ -515,10 +515,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     public final StyledShape clone() {
         // this is used only for undo, it should be OK to share
         // all the references
-        assert checkConsistency();
+        assert checkInvariants();
         try {
             StyledShape clone = (StyledShape) super.clone();
-            assert clone.checkConsistency();
+            assert clone.checkInvariants();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(); // can't happen
@@ -632,7 +632,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         return shape.contains(p);
     }
 
-    public boolean checkConsistency() {
+    public boolean checkInvariants() {
         // TODO CREATED, but not initialized styled shapes
         //  shouldn't be put in shape layers
         if (state == State.CREATED) {

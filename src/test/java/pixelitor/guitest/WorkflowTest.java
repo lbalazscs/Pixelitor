@@ -34,6 +34,7 @@ import pixelitor.guitest.AppRunner.ShowOriginal;
 import pixelitor.layers.*;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.Utils;
 
@@ -43,6 +44,7 @@ import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
@@ -51,6 +53,7 @@ import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 import static pixelitor.tools.gradient.GradientType.*;
+import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
 import static pixelitor.tools.shapes.ShapeType.*;
 import static pixelitor.tools.shapes.TwoPointPaintType.*;
@@ -77,6 +80,14 @@ public class WorkflowTest {
 
     private static File referenceImagesDir;
 
+    enum WithinGroup {
+        NO, YES, BOTH;
+
+        public boolean isTrue() {
+            return this == YES;
+        }
+    }
+
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
@@ -99,17 +110,21 @@ public class WorkflowTest {
         keyboard = app.getKeyboard();
 //        app.runSlowly();
 
+        WithinGroup withinGroup = WithinGroup.BOTH;
+
         switch (arg) {
             case "all" -> {
-                wfTest1();
-                wfTest2();
-                wfTest3();
-                wfTest4();
+                wfTest1(withinGroup, true);
+                wfTest2(withinGroup, true);
+                wfTest3(withinGroup, true);
+                wfTest4(withinGroup, true);
+                wfTest5(withinGroup, true);
             }
-            case "1" -> wfTest1();
-            case "2" -> wfTest2();
-            case "3" -> wfTest3();
-            case "4" -> wfTest4();
+            case "1" -> wfTest1(withinGroup, true);
+            case "2" -> wfTest2(withinGroup, true);
+            case "3" -> wfTest3(withinGroup, true);
+            case "4" -> wfTest4(withinGroup, true);
+            case "5" -> wfTest5(withinGroup, true);
             default -> throw new IllegalArgumentException("arg = " + arg);
         }
 
@@ -118,14 +133,25 @@ public class WorkflowTest {
         }
     }
 
-    private void wfTest1() {
-        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 1");
+    private void wfTest1(WithinGroup withinGroup, boolean loadRefImage) {
+        if (withinGroup == WithinGroup.BOTH) {
+            wfTest1(WithinGroup.NO, false);
+            wfTest1(WithinGroup.YES, loadRefImage);
+            return;
+        }
+
+        String compName = createCompName(1, withinGroup);
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
+
+        if (withinGroup.isTrue()) {
+            group();
+        }
+
         addGuide();
         runFilterWithDialog("Wood");
         duplicateLayerThenUndo(ImageLayer.class);
 
         app.addTextLayer("Wood", null, "Pixelitor");
-
         app.editTextLayer(dialog -> {
             dialog.textBox("textTF").requireText("Wood");
             dialog.slider("fontSize").slideTo(200);
@@ -133,13 +159,14 @@ public class WorkflowTest {
         duplicateLayerThenUndo(TextLayer.class);
         rasterizeThenUndo(TextLayer.class);
         selectionFromText();
-        deleteEditingTarget(TextLayer.class, true);
+        deleteActiveLayer(TextLayer.class);
         rotate90();
         invertSelection();
         deselect();
         rotate270();
         drawTransparentZigzagRectangle();
         enlargeCanvas();
+
         app.addEmptyImageLayer(true);
         renderCaustics();
         app.selectLayerAbove(); // select the wood layer
@@ -153,62 +180,54 @@ public class WorkflowTest {
         tracePath(BrushType.WOBBLE);
         pathToSelection();
         copySelection();
-        moveSelection(-100);
+        move(MOVE_SELECTION_ONLY, 0, -100);
         pasteSelection();
-        moveSelection(50);
+        move(MOVE_SELECTION_ONLY, 0, 50);
         selectionToPath();
         app.swapColors();
         tracePath(BrushType.SHAPE);
         flipHorizontal();
         clearGuides();
         app.clickTool(Tools.BRUSH);
-        loadReferenceImage("wf1_ref.png");
+
+        if (loadRefImage) {
+            loadReferenceImage("wf1.png");
+        }
     }
 
-    private void wfTest2() {
-        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 2");
+    private static String createCompName(int testNr, WithinGroup withinGroup) {
+        String compName = "wf " + testNr;
+        if (withinGroup == WithinGroup.YES) {
+            compName += "G";
+        }
+        return compName;
+    }
+
+    private void group() {
+        app.runMenuCommand("Convert Visible to Group");
+        app.selectActiveLayer("layer 1");
+    }
+
+    private void ungroup() {
+        app.runMenuCommand("Ungroup");
+    }
+
+    private void wfTest2(WithinGroup withinGroup, boolean loadRefImage) {
+        if (withinGroup == WithinGroup.BOTH) {
+            wfTest2(WithinGroup.NO, false);
+            wfTest2(WithinGroup.YES, loadRefImage);
+            return;
+        }
+
+        String compName = createCompName(2, withinGroup);
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
+
+        if (withinGroup.isTrue()) {
+            group();
+        }
+
         runFilterWithDialog("Spider Web");
-        app.runMenuCommand("Duplicate");
-
-        addTextLayer("Spider", "Top", "Left");
-        addTextLayer("Web", "Top", "Right");
-
-        // switch back to the main tab
-        pw.tabbedPane().selectTab("wf test 2");
-        int mainTabIndex = EDT.call(() -> ((TabsUI) ImageArea.getUI()).getSelectedIndex());
-
-        runFilterWithDialog("Clouds");
-        app.addEmptyImageLayer(false);
-        runFilterWithDialog("Fractal Tree",
-            dialog -> dialog.slider("Age (Iterations)").slideTo(14));
-        app.changeLayerBlendingMode(BlendingMode.HARD_LIGHT);
-        app.mergeDown();
-
-        app.addGradientFillLayer(SPIRAL_CW);
-        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
-        duplicateLayerThenUndo(GradientFillLayer.class);
-        rasterizeThenUndo(GradientFillLayer.class);
-        app.mergeDown();
-
-        runFilterWithDialog("Bump Map", dialog ->
-            dialog.comboBox("Bump Map").selectItem("wf test 2 copy"));
-
-        // close the temporary tab
-        pw.tabbedPane().selectTab("wf test 2 copy");
-        app.closeCurrentView();
-        app.closeDoYouWantToSaveChangesDialog();
-
-        // now the main tab should be the active one
-        pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
-
-        app.addColorFillLayer(Color.BLUE);
-        app.changeLayerBlendingMode(BlendingMode.HUE);
-        app.changeLayerOpacity(0.5f);
-
-        duplicateLayerThenUndo(ColorFillLayer.class);
-        rasterizeThenUndo(ColorFillLayer.class);
-
-        app.mergeDown();
+        editSpiderWebImage(compName);
 
         app.addTextLayer("TEXT", null, "Pixelitor");
         convertLayerToSmartObject();
@@ -237,7 +256,11 @@ public class WorkflowTest {
         keyboard.redo("Move Frosted Glass Down");
         keyboard.redo("Move Frosted Glass Up");
 
+        app.selectActiveLayer("smart TEXT");
         duplicateLayerThenUndo(SmartObject.class);
+        Utils.sleep(1, SECONDS);
+        assert EDT.active(Composition::checkInvariants);
+
         rasterizeThenUndo(SmartObject.class);
 
         int catMargin = 20;
@@ -255,11 +278,76 @@ public class WorkflowTest {
         app.selectLayerBellow();
         app.selectLayerBellow();
 
-        loadReferenceImage("wf2_ref.png");
+        // double the text
+        app.clickLayerPopup("smart TEXT", "Edit Contents");
+        app.runMenuCommand("Duplicate Layer");
+        move(MOVE_LAYER_ONLY, 0, -25);
+        app.runMenuCommand("Lower Layer Selection");
+        move(MOVE_LAYER_ONLY, 0, 50);
+        app.closeCurrentView();
+
+        if (loadRefImage) {
+            loadReferenceImage("wf2.png");
+        }
     }
 
-    private void wfTest3() {
-        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 3");
+    private void editSpiderWebImage(String compName) {
+        app.runMenuCommand("Duplicate");
+
+        addTextLayer("Spider", "Top", "Left");
+        addTextLayer("Web", "Top", "Right");
+
+        // switch back to the main tab
+        pw.tabbedPane().selectTab(compName);
+        int mainTabIndex = EDT.call(() -> ((TabsUI) ImageArea.getUI()).getSelectedIndex());
+
+        runFilterWithDialog("Clouds");
+        app.addEmptyImageLayer(false);
+        runFilterWithDialog("Fractal Tree",
+            dialog -> dialog.slider("Age (Iterations)").slideTo(14));
+        app.changeLayerBlendingMode(BlendingMode.HARD_LIGHT);
+        app.mergeDown();
+
+        app.addGradientFillLayer(SPIRAL_CW);
+        app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
+        duplicateLayerThenUndo(GradientFillLayer.class);
+        rasterizeThenUndo(GradientFillLayer.class);
+        app.mergeDown();
+
+        runFilterWithDialog("Bump Map", dialog ->
+            dialog.comboBox("Bump Map").selectItem(compName + " copy"));
+
+        // close the temporary tab
+        pw.tabbedPane().selectTab(compName + " copy");
+        app.closeCurrentView();
+        app.closeDoYouWantToSaveChangesDialog();
+
+        // now the main tab should be the active one
+        pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
+
+        app.addColorFillLayer(Color.BLUE);
+        app.changeLayerBlendingMode(BlendingMode.HUE);
+        app.changeLayerOpacity(0.5f);
+
+        duplicateLayerThenUndo(ColorFillLayer.class);
+        rasterizeThenUndo(ColorFillLayer.class);
+
+        app.mergeDown();
+    }
+
+    private void wfTest3(WithinGroup withinGroup, boolean loadRefImage) {
+        if (withinGroup == WithinGroup.BOTH) {
+            wfTest3(WithinGroup.NO, false);
+            wfTest3(WithinGroup.YES, loadRefImage);
+            return;
+        }
+        String compName = createCompName(3, withinGroup);
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
+
+        if (withinGroup.isTrue()) {
+            group();
+        }
+
         runFilterWithDialog("Spirograph");
 
         app.addTextLayer("Cutout",
@@ -301,23 +389,38 @@ public class WorkflowTest {
         app.clickLayerPopup("Colorize", "Copy Colorize");
 
         // paste the smart filter into the copy of the smart object
-        app.selectLayerAbove();
+        app.selectLayerAbove(); // select the whole first smart object
+        app.selectLayerAbove(); // select the copy smart object
         app.clickLayerPopup("smart Cutout copy", "Paste Colorize");
         keyboard.undoRedoUndo("Add Smart Colorize copy");
 
         // rasterize, then delete the copy of the smart object
         rasterizeThenUndo(SmartObject.class);
-        deleteEditingTarget(SmartObject.class, true);
+        deleteActiveLayer(SmartObject.class);
 
         // delete the Colorize smart object
         app.findLayerIconByLayerName("Colorize").click();
-        deleteEditingTarget(SmartFilter.class, false);
+        deleteActiveLayer(SmartFilter.class);
 
-        loadReferenceImage("wf3_ref.png");
+        if (loadRefImage) {
+            loadReferenceImage("wf3.png");
+        }
     }
 
-    private void wfTest4() {
-        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, "wf test 4");
+    private void wfTest4(WithinGroup withinGroup, boolean loadRefImage) {
+        if (withinGroup == WithinGroup.BOTH) {
+            wfTest4(WithinGroup.NO, false);
+            wfTest4(WithinGroup.YES, loadRefImage);
+            return;
+        }
+
+        String compName = createCompName(4, withinGroup);
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
+
+        if (withinGroup.isTrue()) {
+            group();
+        }
+
         runFilterWithDialog("Checker Pattern", dialog -> {
             dialog.slider("Width").slideTo(25);
             dialog.slider("Amount").slideTo(17);
@@ -341,6 +444,8 @@ public class WorkflowTest {
         runFilterWithDialog("Glass Tiles");
         runFilterWithDialog("Color Balance", dialog ->
             dialog.slider("Yellow-Blue").slideTo(-45));
+
+        app.selectActiveLayer("smart layer 1");
 
         duplicateLayerThenUndo(SmartObject.class);
         cloneSmartObjectThenUndo();
@@ -381,7 +486,29 @@ public class WorkflowTest {
         keyboard.undoRedoUndo("Resize");
         keyboard.undoRedoUndo("Resize");
 
-        loadReferenceImage("wf4_ref.png");
+        if (loadRefImage) {
+            loadReferenceImage("wf4.png");
+        }
+    }
+
+    private void wfTest5(WithinGroup withinGroup, boolean loadRefImage) {
+        if (withinGroup == WithinGroup.BOTH) {
+            wfTest5(WithinGroup.NO, false);
+            wfTest5(WithinGroup.YES, loadRefImage);
+            return;
+        }
+
+        String compName = createCompName(5, withinGroup);
+        app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
+
+        if (withinGroup.isTrue()) {
+            group();
+        }
+
+        runFilterWithDialog("Marble");
+        convertLayerToSmartObject();
+        runFilterWithDialog("Crystallize");
+        app.resize(600);
     }
 
     private void addTextLayer(String text, String vAlignment, String hAlignment) {
@@ -410,28 +537,31 @@ public class WorkflowTest {
     private void runFilterWithDialog(String filterName, Consumer<DialogFixture> customizer) {
         app.runFilterWithDialog(filterName, Randomize.NO, Reseed.NO, ShowOriginal.NO, false, customizer);
 
-        boolean activeIsSmart = EDT.activeLayer(layer -> layer instanceof SmartObject);
+        boolean activeIsSmart = EDT.activeLayer(layer ->
+            (layer instanceof SmartObject) || (layer instanceof SmartFilter));
         String expectedEditName = activeIsSmart ? "Add Smart " + filterName : filterName;
         keyboard.undoRedo(expectedEditName);
     }
 
     private void duplicateLayerThenUndo(Class<? extends Layer> expectedLayerType) {
-        int numLayers = EDT.getNumLayersInActiveComp();
+        int numLayers = EDT.getNumLayersInActiveHolder();
         EDT.assertActiveLayerTypeIs(expectedLayerType);
 
         app.runMenuCommand("Duplicate Layer");
 
         EDT.assertNumLayersIs(numLayers + 1);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
+        assert EDT.active(Composition::checkInvariants);
 
         keyboard.undoRedoUndo("Duplicate Layer");
 
         EDT.assertNumLayersIs(numLayers);
         EDT.assertActiveLayerTypeIs(expectedLayerType);
+        assert EDT.active(Composition::checkInvariants);
     }
 
     private void cloneSmartObjectThenUndo() {
-        int numLayers = EDT.getNumLayersInActiveComp();
+        int numLayers = EDT.getNumLayersInActiveHolder();
         EDT.assertActiveLayerTypeIs(SmartObject.class);
 
         app.runMenuCommand("Clone");
@@ -446,19 +576,22 @@ public class WorkflowTest {
     }
 
     private void rasterizeThenUndo(Class<? extends Layer> expectedLayerType) {
-        int numLayers = EDT.getNumLayersInActiveComp();
+        int numLayers = EDT.getNumLayersInActiveHolder();
         EDT.assertActiveLayerTypeIs(expectedLayerType);
         Layer layer = EDT.getActiveLayer();
 
         app.runMenuCommand("Rasterize " + layer.getTypeString());
+        Utils.sleep(1, SECONDS);
 
         EDT.assertNumLayersIs(numLayers);
         EDT.assertActiveLayerTypeIs(ImageLayer.class);
+        assert EDT.active(Composition::checkInvariants);
 
         keyboard.undoRedoUndo("Rasterize " + layer.getTypeString());
 
         EDT.assertActiveLayerTypeIs(expectedLayerType);
         EDT.assertNumLayersIs(numLayers);
+        assert EDT.active(Composition::checkInvariants);
     }
 
     private void selectionFromText() {
@@ -474,35 +607,26 @@ public class WorkflowTest {
         EDT.assertThereIsSelection();
     }
 
-    private void deleteEditingTarget(Class<? extends Layer> expectedLayerType, boolean expectedTopLevel) {
-        int numLayers = EDT.getNumLayersInActiveComp();
-        EDT.assertEditingTargetTypeIs(expectedLayerType);
-        boolean actualTopLevel = EDT.active(Composition::isEditingTargetTopLevel);
-        assert expectedTopLevel == actualTopLevel;
-        app.checkNumLayersIs(numLayers);
+    private void deleteActiveLayer(Class<? extends Layer> expectedLayerType) {
+        String expectedEditName = "Delete " + EDT.active(comp -> comp.getActiveLayer().getName());
 
-        String expectedEditName = "Delete Layer";
-        if (expectedLayerType.equals(SmartFilter.class)) {
-            SmartFilter sf = (SmartFilter) EDT.active(Composition::getEditingTarget);
-            expectedEditName = "Delete Smart " + sf.getFilter().getName();
-        }
+        // save a reference, because after the deleting the last child, 
+        // it would stop being the active holder
+        LayerHolder holder = EDT.active(Composition::getActiveLayerHolder);
+
+        int numLayers = EDT.call(holder::getNumLayers);
+
+        EDT.assertActiveLayerTypeIs(expectedLayerType);
+        app.checkNumLayersIs(numLayers);
 
         pw.button("deleteLayer").click();
-        if (expectedTopLevel) {
-            app.checkNumLayersIs(numLayers - 1);
-        } else {
-            app.checkNumLayersIs(numLayers);
-        }
+        assert EDT.call(holder::getNumLayers) == numLayers - 1;
 
         keyboard.undo(expectedEditName);
-        app.checkNumLayersIs(numLayers);
+        assert EDT.call(holder::getNumLayers) == numLayers;
 
         keyboard.redo(expectedEditName);
-        if (expectedTopLevel) {
-            app.checkNumLayersIs(numLayers - 1);
-        } else {
-            app.checkNumLayersIs(numLayers);
-        }
+        assert EDT.call(holder::getNumLayers) == numLayers - 1;
     }
 
     private void rotate90() {
@@ -654,11 +778,13 @@ public class WorkflowTest {
         app.runMenuCommand("Copy Selection");
     }
 
-    private void moveSelection(int dy) {
+    private void move(MoveMode moveMode, int dx, int dy) {
         app.clickTool(Tools.MOVE);
-        pw.comboBox("modeSelector").selectItem(MOVE_SELECTION_ONLY.toString());
-        mouse.moveToCanvas(400, 400);
-        mouse.dragToCanvas(400, 400 + dy);
+        pw.comboBox("modeSelector").selectItem(moveMode.toString());
+        int startX = INITIAL_WIDTH / 2;
+        int startY = INITIAL_HEIGHT / 2;
+        mouse.moveToCanvas(startX, startY);
+        mouse.dragToCanvas(startX + dx, startY + dy);
     }
 
     private void pasteSelection() {

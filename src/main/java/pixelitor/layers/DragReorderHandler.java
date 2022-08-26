@@ -113,7 +113,7 @@ public class DragReorderHandler extends MouseInputAdapter {
 
         // ensure that mouse drags on smart filter
         // guis move the whole smart object
-        if (layerGUI.isSmartFilterGUI()) {
+        while (layerGUI.isEmbedded()) {
             e.translatePoint(layerGUI.getX(), layerGUI.getY());
             layerGUI = layerGUI.getOwner();
         }

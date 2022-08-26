@@ -101,7 +101,7 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer) {
         assert view != null;
-        assert layer.isActive() || layer.isSmartFilter();
+        assert layer.isActive();
 
         if (AppContext.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
@@ -149,7 +149,7 @@ public enum MaskViewMode {
     }
 
     // used in asserts
-    private boolean canBeAssignedTo(Layer layer) {
+    public boolean canBeAssignedTo(Layer layer) {
         if (editMask || showMask) {
             boolean hasMask = layer.hasMask();
             if (!hasMask) {

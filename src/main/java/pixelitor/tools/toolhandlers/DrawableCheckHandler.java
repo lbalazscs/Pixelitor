@@ -68,7 +68,7 @@ public class DrawableCheckHandler extends ToolHandler {
 
     private boolean shouldForwardToNextHandler(PMouseEvent e) {
         Composition activeComp = e.getComp();
-        if (activeComp.activeAcceptsToolDrawing()) { // normal case
+        if (activeComp.activeLayerAcceptsToolDrawing()) { // normal case
             return true;
         }
 

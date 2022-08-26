@@ -80,7 +80,7 @@ class SmartFilterTest {
             .invariantsAreOK();
 
         smartObject.createUI();
-        soIconUpdates = new IconUpdateChecker(smartObject, null, 0, 0);
+        soIconUpdates = new IconUpdateChecker(smartObject, null);
 
         firstFilter.resetNumTransformCalls();
         middleFilter.resetNumTransformCalls();
@@ -111,10 +111,11 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 4")
+            .activeLayerNameIs("Filter 4")
             .invariantsAreOK();
 
         History.assertNumEditsIs(1);
+        smartObject.getVisibleImage();
         soIconUpdates.check(1, 0);
 
         undo("Add Smart Filter 4");
@@ -124,7 +125,7 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
         soIconUpdates.check(2, 0);
 
@@ -135,7 +136,7 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 4")
+            .activeLayerNameIs("Filter 4")
             .invariantsAreOK();
         soIconUpdates.check(3, 0);
     }
@@ -288,7 +289,7 @@ class SmartFilterTest {
 
     @Test
     void deleteFirst() {
-        smartObject.deleteSmartFilter(first, true);
+        smartObject.deleteSmartFilter(first, true, true);
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 1, 1);
@@ -298,11 +299,11 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 2")
+            .activeLayerNameIs("Filter 2")
             .invariantsAreOK();
         History.assertNumEditsIs(1);
 
-        undo("Delete Smart Filter 1");
+        undo("Delete Filter 1");
         checkNumFilterRuns(0, 2, 2);
         soIconUpdates.check(2, 0);
         assertThat(smartObject)
@@ -310,10 +311,10 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
 
-        redo("Delete Smart Filter 1");
+        redo("Delete Filter 1");
         checkNumFilterRuns(0, 3, 3);
         soIconUpdates.check(3, 0);
         assertThat(smartObject)
@@ -321,13 +322,13 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 2")
+            .activeLayerNameIs("Filter 2")
             .invariantsAreOK();
     }
 
     @Test
     void deleteMiddle() {
-        smartObject.deleteSmartFilter(middle, true);
+        smartObject.deleteSmartFilter(middle, true, true);
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 1);
@@ -336,11 +337,11 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
         History.assertNumEditsIs(1);
 
-        undo("Delete Smart Filter 2");
+        undo("Delete Filter 2");
         checkNumFilterRuns(0, 0, 2);
         soIconUpdates.check(2, 0);
         assertThat(smartObject)
@@ -348,10 +349,10 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 2")
+            .activeLayerNameIs("Filter 2")
             .invariantsAreOK();
 
-        redo("Delete Smart Filter 2");
+        redo("Delete Filter 2");
         checkNumFilterRuns(0, 0, 3);
         soIconUpdates.check(3, 0);
         assertThat(smartObject)
@@ -359,13 +360,13 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
     }
 
     @Test
     void deleteLast() {
-        smartObject.deleteSmartFilter(last, true);
+        smartObject.deleteSmartFilter(last, true, true);
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 0);
@@ -374,11 +375,11 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 2")
+            .activeLayerNameIs("Filter 2")
             .invariantsAreOK();
         History.assertNumEditsIs(1);
 
-        undo("Delete Smart Filter 3");
+        undo("Delete Filter 3");
         checkNumFilterRuns(0, 0, 0);
         soIconUpdates.check(2, 0);
         assertThat(smartObject)
@@ -386,10 +387,10 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
 
-        redo("Delete Smart Filter 3");
+        redo("Delete Filter 3");
         checkNumFilterRuns(0, 0, 0);
         soIconUpdates.check(3, 0);
         assertThat(smartObject)
@@ -397,7 +398,7 @@ class SmartFilterTest {
             .smartFilterVisibilitiesAre(true, true)
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 2")
+            .activeLayerNameIs("Filter 2")
             .invariantsAreOK();
     }
 
@@ -413,7 +414,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 1", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
 
         smartObject.moveUp(filter1);
@@ -421,7 +422,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
@@ -430,7 +431,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
@@ -439,7 +440,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 1", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
 
         undo("Move Filter 1 Up");
@@ -447,7 +448,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
 
         redo("Move Filter 1 Up");
@@ -455,7 +456,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 1", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
 
         redo("Move Filter 1 Up");
@@ -463,7 +464,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 2", "Filter 3", "Filter 1")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 1")
+            .activeLayerNameIs("Filter 1")
             .invariantsAreOK();
     }
 
@@ -479,7 +480,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 3", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
 
         smartObject.moveDown(filter3);
@@ -487,7 +488,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
@@ -496,7 +497,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
         History.assertNumEditsIs(2);
 
@@ -505,7 +506,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 3", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
 
         undo("Move Filter 3 Down");
@@ -513,7 +514,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 2", "Filter 3")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
 
         redo("Move Filter 3 Down");
@@ -521,7 +522,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 1", "Filter 3", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
 
         redo("Move Filter 3 Down");
@@ -529,7 +530,7 @@ class SmartFilterTest {
             .smartFilterNamesAre("Filter 3", "Filter 1", "Filter 2")
             .invariantsAreOK();
         assertThat(smartObject.getComp())
-            .editingTargetNameIs("Filter 3")
+            .activeLayerNameIs("Filter 3")
             .invariantsAreOK();
     }
 

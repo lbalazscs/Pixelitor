@@ -131,7 +131,7 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public void editingTargetChanged(Layer layer) {
+    public void activeLayerChanged(Layer layer) {
         if (sampleLayerOnly.isSelected()) {
             // don't show the values for the old layer
             Messages.showPlainInStatusBar("");

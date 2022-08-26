@@ -62,7 +62,7 @@ public class History {
     }
 
     public static void add(PixelitorEdit edit) {
-//        Debug.call(edit.getDebugName());
+//        Debug.debugCall(edit.getDebugName(), 4);
 
         assert edit != null;
         if (forbidEdits) {

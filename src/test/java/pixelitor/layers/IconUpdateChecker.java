@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,15 +30,18 @@ public class IconUpdateChecker {
     private final int layerIconUpdatesAtStart;
     private final int maskIconUpdatesAtStart;
 
-    public IconUpdateChecker(Layer layer, LayerMask mask,
-                             int layerIconUpdatesAtStart,
-                             int maskIconUpdatesAtStart) {
+    public IconUpdateChecker(Layer layer, LayerMask mask) {
         this.ui = (TestLayerUI) layer.getUI();
         this.mask = mask;
-        this.layerIconUpdatesAtStart = layerIconUpdatesAtStart;
-        this.maskIconUpdatesAtStart = maskIconUpdatesAtStart;
 
-        // check that the start update counts are correct
+        layerIconUpdatesAtStart = ui.getNumLayerIconUpdates();
+        if (mask != null) {
+            maskIconUpdatesAtStart = ui.getNumMaskIconUpdates();
+        } else {
+            maskIconUpdatesAtStart = 0;
+        }
+
+        // check the start update counts for safety
         check(0, 0);
     }
 

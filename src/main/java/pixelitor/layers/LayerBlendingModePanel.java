@@ -20,9 +20,12 @@ package pixelitor.layers;
 import pixelitor.Views;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.View;
+import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
 
-import static pixelitor.Views.onEditingTarget;
+import javax.swing.*;
+
+import static pixelitor.Views.onActiveLayer;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
@@ -34,12 +37,14 @@ public class LayerBlendingModePanel extends BlendingModePanel
 
     private static final LayerBlendingModePanel INSTANCE = new LayerBlendingModePanel();
 
-    public static LayerBlendingModePanel get() {
-        return INSTANCE;
-    }
+    private boolean lastActiveWasGroup = false;
+
+    private final ComboBoxModel<BlendingMode> groupModel;
 
     private LayerBlendingModePanel() {
         super(false);
+
+        groupModel = new DefaultComboBoxModel<>(BlendingMode.ALL_MODES);
 
         opacityDDSlider.setName("layerOpacity");
         bmCombo.setName("layerBM");
@@ -62,13 +67,17 @@ public class LayerBlendingModePanel extends BlendingModePanel
         setEnabled(false);
     }
 
+    public static LayerBlendingModePanel get() {
+        return INSTANCE;
+    }
+
     private void opacityChanged() {
-        onEditingTarget(layer ->
+        onActiveLayer(layer ->
             layer.setOpacity(getOpacity(), true, true));
     }
 
     private void blendingModeChanged() {
-        onEditingTarget(layer ->
+        onActiveLayer(layer ->
             layer.setBlendingMode(getBlendingMode(), true, true));
     }
 
@@ -91,33 +100,55 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void layerTargeted(Layer newEditingTarget) {
-        float floatOpacity = newEditingTarget.getOpacity();
+    public void layerActivated(Layer newActiveLayer) {
+        float floatOpacity = newActiveLayer.getOpacity();
         int intOpacity = (int) (floatOpacity * 100);
 
-        BlendingMode bm = newEditingTarget.getBlendingMode();
+        BlendingMode bm = newActiveLayer.getBlendingMode();
         try {
             userInteractionChange = false;
             opacityDDSlider.setValue(intOpacity);
-            bmCombo.setSelectedItem(bm);
+            setBlendingMode(bm, newActiveLayer);
         } finally {
             userInteractionChange = true;
         }
     }
 
-    public void setBlendingModeFromModel(BlendingMode bm) {
+    public void blendingModeChangedForLayer(BlendingMode bm, Layer layer) {
         try {
             userInteractionChange = false;
-            bmCombo.setSelectedItem(bm);
+            setBlendingMode(bm, layer);
+        } catch (Exception ex) {
+            Messages.showException(ex);
         } finally {
             userInteractionChange = true;
         }
     }
 
-    public void setOpacityFromModel(float f) {
+    @Override
+    public void setBlendingMode(BlendingMode bm, Layer newLayer) {
+        if (newLayer == null) {
+            newLayer = Views.getActiveLayer();
+        }
+
+        if (newLayer instanceof LayerGroup) {
+            if (!lastActiveWasGroup) {
+                bmCombo.setModel(groupModel);
+                lastActiveWasGroup = true;
+            }
+        } else { // not a layer group
+            if (lastActiveWasGroup) {
+                bmCombo.setModel(layerModel);
+                lastActiveWasGroup = false;
+            }
+        }
+        bmCombo.setSelectedItem(bm);
+    }
+
+    public void opacityChangedForLayer(float newOpacity) {
         try {
             userInteractionChange = false;
-            int intValue = (int) (f * 100);
+            int intValue = (int) (newOpacity * 100);
             opacityDDSlider.setValue(intValue);
         } finally {
             userInteractionChange = true;

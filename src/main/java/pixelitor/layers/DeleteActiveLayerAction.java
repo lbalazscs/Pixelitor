@@ -40,7 +40,7 @@ public class DeleteActiveLayerAction extends PAction
     private DeleteActiveLayerAction() {
         super(i18n("delete_layer"),
             Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED),
-            () -> Views.getActiveComp().deleteEditingTarget(true));
+            () -> Views.getActiveComp().deleteActiveLayer(true));
 
         setToolTip("Deletes the active layer.");
         setEnabled(false);
@@ -55,7 +55,8 @@ public class DeleteActiveLayerAction extends PAction
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        setEnabled(newView.getComp().getNumLayers() > 1);
+        LayerHolder holder = newView.getComp().getActiveLayerHolder();
+        enableDisable(holder, holder.getNumLayers());
     }
 
     @Override
@@ -64,8 +65,8 @@ public class DeleteActiveLayerAction extends PAction
     }
 
     @Override
-    public void layerTargeted(Layer newEditingTarget) {
-        LayerHolder holder = newEditingTarget.getHolder();
+    public void layerActivated(Layer newActiveLayer) {
+        LayerHolder holder = newActiveLayer.getHolder();
         enableDisable(holder, holder.getNumLayers());
     }
 

@@ -139,4 +139,9 @@ public class Messages {
                      "<br><br>Do you want to reload it?";
         return showYesNoQuestion(title, msg);
     }
+
+    public static void showNoVisibleLayersError(Composition comp) {
+        showError("No visible layers",
+            "There are no visible layers in " + comp.getName());
+    }
 }

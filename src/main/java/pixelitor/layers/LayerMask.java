@@ -149,9 +149,9 @@ public class LayerMask extends ImageLayer {
      * Duplicates this layer mask, and attaches the duplicated mask
      * to the given layer
      */
-    public LayerMask duplicate(Layer owner) {
+    public LayerMask duplicate(Layer owner, Composition newComp) {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
-        return new LayerMask(comp, maskImageCopy, owner, getTx(), getTy());
+        return new LayerMask(newComp, maskImageCopy, owner, getTx(), getTy());
     }
 
     public boolean isLinked() {
@@ -226,7 +226,6 @@ public class LayerMask extends ImageLayer {
         this.ui = owner.ui;
     }
 
-    @Override
     public Layer getOwner() {
         return owner;
     }
@@ -248,7 +247,7 @@ public class LayerMask extends ImageLayer {
         if (owner instanceof SmartFilter sf) {
             sf.maskChanged();
         }
-        comp.update();
+        holder.update();
     }
 
     @Override

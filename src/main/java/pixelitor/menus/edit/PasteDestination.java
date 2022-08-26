@@ -93,7 +93,7 @@ public enum PasteDestination {
 
             g.dispose();
 
-            Layer layer = comp.getEditingTarget();
+            Layer layer = comp.getActiveLayer();
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");

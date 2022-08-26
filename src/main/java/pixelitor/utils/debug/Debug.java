@@ -66,6 +66,8 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Debugging-related static utility methods
  */
 public class Debug {
+    public static volatile boolean flag = false;
+
     private Debug() {
         // shouldn't be instantiated
     }

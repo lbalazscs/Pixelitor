@@ -614,7 +614,7 @@ public class FlowField extends ParametrizedFilter {
         final Modifier<FlowFieldParticle> modifier;
 
         public PositionRandomizer(int x, int y, int width, int height, List<Point2D> spawnPoints, Random random) {
-            if (spawnPoints == null || spawnPoints.size() <= 0) {
+            if (spawnPoints == null || spawnPoints.isEmpty()) {
                 modifier = new RandomizePosition<>(x, y, width, height, random);
             } else {
                 int size = spawnPoints.size();

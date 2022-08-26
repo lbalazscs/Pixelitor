@@ -51,9 +51,9 @@ public class PixelitorEventListener implements ActiveLayerHolderListener,
     }
 
     @Override
-    public void layerTargeted(Layer newEditingTarget) {
-        String type = "layer targeted: " + newEditingTarget.getName();
-        Events.postListenerEvent(type, newEditingTarget.getComp(), newEditingTarget);
+    public void layerActivated(Layer newActiveLayer) {
+        String type = "layer targeted: " + newActiveLayer.getName();
+        Events.postListenerEvent(type, newActiveLayer.getComp(), newActiveLayer);
     }
 
     @Override

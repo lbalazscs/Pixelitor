@@ -256,7 +256,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         // empty by default
     }
 
-    public void editingTargetChanged(Layer layer) {
+    public void activeLayerChanged(Layer layer) {
         // empty by default
     }
 

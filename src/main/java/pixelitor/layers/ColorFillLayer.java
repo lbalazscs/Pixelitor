@@ -58,7 +58,10 @@ public class ColorFillLayer extends Layer {
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
-        new Composition.LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(layer);
+        LayerHolder holder = comp.getHolderForNewLayers();
+        new Composition.LayerAdder(holder)
+            .atPosition(ABOVE_ACTIVE)
+            .add(layer);
 
         String title = "Add Color Fill Layer";
         Color defaultColor = FgBgColors.getFGColor();
@@ -67,10 +70,10 @@ public class ColorFillLayer extends Layer {
             defaultColor, true, c -> layer.changeColor(c, false))) {
             // dialog accepted, now it is safe to add it to the history
             History.add(new NewLayerEdit(title,
-                comp, layer, activeLayerBefore, oldViewMode));
+                holder, layer, activeLayerBefore, oldViewMode));
         } else {
             // dialog cancelled
-            comp.deleteLayer(layer, false);
+            holder.deleteLayer(layer, false);
         }
     }
 
@@ -90,7 +93,7 @@ public class ColorFillLayer extends Layer {
     public void changeColor(Color color, boolean addHistory) {
         Color oldColor = this.color;
         this.color = color;
-        comp.update();
+        holder.update();
         updateIconImage();
         if (addHistory) {
             History.add(new ColorFillLayerChangeEdit(this, oldColor, color));
@@ -125,10 +128,10 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    protected ColorFillLayer createTypeSpecificCopy(CopyType copyType) {
+    protected ColorFillLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         Color colorCopy = new Color(this.color.getRGB(), true);
-        String duplicateName = copyType.createLayerDuplicateName(name);
-        return new ColorFillLayer(comp, duplicateName, colorCopy);
+        String copyName = copyType.createLayerCopyName(name);
+        return new ColorFillLayer(comp, copyName, colorCopy);
     }
 
     @Override

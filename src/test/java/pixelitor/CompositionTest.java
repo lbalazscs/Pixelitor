@@ -491,12 +491,12 @@ class CompositionTest {
             .firstLayerIsActive();
         History.assertNumEditsIs(1);
 
-        History.undo("Delete Layer");
+        History.undo("Delete layer 2");
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        History.redo("Delete Layer");
+        History.redo("Delete layer 2");
         assertThat(comp)
             .layerNamesAre("layer 1")
             .firstLayerIsActive();
@@ -517,16 +517,16 @@ class CompositionTest {
             .layerNamesAre("layer 1");
         History.assertNumEditsIs(1);
 
-        History.undo("Delete Layer");
+        History.undo("Delete layer 2");
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        History.redo("Delete Layer");
+        History.redo("Delete layer 2");
         assertThat(comp)
             .layerNamesAre("layer 1");
 
-        History.undo("Delete Layer");
+        History.undo("Delete layer 2");
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -539,12 +539,12 @@ class CompositionTest {
         assertThat(comp)
             .layerNamesAre("layer 2");
 
-        History.undo("Delete Layer");
+        History.undo("Delete layer 1");
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive(); // the first because we have activated it
 
-        History.redo("Delete Layer");
+        History.redo("Delete layer 1");
         assertThat(comp)
             .layerNamesAre("layer 2");
     }
@@ -581,14 +581,14 @@ class CompositionTest {
         Layer layer2 = comp.getLayer(1);
 
         assertThat(comp).activeLayerIs(layer2);
-        assertThat(comp.isActive(layer1)).isFalse();
-        assertThat(comp.isActive(layer2)).isTrue();
+        assertThat(comp.isActiveLayer(layer1)).isFalse();
+        assertThat(comp.isActiveLayer(layer2)).isTrue();
 
         comp.setActiveLayer(layer1);
 
         assertThat(comp).activeLayerIs(layer1).invariantsAreOK();
-        assertThat(comp.isActive(layer1)).isTrue();
-        assertThat(comp.isActive(layer2)).isFalse();
+        assertThat(comp.isActiveLayer(layer1)).isTrue();
+        assertThat(comp.isActiveLayer(layer2)).isFalse();
     }
 
     @Test
@@ -747,7 +747,7 @@ class CompositionTest {
         int numEdits;
         if (makeDuplicateLayer) {
             numEdits = 11; // 1 + 2*5
-            assertHistoryEditsAre("Delete Layer",
+            assertHistoryEditsAre("Delete layer 2",
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer",
                 "Duplicate Layer", "Move Layer",
@@ -755,7 +755,7 @@ class CompositionTest {
                 "Duplicate Layer", "Move Layer");
         } else {
             numEdits = 6; // 1 initially + 5 movements
-            assertHistoryEditsAre("Delete Layer",
+            assertHistoryEditsAre("Delete layer 2",
                 "Move Layer", "Move Layer", "Move Layer", "Move Layer", "Move Layer");
         }
         History.assertNumEditsIs(numEdits);

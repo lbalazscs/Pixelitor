@@ -17,7 +17,7 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
+import pixelitor.layers.LayerHolder;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -27,12 +27,14 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the changes made to the layer order.
  */
 public class LayerOrderChangeEdit extends PixelitorEdit {
+    private LayerHolder holder;
     private final int oldLayerIndex;
     private final int newLayerIndex;
 
-    public LayerOrderChangeEdit(String editName, Composition comp, int oldLayerIndex, int newLayerIndex) {
-        super(editName == null ? "Layer Order Change" : editName, comp);
+    public LayerOrderChangeEdit(String editName, LayerHolder holder, int oldLayerIndex, int newLayerIndex) {
+        super(editName == null ? "Layer Order Change" : editName, holder.getComp());
 
+        this.holder = holder;
         this.oldLayerIndex = oldLayerIndex;
         this.newLayerIndex = newLayerIndex;
     }
@@ -41,14 +43,21 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.changeLayerOrder(newLayerIndex, oldLayerIndex);
+        holder.changeLayerOrder(newLayerIndex, oldLayerIndex);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.changeLayerOrder(oldLayerIndex, newLayerIndex);
+        holder.changeLayerOrder(oldLayerIndex, newLayerIndex);
+    }
+
+    @Override
+    public void die() {
+        super.die();
+
+        holder = null;
     }
 
     @Override

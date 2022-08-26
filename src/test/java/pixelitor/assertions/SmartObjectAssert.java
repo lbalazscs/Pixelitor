@@ -26,25 +26,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Custom AssertJ assertions for {@link ContentLayer} objects.
  */
-public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, SmartObject> {
+public class SmartObjectAssert extends ContentLayerAssert<SmartObjectAssert, SmartObject> {
     public SmartObjectAssert(SmartObject actual) {
         super(actual, SmartObjectAssert.class);
     }
 
     public SmartObjectAssert hasNumSmartFilters(int expected) {
         isNotNull();
-        assertThat(((SmartObject) actual).getNumSmartFilters()).isEqualTo(expected);
+        assertThat(actual.getNumSmartFilters()).isEqualTo(expected);
         return myself;
     }
 
     public SmartObjectAssert smartFilterNamesAre(String... expected) {
         isNotNull();
 
-        SmartObject so = (SmartObject) actual;
-        int numFilters = so.getNumSmartFilters();
+        int numFilters = actual.getNumSmartFilters();
         assertThat(numFilters).isEqualTo(expected.length);
         for (int i = 0; i < numFilters; i++) {
-            SmartFilter smartFilter = so.getSmartFilter(i);
+            SmartFilter smartFilter = actual.getSmartFilter(i);
             assertThat(smartFilter.getName()).isEqualTo(expected[i]);
         }
 
@@ -54,11 +53,10 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
     public SmartObjectAssert smartFilterVisibilitiesAre(boolean... expected) {
         isNotNull();
 
-        SmartObject so = (SmartObject) actual;
-        int numFilters = so.getNumSmartFilters();
+        int numFilters = actual.getNumSmartFilters();
         assertThat(numFilters).isEqualTo(expected.length);
         for (int i = 0; i < numFilters; i++) {
-            SmartFilter smartFilter = so.getSmartFilter(i);
+            SmartFilter smartFilter = actual.getSmartFilter(i);
             assertThat(smartFilter.isVisible()).isEqualTo(expected[i]);
         }
 
@@ -68,8 +66,7 @@ public class SmartObjectAssert extends ImageLayerAssert<SmartObjectAssert, Smart
     public SmartObjectAssert invariantsAreOK() {
         isNotNull();
 
-        SmartObject so = (SmartObject) actual;
-        assertThat(so.checkInvariants()).isTrue();
+        assertThat(actual.checkInvariants()).isTrue();
 
         return myself;
     }

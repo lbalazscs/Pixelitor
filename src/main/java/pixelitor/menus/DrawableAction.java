@@ -18,7 +18,6 @@
 package pixelitor.menus;
 
 import pixelitor.Composition;
-import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.layers.*;
@@ -28,16 +27,12 @@ import javax.swing.*;
 import java.awt.EventQueue;
 import java.util.function.Consumer;
 
-import static java.lang.String.format;
-
 /**
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
  */
 public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
     protected final String name;
-    protected String menuName;
-    protected boolean hasDialog;
     private final boolean allowSmartObjects;
 
     protected DrawableAction(String name) {
@@ -49,12 +44,11 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
     }
 
     protected DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects) {
-        this.hasDialog = hasDialog;
         this.allowSmartObjects = allowSmartObjects;
         assert name != null;
 
         this.name = name;
-        menuName = hasDialog ? name + "..." : name;
+        String menuName = hasDialog ? name + "..." : name;
         setText(menuName);
     }
 
@@ -91,27 +85,14 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
         if (layer.isMaskEditing()) {
             process(layer.getMask());
         } else if (layer instanceof ImageLayer imageLayer) {
-            if (imageLayer instanceof SmartObject so) {
-                Drawable soMask = so.getActiveDrawable();
-                if (allowSmartObjects) {
-                    if (soMask != null) {
-                        process(soMask);
-                    } else {
-                        process(so);
-                    }
-                } else {
-                    if (soMask != null) {
-                        process(soMask);
-                        return;
-                    }
-                    boolean rasterize = showRasterizeDialog(layer);
-                    if (rasterize) {
-                        ImageLayer newImageLayer = so.replaceWithRasterized();
-                        process(newImageLayer);
-                    }
+            process(imageLayer);
+        } else if (layer instanceof SmartObject so) {
+            if (!allowSmartObjects) {
+                boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
+                if (rasterize) {
+                    ImageLayer newImageLayer = so.replaceWithRasterized();
+                    process(newImageLayer);
                 }
-            } else { // plain image layer
-                process(imageLayer);
             }
         } else if (layer.isRasterizable()) {
             if (RandomGUITest.isRunning()) {
@@ -123,7 +104,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
                 return;
             }
 
-            boolean rasterize = showRasterizeDialog(layer);
+            boolean rasterize = Dialogs.showRasterizeDialog(layer, name);
             if (rasterize) {
                 ImageLayer newImageLayer = layer.replaceWithRasterized();
                 process(newImageLayer);
@@ -134,30 +115,6 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }
-    }
-
-    private boolean showRasterizeDialog(Layer layer) {
-        if (RandomGUITest.isRunning()) {
-            return true;
-        }
-
-        boolean isNoun = name.contains("Tool");
-        String firstName = isNoun ? "The " + name : name;
-        String secondName = isNoun ? "the " + name : name;
-
-        String typeStringLC = layer.getTypeStringLC();
-        String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
-                            "%s cannot be used on %ss.<br>" +
-                            "If you rasterize this %s, you can use %s,<br>" +
-                            "but the layer will become a regular image layer.",
-            layer.getName(), typeStringLC, firstName,
-            typeStringLC, typeStringLC, secondName);
-
-        String[] options = {"Rasterize", GUIText.CANCEL};
-
-        boolean rasterize = Dialogs.showOKCancelWarningDialog(msg,
-            layer.getTypeString(), options, 1);
-        return rasterize;
     }
 
     public String getName() {

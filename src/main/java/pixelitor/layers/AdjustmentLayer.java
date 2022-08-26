@@ -69,9 +69,9 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    protected AdjustmentLayer createTypeSpecificCopy(CopyType copyType) {
-        String duplicateName = copyType.createLayerDuplicateName(name);
-        return new AdjustmentLayer(comp, duplicateName, filter.copy());
+    protected AdjustmentLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        String copyName = copyType.createLayerCopyName(name);
+        return new AdjustmentLayer(comp, copyName, filter.copy());
     }
 
     @Override
@@ -101,7 +101,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public boolean hasIconThumbnail() {
+    public boolean hasRasterThumbnail() {
         return false;
     }
 
@@ -151,13 +151,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
         filter = lastFilter;
         lastFilter = tmp;
 
-        comp.update();
+        holder.update();
     }
 
     @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
-            comp.update();
+            holder.update();
         }
     }
 
@@ -169,7 +169,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     public void onFilterDialogAccepted(String filterName) {
         if (showOriginal) {
             filter = lastFilter;
-            comp.update();
+            holder.update();
         } else {
             if (!tentative) {
                 History.add(new FilterChangedEdit(this, lastFilter, null));
@@ -184,7 +184,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     public void onFilterDialogCanceled() {
         if (!showOriginal) {
             filter = lastFilter;
-            comp.update();
+            holder.update();
         }
         lastFilter = null;
         showOriginal = false;
@@ -208,7 +208,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     public void setFilter(Filter filter) {
         this.filter = filter;
 
-        comp.update();
+        holder.update();
     }
 
     @Override
@@ -223,12 +223,5 @@ public class AdjustmentLayer extends Layer implements Filterable {
         node.add(filter.createDebugNode("filter"));
 
         return node;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName()
-               + "{" + "filter=" + (filter == null ? "null filter" : filter.getName())
-               + ", super=" + super.toString() + '}';
     }
 }

@@ -28,7 +28,12 @@ import static java.awt.AlphaComposite.DST_OUT;
  * The blending modes
  */
 public enum BlendingMode {
-    NORMAL("Normal", "svg:src-over") {
+    PASS_THROUGH("Pass Through", "") {
+        @Override
+        public Composite getComposite(float opacity) {
+            throw new IllegalStateException();
+        }
+    }, NORMAL("Normal", "svg:src-over") {
         @Override
         public Composite getComposite(float opacity) {
             return AlphaComposite.SrcOver.derive(opacity);
@@ -137,6 +142,17 @@ public enum BlendingMode {
         }
     };
 
+    public static final BlendingMode[] ALL_MODES = values();
+    public static final BlendingMode[] LAYER_MODES;
+
+    static {
+        // skip the first mode (pass through)
+        LAYER_MODES = new BlendingMode[ALL_MODES.length - 1];
+        for (int i = 0; i < LAYER_MODES.length; i++) {
+            LAYER_MODES[i] = ALL_MODES[i + 1];
+        }
+    }
+
     private final String guiName;
     private final String svgName; // used by the OpenRaster import-export
 
@@ -157,8 +173,7 @@ public enum BlendingMode {
     }
 
     public static BlendingMode fromSVGName(String svgName) {
-        BlendingMode[] blendingModes = values();
-        for (BlendingMode mode : blendingModes) {
+        for (BlendingMode mode : LAYER_MODES) {
             String modeSVGName = mode.toSVGName();
             if (modeSVGName.equals(svgName)) {
                 return mode;
@@ -166,4 +181,5 @@ public enum BlendingMode {
         }
         return NORMAL;
     }
+
 }

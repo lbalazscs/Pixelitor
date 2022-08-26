@@ -74,7 +74,7 @@ public enum ImageMode {
 
     private JMenuItem createMenuItem() {
         Action action = new OpenViewEnabledAction(toString(),
-            comp -> comp.changeMode(ImageMode.this));
+            comp -> comp.changeMode(this));
 
         return new JRadioButtonMenuItem(action);
     }

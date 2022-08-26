@@ -66,7 +66,7 @@ public class AddLayerMaskAction extends NamedAction
 
     private void onClick(boolean ctrlPressed) {
         var comp = Views.getActiveComp();
-        var layer = comp.getEditingTarget();
+        var layer = comp.getActiveLayer();
         assert !layer.hasMask();
 
         layer.addMask(ctrlPressed);
@@ -79,7 +79,7 @@ public class AddLayerMaskAction extends NamedAction
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        boolean hasMask = newView.getComp().getEditingTarget().hasMask();
+        boolean hasMask = newView.getComp().getActiveLayer().hasMask();
         setEnabled(!hasMask);
     }
 
@@ -100,8 +100,8 @@ public class AddLayerMaskAction extends NamedAction
     }
 
     @Override
-    public void layerTargeted(Layer newEditingTarget) {
-        setEnabled(!newEditingTarget.hasMask());
+    public void layerActivated(Layer newActiveLayer) {
+        setEnabled(!newActiveLayer.hasMask());
     }
 
     @Override

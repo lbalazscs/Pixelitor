@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,7 +67,7 @@ public abstract class OKCancelDialog extends JDialog {
         setupCancelButton(cancelButton);
 
         pack();
-        Screens.position(this, SCREEN_CENTER);
+        Screens.position(this, SCREEN_CENTER, null);
     }
 
     private void setupOKButton() {

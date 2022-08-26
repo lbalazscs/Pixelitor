@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
@@ -67,6 +68,17 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         super(smartObject.getComp(), filter.getName(), filter);
         setImageSource(imageSource);
         setSmartObject(smartObject);
+        holder = smartObject;
+    }
+
+    public SmartFilter(SmartFilter orig, Composition newComp, String name) {
+        super(newComp, name, orig.getFilter().copy());
+
+        this.imageSource = orig.imageSource;
+        this.smartObject = orig.smartObject;
+
+        holder = smartObject;
+        cachedImage = orig.cachedImage; // safe to share
     }
 
     @Serial
@@ -75,14 +87,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         cachedImage = null;
 
         in.defaultReadObject();
+
+        // migrate
+        holder = smartObject;
     }
 
     @Override
-    protected SmartFilter createTypeSpecificCopy(CopyType copyType) {
-        SmartFilter duplicate = new SmartFilter(filter.copy(), imageSource, smartObject);
-        String duplicateName = copyType.createLayerDuplicateName(name);
-        duplicate.setName(duplicateName, false);
-        return duplicate;
+    protected SmartFilter createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        return new SmartFilter(this, newComp, copyType.createLayerCopyName(name));
     }
 
     @Override
@@ -151,18 +163,19 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         this.imageSource = Objects.requireNonNull(imageSource);
     }
 
+    public SmartObject getSmartObject() {
+        return smartObject;
+    }
+
     public void setSmartObject(SmartObject smartObject) {
         this.smartObject = Objects.requireNonNull(smartObject);
+        this.holder = smartObject;
     }
 
     @Override
-    public Layer getOwner() {
-        return smartObject;
-    }
-
-    @Override
-    public LayerHolder getHolder() {
-        return smartObject;
+    public void setHolder(LayerHolder holder) {
+        // setSmartObject should be used to set the holder
+        throw new IllegalStateException();
     }
 
     public SmartFilter getNext() {
@@ -267,7 +280,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             next.invalidateChain();
         }
         smartObject.invalidateImageCache();
-        comp.update();
+        holder.update();
         smartObject.updateIconImage();
     }
 
@@ -288,19 +301,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         this.filter = filter;
 
         filterSettingsChanged();
-        comp.update();
+        holder.update();
     }
 
-    @Override
-    public void activate(boolean addToHistory) {
-        comp.setEditingTarget(this);
-        smartObject.activate(addToHistory);
-    }
-
-    @Override
-    public boolean isActive() {
-        return smartObject.isActive();
-    }
+//    @Override
+//    public boolean isActiveRoot() {
+//        return smartObject.isActiveRoot();
+//    }
 
     @Override
     public void setMaskEditing(boolean newValue) {
@@ -314,7 +321,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
             filterSettingsChanged();
-            comp.update();
+            holder.update();
         }
     }
 
@@ -335,9 +342,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             popup.add(new PAction("Edit " + getName() + "...", this::edit));
         }
         popup.add(new PAction("Delete " + getName(), () ->
-            smartObject.deleteSmartFilter(SmartFilter.this, true)));
+            smartObject.deleteSmartFilter(this, true, true)));
         popup.add(new PAction("Copy " + getName(), () ->
-            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true)));
+            copiedSmartFilter = (SmartFilter) copy(CopyType.UNDO, true, comp)));
 
         if (!hasMask()) {
             popup.add(new PAction("Add Layer Mask", () -> addMask(false)));
@@ -348,9 +355,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (smartObject.getNumSmartFilters() > 1) {
             popup.addSeparator();
             popup.add(new PAction("Move Up", Icons.getNorthArrowIcon(), () ->
-                smartObject.moveUp(SmartFilter.this)));
+                smartObject.moveUp(this)));
             popup.add(new PAction("Move Down", Icons.getSouthArrowIcon(), () ->
-                smartObject.moveDown(SmartFilter.this)));
+                smartObject.moveDown(this)));
         }
 
         return popup;
@@ -368,14 +375,14 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             History.add(new FilterChangedEdit(this, oldFilter, oldName));
 
             filterSettingsChanged();
-            comp.update();
+            holder.update();
             edit();
         }
     }
 
     public void updateOptions(SmartObject layer) {
         if (filter instanceof ParametrizedFilter pf) {
-            pf.getParamSet().updateOptions(layer, false);
+            pf.getParamSet().updateOptions(this, false);
         }
     }
 
@@ -424,16 +431,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
         node.addString("imageSource class", imageSource.getClass().getSimpleName());
         node.add(imageSource.createDebugNode("imageSource"));
+        node.addString("next", next == null ? "null" : next.toString());
+        node.addBoolean("cached", (cachedImage != null));
 
         return node;
-    }
-
-    @Override
-    public String toString() {
-        return "SmartFilter(name=" + getName()
-               + ", visibility = " + isVisible()
-               + ", next = " + (next != null ? next.getName() : "null")
-               + ", cached = " + (cachedImage != null)
-               + ")";
     }
 }

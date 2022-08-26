@@ -30,7 +30,9 @@ import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
+import pixelitor.tools.Tools;
 import pixelitor.utils.debug.Debug;
 
 import javax.imageio.ImageIO;
@@ -43,6 +45,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
@@ -1236,5 +1239,37 @@ public class ImageUtils {
         g.drawImage(src, 0, 0, null);
         g.dispose();
         return newImage;
+    }
+
+    public static BufferedImage calculateCompositeImage(List<Layer> layers, Canvas canvas) {
+        if (layers.size() == 1) { // shortcut
+            Layer layer = layers.get(0);
+            if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
+                return layer.asImage(true, true);
+            }
+        }
+
+        var imageSoFar = new BufferedImage(
+            canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
+        Graphics2D g = imageSoFar.createGraphics();
+
+        boolean firstVisibleLayer = true;
+        for (Layer layer : layers) {
+            if (layer.isVisible()) {
+                BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
+                if (result != null) { // adjustment layer or watermarking text layer
+                    imageSoFar = result;
+                    if (g != null) {
+                        g.dispose();
+                    }
+                    g = imageSoFar.createGraphics();
+                }
+                firstVisibleLayer = false;
+            }
+        }
+
+        g.dispose();
+
+        return imageSoFar;
     }
 }

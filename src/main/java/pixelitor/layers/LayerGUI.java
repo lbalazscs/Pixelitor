@@ -17,25 +17,30 @@
 
 package pixelitor.layers;
 
+import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.AppContext;
-import pixelitor.ThreadPool;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.plaf.ButtonUI;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -52,9 +57,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public static final Color UNSELECTED_COLOR = new Color(214, 217, 223);
     public static final Color SELECTED_COLOR = new Color(48, 76, 111);
-    public static final Color SELECTED_DARK_COLOR = new Color(16, 16, 16);
-    public static final Color SEMI_SELECTED_COLOR = new Color(131, 146, 167);
-    public static final Color SEMI_SELECTED_DARK_COLOR = new Color(38, 39, 40);
+    private static final Color SELECTED_DARK_COLOR = new Color(16, 16, 16);
+    private static final Color SEMI_SELECTED_COLOR = new Color(131, 146, 167);
+    private static final Color SEMI_SELECTED_DARK_COLOR = new Color(38, 39, 40);
 
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
@@ -116,12 +121,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (layer instanceof LayerHolder layerHolder) {
             int numChildren = layerHolder.getNumLayers();
             if (numChildren > 0) {
-                GridLayout gridLayout = new GridLayout(numChildren, 1);
                 if (childrenPanel == null) {
-                    childrenPanel = new JPanel(gridLayout);
+                    VerticalLayout innerLayout = new VerticalLayout();
+                    childrenPanel = new JPanel(innerLayout);
                 } else {
                     childrenPanel.removeAll();
-                    childrenPanel.setLayout(gridLayout);
                 }
             } else {
                 if (childrenPanel != null) {
@@ -224,11 +228,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void activateLayerNow() {
         // the layer would be activated anyway, but only in an invokeLayer,
         // and the mask activation expects events to be coming from the active layer
-        layer.activate(true);
+//        layer.getTopLevelLayer().activate(true);
 
-        // the call above might not set it as editing target,
-        // if the layer was already active
-        layer.setAsEditingTarget();
+        layer.activate();
     }
 
     private void layerPopupTriggered(MouseEvent e) {
@@ -323,7 +325,13 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void buttonActivationChanged() {
         if (isSelected()) {
             // the layer was just activated
-            layer.activate(userInteraction);
+//            layer.activate(userInteraction);
+
+            // during comp actions, the active layer might already be inside the active layer
+            boolean setActiveLayer = !layer.contains(layer.getComp().getActiveLayer());
+            if (setActiveLayer) {
+                layer.activate();
+            }
         } else {
             // the layer was just deactivated
             nameEditor.disableEditing();
@@ -346,7 +354,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         this.userInteraction = userInteraction;
     }
 
-    public void setDragReorderHandler(DragReorderHandler handler) {
+    private void setDragReorderHandler(DragReorderHandler handler) {
         if (dragReorderHandler != null) {
             return; // don't attach twice
         }
@@ -432,7 +440,17 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public void updateLayerIconImageAsync(Layer layer) {
         assert calledOnEDT() : threadInfo();
-        assert layer.hasIconThumbnail();
+        assert layer.hasRasterThumbnail();
+
+        if (layer instanceof SmartObject) {
+            // the synchronous update avoids starting a filter twice
+            BufferedImage thumb = layer.createIconThumbnail();
+            assert thumb != null;
+            if (thumb != null) {
+                updateIconOnEDT(layer, thumb);
+            }
+            return;
+        }
 
         Runnable notEDT = () -> {
             BufferedImage thumb = layer.createIconThumbnail();
@@ -441,16 +459,17 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 SwingUtilities.invokeLater(() -> updateIconOnEDT(layer, thumb));
             }
         };
-        ThreadPool.submit(notEDT);
+
+        CompletableFuture.runAsync(notEDT, Threads.onIOThread);
     }
 
     private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
         assert calledOnEDT() : threadInfo();
-        if (layer instanceof LayerMask) {
+        if (layer instanceof LayerMask mask) {
             if (!hasMaskIcon()) {
                 return;
             }
-            boolean disabledMask = !layer.getOwner().isMaskEnabled();
+            boolean disabledMask = !mask.getOwner().isMaskEnabled();
             if (disabledMask) {
                 ImageUtils.paintRedXOn(thumb);
             }
@@ -561,12 +580,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateSelectionState() {
-//        boolean isSmartFilter = isSmartFilterGUI();
-
-//        System.out.printf("LayerGUI::updateSelectionState: layer = %s '%s', editingTarget = %s, selected = %s, maskEditing = %s%n",
-//            layer.getClass().getSimpleName(), layer.getName(), layer.isEditingTarget(), isSelected(), layer.isMaskEditing());
-
-        if (!layer.isEditingTarget()) {
+        if (!layer.isActive()) {
             setSelectionState(SelectionState.UNSELECTED);
         } else if (layer.isMaskEditing()) {
             setSelectionState(SelectionState.MASK_SELECTED);
@@ -602,7 +616,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (newLayer.hasMask()) {
             addMaskIcon();
         }
-        selectionState.show(layerIconLabel, maskIconLabel);
+        updateSelectionState();
         updateChildrenPanel();
     }
 
@@ -619,12 +633,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 //            return;
 //        }
 
-        if (!layer.isActive()) {
+        if (!layer.getTopLevelLayer().isActiveRoot()) {
             return;
         }
 
         Color selectedColor;
-        if (layer.isEditingTarget()) {
+        if (layer.isActive()) {
             if (Themes.getCurrent().isDark()) {
                 selectedColor = SELECTED_DARK_COLOR;
             } else {
@@ -680,7 +694,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         return children;
     }
 
-    public boolean isSmartFilterGUI() {
+    public boolean isEmbedded() {
         return owner != null;
     }
 

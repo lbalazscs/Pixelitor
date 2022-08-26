@@ -114,28 +114,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert activeLayerIs(Layer expected) {
-        isNotNull();
-
-        Layer active = actual.getActiveLayer();
-        if (active != expected) {
-            throw new AssertionError("expected " + expected.getName()
-                    + ", found " + active.getName());
-        }
-
-        return this;
-    }
-
-    public CompositionAssert activeLayerNameIs(String expected) {
-        isNotNull();
-
-        assertThat(actual.getActiveLayer()
-                .getName())
-                .isEqualTo(expected);
-
-        return this;
-    }
-
     public CompositionAssert layerNHasMask(int n) {
         isNotNull();
 
@@ -363,18 +341,18 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert editingTargetIs(Layer expected) {
+    public CompositionAssert activeLayerIs(Layer expected) {
         isNotNull();
 
-        assertThat(actual.getEditingTarget()).isSameAs(expected);
+        assertThat(actual.getActiveLayer()).isSameAs(expected);
 
         return this;
     }
 
-    public CompositionAssert editingTargetNameIs(String expected) {
+    public CompositionAssert activeLayerNameIs(String expected) {
         isNotNull();
 
-        assertThat(actual.getEditingTarget().getName()).isEqualTo(expected);
+        assertThat(actual.getActiveLayer().getName()).isEqualTo(expected);
 
         return this;
     }

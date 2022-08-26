@@ -283,7 +283,7 @@ public class AppRunner {
         }
         dialog.textBox("widthTF").deleteText().enterText(String.valueOf(width));
 
-        if (!newImageValidationTested) {
+        if (!newImageValidationTested && Math.random() < 0.1) {
             dialog.textBox("heightTF").deleteText().enterText("e");
 
             // try to accept the dialog
@@ -317,7 +317,9 @@ public class AppRunner {
     void runMenuCommand(String text) {
         assert calledOutsideEDT() : threadInfo();
 
-        findMenuItemByText(text).click();
+        findMenuItemByText(text)
+            .requireEnabled()
+            .click();
         Utils.sleep(200, MILLISECONDS);
     }
 
@@ -628,6 +630,10 @@ public class AppRunner {
         });
     }
 
+    public void selectActiveLayer(String layerName) {
+        findLayerIconByLayerName(layerName).click();
+    }
+
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
                                     ShowOriginal showOriginal, boolean testPresets,
                                     Consumer<DialogFixture> customizer) {
@@ -713,7 +719,9 @@ public class AppRunner {
 
     void checkNumLayersIs(int expected) {
         EDT.assertNumLayersIs(expected);
-        layersContainer.requireNumLayerButtons(expected);
+
+        // the above line checks the layers in the active holder
+//        layersContainer.requireNumLayerButtons(expected);
     }
 
     public void checkLayerNamesAre(String... expectedNames) {
@@ -740,7 +748,7 @@ public class AppRunner {
             .requireEnabled()
             .click()
             .requireDisabled();
-        assert EDT.editingTargetHasMask();
+        assert EDT.activeLayerHasMask();
     }
 
     private void undoRedoNewLayer(int numLayersBefore, String editName) {
@@ -754,7 +762,7 @@ public class AppRunner {
     }
 
     public void mergeDown() {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         runMenuCommand("Merge Down");
         checkNumLayersIs(numLayersBefore - 1);
@@ -767,7 +775,7 @@ public class AppRunner {
     }
 
     public void addEmptyImageLayer(boolean bellow) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         if (bellow) {
             keyboard.pressCtrl();
@@ -781,7 +789,7 @@ public class AppRunner {
     }
 
     public void addTextLayer(String text, Consumer<DialogFixture> customizer, String expectedText) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
         pw.button("addTextLayer").click();
 
         var dialog = findDialogByTitle("Create Text Layer");
@@ -827,7 +835,7 @@ public class AppRunner {
     }
 
     public void addColorFillLayer(Color c) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         runMenuCommand("New Color Fill Layer...");
         var colorSelector = findDialogByTitle("Add Color Fill Layer");
@@ -841,7 +849,7 @@ public class AppRunner {
     }
 
     public void addGradientFillLayer(GradientType gradientType) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         keyboard.ctrlAltPress(VK_G);
         undoRedoNewLayer(numLayersBefore, "Add Gradient Fill Layer");
@@ -885,7 +893,7 @@ public class AppRunner {
     }
 
     public void addShapesLayer(ShapeType shapeType, CanvasDrag shapeLocation) {
-        int numLayersBefore = EDT.getNumLayersInActiveComp();
+        int numLayersBefore = EDT.getNumLayersInActiveHolder();
 
         keyboard.ctrlAltPress(VK_S);
         undoRedoNewLayer(numLayersBefore, "Add Shape Layer");

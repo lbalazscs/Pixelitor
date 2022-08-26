@@ -28,7 +28,7 @@ public enum CopyType {
      */
     LAYER_DUPLICATE(true) {
         @Override
-        public String createLayerDuplicateName(String orig) {
+        public String createLayerCopyName(String orig) {
             return Utils.createCopyName(orig);
         }
     },
@@ -37,7 +37,7 @@ public enum CopyType {
      */
     UNDO(false) {
         @Override
-        public String createLayerDuplicateName(String orig) {
+        public String createLayerCopyName(String orig) {
             return orig;
         }
     },
@@ -46,7 +46,7 @@ public enum CopyType {
      */
     COMP_DUPLICATE(true) {
         @Override
-        public String createLayerDuplicateName(String orig) {
+        public String createLayerCopyName(String orig) {
             return orig;
         }
     },
@@ -55,7 +55,7 @@ public enum CopyType {
      */
     SMART_OBJECT_CLONE(false) {
         @Override
-        public String createLayerDuplicateName(String orig) {
+        public String createLayerCopyName(String orig) {
             return orig + " clone";
         }
     };
@@ -70,5 +70,5 @@ public enum CopyType {
         return deepContentCopy;
     }
 
-    public abstract String createLayerDuplicateName(String orig);
+    public abstract String createLayerCopyName(String orig);
 }

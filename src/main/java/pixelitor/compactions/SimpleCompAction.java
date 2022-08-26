@@ -27,7 +27,7 @@ import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
+import pixelitor.layers.SmartObject;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
@@ -56,7 +56,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.hasSmartObjects()) {
+        if (oldComp.containsLayerClass(SmartObject.class)) {
             Messages.showNotImplementedForSmartObjects(getText());
             return CompletableFuture.completedFuture(oldComp);
         }
@@ -69,7 +69,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
         var canvasAT = createCanvasTransform(newCanvas);
         newComp.imCoordsChanged(canvasAT, false, view);
 
-        newComp.forEachLayer(this::processLayer);
+        newComp.forEachNestedLayerAndMask(this::processLayer);
 
         if (affectsCanvasSize) {
             changeCanvasSize(newCanvas, view);
@@ -103,10 +103,6 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
     private void processLayer(Layer layer) {
         if (layer instanceof ContentLayer contentLayer) {
             transform(contentLayer);
-        }
-        if (layer.hasMask()) {
-            LayerMask mask = layer.getMask();
-            transform(mask);
         }
     }
 

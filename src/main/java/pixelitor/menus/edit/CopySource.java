@@ -39,7 +39,7 @@ public enum CopySource {
     LAYER_OR_MASK {
         @Override
         Result<BufferedImage, String> getImage(Composition comp) {
-            Layer layer = comp.getEditingTarget();
+            Layer layer = comp.getActiveLayer();
             if (layer.isMaskEditing()) {
                 layer = layer.getMask();
             }

@@ -26,7 +26,7 @@ import pixelitor.Composition;
 public interface ActiveLayerHolderListener {
     void numLayersChanged(LayerHolder layerHolder, int newLayerCount);
 
-    void layerTargeted(Layer newEditingTarget);
+    void layerActivated(Layer newActiveLayer);
 
     void layerOrderChanged(LayerHolder layerHolder);
 }

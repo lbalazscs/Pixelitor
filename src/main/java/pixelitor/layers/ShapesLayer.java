@@ -63,7 +63,7 @@ public class ShapesLayer extends ContentLayer {
 
     public static void createNew(Composition comp) {
         var layer = new ShapesLayer(comp, "shape layer " + (++count));
-        new Composition.LayerAdder(comp)
+        new Composition.LayerAdder(comp.getHolderForNewLayers())
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Shape Layer")
             .add(layer);
@@ -77,8 +77,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    protected ShapesLayer createTypeSpecificCopy(CopyType copyType) {
-        String duplicateName = copyType.createLayerDuplicateName(name);
+    protected ShapesLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
+        String duplicateName = copyType.createLayerCopyName(name);
         var duplicate = new ShapesLayer(comp, duplicateName);
         if (styledShape != null) {
             duplicate.setStyledShape(styledShape.clone());
@@ -284,7 +284,7 @@ public class ShapesLayer extends ContentLayer {
         }
 
         if (styledShape != null) {
-            return styledShape.checkConsistency();
+            return styledShape.checkInvariants();
         }
         return true;
     }

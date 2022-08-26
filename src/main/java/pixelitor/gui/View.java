@@ -209,8 +209,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         if (isActive()) {
             LayersContainer.showLayersOf(this);
-            Layers.activeCompChanged(newComp, false);
-            newMaskViewMode.activate(this, newComp.getEditingTarget());
+
+            Layers.activeCompChanged(newComp, reloaded);
+
+            // is this needed?
+            newMaskViewMode.activate(this, newComp.getActiveLayer());
+
             repaintNavigator(true);
             HistogramsPanel.updateFrom(newComp);
             PixelitorWindow.get().updateTitle(newComp);
@@ -380,14 +384,16 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // after the translation and scaling, we are in "image space"
 
         if (showMask) {
-            LayerMask mask = comp.getActiveLayer().getActiveMask();
+//            LayerMask mask = comp.getActiveLayer().getActiveMask();
+            LayerMask mask = comp.getActiveLayer().getMask();
             assert mask != null : "no mask in " + maskViewMode;
             mask.paintLayerOnGraphics(g2, true);
         } else {
             g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 
             if (maskViewMode.showRuby()) {
-                LayerMask mask = comp.getActiveLayer().getActiveMask();
+                //LayerMask mask = comp.getActiveLayer().getActiveMask();
+                LayerMask mask = comp.getActiveLayer().getMask();
                 assert mask != null : "no mask in " + maskViewMode;
                 mask.paintAsRubylith(g2);
             }
@@ -805,13 +811,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             layerGUI.setUserInteraction(true);
         }
 
-        if (isActive()) {
+        if (isActive() && comp.isHolderOfActiveLayer()) {
             Layers.numLayersChanged(comp, comp.getNumLayers());
-        }
-
-        newLayer.updateIconImage();
-        if (newLayer.hasMask()) {
-            newLayer.getMask().updateIconImage();
         }
     }
 

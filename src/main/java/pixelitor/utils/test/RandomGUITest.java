@@ -793,7 +793,7 @@ public class RandomGUITest {
         if (comp == null) {
             return false;
         }
-        return comp.hasActivePath() && comp.activeAcceptsToolDrawing();
+        return comp.hasActivePath() && comp.activeLayerAcceptsToolDrawing();
     }
 
     private static void randomRotateFlip() {
@@ -864,7 +864,7 @@ public class RandomGUITest {
 
         if (rand.nextBoolean()) {
             Layer layer = comp.getActiveLayer();
-            if (comp.canMergeDown(layer)) {
+            if (layer.getHolder().canMergeDown(layer)) {
                 log("merge down " + layer.getName() + " in " + comp.getName());
                 comp.mergeActiveLayerDown();
             }
@@ -1082,7 +1082,7 @@ public class RandomGUITest {
 
     // (add, delete, apply, link)
     private static void randomLayerMaskAction() {
-        Layer layer = Views.getActiveLayer();
+        Layer layer = Views.getActiveRoot();
         if (!layer.hasMask()) {
             assert AddLayerMaskAction.INSTANCE.isEnabled();
             runAction(AddLayerMaskAction.INSTANCE);

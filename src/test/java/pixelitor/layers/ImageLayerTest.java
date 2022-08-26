@@ -97,16 +97,7 @@ public class ImageLayerTest {
         withTranslation.setupFor(layer);
         withSelection.setupFor(comp);
 
-        int layerIconUpdatesAtStart = 0;
-        int maskIconUpdatesAtStart = 0;
-        if (withTranslation.isTrue()) {
-            layerIconUpdatesAtStart = 1;
-            if (withMask.isTrue()) {
-                maskIconUpdatesAtStart = 1;
-            }
-        }
-
-        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, maskIconUpdatesAtStart);
+        iconUpdates = new IconUpdateChecker(layer, mask);
     }
 
     @Test
@@ -536,7 +527,7 @@ public class ImageLayerTest {
 
     @Test
     public void duplicate() {
-        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.LAYER_DUPLICATE, true);
+        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.LAYER_DUPLICATE, true, comp);
 
         assertThat(duplicate)
             .contentBoundsIsEqualTo(layer.getContentBounds())

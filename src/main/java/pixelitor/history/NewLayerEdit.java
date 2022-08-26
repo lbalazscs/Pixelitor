@@ -17,9 +17,9 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerHolder;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.debug.DebugNode;
 
@@ -30,27 +30,31 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the creation of a new layer
  */
 public class NewLayerEdit extends PixelitorEdit {
+    private LayerHolder holder;
     private Layer activeLayerBefore;
     private Layer newLayer;
     private final int newLayerIndex;
     private final MaskViewMode viewModeBefore;
 
-    public NewLayerEdit(String historyName, Composition comp,
+    public NewLayerEdit(String editName, LayerHolder holder,
                         Layer newLayer, Layer activeLayerBefore,
                         MaskViewMode viewModeBefore) {
-        super(historyName, comp);
+        super(editName, holder.getComp());
 
+        assert activeLayerBefore != newLayer;
+
+        this.holder = holder;
         this.activeLayerBefore = activeLayerBefore;
         this.viewModeBefore = viewModeBefore;
         this.newLayer = newLayer;
-        newLayerIndex = comp.getLayerIndex(newLayer);
+        newLayerIndex = holder.indexOf(newLayer);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.deleteLayer(newLayer, false);
+        holder.deleteLayer(newLayer, false);
         comp.setActiveLayer(activeLayerBefore);
         viewModeBefore.activate(comp, activeLayerBefore);
     }
@@ -59,7 +63,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        new LayerAdder(comp)
+        new LayerAdder(holder)
             .atIndex(newLayerIndex)
             .add(newLayer);
     }
@@ -70,12 +74,14 @@ public class NewLayerEdit extends PixelitorEdit {
 
         newLayer = null;
         activeLayerBefore = null;
+        holder = null;
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
+        node.add(holder.createDebugNode("holder"));
         node.add(activeLayerBefore.createDebugNode("active layer before"));
         node.add(newLayer.createDebugNode("new layer"));
         node.addInt("new layer index", newLayerIndex);

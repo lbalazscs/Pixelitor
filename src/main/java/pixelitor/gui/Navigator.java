@@ -106,7 +106,7 @@ public class Navigator extends JComponent
         }
         popup.addSeparator();
         popup.add(new PAction("View Box Color...", () ->
-            Colors.selectColorWithDialog(Navigator.this,
+            Colors.selectColorWithDialog(this,
                 "View Box Color", viewBoxColor, true,
                 this::setNewViewBoxColor)));
     }

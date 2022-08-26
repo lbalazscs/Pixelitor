@@ -279,7 +279,7 @@ public class MenuBar extends JMenuBar {
         var layersMenu = new PMenu(texts.getString("layer"), 'L');
 
         layersMenu.add(AddNewLayerAction.INSTANCE);
-        layersMenu.add(DeleteActiveLayerAction.INSTANCE);
+        layersMenu.add(DeleteActiveLayerAction.INSTANCE, DELETE);
         layersMenu.add(DuplicateLayerAction.INSTANCE, CTRL_J);
 
         layersMenu.addSeparator();
@@ -309,6 +309,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createTextLayerSubmenu(texts));
 
         if (AppContext.enableExperimentalFeatures) {
+            layersMenu.add(createLayerGroupsSubmenu());
             layersMenu.add(createAdjustmentLayersSubmenu());
             layersMenu.add(createSmartObjectSubmenu());
             layersMenu.add(createColorFillLayerSubmenu());
@@ -328,13 +329,13 @@ public class MenuBar extends JMenuBar {
 
         // layer to top
         var layerToTop = new OpenViewEnabledAction(LAYER_TO_TOP,
-            Composition::moveActiveLayerToTop);
+            comp -> comp.getActiveLayerHolder().moveActiveLayerToTop());
         layerToTop.setToolTip(texts.getString("layer_to_top_tt"));
         sub.add(layerToTop, CTRL_SHIFT_ALT_R);
 
         // layer_to_bottom
         var layerToBottom = new OpenViewEnabledAction(LAYER_TO_BOTTOM,
-            Composition::moveActiveLayerToBottom);
+            comp -> comp.getActiveLayerHolder().moveActiveLayerToBottom());
         layerToBottom.setToolTip(texts.getString("layer_to_bottom_tt"));
         sub.add(layerToBottom, CTRL_SHIFT_ALT_L);
 
@@ -342,19 +343,19 @@ public class MenuBar extends JMenuBar {
 
         // raise layer selection
         var raiseLayerSelection = new OpenViewEnabledAction(RAISE_LAYER_SELECTION,
-            Composition::raiseLayerSelection);
+            comp -> comp.getActiveLayerHolder().raiseLayerSelection());
         raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
         sub.add(raiseLayerSelection, CTRL_SHIFT_R);
 
         var lowerLayerSelection = new OpenViewEnabledAction(LOWER_LAYER_SELECTION,
-            Composition::lowerLayerSelection);
+            comp -> comp.getActiveLayerHolder().lowerLayerSelection());
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
         sub.add(lowerLayerSelection, CTRL_SHIFT_L);
 
         sub.addSeparator();
 
         sub.add(new OpenViewEnabledAction("Isolate",
-            Composition::isolateActive));
+            Composition::isolateRoot));
 
         return sub;
     }
@@ -464,6 +465,20 @@ public class MenuBar extends JMenuBar {
                 layer.getComp().createSelectionFromText();
             }
         });
+
+        return sub;
+    }
+
+    private static JMenu createLayerGroupsSubmenu() {
+        PMenu sub = new PMenu("Layer Groups");
+
+        sub.add(new OpenViewEnabledAction("Convert Visible to Group",
+            Composition::convertVisibleLayersToGroup), CTRL_G);
+
+//        Condition isLayerGroup = new ClassCondition(LayerGroup.class, "layer group");
+
+        sub.add(new OpenViewEnabledAction("Ungroup",
+            comp -> comp.getActiveLayer().unGroup()), CTRL_U);
 
         return sub;
     }
@@ -695,7 +710,7 @@ public class MenuBar extends JMenuBar {
         PMenu colorsMenu = new PMenu(GUIText.COLOR, 'C');
 
         colorsMenu.addFilter(ColorBalance.NAME, ColorBalance::new, CTRL_B);
-        colorsMenu.addFilter(HueSat.NAME, HueSat::new, CTRL_U);
+        colorsMenu.addFilter(HueSat.NAME, HueSat::new);
         colorsMenu.addFilter(Colorize.NAME, Colorize::new);
         colorsMenu.addFilter(Levels.NAME, Levels::new, CTRL_L);
         colorsMenu.addFilter(ToneCurvesFilter.NAME, ToneCurvesFilter::new, CTRL_M);
@@ -1271,6 +1286,8 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createManualSubmenu(PixelitorWindow pw) {
         PMenu sub = new PMenu("Manual");
+
+        sub.add(new PAction("repaint() the main window", pw::repaint));
 
         sub.add(new OpenViewEnabledAction("repaint() on the active image",
             comp -> repaintActive()));

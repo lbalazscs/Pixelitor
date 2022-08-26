@@ -17,8 +17,8 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerHolder;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -28,12 +28,14 @@ import javax.swing.undo.CannotUndoException;
  * Represents the replacement of a layer with another
  */
 public class ReplaceLayerEdit extends PixelitorEdit {
+    private LayerHolder holder;
     private Layer before;
     private Layer after;
 
-    public ReplaceLayerEdit(Composition comp, Layer before, Layer after, String editName) {
-        super(editName, comp, true);
+    public ReplaceLayerEdit(LayerHolder holder, Layer before, Layer after, String editName) {
+        super(editName, holder.getComp(), true);
 
+        this.holder = holder;
         this.before = before;
         this.after = after;
     }
@@ -42,7 +44,7 @@ public class ReplaceLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.replaceLayer(after, before);
+        holder.replaceLayer(after, before);
 
         assert before.isActive();
         assert before.hasUI();
@@ -52,7 +54,10 @@ public class ReplaceLayerEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.replaceLayer(before, after);
+        holder.replaceLayer(before, after);
+
+        assert after.isActive();
+        assert after.hasUI();
     }
 
     @Override
@@ -61,6 +66,7 @@ public class ReplaceLayerEdit extends PixelitorEdit {
 
         before = null;
         after = null;
+        holder = null;
     }
 
     @Override

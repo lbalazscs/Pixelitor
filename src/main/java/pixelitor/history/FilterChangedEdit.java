@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.filters.Filter;
 import pixelitor.layers.AdjustmentLayer;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -62,5 +63,14 @@ public class FilterChangedEdit extends PixelitorEdit {
             layer.setName(backupName, false);
             backupName = tmpName;
         }
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(backupFilter.createDebugNode("backupFilter"));
+
+        return node;
     }
 }

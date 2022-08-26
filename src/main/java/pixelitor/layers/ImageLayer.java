@@ -225,9 +225,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        if (serializeImage()) {
-            PXCFormat.serializeImage(out, image);
-        }
+        PXCFormat.serializeImage(out, image);
     }
 
     @Serial
@@ -240,14 +238,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         image = null;
 
         in.defaultReadObject();
-        if (serializeImage()) {
-            setImage(PXCFormat.deserializeImage(in));
-        }
+        setImage(PXCFormat.deserializeImage(in));
         imageContentChanged = false;
-    }
-
-    boolean serializeImage() {
-        return true;
     }
 
     public State getState() {
@@ -280,15 +272,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    protected ImageLayer createTypeSpecificCopy(CopyType copyType) {
+    protected ImageLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         BufferedImage imageCopy = copyImage(image);
         if (imageCopy == null) {
             // there was an out of memory error
             return null;
         }
 
-        String duplicateName = copyType.createLayerDuplicateName(name);
-        return new ImageLayer(comp, imageCopy, duplicateName, getTx(), getTy());
+        String copyName = copyType.createLayerCopyName(name);
+        return new ImageLayer(comp, imageCopy, copyName, getTx(), getTy());
     }
 
     @Override
@@ -376,7 +368,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             case PREVIEW -> previewImage;
         };
 
-        assert visibleImage != null : "state = " + state;
+        assert visibleImage != null : "state = " + state + " in " + getName();
         return visibleImage;
     }
 
@@ -411,7 +403,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         setState(PREVIEW);
         imageRefChanged();
-        comp.update();
+        holder.update();
     }
 
     private void setImageWithSelection(BufferedImage newImage, boolean isUndoRedo) {
@@ -499,7 +491,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setImage(newImage);
 
         History.add(new ImageEdit(editName, comp, this, oldImage, true));
-        comp.update();
+        holder.update();
         updateIconImage();
     }
 
@@ -532,7 +524,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // from the real image after the previews
         imageRefChanged();
 
-        comp.update();
+        holder.update();
     }
 
     @Override
@@ -556,7 +548,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setState(NORMAL);
 
         if (wasShowOriginal) {
-            comp.update();
+            holder.update();
         }
     }
 
@@ -607,7 +599,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             if (shouldRefresh) {
                 imageRefChanged();
-                comp.update();
+                holder.update();
             }
         } else {
             imageContentChanged = true; // history will be necessary
@@ -661,7 +653,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // not the actual one
         filterSourceImage = null;
         updateIconImage();
-        comp.update();
+        holder.update();
 //        Tools.editingTargetChanged(this);
     }
 
@@ -825,7 +817,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     public void forceTranslation(int x, int y) {
-        // skips the range check
+        // skips the range check on the overridden setTranslation
         super.setTranslation(x, y);
     }
 
@@ -1204,7 +1196,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void update() {
-        comp.update();
+        holder.update();
     }
 
     @Override
@@ -1225,24 +1217,5 @@ public class ImageLayer extends ContentLayer implements Drawable {
         node.add(DebugNodes.createBufferedImageNode("image", image));
 
         return node;
-    }
-
-    public String toDebugCanvasString() {
-        return "{canvasWidth=" + comp.getCanvasWidth()
-               + ", canvasHeight=" + comp.getCanvasHeight()
-               + ", tx=" + getTx()
-               + ", ty=" + getTy()
-               + ", imgWidth=" + image.getWidth()
-               + ", imgHeight=" + image.getHeight()
-               + '}';
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName()
-               + "{img=" + image.getWidth() + "x" + image.getHeight()
-               + ", state=" + state
-               + ", super=" + super.toString()
-               + '}';
     }
 }

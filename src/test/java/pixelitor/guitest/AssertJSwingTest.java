@@ -411,14 +411,14 @@ public class AssertJSwingTest {
         layer1Button.requireSelected();
 
         // undo delete
-        keyboard.undo("Delete Layer");
+        keyboard.undo("Delete layer 2");
 
         app.checkNumLayersIs(2);
         layer2Button = findLayerButton("layer 2");
         layer2Button.requireSelected();
 
         // redo delete
-        keyboard.redo("Delete Layer");
+        keyboard.redo("Delete layer 2");
         app.checkNumLayersIs(1);
         layer1Button.requireSelected();
 
@@ -520,7 +520,7 @@ public class AssertJSwingTest {
         maskMode.set(this);
 
         runMenuCommand("Delete Layer");
-        keyboard.undoRedo("Delete Layer");
+        keyboard.undoRedo("Delete layer 3");
         maskMode.set(this);
 
         runMenuCommand("Flatten Image");
@@ -930,7 +930,7 @@ public class AssertJSwingTest {
     }
 
     private void testDuplicateImage() {
-        int numLayers = EDT.getNumLayersInActiveComp();
+        int numLayers = EDT.getNumLayersInActiveHolder();
         log(1, "image duplication, num layers = " + numLayers);
 
         EDT.assertNumOpenImagesIs(1);

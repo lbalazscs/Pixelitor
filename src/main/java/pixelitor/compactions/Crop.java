@@ -29,6 +29,7 @@ import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
 import pixelitor.layers.Layer;
+import pixelitor.layers.SmartObject;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
@@ -69,7 +70,7 @@ public class Crop implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.hasSmartObjects()) {
+        if (oldComp.containsLayerClass(SmartObject.class)) {
             Messages.showNotImplementedForSmartObjects("Cropping");
             return CompletableFuture.completedFuture(oldComp);
         }
@@ -109,12 +110,8 @@ public class Crop implements CompAction {
             newComp.intersectSelection(cropRect);
         }
 
-        newComp.forEachLayer(layer -> {
-            layer.crop(cropRect, deleteCroppedPixels, allowGrowing);
-            if (layer.hasMask()) {
-                layer.getMask().crop(cropRect, deleteCroppedPixels, allowGrowing);
-            }
-        });
+        newComp.forEachNestedLayerAndMask(layer ->
+            layer.crop(cropRect, deleteCroppedPixels, allowGrowing));
 
         newCanvas.changeSize(cropRect.width, cropRect.height, view, false);
 

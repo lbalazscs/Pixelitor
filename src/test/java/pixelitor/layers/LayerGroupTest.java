@@ -15,26 +15,35 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.testutils;
+package pixelitor.layers;
 
+import org.junit.jupiter.api.*;
 import pixelitor.Composition;
+import pixelitor.TestHelper;
+import pixelitor.history.History;
 
-/**
- * The number of layers which is present when a test runs
- */
-public enum NumLayers {
-    ONE() {
-        @Override
-        public void setupFor(Composition comp) {
-            // delete one layer so that we have one left
-            comp.deleteLayer(comp.getActiveLayer(), true);
-        }
-    }, TWO() {
-        @Override
-        public void setupFor(Composition comp) {
+@DisplayName("layer group tests")
+@TestMethodOrder(MethodOrderer.Random.class)
+class LayerGroupTest {
+    private Composition comp;
 
-        }
-    };
+    private LayerGroup shallowGroup;
+    private LayerGroup deepGroup;
+    private LayerGroup nestedGroupA;
+    private LayerGroup nestedGroupB;
 
-    public abstract void setupFor(Composition comp);
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
+    @BeforeEach
+    void beforeEachTest() {
+        History.clear();
+    }
+
+    @Test
+    void copyCompWithGroups() {
+    }
+
 }
