@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerGroup;
 
 import java.awt.Component;
 import java.io.File;
@@ -143,5 +144,12 @@ public class Messages {
     public static void showNoVisibleLayersError(Composition comp) {
         showError("No visible layers",
             "There are no visible layers in " + comp.getName());
+    }
+
+    public static void showUnrasterizableLayerGroupError(LayerGroup group, String name) {
+        String msg = "<html>The active layer <i>\"%s\"</i> is a layer group." +
+                     "<br><br>%s cannot be applied to layer groups." +
+                     "<br>Pass through groups can't even be rasterized.";
+        showError("Layer Group", msg.formatted(group.getName(), name));
     }
 }

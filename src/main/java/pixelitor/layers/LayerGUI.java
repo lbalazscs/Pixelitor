@@ -25,7 +25,6 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
@@ -40,7 +39,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -460,7 +458,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         };
 
-        CompletableFuture.runAsync(notEDT, Threads.onIOThread);
+//        CompletableFuture.runAsync(notEDT, Threads.onIOThread);
+        new Thread(notEDT).start();
     }
 
     private void updateIconOnEDT(Layer layer, BufferedImage thumb) {
@@ -634,6 +633,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 //        }
 
         if (!layer.getTopLevelLayer().isActiveRoot()) {
+            // no custom painting if not selected or semi-selected
             return;
         }
 
@@ -680,6 +680,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public void thumbSizeChanged(int newThumbSize) {
         layout.thumbSizeChanged(newThumbSize);
+        for (LayerGUI child : children) {
+            child.thumbSizeChanged(newThumbSize);
+        }
     }
 
     public void setOwner(LayerGUI owner) {

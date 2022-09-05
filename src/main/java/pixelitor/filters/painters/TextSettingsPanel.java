@@ -318,7 +318,7 @@ public class TextSettingsPanel extends FilterGUI
         } else {
             assert textLayer != null;
             textLayer.applySettings(settings);
-            textLayer.getComp().update();
+            textLayer.update();
         }
     }
 

@@ -43,7 +43,7 @@ public enum WithTranslation {
     }, YES(-4, -4) {
         @Override
         public void setupFor(Composition comp) {
-            comp.forEachLayer(ContentLayer.class, contentLayer ->
+            comp.forEachNestedLayer(ContentLayer.class, contentLayer ->
                 TestHelper.setTranslation(comp, contentLayer, this));
         }
 

@@ -62,7 +62,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         translationEdit.undo();
 
         if (!embedded) {
-            layer.getComp().update();
+            layer.update();
             layer.updateIconImage();
         }
     }
@@ -77,7 +77,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
         translationEdit.redo();
 
         if (!embedded) {
-            layer.getComp().update();
+            layer.update();
             layer.updateIconImage();
         }
     }

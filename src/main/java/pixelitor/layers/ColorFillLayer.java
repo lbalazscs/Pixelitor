@@ -104,7 +104,7 @@ public class ColorFillLayer extends Layer {
     public BufferedImage createIconThumbnail() {
         Canvas canvas = comp.getCanvas();
         Dimension thumbDim = ImageUtils.calcThumbDimensions(
-            canvas.getWidth(), canvas.getHeight(), thumbSize);
+            canvas.getWidth(), canvas.getHeight(), thumbSize, true);
         BufferedImage thumb = ImageUtils.createSysCompatibleImage(thumbDim.width, thumbDim.height);
         Graphics2D g2 = thumb.createGraphics();
         Colors.fillWith(color, g2, thumbDim.width, thumbDim.height);

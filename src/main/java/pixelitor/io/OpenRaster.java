@@ -25,13 +25,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixelitor.Composition;
 import pixelitor.ImageMode;
-import pixelitor.layers.BlendingMode;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
+import pixelitor.layers.*;
 import pixelitor.utils.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -50,6 +49,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class OpenRaster {
     private static final String MERGED_IMAGE_NAME = "mergedimage.png";
+    private static final String THUMBNAIL_IMAGE_NAME = "Thumbnails/thumbnail.png";
 
     private OpenRaster() {
     }
@@ -68,37 +68,34 @@ public class OpenRaster {
         var fos = new FileOutputStream(outFile);
         var zos = new ZipOutputStream(fos);
 
-        String stackXML = format("""
-            <?xml version='1.0' encoding='UTF-8'?>
-            <image w="%d" h="%d">
-            <stack>
-            """, comp.getCanvasWidth(), comp.getCanvasHeight());
-
-        int numLayers = comp.getNumLayers();
-        int numImages = comp.getNumExportableImages() + 1; // +1 for the merged image
+        // +1 for the merged image, and +1 for the thumbnail
+        int numImages = comp.getNumExportableImages() + 2;
         double workRatio = 1.0 / numImages;
 
-        // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
-        for (int i = numLayers - 1; i >= 0; i--) {
-            Layer layer = comp.getLayer(i);
-            if (layer.canExportImage()) {
-                var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
-                stackXML += writeLayer(layer, i, zos, subTracker);
-            }
-        }
+        StringBuilder stackXML = new StringBuilder(format("""
+            <?xml version='1.0' encoding='UTF-8'?>
+            <image w="%d" h="%d">
+            """, comp.getCanvasWidth(), comp.getCanvasHeight()));
+        writeHolder(comp, mainTracker, zos, stackXML, workRatio, 0);
+        stackXML.append("</image>");
 
-        // add merged image
+        // add the merged image
         zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
-        var subTaskTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+        var mergedTracker = new SubtaskProgressTracker(workRatio, mainTracker);
         var img = comp.getCompositeImage();
-        TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
+        TrackedIO.writeToStream(img, zos, "PNG", mergedTracker);
         zos.closeEntry();
 
-        stackXML += "</stack>\n</image>";
+        // add the thumbnail image
+        zos.putNextEntry(new ZipEntry(THUMBNAIL_IMAGE_NAME));
+        var thumbTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+        var thumb = createORAThumbnail(comp.getCompositeImage());
+        TrackedIO.writeToStream(thumb, zos, "PNG", thumbTracker);
+        zos.closeEntry();
 
         // write the stack.xml file
         zos.putNextEntry(new ZipEntry("stack.xml"));
-        zos.write(stackXML.getBytes(UTF_8));
+        zos.write(stackXML.toString().getBytes(UTF_8));
         zos.closeEntry();
 
         // write the mimetype
@@ -110,30 +107,51 @@ public class OpenRaster {
         mainTracker.finished();
     }
 
-    private static String writeLayer(Layer layer,
-                                     int layerIndex,
-                                     ZipOutputStream zos,
-                                     ProgressTracker pt) throws IOException {
+    private static int writeHolder(LayerHolder holder, StatusBarProgressTracker mainTracker, ZipOutputStream zos, StringBuilder stackXML, double workRatio, int uniqueId) throws IOException {
+        stackXML.append(holder.getORAStackXML());
+
+        int numLayers = holder.getNumLayers();
+        // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
+        for (int i = numLayers - 1; i >= 0; i--) {
+            Layer layer = holder.getLayer(i);
+            if (layer instanceof LayerGroup group) {
+                uniqueId = writeHolder(group, mainTracker, zos, stackXML, workRatio, uniqueId);
+            } else if (layer.canExportImage()) {
+                var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+                writeLayer(layer, uniqueId, zos, subTracker, stackXML);
+                uniqueId++;
+            }
+        }
+
+        stackXML.append("</stack>");
+        return uniqueId;
+    }
+
+    private static void writeLayer(Layer layer,
+                                   int uniqueId,
+                                   ZipOutputStream zos,
+                                   ProgressTracker pt,
+                                   StringBuilder stackXML) throws IOException {
         TranslatedImage translatedImage = layer.getTranslatedImage();
 
-        String stackXML = format(Locale.ENGLISH,
+        String xml = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
             "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
             layer.getName(),
             layer.getVisibilityAsORAString(),
             layer.getBlendingMode().toSVGName(),
             layer.getOpacity(),
-            layerIndex,
+            uniqueId,
             translatedImage.tx(),
             translatedImage.ty());
+        stackXML.append(xml);
 
-        var entry = new ZipEntry(format("data/%d.png", layerIndex));
+        var entry = new ZipEntry(format("data/%d.png", uniqueId));
         zos.putNextEntry(entry);
 
         TrackedIO.writeToStream(translatedImage.img(), zos, "PNG", pt);
 
         zos.closeEntry();
-        return stackXML;
     }
 
     public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
@@ -154,7 +172,9 @@ public class OpenRaster {
                 if (name.equalsIgnoreCase("stack.xml")) {
                     stackXML = extractString(zipFile.getInputStream(entry));
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
-                    // no need for that
+                    // no need to read it
+                } else if (name.equalsIgnoreCase(THUMBNAIL_IMAGE_NAME)) {
+                    // no need to read it
                 } else if (FileUtils.hasPNGExtension(name)) {
                     var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
                     var stream = zipFile.getInputStream(entry);
@@ -170,11 +190,11 @@ public class OpenRaster {
 
         Element doc = loadXMLFromString(stackXML).getDocumentElement();
         doc.normalize();
-        String documentElementNodeName = doc.getNodeName();
-        if (!documentElementNodeName.equals("image")) {
+        String docNodeName = doc.getNodeName();
+        if (!docNodeName.equals("image")) {
             throw new IllegalStateException(format(
                 "stack.xml root element is '%s', expected: 'image'",
-                documentElementNodeName));
+                docNodeName));
         }
 
         int compWidth = parseInt(doc.getAttribute("w").trim());
@@ -184,56 +204,92 @@ public class OpenRaster {
         comp.setFile(file);
         comp.createDebugName();
 
-        NodeList layers = doc.getElementsByTagName("layer");
-        for (int i = layers.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
-            Node node = layers.item(i);
-            Element element = (Element) node;
-
-            String layerName = element.getAttribute("name");
-            String layerVisibility = element.getAttribute("visibility");
-            String layerVisible = element.getAttribute("visible");
-            String layerBlendingMode = element.getAttribute("composite-op");
-            String layerOpacity = element.getAttribute("opacity");
-            String layerImageSource = element.getAttribute("src");
-            String layerX = element.getAttribute("x");
-            String layerY = element.getAttribute("y");
-
-            BufferedImage image = images.get(layerImageSource);
-            image = ImageUtils.toSysCompatibleImage(image);
-
-            if (layerVisibility == null || layerVisibility.isEmpty()) {
-                //workaround: paint.net exported files use "visible" attribute instead of "visibility"
-                layerVisibility = layerVisible;
-            }
-            boolean visibility = layerVisibility == null || layerVisibility.equals("visible");
-
-            int tx = Utils.parseInt(layerX, 0);
-            int ty = Utils.parseInt(layerY, 0);
-
-            ImageLayer layer = new ImageLayer(comp, image, layerName, 0, 0);
-            if (tx > 0 || ty > 0) {
-                // Pixelitor doesn't support > 0 translations for image layers
-                // (i.e. image layers where the image doesn't fully cover the canvas)
-                // therefore the image must be enlarged
-                layer.forceTranslation(tx, ty);
-                layer.enlargeCanvas(0, 0, 0, 0);
-            } else {
-                layer.setTranslation(tx, ty);
-            }
-
-            layer.setVisible(visibility);
-            BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
-
-            layer.setBlendingMode(blendingMode);
-            float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity);
-
-            comp.addLayerInInitMode(layer);
+        Node mainStackElement = doc.getFirstChild();
+        // make sure that text nodes caused by whitespace are ignored
+        while (!(mainStackElement instanceof Element)) {
+            mainStackElement = mainStackElement.getNextSibling();
         }
+
+        readHolder(mainStackElement, comp, images);
 
         mainTracker.finished();
 
         return comp;
+    }
+
+    // reads a stack element
+    private static void readHolder(Node stackNode, LayerHolder parent, Map<String, BufferedImage> images) {
+        assert stackNode.getNodeName().equals("stack");
+
+        NodeList childNodes = stackNode.getChildNodes();
+        for (int i = childNodes.getLength() - 1; i >= 0; i--) { // stack.xml contains layers in reverse order
+            Node child = childNodes.item(i);
+            String childNodeName = child.getNodeName();
+            if (childNodeName.equals("stack")) {
+                Element childElem = (Element) child;
+                String groupName = childElem.getAttribute("name");
+                LayerGroup group = new LayerGroup(parent.getComp(), groupName);
+                group.setHolder(parent);
+                parent.addLayerInInitMode(group);
+                readBasicAttributes(childElem, group);
+
+                String isolation = childElem.getAttribute("isolation");
+                if (isolation != null) {
+                    if (isolation.equals("auto")) {
+                        group.setBlendingMode(BlendingMode.PASS_THROUGH);
+                    }
+                }
+
+                readHolder(child, group, images);
+            } else if (childNodeName.equals("layer")) {
+                readLayer(images, parent, (Element) child);
+            }
+        }
+    }
+
+    private static void readLayer(Map<String, BufferedImage> images, LayerHolder holder, Element node) {
+        Element element = node;
+        String layerName = element.getAttribute("name");
+        String layerImageSource = element.getAttribute("src");
+
+        BufferedImage image = images.get(layerImageSource);
+        image = ImageUtils.toSysCompatibleImage(image);
+
+        String layerX = element.getAttribute("x");
+        String layerY = element.getAttribute("y");
+        int tx = Utils.parseInt(layerX, 0);
+        int ty = Utils.parseInt(layerY, 0);
+
+        ImageLayer layer = new ImageLayer(holder.getComp(), image, layerName, 0, 0);
+        // Pixelitor doesn't support > 0 translations for image layers
+        // (i.e. image layers where the image doesn't fully cover the canvas)
+        // therefore the image must be enlarged
+        // Also, Krita can export 1x1 pngs for untouched paint layers (without translation)
+        layer.forceTranslation(tx, ty);
+        layer.enlargeCanvas(0, 0, 0, 0);
+
+        readBasicAttributes(element, layer);
+
+        holder.addLayerInInitMode(layer);
+    }
+
+    private static void readBasicAttributes(Element element, Layer layer) {
+        String layerVisibility = element.getAttribute("visibility");
+        String layerVisible = element.getAttribute("visible");
+        String layerBlendingMode = element.getAttribute("composite-op");
+        String layerOpacity = element.getAttribute("opacity");
+        if (layerVisibility == null || layerVisibility.isEmpty()) {
+            //workaround: paint.net exported files use "visible" attribute instead of "visibility"
+            layerVisibility = layerVisible;
+        }
+        boolean visibility = layerVisibility == null || layerVisibility.equals("visible");
+
+        layer.setVisible(visibility);
+        BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
+
+        layer.setBlendingMode(blendingMode);
+        float opacity = Utils.parseFloat(layerOpacity, 1.0f);
+        layer.setOpacity(opacity);
     }
 
     private static int countNumImageFiles(ZipFile zipFile) {
@@ -242,7 +298,7 @@ public class OpenRaster {
         while (fileEntries.hasMoreElements()) {
             ZipEntry entry = fileEntries.nextElement();
             String name = entry.getName().toLowerCase();
-            if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME)) {
+            if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME) && !name.equals(THUMBNAIL_IMAGE_NAME)) {
                 numImageFiles++;
             }
         }
@@ -270,5 +326,13 @@ public class OpenRaster {
             retVal = s.hasNext() ? s.next() : "";
         }
         return retVal;
+    }
+
+    private static BufferedImage createORAThumbnail(BufferedImage src) {
+        // "It must be a non-interlaced PNG with 8 bits per channel
+        // of at most 256x256 pixels. It should be as big as possible
+        // without upscaling or changing the aspect ratio."
+        Dimension thumbSize = ImageUtils.calcThumbDimensions(src.getWidth(), src.getHeight(), 256, false);
+        return ImageUtils.resize(src, thumbSize.width, thumbSize.height);
     }
 }

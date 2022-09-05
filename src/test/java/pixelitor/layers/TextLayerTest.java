@@ -65,7 +65,7 @@ public class TextLayerTest {
         layer.updateLayerName();
         new Composition.LayerAdder(comp).add(layer);
 
-        withMask.setupFor(layer);
+        withMask.setupForLayer(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();

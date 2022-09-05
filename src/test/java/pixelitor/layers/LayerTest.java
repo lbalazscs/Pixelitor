@@ -68,22 +68,22 @@ public class LayerTest {
         TestHelper.setUnitTestingMode();
 
         return Arrays.asList(new Object[][]{
-//            {ImageLayer.class, WithMask.NO},
-//            {ImageLayer.class, WithMask.YES},
-//            {TextLayer.class, WithMask.NO},
-//            {TextLayer.class, WithMask.YES},
-//            {ShapesLayer.class, WithMask.NO},
-//            {ShapesLayer.class, WithMask.YES},
-//            {GradientFillLayer.class, WithMask.NO},
-//            {GradientFillLayer.class, WithMask.YES},
-//            {ColorFillLayer.class, WithMask.NO},
-//            {ColorFillLayer.class, WithMask.YES},
+            {ImageLayer.class, WithMask.NO},
+            {ImageLayer.class, WithMask.YES},
+            {TextLayer.class, WithMask.NO},
+            {TextLayer.class, WithMask.YES},
+            {ShapesLayer.class, WithMask.NO},
+            {ShapesLayer.class, WithMask.YES},
+            {GradientFillLayer.class, WithMask.NO},
+            {GradientFillLayer.class, WithMask.YES},
+            {ColorFillLayer.class, WithMask.NO},
+            {ColorFillLayer.class, WithMask.YES},
             {SmartObject.class, WithMask.NO},
-//            {SmartObject.class, WithMask.YES},
-//            {AdjustmentLayer.class, WithMask.NO},
-//            {AdjustmentLayer.class, WithMask.YES},
-//            {SmartFilter.class, WithMask.NO},
-//            {SmartFilter.class, WithMask.YES},
+            {SmartObject.class, WithMask.YES},
+            {AdjustmentLayer.class, WithMask.NO},
+            {AdjustmentLayer.class, WithMask.YES},
+            {SmartFilter.class, WithMask.NO},
+            {SmartFilter.class, WithMask.YES},
         });
     }
 
@@ -104,7 +104,7 @@ public class LayerTest {
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
         comp.addLayerInInitMode(layer2);
 
-        withMask.setupFor(layer);
+        withMask.setupForLayer(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();

@@ -306,16 +306,19 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.add(createLayerStackSubmenu(texts));
         layersMenu.add(createLayerMaskSubmenu(texts));
-        layersMenu.add(createTextLayerSubmenu(texts));
 
         if (AppContext.enableExperimentalFeatures) {
-            layersMenu.add(createLayerGroupsSubmenu());
+            layersMenu.addSeparator();
+
             layersMenu.add(createAdjustmentLayersSubmenu());
-            layersMenu.add(createSmartObjectSubmenu());
             layersMenu.add(createColorFillLayerSubmenu());
             layersMenu.add(createGradientFillLayerSubmenu());
+            layersMenu.add(createLayerGroupsSubmenu());
             layersMenu.add(createShapeLayerSubmenu());
+            layersMenu.add(createSmartObjectSubmenu());
         }
+
+        layersMenu.add(createTextLayerSubmenu(texts));
 
         return layersMenu;
     }
@@ -423,7 +426,7 @@ public class MenuBar extends JMenuBar {
 
                 // not necessary, as the result looks the same, but still
                 // useful because bugs would be spotted early
-                layer.getComp().update();
+                layer.update();
             }
         });
 
@@ -472,8 +475,11 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLayerGroupsSubmenu() {
         PMenu sub = new PMenu("Layer Groups");
 
+        sub.add(new OpenViewEnabledAction("New Empty Group",
+            comp -> comp.getHolderForNewLayers().addEmptyGroup()), CTRL_G);
+
         sub.add(new OpenViewEnabledAction("Convert Visible to Group",
-            Composition::convertVisibleLayersToGroup), CTRL_G);
+            Composition::convertVisibleLayersToGroup), CTRL_SHIFT_G);
 
 //        Condition isLayerGroup = new ClassCondition(LayerGroup.class, "layer group");
 
@@ -484,7 +490,7 @@ public class MenuBar extends JMenuBar {
     }
 
     private static JMenu createAdjustmentLayersSubmenu() {
-        PMenu sub = new PMenu("New Adjustment Layer");
+        PMenu sub = new PMenu("Adjustment Layer");
 
         for (Action action : AddAdjLayerAction.actions) {
             sub.add(action);
@@ -1300,6 +1306,9 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("update(FULL) on the active image",
             comp -> comp.update(FULL)));
 
+        sub.add(new OpenViewEnabledAction("update() on the active holder",
+            comp -> comp.getActiveLayerHolder().update()));
+
         sub.addSeparator();
 
         sub.add(new PAction("Change UI", ImageArea::changeUI));
@@ -1330,7 +1339,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onActiveLayer(Layer layer) {
                 layer.getMask().updateTransparencyImage();
-                layer.getComp().update();
+                layer.update();
             }
         });
 

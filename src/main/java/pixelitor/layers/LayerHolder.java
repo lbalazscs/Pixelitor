@@ -42,9 +42,13 @@ public interface LayerHolder extends Debuggable {
 
     void addLayerToList(int index, Layer newLayer);
 
-    Composition getComp();
-
-    String getName();
+    /**
+     * "Init mode" means that this is part of the construction,
+     * the layer is not added as a result of a user interaction
+     */
+    default void addLayerInInitMode(Layer newLayer) {
+        new Composition.LayerAdder(this).compInitMode().add(newLayer);
+    }
 
     default void moveActiveLayerUp() {
         assert isHolderOfActiveLayer();
@@ -139,8 +143,6 @@ public interface LayerHolder extends Debuggable {
      */
     void replaceLayer(Layer before, Layer after);
 
-    void update();
-
     default void raiseLayerSelection() {
         Composition comp = getComp();
         Layer activeLayer = comp.getActiveLayer();
@@ -222,4 +224,23 @@ public interface LayerHolder extends Debuggable {
     default boolean isHolderOfActiveLayer() {
         return getComp().getActiveLayerHolder() == this;
     }
+
+    default void addEmptyGroup() {
+        LayerGroup group = new LayerGroup(getComp(), "Layer Group");
+        new Composition.LayerAdder(this)
+            .withHistory("New Layer Group")
+            .add(group);
+    }
+
+    void update();
+
+    void smartObjectChanged(boolean linked);
+
+    String getORAStackXML();
+
+    Composition getComp();
+
+    String getName();
+
+    void invalidateImageCache();
 }

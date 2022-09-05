@@ -295,7 +295,7 @@ class LayerBlendingModesTest {
     }
 
     private Color getResultingColor() {
-        comp.invalidateCompositeCache();
+        comp.invalidateImageCache();
         return new Color(comp.getCompositeImage().getRGB(0, 0));
     }
 

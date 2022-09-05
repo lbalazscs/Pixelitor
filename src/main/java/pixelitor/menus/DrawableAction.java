@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.layers.*;
+import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -112,6 +113,9 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " cannot be applied to adjustment layers.");
+        } else if (layer instanceof LayerGroup group) {
+            assert group.isPassThrough(); // isolated groups can be rasterized
+            Messages.showUnrasterizableLayerGroupError(group, name);
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }

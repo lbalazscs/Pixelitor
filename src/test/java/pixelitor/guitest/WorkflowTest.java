@@ -40,6 +40,7 @@ import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
@@ -80,15 +81,81 @@ public class WorkflowTest {
 
     private static File referenceImagesDir;
 
+    /**
+     * Enables running all tests within a group
+     */
     enum WithinGroup {
-        NO, YES, BOTH;
+        NO_GROUP("") {
+            @Override
+            public void group(AppRunner app) {
+                // do nothing
+            }
+        }, PASS_THROUGH("P") {
+            @Override
+            public void group(AppRunner app) {
+                app.runMenuCommand("Convert Visible to Group");
+                app.selectActiveLayer("layer 1");
+            }
+        }, ISOLATED("I") {
+            @Override
+            public void group(AppRunner app) {
+                app.runMenuCommand("Convert Visible to Group");
+                app.changeLayerBlendingMode(BlendingMode.NORMAL);
+                app.selectActiveLayer("layer 1");
+            }
+        }, DOUBLE_PP("PP") {
+            @Override
+            public void group(AppRunner app) {
+                // two nested pass-through groups
+                app.runMenuCommand("Convert Visible to Group");
+                app.runMenuCommand("Convert Visible to Group");
+                app.selectActiveLayer("layer 1");
+            }
+        }, DOUBLE_II("II") {
+            @Override
+            public void group(AppRunner app) {
+                // two nested isolated groups
+                app.runMenuCommand("Convert Visible to Group");
+                app.changeLayerBlendingMode(BlendingMode.NORMAL);
+                app.runMenuCommand("Convert Visible to Group");
+                app.changeLayerBlendingMode(BlendingMode.NORMAL);
+                app.selectActiveLayer("layer 1");
+            }
+        }, DOUBLE_PI("PI") {
+            // inner pass-through, outer isolated
+            @Override
+            public void group(AppRunner app) {
+                app.runMenuCommand("Convert Visible to Group");
+                app.runMenuCommand("Convert Visible to Group");
+                app.changeLayerBlendingMode(BlendingMode.NORMAL);
+                app.selectActiveLayer("layer 1");
+            }
+        }, DOUBLE_IP("IP") {
+            // inner isolated, outer pass-through
+            @Override
+            public void group(AppRunner app) {
+                app.runMenuCommand("Convert Visible to Group");
+                app.changeLayerBlendingMode(BlendingMode.NORMAL);
+                app.runMenuCommand("Convert Visible to Group");
+                app.selectActiveLayer("layer 1");
+            }
+        };
 
-        public boolean isTrue() {
-            return this == YES;
+        private final String nameSuffix;
+
+        WithinGroup(String nameSuffix) {
+            this.nameSuffix = nameSuffix;
+        }
+
+        public abstract void group(AppRunner app);
+
+        public String getNameSuffix() {
+            return nameSuffix;
         }
     }
 
     public static void main(String[] args) {
+        System.out.println("WorkflowTest: started at " + AppRunner.getCurrentTimeHM());
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
 
@@ -110,42 +177,41 @@ public class WorkflowTest {
         keyboard = app.getKeyboard();
 //        app.runSlowly();
 
-        WithinGroup withinGroup = WithinGroup.BOTH;
+        List<WithinGroup> groupSettings = List.of(
+            WithinGroup.values()
+//            WithinGroup.NO_GROUP,
+//            WithinGroup.PASS_THROUGH,
+//            WithinGroup.ISOLATED
+        );
 
         switch (arg) {
             case "all" -> {
-                wfTest1(withinGroup, true);
-                wfTest2(withinGroup, true);
-                wfTest3(withinGroup, true);
-                wfTest4(withinGroup, true);
-                wfTest5(withinGroup, true);
+                groupSettings.forEach(this::wfTest1);
+                groupSettings.forEach(this::wfTest2);
+                groupSettings.forEach(this::wfTest3);
+                groupSettings.forEach(this::wfTest4);
+                groupSettings.forEach(this::wfTest5);
             }
-            case "1" -> wfTest1(withinGroup, true);
-            case "2" -> wfTest2(withinGroup, true);
-            case "3" -> wfTest3(withinGroup, true);
-            case "4" -> wfTest4(withinGroup, true);
-            case "5" -> wfTest5(withinGroup, true);
+            case "1" -> groupSettings.forEach(this::wfTest1);
+            case "2" -> groupSettings.forEach(this::wfTest2);
+            case "3" -> groupSettings.forEach(this::wfTest3);
+            case "4" -> groupSettings.forEach(this::wfTest4);
+            case "5" -> groupSettings.forEach(this::wfTest5);
             default -> throw new IllegalArgumentException("arg = " + arg);
         }
 
         if (!experimentalWasEnabled) {
             EDT.run(() -> AppContext.enableExperimentalFeatures = false);
         }
+
+        System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());
     }
 
-    private void wfTest1(WithinGroup withinGroup, boolean loadRefImage) {
-        if (withinGroup == WithinGroup.BOTH) {
-            wfTest1(WithinGroup.NO, false);
-            wfTest1(WithinGroup.YES, loadRefImage);
-            return;
-        }
-
+    private void wfTest1(WithinGroup withinGroup) {
         String compName = createCompName(1, withinGroup);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        if (withinGroup.isTrue()) {
-            group();
-        }
+        withinGroup.group(app);
 
         addGuide();
         runFilterWithDialog("Wood");
@@ -190,41 +256,23 @@ public class WorkflowTest {
         clearGuides();
         app.clickTool(Tools.BRUSH);
 
-        if (loadRefImage) {
-            loadReferenceImage("wf1.png");
-        }
+        loadReferenceImage("wf1.png");
     }
 
     private static String createCompName(int testNr, WithinGroup withinGroup) {
-        String compName = "wf " + testNr;
-        if (withinGroup == WithinGroup.YES) {
-            compName += "G";
-        }
+        String compName = "wf " + testNr + withinGroup.getNameSuffix();
         return compName;
-    }
-
-    private void group() {
-        app.runMenuCommand("Convert Visible to Group");
-        app.selectActiveLayer("layer 1");
     }
 
     private void ungroup() {
         app.runMenuCommand("Ungroup");
     }
 
-    private void wfTest2(WithinGroup withinGroup, boolean loadRefImage) {
-        if (withinGroup == WithinGroup.BOTH) {
-            wfTest2(WithinGroup.NO, false);
-            wfTest2(WithinGroup.YES, loadRefImage);
-            return;
-        }
-
+    private void wfTest2(WithinGroup withinGroup) {
         String compName = createCompName(2, withinGroup);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        if (withinGroup.isTrue()) {
-            group();
-        }
+        withinGroup.group(app);
 
         runFilterWithDialog("Spider Web");
         editSpiderWebImage(compName);
@@ -286,9 +334,7 @@ public class WorkflowTest {
         move(MOVE_LAYER_ONLY, 0, 50);
         app.closeCurrentView();
 
-        if (loadRefImage) {
-            loadReferenceImage("wf2.png");
-        }
+        loadReferenceImage("wf2.png");
     }
 
     private void editSpiderWebImage(String compName) {
@@ -335,18 +381,11 @@ public class WorkflowTest {
         app.mergeDown();
     }
 
-    private void wfTest3(WithinGroup withinGroup, boolean loadRefImage) {
-        if (withinGroup == WithinGroup.BOTH) {
-            wfTest3(WithinGroup.NO, false);
-            wfTest3(WithinGroup.YES, loadRefImage);
-            return;
-        }
+    private void wfTest3(WithinGroup withinGroup) {
         String compName = createCompName(3, withinGroup);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        if (withinGroup.isTrue()) {
-            group();
-        }
+        withinGroup.group(app);
 
         runFilterWithDialog("Spirograph");
 
@@ -402,24 +441,14 @@ public class WorkflowTest {
         app.findLayerIconByLayerName("Colorize").click();
         deleteActiveLayer(SmartFilter.class);
 
-        if (loadRefImage) {
-            loadReferenceImage("wf3.png");
-        }
+        loadReferenceImage("wf3.png");
     }
 
-    private void wfTest4(WithinGroup withinGroup, boolean loadRefImage) {
-        if (withinGroup == WithinGroup.BOTH) {
-            wfTest4(WithinGroup.NO, false);
-            wfTest4(WithinGroup.YES, loadRefImage);
-            return;
-        }
-
+    private void wfTest4(WithinGroup withinGroup) {
         String compName = createCompName(4, withinGroup);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        if (withinGroup.isTrue()) {
-            group();
-        }
+        withinGroup.group(app);
 
         runFilterWithDialog("Checker Pattern", dialog -> {
             dialog.slider("Width").slideTo(25);
@@ -486,24 +515,14 @@ public class WorkflowTest {
         keyboard.undoRedoUndo("Resize");
         keyboard.undoRedoUndo("Resize");
 
-        if (loadRefImage) {
-            loadReferenceImage("wf4.png");
-        }
+        loadReferenceImage("wf4.png");
     }
 
-    private void wfTest5(WithinGroup withinGroup, boolean loadRefImage) {
-        if (withinGroup == WithinGroup.BOTH) {
-            wfTest5(WithinGroup.NO, false);
-            wfTest5(WithinGroup.YES, loadRefImage);
-            return;
-        }
-
+    private void wfTest5(WithinGroup withinGroup) {
         String compName = createCompName(5, withinGroup);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        if (withinGroup.isTrue()) {
-            group();
-        }
+        withinGroup.group(app);
 
         runFilterWithDialog("Marble");
         convertLayerToSmartObject();
@@ -809,6 +828,6 @@ public class WorkflowTest {
     }
 
     private void loadReferenceImage(String fileName) {
-        app.openFileWithDialog("Open...", referenceImagesDir, fileName);
+//        app.openFileWithDialog("Open...", referenceImagesDir, fileName);
     }
 }

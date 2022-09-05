@@ -274,7 +274,7 @@ public class CropTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        e.getComp().update();
+        e.getComp().update(); // TODO is an update needed?
 
         switch (state) {
             case NO_INTERACTION, AFTER_FIRST_MOUSE_PRESS:

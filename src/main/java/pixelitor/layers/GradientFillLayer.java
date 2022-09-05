@@ -111,7 +111,7 @@ public class GradientFillLayer extends ContentLayer {
     public BufferedImage createIconThumbnail() {
         Canvas canvas = comp.getCanvas();
         Dimension thumbDim = ImageUtils.calcThumbDimensions(
-            canvas.getWidth(), canvas.getHeight(), thumbSize);
+            canvas.getWidth(), canvas.getHeight(), thumbSize, true);
 
         BufferedImage img = ImageUtils.createSysCompatibleImage(
             thumbDim.width, thumbDim.height);

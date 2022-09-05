@@ -178,6 +178,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         throw new IllegalStateException();
     }
 
+    @Override
+    public LayerHolder getHolderForNewLayers() {
+        // don't try to add regular layers inside a smart object
+        // just because a smart filter is selected.
+        return smartObject.getHolderForNewLayers();
+    }
+
     public SmartFilter getNext() {
         return next;
     }
@@ -383,16 +390,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void updateOptions(SmartObject layer) {
         if (filter instanceof ParametrizedFilter pf) {
             pf.getParamSet().updateOptions(this, false);
-        }
-    }
-
-    @Override
-    public void updateUI() {
-        if (ui != null) {
-            ui.updateSelectionState();
-
-            // the whole GUI must be repainted when switching to another layer
-            smartObject.getUI().repaint();
         }
     }
 

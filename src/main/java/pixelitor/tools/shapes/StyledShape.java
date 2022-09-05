@@ -560,7 +560,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         var comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
-        comp.update();
+        comp.getActiveLayerHolder().update();
 
         notifyChangeListener();
     }

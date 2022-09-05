@@ -113,7 +113,7 @@ public class SmartObject extends CompositeLayer {
         newContent.createDebugName();
         setContent(newContent);
 
-        copyBlendingFrom(layer);
+        copyLayerLevelPropertiesFrom(layer);
 
         assert checkInvariants();
     }
@@ -302,6 +302,7 @@ public class SmartObject extends CompositeLayer {
         holder.update();
     }
 
+    @Override
     public void invalidateImageCache() {
         imageNeedsRefresh = true;
     }
@@ -327,7 +328,7 @@ public class SmartObject extends CompositeLayer {
             imageTransformer.invalidateCache();
         }
 
-        comp.smartObjectChanged(isContentLinked());
+        holder.smartObjectChanged(isContentLinked());
     }
 
     private void invalidateAllFilterCaches() {
@@ -961,14 +962,14 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
+    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
         action.accept(this);
-        if (hasMask()) {
+        if (includeMasks && hasMask()) {
             action.accept(getMask());
         }
         for (SmartFilter filter : filters) {
             action.accept(filter);
-            if (filter.hasMask()) {
+            if (includeMasks && filter.hasMask()) {
                 action.accept(filter.getMask());
             }
         }
@@ -1200,6 +1201,16 @@ public class SmartObject extends CompositeLayer {
 //        BufferedImage bigImg = getCanvasSizedSubImage();
         // TODO is the image always canvas-sized?
         return createThumbnail(getVisibleImage(), thumbSize, thumbCheckerBoardPainter);
+    }
+
+    @Override
+    public void smartObjectChanged(boolean linked) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public String getORAStackXML() {
+        throw new IllegalStateException();
     }
 
     @Override

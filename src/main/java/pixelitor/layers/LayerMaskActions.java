@@ -112,7 +112,7 @@ public class LayerMaskActions {
 
                 ((ImageLayer) layer).applyLayerMask(true);
 
-                layer.getComp().update();
+                layer.update();
             });
         }
     }

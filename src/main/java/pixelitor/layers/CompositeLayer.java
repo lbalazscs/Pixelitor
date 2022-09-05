@@ -20,15 +20,22 @@ package pixelitor.layers;
 import pixelitor.Composition;
 
 import java.awt.EventQueue;
+import java.io.Serial;
 
 /**
  * A {@link ContentLayer} that is also a {@link LayerHolder},
  * and therefore can have nested "child" layers in its GUI.
  */
 public abstract class CompositeLayer extends ContentLayer implements LayerHolder {
+    @Serial
+    private static final long serialVersionUID = 8962987501686783478L;
+
     CompositeLayer(Composition comp, String name) {
         super(comp, name);
     }
+
+    // run stuff that requires a deserialized canvas
+    public abstract void afterDeserialization();
 
     public void updateChildrenUI() {
         if (ui == null) { // in some unit tests

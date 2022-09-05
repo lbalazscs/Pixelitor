@@ -88,7 +88,7 @@ public class ImageLayerTest {
 
         layer = createEmptyImageLayer(comp, "layer 1");
 
-        withMask.setupFor(layer);
+        withMask.setupForLayer(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();
@@ -114,7 +114,7 @@ public class ImageLayerTest {
         if (withMask.isTrue() && withTranslation.isTrue()) {
             expectedImageChangedCalls++;
         }
-        verify(comp, times(expectedImageChangedCalls)).invalidateCompositeCache();
+        verify(comp, times(expectedImageChangedCalls)).invalidateImageCache();
 
         BufferedImage image = layer.getImage();
         assertThat(image).isNotNull();
@@ -123,7 +123,7 @@ public class ImageLayerTest {
         layer.setImage(testImage);
 
         // called one more time
-        verify(comp, times(expectedImageChangedCalls + 1)).invalidateCompositeCache();
+        verify(comp, times(expectedImageChangedCalls + 1)).invalidateImageCache();
 
         // actually setImage should not update the icon image
         iconUpdates.check(0, 0);

@@ -55,7 +55,7 @@ public final class ConsistencyChecks {
     }
 
     public static boolean shapeLayersAreOK(Composition comp) {
-        comp.forEachLayer(ShapesLayer.class, ShapesLayer::checkInvariants);
+        comp.forEachNestedLayer(ShapesLayer.class, ShapesLayer::checkInvariants);
         return true;
     }
 

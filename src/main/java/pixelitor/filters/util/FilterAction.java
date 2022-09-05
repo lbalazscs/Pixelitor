@@ -95,12 +95,8 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
             Dialogs.showErrorDialog("Adjustment Layer",
                 name + " cannot be applied to adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
-            // this must be a pass through group,
-            // because isolated groups are rasterizable
-            assert group.isPassThrough();
-            Dialogs.showErrorDialog("Layer Group",
-                name + " cannot be applied to layer groups.\n" +
-                "Pass through groups can't even be rasterized.");
+            assert group.isPassThrough(); // isolated groups can be rasterized
+            Messages.showUnrasterizableLayerGroupError(group, name);
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }

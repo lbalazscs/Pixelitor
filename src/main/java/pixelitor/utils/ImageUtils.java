@@ -140,16 +140,17 @@ public class ImageUtils {
             cm.isAlphaPremultiplied(), null);
     }
 
-
     public static CompletableFuture<BufferedImage> resizeAsync(BufferedImage img,
                                                                int targetWidth,
                                                                int targetHeight) {
+        return CompletableFuture.supplyAsync(() ->
+            resize(img, targetWidth, targetHeight), onPool);
+    }
+
+    public static BufferedImage resize(BufferedImage img, int targetWidth, int targetHeight) {
         boolean progressiveBilinear = targetWidth < img.getWidth() / 2
                                       || targetHeight < img.getHeight() / 2;
-
-        return CompletableFuture.supplyAsync(() ->
-            getFasterScaledInstance(img, targetWidth, targetHeight,
-                VALUE_INTERPOLATION_BICUBIC, progressiveBilinear), onPool);
+        return getFasterScaledInstance(img, targetWidth, targetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
     }
 
     // From the Filthy Rich Clients book
@@ -553,26 +554,38 @@ public class ImageUtils {
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
 
-        Dimension thumbDim = calcThumbDimensions(src.getWidth(), src.getHeight(), size);
+        Dimension thumbDim = calcThumbDimensions(src.getWidth(), src.getHeight(), size, true);
 
         return downSizeFast(src, thumbDim.width, thumbDim.height, painter);
     }
 
     /**
-     * Returns a Dimension object representing the given srcWidth
-     * and srcHeight scaled down to match srcWidth to size.
+     * Calculates the target dimensions if an image needs to be resized
+     * to fit into a box of a given size without distorting the aspect ratio.
      */
-    public static Dimension calcThumbDimensions(int srcWidth, int srcHeight, int size) {
+    public static Dimension calcThumbDimensions(int srcWidth, int srcHeight, int boxSize, boolean upscale) {
         int thumbWidth;
         int thumbHeight;
-        if (srcWidth > srcHeight) {
-            thumbWidth = size;
-            float ratio = (float) srcWidth / srcHeight;
-            thumbHeight = (int) (size / ratio);
-        } else {
-            thumbHeight = size;
-            float ratio = (float) srcHeight / srcWidth;
-            thumbWidth = (int) (size / ratio);
+        if (srcWidth > srcHeight) { // landscape
+            if (upscale || srcWidth > boxSize) {
+                thumbWidth = boxSize;
+                double ratio = (double) srcWidth / srcHeight;
+                thumbHeight = (int) (boxSize / ratio);
+            } else {
+                // the image already fits in the box and no up-scaling is needed
+                thumbWidth = srcWidth;
+                thumbHeight = srcHeight;
+            }
+        } else { // portrait
+            if (upscale || srcHeight > boxSize) {
+                thumbHeight = boxSize;
+                double ratio = (double) srcHeight / srcWidth;
+                thumbWidth = (int) (boxSize / ratio);
+            } else {
+                // the image already fits in the box and no up-scaling is needed
+                thumbWidth = srcWidth;
+                thumbHeight = srcHeight;
+            }
         }
 
         if (thumbWidth == 0) {

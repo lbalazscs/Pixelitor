@@ -92,8 +92,9 @@ public interface Drawable extends Filterable {
     default void runFilter(Filter filter, FilterContext context) {
         try {
             BufferedImage src = getFilterSourceImage();
-            BufferedImage dest = filter.transformImage(src);
+            assert src != null;
 
+            BufferedImage dest = filter.transformImage(src);
             assert dest != null;
 
             if (context.isPreview()) {

@@ -410,7 +410,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         image = replaceSelectedRegion(image, newImage, isUndoRedo);
         imageRefChanged();
 
-        comp.invalidateCompositeCache();
+        comp.invalidateImageCache();
     }
 
     /**
@@ -476,7 +476,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         assert Assertions.checkRasterMinimum(newImage);
 
-        comp.invalidateCompositeCache();
+        comp.invalidateImageCache();
 
         if (oldRef != null && oldRef != image) {
             oldRef.flush();

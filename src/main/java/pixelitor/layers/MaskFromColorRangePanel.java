@@ -159,7 +159,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
     private JPanel createImagesPanel(BufferedImage image) {
         Dimension thumbDim = calcThumbDimensions(
-            image.getWidth(), image.getHeight(), DEFAULT_THUMB_SIZE);
+            image.getWidth(), image.getHeight(), DEFAULT_THUMB_SIZE, true);
 
         createColorPickerPanel(thumbDim);
         previewPanel.setPreferredSize(thumbDim);

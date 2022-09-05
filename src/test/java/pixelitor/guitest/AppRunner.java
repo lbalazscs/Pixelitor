@@ -924,22 +924,22 @@ public class AppRunner {
     public void addAdjustmentLayer(String filterName, Consumer<DialogFixture> customizer) {
         pw.button("addAdjLayer").click();
         JPopupMenuFixture popup = new JPopupMenuFixture(robot, robot.findActivePopupMenu());
-        clickPopupMenu(popup, filterName + " Adjustment", true);
+        clickPopupMenu(popup, "New " + filterName, true);
         DialogFixture dialog = findDialogByTitle(filterName);
         customizer.accept(dialog);
         dialog.button("ok").click();
     }
 
     public void changeLayerBlendingMode(BlendingMode blendingMode) {
-        if (blendingMode == BlendingMode.NORMAL) {
+        String existingBMString = pw.comboBox("layerBM").selectedItem();
+        if (blendingMode.toString().equals(existingBMString)) {
             return;
         }
         pw.comboBox("layerBM")
-            .requireSelection("Normal")
             .selectItem(blendingMode.toString());
 
         keyboard.undo("Blending Mode Change");
-        pw.comboBox("layerBM").requireSelection("Normal");
+        pw.comboBox("layerBM").requireSelection(existingBMString);
 
         keyboard.redo("Blending Mode Change");
         pw.comboBox("layerBM").requireSelection(blendingMode.toString());

@@ -171,16 +171,19 @@ public abstract class Layer implements Serializable, Debuggable {
     public void updateUI() {
         if (ui != null) {
             ui.updateSelectionState();
-            ui.repaint();
+
+            // the whole GUI must be repainted when switching to another layer
+            LayerUI topLevelUI = getTopLevelLayer().getUI();
+            if (topLevelUI != null) { // null when "Convert Visible to Group"
+                topLevelUI.repaint();
+            }
         }
     }
 
     public final Layer copy(CopyType copyType, boolean duplicateMask, Composition newComp) {
         Layer d = createTypeSpecificCopy(copyType, newComp);
 
-        d.setOpacity(getOpacity());
-        d.setBlendingMode(getBlendingMode());
-        d.setVisible(isVisible());
+        d.copyLayerLevelPropertiesFrom(this);
 
         d.comp = newComp;
         if (newComp != comp && isActive()) {
@@ -306,7 +309,8 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    protected void copyBlendingFrom(Layer other) {
+    protected void copyLayerLevelPropertiesFrom(Layer other) {
+        setVisible(other.isVisible());
         setBlendingMode(other.getBlendingMode());
         setOpacity(other.getOpacity());
     }
@@ -344,6 +348,13 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public LayerHolder getHolder() {
+        return holder;
+    }
+
+    /**
+     * Returns the holder for new layers if this is the currently active layer.
+     */
+    public LayerHolder getHolderForNewLayers() {
         return holder;
     }
 
@@ -534,7 +545,7 @@ public abstract class Layer implements Serializable, Debuggable {
                 Layers.maskAddedTo(this);
             }
         } else {
-            comp.invalidateCompositeCache();
+            comp.invalidateImageCache();
         }
     }
 
@@ -956,7 +967,9 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void updateIconImage() {
+        // otherwise this method must be overridden to do nothing
         assert hasRasterThumbnail();
+
         if (ui != null) {
             ui.updateLayerIconImageAsync(this);
         }
@@ -995,7 +1008,7 @@ public abstract class Layer implements Serializable, Debuggable {
         var rasterizedImage = asImage(false, false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.setHolder(holder);
-        newImageLayer.copyBlendingFrom(this);
+        newImageLayer.copyLayerLevelPropertiesFrom(this);
         History.add(new ReplaceLayerEdit(holder, this, newImageLayer, "Rasterize " + getTypeString()));
         holder.replaceLayer(this, newImageLayer);
         Messages.showInStatusBar(format(
@@ -1044,11 +1057,15 @@ public abstract class Layer implements Serializable, Debuggable {
         return getClass() == clazz;
     }
 
-    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
+    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
         action.accept(this);
-        if (hasMask()) {
+        if (includeMasks && hasMask()) {
             action.accept(getMask());
         }
+    }
+
+    public void update() {
+        holder.update();
     }
 
     public boolean checkInvariants() {

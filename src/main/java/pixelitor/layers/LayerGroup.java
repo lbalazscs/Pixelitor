@@ -54,6 +54,10 @@ public class LayerGroup extends CompositeLayer {
     // used only for isolated images
     private transient BufferedImage cachedImage;
 
+    public LayerGroup(Composition comp, String name) {
+        this(comp, name, new ArrayList<>());
+    }
+
     public LayerGroup(Composition comp, String name, List<Layer> layers) {
         super(comp, name);
         this.layers = layers;
@@ -67,6 +71,12 @@ public class LayerGroup extends CompositeLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
+        cachedImage = null;
+        thumb = null;
+    }
+
+    @Override
+    public void afterDeserialization() {
         recalculateCachedImage();
     }
 
@@ -113,16 +123,15 @@ public class LayerGroup extends CompositeLayer {
             }
         } else {
             // TODO apply mask
-
-            assert cachedImage != null;
             g.setComposite(blendingMode.getComposite(getOpacity()));
-            g.drawImage(cachedImage, 0, 0, null);
+            g.drawImage(getCachedImage(), 0, 0, null);
         }
         return imageSoFar;
     }
 
     @Override
     public void update() {
+        recalculateCachedImage();
         holder.update();
     }
 
@@ -132,6 +141,12 @@ public class LayerGroup extends CompositeLayer {
         } else {
             cachedImage = ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
         }
+    }
+
+    @Override
+    public void invalidateImageCache() {
+        cachedImage = null;
+        holder.invalidateImageCache();
     }
 
     @Override
@@ -146,8 +161,15 @@ public class LayerGroup extends CompositeLayer {
         if (isPassThrough()) {
             return ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
         } else {
-            return cachedImage;
+            return getCachedImage();
         }
+    }
+
+    private BufferedImage getCachedImage() {
+        if (cachedImage == null) {
+            recalculateCachedImage();
+        }
+        return cachedImage;
     }
 
     @Override
@@ -182,14 +204,35 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
         // Do nothing for the layer group itself.
-        // The mask and layers are resized via forEachNestedLayerAndMask
+        // The mask and layers are resized via forEachNestedLayer.
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
-        // Do nothing for the layer group itself.
-        // The mask and layers are cropped via forEachNestedLayerAndMask
+    }
+
+    @Override
+    public void flip(Flip.Direction direction) {
+    }
+
+    @Override
+    public void rotate(QuadrantAngle angle) {
+    }
+
+    @Override
+    public void enlargeCanvas(int north, int east, int south, int west) {
+    }
+
+    @Override
+    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
+        action.accept(this);
+        if (includeMasks && hasMask()) {
+            action.accept(getMask());
+        }
+        for (Layer layer : layers) {
+            layer.forEachNestedLayer(action, includeMasks);
+        }
     }
 
     @Override
@@ -283,7 +326,7 @@ public class LayerGroup extends CompositeLayer {
         }
 
         updateChildrenUI();
-        holder.update();
+        update();
     }
 
     @Override
@@ -301,8 +344,20 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public void smartObjectChanged(boolean linked) {
+        cachedImage = null;
+        holder.smartObjectChanged(linked);
+    }
+
+    @Override
+    public void updateIconImage() {
+        thumb = null;
+        super.updateIconImage();
+    }
+
+    @Override
     public boolean allowZeroLayers() {
-        return false;
+        return true;
     }
 
     @Override
@@ -384,41 +439,17 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void flip(Flip.Direction direction) {
-
-    }
-
-    @Override
-    public void rotate(QuadrantAngle angle) {
-
-    }
-
-    @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
-
-    }
-
-    @Override
-    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
-        action.accept(this);
-        if (hasMask()) {
-            action.accept(getMask());
-        }
-        for (Layer layer : layers) {
-            action.accept(layer);
-            if (layer.hasMask()) {
-                action.accept(layer.getMask());
-            }
-        }
-    }
-
-    @Override
     public void setComp(Composition comp) {
         super.setComp(comp);
 
         for (Layer layer : layers) {
             layer.setComp(comp);
         }
+    }
+
+    @Override
+    public LayerHolder getHolderForNewLayers() {
+        return this;
     }
 
     @Override
@@ -438,6 +469,13 @@ public class LayerGroup extends CompositeLayer {
             assert layer.checkInvariants();
         }
         return true;
+    }
+
+    @Override
+    public String getORAStackXML() {
+        return "<stack composite-op=\"%s\" name=\"%s\" opacity=\"%f\" visibility=\"%s\" isolation=\"%s\">\n".formatted(
+            blendingMode.toSVGName(), getName(), getOpacity(), getVisibilityAsORAString(),
+            blendingMode == BlendingMode.PASS_THROUGH ? "auto" : "isolate");
     }
 }
 

@@ -198,10 +198,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         activeRoot = activeLayer.getTopLevelLayer();
 
         for (Layer layer : layerList) {
-            if (layer instanceof SmartObject so) {
+            if (layer instanceof CompositeLayer cl) {
                 // things that need a full canvas and also
                 // (re)load the contents of linked smart objects
-                so.afterDeserialization();
+                cl.afterDeserialization();
             }
         }
 
@@ -286,12 +286,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (activeLayer == null) { // can happen during initialization
             return this;
         }
-        if (activeLayer instanceof LayerGroup group) {
-            // don't check for layer holders in general, because
-            // the active layer could be a smart object
-            return group;
-        }
-        return getActiveLayerHolder();
+        return activeLayer.getHolderForNewLayers();
     }
 
     public View getView() {
@@ -546,14 +541,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         addLayerInInitMode(newLayer);
     }
 
-    /**
-     * "Init mode" means that this is part of the composition construction,
-     * the layer is not added as a result of a user interaction
-     */
-    public void addLayerInInitMode(Layer newLayer) {
-        new LayerAdder(this).compInitMode().add(newLayer);
-    }
-
     public ImageLayer addNewEmptyImageLayer(String name, boolean bellowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         new LayerAdder(getHolderForNewLayers())
@@ -634,7 +621,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         // this shouldn't change the active layer here,
         // but sets the last button to selected
-        forEachLayer(this::addLayerToGUI);
+        forEachTopLevelLayer(this::addLayerToGUI);
         assert activeRoot == activeRootBefore;
 
         // correct the selection
@@ -866,9 +853,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public int getNumExportableImages() {
-        return (int) layerList.stream()
-            .filter(Layer::canExportImage)
-            .count();
+        int[] count = {0};
+        forEachNestedLayer(layer -> {
+            if (layer.canExportImage()) {
+                count[0]++;
+            }
+        }, false);
+        return count[0];
+    }
+
+    @Override
+    public String getORAStackXML() {
+        return "<stack>\n";
     }
 
     public void isolateRoot() {
@@ -901,37 +897,42 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         update();
     }
 
-    private List<Layer> getVisibleLayers() {
+    private List<Layer> getVisibleTopLevelLayers() {
         List<Layer> visibleLayers = layerList.stream()
             .filter(Layer::isVisible)
             .toList();
         return visibleLayers;
     }
 
-    public void forEachLayer(Consumer<Layer> action) {
+    public void forEachTopLevelLayer(Consumer<Layer> action) {
         layerList.forEach(action);
     }
 
     public void forEachNestedLayerAndMask(Consumer<Layer> action) {
+        forEachNestedLayer(action, true);
+    }
+
+    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
         for (Layer layer : layerList) {
-            layer.forEachNestedLayerAndMask(action);
+            layer.forEachNestedLayer(action, includeMasks);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Layer> void forEachLayer(Class<T> clazz, Consumer<T> action) {
-        for (Layer layer : layerList) {
+    public <T extends Layer> void forEachNestedLayer(Class<T> clazz, Consumer<T> action) {
+        forEachNestedLayer(layer -> {
             if (clazz.isAssignableFrom(layer.getClass())) {
                 action.accept((T) layer);
             }
-        }
+        }, false);
     }
 
     /**
      * Recursively applies the given action to all nested smart objects.
+     * "Nested" here means both the layer group nesting and the smart object nesting.
      */
     public void forAllNestedSmartObjects(Consumer<SmartObject> action) {
-        forEachLayer(SmartObject.class, so -> so.forAllNestedSmartObjects(action));
+        forEachNestedLayer(SmartObject.class, so -> so.forAllNestedSmartObjects(action));
     }
 
     public Layer findLayerAtPoint(Point2D p) {
@@ -968,7 +969,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void updateAllIconImages() {
-        forEachLayer(Layer::updateIconImage);
+        forEachNestedLayerAndMask(Layer::updateIconImage);
     }
 
     public boolean activeLayerAcceptsToolDrawing() {
@@ -1031,8 +1032,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Called when the contents of one of the smart objects
      * belonging to this composition have changed
      */
+    @Override
     public void smartObjectChanged(boolean linked) {
-        invalidateCompositeCache();
+        invalidateImageCache();
         if (!linked) {
             setDirty(true);
         }
@@ -1068,6 +1070,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
             layer.moveWhileDragging(relImX, relImY);
+            layer.getHolder().invalidateImageCache();
         }
         if (mode.movesSelection()) {
             if (selection != null) {
@@ -1143,7 +1146,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
-        invalidateCompositeCache();
+        invalidateImageCache();
         if (view != null) { // during reload image it can be null
             view.repaintRegion(start, end, thickness);
             view.repaintNavigator(false);
@@ -1151,7 +1154,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void repaintRegion(PRectangle area) {
-        invalidateCompositeCache();
+        invalidateImageCache();
         if (view != null) { // during reload image it can be null
             view.repaintRegion(area);
             view.repaintNavigator(false);
@@ -1443,7 +1446,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Forces the recalculation of the composite image
      * the next time when getCompositeImage() is called.
      */
-    public void invalidateCompositeCache() {
+    @Override
+    public void invalidateImageCache() {
 //        Debug.debugCall(getName() + " cache invalidated", 1);
         if (compositeImage != null) {
             compositeImage.flush();
@@ -1465,7 +1469,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * the cache is invalidated, and additional actions might be necessary
      */
     public void update(UpdateActions actions, boolean sizeChanged) {
-        invalidateCompositeCache();
+        invalidateImageCache();
 
         if (actions.repaintNeeded()) {
             if (view != null) {
@@ -1825,7 +1829,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         content.setName("visible");
         Composition newMainComp = copy(CopyType.UNDO, true);
 
-        List<Layer> visibleLayers = newMainComp.getVisibleLayers();
+        List<Layer> visibleLayers = newMainComp.getVisibleTopLevelLayers();
 
         for (Layer layer : visibleLayers) {
             newMainComp.deleteLayer(layer, false, false);
@@ -1858,10 +1862,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (layer.isVisible()) {
                 movedLayers.add(layer);
 
-                if (layer instanceof LayerGroup) {
-                    Messages.showInfo("No Nested Groups", "The creation of nested groups is not yet supported");
-                    return;
-                }
+//                if (layer instanceof LayerGroup) {
+//                    Messages.showInfo("No Nested Groups", "The creation of nested groups is not yet supported");
+//                    return;
+//                }
             }
         }
         if (movedLayers.isEmpty()) {
@@ -1886,7 +1890,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         node.add(activeRoot.createDebugNode("active root"));
         node.add(activeLayer.createDebugNode("active layer"));
 
-        forEachLayer(layer -> node.add(layer.createDebugNode()));
+        forEachTopLevelLayer(layer -> node.add(layer.createDebugNode()));
 
         node.add(createBufferedImageNode("composite image", getCompositeImage()));
 

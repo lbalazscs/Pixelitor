@@ -614,7 +614,7 @@ public class ShapesTool extends DragTool {
 
         Views.onActiveComp(comp -> {
             if (hadShape) {
-                comp.update();
+                comp.getActiveLayerHolder().update();
             } else {
                 comp.repaint();
             }

@@ -77,7 +77,7 @@ public class ContentLayerTest {
 
         comp.addLayerInInitMode(layer);
 
-        withMask.setupFor(layer);
+        withMask.setupForLayer(layer);
         LayerMask mask = null;
         if (withMask.isTrue()) {
             mask = layer.getMask();

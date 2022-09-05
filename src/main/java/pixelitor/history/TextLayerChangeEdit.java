@@ -65,7 +65,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
         layer.updateLayerName();
 
-        layer.getComp().update();
+        layer.update();
     }
 
     @Override

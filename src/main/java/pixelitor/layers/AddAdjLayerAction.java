@@ -98,7 +98,7 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
     }
 
     private static Action createAction(Supplier<Filter> factory, String name) {
-        return new PAction(name + " Adjustment", () ->
+        return new PAction("New " + name, () ->
             addAdjustmentLayer(factory, name));
     }
 
