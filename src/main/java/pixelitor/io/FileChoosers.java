@@ -58,12 +58,14 @@ public class FileChoosers {
         "TIFF files", "tiff", "tif");
     public static final FileNameExtensionFilter svgFilter = new FileNameExtensionFilter(
         "SVG files", "svg");
+    public static final FileNameExtensionFilter webpFilter = new FileNameExtensionFilter(
+        "WebP files", "webp");
 
     // the difference is that all NetPBM files can be opened,
     // but only PAM and PPM can be saved
     public static final FileNameExtensionFilter[] OPEN_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, netPBMFilters, oraFilter,
-        pngFilter, pxcFilter, tiffFilter, tgaFilter};
+        pngFilter, pxcFilter, tiffFilter, tgaFilter, webpFilter};
     public static final FileNameExtensionFilter[] SAVE_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, oraFilter, pamFilter,
         pngFilter, ppmFilter, pxcFilter, tiffFilter, tgaFilter};
