@@ -70,14 +70,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
                       SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
-        assert min < max : name + ": min (" + min + ") >= max (" + max + ')';
-        assert def >= min : name + ": def (" + def + ") < min (" + min + ')';
-        assert def <= max : name + ": def (" + def + ") > max (" + max + ')';
-
         minValue = min;
         maxValue = max;
         defaultValue = def;
         value = def;
+        assert checkInvariants();
+
         this.addResetButton = addResetButton;
         textPosition = position;
     }
@@ -431,6 +429,19 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     @Override
     public Object getParamValue() {
         return value;
+    }
+
+    public boolean checkInvariants() {
+        if (maxValue <= minValue) {
+            throw new AssertionError("%s: maxValue (%d) <= minValue (%d)".formatted(getName(), maxValue, minValue));
+        }
+        if (value < minValue) {
+            throw new AssertionError("%s: value (%.2f) < minValue (%d)".formatted(getName(), value, minValue));
+        }
+        if (value > maxValue) {
+            throw new AssertionError("%s: value (%.2f) > maxValue (%d)".formatted(getName(), value, maxValue));
+        }
+        return true;
     }
 
     @Override

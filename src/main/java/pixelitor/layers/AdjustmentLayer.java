@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.FilterContext;
 import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
@@ -184,10 +185,20 @@ public class AdjustmentLayer extends Layer implements Filterable {
     public void onFilterDialogCanceled() {
         if (!showOriginal) {
             filter = lastFilter;
+
+            // when the filter was copied, then it wasn't adjusted to the image size
+            updateOptions();
+
             holder.update();
         }
         lastFilter = null;
         showOriginal = false;
+    }
+
+    public void updateOptions() {
+        if (filter instanceof ParametrizedFilter pf) {
+            pf.getParamSet().updateOptions(this, false);
+        }
     }
 
     @Override

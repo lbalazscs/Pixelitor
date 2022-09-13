@@ -150,6 +150,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     private JSpinner createSpinner(RangeParam model) {
+        assert model.checkInvariants();
+
         SpinnerNumberModel spinnerModel;
         int decimalPlaces = model.getDecimalPlaces();
         if (decimalPlaces > 0) {

@@ -225,7 +225,7 @@ public class SmartObject extends CompositeLayer {
 
         // has to be done after the migration
         for (SmartFilter filter : filters) {
-            filter.updateOptions(this);
+            filter.updateOptions();
         }
 
         recalculateImage();

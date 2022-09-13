@@ -20,7 +20,6 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.filters.Filter;
-import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
@@ -353,12 +352,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             filterSettingsChanged();
             holder.update();
             edit();
-        }
-    }
-
-    public void updateOptions(SmartObject layer) {
-        if (filter instanceof ParametrizedFilter pf) {
-            pf.getParamSet().updateOptions(this, false);
         }
     }
 
