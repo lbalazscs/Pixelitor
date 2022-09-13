@@ -374,6 +374,29 @@ public class Shapes {
         return it2.isDone();
     }
 
+    public static Shape createSquare(double cx, double cy, double radius) {
+        double diameter = 2 * radius;
+        return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
+    }
+
+    public static Shape createHexagon(double cx, double cy, double radius) {
+        double cos60 = 0.5;
+        double sin60 = 0.86602540378443864676372317075294;
+        double rCos60 = radius * cos60;
+        double rSin60 = radius * sin60;
+
+        Path2D path = new Path2D.Double();
+        path.moveTo(cx + radius, cy);
+        path.lineTo(cx + rCos60, cy + rSin60);
+        path.lineTo(cx - rCos60, cy + rSin60);
+        path.lineTo(cx - radius, cy);
+        path.lineTo(cx - rCos60, cy - rSin60);
+        path.lineTo(cx + rCos60, cy - rSin60);
+        path.closePath();
+
+        return path;
+    }
+
     public static Shape createCircle(Point2D center, double radius) {
         return createCircle(center.getX(), center.getY(), radius);
     }

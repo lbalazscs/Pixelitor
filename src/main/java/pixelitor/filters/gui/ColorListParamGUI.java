@@ -49,7 +49,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     private boolean sliderMovedByUser = true;
     private int numVisibleSwatches;
 
-    public ColorListParamGUI(ColorListParam model, Color[] candidateColors) {
+    public ColorListParamGUI(ColorListParam model, Color[] candidateColors, int minNumColors) {
         super(new VerticalLayout());
         this.model = model;
         this.candidateColors = candidateColors;
@@ -67,7 +67,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         resetButton = new ResetButton(model);
 
         RangeParam numColorsModel = new RangeParam("Number",
-            1, numVisibleSwatches, candidateColors.length);
+            minNumColors, numVisibleSwatches, candidateColors.length);
         numColorsSlider = new SliderSpinner(numColorsModel, NONE, false);
         numColorsSlider.setupTicks(1, 0);
         numColorsSlider.addExplicitResetButton(resetButton);

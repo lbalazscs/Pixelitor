@@ -52,7 +52,7 @@ public class Starburst extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
     private final ColorListParam rayColorsParam = new ColorListParam("Ray Colors",
-        1, WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
+        1, 1, WHITE, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final RangeParam spiralParam = new RangeParam("Spiral", -200, 0, 200);

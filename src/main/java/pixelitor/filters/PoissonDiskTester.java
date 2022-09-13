@@ -49,7 +49,7 @@ public class PoissonDiskTester extends ParametrizedFilter {
     private final BooleanParam debugGrid = new BooleanParam("Debug Grid", false, IGNORE_RANDOMIZE);
 
     private final ColorListParam colors = new ColorListParam("Colors",
-        1, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
+        1, 1, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET, Colors.CW_YELLOW);
 
     public PoissonDiskTester() {

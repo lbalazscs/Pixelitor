@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class FilterParamTest {
             {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
             {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
             {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
-            {new ColorListParam("Param Name", 1, BLACK, BLUE)},
+            {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
             {new BooleanParam("Param Name", true)},
             {new AngleParam("Param Name", 0)},
             {new ElevationAngleParam("Param Name", 0)},

@@ -34,11 +34,13 @@ import static java.util.stream.Collectors.joining;
  */
 public class ColorListParam extends AbstractFilterParam {
     private Color[] colors;
+    private int minNumColors;
     private final Color[] candidateColors;
     private final Color[] defaultColors;
 
-    public ColorListParam(String name, int defaultNumColors, Color... candidateColors) {
+    public ColorListParam(String name, int defaultNumColors, int minNumColors, Color... candidateColors) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
+        this.minNumColors = minNumColors;
         this.candidateColors = candidateColors;
         this.colors = Arrays.copyOf(candidateColors, defaultNumColors);
         this.defaultColors = Arrays.copyOf(candidateColors, defaultNumColors);
@@ -46,7 +48,7 @@ public class ColorListParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ColorListParamGUI(this, candidateColors);
+        var gui = new ColorListParamGUI(this, candidateColors, minNumColors);
         paramGUI = gui;
         guiCreated();
 
