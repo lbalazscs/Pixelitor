@@ -393,6 +393,10 @@ public class Views {
             .findFirst();
     }
 
+    public static LayerHolder getActiveHolder() {
+        return getActiveComp().getActiveLayerHolder();
+    }
+
     public static List<Composition> getUnsavedComps() {
         return views.stream()
             .map(View::getComp)

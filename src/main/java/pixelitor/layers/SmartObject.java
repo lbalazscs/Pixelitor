@@ -295,6 +295,14 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
+    public void update(Composition.UpdateActions actions) {
+        if (imageNeedsRefresh) {
+            recalculateImage();
+        }
+        holder.update(actions);
+    }
+
+    @Override
     public void update() {
         if (imageNeedsRefresh) {
             recalculateImage();

@@ -41,6 +41,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
@@ -263,7 +264,7 @@ public class Path implements Serializable {
 
     public SubPath startNewSubpath(double x, double y, View view) {
         SubPath sp = startNewSubpath();
-        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, view), sp);
+        AnchorPoint first = new AnchorPoint(PPoint.lazyFromIm(x, y, view), sp);
         first.setType(SMOOTH);
         sp.addFirstPoint(first, false);
         return sp;
@@ -420,6 +421,13 @@ public class Path implements Serializable {
     public Rectangle getImBounds() {
         Shape shape = toImageSpaceShape();
         return shape.getBounds();
+    }
+
+
+    public void randomize(Random rng, double amount) {
+        for (SubPath subPath : subPaths) {
+            subPath.randomize(rng, amount);
+        }
     }
 
     @Override

@@ -232,6 +232,8 @@ public interface LayerHolder extends Debuggable {
             .add(group);
     }
 
+    void update(Composition.UpdateActions actions);
+
     void update();
 
     void smartObjectChanged(boolean linked);

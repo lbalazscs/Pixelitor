@@ -250,6 +250,9 @@ public class Pixelitor {
             return;
         }
 
+//        NewImage.addNewImage(FillType.WHITE, 700, 500, "Test");
+//        Debug.startFilter(ConcentricShapes.NAME);
+
 //        GradientFillLayer.createNew();
 
 //        Views.onActiveLayer(Layer::replaceWithSmartObject);

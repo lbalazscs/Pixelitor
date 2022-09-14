@@ -110,11 +110,11 @@ public class ControlPoint extends DraggablePoint {
     }
 
     public boolean isRetracted() {
-        return samePositionAs(anchor);
+        return isRetracted(1.0);
     }
 
     public boolean isRetracted(double epsilon) {
-        return samePositionAs(anchor, epsilon);
+        return sameImPositionAs(anchor, epsilon);
     }
 
     void retract() {

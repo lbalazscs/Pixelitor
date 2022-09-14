@@ -130,6 +130,12 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public void update(Composition.UpdateActions actions) {
+        recalculateCachedImage();
+        holder.update(actions);
+    }
+
+    @Override
     public void update() {
         recalculateCachedImage();
         holder.update();

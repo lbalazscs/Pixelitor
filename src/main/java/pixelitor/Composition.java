@@ -1460,6 +1460,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         update(FULL);
     }
 
+    @Override
     public void update(UpdateActions actions) {
         update(actions, false);
     }

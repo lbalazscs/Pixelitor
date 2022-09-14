@@ -268,7 +268,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             setState(PREVIEW);
         }
         imageRefChanged();
-        comp.update(REPAINT);
+        holder.update(REPAINT);
     }
 
     @Override

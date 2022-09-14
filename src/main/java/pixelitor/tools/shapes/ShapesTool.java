@@ -353,7 +353,7 @@ public class ShapesTool extends DragTool {
             // therefore the continuous drawing of the shape.
             // It repaints the whole image because
             // some shapes extend beyond their drag rectangle.
-            e.getComp().update(REPAINT);
+            e.getComp().getActiveLayerHolder().update(REPAINT);
         }
     }
 
@@ -428,7 +428,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, true, false);
 
-            Views.getActiveComp().update(REPAINT);
+            Views.getActiveHolder().update(REPAINT);
         }
         altDown = true;
     }
@@ -441,7 +441,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, false, false);
 
-            Views.getActiveComp().update(REPAINT);
+            Views.getActiveHolder().update(REPAINT);
         }
         altDown = false;
     }

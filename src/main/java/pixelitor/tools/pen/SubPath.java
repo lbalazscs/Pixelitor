@@ -30,6 +30,7 @@ import pixelitor.tools.pen.history.SubPathStartEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.debug.DebugNode;
@@ -45,6 +46,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
@@ -82,7 +84,6 @@ public class SubPath implements Serializable, Transformable {
 
     public SubPath(Path path, Composition comp) {
         assert path != null;
-        assert comp != null;
         this.path = path;
         this.comp = comp;
         id = "SP" + nextId++;
@@ -353,7 +354,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
-        if (ap1.samePositionAs(ap2, 1.0)
+        if (ap1.sameImPositionAs(ap2, 1.0)
             && ap1.ctrlOut.isRetracted()
             && ap2.ctrlIn.isRetracted()) {
             // the first will be kept, so copy the out ctrl of the second to the first
@@ -606,8 +607,10 @@ public class SubPath implements Serializable, Transformable {
 
         setFinished(true);
         path.setBuildState(NO_INTERACTION);
-        comp.setActivePath(path);
-        Tools.PEN.enableActions(true);
+        if (comp != null) {
+            comp.setActivePath(path);
+            Tools.PEN.enableActions(true);
+        }
 
         if (addToHistory) {
             History.add(new FinishSubPathEdit(comp, this));
@@ -615,40 +618,32 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void addLine(double newX, double newY, View view) {
-        newX = view.imageXToComponentSpace(newX);
-        newY = view.imageYToComponentSpace(newY);
-        AnchorPoint ap = new AnchorPoint(newX, newY, view, this);
+        PPoint point = PPoint.lazyFromIm(newX, newY, view);
+        AnchorPoint ap = new AnchorPoint(point, view, this);
         addPoint(ap);
     }
 
     public void addCubicCurve(double c1x, double c1y,
                               double c2x, double c2y,
-                              double newX, double newY, View view) {
+                              double nextX, double nextY, View view) {
         ControlPoint lastOut = getLast().ctrlOut;
-        c1x = view.imageXToComponentSpace(c1x);
-        c1y = view.imageYToComponentSpace(c1y);
-        lastOut.setLocationOnlyForThis(c1x, c1y);
+        PPoint c1 = PPoint.lazyFromIm(c1x, c1y, view);
+        lastOut.setLocationOnlyForThis(c1);
         lastOut.afterMovingActionsForThis();
 
-        newX = view.imageXToComponentSpace(newX);
-        newY = view.imageYToComponentSpace(newY);
-        AnchorPoint next = new AnchorPoint(newX, newY, view, this);
+        PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
+        AnchorPoint next = new AnchorPoint(nextLoc, view, this);
         addPoint(next);
         next.setType(SMOOTH);
 
-        c2x = view.imageXToComponentSpace(c2x);
-        c2y = view.imageYToComponentSpace(c2y);
         ControlPoint nextIn = next.ctrlIn;
-        nextIn.setLocationOnlyForThis(c2x, c2y);
+        PPoint c2 = PPoint.lazyFromIm(c2x, c2y, view);
+        nextIn.setLocationOnlyForThis(c2);
         nextIn.afterMovingActionsForThis();
     }
 
     public void addQuadCurve(double cx, double cy,
-                             double newX, double newY, View view) {
-        cx = view.imageXToComponentSpace(cx);
-        cy = view.imageYToComponentSpace(cy);
-        newX = view.imageXToComponentSpace(newX);
-        newY = view.imageYToComponentSpace(newY);
+                             double nextX, double nextY, View view) {
         AnchorPoint last = getLast();
 
         // convert the quadratic bezier (with one control point)
@@ -658,25 +653,29 @@ public class SubPath implements Serializable, Transformable {
         double qp1y = cy;
         double qp0x = last.x;
         double qp0y = last.y;
-        double qp2x = newX;
-        double qp2y = newY;
+        double qp2x = nextX;
+        double qp2y = nextY;
 
         double twoThirds = 2.0 / 3.0;
         double cp1x = qp0x + twoThirds * (qp1x - qp0x);
         double cp1y = qp0y + twoThirds * (qp1y - qp0y);
+        PPoint cp1 = PPoint.lazyFromIm(cp1x, cp1y, view);
+
         double cp2x = qp2x + twoThirds * (qp1x - qp2x);
         double cp2y = qp2y + twoThirds * (qp1y - qp2y);
+        PPoint cp2 = PPoint.lazyFromIm(cp2x, cp2y, view);
 
         ControlPoint lastOut = last.ctrlOut;
-        lastOut.setLocationOnlyForThis(cp1x, cp1y);
+        lastOut.setLocationOnlyForThis(cp1);
         lastOut.afterMovingActionsForThis();
 
-        AnchorPoint next = new AnchorPoint(newX, newY, view, this);
+        PPoint nextLoc = PPoint.lazyFromIm(nextX, nextY, view);
+        AnchorPoint next = new AnchorPoint(nextLoc, view, this);
         addPoint(next);
         next.setType(SMOOTH);
 
         ControlPoint nextIn = next.ctrlIn;
-        nextIn.setLocationOnlyForThis(cp2x, cp2y);
+        nextIn.setLocationOnlyForThis(cp2);
         nextIn.afterMovingActionsForThis();
     }
 
@@ -772,6 +771,14 @@ public class SubPath implements Serializable, Transformable {
     @VisibleForTesting
     public String getId() {
         return id;
+    }
+
+    public void randomize(Random rng, double amount) {
+        for (AnchorPoint anchorPoint : anchorPoints) {
+            double dx = (rng.nextDouble() * 2 - 2) * amount;
+            double dy = (rng.nextDouble() * 2 - 2) * amount;
+            anchorPoint.imTranslate(dx, dy);
+        }
     }
 
     @Override

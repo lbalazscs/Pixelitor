@@ -363,7 +363,7 @@ public class Debug {
 
     public static void startFilter(String filterName) {
         FilterAction action = Filters.getFilterActionByName(filterName);
-        action.actionPerformed(null);
+        EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 
     public static void addNewImageWithMask() {

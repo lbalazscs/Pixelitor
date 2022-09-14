@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import org.jdesktop.swingx.geom.Star2D;
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
@@ -25,8 +26,10 @@ import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -50,7 +53,8 @@ public class Shapes {
      * in image coordinates, to a {@link Path}
      */
     public static Path shapeToPath(Shape shape, View view) {
-        Path path = new Path(view.getComp(), true);
+        Composition comp = view == null ? null : view.getComp();
+        Path path = new Path(comp, comp != null);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];
@@ -79,6 +83,7 @@ public class Shapes {
         }
 
         path.mergeOverlappingAnchors();
+
         path.setHeuristicTypes();
         assert path.checkConsistency();
         return path;
@@ -328,16 +333,25 @@ public class Shapes {
             int type = pathIterator.currentSegment(coords);
 
             switch (type) {
-                case SEG_MOVETO -> System.out.println("MOVE TO " + Arrays.toString(coords));
-                case SEG_LINETO -> System.out.println("LINE TO " + Arrays.toString(coords));
-                case SEG_QUADTO -> System.out.println("QUAD TO " + Arrays.toString(coords));
-                case SEG_CUBICTO -> System.out.println("CUBIC TO " + Arrays.toString(coords));
-                case SEG_CLOSE -> System.out.println("CLOSE " + Arrays.toString(coords));
+                case SEG_MOVETO -> System.out.println("MOVE TO " + arrayToString(coords, 2));
+                case SEG_LINETO -> System.out.println("LINE TO " + arrayToString(coords, 2));
+                case SEG_QUADTO -> System.out.println("QUAD TO " + arrayToString(coords, 4));
+                case SEG_CUBICTO -> System.out.println("CUBIC TO " + arrayToString(coords, 6));
+                case SEG_CLOSE -> System.out.println("CLOSE " + arrayToString(coords, 2));
                 default -> throw new IllegalArgumentException("type = " + type);
             }
 
             pathIterator.next();
         }
+    }
+
+    private static String arrayToString(double[] array, int firstN) {
+        if (firstN == array.length) {
+            return Arrays.toString(array);
+        }
+        double[] shortArray = new double[firstN];
+        System.arraycopy(array, 0, shortArray, 0, firstN);
+        return Arrays.toString(shortArray);
     }
 
     /**
@@ -374,6 +388,77 @@ public class Shapes {
         return it2.isDone();
     }
 
+    public static Shape randomize(Shape in, Random rng, double amount) {
+        Path path = shapeToPath(in, null);
+        path.randomize(rng, amount);
+        return path.toImageSpaceShape();
+    }
+
+    public static Shape randomize2(Shape in, double amount) {
+        Path2D out = new Path2D.Double();
+        PathIterator pathIterator = in.getPathIterator(null);
+
+        record PathPoint(int type, double[] coords) {
+        }
+        List<PathPoint> points = new ArrayList<>();
+
+        boolean closed = false;
+        while (!pathIterator.isDone()) {
+            double[] coords = new double[6];
+            int type = pathIterator.currentSegment(coords);
+            if (type == SEG_CLOSE) {
+                closed = true;
+            }
+            points.add(new PathPoint(type, coords));
+            pathIterator.next();
+        }
+
+        // randomize
+        int numPoints = points.size();
+        for (int i = 0; i < numPoints; i++) {
+            double[] coords = points.get(i).coords();
+            int type = points.get(i).type();
+            if (closed && i == numPoints - 2) {
+                // make sure that at the end we arrive at the first point
+                PathPoint first = points.get(0);
+                double[] firstCoords = first.coords();
+                switch (type) {
+                    case SEG_LINETO -> {
+                        coords[0] = firstCoords[0];
+                        coords[1] = firstCoords[1];
+                    }
+                    case SEG_QUADTO -> {
+                        coords[2] = firstCoords[0];
+                        coords[3] = firstCoords[1];
+                    }
+                    case SEG_CUBICTO -> {
+                        coords[4] = firstCoords[0];
+                        coords[5] = firstCoords[1];
+                    }
+                    default -> throw new IllegalStateException("unexpected type " + type);
+                }
+            } else {
+                for (int j = 0; j < 6; j++) {
+                    coords[j] += ((2 * Math.random() - 2) * amount);
+                }
+            }
+        }
+
+        for (PathPoint point : points) {
+            double[] coords = point.coords();
+            switch (point.type()) {
+                case SEG_MOVETO -> out.moveTo(coords[0], coords[1]);
+                case SEG_LINETO -> out.lineTo(coords[0], coords[1]);
+                case SEG_QUADTO -> out.quadTo(coords[0], coords[1], coords[2], coords[3]);
+                case SEG_CUBICTO -> out.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                case SEG_CLOSE -> out.closePath();
+                default -> throw new IllegalArgumentException("type = " + point.type());
+            }
+        }
+
+        return out;
+    }
+
     public static Shape createSquare(double cx, double cy, double radius) {
         double diameter = 2 * radius;
         return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
@@ -392,6 +477,7 @@ public class Shapes {
         path.lineTo(cx - radius, cy);
         path.lineTo(cx - rCos60, cy - rSin60);
         path.lineTo(cx + rCos60, cy - rSin60);
+        path.lineTo(cx + radius, cy);
         path.closePath();
 
         return path;

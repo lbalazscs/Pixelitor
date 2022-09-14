@@ -301,7 +301,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     @Override
     public void updateUI(View view) {
-        view.getComp().update(REPAINT);
+        view.getComp().getActiveLayerHolder().update(REPAINT);
     }
 
     private void reloadType(ShapesTool tool) {

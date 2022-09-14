@@ -217,11 +217,17 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(x + dx, y + dy);
     }
 
+    public void imTranslate(double dx, double dy) {
+        // Only set the image-space coordinates because this should work without a view
+        imX += dx;
+        imY += dy;
+    }
+
     public boolean handleContains(double x, double y) {
         return x > this.x - HANDLE_RADIUS
-            && x < this.x + HANDLE_RADIUS
-            && y > this.y - HANDLE_RADIUS
-            && y < this.y + HANDLE_RADIUS;
+               && x < this.x + HANDLE_RADIUS
+               && y > this.y - HANDLE_RADIUS
+               && y < this.y + HANDLE_RADIUS;
     }
 
     public void paintHandle(Graphics2D g) {
@@ -333,20 +339,17 @@ public class DraggablePoint extends Point2D.Double {
         if (!(o instanceof DraggablePoint that)) {
             return false;
         }
-        return samePositionAs(that);
+        return sameImPositionAs(that, 1.0);
     }
 
-    public boolean samePositionAs(DraggablePoint that) {
-        return x == that.x && y == that.y;
-    }
-
-    public boolean samePositionAs(DraggablePoint that, double epsilon) {
-        return Math.abs(x - that.x) < epsilon
-            && Math.abs(y - that.y) < epsilon;
+    public boolean sameImPositionAs(DraggablePoint that, double epsilon) {
+        return Math.abs(imX - that.imX) < epsilon
+               && Math.abs(imY - that.imY) < epsilon;
     }
 
     public void copyPositionFrom(DraggablePoint that) {
-        setLocationOnlyForThis(that.x, that.y);
+        x = that.x;
+        y = that.y;
         imX = that.imX;
         imY = that.imY;
 

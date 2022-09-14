@@ -68,7 +68,7 @@ public class AnchorPoint extends DraggablePoint {
         this(PPoint.eagerFromCo(coX, coY, view), view, subPath);
     }
 
-    private AnchorPoint(PPoint p, View view, SubPath subPath) {
+    public AnchorPoint(PPoint p, View view, SubPath subPath) {
         super("AP" + debugCounter++, p, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
 
         this.subPath = subPath;
@@ -151,6 +151,13 @@ public class AnchorPoint extends DraggablePoint {
         imTransformOnlyThis(at, useRefPoint);
         ctrlIn.imTransformOnlyThis(at, useRefPoint);
         ctrlOut.imTransformOnlyThis(at, useRefPoint);
+    }
+
+    @Override
+    public void imTranslate(double dx, double dy) {
+        super.imTranslate(dx, dy);
+        ctrlIn.imTranslate(dx, dy);
+        ctrlOut.imTranslate(dx, dy);
     }
 
     public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,

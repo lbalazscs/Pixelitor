@@ -18,12 +18,10 @@
 package pixelitor.filters;
 
 import pixelitor.colors.Colors;
-import pixelitor.filters.gui.ColorListParam;
-import pixelitor.filters.gui.EnumParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 
 import java.awt.Color;
@@ -31,6 +29,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.Random;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -84,24 +83,31 @@ public class ConcentricShapes extends ParametrizedFilter {
     private final ColorListParam colorsParam = new ColorListParam("Colors",
         2, 2, WHITE, BLACK, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET);
-//    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
+    //    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
 //    private final AngleParam rotate = new AngleParam("Rotate", 0);
+    private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 0, 100);
 
     public ConcentricShapes() {
         super(false);
+
+        FilterButtonModel reseedAction = ReseedSupport.createAction("", "Reseed Randomness");
 
         setParams(
             type,
             center,
             distanceParam,
-            colorsParam
+            colorsParam,
+            randomnessParam.withAction(reseedAction)
 //            scale
 //            rotate
         );
+
+        randomnessParam.setupEnableOtherIfNotZero(reseedAction);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        Random rng = ReseedSupport.getLastSeedRandom();
         dest = ImageUtils.copyImage(src);
 
         int width = dest.getWidth();
@@ -124,10 +130,18 @@ public class ConcentricShapes extends ParametrizedFilter {
 
         Color[] colors = colorsParam.getColors();
         int numColors = colors.length;
+
+        int randomness = randomnessParam.getValue();
+        double rndMultiplier = randomness / 400.0;
+
         for (int ring = numRings; ring > 0; ring--) {
             double r = ring * distance;
             g.setColor(colorsParam.getColor((ring - 1) % numColors));
-            g.fill(shapeType.createShape(cx, cy, r));
+            Shape shape = shapeType.createShape(cx, cy, r);
+            if (randomness > 0) {
+                shape = Shapes.randomize(shape, rng, rndMultiplier * r);
+            }
+            g.fill(shape);
         }
 
         g.dispose();

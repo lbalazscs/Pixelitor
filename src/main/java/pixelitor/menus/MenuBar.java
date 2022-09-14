@@ -87,7 +87,6 @@ import java.io.File;
 import java.util.ResourceBundle;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.Views.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
@@ -1304,8 +1303,8 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new PAction("Themes.updateAllUI()", Themes::updateAllUI));
 
-        sub.add(new OpenViewEnabledAction("update(FULL) on the active image",
-            comp -> comp.update(FULL)));
+        sub.add(new OpenViewEnabledAction("update() on the active image",
+            comp -> comp.update()));
 
         sub.add(new OpenViewEnabledAction("update() on the active holder",
             comp -> comp.getActiveLayerHolder().update()));
