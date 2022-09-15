@@ -243,11 +243,11 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public void update() {
+    public void update(Composition.UpdateActions actions) {
         if (owner instanceof SmartFilter sf) {
             sf.maskChanged();
         }
-        holder.update();
+        holder.update(actions);
     }
 
     @Override

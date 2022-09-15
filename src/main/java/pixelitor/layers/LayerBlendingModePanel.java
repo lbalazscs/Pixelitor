@@ -31,7 +31,7 @@ import static pixelitor.Views.onActiveLayer;
  * The GUI selector for the opacity and blending mode of the layers
  */
 public class LayerBlendingModePanel extends BlendingModePanel
-    implements ViewActivationListener, ActiveLayerHolderListener {
+    implements ViewActivationListener, ActiveHolderListener {
 
     private boolean userInteractionChange = true;
 
@@ -50,7 +50,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
         bmCombo.setName("layerBM");
 
         Views.addActivationListener(this);
-        Layers.addLayerHolderListener(this);
+        Layers.addHolderListener(this);
 
         opacityDDSlider.addActionListener(e -> {
             if (userInteractionChange) {

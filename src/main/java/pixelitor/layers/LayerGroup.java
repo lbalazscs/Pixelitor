@@ -22,10 +22,12 @@ import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
 import pixelitor.history.DeleteLayerEdit;
+import pixelitor.history.GroupingEdit;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -37,8 +39,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static pixelitor.layers.LayerGUILayout.thumbSize;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**
  * A layer group.
@@ -47,7 +51,7 @@ public class LayerGroup extends CompositeLayer {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final List<Layer> layers;
+    private List<Layer> layers;
 
     private transient BufferedImage thumb;
 
@@ -60,10 +64,7 @@ public class LayerGroup extends CompositeLayer {
 
     public LayerGroup(Composition comp, String name, List<Layer> layers) {
         super(comp, name);
-        this.layers = layers;
-        for (Layer layer : layers) {
-            layer.setHolder(this);
-        }
+        setLayers(layers);
         blendingMode = BlendingMode.PASS_THROUGH;
     }
 
@@ -89,6 +90,13 @@ public class LayerGroup extends CompositeLayer {
         }
         LayerGroup copy = new LayerGroup(comp, copyName, layersCopy);
         return copy;
+    }
+
+    public void setLayers(List<Layer> layers) {
+        this.layers = layers;
+        for (Layer layer : layers) {
+            layer.setHolder(this);
+        }
     }
 
     public boolean isPassThrough() {
@@ -133,12 +141,6 @@ public class LayerGroup extends CompositeLayer {
     public void update(Composition.UpdateActions actions) {
         recalculateCachedImage();
         holder.update(actions);
-    }
-
-    @Override
-    public void update() {
-        recalculateCachedImage();
-        holder.update();
     }
 
     private void recalculateCachedImage() {
@@ -294,6 +296,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public Stream<? extends Layer> levelStream() {
+        return layers.stream();
+    }
+
+    @Override
     public void addLayerToList(int index, Layer newLayer) {
         layers.add(index, newLayer);
     }
@@ -385,28 +392,27 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        // TODO
-        if (thumb == null) {
-            thumb = ImageUtils.createSysCompatibleImage(thumbSize, thumbSize);
-            Graphics2D g2 = thumb.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            if (isPassThrough()) {
-                g2.setColor(new Color(0, 138, 0));
-            } else {
-                g2.setColor(new Color(0, 0, 203));
+        if (isPassThrough()) {
+            if (thumb == null) {
+                thumb = ImageUtils.createCircleThumb(new Color(0, 138, 0));
             }
-            g2.fillOval(0, 0, thumbSize, thumbSize);
-            g2.dispose();
+        } else {
+            if (cachedImage != null) {
+                thumb = createThumbnail(cachedImage, thumbSize, thumbCheckerBoardPainter);
+            } else {
+                thumb = ImageUtils.createCircleThumb(new Color(0, 0, 203));
+            }
         }
+
         return thumb;
     }
 
     @Override
     public void unGroup() {
-        replaceWithUnGrouped();
+        replaceWithUnGrouped(null, true);
     }
 
-    public void replaceWithUnGrouped() {
+    public void replaceWithUnGrouped(int[] prevIndices, boolean addToHistory) {
         int indexInParent = holder.indexOf(this);
         holder.deleteTemporarily(this);
 
@@ -414,8 +420,19 @@ public class LayerGroup extends CompositeLayer {
         boolean activeWasThis = this == activeBefore;
         boolean activeWasInside = !activeWasThis && contains(activeBefore);
 
-        for (Layer layer : layers) {
-            holder.insertLayer(layer, indexInParent, true);
+        int numLayers = layers.size();
+        int[] insertIndices = new int[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+            Layer layer = layers.get(i);
+
+            // The owner field in LayerGUIs can cause problems later
+            // because if the new holder is a Composition,
+            // then it won't be automatically updated.
+            layer.getUI().setOwner(null);
+
+            int insertIndex = prevIndices != null ? prevIndices[i] : indexInParent;
+            holder.insertLayer(layer, insertIndex, true);
+            insertIndices[i] = insertIndex;
             indexInParent++;
         }
 
@@ -426,7 +443,10 @@ public class LayerGroup extends CompositeLayer {
         }
 
         assert comp.getActiveRoot() != this;
-        History.clear();
+
+        if (addToHistory) { // wasn't called from undo
+            History.add(new GroupingEdit(holder, this, insertIndices, false));
+        }
     }
 
     @Override
@@ -482,6 +502,19 @@ public class LayerGroup extends CompositeLayer {
         return "<stack composite-op=\"%s\" name=\"%s\" opacity=\"%f\" visibility=\"%s\" isolation=\"%s\">\n".formatted(
             blendingMode.toSVGName(), getName(), getOpacity(), getVisibilityAsORAString(),
             blendingMode == BlendingMode.PASS_THROUGH ? "auto" : "isolate");
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.addBoolean("has cached image", cachedImage != null);
+        node.addBoolean("has thumb", thumb != null);
+        for (Layer layer : layers) {
+            node.add(layer.createDebugNode());
+        }
+
+        return node;
     }
 }
 

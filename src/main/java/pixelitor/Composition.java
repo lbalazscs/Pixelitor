@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static pixelitor.Composition.LayerAdder.Position.*;
@@ -275,7 +276,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Returns the holder of the active layer
      */
-    public LayerHolder getActiveLayerHolder() {
+    public LayerHolder getActiveHolder() {
         return activeLayer.getHolder();
     }
 
@@ -583,7 +584,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // there was an out of memory error
             return;
         }
-        new LayerAdder(getActiveLayerHolder())
+        new LayerAdder(getActiveHolder())
             .withHistory("Duplicate Layer")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
@@ -648,7 +649,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void mergeActiveLayerDown() {
         assert checkInvariants();
 
-        LayerHolder holder = getActiveLayerHolder();
+        LayerHolder holder = getActiveHolder();
 
         if (holder.canMergeDown(activeLayer)) {
             holder.mergeDown(activeLayer);
@@ -665,7 +666,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void deleteActiveLayer(boolean addToHistory) {
-        getActiveLayerHolder().deleteLayer(activeLayer, addToHistory);
+        getActiveHolder().deleteLayer(activeLayer, addToHistory);
     }
 
     @Override
@@ -765,14 +766,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             layer.getName(), layer.getClass().getSimpleName(),
             System.identityHashCode(layer), getDebugName());
 
-//        Layer oldLayer = activeLayer;
         activeRoot = layer;
 
         if (activeRoot.hasUI()) {
             activeRoot.activateUI();
         }
-
-        assert checkInvariants();
     }
 
     // only sets a reference - used only when copying
@@ -840,6 +838,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     @Override
     public Layer getLayer(int i) {
         return layerList.get(i);
+    }
+
+    @Override
+    public Stream<? extends Layer> levelStream() {
+        return layerList.stream();
     }
 
     @Override
@@ -1855,33 +1858,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             .withHistory("Clone")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
-    }
-
-    public void convertVisibleLayersToGroup() {
-        List<Layer> movedLayers = new ArrayList<>();
-        for (Layer layer : layerList) {
-            if (layer.isVisible()) {
-                movedLayers.add(layer);
-
-//                if (layer instanceof LayerGroup) {
-//                    Messages.showInfo("No Nested Groups", "The creation of nested groups is not yet supported");
-//                    return;
-//                }
-            }
-        }
-        if (movedLayers.isEmpty()) {
-            return;
-        }
-        Layer lastMoved = movedLayers.get(movedLayers.size() - 1);
-        int newIndex = layerList.indexOf(lastMoved) + 1;
-        for (Layer layer : movedLayers) {
-            deleteTemporarily(layer);
-            newIndex--;
-        }
-        LayerGroup newGroup = new LayerGroup(this, "Layer Group", movedLayers);
-        new LayerAdder(this).atIndex(newIndex).add(newGroup);
-
-        History.clear();
     }
 
     @Override

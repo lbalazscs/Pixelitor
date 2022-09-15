@@ -232,7 +232,7 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        LayerHolder parent = comp.getActiveLayerHolder();
+        LayerHolder parent = comp.getActiveHolder();
 
         boolean enabled = action.isEnabled();
         int numLayers = parent.getNumLayers();

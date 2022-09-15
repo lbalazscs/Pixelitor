@@ -33,7 +33,7 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that deletes the active layer from the active composition.
  */
 public class DeleteActiveLayerAction extends PAction
-    implements ViewActivationListener, ActiveLayerHolderListener {
+    implements ViewActivationListener, ActiveHolderListener {
 
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
@@ -45,7 +45,7 @@ public class DeleteActiveLayerAction extends PAction
         setToolTip("Deletes the active layer.");
         setEnabled(false);
         Views.addActivationListener(this);
-        Layers.addLayerHolderListener(this);
+        Layers.addHolderListener(this);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DeleteActiveLayerAction extends PAction
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        LayerHolder holder = newView.getComp().getActiveLayerHolder();
+        LayerHolder holder = newView.getComp().getActiveHolder();
         enableDisable(holder, holder.getNumLayers());
     }
 

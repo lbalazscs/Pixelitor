@@ -29,7 +29,7 @@ import static java.lang.String.format;
  * Used for tracking what happens in long-running automatic tests.
  * Listens to changes and generates events.
  */
-public class PixelitorEventListener implements ActiveLayerHolderListener,
+public class PixelitorEventListener implements ActiveHolderListener,
     ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
@@ -39,7 +39,7 @@ public class PixelitorEventListener implements ActiveLayerHolderListener,
     }
 
     public void register() {
-        Layers.addLayerHolderListener(this);
+        Layers.addHolderListener(this);
         Layers.addMaskListener(this);
         Views.addActivationListener(this);
     }

@@ -186,9 +186,6 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     public void paintIconThumbnail(Graphics2D g2, int thumbSize) {
-        g2.setColor(LayerGUI.UNSELECTED_COLOR);
-        g2.fillRect(0, 0, thumbSize, thumbSize);
-        g2.setColor(LayerGUI.SELECTED_COLOR);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         Drag drag;
         if (shapeType.isDirectional()) {
@@ -196,6 +193,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             drag = new Drag(0, halfHeight, thumbSize, halfHeight);
         } else {
             drag = new Drag(0, 0, thumbSize, thumbSize);
+        }
+        if (fillPaint == NONE) {
+            g2.setColor(LayerGUI.UNSELECTED_COLOR);
+            g2.fillRect(0, 0, thumbSize, thumbSize);
+            g2.setColor(LayerGUI.SELECTED_COLOR);
+        } else {
+            g2.setPaint(fillPaint.createPaint(drag, fgColor, bgColor));
         }
         g2.fill(shapeType.createShape(drag, null));
     }
@@ -301,7 +305,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     @Override
     public void updateUI(View view) {
-        view.getComp().getActiveLayerHolder().update(REPAINT);
+        view.getComp().getActiveLayer().update(REPAINT);
     }
 
     private void reloadType(ShapesTool tool) {
@@ -560,7 +564,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         var comp = Views.getActiveComp();
         History.add(new StyledShapeEdit(editName, comp, backup));
-        comp.getActiveLayerHolder().update();
+        comp.getActiveLayer().update();
 
         notifyChangeListener();
     }

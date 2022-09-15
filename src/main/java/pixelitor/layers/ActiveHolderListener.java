@@ -23,7 +23,7 @@ import pixelitor.Composition;
  * the active {@link LayerHolder} of the active {@link Composition}.
  * It doesn't observe a specific {@link LayerHolder},but rather the active one.
  */
-public interface ActiveLayerHolderListener {
+public interface ActiveHolderListener {
     void numLayersChanged(LayerHolder layerHolder, int newLayerCount);
 
     void layerActivated(Layer newActiveLayer);

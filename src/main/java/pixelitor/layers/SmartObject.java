@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
@@ -300,14 +301,6 @@ public class SmartObject extends CompositeLayer {
             recalculateImage();
         }
         holder.update(actions);
-    }
-
-    @Override
-    public void update() {
-        if (imageNeedsRefresh) {
-            recalculateImage();
-        }
-        holder.update();
     }
 
     @Override
@@ -1105,6 +1098,11 @@ public class SmartObject extends CompositeLayer {
     @Override
     public SmartFilter getLayer(int index) {
         return filters.get(index);
+    }
+
+    @Override
+    public Stream<? extends Layer> levelStream() {
+        return filters.stream();
     }
 
     @Override

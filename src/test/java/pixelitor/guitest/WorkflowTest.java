@@ -631,7 +631,7 @@ public class WorkflowTest {
 
         // save a reference, because after the deleting the last child, 
         // it would stop being the active holder
-        LayerHolder holder = EDT.active(Composition::getActiveLayerHolder);
+        LayerHolder holder = EDT.active(Composition::getActiveHolder);
 
         int numLayers = EDT.call(holder::getNumLayers);
 

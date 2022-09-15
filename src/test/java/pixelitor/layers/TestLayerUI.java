@@ -128,6 +128,16 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
+    public void setOwner(LayerUI owner) {
+
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        return true;
+    }
+
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
         node.addString("name", name);

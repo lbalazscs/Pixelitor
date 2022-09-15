@@ -58,6 +58,6 @@ public class StyledShapeEdit extends PixelitorEdit {
         Tools.SHAPES.loadShapeAndBox(backup, null);
         backup = tmp;
 
-        comp.getActiveLayerHolder().update();
+        comp.getActiveLayer().update();
     }
 }

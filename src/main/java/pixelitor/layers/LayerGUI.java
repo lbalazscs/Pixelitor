@@ -155,8 +155,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         } else {
             if (childrenPanel != null) {
-                // The layer isn't a smart object, but it has a smart filter
-                // panel: can happen after a smart object rasterization.
+                // The layer isn't a holder, but it has a children
+                // panel: can happen after holder rasterization.
                 remove(childrenPanel);
                 childrenPanel = null;
             }
@@ -589,9 +589,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private void setSelectionState(SelectionState newSelectionState) {
-//        System.out.printf("LayerGUI::setSelectionState(%s) for %s '%s'%n",
-//            newSelectionState, layer.getClass().getSimpleName(), layer.getName());
-
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;
             selectionState.show(layerIconLabel, maskIconLabel);
@@ -685,8 +682,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    public void setOwner(LayerGUI owner) {
-        this.owner = owner;
+    @Override
+    public void setOwner(LayerUI owner) {
+        this.owner = (LayerGUI) owner;
     }
 
     public LayerGUI getOwner() {
@@ -699,6 +697,22 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public boolean isEmbedded() {
         return owner != null;
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        if (owner != null) {
+            assert owner.containsChild(this);
+        }
+        if (layer.getHolder() instanceof Layer parentLayer) {
+            assert owner != null;
+            assert parentLayer.getUI() == owner;
+        }
+        return false;
+    }
+
+    private boolean containsChild(LayerGUI layerGUI) {
+        return children.contains(layerGUI);
     }
 
     @Override
@@ -724,8 +738,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public String toString() {
         return "LayerGUI{" +
                "name='" + getLayerName() + '\'' +
-               "id='" + getId() + '\'' +
-               "has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
+               ", id='" + getId() + '\'' +
+               ", has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
                '}';
     }
 }

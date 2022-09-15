@@ -331,13 +331,13 @@ public class MenuBar extends JMenuBar {
 
         // layer to top
         var layerToTop = new OpenViewEnabledAction(LAYER_TO_TOP,
-            comp -> comp.getActiveLayerHolder().moveActiveLayerToTop());
+            comp -> comp.getActiveHolder().moveActiveLayerToTop());
         layerToTop.setToolTip(texts.getString("layer_to_top_tt"));
         sub.add(layerToTop, CTRL_SHIFT_ALT_R);
 
         // layer_to_bottom
         var layerToBottom = new OpenViewEnabledAction(LAYER_TO_BOTTOM,
-            comp -> comp.getActiveLayerHolder().moveActiveLayerToBottom());
+            comp -> comp.getActiveHolder().moveActiveLayerToBottom());
         layerToBottom.setToolTip(texts.getString("layer_to_bottom_tt"));
         sub.add(layerToBottom, CTRL_SHIFT_ALT_L);
 
@@ -345,12 +345,12 @@ public class MenuBar extends JMenuBar {
 
         // raise layer selection
         var raiseLayerSelection = new OpenViewEnabledAction(RAISE_LAYER_SELECTION,
-            comp -> comp.getActiveLayerHolder().raiseLayerSelection());
+            comp -> comp.getActiveHolder().raiseLayerSelection());
         raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
         sub.add(raiseLayerSelection, CTRL_SHIFT_R);
 
         var lowerLayerSelection = new OpenViewEnabledAction(LOWER_LAYER_SELECTION,
-            comp -> comp.getActiveLayerHolder().lowerLayerSelection());
+            comp -> comp.getActiveHolder().lowerLayerSelection());
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
         sub.add(lowerLayerSelection, CTRL_SHIFT_L);
 
@@ -478,7 +478,7 @@ public class MenuBar extends JMenuBar {
             comp -> comp.getHolderForNewLayers().addEmptyGroup()), CTRL_G);
 
         sub.add(new OpenViewEnabledAction("Convert Visible to Group",
-            Composition::convertVisibleLayersToGroup), CTRL_SHIFT_G);
+            comp -> comp.getActiveHolder().convertVisibleLayersToGroup()), CTRL_SHIFT_G);
 
 //        Condition isLayerGroup = new ClassCondition(LayerGroup.class, "layer group");
 
@@ -1304,10 +1304,13 @@ public class MenuBar extends JMenuBar {
         sub.add(new PAction("Themes.updateAllUI()", Themes::updateAllUI));
 
         sub.add(new OpenViewEnabledAction("update() on the active image",
-            comp -> comp.update()));
+            Composition::update));
 
         sub.add(new OpenViewEnabledAction("update() on the active holder",
-            comp -> comp.getActiveLayerHolder().update()));
+            comp -> comp.getActiveHolder().update()));
+
+        sub.add(new OpenViewEnabledAction("update() on the active layer",
+            comp -> comp.getActiveLayer().update()));
 
         sub.addSeparator();
 

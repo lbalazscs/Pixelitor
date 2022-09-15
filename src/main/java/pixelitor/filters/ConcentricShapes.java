@@ -17,8 +17,11 @@
 
 package pixelitor.filters;
 
+import pixelitor.Canvas;
+import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.io.IO;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
@@ -29,6 +32,8 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static java.awt.Color.BLACK;
@@ -48,18 +53,13 @@ public class ConcentricShapes extends ParametrizedFilter {
     enum ConcentricShapeType {
         CIRCLES("Circles") {
             @Override
-            Shape createShape(double cx, double cy, double r) {
+            Shape createShape(double cx, double cy, double r, int n) {
                 return Shapes.createCircle(cx, cy, r);
             }
-        }, SQUARES("Squares") {
+        }, POLYGONS("Polygons") {
             @Override
-            Shape createShape(double cx, double cy, double r) {
-                return Shapes.createSquare(cx, cy, r);
-            }
-        }, HEXAGONS("Hexagons") {
-            @Override
-            Shape createShape(double cx, double cy, double r) {
-                return Shapes.createHexagon(cx, cy, r);
+            Shape createShape(double cx, double cy, double r, int n) {
+                return Shapes.createCircumscribedPolygon(n, cx, cy, r);
             }
         };
 
@@ -69,7 +69,7 @@ public class ConcentricShapes extends ParametrizedFilter {
             this.guiName = guiName;
         }
 
-        abstract Shape createShape(double cx, double cy, double r);
+        abstract Shape createShape(double cx, double cy, double r, int n);
 
         @Override
         public String toString() {
@@ -78,6 +78,7 @@ public class ConcentricShapes extends ParametrizedFilter {
     }
 
     private final EnumParam<ConcentricShapeType> type = new EnumParam<>("Type", ConcentricShapeType.class);
+    private final RangeParam polySides = new RangeParam("Polygon Sides", 3, 4, 25);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam distanceParam = new RangeParam("Distance", 1, 20, 100);
     private final ColorListParam colorsParam = new ColorListParam("Colors",
@@ -87,65 +88,95 @@ public class ConcentricShapes extends ParametrizedFilter {
 //    private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 0, 100);
 
+    private record ColoredShape(Color color, Shape shape) {
+    }
+
     public ConcentricShapes() {
         super(false);
 
         FilterButtonModel reseedAction = ReseedSupport.createAction("", "Reseed Randomness");
+        type.setupEnableOtherIf(polySides, selectedType -> selectedType == ConcentricShapeType.POLYGONS);
 
         setParams(
             type,
+            polySides,
             center,
             distanceParam,
             colorsParam,
             randomnessParam.withAction(reseedAction)
 //            scale
 //            rotate
-        );
+        ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
+            null, "Export the current image to an SVG file",
+            null, false));
+        ;
 
         randomnessParam.setupEnableOtherIfNotZero(reseedAction);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rng = ReseedSupport.getLastSeedRandom();
         dest = ImageUtils.copyImage(src);
-
-        int width = dest.getWidth();
-        int height = dest.getHeight();
-
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+
+        List<ColoredShape> coloredShapes = createShapes(dest.getWidth(), dest.getHeight());
+        for (ColoredShape coloredShape : coloredShapes) {
+            g.setColor(coloredShape.color());
+            g.fill(coloredShape.shape());
+        }
+
+        g.dispose();
+        return dest;
+    }
+
+    private List<ColoredShape> createShapes(int width, int height) {
+        Random rng = ReseedSupport.getLastSeedRandom();
 
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
         ConcentricShapeType shapeType = type.getSelected();
         double maxDist = calcMaxDistance(cx, cy, width, height);
-        if (shapeType == ConcentricShapeType.HEXAGONS) {
-            maxDist = maxDist * 1.3;
-        }
+
+        int randomness = randomnessParam.getValue();
+        double rndMultiplier = randomness / 400.0;
+        maxDist += rndMultiplier * maxDist;
 
         double distance = distanceParam.getValueAsDouble();
         int numRings = 1 + (int) (maxDist / distance);
 
         Color[] colors = colorsParam.getColors();
         int numColors = colors.length;
-
-        int randomness = randomnessParam.getValue();
-        double rndMultiplier = randomness / 400.0;
+        List<ColoredShape> retVal = new ArrayList<>(numRings);
 
         for (int ring = numRings; ring > 0; ring--) {
             double r = ring * distance;
-            g.setColor(colorsParam.getColor((ring - 1) % numColors));
-            Shape shape = shapeType.createShape(cx, cy, r);
+            Color color = colorsParam.getColor((ring - 1) % numColors);
+            Shape shape = shapeType.createShape(cx, cy, r, polySides.getValue());
             if (randomness > 0) {
                 shape = Shapes.randomize(shape, rng, rndMultiplier * r);
             }
-            g.fill(shape);
+            retVal.add(new ColoredShape(color, shape));
         }
+        return retVal;
+    }
 
-        g.dispose();
-        return dest;
+    private void exportSVG() {
+        StringBuilder content = new StringBuilder();
+        content.append(IO.createSVGElement());
+        content.append("\n");
+
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight());
+        for (ColoredShape coloredShape : coloredShapes) {
+            String svgPath = Shapes.toSVGPath(coloredShape.shape());
+            String svgColor = Colors.toHTMLHex(coloredShape.color(), false);
+            content.append("<path d=\"%s\" fill=\"#%s\"/>\n".formatted(svgPath, svgColor));
+        }
+        content.append("</svg>");
+
+        IO.saveSVG(content.toString(), "concentric.svg");
     }
 
     private static double calcMaxDistance(double cx, double cy, double width, double height) {

@@ -222,7 +222,7 @@ public class ShapesTool extends DragTool {
     @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createFillPaintCombo() {
         return GUIUtils.createComboBox(fillPaintModel,
-            e -> uiChanged(CHANGE_SHAPE_FILL));
+            e -> fillChanged());
     }
 
     @SuppressWarnings("unchecked")
@@ -353,7 +353,7 @@ public class ShapesTool extends DragTool {
             // therefore the continuous drawing of the shape.
             // It repaints the whole image because
             // some shapes extend beyond their drag rectangle.
-            e.getComp().getActiveLayerHolder().update(REPAINT);
+            e.getComp().getActiveLayer().update(REPAINT);
         }
     }
 
@@ -428,7 +428,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, true, false);
 
-            Views.getActiveHolder().update(REPAINT);
+            Views.getActiveLayer().update(REPAINT);
         }
         altDown = true;
     }
@@ -441,7 +441,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, false, false);
 
-            Views.getActiveHolder().update(REPAINT);
+            Views.getActiveLayer().update(REPAINT);
         }
         altDown = false;
     }
@@ -583,9 +583,19 @@ public class ShapesTool extends DragTool {
         Tools.SELECTION.activate();
     }
 
+    private void fillChanged() {
+        uiChanged(CHANGE_SHAPE_FILL);
+        if (isEditingShapesLayer()) {
+            shapesLayer.updateIconImage();
+        }
+    }
+
     @Override
     public void fgBgColorsChanged() {
         regenerateShape(CHANGE_SHAPE_COLORS);
+        if (isEditingShapesLayer()) {
+            shapesLayer.updateIconImage();
+        }
     }
 
     @Override
@@ -614,7 +624,7 @@ public class ShapesTool extends DragTool {
 
         Views.onActiveComp(comp -> {
             if (hadShape) {
-                comp.getActiveLayerHolder().update();
+                comp.getActiveLayer().update();
             } else {
                 comp.repaint();
             }

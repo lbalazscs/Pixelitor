@@ -31,7 +31,7 @@ import static pixelitor.utils.Texts.i18n;
  * up or down in the layer stack
  */
 public class LayerMoveAction extends OpenViewEnabledAction.Checked
-    implements ActiveLayerHolderListener {
+    implements ActiveHolderListener {
 
     // menu and history names (also for selection movements)
     public static final String RAISE_LAYER = i18n("raise_layer");
@@ -51,12 +51,12 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
         this.up = up;
         setToolTip(up ? i18n("raise_layer_tt") : i18n("lower_layer_tt"));
         setEnabled(false);
-        Layers.addLayerHolderListener(this);
+        Layers.addHolderListener(this);
     }
 
     @Override
     protected void onClick(Composition comp) {
-        LayerHolder layerHolder = comp.getActiveLayerHolder();
+        LayerHolder layerHolder = comp.getActiveHolder();
         if (up) {
             layerHolder.moveActiveLayerUp();
         } else {
@@ -66,7 +66,7 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        enableDisable(newView.getComp().getActiveLayerHolder());
+        enableDisable(newView.getComp().getActiveHolder());
     }
 
     public void enableDisable(LayerHolder layerHolder) {

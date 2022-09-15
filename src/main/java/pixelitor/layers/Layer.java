@@ -54,6 +54,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
+import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 
@@ -967,11 +968,14 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void updateIconImage() {
-        // otherwise this method must be overridden to do nothing
+        // otherwise this method must be overridden
         assert hasRasterThumbnail();
 
         if (ui != null) {
             ui.updateLayerIconImageAsync(this);
+        }
+        if (holder != comp) {
+            ((CompositeLayer) holder).updateIconImage();
         }
     }
 
@@ -1064,8 +1068,12 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
+    public void update(Composition.UpdateActions actions) {
+        holder.update(actions);
+    }
+
     public void update() {
-        holder.update();
+        update(FULL);
     }
 
     public boolean checkInvariants() {
@@ -1073,6 +1081,7 @@ public abstract class Layer implements Serializable, Debuggable {
             if (ui.getLayer() != this) {
                 throw new AssertionError("ui has bad layer reference for " + getName());
             }
+            ui.checkInvariants();
         }
         return true;
     }
@@ -1117,7 +1126,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public void unGroup() {
         if (holder instanceof LayerGroup group) {
-            group.replaceWithUnGrouped();
+            group.replaceWithUnGrouped(null, true);
         } else {
             Messages.showError("Can't ungroup",
                 "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));

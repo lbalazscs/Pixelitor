@@ -394,7 +394,7 @@ public class Views {
     }
 
     public static LayerHolder getActiveHolder() {
-        return getActiveComp().getActiveLayerHolder();
+        return getActiveComp().getActiveHolder();
     }
 
     public static List<Composition> getUnsavedComps() {
@@ -459,7 +459,7 @@ public class Views {
             throw new AssertionError("no open images");
         }
 
-        return comp.getActiveLayerHolder().getNumLayers();
+        return comp.getActiveHolder().getNumLayers();
     }
 
     public static Layer getActiveRoot() {

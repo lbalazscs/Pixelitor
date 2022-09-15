@@ -27,13 +27,13 @@ import java.util.List;
  * Static methods related to layer listeners
  */
 public class Layers {
-    private static final List<ActiveLayerHolderListener> lhListeners = new ArrayList<>();
+    private static final List<ActiveHolderListener> lhListeners = new ArrayList<>();
     private static final List<ActiveMaskListener> maskListeners = new ArrayList<>();
 
     private Layers() {
     }
 
-    public static void addLayerHolderListener(ActiveLayerHolderListener listener) {
+    public static void addHolderListener(ActiveHolderListener listener) {
         lhListeners.add(listener);
     }
 

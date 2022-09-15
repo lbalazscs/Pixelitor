@@ -36,7 +36,7 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
  * to the active layer of the active composition.
  */
 public class AddLayerMaskAction extends NamedAction
-    implements ViewActivationListener, ActiveMaskListener, ActiveLayerHolderListener {
+    implements ViewActivationListener, ActiveMaskListener, ActiveHolderListener {
 
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
@@ -46,7 +46,7 @@ public class AddLayerMaskAction extends NamedAction
                    "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         Views.addActivationListener(this);
-        Layers.addLayerHolderListener(this);
+        Layers.addHolderListener(this);
         Layers.addMaskListener(this);
     }
 

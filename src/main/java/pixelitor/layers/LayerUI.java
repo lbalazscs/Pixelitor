@@ -58,4 +58,8 @@ public interface LayerUI extends Debuggable {
     int getId();
 
     void repaint();
+
+    void setOwner(LayerUI owner);
+
+    boolean checkInvariants();
 }

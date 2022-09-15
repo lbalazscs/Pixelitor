@@ -298,11 +298,25 @@ public class IO {
     }
 
     public static void saveSVG(Shape shape, StrokeParam strokeParam, String suggestedFileName) {
+        String svg = createSVGContent(shape, strokeParam);
+        saveSVG(svg, suggestedFileName);
+    }
+
+    public static void saveSVG(String content, String suggestedFileName) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(suggestedFileName, svgFilter);
         if (file == null) { // save file dialog cancelled
             return;
         }
 
+        try (PrintWriter out = new PrintWriter(file, UTF_8)) {
+            out.println(content);
+        } catch (IOException e) {
+            Messages.showException(e);
+        }
+        Messages.showFileSavedMessage(file);
+    }
+
+    private static String createSVGContent(Shape shape, StrokeParam strokeParam) {
         boolean exportFilled = false;
         if (strokeParam != null) {
             exportFilled = switch (strokeParam.getStrokeType()) {
@@ -324,33 +338,31 @@ public class IO {
             };
         }
 
-        Canvas canvas = Views.getActiveComp().getCanvas();
         String svg;
         if (exportFilled) {
             svg = """
-                <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+                %s
                   <path d="%s" fill="black" stroke="none" fill-rule="%s"/>
                 </svg>
-                """.formatted(canvas.getWidth(), canvas.getHeight(),
-                svgPath, svgFillRule);
+                """.formatted(createSVGElement(), svgPath, svgFillRule);
         } else {
             String strokeDescr = "";
             if (strokeParam != null) {
                 strokeDescr = strokeParam.copyState().toSVGString();
             }
             svg = """
-                <svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+                %s
                   <path d="%s" fill="none" stroke="black" fill-rule="%s" %s/>
                 </svg>
-                """.formatted(canvas.getWidth(), canvas.getHeight(),
+                """.formatted(createSVGElement(),
                 svgPath, svgFillRule, strokeDescr);
         }
+        return svg;
+    }
 
-        try (PrintWriter out = new PrintWriter(file, UTF_8)) {
-            out.println(svg);
-        } catch (IOException e) {
-            Messages.showException(e);
-        }
-        Messages.showFileSavedMessage(file);
+    public static String createSVGElement() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
+        return "<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">"
+            .formatted(canvas.getWidth(), canvas.getHeight());
     }
 }

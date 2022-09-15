@@ -61,6 +61,7 @@ import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
 import static pixelitor.colors.Colors.packedIntToString;
 import static pixelitor.colors.Colors.toPackedARGB;
+import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.Threads.onPool;
 
 /**
@@ -1284,5 +1285,15 @@ public class ImageUtils {
         g.dispose();
 
         return imageSoFar;
+    }
+
+    public static BufferedImage createCircleThumb(Color color) {
+        BufferedImage img = createSysCompatibleImage(thumbSize, thumbSize);
+        Graphics2D g2 = img.createGraphics();
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g2.setColor(color);
+        g2.fillOval(0, 0, thumbSize, thumbSize);
+        g2.dispose();
+        return img;
     }
 }

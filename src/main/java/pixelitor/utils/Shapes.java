@@ -464,6 +464,23 @@ public class Shapes {
         return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
+    public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius) {
+        double angleIncrement = Math.PI * 2 / n;
+        double maxRadius = radius / Math.cos(angleIncrement / 2);
+        double angle = 3 * Math.PI / 2;
+        if (n % 2 == 0) {
+            angle += angleIncrement / 2;
+        }
+        Path2D path = new Path2D.Double();
+        path.moveTo(cx + maxRadius * Math.cos(angle), cy + maxRadius * Math.sin(angle));
+        for (int i = 0; i < n; i++) {
+            angle += angleIncrement;
+            path.lineTo(cx + maxRadius * Math.cos(angle), cy + maxRadius * Math.sin(angle));
+        }
+        path.closePath();
+        return path;
+    }
+
     public static Shape createHexagon(double cx, double cy, double radius) {
         double cos60 = 0.5;
         double sin60 = 0.86602540378443864676372317075294;

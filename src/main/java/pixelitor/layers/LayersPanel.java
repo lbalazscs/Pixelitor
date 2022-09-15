@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
@@ -37,7 +36,7 @@ import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
  * Each {@link View} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
-    private final List<LayerGUI> layerGUIS = new ArrayList<>();
+    private final List<LayerGUI> layerGUIs = new ArrayList<>();
     private final ButtonGroup buttonGroup = new ButtonGroup();
     private final DragReorderHandler dragReorderHandler;
     private LayerGUI draggedGUI;
@@ -50,7 +49,7 @@ public class LayersPanel extends JLayeredPane {
         assert gui != null;
 
         buttonGroup.add(gui);
-        layerGUIS.add(index, gui);
+        layerGUIs.add(index, gui);
 
         add(gui, JLayeredPane.DEFAULT_LAYER);
 
@@ -67,7 +66,7 @@ public class LayersPanel extends JLayeredPane {
 
     public void removeLayerGUI(LayerGUI gui) {
         buttonGroup.remove(gui);
-        layerGUIS.remove(gui);
+        layerGUIs.remove(gui);
         remove(gui);
         revalidate();
         repaint();
@@ -76,8 +75,8 @@ public class LayersPanel extends JLayeredPane {
     }
 
     public void changeLayerGUIOrder(int oldIndex, int newIndex) {
-        LayerGUI layerGUI = layerGUIS.remove(oldIndex);
-        layerGUIS.add(newIndex, layerGUI);
+        LayerGUI layerGUI = layerGUIs.remove(oldIndex);
+        layerGUIs.add(newIndex, layerGUI);
 
         revalidate();
     }
@@ -104,7 +103,7 @@ public class LayersPanel extends JLayeredPane {
     public void doLayout() {
         int parentHeight = getHeight();
         int y = parentHeight;
-        for (LayerGUI layerGUI : layerGUIS) {
+        for (LayerGUI layerGUI : layerGUIs) {
             int guiHeight = layerGUI.getPreferredHeight();
             y -= guiHeight;
             if (layerGUI != draggedGUI) {
@@ -121,27 +120,27 @@ public class LayersPanel extends JLayeredPane {
     private void swapIfNecessary(int dragY) {
         int staticY = draggedGUI.getStaticY();
         int deltaY = dragY - staticY;
-        int draggedIndex = layerGUIS.indexOf(draggedGUI);
+        int draggedIndex = layerGUIs.indexOf(draggedGUI);
         if (deltaY > 0) {  // dragging downwards
             int indexBellow = draggedIndex - 1;
             if (indexBellow < 0) {
                 return;
             }
-            int swapDistance = layerGUIS.get(indexBellow).getPreferredHeight() / 2;
+            int swapDistance = layerGUIs.get(indexBellow).getPreferredHeight() / 2;
             if (deltaY >= swapDistance) {
                 if (draggedIndex > 0) {
-                    Collections.swap(layerGUIS, indexBellow, draggedIndex);
+                    Collections.swap(layerGUIs, indexBellow, draggedIndex);
                 }
             }
         } else { // dragging upwards
             int indexAbove = draggedIndex + 1;
-            if (indexAbove >= layerGUIS.size()) {
+            if (indexAbove >= layerGUIs.size()) {
                 return;
             }
-            int swapDistance = layerGUIS.get(indexAbove).getPreferredHeight() / 2;
+            int swapDistance = layerGUIs.get(indexAbove).getPreferredHeight() / 2;
             if (deltaY <= -swapDistance) {
-                if (draggedIndex < layerGUIS.size() - 1) {
-                    Collections.swap(layerGUIS, indexAbove, draggedIndex);
+                if (draggedIndex < layerGUIs.size() - 1) {
+                    Collections.swap(layerGUIs, indexAbove, draggedIndex);
                 }
             }
         }
@@ -151,7 +150,7 @@ public class LayersPanel extends JLayeredPane {
     public void dragFinished() {
         if (draggedGUI != null) {
             setLayer(draggedGUI, JLayeredPane.DEFAULT_LAYER);
-            draggedGUI.dragFinished(layerGUIS.indexOf(draggedGUI)); // notify the composition
+            draggedGUI.dragFinished(layerGUIs.indexOf(draggedGUI)); // notify the composition
         } else {
             throw new IllegalStateException();
         }
@@ -167,7 +166,7 @@ public class LayersPanel extends JLayeredPane {
     @Override
     public Dimension getPreferredSize() {
         int totalHeight = 0;
-        for (LayerGUI gui : layerGUIS) {
+        for (LayerGUI gui : layerGUIs) {
             totalHeight += gui.getPreferredHeight();
         }
         return new Dimension(10, totalHeight);
@@ -175,18 +174,22 @@ public class LayersPanel extends JLayeredPane {
 
     @VisibleForTesting
     public int getNumLayerGUIs() {
-        return layerGUIS.size();
+        return layerGUIs.size();
     }
 
     @VisibleForTesting
     public List<String> getLayerNames() {
-        return layerGUIS.stream()
+        return layerGUIs.stream()
             .map(LayerGUI::getLayerName)
             .collect(toList());
     }
 
+    public boolean containsGUI(LayerGUI gui) {
+        return layerGUIs.contains(gui);
+    }
+
     public void thumbSizeChanged(int newThumbSize) {
-        for (LayerGUI gui : layerGUIS) {
+        for (LayerGUI gui : layerGUIs) {
             gui.thumbSizeChanged(newThumbSize);
         }
     }

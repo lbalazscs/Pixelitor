@@ -254,7 +254,7 @@ public class ShapesLayer extends ContentLayer {
         PixelitorEdit edit = super.endMovement();
         if (hasShape() && transformBox != null) {
             transformBox.endMovement();
-            updateIconImage();
+//            updateIconImage();
         }
         return edit;
     }
@@ -265,6 +265,18 @@ public class ShapesLayer extends ContentLayer {
             return transformBox.createMovementEdit(comp, "Move Layer");
         }
         return null;
+    }
+
+    @Override
+    public void update(Composition.UpdateActions actions) {
+        super.update(actions);
+
+        // TODO currently updateIconImage() of ShapesLayer is
+        //  called only when the icon really changes.
+        //  This must change when multiple shapes are allowed.
+        if (holder != comp) {
+            ((CompositeLayer) holder).updateIconImage();
+        }
     }
 
     @Override

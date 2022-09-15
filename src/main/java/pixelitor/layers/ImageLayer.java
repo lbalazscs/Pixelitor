@@ -652,9 +652,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // otherwise the next filter run will take the old image source,
         // not the actual one
         filterSourceImage = null;
-        updateIconImage();
         holder.update();
-//        Tools.editingTargetChanged(this);
+        updateIconImage();
     }
 
     @Override
@@ -1192,11 +1191,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public String getTypeString() {
         return "Image Layer";
-    }
-
-    @Override
-    public void update() {
-        holder.update();
     }
 
     @Override

@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.history.GroupingEdit;
 import pixelitor.history.History;
 import pixelitor.history.LayerOrderChangeEdit;
 import pixelitor.history.MergeDownEdit;
@@ -27,6 +28,9 @@ import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Something that has an ordered collection of layers inside it.
@@ -222,14 +226,7 @@ public interface LayerHolder extends Debuggable {
     }
 
     default boolean isHolderOfActiveLayer() {
-        return getComp().getActiveLayerHolder() == this;
-    }
-
-    default void addEmptyGroup() {
-        LayerGroup group = new LayerGroup(getComp(), "Layer Group");
-        new Composition.LayerAdder(this)
-            .withHistory("New Layer Group")
-            .add(group);
+        return getComp().getActiveHolder() == this;
     }
 
     void update(Composition.UpdateActions actions);
@@ -245,4 +242,59 @@ public interface LayerHolder extends Debuggable {
     String getName();
 
     void invalidateImageCache();
+
+    /**
+     * Return a Stream of layers at this level.
+     */
+    Stream<? extends Layer> levelStream();
+
+    default void convertVisibleLayersToGroup() {
+        int[] indices = levelStream()
+            .filter(Layer::isVisible)
+            .mapToInt(this::indexOf)
+            .toArray();
+        if (indices.length == 0) {
+            return;
+        }
+
+        convertToGroup(indices, null, true);
+    }
+
+    default void convertToGroup(int[] indices, LayerGroup target, boolean addHistory) {
+        List<Layer> movedLayers = new ArrayList<>(indices.length);
+        for (int index : indices) {
+            movedLayers.add(getLayer(index));
+        }
+        for (Layer layer : movedLayers) {
+            deleteTemporarily(layer);
+        }
+
+        LayerGroup newGroup;
+        if (target != null) {
+            // history edits must use a specific instance for consistency
+            assert !addHistory;
+            newGroup = target;
+            newGroup.setLayers(movedLayers);
+            // restore the UI-level invariants
+            newGroup.updateChildrenUI();
+        } else {
+            assert addHistory;
+            newGroup = new LayerGroup(getComp(), "Layer Group", movedLayers);
+        }
+
+        int lastMovedIndex = indices[indices.length - 1];
+        int newIndex = lastMovedIndex + 1 - indices.length;
+        new Composition.LayerAdder(this).atIndex(newIndex).add(newGroup);
+
+        if (addHistory) {
+            History.add(new GroupingEdit(this, newGroup, indices, true));
+        }
+    }
+
+    default void addEmptyGroup() {
+        LayerGroup group = new LayerGroup(getComp(), "Layer Group");
+        new Composition.LayerAdder(this)
+            .withHistory("New Layer Group")
+            .add(group);
+    }
 }

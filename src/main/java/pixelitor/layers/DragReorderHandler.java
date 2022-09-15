@@ -71,6 +71,7 @@ public class DragReorderHandler extends MouseInputAdapter {
         int newY = layerGUI.getY() + e.getY() - dragStartYInLayerGUI;
         layerGUI.setLocation(DRAG_X_INDENT, newY);
 
+//        assert layersPanel.containsGUI(layerGUI) : layerGUI.getLayer().getName() + " GUI not contained";
         layersPanel.updateDrag(layerGUI, newY, !dragging);
         dragging = true;
 
