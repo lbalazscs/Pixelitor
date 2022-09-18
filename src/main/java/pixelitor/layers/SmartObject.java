@@ -50,6 +50,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
@@ -351,11 +352,6 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    protected boolean isSmartObject() {
-        return true;
-    }
-
-    @Override
     protected String getRasterizedName() {
         return Utils.removePrefix(name, NAME_PREFIX);
     }
@@ -365,7 +361,15 @@ public class SmartObject extends CompositeLayer {
         return new SmartObject(this, copyType, newComp);
     }
 
-    void addSmartObjectSpecificItems(JPopupMenu popup) {
+    @Override
+    public void replaceWithSmartObject() {
+        String msg = format("<html>The layer <b>%s</b> is already a smart object.",
+            getName());
+        Messages.showInfo("Already a Smart Object", msg);
+    }
+
+    @Override
+    protected void addSmartObjectMenus(JPopupMenu popup) {
         popup.add(new PAction("Edit Contents", this::edit));
         popup.add(new PAction("Clone", () ->
             comp.shallowDuplicate(this)));
@@ -893,48 +897,6 @@ public class SmartObject extends CompositeLayer {
 
     public boolean containsSmartFilter(SmartFilter filter) {
         return filters.contains(filter);
-    }
-
-    @Override
-    public Drawable getActiveDrawable() {
-        // TODO should not be needed
-        return getActiveMask();
-    }
-
-    @Override
-    public LayerMask getActiveMask() {
-        if (isMaskEditing()) {
-            return getMask();
-        }
-        SmartFilter sf = getSelectedSmartFilter();
-        if (sf != null && sf.isMaskEditing()) {
-            return sf.getMask();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isEditingAnyMask() {
-        return getActiveMask() != null;
-    }
-
-    @Override
-    public void setMaskEditing(boolean newValue) {
-        super.setMaskEditing(newValue);
-        if (newValue) {
-            for (SmartFilter filter : filters) {
-                filter.setMaskEditing(false);
-            }
-        }
-    }
-
-    public void setFilterMaskEditing(SmartFilter edited) {
-        setMaskEditing(false);
-        for (SmartFilter filter : filters) {
-            if (filter != edited) {
-                filter.setMaskEditing(false);
-            }
-        }
     }
 
     public void editSelectedSmartFilter() {

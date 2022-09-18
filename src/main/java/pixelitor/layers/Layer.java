@@ -376,7 +376,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public Layer getTopLevelLayer() {
         Layer root = this;
-        while (root.holder != comp) {
+        while (!root.isTopLevel()) {
             if (!(root.holder instanceof Layer)) {
                 throw new IllegalStateException("this = " + getName() + ", root.holder = " + root.holder.getName());
             }
@@ -490,6 +490,7 @@ public abstract class Layer implements Serializable, Debuggable {
             return null;
         }
 
+        maskingChanged();
         holder.update();
 
         Layers.maskAddedTo(this);
@@ -541,6 +542,7 @@ public abstract class Layer implements Serializable, Debuggable {
             ui.addMaskIcon();
         }
         if (comp.isActive()) {
+            maskingChanged();
             holder.update();
             if (isActive()) {
                 Layers.maskAddedTo(this);
@@ -569,20 +571,18 @@ public abstract class Layer implements Serializable, Debuggable {
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
         }
+        maskingChanged();
         holder.update();
+    }
+
+    public void maskingChanged() {
+        // empty by default
     }
 
     public boolean isMaskEditing() {
         //noinspection SimplifiableConditionalExpression
         assert maskEditing ? hasMask() : true;
 
-        return maskEditing;
-    }
-
-    /**
-     * This also returns true if a smart filter's mask is edited.
-     */
-    public boolean isEditingAnyMask() {
         return maskEditing;
     }
 
@@ -645,6 +645,7 @@ public abstract class Layer implements Serializable, Debuggable {
         assert hasMask();
         this.maskEnabled = maskEnabled;
 
+        maskingChanged();
         holder.update();
         mask.updateIconImage();
         notifyListeners();
@@ -927,42 +928,31 @@ public abstract class Layer implements Serializable, Debuggable {
                 popup = new JPopupMenu();
             }
 
-            if (this instanceof SmartObject so) {
-                so.addSmartObjectSpecificItems(popup);
-            } else if (canExportImage()) {
-                popup.add(new PAction("Convert to Smart Object", this::replaceWithSmartObject));
-            }
+            addSmartObjectMenus(popup);
         }
 
         return popup;
     }
 
-    protected boolean isSmartObject() {
-        return false;
-    }
-
-    private boolean canBeSmartObject() {
-        return !isSmartObject() && canExportImage();
+    protected void addSmartObjectMenus(JPopupMenu popup) {
+        if (canExportImage()) {
+            popup.add(new PAction("Convert to Smart Object", this::replaceWithSmartObject));
+        }
     }
 
     public void replaceWithSmartObject() {
-        if (!canBeSmartObject()) {
-            String msg;
-            if (isSmartObject()) {
-                msg = format("<html>The layer <b>%s</b> is already a smart object.",
-                    getName());
-            } else {
-                msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
-                    getName(), Utils.addArticle(getTypeStringLC()));
-            }
+        if (!canExportImage()) {
+            String msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
+                getName(), Utils.addArticle(getTypeStringLC()));
             Messages.showInfo("Convert Layer to Smart Object", msg);
             return;
         }
-
         SmartObject so = new SmartObject(this);
         so.setHolder(holder);
-        History.add(new ReplaceLayerEdit(holder, this, so, "Convert to Smart Object"));
+
         holder.replaceLayer(this, so);
+        History.add(new ReplaceLayerEdit(holder, this, so, "Convert to Smart Object"));
+
         Messages.showInStatusBar(format(
             "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
     }
@@ -974,7 +964,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (ui != null) {
             ui.updateLayerIconImageAsync(this);
         }
-        if (holder != comp) {
+        if (!isTopLevel()) {
             ((CompositeLayer) holder).updateIconImage();
         }
     }
@@ -1036,22 +1026,22 @@ public abstract class Layer implements Serializable, Debuggable {
         return this instanceof SmartFilter;
     }
 
-    public Drawable getActiveDrawable() {
-        if (isMaskEditing()) {
-            return getMask();
-        }
-        if (this instanceof Drawable) {
-            return (Drawable) this;
-        }
-        return null;
-    }
+//    public Drawable getActiveDrawable() {
+//        if (isMaskEditing()) {
+//            return getMask();
+//        }
+//        if (this instanceof Drawable) {
+//            return (Drawable) this;
+//        }
+//        return null;
+//    }
 
-    public LayerMask getActiveMask() {
-        if (isMaskEditing()) {
-            return getMask();
-        }
-        return null;
-    }
+//    public LayerMask getActiveMask() {
+//        if (isMaskEditing()) {
+//            return getMask();
+//        }
+//        return null;
+//    }
 
     public boolean contains(Layer layer) {
         return layer == this;

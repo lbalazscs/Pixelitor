@@ -21,10 +21,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
-import pixelitor.history.DeleteLayerEdit;
-import pixelitor.history.GroupingEdit;
-import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
+import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
@@ -54,6 +51,7 @@ public class LayerGroup extends CompositeLayer {
     private List<Layer> layers;
 
     private transient BufferedImage thumb;
+    private transient boolean needsIconUpdate = false;
 
     // used only for isolated images
     private transient BufferedImage cachedImage;
@@ -148,6 +146,10 @@ public class LayerGroup extends CompositeLayer {
             cachedImage = null;
         } else {
             cachedImage = ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
+            if (needsIconUpdate) {
+                updateIconImage();
+                needsIconUpdate = false;
+            }
         }
     }
 
@@ -363,12 +365,6 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void updateIconImage() {
-        thumb = null;
-        super.updateIconImage();
-    }
-
-    @Override
     public boolean allowZeroLayers() {
         return true;
     }
@@ -391,6 +387,18 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public void updateIconImage() {
+        if (!isPassThrough()) {
+            if (cachedImage == null) {
+                needsIconUpdate = true; // postpone
+                return;
+            }
+        }
+        thumb = null;
+        super.updateIconImage();
+    }
+
+    @Override
     public BufferedImage createIconThumbnail() {
         if (isPassThrough()) {
             if (thumb == null) {
@@ -400,6 +408,7 @@ public class LayerGroup extends CompositeLayer {
             if (cachedImage != null) {
                 thumb = createThumbnail(cachedImage, thumbSize, thumbCheckerBoardPainter);
             } else {
+                // should not happen
                 thumb = ImageUtils.createCircleThumb(new Color(0, 0, 203));
             }
         }
@@ -460,8 +469,50 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
+    public void startMovement() {
+        super.startMovement();
+
+        for (Layer layer : layers) {
+            layer.startMovement();
+        }
+    }
+
+    @Override
+    public void moveWhileDragging(double relImX, double relImY) {
+        super.moveWhileDragging(relImX, relImY);
+
+        for (Layer layer : layers) {
+            layer.moveWhileDragging(relImX, relImY);
+        }
+
+        invalidateImageCache();
+    }
+
+    @Override
+    public PixelitorEdit endMovement() {
+        MultiEdit fullEdit = new MultiEdit(ContentLayerMoveEdit.NAME, comp);
+        PixelitorEdit maskEdit = createLinkedMovementEdit();
+        if (maskEdit != null) {
+            fullEdit.add(maskEdit);
+        }
+        for (Layer layer : layers) {
+            PixelitorEdit layerEdit = layer.endMovement();
+            if (layerEdit != null) {
+                fullEdit.add(layerEdit);
+            }
+        }
+
+        invalidateImageCache();
+
+        if (fullEdit.isEmpty()) {
+            return null;
+        }
+        return fullEdit;
+    }
+
+    @Override
     PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
-        return null;
+        return null; // the group has no content on its own
     }
 
     @Override

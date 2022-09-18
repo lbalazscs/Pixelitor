@@ -976,10 +976,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public boolean activeLayerAcceptsToolDrawing() {
-        if (activeLayer.getClass() == ImageLayer.class) { // but not smart objects
+        if (activeLayer instanceof Drawable) {
             return true;
         }
-        if (activeLayer.isEditingAnyMask()) {
+        if (activeLayer.isMaskEditing()) {
             return true;
         }
 

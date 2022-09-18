@@ -90,7 +90,7 @@ public class MoveTool extends DragTool {
     }
 
     private void setMoveCursor(View view, MouseEvent e) {
-        if (useAutoSelect()) {
+        if (isAutoSelecting()) {
             Point2D p = view.componentToImageSpace(e.getPoint());
             Layer movedLayer = view.getComp().findLayerAtPoint(p);
             if (movedLayer == null) {
@@ -103,7 +103,7 @@ public class MoveTool extends DragTool {
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (currentMode.movesLayer() && useAutoSelect()) {
+        if (currentMode.movesLayer() && isAutoSelecting()) {
             Point2D p = e.asImPoint2D();
             Layer movedLayer = e.getComp().findLayerAtPoint(p);
 
@@ -247,7 +247,6 @@ public class MoveTool extends DragTool {
         View view = Views.getActive();
         Selection sel = view.getComp().getSelection();
         if (sel != null && transformBox == null) {
-            sel.startMovement();
             Rectangle boxSize = view.imageToComponentSpace(sel.getShapeBounds2D());
             boxSize.grow(10, 10); // make sure the rectangular selections are visible
             transformBox = new TransformBox(boxSize, view, new SelectionTransformable(sel), true);
@@ -255,7 +254,7 @@ public class MoveTool extends DragTool {
         }
     }
 
-    private boolean useAutoSelect() {
+    private boolean isAutoSelecting() {
         return autoSelectCheckBox.isSelected();
     }
 
@@ -267,7 +266,7 @@ public class MoveTool extends DragTool {
     @Override
     public void saveStateTo(UserPreset preset) {
         preset.put("Mode", modeSelector.getSelectedItem().toString());
-        preset.putBoolean("AutoSelect", useAutoSelect());
+        preset.putBoolean("AutoSelect", isAutoSelecting());
     }
 
     @Override

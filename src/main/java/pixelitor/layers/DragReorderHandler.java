@@ -87,7 +87,7 @@ public class DragReorderHandler extends MouseInputAdapter {
             layersPanel.dragFinished();
         } else {
             // select the layer if the user clicks on the name field
-            layerGUI.setSelected(true);
+            realLayerGUIForEvent(e).getLayer().activate();
         }
         dragging = false;
     }
@@ -120,6 +120,20 @@ public class DragReorderHandler extends MouseInputAdapter {
         }
 
         return layerGUI;
+    }
+
+    /**
+     * Returns the real LayerGUI, without going up in the hierarchy
+     */
+    private static LayerGUI realLayerGUIForEvent(MouseEvent e) {
+        Component c = e.getComponent();
+        if (c instanceof LayerNameEditor nameEditor) {
+            return nameEditor.getLayerGUI();
+        } else if (c instanceof JLabel) {
+            return (LayerGUI) c.getParent();
+        } else {
+            return (LayerGUI) c;
+        }
     }
 
     public void attachTo(JComponent c) {

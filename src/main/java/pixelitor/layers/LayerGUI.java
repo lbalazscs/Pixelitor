@@ -226,8 +226,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void activateLayerNow() {
         // the layer would be activated anyway, but only in an invokeLayer,
         // and the mask activation expects events to be coming from the active layer
-//        layer.getTopLevelLayer().activate(true);
-
         layer.activate();
     }
 
@@ -440,8 +438,13 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         assert calledOnEDT() : threadInfo();
         assert layer.hasRasterThumbnail();
 
-        if (layer instanceof SmartObject) {
+        boolean synchronousUpdate = false;
+        if (layer instanceof CompositeLayer) {
             // the synchronous update avoids starting a filter twice
+            synchronousUpdate = true;
+        }
+
+        if (synchronousUpdate) {
             BufferedImage thumb = layer.createIconThumbnail();
             assert thumb != null;
             if (thumb != null) {

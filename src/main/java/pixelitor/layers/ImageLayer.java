@@ -532,7 +532,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert state == PREVIEW || state == SHOW_ORIGINAL;
         assert previewImage != null;
 
-        if (imageContentChanged && !isSmartObject()) {
+        if (imageContentChanged) {
             History.add(new ImageEdit(filterName, comp, this,
                 getSelectedSubImage(true), false));
         }
@@ -643,11 +643,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         assert imageForUndo != null;
 
-        if (!isSmartObject()) {
-            var edit = new ImageEdit(filterName, comp, this,
-                imageForUndo, false);
-            History.add(edit);
-        }
+        var edit = new ImageEdit(filterName, comp, this,
+            imageForUndo, false);
+        History.add(edit);
 
         // otherwise the next filter run will take the old image source,
         // not the actual one

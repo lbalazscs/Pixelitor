@@ -141,7 +141,7 @@ public class LayerMask extends ImageLayer {
     protected void imageRefChanged() {
         updateTransparencyImage();
         if (owner instanceof SmartFilter sf) {
-            sf.maskChanged();
+            sf.layerLevelSettingsChanged(false);
         }
     }
 
@@ -245,7 +245,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void update(Composition.UpdateActions actions) {
         if (owner instanceof SmartFilter sf) {
-            sf.maskChanged();
+            sf.layerLevelSettingsChanged(false);
         }
         holder.update(actions);
     }
@@ -253,7 +253,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
         if (owner instanceof SmartFilter sf) {
-            sf.maskChanged();
+            sf.layerLevelSettingsChanged(false);
         }
         comp.repaintRegion(start, end, thickness);
     }
@@ -261,7 +261,7 @@ public class LayerMask extends ImageLayer {
     @Override
     public void repaintRegion(PRectangle area) {
         if (owner instanceof SmartFilter sf) {
-            sf.maskChanged();
+            sf.layerLevelSettingsChanged(false);
         }
         comp.repaintRegion(area);
     }

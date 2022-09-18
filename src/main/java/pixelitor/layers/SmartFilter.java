@@ -231,26 +231,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
         super.setVisible(newVisibility, addToHistory, false);
         if (update) {
-            layerLevelSettingsChanged();
+            layerLevelSettingsChanged(true);
         }
     }
 
     @Override
-    public void setMaskEnabled(boolean maskEnabled, boolean addToHistory) {
-        super.setMaskEnabled(maskEnabled, addToHistory);
-        layerLevelSettingsChanged();
-    }
-
-    @Override
-    public void deleteMask(boolean addToHistory) {
-        super.deleteMask(addToHistory);
-        layerLevelSettingsChanged();
-    }
-
-    @Override
-    public void addConfiguredMask(LayerMask mask) {
-        super.addConfiguredMask(mask);
-        layerLevelSettingsChanged();
+    public void maskingChanged() {
+        layerLevelSettingsChanged(false);
     }
 
     @Override
@@ -260,7 +247,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
         super.setOpacity(newOpacity, addToHistory, false);
         if (update) {
-            layerLevelSettingsChanged();
+            layerLevelSettingsChanged(true);
         }
     }
 
@@ -271,7 +258,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
         super.setBlendingMode(newMode, addToHistory, false);
         if (update) {
-            layerLevelSettingsChanged();
+            layerLevelSettingsChanged(true);
         }
     }
 
@@ -281,14 +268,16 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     // "layer level" = not related to the filter settings
-    private void layerLevelSettingsChanged() {
+    public void layerLevelSettingsChanged(boolean update) {
         // invalidate only starting from the next one
         if (next != null) {
             next.invalidateChain();
         }
         smartObject.invalidateImageCache();
-        holder.update();
-        smartObject.updateIconImage();
+        if (update) {
+            holder.update();
+            smartObject.updateIconImage();
+        }
     }
 
     @Override
@@ -311,32 +300,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         holder.update();
     }
 
-//    @Override
-//    public boolean isActiveRoot() {
-//        return smartObject.isActiveRoot();
-//    }
-
-    @Override
-    public void setMaskEditing(boolean newValue) {
-        super.setMaskEditing(newValue);
-        if (newValue) {
-            smartObject.setFilterMaskEditing(this);
-        }
-    }
-
     @Override
     public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
             filterSettingsChanged();
             holder.update();
         }
-    }
-
-    public void maskChanged() {
-        if (next != null) {
-            next.invalidateChain();
-        }
-        smartObject.invalidateImageCache();
     }
 
     @Override

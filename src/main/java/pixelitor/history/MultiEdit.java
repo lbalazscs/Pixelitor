@@ -67,6 +67,10 @@ public class MultiEdit extends PixelitorEdit {
         edits.add(edit);
     }
 
+    public boolean isEmpty() {
+        return edits.isEmpty();
+    }
+
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
