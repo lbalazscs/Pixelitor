@@ -54,6 +54,7 @@ import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
+import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
 /**
  * A shape with associated stroke, fill and effects
@@ -194,7 +195,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         } else {
             drag = new Drag(0, 0, thumbSize, thumbSize);
         }
-        if (fillPaint == NONE) {
+        if (fillPaint == NONE || fillPaint == TRANSPARENT) {
             g2.setColor(LayerGUI.UNSELECTED_COLOR);
             g2.fillRect(0, 0, thumbSize, thumbSize);
             g2.setColor(LayerGUI.SELECTED_COLOR);
