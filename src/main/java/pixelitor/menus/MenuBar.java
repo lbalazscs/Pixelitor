@@ -478,7 +478,7 @@ public class MenuBar extends JMenuBar {
             comp -> comp.getHolderForNewLayers().addEmptyGroup()), CTRL_G);
 
         sub.add(new OpenViewEnabledAction("Convert Visible to Group",
-            comp -> comp.getActiveHolder().convertVisibleLayersToGroup()), CTRL_SHIFT_G);
+            comp -> comp.getHolderForGrouping().convertVisibleLayersToGroup()), CTRL_SHIFT_G);
 
 //        Condition isLayerGroup = new ClassCondition(LayerGroup.class, "layer group");
 

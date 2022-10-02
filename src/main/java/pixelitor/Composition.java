@@ -280,6 +280,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return activeLayer.getHolder();
     }
 
+    public LayerHolder getHolderForGrouping() {
+        LayerHolder holder = activeLayer.getHolder();
+        if (holder instanceof SmartObject so) {
+            return so.getHolder();
+        }
+        return holder;
+    }
+
     /**
      * Returns the holder where new layers should be added
      */
