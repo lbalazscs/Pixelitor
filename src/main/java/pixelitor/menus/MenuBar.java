@@ -325,21 +325,21 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLayerStackSubmenu(ResourceBundle texts) {
         var sub = new PMenu(texts.getString("layer_stack"));
 
-        sub.add(MOVE_LAYER_UP, CTRL_ALT_R);
+        sub.add(MOVE_LAYER_UP, CTRL_PAGE_UP);
 
-        sub.add(MOVE_LAYER_DOWN, CTRL_ALT_L);
+        sub.add(MOVE_LAYER_DOWN, CTRL_PAGE_DOWN);
 
         // layer to top
         var layerToTop = new OpenViewEnabledAction(LAYER_TO_TOP,
             comp -> comp.getActiveHolder().moveActiveLayerToTop());
         layerToTop.setToolTip(texts.getString("layer_to_top_tt"));
-        sub.add(layerToTop, CTRL_SHIFT_ALT_R);
+        sub.add(layerToTop, CTRL_ALT_PAGE_UP);
 
         // layer_to_bottom
         var layerToBottom = new OpenViewEnabledAction(LAYER_TO_BOTTOM,
             comp -> comp.getActiveHolder().moveActiveLayerToBottom());
         layerToBottom.setToolTip(texts.getString("layer_to_bottom_tt"));
-        sub.add(layerToBottom, CTRL_SHIFT_ALT_L);
+        sub.add(layerToBottom, CTRL_ALT_PAGE_DOWN);
 
         sub.addSeparator();
 
@@ -347,12 +347,12 @@ public class MenuBar extends JMenuBar {
         var raiseLayerSelection = new OpenViewEnabledAction(RAISE_LAYER_SELECTION,
             comp -> comp.getActiveHolder().raiseLayerSelection());
         raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
-        sub.add(raiseLayerSelection, CTRL_SHIFT_R);
+        sub.add(raiseLayerSelection, PAGE_UP);
 
         var lowerLayerSelection = new OpenViewEnabledAction(LOWER_LAYER_SELECTION,
             comp -> comp.getActiveHolder().lowerLayerSelection());
         lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
-        sub.add(lowerLayerSelection, CTRL_SHIFT_L);
+        sub.add(lowerLayerSelection, PAGE_DOWN);
 
         sub.addSeparator();
 

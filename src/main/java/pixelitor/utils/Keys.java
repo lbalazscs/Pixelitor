@@ -35,7 +35,14 @@ public class Keys {
     private static final int ALT = InputEvent.ALT_DOWN_MASK;
     private static final int SHIFT = InputEvent.SHIFT_DOWN_MASK;
 
-//    public static final KeyStroke CTRL_A = getKeyStroke('A', CTRL);
+    public static final KeyStroke PAGE_DOWN = getKeyStroke(VK_PAGE_DOWN, 0);
+    public static final KeyStroke PAGE_UP = getKeyStroke(VK_PAGE_UP, 0);
+    public static final KeyStroke CTRL_PAGE_DOWN = getKeyStroke(VK_PAGE_DOWN, CTRL);
+    public static final KeyStroke CTRL_PAGE_UP = getKeyStroke(VK_PAGE_UP, CTRL);
+    public static final KeyStroke CTRL_ALT_PAGE_DOWN = getKeyStroke(VK_PAGE_DOWN, CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_PAGE_UP = getKeyStroke(VK_PAGE_UP, CTRL | ALT);
+
+    //    public static final KeyStroke CTRL_A = getKeyStroke('A', CTRL);
     public static final KeyStroke CTRL_B = getKeyStroke('B', CTRL);
     public static final KeyStroke CTRL_C = getKeyStroke('C', CTRL);
     public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);
@@ -69,9 +76,11 @@ public class Keys {
     public static final KeyStroke CTRL_ALT_F = getKeyStroke('F', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_G = getKeyStroke('G', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', CTRL | ALT);
-    public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL | ALT);
+
+    // Ctrl+Alt+L is lock screen in Linux!
+    //    public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_O = getKeyStroke('O', CTRL | ALT);
-    public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL | ALT);
+    //    public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_S = getKeyStroke('S', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
@@ -81,15 +90,15 @@ public class Keys {
     public static final KeyStroke CTRL_SHIFT_F = getKeyStroke('F', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_G = getKeyStroke('G', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', CTRL | SHIFT);
-    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL | SHIFT);
-    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', CTRL | SHIFT);
+    //    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL | SHIFT);
+//    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_S = getKeyStroke('S', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_V = getKeyStroke('V', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_Z = getKeyStroke('Z', CTRL | SHIFT);
 
     public static final KeyStroke CTRL_SHIFT_ALT_E = getKeyStroke('E', CTRL | ALT | SHIFT);
-    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL | ALT | SHIFT);
-    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL | ALT | SHIFT);
+//    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL | ALT | SHIFT);
+//    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL | ALT | SHIFT);
 
     public static final KeyStroke CTRL_MINUS = getKeyStroke(VK_MINUS, CTRL);
     public static final KeyStroke CTRL_PLUS = getKeyStroke(VK_PLUS, CTRL);
