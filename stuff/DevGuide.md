@@ -9,9 +9,30 @@ There are many good online tutorials for Swing and for the Java 2D API, but ther
 A [```BufferedImage```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BufferedImage.html) consists of a [```Raster```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/Raster.html) and a [```ColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/ColorModel.html).   
 The ```Raster``` contains the samples (pixel values), and the ```ColorModel``` knows how to interpret the samples as colors (more exactly ```ColorModel``` interprets the samples as color components, and its [```ColorSpace```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/color/ColorSpace.html) interprets the color components as actual colors).
 
+```mermaid
+classDiagram 
+    direction LR
+    BufferedImage --> Raster
+    Raster -->  DataBuffer
+    Raster -->  SampleModel
+    BufferedImage -->  ColorModel
+    ColorModel -->  ColorSpace
+```
+
 ## Color Models
 
-It's important to understand that the pixel values in a ```Raster``` are not necessarily colors, [indexed-color](https://en.wikipedia.org/wiki/Indexed_color) images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
+The color model can tell the color of a pixel. The pixel values in a ```Raster``` are not necessarily colors, [indexed-color](https://en.wikipedia.org/wiki/Indexed_color) images (using the [```IndexColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/IndexColorModel.html)) store the colors in a palette, and the raster only contains indexes referring to this palette.
+
+```mermaid
+classDiagram
+    direction TB 
+    class ColorModel
+    <<abstract>> ColorModel
+    ColorModel <|-- IndexColorModel
+    ColorModel <|-- PackedColorModel
+    PackedColorModel <|-- DirectColorModel
+    ColorModel <|-- ComponentColorModel
+```
 
 [```PackedColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/PackedColorModel.html) means that the colors are packed inside the pixel values. "Packed" always means that multiple values are packed into a larger Java primitive, and they can be retrieved by bit-shifting. For example four 8-bit values could be packed in a single 32-bit int in ARGB order, and they could be retrieved like this:
 
@@ -29,18 +50,74 @@ It's important to understand that the pixel values in a ```Raster``` are not nec
 
 ## Rasters
 
-A ```Raster``` consists of a [```SampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/SampleModel.html) and a [```DataBuffer```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DataBuffer.html).
+A ```Raster``` contains the pixel data. It consists of
+a [```DataBuffer```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DataBuffer.html) (a wrapper around raw pixel arrays)
+and a [```SampleModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/SampleModel.html) (which knows how to get pixel values from the raw arrays).
+
+```mermaid
+classDiagram 
+    direction LR
+    BufferedImage --> Raster
+    Raster --> DataBuffer
+    Raster --> SampleModel
+```
+
+The WritableRaster subclass has methods for modifying the pixel data.
+
 
 ### Data Buffers
 
+```mermaid
+classDiagram
+    direction TB 
+    class DataBuffer
+    <<abstract>> DataBuffer
+    class DataBufferByte {
+        byte[] data
+    }
+    class DataBufferDouble {
+        double[] data
+    }
+    class DataBufferFloat {
+        float[] data
+    }
+    class DataBufferInt {
+        int[] data
+    }
+    class DataBufferShort {
+        short[] data
+    } 
+    class DataBufferUShort {
+        short[] data
+    } 
+    DataBuffer <|-- DataBufferByte
+    DataBuffer <|-- DataBufferDouble
+    DataBuffer <|-- DataBufferFloat
+    DataBuffer <|-- DataBufferInt
+    DataBuffer <|-- DataBufferShort
+    DataBuffer <|-- DataBufferUShort
+```
+
 A ```DataBuffer``` stores the image data at the lowest level, as Java arrays. For example [```DataBufferInt```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/DataBufferInt.html) stores the data in int arrays.
 
-A ```DataBuffer```contains one or more *banks*. The banks don't have to be different arrays, each bank can be part of the same array. Banks should not to be confused with *bands* - a band is a group of pixel samples of the same kind, usually is corresponds to a color channel, for example all the red values within an RGB image. 
+A ```DataBuffer```contains one or more *banks*. The banks don't have to be different arrays, each bank can be part of the same array. Banks should not to be confused with *bands* - a band is a group of pixel samples of the same kind, usually it corresponds to a color channel, for example all the red values within an RGB image. 
 
 
 A *data element* is one entry in a bank/array. A ```DataBuffer``` can set the individual data elements in its banks. 
 
 ### Sample Models
+
+```mermaid
+classDiagram
+    direction TB 
+    class SampleModel
+    <<abstract>> SampleModel
+    SampleModel <|-- ComponentSampleModel
+    ComponentSampleModel <|-- BandedSampleModel
+    ComponentSampleModel <|-- PixelInterleavedSampleModel
+    SampleModel <|-- MultiPixelPackedSampleModel
+    SampleModel <|-- SinglePixelPackedSampleModel
+```
 
 Each pixel consists of a number of [samples](https://en.wikipedia.org/wiki/Sample_(graphics)), which (together with the color model and its color space) will determine the color of the pixels. For example the R, G, B values can be the samples of an RGB pixel, C, M, Y, K can be the sample of an CMKY pixel. In the case of indexed-color images, a sample is just an integer index in the palette. Sample Models are "color blind", the same sample model could be used for CMKY and for ARGB images, the color interpretation is done by the color models.
 
@@ -60,9 +137,36 @@ Different ```ColorModel```, ```SampleModel``` and ```DataBuffer``` subclasses ca
 
 ```BufferedImage``` has ```getRGB``` and ```setRGB``` methods that hide all this complexity, but they are slow (if you want to access and modify millions of pixels). Changing the raw array(s) behind ```BufferedImage``` is much faster, but then we must understand the meaning of the array elements.
 
+The following image illustrates how the seemingly simple getRGB() and setRGB() calls can trigger some complex computations. Calling getRGB() and setRGB() for each pixel of an image will run much slower than necessary.              
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant BI as BufferedImage
+    participant R as Raster
+    participant SM as SampleModel    
+    participant CM as ColorModel    
+    User->>BI: getRGB()  
+    activate BI  
+    BI->>R: getDataElements()
+    activate R    
+    R->>SM: getDataElements()
+    BI->>CM: getRGB()
+    deactivate R
+    deactivate BI  
+    User->>BI: setRGB()
+    activate BI  
+    BI->>CM: getDataElements()
+    BI->>R: setDataElements()
+    activate R    
+    R->>SM: setDataElements()
+    deactivate R
+    deactivate BI  
+```
+
 ## Exercises
 
-1. Try to read a gif or indexed png file, it should give you an image with ```IndexColorModel```, and then try to modify its palette in a small project. Also examine the type of the raster and the sample model. As a first step, you could simply print the palette's colors. When you have an ```IndexColorModel```, you can get the palette colors with ```getBlues​(byte[] b)``` and similar methods. The array size is given by ```getMapSize()```. You can't just change the color model of a buffered image, you'll have to construct a new one, with the new indexed color model and the old raster.
+1. Try to read a gif or indexed png file, it should give you an image with ```IndexColorModel```, and then try to modify its palette in a small project. Also examine the type of the raster and the sample model. As a first step, you could simply print the palette's colors. When you have an ```IndexColorModel```, you can get the palette colors with ```getBlues(byte[] b)``` and similar methods. The array size is given by ```getMapSize()```. You can't just change the color model of a buffered image, you'll have to construct a new one, with the new indexed color model and the old raster.
 2. Read a small jpg image, and print the contents of the actual Java array behind the resulting buffered image.
 
 # Understanding ```BufferedImageOp``` and the JH Labs filters
@@ -77,4 +181,12 @@ The ```BufferedImageOp``` implementations in the JDK are not very useful for Pix
 2. ```WholeImageFilter```. A superclass for filters which need to have the whole image in memory. The output pixel values can depend on any input pixel value.
 3. ```TransformFilter```. A superclass for distorting and displacing filters. These don't change the pixel colors, but move them to different places. Subclasses must implement the ```transformInverse``` method, which returns the position in the input image, given the position in the output image. The idea is to move through all the pixel positions in the output, and for each point to determine the input position, inverting our normal thinking. Since the source position will be typically *between* two input pixels, interpolation will be needed. If the source position is outside the image, then the "edge action" determines what should happen. 
 
+```mermaid
+classDiagram
+    direction TB 
+    BufferedImageOp <|-- AbstractBufferedImageOp
+    AbstractBufferedImageOp <|-- PointFilter
+    AbstractBufferedImageOp <|-- WholeImageFilter
+    AbstractBufferedImageOp <|-- TransformFilter
+```
 
