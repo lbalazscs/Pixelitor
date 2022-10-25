@@ -606,7 +606,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (hasMask()) {
             return modifyMaskToHide(shape, createEdit);
         } else {
-            var maskImage = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, shape);
+            var maskImage = REVEAL_SELECTION.createBWImage(this, shape);
             return addImageAsMask(maskImage, false, createEdit, false,
                 "Add Layer Mask", false);
         }

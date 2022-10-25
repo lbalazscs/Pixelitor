@@ -22,5 +22,5 @@ import pixelitor.utils.debug.Debuggable;
 import java.awt.image.BufferedImage;
 
 public interface ImageSource extends Debuggable {
-    public BufferedImage getImage();
+    BufferedImage getImage();
 }

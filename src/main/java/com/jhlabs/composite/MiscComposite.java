@@ -92,8 +92,8 @@ public final class MiscComposite implements Composite {
         "Silhouette",
     };
 
-    private float extraAlpha;
-    private int rule;
+    private final float extraAlpha;
+    private final int rule;
 
     private MiscComposite(int rule) {
         this(rule, 1.0f);

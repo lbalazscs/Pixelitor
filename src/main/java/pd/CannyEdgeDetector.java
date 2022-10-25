@@ -358,7 +358,7 @@ public class CannyEdgeDetector {
                 float sumY = sumX;
                 int xOffset = 1;
                 int yOffset = width;
-                for (; xOffset < kwidth; ) {
+                while (xOffset < kwidth) {
                     sumY += kernel[xOffset] * (data[index - yOffset] + data[index + yOffset]);
                     sumX += kernel[xOffset] * (data[index - xOffset] + data[index + xOffset]);
                     yOffset += width;

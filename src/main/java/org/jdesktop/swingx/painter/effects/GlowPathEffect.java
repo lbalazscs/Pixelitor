@@ -36,7 +36,6 @@ public class GlowPathEffect extends AbstractAreaEffect {
     private static final long serialVersionUID = -6738743422803660317L;
 
     public GlowPathEffect() {
-        super();
         setBrushColor(Color.WHITE);
         setBrushSteps(10);
         setEffectWidth(10);

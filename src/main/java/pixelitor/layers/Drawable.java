@@ -127,5 +127,5 @@ public interface Drawable extends Filterable {
 
     void repaintRegion(PPoint start, PPoint end, double thickness);
 
-    public void repaintRegion(PRectangle area);
+    void repaintRegion(PRectangle area);
 }

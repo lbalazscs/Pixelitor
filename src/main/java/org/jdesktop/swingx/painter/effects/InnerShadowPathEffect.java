@@ -36,7 +36,6 @@ public class InnerShadowPathEffect extends AbstractAreaEffect {
      * Creates a new instance of InnerShadowPathEffect
      */
     public InnerShadowPathEffect(float opacity) {
-        super();
         setRenderInsideShape(true);
         setBrushColor(Color.BLACK);
         setOffset(new Point(2, 2));

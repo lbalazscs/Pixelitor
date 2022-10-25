@@ -37,7 +37,7 @@ public class DiamondsTransition2D extends Transition2D {
 
     private final int shapeSize;
     private final int type;
-    private double angle;
+    private final double angle;
 
     /**
      * Creates a new DiamondsTransition2D with a diamond size of 50.

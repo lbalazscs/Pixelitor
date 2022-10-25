@@ -53,7 +53,7 @@ public interface PresetOwner {
 
     String getPresetDirName();
 
-    public default PAction createManagePresetsAction() {
+    default PAction createManagePresetsAction() {
         return new PAction("Manage Presets...", () -> {
             try {
                 String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();

@@ -36,7 +36,6 @@ public class ShadowPathEffect extends AbstractAreaEffect {
     private static final long serialVersionUID = 1223861400165925384L;
 
     public ShadowPathEffect() {
-        super();
         setBrushColor(Color.BLACK);
         setRenderInsideShape(false);
         setShouldFillShape(true);

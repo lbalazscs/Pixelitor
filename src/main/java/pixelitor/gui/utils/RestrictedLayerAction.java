@@ -42,7 +42,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             Messages.showInfo(getErrorTitle(), getErrorMessage(layer));
         }
 
-        public Condition ALWAYS = new Condition() {
+        Condition ALWAYS = new Condition() {
             @Override
             public boolean isAllowed(Layer layer) {
                 return true;
@@ -59,7 +59,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             }
         };
 
-        public Condition HAS_LAYER_MASK = new Condition() {
+        Condition HAS_LAYER_MASK = new Condition() {
             @Override
             public boolean isAllowed(Layer layer) {
                 return layer.hasMask();
@@ -76,7 +76,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             }
         };
 
-        public Condition NO_LAYER_MASK = new Condition() {
+        Condition NO_LAYER_MASK = new Condition() {
             @Override
             public boolean isAllowed(Layer layer) {
                 return !layer.hasMask();
@@ -93,7 +93,7 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             }
         };
 
-        public record ClassCondition(Class<? extends Layer> clazz, String desc) implements Condition {
+        record ClassCondition(Class<? extends Layer> clazz, String desc) implements Condition {
             @Override
             public boolean isAllowed(Layer layer) {
                 return layer.getClass() == clazz;

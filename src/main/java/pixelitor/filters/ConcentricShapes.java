@@ -109,7 +109,6 @@ public class ConcentricShapes extends ParametrizedFilter {
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
             null, "Export the current image to an SVG file",
             null, false));
-        ;
 
         randomnessParam.setupEnableOtherIfNotZero(reseedAction);
     }

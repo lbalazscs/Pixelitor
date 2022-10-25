@@ -82,7 +82,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
          */
         NearestNeighbor(RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        private Object value;
+        private final Object value;
 
         Interpolation(Object value) {
             this.value = value;

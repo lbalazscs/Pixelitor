@@ -198,6 +198,7 @@ public class SmartObject extends CompositeLayer {
         content = backup;
     }
 
+    @Override
     public void afterDeserialization() {
         if (isContentLinked()) {
             if (linkedContentFile.exists()) {

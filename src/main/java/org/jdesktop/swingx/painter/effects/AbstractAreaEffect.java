@@ -154,7 +154,7 @@ public class AbstractAreaEffect implements AreaEffect {
         g.setComposite(savedComposite);
     }
 
-    transient BufferedImage _clipImage = null;
+    private transient BufferedImage _clipImage = null;
 
     protected BufferedImage getClipImage(final Rectangle effectBounds) {
         // set up a temp buffer
@@ -262,7 +262,7 @@ public class AbstractAreaEffect implements AreaEffect {
     /**
      * Utility field used by bound properties.
      */
-    private java.beans.PropertyChangeSupport propertyChangeSupport = new java.beans.PropertyChangeSupport(this);
+    private final java.beans.PropertyChangeSupport propertyChangeSupport = new java.beans.PropertyChangeSupport(this);
 
     /**
      * Adds a PropertyChangeListener to the listener list.

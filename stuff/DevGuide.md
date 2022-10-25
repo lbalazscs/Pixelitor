@@ -48,6 +48,20 @@ classDiagram
 
 [```ComponentColorModel```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/ComponentColorModel.html) means that the colors are not indexed, but also not packed, there is a 1:1 correspondence between the color components and array elements. This works with ```ComponentSampleModel``` (see bellow).
 
+## Color Spaces
+            
+In color theory a [color model](https://en.wikipedia.org/wiki/Color_model) only specifies the way colors can be described with numbers, and a [color space](https://en.wikipedia.org/wiki/Color_space) is a concrete mapping of colors to a color model's values. [sRGB](https://en.wikipedia.org/wiki/SRGB) and [AdobeRGB](https://en.wikipedia.org/wiki/Adobe_RGB_color_space) are color spaces that both use [RGB](https://en.wikipedia.org/wiki/RGB_color_model) as model. An [ICC profile](https://en.wikipedia.org/wiki/ICC_profile) is the usual format for specifying color spaces. 
+      
+Java's ColorModel class also uses a [ColorSpace](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/color/ColorSpace.html) class in order to interpret the color components, and its [ICC_ColorSpace](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/color/ICC_ColorSpace.html) subclass is a color space represented by an ICC profile. 
+               
+```mermaid
+classDiagram
+    direction TB 
+    class ColorSpace
+    <<abstract>> ColorSpace
+    ColorSpace <|-- ICC_ColorSpace
+```
+
 ## Rasters
 
 A ```Raster``` contains the pixel data. It consists of
@@ -63,7 +77,6 @@ classDiagram
 ```
 
 The WritableRaster subclass has methods for modifying the pixel data.
-
 
 ### Data Buffers
 
@@ -137,7 +150,9 @@ Different ```ColorModel```, ```SampleModel``` and ```DataBuffer``` subclasses ca
 
 ```BufferedImage``` has ```getRGB``` and ```setRGB``` methods that hide all this complexity, but they are slow (if you want to access and modify millions of pixels). Changing the raw array(s) behind ```BufferedImage``` is much faster, but then we must understand the meaning of the array elements.
 
-The following image illustrates how the seemingly simple getRGB() and setRGB() calls can trigger some complex computations. Calling getRGB() and setRGB() for each pixel of an image will run much slower than necessary.              
+The following image illustrates how the seemingly simple getRGB() and setRGB() calls can trigger some complex computations. 
+DataBuffer and ColorSpace objects aren't even included.
+In practice, there are optimized Raster and ColorModel subclasses that don't delegate to other objects, but it's still slow.                
 
 ```mermaid
 sequenceDiagram
@@ -151,8 +166,8 @@ sequenceDiagram
     BI->>R: getDataElements()
     activate R    
     R->>SM: getDataElements()
-    BI->>CM: getRGB()
     deactivate R
+    BI->>CM: getRGB()
     deactivate BI  
     User->>BI: setRGB()
     activate BI  
@@ -173,7 +188,9 @@ sequenceDiagram
 
 There are two ways to change a buffered image. You can call ```createGraphics()``` on it to create a [```Graphics2D```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/Graphics2D.html). This allows you to draw on the image, but what you draw will not depend on the existing pixels values. If you do this, don't forget to call ```dispose()``` on the Graphics2D object when you are done.
 
-The more powerful way to change a buffered image is  [```BufferedImageOp```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BufferedImageOp.html), which can create a new image based on the existing pixels. Most filters in Pixelitor either use the [JH Labs filters](http://www.jhlabs.com/ip/filters/) directly or extend its base classes. Note that Pixelitor uses an improved version of the original JH Labs filters, with added multithreading, progress tracking, bugfixes, and other improvements.
+The more powerful way to change a buffered image is  [```BufferedImageOp```](https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/image/BufferedImageOp.html), which can create a new image based on the existing pixels. 
+Most filters in Pixelitor either use the [JH Labs filters](http://www.jhlabs.com/ip/filters/) directly or extend its base classes. 
+Note that Pixelitor uses an improved version of the original JH Labs filters, with added multithreading, progress tracking, bugfixes, and other improvements.
 
 The ```BufferedImageOp``` implementations in the JDK are not very useful for Pixelitor, but ```com.jhlabs.image.AbstractBufferedImageOp``` is a good base class for image filters. ```org.jdesktop.swingx.image.AbstractFilter``` is a similar idea, but its subclasses are less powerful. The most important subclasses of ```AbstractBufferedImageOp``` are the following:
 

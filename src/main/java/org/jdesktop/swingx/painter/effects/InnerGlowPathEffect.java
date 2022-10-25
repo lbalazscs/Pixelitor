@@ -38,7 +38,6 @@ public class InnerGlowPathEffect extends AbstractAreaEffect {
     private static final long serialVersionUID = 1887188174881815174L;
 
     public InnerGlowPathEffect() {
-        super();
         setBrushColor(Color.WHITE);
         setBrushSteps(10);
         setEffectWidth(10);
