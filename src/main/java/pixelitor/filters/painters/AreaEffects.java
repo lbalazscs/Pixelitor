@@ -102,28 +102,27 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         // because it doesn't add extra thickness
         double max = 0;
         if (glowEffect != null) {
-            double effectWidth = glowEffect.getEffectWidth();
-            if (effectWidth > max) {
-                max = effectWidth;
+            double thickness = glowEffect.getEffectWidth() / 2.0;
+            if (thickness > max) {
+                max = thickness;
             }
         }
         if (neonBorderEffect != null) {
-            double effectWidth = neonBorderEffect.getEffectWidth();
-            if (effectWidth > max) {
-                max = effectWidth;
+            double thickness = neonBorderEffect.getEffectWidth() / 2.0;
+            if (thickness > max) {
+                max = thickness;
             }
         }
         if (dropShadowEffect != null) {
-            double safetyFactor = 2.0;
-            double effectWidth = 3 + dropShadowEffect.getEffectWidth() * safetyFactor;
+            double thickness = dropShadowEffect.getEffectWidth() / 2.0;
 
             Point2D offset = dropShadowEffect.getOffset();
 
-            double xGap = effectWidth + Math.abs(offset.getX() * safetyFactor);
+            double xGap = thickness + Math.abs(offset.getX());
             if (xGap > max) {
                 max = xGap;
             }
-            double yGap = effectWidth + Math.abs(offset.getY() * safetyFactor);
+            double yGap = thickness + Math.abs(offset.getY());
             if (yGap > max) {
                 max = yGap;
             }

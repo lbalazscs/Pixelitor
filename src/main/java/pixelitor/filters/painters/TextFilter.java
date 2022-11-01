@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class TextFilter extends FilterWithGUI {
             int width = dest.getWidth();
             int height = dest.getHeight();
 
-            textPainter.setFillPaint(settings.getColor());
+            textPainter.setColor(settings.getColor());
 
             dest = ImageUtils.copyImage(src);
             Graphics2D g = dest.createGraphics();

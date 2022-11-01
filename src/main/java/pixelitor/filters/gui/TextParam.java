@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.io.Serial;
@@ -41,8 +42,6 @@ public class TextParam extends AbstractFilterParam {
 
     // in the case of commands the random values have to be listed explicitly
     private List<String> randomCommands;
-
-    private static final String ENCODED_NEWLINE = "#NL#";
 
     public TextParam(String name, String defaultValue, boolean command) {
         super(name, ALLOW_RANDOMIZE);
@@ -113,7 +112,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        String newValue = decodeSavedString(((TextParamState) state).value());
+        String newValue = Utils.decodeNewlines(((TextParamState) state).value());
         value = newValue;
         if (updateGUI) {
             gui.setText(newValue);
@@ -122,11 +121,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        setValue(decodeSavedString(savedValue), false);
-    }
-
-    private static String decodeSavedString(String s) {
-        return s.replaceAll(ENCODED_NEWLINE, "\n");
+        setValue(Utils.decodeNewlines(savedValue), false);
     }
 
     public boolean isEmpty() {
@@ -164,7 +159,7 @@ public class TextParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            return value.replaceAll("\\R", ENCODED_NEWLINE);
+            return Utils.encodeNewlines(value);
         }
     }
 }

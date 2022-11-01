@@ -51,6 +51,7 @@ import static java.lang.String.format;
  */
 public final class Utils {
     public static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
+    private static final String ENCODED_NEWLINE = "#NL#";
     private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
     public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
@@ -316,7 +317,7 @@ public final class Utils {
     }
 
     public static String[] getAvailableFontNames() {
-        // make sure that all font names are loaded
+        // wait until all font names are loaded
         try {
             boolean ok = fontNamesLoaded.await(5, TimeUnit.MINUTES);
             if (!ok) {
@@ -400,6 +401,14 @@ public final class Utils {
             return exeFile;
         }
         return null;
+    }
+
+    public static String encodeNewlines(String input) {
+        return input.replaceAll("\\R", ENCODED_NEWLINE);
+    }
+
+    public static String decodeNewlines(String input) {
+        return input.replaceAll(ENCODED_NEWLINE, "\n");
     }
 }
 

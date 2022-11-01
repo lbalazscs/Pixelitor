@@ -51,6 +51,9 @@ public class RotatedRectangle implements Debuggable {
     private double bottomLeftX;
     private double bottomLeftY;
 
+    private GeneralPath cachedShape;
+    private Rectangle cachedBox;
+
     public RotatedRectangle(Rectangle r, double theta) {
         this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), theta);
     }
@@ -133,24 +136,33 @@ public class RotatedRectangle implements Debuggable {
     }
 
     public Shape asShape() {
-        var path = new GeneralPath();
-        path.moveTo(topLeftX, topLeftY);
-        path.lineTo(topRightX, topRightY);
-        path.lineTo(bottomRightX, bottomRightY);
-        path.lineTo(bottomLeftX, bottomLeftY);
-        path.closePath();
-        return path;
+        if (cachedShape != null) {
+            return cachedShape;
+        }
+
+        cachedShape = new GeneralPath();
+        cachedShape.moveTo(topLeftX, topLeftY);
+        cachedShape.lineTo(topRightX, topRightY);
+        cachedShape.lineTo(bottomRightX, bottomRightY);
+        cachedShape.lineTo(bottomLeftX, bottomLeftY);
+        cachedShape.closePath();
+
+        return cachedShape;
     }
 
     public Rectangle getBoundingBox() {
+        if (cachedBox != null) {
+            return cachedBox;
+        }
         double minX = min(min(topLeftX, topRightX), min(bottomRightX, bottomLeftX));
         double minY = min(min(topLeftY, topRightY), min(bottomRightY, bottomLeftY));
         double maxX = max(max(topLeftX, topRightX), max(bottomRightX, bottomLeftX));
         double maxY = max(max(topLeftY, topRightY), max(bottomRightY, bottomLeftY));
 
-        int width = (int) (maxX - minX);
-        int height = (int) (maxY - minY);
-        return new Rectangle((int) minX, (int) minY, width, height);
+        int width = 1 + (int) (maxX - minX);
+        int height = 1 + (int) (maxY - minY);
+        cachedBox = new Rectangle((int) minX, (int) minY, width, height);
+        return cachedBox;
     }
 
     public void translate(double dx, double dy) {
@@ -165,6 +177,9 @@ public class RotatedRectangle implements Debuggable {
 
         bottomLeftX += dx;
         bottomLeftY += dy;
+
+        cachedShape = null;
+        cachedBox = null;
     }
 
     // paints the original and rotated corners for debugging

@@ -355,8 +355,8 @@ public class WorkflowTest {
     private void editSpiderWebImage(String compName) {
         app.runMenuCommand("Duplicate");
 
-        addTextLayer("Spider", "Top", "Left");
-        addTextLayer("Web", "Top", "Right");
+        addTextLayer("Spider", "Top Left");
+        addTextLayer("Web", "Top Right");
 
         // switch back to the main tab
         pw.tabbedPane().selectTab(compName);
@@ -410,18 +410,11 @@ public class WorkflowTest {
         convertLayerToSmartObject();
         app.runMenuCommand("Edit Contents");
 
+        // In the contents add a plasma image layer
+        // bellow the existing text layer.
         app.addEmptyImageLayer(false);
         app.runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
-
-//        try {
-//            EventQueue.invokeAndWait(() -> {
-//                JHPlasma plasma = (JHPlasma) Filters.getFilterActionByName("Plasma").getFilter();
-//                plasma.getParamSet().setSeed(0);
-//            });
-//        } catch (Exception e) {
-//            Messages.showException(e);
-//        }
         runFilterWithDialog("Plasma");
 
         // select the text layer
@@ -553,10 +546,9 @@ public class WorkflowTest {
         app.resize(600);
     }
 
-    private void addTextLayer(String text, String vAlignment, String hAlignment) {
+    private void addTextLayer(String text, String alignment) {
         app.addTextLayer(text, dialog -> {
-            dialog.comboBox("hAlignmentCB").selectItem(hAlignment);
-            dialog.comboBox("vAlignmentCB").selectItem(vAlignment);
+            dialog.comboBox("alignmentCB").selectItem(alignment);
         }, "Pixelitor");
     }
 

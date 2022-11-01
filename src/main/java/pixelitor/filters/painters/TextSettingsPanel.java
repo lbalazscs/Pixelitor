@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,13 +18,8 @@
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.VerticalLayout;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.filters.gui.*;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.*;
 import pixelitor.layers.Filterable;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Utils;
@@ -52,7 +47,7 @@ public class TextSettingsPanel extends FilterGUI
     private TextLayer textLayer;
     private FontInfo fontInfo;
 
-    private JTextField textTF;
+    private JTextArea textTF;
     private JComboBox<String> fontFamilyChooserCB;
     private SliderSpinner fontSizeSlider;
     private AngleParam rotationParam;
@@ -60,8 +55,7 @@ public class TextSettingsPanel extends FilterGUI
     private JCheckBox italicCB;
     private ColorParam color;
     private EffectsPanel effectsPanel;
-    private JComboBox<VerticalAlignment> vAlignmentCB;
-    private JComboBox<HorizontalAlignment> hAlignmentCB;
+    private JComboBox<BoxAlignment> alignmentCB;
     private JCheckBox watermarkCB;
 
     private JDialog advancedSettingsDialog;
@@ -127,25 +121,18 @@ public class TextSettingsPanel extends FilterGUI
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
-        hAlignmentCB = new JComboBox<>(HorizontalAlignment.values());
-        hAlignmentCB.setName("hAlignmentCB");
-        hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
-        hAlignmentCB.addActionListener(this);
-        gbh.addLabel("Horizontal Alignment:", 0, 2);
-        gbh.addControl(hAlignmentCB);
-
-        vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
-        vAlignmentCB.setName("vAlignmentCB");
-        vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
-        vAlignmentCB.addActionListener(this);
-        gbh.addLabel("Vertical Alignment:", 0, 3);
-        gbh.addControl(vAlignmentCB);
+        alignmentCB = new JComboBox<>(BoxAlignment.values());
+        alignmentCB.setName("alignmentCB");
+        alignmentCB.setSelectedItem(settings.getBoxAlignment());
+        alignmentCB.addActionListener(this);
+        gbh.addLabel("Alignment:", 0, 2);
+        gbh.addControl(alignmentCB);
 
         return textPanel;
     }
 
     private void createTextTF(TextSettings settings) {
-        textTF = new JTextField(settings.getText(), 20);
+        textTF = new JTextArea(settings.getText(), 3, 20);
         textTF.setName("textTF");
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -296,10 +283,11 @@ public class TextSettingsPanel extends FilterGUI
 
         Font selectedFont = getSelectedFont();
 
+        BoxAlignment alignment = (BoxAlignment) alignmentCB.getSelectedItem();
         var settings = new TextSettings(
             text, selectedFont, color.getColor(), effects,
-            (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
-            (VerticalAlignment) vAlignmentCB.getSelectedItem(),
+            alignment.getHorizontal(),
+            alignment.getVertical(),
             watermarkCB.isSelected(), textRotationAngle, this);
 
         updateApp(settings);
@@ -336,8 +324,7 @@ public class TextSettingsPanel extends FilterGUI
         textTF.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
-        hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
-        vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
+        alignmentCB.setSelectedItem(settings.getBoxAlignment());
 
         Font font = settings.getFont();
         fontSizeSlider.setValue(font.getSize());

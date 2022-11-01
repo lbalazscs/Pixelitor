@@ -22,6 +22,7 @@
 package org.jdesktop.swingx.painter;
 
 import org.jdesktop.swingx.painter.effects.AreaEffect;
+import pixelitor.utils.Shapes;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -35,7 +36,10 @@ import java.awt.geom.Rectangle2D;
 import java.io.Serial;
 import java.util.Map;
 
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
 import static java.awt.font.TextAttribute.*;
 import static org.jdesktop.swingx.painter.PainterUtils.getComponentFont;
 import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
@@ -48,8 +52,9 @@ import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
  */
 @SuppressWarnings("nls")
 public class TextPainter extends AbstractAreaPainter<Object> {
-    private String text = "";
+    protected String text = "";
     protected Font font = null;
+    protected transient String[] lines;
 
     // for compatibility with older pixelitor versions
     @Serial
@@ -137,6 +142,8 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         this.text = text == null ? "" : text;
         setDirty(true);
         firePropertyChange("text", old, getText());
+
+        lines = text.split("\n");
     }
 
     /**
@@ -225,76 +232,90 @@ public class TextPainter extends AbstractAreaPainter<Object> {
      */
     @Override
     protected Shape provideShape(Graphics2D g2, Object comp, int width, int height) {
-//        Font f = calculateFont(comp);
-        Font f = getFont();
-//        String t = calculateText(comp);
-        FontMetrics metrics = g2.getFontMetrics(f);
-
+        FontMetrics metrics = g2.getFontMetrics(font);
         FontRenderContext frc = g2.getFontRenderContext();
 
         Map<TextAttribute, ?> attributes = font.getAttributes();
         boolean hasKerning = KERNING_ON.equals(attributes.get(KERNING));
         boolean hasLigatures = LIGATURES_ON.equals(attributes.get(LIGATURES));
+        boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
+        boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
 
-        GlyphVector vect;
+        if (lines.length == 1) {
+            return getLineShape(lines[0], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
+        }
+
+        Area retVal = null;
+        for (int i = 0; i < lines.length; i++) {
+            Shape lineShape = getLineShape(lines[i], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
+            if (i == 0) {
+                retVal = new Area(lineShape);
+            } else {
+                lineShape = Shapes.translate(lineShape, 0, i * metrics.getHeight());
+                retVal.add(new Area(lineShape));
+            }
+        }
+        return retVal;
+    }
+
+    private Shape getLineShape(String line, FontRenderContext frc, FontMetrics metrics, boolean hasKerning, boolean hasLigatures, boolean hasUnderline, boolean hasStrikeThrough) {
+        GlyphVector glyphs;
         if (!hasKerning && !hasLigatures && font.getSize() <= 100) {
             // fix for issue #72: it seems that for some reason 100
             // is a magic number, under which the old way of getting
             // the shape works better
-            vect = f.createGlyphVector(frc, text);
+            glyphs = font.createGlyphVector(frc, line);
         } else {
             // partial fix for issue #64 (fixes kerning and ligatures),
             // also see https://community.oracle.com/thread/1289266
-            char[] chars = text.toCharArray();
-            vect = font.layoutGlyphVector(frc, chars, 0,
+            char[] chars = line.toCharArray();
+            glyphs = font.layoutGlyphVector(frc, chars, 0,
                 chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
         }
 
-        Shape glyphsOutline = vect.getOutline(0.0f, metrics.getAscent());
-
-        boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
-        boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
+        Shape glyphsOutline = glyphs.getOutline(0.0f, metrics.getAscent());
 
         if (!hasUnderline && !hasStrikeThrough) {
             // simple case: the glyphs contain all of the shape
             return glyphsOutline;
         }
 
-        LineMetrics lineMetrics = font.getLineMetrics(text, frc);
+        LineMetrics lineMetrics = font.getLineMetrics(line, frc);
         float ascent = lineMetrics.getAscent();
         Area combinedOutline = new Area(glyphsOutline);
+        int stringWidth = metrics.stringWidth(line);
 
         if (hasUnderline) {
             combinedOutline.add(
-                createUnderlineShape(metrics, lineMetrics, ascent));
+                createUnderlineShape(lineMetrics, ascent, stringWidth));
         }
 
         if (hasStrikeThrough) {
             combinedOutline.add(
-                createStrikeThroughShape(metrics, lineMetrics, ascent));
+                createStrikeThroughShape(lineMetrics, ascent, stringWidth));
         }
 
         return combinedOutline;
     }
 
-    private Area createUnderlineShape(FontMetrics metrics, LineMetrics lineMetrics, float ascent) {
+    private static Area createUnderlineShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
         float underlineOffset = lineMetrics.getUnderlineOffset();
         float underlineThickness = lineMetrics.getUnderlineThickness();
         Shape underLineShape = new Rectangle2D.Float(
             0.0f,
             ascent + underlineOffset - underlineThickness / 2.0f,
-            metrics.stringWidth(text),
+            stringWidth,
             underlineThickness);
         return new Area(underLineShape);
     }
 
-    private Area createStrikeThroughShape(FontMetrics metrics, LineMetrics lineMetrics, float ascent) {
+    private static Area createStrikeThroughShape(LineMetrics lineMetrics, float ascent, int stringWidth) {
         float strikethroughOffset = lineMetrics.getStrikethroughOffset();
         float strikethroughThickness = lineMetrics.getStrikethroughThickness();
         Shape strikethroughShape = new Rectangle2D.Float(
             0.0f,
             ascent + strikethroughOffset - strikethroughThickness / 2.0f,
-            metrics.stringWidth(text),
+            stringWidth,
             strikethroughThickness);
         return new Area(strikethroughShape);
     }

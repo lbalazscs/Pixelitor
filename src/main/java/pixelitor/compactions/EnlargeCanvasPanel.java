@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -250,7 +250,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
      */
     private class PreviewPanel extends JPanel {
         private static final Color newCanvasColor = new Color(136, 139, 146);
-        private static final CheckerboardPainter painter = ImageUtils.createCheckerboardPainter();
+        private static final CheckerboardPainter checkerboard = ImageUtils.createCheckerboardPainter();
         private BufferedImage thumb;
 
         public PreviewPanel() {
@@ -326,7 +326,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
             BufferedImage board = new BufferedImage((int) canvasW, (int) canvasH, thumb.getType());
             Graphics2D boardGraphics = board.createGraphics();
-            painter.paint(boardGraphics, null, board.getWidth(), board.getHeight());
+            checkerboard.paint(boardGraphics, null, board.getWidth(), board.getHeight());
             boardGraphics.dispose();
 
             // Drawing the thumb, which represents the old canvas

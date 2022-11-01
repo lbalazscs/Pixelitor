@@ -19,12 +19,12 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.Composition;
 import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -41,10 +41,13 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static java.awt.font.TextAttribute.KERNING;
+import static java.awt.font.TextAttribute.KERNING_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
@@ -147,6 +150,10 @@ public class TextSettings implements Serializable, Debuggable {
         return horizontalAlignment;
     }
 
+    public BoxAlignment getBoxAlignment() {
+        return BoxAlignment.forPair(horizontalAlignment, verticalAlignment);
+    }
+
     public String getText() {
         return text;
     }
@@ -183,30 +190,27 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public void configurePainter(TransformedTextPainter painter) {
-        painter.setAntialiasing(true);
         painter.setText(text);
         painter.setFont(font);
-        if (areaEffects != null) {
-            painter.setAreaEffects(areaEffects.asArray());
-        }
+        painter.setEffects(areaEffects);
         painter.setHorizontalAlignment(horizontalAlignment);
         painter.setVerticalAlignment(verticalAlignment);
         painter.setRotation(rotation);
     }
 
-    public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
+    public BufferedImage watermarkImage(BufferedImage src, TransformedTextPainter textPainter) {
         BufferedImage bumpImage = createBumpMapImage(
             textPainter, src.getWidth(), src.getHeight());
         return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
     }
 
     // the bump map image has white text on a black background
-    private BufferedImage createBumpMapImage(TextPainter textPainter,
+    private BufferedImage createBumpMapImage(TransformedTextPainter textPainter,
                                              int width, int height) {
         BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D g = bumpImage.createGraphics();
         Colors.fillWith(BLACK, g, width, height);
-        textPainter.setFillPaint(WHITE);
+        textPainter.setColor(WHITE);
         textPainter.paint(g, this, width, height);
         g.dispose();
 
@@ -215,7 +219,8 @@ public class TextSettings implements Serializable, Debuggable {
 
     private static Font calcDefaultFont() {
         String[] fontNames = Utils.getAvailableFontNames();
-        return new Font(fontNames[0], Font.PLAIN, calcDefaultFontSize());
+        return new Font(fontNames[0], Font.PLAIN, calcDefaultFontSize())
+            .deriveFont(Map.of(KERNING, KERNING_ON));
     }
 
     private static int calcDefaultFontSize() {
@@ -241,7 +246,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public void saveStateTo(UserPreset preset) {
-        preset.put(PRESET_KEY_TEXT, text);
+        preset.put(PRESET_KEY_TEXT, Utils.encodeNewlines(text));
         preset.putColor(PRESET_KEY_COLOR, color);
         preset.putFloat(PRESET_KEY_ROTATION, (float) rotation);
         preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
@@ -255,7 +260,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public void loadUserPreset(UserPreset preset) {
-        text = preset.get(PRESET_KEY_TEXT);
+        text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
         color = preset.getColor(PRESET_KEY_COLOR);
         rotation = preset.getFloat(PRESET_KEY_ROTATION);
         horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];

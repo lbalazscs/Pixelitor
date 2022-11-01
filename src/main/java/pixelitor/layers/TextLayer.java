@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.utils.Keys.CTRL_T;
@@ -54,6 +55,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Serial
     private static final long serialVersionUID = 2L;
     public static final String TEXT_PRESETS_DIR_NAME = "text";
+    private static final Pattern ALL_WHITESPACE = Pattern.compile("\\s+");
 
     private transient TransformedTextPainter painter;
     private TextSettings settings;
@@ -222,7 +224,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        painter.setFillPaint(settings.getColor());
+        painter.setColor(settings.getColor());
         painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
@@ -278,25 +280,28 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     public void updateLayerName() {
         if (settings != null) {
-            setName(settings.getText(), false);
+            String raw = settings.getText().trim();
+            String cleaned = ALL_WHITESPACE.matcher(raw).replaceAll(" ");
+            String shortened = shorten(cleaned, 30);
+            setName(shortened, false);
         }
     }
 
+    public static String shorten(String input, int maxLength) {
+        if (input.length() > maxLength) {
+            input = input.substring(0, maxLength - 3) + "...";
+        }
+        return input;
+    }
+
+    /**
+     * This method ensures that the whole text is exported by ignoring
+     * the canvas and only exporting an image corresponding to the text's bounds.
+     */
     @Override
     public TranslatedImage getTranslatedImage() {
-        // This method ensures that the whole text is exported by ignoring
-        // the canvas and only exporting an image corresponding to the text's bounds
-
-        // the translation is already taken into account
-        // in the bounding box, but not the effect width
         Rectangle textBounds = painter.getBoundingBox();
-        int effectsWidth = (int) settings.getEffects().getMaxEffectThickness();
-        if (effectsWidth != 0) {
-            textBounds = new Rectangle(textBounds); // the original mustn't be affected
-            textBounds.grow(effectsWidth + 1, effectsWidth + 1);
-        }
-
-        BufferedImage img = painter.renderRectangle(textBounds);
+        BufferedImage img = painter.renderArea(textBounds);
         return new TranslatedImage(img, textBounds.x, textBounds.y);
     }
 
@@ -334,7 +339,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     private Shape getTextShape() {
-        return painter.getTextShape(comp.getCanvas());
+        return painter.getTextShape();
     }
 
     @Override

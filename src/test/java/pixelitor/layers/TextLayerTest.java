@@ -152,28 +152,31 @@ public class TextLayerTest {
     public void commitSettings() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
+        String oldExpectedName = oldText.trim();
+
         assertThat(layer).nameIs(oldText);
-        String newText = "New Text";
+        String newText = "New Text  ";
+        String newExpectedName = newText.trim();
+
         TextSettings newSettings = oldSettings.copy();
         newSettings.setText(newText);
         layer.applySettings(newSettings);
-
         layer.commitSettings(oldSettings);
 
         assertThat(layer)
             .textIs(newText)
-            .nameIs(newText);
+            .nameIs(newExpectedName);
         History.assertNumEditsIs(1);
 
         History.undo("Edit Text Layer");
         assertThat(layer)
             .textIs(oldText)
-            .nameIs(oldText);
+            .nameIs(oldExpectedName);
 
         History.redo("Edit Text Layer");
         assertThat(layer)
             .textIs(newText)
-            .nameIs(newText);
+            .nameIs(newExpectedName);
 
         iconUpdates.check(0, 0);
     }
