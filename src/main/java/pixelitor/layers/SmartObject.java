@@ -254,7 +254,12 @@ public class SmartObject extends CompositeLayer {
             imageTransformer = transformer;
             contentTransform = null; // no longer needed
         } else {
-            baseSource = content;
+            if (imageTransformer != null) {
+                assert baseSource == imageTransformer;
+                baseSource = imageTransformer;
+            } else {
+                baseSource = content;
+            }
         }
     }
 
@@ -1134,7 +1139,7 @@ public class SmartObject extends CompositeLayer {
      * Returns the image bounds relative to the canvas
      */
     @Override
-    public Rectangle getContentBounds() {
+    public Rectangle getContentBounds(boolean includeTransparent) {
         return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
     }
 

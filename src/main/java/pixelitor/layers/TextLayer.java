@@ -34,6 +34,7 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.debug.DebugNode;
 
@@ -177,8 +178,17 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public Rectangle getContentBounds() {
-        return painter.getBoundingBox();
+    public Rectangle getContentBounds(boolean includeTransparent) {
+        if (includeTransparent) {
+            // still doesn't include the transparent area, but it should be quick
+            return painter.getBoundingBox();
+        } else {
+            // make an image-based calculation for an exact "content crop"
+            BufferedImage image = asImage(false, false);
+            Rectangle bounds = ImageUtils.getNonTransparentBounds(image);
+            image.flush();
+            return bounds;
+        }
     }
 
     @Override

@@ -18,10 +18,13 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
+import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
 
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.InputEvent;
@@ -398,6 +401,24 @@ public final class Utils {
     public static double mapInterval(double inStart, double inEnd, double outStart, double outEnd, double x) {
         double slope = (outEnd - outStart) / (inEnd - inStart);
         return outStart + slope * (x - inStart);
+    }
+
+    public static Rectangle calcUnionOfContentBounds(List<Layer> layers, boolean includeTransparent) {
+        Rectangle bounds = null;
+        for (Layer layer : layers) {
+            if (layer instanceof ContentLayer contentLayer) {
+                Rectangle layerBounds = contentLayer.getContentBounds(includeTransparent);
+                if (layerBounds == null) {
+                    continue;
+                }
+                if (bounds == null) {
+                    bounds = layerBounds;
+                } else {
+                    bounds = bounds.union(layerBounds);
+                }
+            }
+        }
+        return bounds;
     }
 }
 

@@ -39,10 +39,7 @@ import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
@@ -977,6 +974,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         return null;
+    }
+
+    public Rectangle2D getNonTransparentContentBounds() {
+        return Utils.calcUnionOfContentBounds(layerList, false);
     }
 
     public void updateAllIconImages() {

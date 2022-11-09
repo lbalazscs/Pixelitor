@@ -74,7 +74,11 @@ public abstract class ContentLayer extends Layer {
     /**
      * Returns the rectangle representing the content, relative to the canvas.
      */
-    public abstract Rectangle getContentBounds();
+    public Rectangle getContentBounds() {
+        return getContentBounds(true);
+    }
+
+    public abstract Rectangle getContentBounds(boolean includeTransparent);
 
     /**
      * Returns the pixel value at the given point or zero if

@@ -53,7 +53,7 @@ public final class SelectionActions {
     private static Shape copiedSelShape = null;
 
     private static final Action crop = new PAction("Crop Selection",
-        Crop::selectionCropActiveImage);
+        Crop::selectionCropActiveComp);
 
     private static final Action deselect = new PAction(i18n("deselect"), () ->
         getActiveComp().deselect(true));

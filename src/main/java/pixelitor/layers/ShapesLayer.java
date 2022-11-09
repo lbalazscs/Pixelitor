@@ -212,7 +212,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public Rectangle getContentBounds() {
+    public Rectangle getContentBounds(boolean includeTransparent) {
         if (hasShape()) {
             return styledShape.getContentBounds();
         }

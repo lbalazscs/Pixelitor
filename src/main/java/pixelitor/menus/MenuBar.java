@@ -28,10 +28,7 @@ import pixelitor.automate.BatchResize;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.compactions.EnlargeCanvas;
-import pixelitor.compactions.Flip;
-import pixelitor.compactions.ResizePanel;
-import pixelitor.compactions.Rotate;
+import pixelitor.compactions.*;
 import pixelitor.filters.Mirror;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
@@ -642,8 +639,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createImageMenu(ResourceBundle texts) {
         PMenu imageMenu = new PMenu(texts.getString("image"), 'I');
 
-        // crop
+        // selection crop
         imageMenu.add(SelectionActions.getCrop());
+
+        imageMenu.add(new OpenViewEnabledAction("Crop to Content", Crop::contentCrop));
+
+        imageMenu.addSeparator();
 
         // resize
         imageMenu.add(new OpenViewEnabledAction("Resize...",

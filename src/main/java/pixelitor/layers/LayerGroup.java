@@ -21,11 +21,14 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
+import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -459,8 +462,8 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public Rectangle getContentBounds() {
-        return null;
+    public Rectangle getContentBounds(boolean includeTransparent) {
+        return Utils.calcUnionOfContentBounds(layers, includeTransparent);
     }
 
     @Override
@@ -527,6 +530,19 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public LayerHolder getHolderForNewLayers() {
         return this;
+    }
+
+    @Override
+    public JPopupMenu createLayerIconPopupMenu() {
+        JPopupMenu popup = super.createLayerIconPopupMenu();
+        if (popup == null) {
+            popup = new JPopupMenu();
+        }
+
+        popup.add(new PAction("Ungroup", () ->
+            replaceWithUnGrouped(null, true)));
+
+        return popup;
     }
 
     @Override

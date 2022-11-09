@@ -671,8 +671,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Returns the image bounds relative to the canvas
      */
     @Override
-    public Rectangle getContentBounds() {
-        return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
+    public Rectangle getContentBounds(boolean includeTransparent) {
+        if (includeTransparent) {
+            return new Rectangle(getTx(), getTy(), image.getWidth(), image.getHeight());
+        } else {
+            Rectangle rect = ImageUtils.getNonTransparentBounds(image);
+            rect.translate(getTx(), getTy());
+            return rect;
+        }
     }
 
     @Override

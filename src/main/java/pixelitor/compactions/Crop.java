@@ -169,9 +169,26 @@ public class Crop implements CompAction {
     }
 
     /**
-     * Crops the active image based on the selection bounds
+     * Crops the active composition based on the non-transparent content.
      */
-    public static void selectionCropActiveImage() {
+    public static void contentCrop(Composition comp) {
+        Rectangle2D bounds = comp.getNonTransparentContentBounds();
+        if (bounds == null) {
+            Messages.showError("No Bounds",
+                "<html>No bounds found in <b>%s</b>".formatted(comp.getName()));
+        } else if (bounds.equals(comp.getCanvasBounds())) {
+            Messages.showError("Nothing to Crop",
+                "<html><b>%s</b> doesn't have transparent pixels at the edges.".formatted(comp.getName()));
+        } else {
+            new Crop(bounds, true, false, true, false)
+                .process(comp);
+        }
+    }
+
+    /**
+     * Crops the active composition based on the selection bounds
+     */
+    public static void selectionCropActiveComp() {
         try {
             Views.onActiveComp(Crop::selectionCrop);
         } catch (Exception ex) {

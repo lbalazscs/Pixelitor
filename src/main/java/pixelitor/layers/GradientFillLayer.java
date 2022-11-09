@@ -196,7 +196,7 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public Rectangle getContentBounds() {
+    public Rectangle getContentBounds(boolean includeTransparent) {
         // by returning null, the move tool shows no outline
         return null;
     }
