@@ -1484,11 +1484,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void update(UpdateActions actions, boolean sizeChanged) {
         invalidateImageCache();
 
-        if (actions.repaintNeeded()) {
-            if (view != null) {
-                view.repaint();
-                view.repaintNavigator(sizeChanged);
-            }
+        if (view != null) {
+            view.repaint();
+            view.repaintNavigator(sizeChanged);
         }
 
         if (actions.histogramChanged()) {
@@ -1921,21 +1919,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public enum UpdateActions {
-        REPAINT(true, false) {
-        }, HISTOGRAM(false, true) {
-        }, FULL(true, true) {
+        REPAINT(false) {
+        }, FULL(true) {
         };
 
-        private final boolean repaint;
         private final boolean updateHistogram;
 
-        UpdateActions(boolean repaint, boolean updateHistogram) {
-            this.repaint = repaint;
+        UpdateActions(boolean updateHistogram) {
             this.updateHistogram = updateHistogram;
-        }
-
-        private boolean repaintNeeded() {
-            return repaint;
         }
 
         private boolean histogramChanged() {

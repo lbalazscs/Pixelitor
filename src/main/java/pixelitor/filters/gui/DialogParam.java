@@ -89,7 +89,7 @@ public class DialogParam extends AbstractFilterParam {
         Iterator<ParamState<?>> stateIterator = newStates.iterator();
         for (FilterParam child : children) {
             // this matching only works for animation
-            if (child.canBeAnimated()) {
+            if (child.isAnimatable()) {
                 child.loadStateFrom(stateIterator.next(), updateGUI);
             }
         }
@@ -119,9 +119,9 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         for (FilterParam child : children) {
-            if (child.canBeAnimated()) {
+            if (child.isAnimatable()) {
                 return true;
             }
         }

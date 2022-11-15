@@ -154,7 +154,7 @@ public class ListParam<E>
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return false;
     }
 

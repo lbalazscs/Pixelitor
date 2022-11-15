@@ -27,8 +27,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.colors.FillType.TRANSPARENT;
@@ -42,6 +41,7 @@ public final class NewImage {
     private static int untitledCount = 1;
 
     public static final Dimension lastSize = AppPreferences.getNewImageSize();
+    public static int lastFillTypeIndex = 0; // currently not restored after a restart
 
     private NewImage() {
     }

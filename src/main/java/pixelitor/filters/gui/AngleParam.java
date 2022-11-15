@@ -164,7 +164,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return true;
     }
 

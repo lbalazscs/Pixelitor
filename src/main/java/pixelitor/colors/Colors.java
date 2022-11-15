@@ -30,10 +30,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
@@ -201,25 +198,6 @@ public class Colors {
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
         return format("(%d, %d, %d, %d)", a, r, g, b);
-    }
-
-    public static float calcSaturation(int r, int g, int b) {
-        int cMax = Math.max(r, g);
-        if (b > cMax) {
-            cMax = b;
-        }
-        int cMin = Math.min(r, g);
-        if (b < cMin) {
-            cMin = b;
-        }
-
-        float sat;
-        if (cMax != 0) {
-            sat = (cMax - cMin) / (float) cMax;
-        } else {
-            sat = 0;
-        }
-        return sat;
     }
 
     public static int toPackedARGB(int a, int r, int g, int b) {

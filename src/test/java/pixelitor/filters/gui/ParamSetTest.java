@@ -87,7 +87,7 @@ class ParamSetTest {
 
     @Test
     void canBeAnimated() {
-        assertThat(params.canBeAnimated()).isTrue();
+        assertThat(params.isAnimatable()).isTrue();
     }
 
     @Test

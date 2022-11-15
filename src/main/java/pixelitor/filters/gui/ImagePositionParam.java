@@ -116,7 +116,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return true;
     }
 

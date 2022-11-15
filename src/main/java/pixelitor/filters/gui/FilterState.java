@@ -52,7 +52,7 @@ public class FilterState implements Preset {
 
     private FilterState(Stream<FilterParam> paramStream, boolean animOnly) {
         if (animOnly) {
-            paramStream = paramStream.filter(FilterParam::canBeAnimated);
+            paramStream = paramStream.filter(FilterParam::isAnimatable);
         }
         states = paramStream.collect(
             Collectors.toMap(FilterSetting::getName, FilterParam::copyState));

@@ -214,7 +214,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return true;
     }
 

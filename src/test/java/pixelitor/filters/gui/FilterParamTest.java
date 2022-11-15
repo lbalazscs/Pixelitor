@@ -198,7 +198,7 @@ public class FilterParamTest {
         JComponent gui = param.createGUI();
 //        param.updateOptions(new Dimension(1000, 600));
 
-        param.canBeAnimated();
+        param.isAnimatable();
 
         param.setEnabled(false, APP_LOGIC);
         assertThat(gui.isEnabled()).isFalse();
@@ -207,7 +207,7 @@ public class FilterParamTest {
         assertThat(gui.isEnabled()).isTrue();
 
         param.setEnabled(false, FINAL_ANIMATION_SETTING);
-        if (param.canBeAnimated()) {
+        if (param.isAnimatable()) {
             assertThat(gui.isEnabled()).isTrue();
         } else {
             assertThat(gui.isEnabled()).isFalse();

@@ -138,7 +138,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return false;
     }
 

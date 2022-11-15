@@ -24,10 +24,8 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.Composite;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static pixelitor.utils.Texts.i18n;
@@ -120,14 +118,6 @@ public class BlendingModePanel extends JPanel {
     public void addActionListener(ActionListener al) {
         opacityDDSlider.addActionListener(al);
         bmCombo.addActionListener(al);
-    }
-
-    public void addOpacityListener(Consumer<Float> listener) {
-        opacityDDSlider.addActionListener(e -> listener.accept(getOpacity()));
-    }
-
-    public void addBlendingModeListener(Consumer<BlendingMode> listener) {
-        bmCombo.addActionListener(e -> listener.accept(getBlendingMode()));
     }
 
     public boolean isNormalAndOpaque() {

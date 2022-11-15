@@ -161,7 +161,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         if (pf.excludedFromAnimation()) {
             return false;
         }
-        if (!pf.getParamSet().canBeAnimated()) {
+        if (!pf.getParamSet().isAnimatable()) {
             return false;
         }
         if (filter instanceof Fade && !History.canFade()) {

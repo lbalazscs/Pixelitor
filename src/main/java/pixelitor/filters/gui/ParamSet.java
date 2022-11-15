@@ -172,9 +172,9 @@ public class ParamSet implements Debuggable {
      * A ParamSet can be animated if at least
      * one contained filter parameter can be
      */
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         for (FilterParam param : paramList) {
-            if (param.canBeAnimated()) {
+            if (param.isAnimatable()) {
                 return true;
             }
         }
@@ -216,7 +216,7 @@ public class ParamSet implements Debuggable {
      */
     public void setState(FilterState newStateSet, boolean forAnimation) {
         for (FilterParam param : paramList) {
-            if (forAnimation && !param.canBeAnimated()) {
+            if (forAnimation && !param.isAnimatable()) {
                 continue;
             }
             String name = param.getName();

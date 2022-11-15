@@ -42,7 +42,7 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
 
     private CompositeParamState(Stream<FilterParam> paramStream) {
         states = paramStream
-            .filter(FilterParam::canBeAnimated)
+            .filter(FilterParam::isAnimatable)
             .map(FilterParam::copyState)
             .collect(toList());
     }

@@ -91,7 +91,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         switch (reason) {
             case APP_LOGIC -> enabledByAppLogic = b;
             case FINAL_ANIMATION_SETTING -> {
-                if (canBeAnimated()) {
+                if (isAnimatable()) {
                     // the whole point of the final animation setting mode
                     // is to disable/enable the filter params that can't be animated
                     return;

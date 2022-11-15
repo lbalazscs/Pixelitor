@@ -382,7 +382,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return true;
     }
 

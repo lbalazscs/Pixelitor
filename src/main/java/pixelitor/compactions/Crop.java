@@ -37,8 +37,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
@@ -178,7 +177,7 @@ public class Crop implements CompAction {
                 "<html>No bounds found in <b>%s</b>".formatted(comp.getName()));
         } else if (bounds.equals(comp.getCanvasBounds())) {
             Messages.showError("Nothing to Crop",
-                "<html><b>%s</b> doesn't have transparent pixels at the edges.".formatted(comp.getName()));
+                    "<html><b>%s</b> doesn't have removable transparent pixels at the edges.".formatted(comp.getName()));
         } else {
             new Crop(bounds, true, false, true, false)
                 .process(comp);

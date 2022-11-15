@@ -27,7 +27,7 @@ import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
+import java.awt.*;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -60,6 +60,8 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
         heightTF = addTextField("heightTF", "Height:", NewImage.lastSize.height, gbh);
 
         fillSelector = new JComboBox<>(FillType.values());
+        fillSelector.setSelectedIndex(NewImage.lastFillTypeIndex);
+
         gbh.addLabelAndLastControl("Fill:", fillSelector);
     }
 
@@ -131,6 +133,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
         NewImage.lastSize.width = selectedWidth;
         NewImage.lastSize.height = selectedHeight;
+        NewImage.lastFillTypeIndex = fillSelector.getSelectedIndex();
     }
 
     private String getTitle() {

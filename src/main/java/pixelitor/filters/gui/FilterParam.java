@@ -86,10 +86,10 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     }
 
     /**
-     * True if the value can be interpolated in some useful way.
+     * True if the value can change gradually, and therefore it can be used for tweening animations.
      * All implementing classes return either always true or always false.
      */
-    boolean canBeAnimated();
+    boolean isAnimatable();
 
     /**
      * Whether a filter parameter was configured to be

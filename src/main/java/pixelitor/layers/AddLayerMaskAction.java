@@ -64,9 +64,8 @@ public class AddLayerMaskAction extends NamedAction
         }
     }
 
-    private void onClick(boolean ctrlPressed) {
-        var comp = Views.getActiveComp();
-        var layer = comp.getActiveLayer();
+    private static void onClick(boolean ctrlPressed) {
+        var layer = Views.getActiveComp().getActiveLayer();
         assert !layer.hasMask();
 
         layer.addMask(ctrlPressed);

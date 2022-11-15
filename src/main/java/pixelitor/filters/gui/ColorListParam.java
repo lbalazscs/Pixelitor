@@ -126,7 +126,7 @@ public class ColorListParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean canBeAnimated() {
+    public boolean isAnimatable() {
         return false;
     }
 
