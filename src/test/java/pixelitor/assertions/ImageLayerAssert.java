@@ -27,9 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Custom AssertJ assertions for {@link ImageLayer} objects.
  */
-public class ImageLayerAssert<S extends ImageLayerAssert<S, T>, T extends ImageLayer> extends ContentLayerAssert<S, ImageLayer> {
-    public ImageLayerAssert(ImageLayer actual, Class<S> selfType) {
-        super(actual, selfType);
+public class ImageLayerAssert extends ContentLayerAssert<ImageLayerAssert, ImageLayer> {
+    public ImageLayerAssert(ImageLayer actual) {
+        super(actual, ImageLayerAssert.class);
     }
 
     public ImageLayerAssert stateIs(ImageLayer.State expected) {

@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 import java.awt.Rectangle;
-import java.util.Date;
 import java.util.SplittableRandom;
 
 public class PlasmaFilter extends WholeImageFilter {

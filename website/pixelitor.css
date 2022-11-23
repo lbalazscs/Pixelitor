@@ -1,19 +1,23 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 body {
   font-family: Verdana, Geneva, Arial, sans-serif;
-  background-color: #EBF0F5;
+  background-color: #ebf0f5;
+  margin: 0;
+  line-height: 1.4em;
 }
 
 .container {
   max-width: 70ch;
   margin: auto;
+  padding: 0 0.5em;
 }
 
 h1 {
-  border-bottom: 1px solid black;
   color: #000066;
   font-size: 200%;
 }
@@ -30,12 +34,21 @@ a:visited {
   color: #003040;
 }
 
+.navbar {
+  background-color: #343a40;
+}
+
 ul.navbar-nav {
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #343a40;
+}
+
+@media only screen and (max-width: 600px) {
+  ul.navbar-nav {
+    display: none;
+  }
 }
 
 li.nav-item {
@@ -51,7 +64,8 @@ a.nav-link {
 }
 
 a.nav-link:hover {
-  background-color: #111;
+  background-color: #3e5780;
+  transition: background-color 0.2s ease-in-out;
 }
 
 li.active {
@@ -61,7 +75,15 @@ li.active {
 .release {
   padding: 0.1em 0.5em 0.5em;
   margin-top: 0.8em;
-  background: #F2F7FC;
+  background: #f2f7fc;
+  box-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.35);
+  border-radius: 0.5em;
+}
+
+.card {
+  padding: 0.1em 0.5em 0.5em;
+  margin-top: 0.8em;
+  background: #f2f7fc;
   box-shadow: 0.1rem 0.1rem 0.6rem rgba(0, 0, 0, 0.35);
   border-radius: 0.5em;
 }
@@ -83,4 +105,22 @@ li.active {
 
 .thumb:hover {
   transform: translateY(-1rem);
+}
+
+kbd {
+	margin: 0px 0.1em;
+	padding: 0.1em 0.6em;
+	border-radius: 3px;
+	border: 1px solid rgb(204, 204, 204);
+	line-height: 1.4;
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 0.7em;
+	display: inline-block;
+	box-shadow: 0px 1px 0px rgba(0,0,0,0.2), inset 0 0 0 0.1em #ffffff;
+	background-color: rgb(247, 247, 247);
+}
+
+.screenshot {
+  float: right;
+  margin-left: 1em;
 }

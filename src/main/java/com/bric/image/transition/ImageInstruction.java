@@ -23,7 +23,6 @@ import com.bric.geom.Clipper;
 import com.bric.geom.RectangularTransform;
 import com.bric.geom.ShapeStringUtils;
 import org.jdesktop.swingx.graphics.BlendComposite;
-import pixelitor.utils.Rnd;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;

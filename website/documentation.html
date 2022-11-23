@@ -1,36 +1,549 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Pixelitor Documentation</title>
-  <link type="text/css" rel="stylesheet" href="pixelitor.css">
-</head>
-<body>
-	<nav class="navbar">
-	<ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" href="index.html">Home</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="release_notes.html">Release Notes</a>
-    </li>
-    <li class="nav-item active">
-      <a class="nav-link" href="documentation.html">Documentation</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="installation.html">Installation</a>
-    </li>
-	</ul>
-	</nav>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pixelitor Documentation</title>
+    <link type="text/css" rel="stylesheet" href="pixelitor.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="release_notes.html">Release Notes</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="documentation.html">Documentation</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="installation.html">Installation</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-    <div class="container">
-	<h1>Pixelitor Documentation</h1>
-    <p>
-      Work in progress...
-    <p>
-At the moment you should have some experience with <a href="https://en.wikipedia.org/wiki/Image_editing"  target="_blank">image editors</a> in order to use it, because there isn't much documentation available yet, and many concepts (<a href="http://en.wikipedia.org/wiki/Layers_%28digital_image_editing%29" target="_blank">layers</a>, <a href="http://en.wikipedia.org/wiki/Blend_modes" target="_blank">blending modes</a>, <a href="https://en.wikipedia.org/wiki/Cropping_(image)" target="_blank">cropping</a>, <a href="http://en.wikipedia.org/wiki/Gaussian_blur" target="_blank">Gaussian blurring</a>, <a href="http://en.wikipedia.org/wiki/Unsharp_mask" target="_blank">unsharp masking</a>, <a href="http://en.wikipedia.org/wiki/Image_histogram" target="_blank">histograms</a>, etc.) are the same.
+<div class="container">
+<h1>Pixelitor Documentation</h1>
 
-    </div>
-  </body>
+<h2>Basic Usage</h2>
+
+<p>
+Just launch the program and open the image you want to edit. You can do
+this by clicking on "File" in the menu bar and selecting "Open".
+You can also open images by dragging and dropping them
+onto the program.
+</p><p>
+Once your image is opened, you can use the various tools and features in
+Pixelitor to edit and enhance it. 
+This can include things like cropping and resizing the image, using image filters, and more. 
+When you are happy with your edits, you can save your image by clicking on "File" in the menu bar and selecting
+"Save". You can also save your edits as a separate file by clicking on
+"File" and selecting "Save As".
+</p><p>
+When you are saving a file, you need to choose a file format. 
+The best file format to use will depend on the specific needs of your image and the intended use of the file.  
+In general, it is best to use JPEG for photographs and other images with complex color information, PNG for graphics, diagrams, and other images with simple color information, and PXC if you might want to continue working on the file later.
+</p><p></p>
+PXC is the native file format of Pixelitor. 
+This format preserves all of the layers, and their settings in the saved file. 
+This means that when you open a PXC file, you can access and edit all of the layers in the image just as you left them.
+Note that PXC files can't be opened in other applications.
+</p>
+
+<h2>Detailed Usage</h2>
+<p>
+Pixelitor provides support for image layers and layer masks, allowing you to make complex edits and apply effects to specific areas of your image. 
+You can also use special non-destructive layers in Pixelitor, such as color and gradient fill layers, adjustment layers, shape layers, smart objects, and smart filters, to make advanced edits and apply sophisticated effects to your images.
+</p>
+
+<h3>Layers</h3>
+<p>
+A <a href="http://en.wikipedia.org/wiki/Layers_%28digital_image_editing%29" target="_blank">
+  layer</a> is essentially a separate image that is added on top of the
+original image, and can be edited and adjusted independently of the rest
+of the image. Layers also allow you to apply different filters and effects
+to different parts of your image.
+If parts of a layer are transparent, you can see the layers underneath it, and you can use this transparency to composite different elements together.
+</p><p>
+The layer stack is a visual representation of the different layers that make up an image.
+It shows the layers from bottom to top, with the bottom layer representing the background of the image and the top layer representing the element that is closest to the viewer.
+To rearrange the layers, click and hold on the layer you want to move and drag it to the desired position in the list.
+</p>
+<h3>Renaming Layers</h3>
+<p>
+By default layers have a generic name, such as "layer 1", but you can change these names to something more specific and useful.
+A more descriptive and meaningful name can help you organize your layers more effectively. 
+</p><p>
+To rename a layer double-click on the layer name to activate the text box, and then type the new name for the layer.
+Press <kbd>Enter</kbd> to save the new name.
+</p>
+
+<h3>Layer Visibility</h3>
+<p><img src="images/doc/layers.png" class="screenshot">  
+Each layer can be set to be either visible or hidden, allowing you to control which elements of the image are displayed and which are hidden.
+</p><p>
+To change the visibility of a layer, select the layer in the layers panel and click on the eye icon next to the layer name. 
+This will toggle the visibility of the layer, showing it if it was previously hidden or hiding it if it was previously visible.  
+</p><p>
+The visibility of a layer can also be affected by the visibility of any layer groups that the layer belongs to. If a layer group is hidden, all of the layers within the group will also be hidden, regardless of their individual visibility settings.
+</p>
+
+<h3>Layer Isolation</h3>
+<p>
+Layer isolation allows you to temporarily hide all layers except for the one you are working on. This can be useful when you want to focus on a specific layer and temporarily hide all the other layers in the image.
+</p><p>
+To isolate a layer, hold down the <kbd>Alt</kbd> key on your keyboard and click on its eye icon. 
+To exit layer isolation and show all layers again, <kbd>Alt</kbd>-click again. 
+This will restore the visibility of all layers in the image. 
+</p><p>
+Layer isolation is available only in the latest builds of Pixelitor.
+</p>
+
+<h3>Layer Opacity</h3>
+<p>
+Layer opacity is a setting that determines how transparent a layer will be when it is blended with the layers below it. 
+The opacity of a layer is represented as a percentage, with 100% indicating that the layer is fully opaque and will completely cover the layers below it, and 0% indicating that the layer is fully transparent and will not be visible at all. 
+</p>
+
+<h3>Blending Modes</h3>
+<p>
+<a href="https://en.wikipedia.org/wiki/Blend_modes" target="_blank">Blending modes</a> are used to control how different layers are combined to create the final image. 
+Each layer in an image has a blending mode that determines how it will be blended with the layers below it. 
+There are many different blending modes available, and each one produces a different effect. 
+For example, the "Normal" blending mode simply combines the layers without any special effects, while the "Multiply" blending mode darkens the image by multiplying the colors of the layers together. 
+</p><p>
+To choose the best blending mode for your image, you will need to experiment with different blending modes and see how they affect your image. 
+You can also adjust the opacity of the layer to control the intensity of the blending mode.
+In general, the screen blending mode is a good starting point for lightening an image and removing dark pixels, while the multiply blending mode is useful for darkening an image and adding shadows.
+</p>
+
+<h3>Layer Masks</h3>
+<p>
+A layer mask allows you to selectively hide or reveal parts of a layer.
+When you add a layer mask to an image, it appears as a white box next to
+the layer thumbnail in the layers panel. 
+By default, the mask is white, which means that the entire layer is visible. 
+You can then use a brush tool or other editing tools to paint black onto the layer mask, which
+will hide the corresponding parts of the layer. Painting with gray will
+partially hide the layer, allowing you to fade the layer in and out.
+</p><p>
+Layer masks are a non-destructive way of editing an image, because the
+original image data is not modified. This means that you can easily make
+changes to the mask or even remove it completely without affecting the
+underlying image data.
+</p><p>
+To use a layer mask, first select the layer that you want to apply the layer mask to.
+Then create a new layer mask by clicking the "Add Layer Mask" button in the Layers panel. 
+A layer mask can be edited when it is selected. 
+This is indicated by a white rectangle around the layer mask icon. 
+</p><p>
+By default, a layer mask is hidden and you will only see the result of the mask on the layer it is applied to. 
+<kbd>Alt</kbd>-clicking on the layer mask icon will show you the mask itself.
+This can be useful for fine-tuning the mask. <kbd>Alt</kbd>-click again on the mask icon to return to the image.
+</p><p>
+You can right-click on a layer mask icon to see additional options:
+<ul> 
+<li>"Delete" removes the mask. 
+<li>"Apply" removes the mask as well, but it also transfers its effect into the transparency of the image pixels.
+<li>"Disable" will temporarily hide the effect of the layer mask on the selected layer. The mask can also disabled/enabled by <kbd>Shift</kbd>-clicking on its icon.
+<li>"Unlink" will allow you to move the layer and the layer mask with the move tool independently of each other. 
+</ul>
+</p>
+
+<h3>Merge Down</h3>
+<p>
+"Merge down"  combines the selected layer with the layer below it, creating a new layer with the combined content of both layers.
+</p><p>
+To merge down layers, select the top layer in the layers panel and use the "Merge Down" option in the layers menu or press <kbd>Ctrl</kbd>+<kbd>E</kbd>.   
+</p><p>
+Note that "Merge Down" will only work if the layer below the selected layer is an ordinary image layer, not a special layer type.
+</p>
+
+<h3>Image Layers</h3>
+<p>
+Image layers are the default layer type, and they are created automatically when you open an image file or create a new layer.
+Some tools, such as the brush tool, can only be used with image layers and layer masks, and they will not work with other types of layers such as text layers or shape layers.  
+</p><p>
+Other layer types, with the exception of adjustment layers and smart filters, can be rasterized into image layers. 
+This means that their image data is converted into a static, pixel-based image and they become image layers. 
+For example, rasterizing a text layer will make the text no longer editable, but you will be able to paint on it with the Brush tool.
+</p>
+
+<h3>Text Layers</h3>
+<p>
+A text layer is a special type of layer that contains text rather than
+pixel data. They are useful for adding captions, labels, or other
+text-based information to an image.
+</p><p>
+Text layers are fully editable, allowing you to change the text, font, size, and other formatting options at any time, even after you have saved and closed the file. 
+This is the key advantage of using text layers.  
+</p><p>
+To add a text layer, press the <kbd>T</kbd> key or click on the "Add text layer" button bellow the layers panel.
+You can edit an existing text layer by double-clicking on its "T" icon, or by selecting it and pressing <kbd>Ctrl</kbd>+<kbd>T</kbd>.
+Note that unlike in some other image editors, in Pixelitor text layers are always edited in a separate dialog window.
+</p>
+
+<h3>Layer Groups</h3>
+<p>
+Layer groups allow you to organize and manage multiple layers in your image by creating a hierarchy of layers and easily hiding, showing, or rearranging them. This makes it easier to work with complex images with many layers.
+</p><p>
+To hide or show all layers within a group, click on the eye icon next to the group name in the layers panel. This will hide or show all layers within the group at the same time.
+</p><p>
+To create a new layer group, press <kbd>Ctrl</kbd>+<kbd>G</kbd>. 
+Alternatively, you can press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd> to create a new layer group containing the visible layers.
+When a layer group is active, all new layers are created within that group.
+</p><p>  
+Currently you can't rearrange layers within a layer group by dragging and dropping them. 
+You can use the commands in the Layer/Layer Stack menus instead.
+</p><p>
+Layer groups can have a special blending mode called "Pass Through". 
+When the blending mode is set to "Pass Through", then the image is calculated as if the group didn't exist. 
+For example adjustment layers inside the group will affect the layers bellow the group. 
+</p><p>
+When any other blending mode is used, then the layers of the group are merged into a single image before being blended with the layers bellow the group.  
+</p><p>
+Currently layer groups are an experimental feature, and they are available only in the latest builds.
+</p>
+
+<h3>Color Fill Layers</h3>
+<p>
+A color fill layer is a special type of layer that is used to add a solid color to an image. 
+They work just like an image layer filled with a single color, but they could be easier to manage and they also consume less memory.
+</p><p>
+Currently color fill layers are an experimental feature.
+</p>
+
+<h3>Gradient Layers</h3>
+<p>
+Gradient layers are a nondestructive way of creating gradients. 
+The gradient settings can be edited at any time with the gradient tool.
+</p><p>
+Currently gradient layers are an experimental feature.
+</p>
+
+<h3>Shape Layers</h3>
+<p>
+Shape layers are a nondestructive way of creating shapes. 
+The shape settings can be edited at any time with the shapes tool.
+</p><p>
+Currently shape layers are an experimental feature.
+</p>
+
+<h3>Adjustment Layers</h3>
+<p>
+An adjustment layer is a special layer that allows you to make changes to the colors, tones, and other properties of an image without permanently altering the original image data.
+Adjustment layers are are a key part of non-destructive editing because they let you experiment with different adjustments and then easily adjust or remove them later if you change your mind.
+An adjustment layer affects only the layers below it in the layer stack. 
+This allows you to isolate the adjustments to a specific part of the image.
+</p><p>
+Currently adjustment layers are an experimental feature.
+</p>
+
+<h3>Smart Objects and Smart Filters</h3>
+<p>
+A <b>smart object</b> is a special type of layer that allows you to apply filters and transformations to an image without permanently changing the original data. 
+When you convert one or more layers into a smart object, the original image data is preserved in a separate composition called the content of the smart object. 
+You can then apply filters and transformations to the smart object as a whole. 
+These edits are non-destructive, meaning that you can easily adjust or remove them at any time without affecting the underlying image data.
+</p><p>
+To convert a layer into a smart object, right-click on the layer's thumbnail and choose the "Convert to Smart Object" option from the menu.  
+</p><p>  
+To edit the content of a smart object, right-click on the smart object's thumbnail and choose the "Edit Contents" option from the menu. 
+This will open the content composition in a separate tab/window.
+You can now edit the contents of the smart object just as you would any other image. 
+This may include adding, deleting, or rearranging layers, using tools and filters.
+When you are satisfied with the changes you have made to the smart object, just close the tab/window.
+</p><p>
+A <b>smart filter</b> is a filter applied to a smart object. 
+They are non-destructive, because you can easily adjust or remove the filter at any time without affecting the original image data.  
+To create a smart filter, just start a filter while the selected layer is a smart object. 
+The filter will then be attached to that smart object as a smart filter. 
+</p><p>
+A smart filter is similar to a layer in that it has an eye icon to change its visibility, can have a layer mask, and allows you to change its opacity and blending mode.
+Smart filters and adjustment layers are similar in that they both allow you to apply non-destructive edits to an image.
+Smart filters offer better performance as they are not re-calculated when editing other layers. 
+This can save time and improve the application's performance.  
+</p><p>
+Currently smart objects and smart filters are experimental features.
+</p>
+
+<h3>Move Tool <img src="images/doc/move_tool.svg"></h3>
+<p>
+The move tool allows you to reposition the layers in
+your image. This is useful for aligning and arranging the different
+elements of your composition, or for moving a layer to a different
+location on the canvas. To use the move tool, select it and
+then click and drag on the layer that you want to move. 
+</p><p>
+Holding down the <kbd>Shift</kbd> key while dragging will constrain the movement of the layer to a particular axis. 
+This means that the layer will only be able to move horizontally, vertically, or at a 45-degree angle, depending on which direction you drag. 
+</p><p>
+You can also use the arrow keys on your keyboard to nudge the layer in small increments.
+Holding down the <kbd>Shift</kbd> key while using the arrow keys will cause the layer to move in larger increments.
+</p><p>
+The <b>"auto select layer"</b> checkbox is an option that, when enabled, automatically selects the layer that is currently under the cursor, ignoring transparent areas. 
+This allows you to quickly and easily move the layer without having to manually select it first. 
+When the option is disabled, you must manually select the layer that you want to move.  
+</p>
+
+<h3>Crop Tool <img src="images/doc/crop_tool.svg"></h3>
+<p>
+The crop tool can remove parts of the image that you don't want, such as the edges or empty space, and keep only the part of the image that you want to keep.
+</p><p>
+To use the crop tool, select it and drag the mouse over the part of the image you want to keep. 
+This will create a crop box that outlines the selected area. 
+You can also <kbd>Alt</kbd>-drag  to drag the cropping box out from the center in all directions at once.
+</p><p>
+Later you can adjust the size and position of the crop box to fine-tune your selection. 
+If you <kbd>Shift</kbd>-drag the handles of the crop box, it will constrain the proportions of the cropped area and prevent it from being distorted. 
+</p><p>
+When you are satisfied with your selection, you can crop the image by clicking on the "Crop" button in the toolbar, pressing the <kbd>Enter</kbd> key on your keyboard or double-clicking in the selected area. 
+</p><p>
+The <b>"mask opacity"</b> setting determines the transparency of the overlay that is displayed over the image when you are using the crop tool. 
+When the mask opacity is set to a low value, the cropped areas of the image will be more transparent, making it easier to see the whole image. 
+When the mask opacity is set to a high value, the cropped areas will be less transparent, making it easier to focus on the selected crop area.
+</p><p>
+<b>Composition guides</b> in the crop tool are lines or shapes that are overlaid on the image to help you achieve a well-balanced composition. 
+These guides are based on well-known composition techniques, such as the rule of thirds or the golden ratio. 
+Pressing <kbd>O</kbd> while using the crop tool cycles through the available composition guides. Pressing <kbd>Shift</kbd>+<kbd>O</kbd> changes the orientation of the current guide, if applicable. 
+For example, the "Golden Spiral" guide can be displayed with the spiral starting in the upper left corner, upper right corner, lower left corner, or lower right corner. 
+This allows you to quickly experiment with different compositions and find the one that works best for your image.
+</p><p>
+The <b>"delete cropped pixels"</b> checkbox determines whether or not the areas of the image outside of the selected crop area will be permanently deleted. 
+When the option is disabled, the cropped areas will remain in the image, but will be hidden. 
+They can be made visible again by using the move tool or the "Enlarge Canvas" command. 
+This allows you to change your mind about the crop and easily restore the hidden areas, but it uses more memory.
+</p><p>
+The <b>"allow growing"</b> checkbox allows the cropped area to be expanded beyond the original bounds of the image. 
+This can be useful if you want to include hidden parts of the image in the cropped area, or if you want to add empty space around it. 
+Note that "Enlarge Canvas" is another way to enlarge the canvas size.
+</p>
+
+<h3>Selection Tool <img src="images/doc/selection_tool.svg"></h3>
+<p>
+The selection tool is used to select a specific part of an image. 
+A selection allows you to isolate a particular area of the image and make changes to it without affecting the rest of the image.
+To use the selection tool, click and drag on the image to create a selection area. 
+</p><p>
+In order to create a <b>rectangle</b> or <b>ellipse</b> selection, just drag the mouse from one corner of the desired area to the opposite corner. 
+To create a <b>freehand</b> selection, draw a custom shape by dragging with the mouse, then release the mouse button to finalize the selection. 
+To create a <b>polygonal</b> selection, click on the starting point, then move mouse cursor to the next point, and click again. 
+Continue clicking on each point of the desired polygon. 
+When you have reached the final point of the desired area, double-click or right-click to close the polygonal selection.
+</p><p>
+If you already have a selection in the image, you can use the following keyboard shortcuts to modify it:
+<ul>
+<li><kbd>Shift</kbd>-drag: Adds a new selection to the existing selection.  
+<li><kbd>Alt</kbd>-drag: Removes a new selection from the existing selection.  
+<li><kbd>Shift</kbd>-<kbd>Alt</kbd>-drag: Creates an intersection of the two selections.
+</ul>    
+These keyboard shortcuts allow you to quickly and easily combine multiple selections to create complex selections shapes.
+</p><p>
+In addition to the selection tool, the <b>select menu</b> also contains a number of tools that can be used to modify a selection.   
+To access these tools, you would first create a selection using the selection tool, and then choose a command from the select menu.
+<ul>
+<li>The <b>deselect</b> command (<kbd>Ctrl</kbd>+<kbd>D</kbd>) removes a selection from the image. 
+<li><b>hide selection edges</b> (<kbd>Ctrl</kbd>+<kbd>H</kbd>) only hides the selection outline, but the selection effects remain, and pressing <kbd>Ctrl</kbd>+<kbd>H</kbd> will show the outlines again.
+<li><b>invert selection</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>) reverses the current selection in an image by deselecting previously selected areas and selecting previously unselected areas.
+<li>The <b>modify selection</b> window allows you to precisely expand or contract a selection or to convert it into a border selection.
+<li><b>copy selection</b> and <b>paste selection</b> allows you to copy/paste a selection from one image to another. This only works inside Pixelitor, the system clipboard is not used.
+</ul>
+</p><p>
+In Pixelitor, selections are vector-based, meaning that they are defined by mathematical paths rather than raster-based pixels. 
+This means that a selection will either fully include or exclude the pixels within the selected area. 
+If you want to partially apply an effect, you can use layer masks instead of selections. 
+Layer masks also have the advantage of being able to be non-destructively modified later, while selections come and go.
+</p><p>
+If you have a selection active on the image when you create the layer mask, the selection will be used to define the initial colors of the layer mask. 
+This means that the selected area will become visible, and the unselected area will be transparent.
+You can run a blur filter on the mask if you want soft, feathered selections.
+</p>
+
+<h3>Brush Tool <img src="images/doc/brush_tool.png"></h3>
+<p>
+The brush tool is used to paint or draw on an image. 
+To use the brush tool, select it and then click and drag on the image to paint.
+</p><p>
+The brush <b>radius</b> determines the size of the brush. 
+It can be increased by pressing the <kbd>]</kbd> key and decreased by pressing the <kbd>[</kbd> key.
+</p><p>
+The <b>mirror</b> option allows you to create symmetrical effects or patterns in the image, such as a pattern that is automatically mirrored across a vertical or horizontal axis.
+</p><p>
+The brush tool, like the layers, has <b>opacity</b> and <b>blending mode</b> settings. 
+These settings determine how the brush strokes will interact with the existing colors in the image. 
+In contrast, the opacity and blending mode of a layer determine how the colors of that layer will interact with the colors of the layers below it.</p>
+</p><p>
+The <b>lazy mouse</b> option can help you to draw precise and smooth brush strokes.
+Imagine that the brush is dragged behind the mouse cursor by an invisible string at the given distance. 
+</p>
+
+<h3>Clone Stamp Tool <img src="images/doc/clone_tool.svg"></h3>
+<p>
+The clone stamp tool is used to copy pixels from one part of an image and apply them to another part of the image. 
+This allows you to "clone" or replicate an area of an image.
+</p><p>
+To use the clone stamp tool, select it and hold down the <kbd>Alt</kbd> key to set the "source" point. 
+Then, move the mouse to the area where you want to apply the copied pixels and click and drag to paint. 
+As you paint, the pixels from the source point will be copied to the image.
+</p><p>
+The <b>aligned</b> checkbox determines whether the cloned pixels will be copied from their original location in the image or from a fixed offset relative to the original location. 
+</p><p>
+The <b>sample all layers</b> checkbox determines whether the clone tool will sample pixels only from the currently active layer or from the composite image of all layers in the image.
+</p><p>
+The <b>transform</b> dialog allows you to resize, rotate or mirror the cloned area to better match the destination. 
+</p>
+
+<h3>Eraser Tool <img src="images/doc/eraser_tool.svg"></h3>
+<p>
+The eraser tool is used to remove pixels from an image layer. 
+The erased pixels become transparent.
+For example, if you erase the pixels around the edge of an image layer with the eraser tool, the resulting layer will have a transparent background, which allows you to place it on top of another layer without the original background getting in the way.
+</p>
+
+<h3>Smudge Tool <img src="images/doc/smudge_tool.svg"></h3>
+<p>
+The smudge tool is used to smear the pixels in an image. 
+It can be used to create a more organic or natural look in the image, or to blend colors together. 
+To use the smudge tool, you would select it, and then drag your cursor over the areas of the image that you want to smudge. 
+As you drag the mouse over the image, it will push the pixels around, creating a smeared effect.
+</p><p>
+The <b>strength</b> slider determines how much the pixels will be moved. 
+</p><p>
+In the <b>finger painting</b> checkbox is checked, then each brush stroke begins with the foreground color instead of the image colors.
+</p>
+
+<h3>Gradient Tool <img src="images/doc/gradient_tool.svg"></h3>
+<p>
+The gradient tool is used to create smooth transitions between two or more colors in an image. 
+To use the gradient tool, select it, and then select the colors that you want to use in your gradient by adjusting the foreground/background colors. 
+You can then drag the gradient tool across the image to create the gradient, and adjust the direction and shape of the gradient as needed. 
+</p><p>
+The gradient tool can be used on image and gradient layers.
+</p>
+
+<h3>Paint Bucket Tool <img src="images/doc/paint_bucket_tool.svg"></h3>
+<p>
+The paint bucket tool can be used to fill large areas of an image, or to quickly change the color of an object. 
+To use the paint bucket tool, you would select it, and then select the color that you want to use. 
+You can then click on the area of the image that you want to fill, and the paint bucket tool will automatically fill it with the selected color. 
+</p><p>
+The <b>tolerance</b> determines how similar the colors in the area must be in order for them to be filled.
+</p>
+
+<h3>Color Picker Tool <img src="images/doc/color_picker_tool.svg"></h3>
+<p>
+The color picker tool is used to select a specific color from an image. 
+To use the color picker tool, you would select it, and then click on the image. 
+The color picker tool will set the foreground color, which will be used when you draw or paint in the image.
+Additionally, the color picker tool will display the selected color's RGB/HSB values and its pixel position in the status bar.
+</p><p>
+If the <b>sample only the active layer</b> checkbox is checked, then the color picker tool will only consider the pixels on the active layer, and ignore any pixels on other layers.
+</p>
+
+<h3>Pen Tool <img src="images/doc/pen_tool.svg"></h3>
+</p><p>
+The pen tool is used to create precise vector paths in an image.
+Initially the path is just a geometric shape that is overlaid on the image when the pen tool is active.
+However, you can then convert this path into a selection or a stroke.
+</p><p>
+You can also edit and transform the paths after they have been created.
+This allows you to fine-tune the shape of the path, or to change its position or orientation in the image.
+To edit a path, select the "Edit" mode, and then adjust the position of its anchor points and control points.
+To transform a path, select the "Transform" mode, and then you can move, rotate or scale it.
+</p><p>
+The pen tool is often considered to be a more advanced tool, and it can take some practice to master its use.
+</p>
+
+<h3>Shapes Tool <img src="images/doc/shapes_tool.svg"></h3>
+<p>
+The shapes tool is used to create geometric shapes in an image. 
+To use the shapes tool, select it, and then choose the type of shape that you want to create. 
+You can then click and drag on the image to create the shape, and adjust its position, size, and orientation as needed. 
+You can also apply styles or effects to the shape.
+</p><p>
+The shapes tool currently has only a limited number of shapes.  
+</p>
+
+<h3>Hand Tool <img src="images/doc/hand_tool.svg"></h3>
+<p>
+The hand tool is used to move the view of the image within the editor's window.
+The hand tool is only useful when you are zoomed in on an image and the scrollbars are visible, because this is the only time when you can use the tool to move the view of the image.
+</p>
+
+<h3>Zoom Tool <img src="images/doc/zoom_tool.svg"></h3>
+<p>
+The zoom tool is used to change the current magnification of the image. 
+To use the zoom tool, you would select it, and then click on the image to zoom in, or hold the <kbd>Alt</kbd> key key and click to zoom out.  
+You can also drag a selection around the area of the image that you want to zoom in on, which can be useful for quickly focusing on a specific part of the image. 
+</p>
+
+<h3>The Navigator Window</h3>
+<p>
+The Navigator window can also be used as an alternative to the Hand and Zoom tools.
+The Navigator window is not visible by default, you need to select "Show Navigator" from the View menu in order to open it.
+It displays a thumbnail view of the entire image, and can be used to zoom in and out of the image by dragging the red rectangle in the thumbnail image or by <kbd>Ctrl</kbd>-dragging a new rectangle to select the area of the image that you want to zoom in on.
+</p>
+
+<h3>Guides</h3>
+<p>
+Guides are used to help align and position elements in an image. 
+The commands for creating and managing guides are found in the View menu.
+Guides are not visible when the image is printed or saved into a single-layer format, so they do not affect the final image.
+</p><p>
+These alignment guides in the View menu should not be confused with the cropping guides in the crop tool.  
+In the preferences window they have separate color/style settings, but both types are in the same "Guides" tab.
+</p>
+
+<h3>Filters</h3>
+<p>
+Filters can be used to modify the appearance of an image. 
+They can be used to apply a wide variety of effects to an image, including blurring, sharpening, color correction, and more.
+If a there is a selection in the image, then the filter is applied only to the selected part.
+Filters can be applied directly to the image pixels, or they can be applied as smart filters to a smart object in a nondestructive manner.
+</p><p>
+The filters can be found under the Color and Filter menus.
+To start a filter, you can press the <kbd>F3</kbd> key and type a part of its name.
+</p>
+
+<h3>Creating Layer Animations</h3>
+<p>
+To create a layer animation, you will need to create a new layer for each frame of your animation, and then create the content of each frame.
+You can then choose "Export Layer Animation" in the File menu.
+</p>
+
+<h3>Creating Tweening Animations</h3>
+<p>
+<a href="https://en.wikipedia.org/wiki/Inbetweening" target=_blank>Tweening</a> is a technique used in animation to create the illusion of movement by generating intermediate frames between the starting and ending points of an animation.
+In Pixelitor you can select the starting and ending settings of a filter.
+</p><p>
+To create a tweening animation, select an image layer, and then choose "Export Tweening Animation" in the File menu.
+A wizard window will be shown, where you can choose a filter, then its initial and final settings. 
+</p>
+
+<h3>ImageMagick Integration</h3>
+<p>
+Pixelitor can open and save files in a variety of formats:
+<ul>
+  <li><b>Open:</b> JPEG, PNG, BMP, GIF, WebP, ORA, TIFF, TGA, PAM, PBM, PGM, PPM, PFM, PXC.
+  <li><b>Save:</b> JPEG, PNG, BMP, GIF, ORA, TIFF, TGA, PAM, PPM, PXC.   
+</ul>  
+</p><p>
+For advanced users, Pixelitor also offers the option to integrate with <a href="https://imagemagick.org">ImageMagick</a>. 
+This allows you to access additional image formats and use ImageMagick's encoders and decoders.
+</p><p>
+ImageMagick is a separate open-source project and is not included with Pixelitor. 
+To use this feature, you will need to install ImageMagick 7 on your computer. 
+</p><p>
+Once you have installed ImageMagick, you can enable the integration by configuring the ImageMagick folder in Pixelitor's preferences (Edit/Preferences/Advanced).
+If ImageMagick is added to the PATH environment variable, then Pixelitor should be able to automatically find it when you try to use the ImageMagick import or export in the File menu. 
+</p><p>
+Please note that using ImageMagick is optional, and you can use Pixelitor without it. 
+</p>
+</div>
+</body>
 </html>

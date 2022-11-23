@@ -87,9 +87,8 @@ public class PixelitorAssertions extends Assertions {
         return new ContentLayerAssert<>(actual, ContentLayerAssert.class);
     }
 
-    @SuppressWarnings("unchecked")
     public static ImageLayerAssert assertThat(ImageLayer actual) {
-        return new ImageLayerAssert<>(actual, ImageLayerAssert.class);
+        return new ImageLayerAssert(actual);
     }
 
     public static TextLayerAssert assertThat(TextLayer actual) {
@@ -97,7 +96,7 @@ public class PixelitorAssertions extends Assertions {
     }
 
     @SuppressWarnings("unchecked")
-    public static AdjustmentLayerAssert assertThat(AdjustmentLayer actual) {
+    public static AdjustmentLayerAssert<? extends AdjustmentLayerAssert, AdjustmentLayer> assertThat(AdjustmentLayer actual) {
         return new AdjustmentLayerAssert<>(actual, AdjustmentLayerAssert.class);
     }
 
