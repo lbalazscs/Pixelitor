@@ -56,8 +56,6 @@ public class ShapeStringUtils {
 
     public static String toString(PathIterator i) {
         float[] f = new float[6];
-        //TODO: didn't you read once that a string buffer
-        //is a little inefficient?
         StringBuilder sb = new StringBuilder();
         int k;
         int j = 0;

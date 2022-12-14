@@ -10,6 +10,11 @@
   <body>
     <nav class="navbar">
       <div class="container">
+        <label for="hamburger-cb" class="hamburger-button">
+          <span></span><span></span><span></span>
+        </label>  
+        <input type="checkbox" id="hamburger-cb">
+
         <ul class="navbar-nav">
           <li class="nav-item">
             <a class="nav-link" href="index.html">Home</a>
@@ -139,8 +144,9 @@ underlying image data.
 </p><p>
 To use a layer mask, first select the layer that you want to apply the layer mask to.
 Then create a new layer mask by clicking the "Add Layer Mask" button in the Layers panel. 
-A layer mask can be edited when it is selected. 
-This is indicated by a white rectangle around the layer mask icon. 
+A layer mask can be edited using tools and filters when it is selected. 
+Selection is indicated by a rectangle around the layer mask icon. 
+If the rectangle is around the corresponding layer icon instead, then the tools and filters will be applied to the layer itself, rather than the layer mask.
 </p><p>
 By default, a layer mask is hidden and you will only see the result of the mask on the layer it is applied to. 
 <kbd>Alt</kbd>-clicking on the layer mask icon will show you the mask itself.
@@ -151,7 +157,7 @@ You can right-click on a layer mask icon to see additional options:
 <li>"Delete" removes the mask. 
 <li>"Apply" removes the mask as well, but it also transfers its effect into the transparency of the image pixels.
 <li>"Disable" will temporarily hide the effect of the layer mask on the selected layer. The mask can also disabled/enabled by <kbd>Shift</kbd>-clicking on its icon.
-<li>"Unlink" will allow you to move the layer and the layer mask with the move tool independently of each other. 
+<li>"Unlink" allows you to move the layer and the layer mask independently of each other using the move tool. 
 </ul>
 </p>
 
@@ -450,13 +456,35 @@ If the <b>sample only the active layer</b> checkbox is checked, then the color p
 The pen tool is used to create precise vector paths in an image.
 Initially the path is just a geometric shape that is overlaid on the image when the pen tool is active.
 However, you can then convert this path into a selection or a stroke.
+Note that the pen tool is a more advanced tool, and it can take some practice to master its use.
+</p><p>
+In order to create a path,
+<ol>
+<li>Select the Pen tool.</li>
+<li>Click on the image to create the starting point for your path. 
+  This will create an <b>anchor point</b> on the image. 
+  An anchor point is represented by a small square.</li>
+<li>Move the Pen tool to a different location on the image and click again to create a second anchor point. 
+  This will create a straight line between the two points.</li>
+<li>To create curves with the Pen tool, click and hold the mouse button while dragging the tool to a new location on the image. 
+  This will create a direction line, which you can use to adjust the curve of the path. 
+  The direction line will be accompanied by two <b>control points</b>, represented by small circles, that you can use to further fine-tune the curvature of the path.</li>
+<li>To create a closed path, move the Pen tool back to the starting point and click to complete the path.
+  The starting anchor point will become red when the mouse is over it, indicating that the path can be closed.
+</li>
+<li>Another way to finish a path is to click on the image while  holding down the <kbd>Ctrl</kbd> key. 
+  This will create an unclosed path.</li>
+<li>While creating a path or after finishing it, you can <kbd>Ctrl</kbd>-drag drag any anchor point or control point to a new location.
+Hold down the <kbd>Ctrl</kbd> key, then move the cursor over an anchor point or control point. The point can be dragged when it becomes red.</li>
+<li>You can also <kbd>Alt</kbd>-drag a control point in order to break the smoothness of the path.</li>
+</ol>    
 </p><p>
 You can also edit and transform the paths after they have been created.
-This allows you to fine-tune the shape of the path, or to change its position or orientation in the image.
-To edit a path, select the "Edit" mode, and then adjust the position of its anchor points and control points.
-To transform a path, select the "Transform" mode, and then you can move, rotate or scale it.
+To edit a path, select the <b>Edit mode</b>, and then adjust the position of its anchor points and control points.
+While in Edit mode, you can drag anchor points and control points without holding down the <kbd>Ctrl</kbd> key. 
+Additionally, you can access a popup menu on anchor points by right-clicking on them.
+To transform a path, select the <b>Transform mode</b>, and then you can move, rotate or scale it.
 </p><p>
-The pen tool is often considered to be a more advanced tool, and it can take some practice to master its use.
 </p>
 
 <h3>Shapes Tool <img src="images/doc/shapes_tool.svg"></h3>
