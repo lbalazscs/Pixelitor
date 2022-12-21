@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -195,13 +195,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         activeRoot = activeLayer.getTopLevelLayer();
 
-        for (Layer layer : layerList) {
-            if (layer instanceof CompositeLayer cl) {
-                // things that need a full canvas and also
-                // (re)load the contents of linked smart objects
-                cl.afterDeserialization();
-            }
-        }
+        // things that need a full canvas and also
+        // (re)load the contents of linked smart objects
+        forEachNestedLayer(CompositeLayer.class, CompositeLayer::afterDeserialization);
 
         createDebugName();
         assert checkAllSOInvariants();

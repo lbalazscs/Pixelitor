@@ -37,8 +37,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Cursor;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -292,19 +291,22 @@ public class Views {
             if (comp.isUnsaved()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
-                if (answer == YES_OPTION) { // "Save"
-                    boolean fileSaved = IO.save(comp, false);
-                    if (fileSaved) {
+                switch (answer) {
+                    case YES_OPTION:  // "Save"
+                        boolean fileSaved = IO.save(comp, false);
+                        if (fileSaved) {
+                            view.close();
+                        }
+                        break;
+                    case NO_OPTION:  // "Don't Save"
                         view.close();
-                    }
-                } else if (answer == NO_OPTION) { // "Don't Save"
-                    view.close();
-                } else if (answer == CANCEL_OPTION) {
-                    // do nothing
-                } else if (answer == CLOSED_OPTION) { // dialog closed by pressing X
-                    // do nothing
-                } else {
-                    throw new IllegalStateException("answer = " + answer);
+                        break;
+                    case CANCEL_OPTION:
+                    case CLOSED_OPTION:  // dialog closed by pressing X
+                        // do nothing
+                        break;
+                    default:
+                        throw new IllegalStateException("answer = " + answer);
                 }
             } else {
                 view.close();
