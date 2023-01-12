@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,16 +21,14 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
-import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -192,7 +190,7 @@ public class ZoomTool extends DragTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new ZoomToolIcon();
     }
 

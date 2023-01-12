@@ -160,22 +160,34 @@ li.active {
 }
 
 kbd {
-	margin: 0 0.1em;
-	padding: 0.1em 0.6em;
-	border-radius: 0.3em;
-	border: 1px solid rgb(204, 204, 204);
-	line-height: 1.4;
-	font-family: Arial,Helvetica,sans-serif;
-	font-size: 0.7em;
-	display: inline-block;
+  margin: 0 0.1em;
+  padding: 0.1em 0.6em;
+  border-radius: 0.3em;
+  border: 1px solid rgb(204, 204, 204);
+  line-height: 1.4;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 0.7em;
+  display: inline-block;
   text-shadow: 0 1px 0 #fff;
-	box-shadow: 0px 1px 0px rgba(0,0,0,0.4), inset 0 0 0 0.1em #ffffff;
+  box-shadow: 0px 1px 0px rgba(0,0,0,0.4), inset 0 0 0 0.1em #ffffff;
   white-space: nowrap;
-	background-color: rgb(247, 247, 247);
+  background-color: rgb(247, 247, 247);
 }
 
 .screenshot {
   float: right;
   margin-left: 1em;
   margin-bottom: 0.5em;
+}
+
+.toc {
+  padding: 0.5rem 2.0rem 0.5rem 0.1rem;
+  background-color: #e2e8f0;
+  display: table;
+  border: 1px solid #64748b;
+}
+
+.toctitle {
+  text-align: center;
+  font-weight: bold;
 }

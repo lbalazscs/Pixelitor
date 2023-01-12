@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.DragToolState;
@@ -542,7 +543,7 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new CropToolIcon();
     }
 

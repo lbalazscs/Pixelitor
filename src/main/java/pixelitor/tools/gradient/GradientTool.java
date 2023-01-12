@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.gui.utils.Themes;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.GradientFillLayer;
@@ -43,11 +44,8 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
-import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -625,7 +623,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new GradientToolIcon();
     }
 

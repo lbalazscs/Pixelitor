@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,9 +38,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import javax.swing.*;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -121,10 +119,10 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     }
 
     /**
-     * Creates the tool's icon. Most tools create their icon using
+     * Creates the tool's icon. Tools create their icon using
      * vector graphics so that is looks good on HiDPI screens.
      */
-    public abstract Icon createIcon();
+    public abstract VectorIcon createIcon();
 
     public char getActivationKey() {
         return activationKey;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.*;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
@@ -35,7 +36,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 import static pixelitor.selection.ShapeCombinator.*;
 
@@ -382,7 +383,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new SelectionToolIcon();
     }
 

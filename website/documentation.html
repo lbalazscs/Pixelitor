@@ -35,7 +35,21 @@
 <div class="container">
 <h1>Pixelitor Documentation</h1>
 
-<h2>Basic Usage</h2>
+<div class="toc">
+  <div class="toctitle">Contents</div>
+  <ul>
+	<li><a href="#basic_usage">Basic Usage</a></li>
+    <li><a href="#detailed_usage">Detailed Usage</a></li>
+    <ul>
+	  <li><a href="#layers">Layers</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#other">Other</a></li>
+    </ul>
+</ul>
+</div>
+
+
+<h2 id="basic_usage">Basic Usage</h2>
 
 <p>
 Just launch the program and open the image you want to edit. You can do
@@ -60,13 +74,13 @@ This means that when you open a PXC file, you can access and edit all of the lay
 Note that PXC files can't be opened in other applications.
 </p>
 
-<h2>Detailed Usage</h2>
+<h2 id="detailed_usage">Detailed Usage</h2>
 <p>
 Pixelitor provides support for image layers and layer masks, allowing you to make complex edits and apply effects to specific areas of your image. 
 You can also use special non-destructive layers in Pixelitor, such as color and gradient fill layers, adjustment layers, shape layers, smart objects, and smart filters, to make advanced edits and apply sophisticated effects to your images.
 </p>
 
-<h3>Layers</h3>
+<h3 id="layers">Layers</h3>
 <p>
 A <a href="http://en.wikipedia.org/wiki/Layers_%28digital_image_editing%29" target="_blank">
   layer</a> is essentially a separate image that is added on top of the
@@ -278,6 +292,8 @@ This can save time and improve the application's performance.
 Currently smart objects and smart filters are experimental features.
 </p>
 
+<h2 id="tools">Tools</h2>
+
 <h3>Move Tool <img src="images/doc/move_tool.svg"></h3>
 <p>
 The move tool allows you to reposition the layers in
@@ -370,7 +386,7 @@ This means that the selected area will become visible, and the unselected area w
 You can run a blur filter on the mask if you want soft, feathered selections.
 </p>
 
-<h3>Brush Tool <img src="images/doc/brush_tool.png"></h3>
+<h3>Brush Tool <img src="images/doc/brush_tool.svg"></h3>
 <p>
 The brush tool is used to paint or draw on an image. 
 To use the brush tool, select it and then click and drag on the image to paint.
@@ -509,6 +525,8 @@ The zoom tool is used to change the current magnification of the image.
 To use the zoom tool, you would select it, and then click on the image to zoom in, or hold the <kbd>Alt</kbd> key key and click to zoom out.  
 You can also drag a selection around the area of the image that you want to zoom in on, which can be useful for quickly focusing on a specific part of the image. 
 </p>
+
+<h2 id="other">Other</h2>
 
 <h3>The Navigator Window</h3>
 <p>

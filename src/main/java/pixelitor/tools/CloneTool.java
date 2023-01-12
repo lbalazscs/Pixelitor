@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
@@ -37,9 +38,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -312,7 +311,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new CloneToolIcon();
     }
 

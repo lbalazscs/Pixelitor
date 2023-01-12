@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -805,29 +805,6 @@ public class SmartObject extends CompositeLayer {
         // a smart object never enlarges the image
         return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
     }
-
-//    @Override
-//    public BufferedImage getCanvasSizedVisibleImage() {
-//        int tx = getTx();
-//        int ty = getTy();
-//        BufferedImage visibleImage = getVisibleImage();
-//        if (tx == 0 && ty == 0) {
-//            assert visibleImage.getWidth() == comp.getCanvasWidth()
-//                : "visible width = " + visibleImage.getWidth() + ", canvas width = " + comp.getCanvasWidth();
-//            assert visibleImage.getHeight() == comp.getCanvasHeight()
-//                : "visible height = " + visibleImage.getHeight() + ", canvas height = " + comp.getCanvasHeight();
-//            return visibleImage;
-//        }
-//
-//        // the image of a moved layer might not cover the canvas,
-//        // therefore (unlike in the superclass) here we can't use subimage
-//        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-//        Graphics2D g = img.createGraphics();
-//        g.drawImage(visibleImage, tx, ty, null);
-//        g.dispose();
-//
-//        return img;
-//    }
 
     public SmartObject shallowDuplicate() {
         SmartObject d = new SmartObject(this, CopyType.SMART_OBJECT_CLONE, comp);

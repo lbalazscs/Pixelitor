@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
@@ -368,7 +369,7 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new PaintBucketToolIcon();
     }
 

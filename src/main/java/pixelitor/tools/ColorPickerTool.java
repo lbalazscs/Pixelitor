@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
@@ -28,9 +29,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -163,7 +162,7 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new ColorPickerToolIcon();
     }
 

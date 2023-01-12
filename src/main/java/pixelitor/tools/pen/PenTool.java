@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.IO;
@@ -39,10 +40,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
@@ -524,7 +522,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new PenToolIcon();
     }
 

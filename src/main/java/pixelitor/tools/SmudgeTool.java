@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
@@ -29,8 +30,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -166,7 +166,7 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new SmudgeToolIcon();
     }
 

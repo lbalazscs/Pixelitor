@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,12 +18,11 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.UserPreset;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
-import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Path2D;
 
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -81,7 +80,7 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public Icon createIcon() {
+    public VectorIcon createIcon() {
         return new HandToolIcon();
     }
 
