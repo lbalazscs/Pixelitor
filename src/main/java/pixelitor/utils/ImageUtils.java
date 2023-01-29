@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -1349,5 +1349,19 @@ public class ImageUtils {
         }
 
         return new Rectangle(left, top, right - left + 1, bottom - top + 1);
+    }
+
+    public static BufferedImage mask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
+        BufferedImage dest = createImageWithSameCM(srcA);
+        int[] srcAPixels = getPixelsAsArray(srcA);
+        int[] srcBPixels = getPixelsAsArray(srcB);
+        int[] maskPixels = getPixelsAsArray(mask);
+        int[] destPixels = getPixelsAsArray(dest);
+        for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
+
+            float transparency = (maskPixels[i] & 0xFF) / 255.0f;
+            destPixels[i] = ImageMath.mixColors(transparency, srcAPixels[i], srcBPixels[i]);
+        }
+        return dest;
     }
 }

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2022 Laszlo Balazs-Csiki and Contributors
+  ~ Copyright 2023 Laszlo Balazs-Csiki and Contributors
   ~
   ~ This file is part of Pixelitor. Pixelitor is free software: you
   ~ can redistribute it and/or modify it under the terms of the GNU
@@ -219,7 +219,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.11.0</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
 

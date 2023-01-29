@@ -217,6 +217,10 @@ public class ImageMath {
         return (input < a) ? a : (input > b) ? b : input;
     }
 
+    public static double clamp(double input, double a, double b) {
+        return (input < a) ? a : (input > b) ? b : input;
+    }
+
     public static float clamp01(float input) {
         return (input < 0.0f) ? 0.0f : (input > 1.0f) ? 1.0f : input;
     }
