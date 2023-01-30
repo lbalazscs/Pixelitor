@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,6 @@ import java.util.List;
 
 import static java.awt.event.MouseEvent.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
@@ -126,7 +124,7 @@ public class TestHelper {
 
         for (int i = 0; i < numLayers; i++) {
             var layer = createEmptyImageLayer(comp, "layer " + (i + 1));
-            comp.addLayerInInitMode(layer);
+            comp.addLayerNoUI(layer);
             if (addMasks) {
                 layer.addMask(REVEAL_ALL);
             }

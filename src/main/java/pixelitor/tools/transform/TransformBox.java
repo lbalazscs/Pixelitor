@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -577,11 +577,6 @@ public class TransformBox implements ToolWidget, Serializable {
      * Transforms the box geometry with the given component-space transformation
      */
     public void coTransform(AffineTransform at) {
-//        at.transform(beforeMovement.nw, nw);
-//        at.transform(beforeMovement.ne, ne);
-//        at.transform(beforeMovement.se, se);
-//        at.transform(beforeMovement.sw, sw);
-
         nw.coTransformOnlyThis(at, beforeMovement.nw);
         ne.coTransformOnlyThis(at, beforeMovement.ne);
         se.coTransformOnlyThis(at, beforeMovement.se);
@@ -714,7 +709,7 @@ public class TransformBox implements ToolWidget, Serializable {
         return format("Transform Box, corners = (%s, %s, %s, %s)", nw, ne, se, sw);
     }
 
-    public void saveState() {
+    private void saveState() {
         beforeMovement = copyState();
     }
 

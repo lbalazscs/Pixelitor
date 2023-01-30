@@ -651,7 +651,7 @@ public class MenuBar extends JMenuBar {
             ResizePanel::showInDialog), CTRL_ALT_I);
 
         imageMenu.add(new OpenViewEnabledAction("Duplicate",
-            comp -> addAsNewComp(comp.copy(CopyType.COMP_DUPLICATE, true))));
+                comp -> addNew(comp.copy(CopyType.COMP_DUPLICATE, true))));
 
         if (AppContext.enableImageMode) {
             imageMenu.add(createModeSubmenu());
@@ -1170,7 +1170,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDevelopMenu(PixelitorWindow pw) {
         PMenu developMenu = new PMenu("Develop", 'D');
 
-        developMenu.add(createDebugSubmenu(pw));
+        developMenu.add(createDebugSubmenu());
         developMenu.add(createExperimentalSubmenu());
         developMenu.add(createManualSubmenu(pw));
         developMenu.add(createSplashSubmenu());
@@ -1220,14 +1220,14 @@ public class MenuBar extends JMenuBar {
         return developMenu;
     }
 
-    private static JMenu createDebugSubmenu(PixelitorWindow pw) {
+    private static JMenu createDebugSubmenu() {
         PMenu sub = new PMenu("Debug");
 
         sub.add(new PAction("Copy Internal State to Clipboard",
-            Debug::copyInternalState), CTRL_ALT_D);
+                Debug::copyInternalState), CTRL_ALT_D);
 
         sub.add(new OpenViewEnabledAction("Debug Active Composite Image",
-            comp -> Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName())));
+                comp -> Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName())));
 
         sub.add(new DrawableAction("Debug ImageLayer Images") {
             @Override

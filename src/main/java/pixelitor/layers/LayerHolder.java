@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Something that has an ordered collection of layers inside it.
+ * Something that contains an ordered collection of layers, like a
+ * composition, layer group or smart object.
  */
 public interface LayerHolder extends Debuggable {
     int getActiveLayerIndex();
@@ -46,12 +47,8 @@ public interface LayerHolder extends Debuggable {
 
     void addLayerToList(int index, Layer newLayer);
 
-    /**
-     * "Init mode" means that this is part of the construction,
-     * the layer is not added as a result of a user interaction
-     */
-    default void addLayerInInitMode(Layer newLayer) {
-        new Composition.LayerAdder(this).compInitMode().add(newLayer);
+    default void addLayerNoUI(Layer newLayer) {
+        new Composition.LayerAdder(this).noUI().add(newLayer);
     }
 
     default void moveActiveLayerUp() {
@@ -59,7 +56,7 @@ public interface LayerHolder extends Debuggable {
 
         int oldIndex = indexOf(getComp().getActiveLayer());
         changeLayerOrder(oldIndex, oldIndex + 1,
-            true, LayerMoveAction.RAISE_LAYER);
+                true, LayerMoveAction.RAISE_LAYER);
     }
 
     default void moveActiveLayerDown() {
@@ -111,7 +108,7 @@ public interface LayerHolder extends Debuggable {
 
         changeLayerGUIOrder(oldIndex, newIndex);
         update();
-        Layers.layerOrderChanged(this);
+        Layers.layersReordered(this);
 
         if (addToHistory) {
             History.add(new LayerOrderChangeEdit(editName, this, oldIndex, newIndex));
@@ -193,7 +190,6 @@ public interface LayerHolder extends Debuggable {
         int index = indexOf(layer);
         if (index > 0 && layer.isVisible()) {
             Layer bellow = getLayer(index - 1);
-            // An instanceof check would be incorrect, because it should not merge on smart objects
             return bellow.getClass() == ImageLayer.class && bellow.isVisible();
         }
         return false;

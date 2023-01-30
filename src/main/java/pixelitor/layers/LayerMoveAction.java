@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,11 +56,11 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
 
     @Override
     protected void onClick(Composition comp) {
-        LayerHolder layerHolder = comp.getActiveHolder();
+        LayerHolder holder = comp.getActiveHolder();
         if (up) {
-            layerHolder.moveActiveLayerUp();
+            holder.moveActiveLayerUp();
         } else {
-            layerHolder.moveActiveLayerDown();
+            holder.moveActiveLayerDown();
         }
     }
 
@@ -69,11 +69,11 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
         enableDisable(newView.getComp().getActiveHolder());
     }
 
-    public void enableDisable(LayerHolder layerHolder) {
-        if (layerHolder != null) {
-            int activeLayerIndex = layerHolder.getActiveLayerIndex();
+    public void enableDisable(LayerHolder holder) {
+        if (holder != null) {
+            int activeLayerIndex = holder.getActiveLayerIndex();
             if (up) {
-                int numLayers = layerHolder.getNumLayers();
+                int numLayers = holder.getNumLayers();
                 setEnabled(activeLayerIndex < numLayers - 1);
             } else {
                 setEnabled(activeLayerIndex > 0);
@@ -82,18 +82,18 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
     }
 
     @Override
-    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
-        enableDisable(layerHolder);
+    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
+        enableDisable(holder);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        enableDisable(newActiveLayer.getHolder());
+    public void layerActivated(Layer layer) {
+        enableDisable(layer.getHolder());
     }
 
     @Override
-    public void layerOrderChanged(LayerHolder layerHolder) {
-        enableDisable(layerHolder);
+    public void layersReordered(LayerHolder holder) {
+        enableDisable(holder);
     }
 
     private static Icon getIcon(boolean up) {

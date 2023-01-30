@@ -40,7 +40,10 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
@@ -345,7 +348,7 @@ public class PenTool extends Tool {
         if (newComp.isActive()) {
             // reloading is asynchronous, the view might not be active anymore
             setPathFromComp(newComp);
-            mode.compReplaced(newComp);
+            mode.compReplaced();
         }
     }
 

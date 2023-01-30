@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,9 @@ import java.awt.Stroke;
 public final class GuideStyle {
     private GuideStrokeType strokeType = GuideStrokeType.DASHED;
     private Color colorA = Color.BLACK;
-    private Color colorB = Color.WHITE; // not used!
+
+    // used only for some styles, currently not configurable
+    private Color colorB = Color.WHITE;
 
     public GuideStrokeType getStrokeType() {
         return strokeType;

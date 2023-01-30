@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,11 +46,11 @@ public class TweenAnimation {
         this.filter = filter;
     }
 
-    public void copyFinalStateFromCurrent() {
+    public void rememberFinalState() {
         finalState = filter.getParamSet().copyState(true);
     }
 
-    public void copyInitialStateFromCurrent() {
+    public void rememberInitialState() {
         initialState = filter.getParamSet().copyState(true);
     }
 
@@ -78,7 +78,7 @@ public class TweenAnimation {
         this.outputType = outputType;
     }
 
-    public AnimationWriter createAnimationWriter() {
+    public AnimationWriter createWriter() {
         return outputType.createAnimationWriter(output, millisBetweenFrames);
     }
 

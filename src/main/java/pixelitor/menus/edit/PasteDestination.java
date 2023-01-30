@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public enum PasteDestination {
         @Override
         void paste(BufferedImage pastedImage) {
             String title = "Pasted Image " + pastedCount;
-            Views.addAsNewComp(pastedImage, null, title);
+            Views.addNew(pastedImage, null, title);
             pastedCount++;
         }
     }, MASK(true) {

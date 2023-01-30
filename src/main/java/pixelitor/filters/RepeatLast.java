@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class RepeatLast extends DrawableAction {
         // an action (deserialized smart filter). Perhaps an action could be searched
         // by the filter name.
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
-            showDialog, false);
+                showDialog, false);
         this.showDialog = showDialog;
         setEnabled(false);
     }
@@ -87,6 +87,7 @@ public class RepeatLast extends DrawableAction {
             SHOW_LAST_ACTION.setText("Show " + lastFilter.getName() + "...");
             SHOW_LAST_ACTION.setEnabled(true);
         } else {
+            // can't show a filter GUI for a filter without a GUI
             SHOW_LAST_ACTION.setText(REPEAT_LAST_DEFAULT_NAME);
             SHOW_LAST_ACTION.setEnabled(false);
         }

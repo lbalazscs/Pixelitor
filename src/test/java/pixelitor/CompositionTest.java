@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -145,7 +145,7 @@ class CompositionTest {
             .isNotDirty()
             .numLayersIs(2);
 
-        comp.addLayerInInitMode(createEmptyImageLayer(comp, "layer 3"));
+        comp.addLayerNoUI(createEmptyImageLayer(comp, "layer 3"));
 
         assertThat(comp)
             .isNotDirty()  // still not dirty!

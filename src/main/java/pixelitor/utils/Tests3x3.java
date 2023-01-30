@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,7 +132,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
             layer.addConfiguredMask(mask);
         }
-        Views.addAsNewComp(comp);
+        Views.addNew(comp);
         comp.getView().setZoom(ZoomLevel.Z100);
     }
 

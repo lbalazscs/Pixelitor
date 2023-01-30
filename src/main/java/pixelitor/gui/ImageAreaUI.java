@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.Dimension;
 public interface ImageAreaUI {
     void activateView(View view);
 
-    void addNewView(View view);
+    void addView(View view);
 
     Dimension getSize();
 }

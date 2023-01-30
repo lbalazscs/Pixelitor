@@ -316,7 +316,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public Component getDialogParent() {
-        assert view != null;
+        assert isOpen();
         if (view == null) {
             return null;
         }
@@ -486,7 +486,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void setName(String name) {
         this.name = name;
-        if (view != null) {
+        if (isOpen()) {
             view.updateTitle();
             PixelitorWindow.get().updateTitle(this);
         }
@@ -540,7 +540,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         var newLayer = new ImageLayer(this,
             baseLayerImage, generateNewLayerName());
 
-        addLayerInInitMode(newLayer);
+        addLayerNoUI(newLayer);
     }
 
     public ImageLayer addNewEmptyImageLayer(String name, boolean bellowActive) {
@@ -616,7 +616,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         History.add(new NotUndoableEdit("Flatten Image", this));
     }
 
-    public void addAllLayersToUI() {
+    public void addLayersToUI() {
         assert checkInvariants();
 
         Layer activeRootBefore = activeRoot;
@@ -783,30 +783,30 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         setActiveLayer(activeLayer, false, null);
     }
 
-    public void setActiveLayer(Layer activeLayer, boolean addToHistory, String editName) {
-        assert activeLayer.getComp() == this;
+    public void setActiveLayer(Layer layer, boolean addToHistory, String editName) {
+        assert layer.getComp() == this;
         Layer oldActive = this.activeLayer;
-        this.activeLayer = activeLayer;
+        this.activeLayer = layer;
 
         // after the ungrouping of a group with a single active layer,
         // the active layer could change without a change in the target.
-        setActiveRoot(activeLayer.getTopLevelLayer());
+        setActiveRoot(layer.getTopLevelLayer());
 
         if (this.activeLayer == oldActive) {
             return;
         }
 
-        if (view != null && isActive()) {  // shouldn't run while loading the composition
-            Tools.activeLayerChanged(activeLayer);
-            Layers.layerActivated(activeLayer, true);
+        if (isOpen() && isActive()) {  // shouldn't run while loading the composition
+            Tools.activeLayerChanged(layer);
+            Layers.layerActivated(layer, true);
 
             if (oldActive != null) {
                 oldActive.updateUI();
             }
-            activeLayer.updateUI();
+            layer.updateUI();
         }
         if (addToHistory) {
-            History.add(new LayerSelectionChangeEdit(editName, this, oldActive, activeLayer));
+            History.add(new LayerSelectionChangeEdit(editName, this, oldActive, layer));
         }
     }
 
@@ -856,10 +856,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return layerList.size();
     }
 
-    public int getNumExportableImages() {
+    public int getNumORAExportableImages() {
         int[] count = {0};
         forEachNestedLayer(layer -> {
-            if (layer.canExportImage()) {
+            if (layer.exportsORAImage()) {
                 count[0]++;
             }
         }, false);
@@ -1155,7 +1155,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
         invalidateImageCache();
-        if (view != null) { // during reload image it can be null
+        if (view != null) { // it might not be opened during image reloading
             view.repaintRegion(start, end, thickness);
             view.repaintNavigator(false);
         }
@@ -1163,7 +1163,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void repaintRegion(PRectangle area) {
         invalidateImageCache();
-        if (view != null) { // during reload image it can be null
+        if (view != null) { // it might not be opened during image reloading
             view.repaintRegion(area);
             view.repaintNavigator(false);
         }
@@ -1436,6 +1436,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public BufferedImage getCompositeImage() {
         if (compositeImage == null) {
             compositeImage = ImageUtils.calculateCompositeImage(layerList, canvas);
+            assert compositeImage != null;
         }
         return compositeImage;
     }
@@ -1480,7 +1481,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void update(UpdateActions actions, boolean sizeChanged) {
         invalidateImageCache();
 
-        if (view != null) {
+        if (isOpen()) {
             view.repaint();
             view.repaintNavigator(sizeChanged);
         }
@@ -1814,9 +1815,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         SmartObject so = new SmartObject(newComp, this);
-        newComp.addLayerInInitMode(so);
+        newComp.addLayerNoUI(so);
         History.add(new CompositionReplacedEdit("Convert All to Smart Object",
-            view, this, newComp, null, false));
+                view, this, newComp, null, false));
         view.replaceComp(newComp);
         setName("Contents of " + name);
     }
@@ -1840,14 +1841,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         for (Layer layer : visibleLayers) {
             newMainComp.deleteLayer(layer, false, false);
-            content.addLayerInInitMode(layer);
+            content.addLayerNoUI(layer);
             layer.setComp(content);
         }
 
         SmartObject so = new SmartObject(newMainComp, content);
-        newMainComp.addLayerInInitMode(so);
+        newMainComp.addLayerNoUI(so);
         History.add(new CompositionReplacedEdit("Convert Visible to Smart Object",
-            view, this, newMainComp, null, false));
+                view, this, newMainComp, null, false));
         view.replaceComp(newMainComp);
     }
 
@@ -1952,22 +1953,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
 
         private Position position = TOP;
-        private boolean compInit = false;
+        private boolean addToUI = true;
 
         public LayerAdder(LayerHolder holder) {
             this.comp = holder.getComp();
             this.holder = holder;
         }
-
-//        public LayerAdder(Composition comp) {
-//            this(comp, comp.getHolderForNewLayers());
-//        }
-//
-//        public LayerAdder(Composition comp, LayerHolder holder) {
-//            this.comp = comp;
-//            this.holder = holder;
-//        }
-
 
         public LayerAdder withHistory(String editName) {
             this.editName = editName;
@@ -1980,10 +1971,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         /**
-         * Used during composition initialization
+         * Means that this is part of the construction,
+         * the layer is not added as a result of a user interaction
          */
-        public LayerAdder compInitMode() {
-            compInit = true;
+        public LayerAdder noUI() {
+            addToUI = false;
             return this;
         }
 
@@ -2039,9 +2031,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 }
             }
             holder.addLayerToList(newLayerIndex, newLayer);
-            comp.setActiveLayer(newLayer);
 
-            if (!compInit) {
+            if (addToUI) {
                 if (holder == comp) {
                     comp.view.addLayerToGUI(newLayer, newLayerIndex);
                 } else {
@@ -2050,18 +2041,20 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
                 // mocked views will not set a UI
                 assert AppContext.isUnitTesting() || newLayer.hasUI();
-            }
 
-            if (!compInit) {
                 comp.setDirty(true);
-
                 if (refresh) {
                     holder.update();
                 }
             }
+
+            // activate only after it has an ui to keep
+            // the consistency checks happy
+            comp.setActiveLayer(newLayer);
+
             if (needsHistory()) {
                 History.add(new NewLayerEdit(editName,
-                    holder, newLayer, activeLayerBefore, oldViewMode));
+                        holder, newLayer, activeLayerBefore, oldViewMode));
             }
             assert comp.checkInvariants();
         }

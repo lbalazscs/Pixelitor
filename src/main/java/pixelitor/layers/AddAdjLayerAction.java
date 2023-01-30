@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,16 +73,15 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
             if (ctrlPressed) {
                 FilterAction action = FilterSearchPanel.showInDialog("Find Adjustment Layer");
                 if (action != null) {
-                    Filter filter = action.createNewInstanceFilter();
+                    Filter filter = action.createNewFilterInstance();
                     addAdjustmentLayer(filter, filter.getName());
                 }
                 return;
             }
 
-            JButton source = (JButton) e.getSource();
             JPopupMenu popup = createActionsPopup();
             Dimension size = popup.getPreferredSize();
-            popup.show(source, 0, -size.height);
+            popup.show((JButton) e.getSource(), 0, -size.height);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

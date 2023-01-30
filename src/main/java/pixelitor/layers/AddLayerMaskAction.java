@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,28 +83,28 @@ public class AddLayerMaskAction extends NamedAction
     }
 
     @Override
-    public void maskAddedTo(Layer layer) {
+    public void maskAdded(Layer layer) {
         assert layer.hasMask();
         setEnabled(false);
     }
 
     @Override
-    public void maskDeletedFrom(Layer layer) {
+    public void maskDeleted(Layer layer) {
         assert !layer.hasMask();
         setEnabled(true);
     }
 
     @Override
-    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        setEnabled(!newActiveLayer.hasMask());
+    public void layerActivated(Layer layer) {
+        setEnabled(!layer.hasMask());
     }
 
     @Override
-    public void layerOrderChanged(LayerHolder layerHolder) {
+    public void layersReordered(LayerHolder holder) {
     }
 
     @Override

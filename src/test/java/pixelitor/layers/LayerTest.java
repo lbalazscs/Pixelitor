@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -99,10 +99,10 @@ public class LayerTest {
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
         // for smart filters add their smart object
-        comp.addLayerInInitMode(layer.getTopLevelLayer());
+        comp.addLayerNoUI(layer.getTopLevelLayer());
 
         layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
-        comp.addLayerInInitMode(layer2);
+        comp.addLayerNoUI(layer2);
 
         withMask.setupForLayer(layer);
         LayerMask mask = null;

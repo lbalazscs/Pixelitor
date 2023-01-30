@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,7 +83,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         int numFrames = animation.getNumFrames();
         ParametrizedFilter filter = animation.getFilter();
 
-        AnimationWriter animationWriter = animation.createAnimationWriter();
+        AnimationWriter animationWriter = animation.createWriter();
 
         dr.startTweening();
 

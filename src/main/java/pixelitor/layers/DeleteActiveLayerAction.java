@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,23 +60,23 @@ public class DeleteActiveLayerAction extends PAction
     }
 
     @Override
-    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
-        enableDisable(layerHolder, newLayerCount);
+    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
+        enableDisable(holder, newLayerCount);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        LayerHolder holder = newActiveLayer.getHolder();
+    public void layerActivated(Layer layer) {
+        LayerHolder holder = layer.getHolder();
         enableDisable(holder, holder.getNumLayers());
     }
 
     @Override
-    public void layerOrderChanged(LayerHolder layerHolder) {
+    public void layersReordered(LayerHolder holder) {
 
     }
 
-    private void enableDisable(LayerHolder layerHolder, int layerCount) {
-        if (layerHolder.allowZeroLayers()) {
+    private void enableDisable(LayerHolder holder, int layerCount) {
+        if (holder.allowZeroLayers()) {
             setEnabled(layerCount > 0);
         } else {
             setEnabled(layerCount > 1);

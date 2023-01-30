@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
@@ -140,14 +139,14 @@ public class Gradient implements Serializable, Debuggable {
             drag = tmpDrawingLayer.translateDrag(drag);
         }
 
-        drawOnGraphics(g, comp, width, height);
+        drawOnGraphics(g, width, height);
 
         g.dispose();
         dr.mergeTmpDrawingLayerDown();
         dr.updateIconImage();
     }
 
-    public void drawOnGraphics(Graphics2D g, Composition comp, int width, int height) {
+    public void drawOnGraphics(Graphics2D g, int width, int height) {
         // No composite is set in this method, because
         // it's not needed for gradient fill layers.
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

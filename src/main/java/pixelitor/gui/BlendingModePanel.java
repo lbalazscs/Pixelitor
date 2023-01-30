@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Composite;
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
 import static java.awt.FlowLayout.LEFT;
@@ -35,7 +36,7 @@ import static pixelitor.utils.Texts.i18n;
  * Used by tools and layers.
  */
 public class BlendingModePanel extends JPanel {
-    private static final String OPACITY = i18n("opacity") + ":";
+    private static final String OPACITY_LABEL_TEXT = i18n("opacity") + ":";
 
     // the value above which the opacity is considered fully opaque
     public static final float CRITICAL_OPACITY = 0.999f;
@@ -49,7 +50,7 @@ public class BlendingModePanel extends JPanel {
 
     public BlendingModePanel(boolean longForm) {
         super(new FlowLayout(LEFT));
-        opacityLabel = new JLabel(OPACITY);
+        opacityLabel = new JLabel(OPACITY_LABEL_TEXT);
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(0, 100, 100);
 
@@ -65,7 +66,8 @@ public class BlendingModePanel extends JPanel {
         layerModel = new DefaultComboBoxModel<>(BlendingMode.LAYER_MODES);
         bmCombo = new JComboBox<>(layerModel);
 
-        // make sure all values are visible without a scrollbar
+        // Make sure all values are visible without a scrollbar.
+        // +1 because for layer groups PASS_THROUGH can also be selected.
         bmCombo.setMaximumRowCount(layerModel.getSize() + 1);
 
         bmCombo.setFocusable(false);
@@ -98,8 +100,7 @@ public class BlendingModePanel extends JPanel {
     }
 
     public void randomize() {
-        BlendingMode[] blendingModes = BlendingMode.values();
-        int randomIndex = Rnd.nextInt(blendingModes.length);
+        int randomIndex = Rnd.nextInt(bmCombo.getModel().getSize());
         bmCombo.setSelectedIndex(randomIndex);
 
         int newOpacity = Rnd.nextInt(100);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,8 +116,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateChildrenPanel() {
-        if (layer instanceof LayerHolder layerHolder) {
-            int numChildren = layerHolder.getNumLayers();
+        if (layer instanceof LayerHolder holder) {
+            int numChildren = holder.getNumLayers();
             if (numChildren > 0) {
                 if (childrenPanel == null) {
                     VerticalLayout innerLayout = new VerticalLayout();
@@ -136,7 +136,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             children.clear();
             // children are added from the bottom up
             for (int i = numChildren - 1; i >= 0; i--) {
-                Layer child = layerHolder.getLayer(i);
+                Layer child = holder.getLayer(i);
                 LayerGUI childUI = (LayerGUI) child.createUI();
                 childUI.setOwner(this);
                 assert !children.contains(childUI);

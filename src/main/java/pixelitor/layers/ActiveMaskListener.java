@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ package pixelitor.layers;
  * but rather the active layer of the active composition.
  */
 public interface ActiveMaskListener {
-    void maskAddedTo(Layer layer);
+    void maskAdded(Layer layer);
 
-    void maskDeletedFrom(Layer layer);
+    void maskDeleted(Layer layer);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ class SmartFilterTest {
         Composition content = TestHelper.createComp(1, false);
 
         smartObject = new SmartObject(parent, content);
-        parent.addLayerInInitMode(smartObject);
+        parent.addLayerNoUI(smartObject);
 
         MockFilter firstFilter = TestHelper.createMockFilter("Filter 1");
         MockFilter middleFilter = TestHelper.createMockFilter("Filter 2");

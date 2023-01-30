@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -149,7 +149,7 @@ public class PreferencesPanel extends JTabbedPane {
         RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, TextPosition.NONE);
         gbh.addParam(fontSize);
 
-        ListParam<String> fontType = new ListParam<String>("Font Type", Utils.getAvailableFontNames(), font.getName());
+        ListParam<String> fontType = new ListParam<>("Font Type", Utils.getAvailableFontNames(), font.getName());
         gbh.addParam(fontType);
 
         fontSize.setAdjustmentListener(() -> {
@@ -318,8 +318,6 @@ public class PreferencesPanel extends JTabbedPane {
     private void addMagickDirField(GridBagHelper gbh) {
         magickDirTF = new JTextField(AppPreferences.magickDirName);
         magickDirTF.setColumns(10);
-        // don't let the textfield grow too large
-//        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
     }
 

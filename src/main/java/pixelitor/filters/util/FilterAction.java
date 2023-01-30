@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,8 +79,13 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         if (layer.isMaskEditing()) {
             processFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
-            // Smart filters are Filterables, but the filter should be started on their smart object
+            // Smart filters are Filterable, but the filter should be started on their smart object
             processSmartObject(smartFilter.getSmartObject());
+        } else if (layer instanceof AdjustmentLayer) {
+            // adjustment layers are Filterable, so this must be
+            // checked first to prevent running unrelated filters on them.
+            Dialogs.showErrorDialog("Adjustment Layer",
+                    name + " can't be used on adjustment layers.");
         } else if (layer instanceof Filterable filterable) {
             processFilterable(filterable);
         } else if (layer instanceof SmartObject so) {
@@ -91,9 +96,6 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
                 ImageLayer newImageLayer = layer.replaceWithRasterized();
                 processFilterable(newImageLayer);
             }
-        } else if (layer instanceof AdjustmentLayer) {
-            Dialogs.showErrorDialog("Adjustment Layer",
-                name + " cannot be applied to adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
             assert group.isPassThrough(); // isolated groups can be rasterized
             Messages.showUnrasterizableLayerGroupError(group, name);
@@ -112,7 +114,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
             return;
         }
 
-        Filter newFilter = createNewInstanceFilter();
+        Filter newFilter = createNewFilterInstance();
         so.tryAddingSmartFilter(newFilter);
     }
 
@@ -121,7 +123,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         dr.startFilter(filter, true);
     }
 
-    public Filter createNewInstanceFilter() {
+    public Filter createNewFilterInstance() {
         Filter newFilter = factory.get();
         newFilter.setName(name);
         return newFilter;
@@ -193,7 +195,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
     }
 
     @Serial
-    private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
+    private void writeObject(ObjectOutputStream oos) throws IOException {
         throw new IOException("should not be serialized");
     }
 

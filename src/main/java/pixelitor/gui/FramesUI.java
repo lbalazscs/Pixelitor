@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     @Override
-    public void addNewView(View view) {
+    public void addView(View view) {
         int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
         int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
 

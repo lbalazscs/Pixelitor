@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -290,6 +290,9 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
+        // this method is overridden for layer groups
+        assert newMode != BlendingMode.PASS_THROUGH;
+
         if (blendingMode == newMode) {
             return;
         }
@@ -493,7 +496,7 @@ public abstract class Layer implements Serializable, Debuggable {
         maskingChanged();
         holder.update();
 
-        Layers.maskAddedTo(this);
+        Layers.maskAdded(this);
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
@@ -545,7 +548,7 @@ public abstract class Layer implements Serializable, Debuggable {
             maskingChanged();
             holder.update();
             if (isActive()) {
-                Layers.maskAddedTo(this);
+                Layers.maskAdded(this);
             }
         } else {
             comp.invalidateImageCache();
@@ -559,7 +562,7 @@ public abstract class Layer implements Serializable, Debuggable {
         mask = null;
 
         ui.removeMaskIcon();
-        Layers.maskDeletedFrom(this);
+        Layers.maskDeleted(this);
 
         // call this only after AddLayerMaskAction is notified,
         // because in some cases it might trigger a consistency check
@@ -852,7 +855,11 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Returns true if asImage() returns non-null.
      */
-    public boolean canExportImage() {
+    public boolean exportsORAImage() {
+        return true;
+    }
+
+    public boolean isConvertibleToSmartObject() {
         return true;
     }
 
@@ -935,15 +942,15 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     protected void addSmartObjectMenus(JPopupMenu popup) {
-        if (canExportImage()) {
+        if (isConvertibleToSmartObject()) {
             popup.add(new PAction("Convert to Smart Object", this::replaceWithSmartObject));
         }
     }
 
     public void replaceWithSmartObject() {
-        if (!canExportImage()) {
+        if (!isConvertibleToSmartObject()) {
             String msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
-                getName(), Utils.addArticle(getTypeStringLC()));
+                    getName(), Utils.addArticle(getTypeStringLC()));
             Messages.showInfo("Convert Layer to Smart Object", msg);
             return;
         }

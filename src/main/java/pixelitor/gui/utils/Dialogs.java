@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -169,9 +169,11 @@ public class Dialogs {
     public static void showErrorDialog(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        if (RandomGUITest.isRunning()) {
-            System.err.println("\nError: " + msg); // avoid dialogs
-            Thread.dumpStack();
+        if (RandomGUITest.isRunning()) { // avoid dialogs
+            if (!msg.contains("can't be used")) {
+                System.err.println("\nError: " + msg);
+                Thread.dumpStack();
+            }
             return;
         }
 

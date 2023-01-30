@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,9 @@ import pixelitor.Composition;
  * It doesn't observe a specific {@link LayerHolder},but rather the active one.
  */
 public interface ActiveHolderListener {
-    void numLayersChanged(LayerHolder layerHolder, int newLayerCount);
+    void numLayersChanged(LayerHolder holder, int newLayerCount);
 
-    void layerActivated(Layer newActiveLayer);
+    void layerActivated(Layer layer);
 
-    void layerOrderChanged(LayerHolder layerHolder);
+    void layersReordered(LayerHolder holder);
 }

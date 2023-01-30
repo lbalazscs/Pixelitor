@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,7 +102,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void finish(Wizard wizard, Drawable dr) {
-            getAnimation(wizard).copyInitialStateFromCurrent();
+            getAnimation(wizard).rememberInitialState();
             getFilter(wizard).getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
@@ -144,7 +144,7 @@ public enum TweenWizardPage implements WizardPage {
             onWizardCanceled(dr);
 
             // save the final state
-            getAnimation(wizard).copyFinalStateFromCurrent();
+            getAnimation(wizard).rememberFinalState();
         }
     }, OUTPUT_SETTINGS {
         TweenOutputSettingsPanel outputSettingsPanel;
@@ -184,7 +184,7 @@ public enum TweenWizardPage implements WizardPage {
             }
 
             TweenAnimation animation = getAnimation(wizard);
-            outputSettingsPanel.copySettingsInto(animation);
+            outputSettingsPanel.configure(animation);
 
             return animation.checkOverwrite(dialogParent);
         }

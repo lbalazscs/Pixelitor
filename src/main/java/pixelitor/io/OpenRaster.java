@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,7 @@ public class OpenRaster {
         var zos = new ZipOutputStream(fos);
 
         // +1 for the merged image, and +1 for the thumbnail
-        int numImages = comp.getNumExportableImages() + 2;
+        int numImages = comp.getNumORAExportableImages() + 2;
         double workRatio = 1.0 / numImages;
 
         StringBuilder stackXML = new StringBuilder(format("""
@@ -116,7 +116,7 @@ public class OpenRaster {
             Layer layer = holder.getLayer(i);
             if (layer instanceof LayerGroup group) {
                 uniqueId = writeHolder(group, mainTracker, zos, stackXML, workRatio, uniqueId);
-            } else if (layer.canExportImage()) {
+            } else if (layer.exportsORAImage()) {
                 var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
                 writeLayer(layer, uniqueId, zos, subTracker, stackXML);
                 uniqueId++;
@@ -230,7 +230,7 @@ public class OpenRaster {
                 String groupName = childElem.getAttribute("name");
                 LayerGroup group = new LayerGroup(parent.getComp(), groupName);
                 group.setHolder(parent);
-                parent.addLayerInInitMode(group);
+                parent.addLayerNoUI(group);
                 readBasicAttributes(childElem, group);
 
                 String isolation = childElem.getAttribute("isolation");
@@ -270,7 +270,7 @@ public class OpenRaster {
 
         readBasicAttributes(element, layer);
 
-        holder.addLayerInInitMode(layer);
+        holder.addLayerNoUI(layer);
     }
 
     private static void readBasicAttributes(Element element, Layer layer) {

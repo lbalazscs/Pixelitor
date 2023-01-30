@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,8 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String isOK(File output) {
-            return expectDir(output, this);
+        public String validate(File output) {
+            return checkDir(output, this);
         }
 
         @Override
@@ -55,8 +55,8 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String isOK(File output) {
-            return expectFileInExistingDir(output, this, "GIF");
+        public String validate(File output) {
+            return checkFile(output, this, "GIF");
         }
 
         @Override
@@ -81,19 +81,19 @@ public enum TweenOutputType {
     /**
      * Returns the error message or null if the argument is OK as output
      */
-    public abstract String isOK(File output);
+    public abstract String validate(File output);
 
     public abstract boolean needsDirectory();
 
-    private static String expectFileInExistingDir(File output,
-                                                  TweenOutputType type,
-                                                  String fileType) {
+    private static String checkFile(File output,
+                                    TweenOutputType type,
+                                    String fileType) {
         if (output.exists()) {
             if (output.isDirectory()) {
                 return format("%s is a folder." +
-                        "<br>For the \"%s\" output type, " +
-                        "select a (new or existing) %s file in an existing folder.",
-                    output.getAbsolutePath(), type, fileType);
+                                "<br>For the \"%s\" output type, " +
+                                "select a (new or existing) %s file in an existing folder.",
+                        output.getAbsolutePath(), type, fileType);
             }
         } else { // if it does not exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
@@ -111,12 +111,12 @@ public enum TweenOutputType {
         return null;
     }
 
-    private static String expectDir(File output, TweenOutputType type) {
+    private static String checkDir(File output, TweenOutputType type) {
         // we expect it to be an existing directory
         if (!output.isDirectory()) {
             return format("\"<b>%s</b>\" is not a folder." +
-                    "<br>For the \"%s\" output type, select an existing folder.",
-                output.getAbsolutePath(), type);
+                            "<br>For the \"%s\" output type, select an existing folder.",
+                    output.getAbsolutePath(), type);
         }
         if (!output.exists()) {
             return output.getAbsolutePath() + " does not exist.";

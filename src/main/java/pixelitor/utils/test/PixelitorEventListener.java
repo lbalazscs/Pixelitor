@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,29 +45,29 @@ public class PixelitorEventListener implements ActiveHolderListener,
     }
 
     @Override
-    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
         String type = "#layers changed, newCount = " + newLayerCount;
-        Events.postListenerEvent(type, layerHolder.getComp(), null);
+        Events.postListenerEvent(type, holder.getComp(), null);
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        String type = "layer targeted: " + newActiveLayer.getName();
-        Events.postListenerEvent(type, newActiveLayer.getComp(), newActiveLayer);
+    public void layerActivated(Layer layer) {
+        String type = "layer targeted: " + layer.getName();
+        Events.postListenerEvent(type, layer.getComp(), layer);
     }
 
     @Override
-    public void layerOrderChanged(LayerHolder layerHolder) {
-        Events.postListenerEvent("layer order changed", layerHolder.getComp(), null);
+    public void layersReordered(LayerHolder holder) {
+        Events.postListenerEvent("layers reordered", holder.getComp(), null);
     }
 
     @Override
-    public void maskAddedTo(Layer layer) {
+    public void maskAdded(Layer layer) {
         Events.postListenerEvent("mask added", layer.getComp(), layer);
     }
 
     @Override
-    public void maskDeletedFrom(Layer layer) {
+    public void maskDeleted(Layer layer) {
         Events.postListenerEvent("mask deleted", layer.getComp(), layer);
     }
 

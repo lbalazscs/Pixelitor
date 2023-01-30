@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,36 +27,36 @@ import java.util.List;
  * Static methods related to layer listeners
  */
 public class Layers {
-    private static final List<ActiveHolderListener> lhListeners = new ArrayList<>();
+    private static final List<ActiveHolderListener> holderListeners = new ArrayList<>();
     private static final List<ActiveMaskListener> maskListeners = new ArrayList<>();
 
     private Layers() {
     }
 
     public static void addHolderListener(ActiveHolderListener listener) {
-        lhListeners.add(listener);
+        holderListeners.add(listener);
     }
 
     public static void addMaskListener(ActiveMaskListener listener) {
         maskListeners.add(listener);
     }
 
-    public static void maskAddedTo(Layer layer) {
+    public static void maskAdded(Layer layer) {
         for (var listener : maskListeners) {
-            listener.maskAddedTo(layer);
+            listener.maskAdded(layer);
         }
     }
 
-    public static void maskDeletedFrom(Layer layer) {
+    public static void maskDeleted(Layer layer) {
         for (var listener : maskListeners) {
-            listener.maskDeletedFrom(layer);
+            listener.maskDeleted(layer);
         }
     }
 
     // used for GUI updates
-    public static void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
-        for (var listener : lhListeners) {
-            listener.numLayersChanged(layerHolder, newLayerCount);
+    public static void numLayersChanged(LayerHolder holder, int newLayerCount) {
+        for (var listener : holderListeners) {
+            listener.numLayersChanged(holder, newLayerCount);
         }
     }
 
@@ -64,29 +64,29 @@ public class Layers {
         layerActivated(newComp.getActiveLayer(), resetMaskViewMode);
     }
 
-    public static void layerActivated(Layer newActiveLayer, boolean resetMaskViewMode) {
-        assert newActiveLayer != null;
-        assert newActiveLayer.isActive();
-        assert newActiveLayer.getComp().isActive();
+    public static void layerActivated(Layer layer, boolean resetMaskViewMode) {
+        assert layer != null;
+        assert layer.isActive();
+        assert layer.getComp().isActive();
 
-        for (var listener : lhListeners) {
-            listener.layerActivated(newActiveLayer);
+        for (var listener : holderListeners) {
+            listener.layerActivated(layer);
         }
 
-        View view = newActiveLayer.getComp().getView();
+        View view = layer.getComp().getView();
         if (view == null) {
             // can happen when adding a new image:
             // the active layer changes, but there is no view yet
             return;
         }
         if (resetMaskViewMode) {
-            MaskViewMode.NORMAL.activate(view, newActiveLayer);
+            MaskViewMode.NORMAL.activate(view, layer);
         }
     }
 
-    public static void layerOrderChanged(LayerHolder layerHolder) {
-        for (var listener : lhListeners) {
-            listener.layerOrderChanged(layerHolder);
+    public static void layersReordered(LayerHolder holder) {
+        for (var listener : holderListeners) {
+            listener.layersReordered(holder);
         }
     }
 }

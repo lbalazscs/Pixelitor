@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,8 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class Views {
         if (views.isEmpty()) {
             onAllViewsClosed();
         }
-        activateAViewIfNoneIs();
+        makeSureAViewIsActive();
     }
 
     private static void onAllViewsClosed() {
@@ -109,10 +110,10 @@ public class Views {
         FramesUI.resetCascadeIndex();
     }
 
-    private static void activateAViewIfNoneIs() {
+    private static void makeSureAViewIsActive() {
         if (!views.isEmpty()) {
             boolean activeFound = views.stream()
-                .anyMatch(view -> view == activeView);
+                    .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
                 activate(views.get(0));
@@ -320,8 +321,8 @@ public class Views {
         warnAndCloseAllIf(view -> true);
     }
 
-    public static void warnAndCloseAllBut(View selected) {
-        warnAndCloseAllIf(view -> view != selected);
+    public static void warnAndCloseAllBut(View ignored) {
+        warnAndCloseAllIf(view -> view != ignored);
     }
 
     private static void warnAndCloseUnmodified() {
@@ -409,7 +410,7 @@ public class Views {
     public static Composition addJustLoadedComp(Composition comp) {
         assert comp != null;
 
-        addAsNewComp(comp);
+        addNew(comp);
 
         File file = comp.getFile();
         RecentFilesMenu.INSTANCE.addFile(file);
@@ -422,21 +423,20 @@ public class Views {
         return comp;
     }
 
-    public static void addAsNewComp(BufferedImage image, File file, String name) {
-        var comp = Composition.fromImage(image, file, name);
-        addAsNewComp(comp);
+    public static void addNew(BufferedImage image, File file, String name) {
+        addNew(Composition.fromImage(image, file, name));
     }
 
-    public static void addAsNewComp(Composition comp) {
+    public static void addNew(Composition comp) {
         try {
             assert comp.getView() == null : "already has a view";
 
             View view = new View(comp);
-            comp.addAllLayersToUI();
+            comp.addLayersToUI();
             view.setCursor(Tools.getCurrent().getStartingCursor());
             views.add(view);
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
-            ImageArea.addNewView(view);
+            ImageArea.addView(view);
             setActiveView(view, false);
 
 // commented out, because ImageArea.addNewView(view); should always call this anyway

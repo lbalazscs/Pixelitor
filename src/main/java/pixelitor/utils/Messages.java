@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -148,8 +148,8 @@ public class Messages {
 
     public static void showUnrasterizableLayerGroupError(LayerGroup group, String name) {
         String msg = "<html>The active layer <i>\"%s\"</i> is a layer group." +
-                     "<br><br>%s cannot be applied to layer groups." +
-                     "<br>Pass through groups can't even be rasterized.";
+                "<br><br>%s can't be used on layer groups." +
+                "<br>Pass through groups can't even be rasterized.";
         showError("Layer Group", msg.formatted(group.getName(), name));
     }
 }

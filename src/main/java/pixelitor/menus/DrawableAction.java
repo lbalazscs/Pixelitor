@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -112,7 +112,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
             }
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
-                name + " cannot be applied to adjustment layers.");
+                    name + " can't be used on adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
             assert group.isPassThrough(); // isolated groups can be rasterized
             Messages.showUnrasterizableLayerGroupError(group, name);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ class ShapesLayerTest {
     void beforeEachTest() {
         comp = TestHelper.createEmptyComp();
         layer = TestHelper.createEmptyShapesLayer(comp, "test");
-        comp.addLayerInInitMode(layer);
+        comp.addLayerNoUI(layer);
         View view = comp.getView();
         Tools.SHAPES.setSelectedType(ShapeType.RECTANGLE);
 
@@ -74,7 +74,7 @@ class ShapesLayerTest {
 
     @Test
     void resize() {
-        comp.addLayerInInitMode(layer.copy(CopyType.LAYER_DUPLICATE, false, comp));
+        comp.addLayerNoUI(layer.copy(CopyType.LAYER_DUPLICATE, false, comp));
 
         Composition smallComp = TestHelper.resize(comp, 10, 5);
         ShapesLayer smallLayer1 = (ShapesLayer) smallComp.getLayer(0);

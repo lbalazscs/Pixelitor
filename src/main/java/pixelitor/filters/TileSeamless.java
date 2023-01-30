@@ -27,7 +27,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
- * Hue-Saturation filter
+ * The "Tile Seamless" filter.
  */
 public class TileSeamless extends ParametrizedFilter {
     public static final String NAME = "Tile Seamless";
@@ -110,10 +110,10 @@ public class TileSeamless extends ParametrizedFilter {
                 distY = (cy - y) / cy;
             }
 
-            double bri = distX * distY / (distX * distY + (1.0 - distX) * (1.0 - distY));
+            double bri01 = distX * distY / (distX * distY + (1.0 - distX) * (1.0 - distY));
+            int bri = ImageMath.clamp((int) (bri01 * 255), 0, 255);
 
-            int r = ImageMath.clamp((int) (bri * 255), 0, 255);
-            return 0xFF_00_00_00 | r << 16 | r << 8 | r;
+            return 0xFF_00_00_00 | bri << 16 | bri << 8 | bri;
         }
     }
 }

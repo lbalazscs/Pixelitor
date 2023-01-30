@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,15 +29,14 @@ public class WeightedCaller {
     private final Random random = new Random();
     private final List<Runnable> tasks = new ArrayList<>();
 
-    public void registerCallback(int weight, Runnable r) {
+    public void registerAction(int weight, Runnable r) {
         for (int i = 0; i < weight; i++) {
             tasks.add(r);
         }
     }
 
-    public void callRandomAction() {
-        int size = tasks.size();
-        int index = random.nextInt(size);
+    public void runRandomAction() {
+        int index = random.nextInt(tasks.size());
         tasks.get(index).run();
     }
 }

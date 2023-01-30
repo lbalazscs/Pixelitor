@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -620,12 +620,12 @@ public class AppRunner {
     }
 
     private JLabelFixture findIconByLayerName(String layerName, String iconType) {
-        return pw.label(new GenericTypeMatcher<JLabel>(JLabel.class) {
+        return pw.label(new GenericTypeMatcher<>(JLabel.class) {
             @Override
             protected boolean isMatching(JLabel label) {
                 return (label.getParent() instanceof LayerGUI layerGUI)
-                       && label.getName().equals(iconType)
-                       && layerGUI.getLayer().getName().equals(layerName);
+                        && label.getName().equals(iconType)
+                        && layerGUI.getLayer().getName().equals(layerName);
             }
         });
     }
@@ -965,7 +965,7 @@ public class AppRunner {
     private JTextComponentFixture findLayerOpacityTF() {
         // the name of the inner textfield can't be set directly,
         // because Nimbus uses it => use the name of the parent combo box
-        JTextComponentFixture layerOpacity = pw.textBox(new GenericTypeMatcher<JTextField>(JTextField.class) {
+        JTextComponentFixture layerOpacity = pw.textBox(new GenericTypeMatcher<>(JTextField.class) {
             @Override
             protected boolean isMatching(JTextField c) {
                 return "layerOpacity".equals(c.getParent().getName());

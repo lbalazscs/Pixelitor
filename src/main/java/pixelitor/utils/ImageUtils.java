@@ -1259,7 +1259,12 @@ public class ImageUtils {
         if (layers.size() == 1) { // shortcut
             Layer layer = layers.get(0);
             if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
-                return layer.asImage(true, true);
+                BufferedImage layerImg = layer.asImage(true, true);
+
+                // it can be null if there's a single adjustment layer
+                if (layerImg != null) {
+                    return layerImg;
+                }
             }
         }
 
@@ -1357,11 +1362,13 @@ public class ImageUtils {
         int[] srcBPixels = getPixelsAsArray(srcB);
         int[] maskPixels = getPixelsAsArray(mask);
         int[] destPixels = getPixelsAsArray(dest);
-        for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
 
+        for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
+            // take the blue channel, assuming that all channels are the same
             float transparency = (maskPixels[i] & 0xFF) / 255.0f;
             destPixels[i] = ImageMath.mixColors(transparency, srcAPixels[i], srcBPixels[i]);
         }
+
         return dest;
     }
 }

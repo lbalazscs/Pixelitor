@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -131,7 +131,7 @@ public class ImageArea {
             // in the top-left corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        Views.forEachView(ImageArea::addNewView);
+        Views.forEachView(ImageArea::addView);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -144,8 +144,8 @@ public class ImageArea {
         ui.activateView(view);
     }
 
-    public static void addNewView(View view) {
-        ui.addNewView(view);
+    public static void addView(View view) {
+        ui.addView(view);
     }
 
     public static Dimension getSize() {

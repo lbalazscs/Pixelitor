@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,8 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.colors.FillType.TRANSPARENT;
@@ -48,7 +49,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         var comp = createNewComposition(bg, width, height, title);
-        Views.addAsNewComp(comp);
+        Views.addNew(comp);
         return comp;
     }
 

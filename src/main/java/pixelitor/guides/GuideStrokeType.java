@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,30 +27,25 @@ import static java.awt.BasicStroke.JOIN_BEVEL;
  * Stroke types for guides.
  */
 public enum GuideStrokeType {
-    SOLID(
-        "Solid",
-        new BasicStroke(1),
-        null
+    SOLID("Solid",
+            new BasicStroke(1),
+            null
     ),
-    DOTTED(
-        "Dotted",
-        new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{1, 2}, 0),
-        null
+    DOTTED("Dotted",
+            new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{1, 2}, 0),
+            null
     ),
-    DASHED(
-        "Dashed",
-        new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0),
-        null
+    DASHED("Dashed",
+            new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0),
+            null
     ),
-    DASHED_DOUBLE(
-        "Dashed with Background",
-        new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5.0f, 2.0f}, 0),
-        new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{2.0f, 5.0f}, 2)
+    DASHED_DOUBLE("Dashed with Background",
+            new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5.0f, 2.0f}, 0),
+            new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{2.0f, 5.0f}, 2)
     ),
-    DASHED_BORDERED(
-        "Dashed with Border",
-        new BasicStroke(3),
-        new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0)
+    DASHED_BORDERED("Dashed with Border",
+            new BasicStroke(3),
+            new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0)
     );
 
     private final String guiName;

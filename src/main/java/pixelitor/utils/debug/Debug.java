@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.Views.addAsNewComp;
+import static pixelitor.Views.addNew;
 import static pixelitor.Views.findCompByName;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
@@ -231,8 +231,8 @@ public class Debug {
         View previousView = Views.getActive();
 
         findCompByName(name).ifPresentOrElse(
-            comp -> replaceImageInDebugComp(comp, copy),
-            () -> addAsNewComp(copy, null, name));
+                comp -> replaceImageInDebugComp(comp, copy),
+                () -> addNew(copy, null, name));
 
         if (previousView != null) {
             Views.activate(previousView);

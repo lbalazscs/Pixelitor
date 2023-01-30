@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,23 +92,23 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void numLayersChanged(LayerHolder layerHolder, int newLayerCount) {
+    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
     }
 
     @Override
-    public void layerOrderChanged(LayerHolder layerHolder) {
+    public void layersReordered(LayerHolder holder) {
     }
 
     @Override
-    public void layerActivated(Layer newActiveLayer) {
-        float floatOpacity = newActiveLayer.getOpacity();
+    public void layerActivated(Layer layer) {
+        float floatOpacity = layer.getOpacity();
         int intOpacity = (int) (floatOpacity * 100);
 
-        BlendingMode bm = newActiveLayer.getBlendingMode();
+        BlendingMode bm = layer.getBlendingMode();
         try {
             userInteractionChange = false;
             opacityDDSlider.setValue(intOpacity);
-            setBlendingMode(bm, newActiveLayer);
+            setBlendingMode(bm, layer);
         } finally {
             userInteractionChange = true;
         }

@@ -110,7 +110,7 @@ public class SmartObject extends CompositeLayer {
         Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
         contentLayer.setName("original content", false);
         contentLayer.setHolder(newContent);
-        newContent.addLayerInInitMode(contentLayer);
+        newContent.addLayerNoUI(contentLayer);
         newContent.setName(getName());
         newContent.createDebugName();
         setContent(newContent);
@@ -370,15 +370,20 @@ public class SmartObject extends CompositeLayer {
     @Override
     public void replaceWithSmartObject() {
         String msg = format("<html>The layer <b>%s</b> is already a smart object.",
-            getName());
+                getName());
         Messages.showInfo("Already a Smart Object", msg);
+    }
+
+    @Override
+    public boolean isConvertibleToSmartObject() {
+        return false;
     }
 
     @Override
     protected void addSmartObjectMenus(JPopupMenu popup) {
         popup.add(new PAction("Edit Contents", this::edit));
         popup.add(new PAction("Clone", () ->
-            comp.shallowDuplicate(this)));
+                comp.shallowDuplicate(this)));
         if (isContentLinked()) {
             popup.add(new PAction("Embed Contents", this::embedLinkedContent));
             popup.add(new PAction("Reload Contents", this::reloadLinkedContent));
@@ -400,7 +405,7 @@ public class SmartObject extends CompositeLayer {
     public boolean edit() {
         View contentView = content.getView();
         if (contentView == null) {
-            Views.addAsNewComp(content);
+            Views.addNew(content);
             content.setDirty(false);
         } else {
             Views.activate(contentView);
@@ -875,7 +880,7 @@ public class SmartObject extends CompositeLayer {
         invalidateImageCache();
         holder.update();
 
-        Layers.layerOrderChanged(this);
+        Layers.layersReordered(this);
     }
 
     public boolean containsSmartFilter(SmartFilter filter) {

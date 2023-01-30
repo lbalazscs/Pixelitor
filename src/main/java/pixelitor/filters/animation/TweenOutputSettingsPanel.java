@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,7 +132,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     }
 
     private void outputTypeChanged() {
-        TweenOutputType selected = (TweenOutputType) outputTypeCB.getSelectedItem();
+        TweenOutputType selected = getOutputType();
         if (selected.needsDirectory()) {
             browseFilesSupport.setSelectionMode(DIRECTORY);
             browseFilesSupport.setFileChooserTitle("Select Output Folder");
@@ -187,10 +187,10 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         } else if (textField == fpsTF) {
             return TextFieldValidator.hasPositiveDouble(textField, "Frames per Second");
         } else if (textField == fileNameTF) {
-            TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
+            TweenOutputType outputType = getOutputType();
 
             String fileName = textField.getText().trim();
-            String errorMessage = outputType.isOK(new File(fileName));
+            String errorMessage = outputType.validate(new File(fileName));
             if (errorMessage == null) {
                 return ValidationResult.ok();
             } else {
@@ -201,9 +201,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         }
     }
 
-    public void copySettingsInto(TweenAnimation animation) {
-        TweenOutputType type = (TweenOutputType) outputTypeCB.getSelectedItem();
-        animation.setOutputType(type);
+    public void configure(TweenAnimation animation) {
+        animation.setOutputType(getOutputType());
 
         File output = browseFilesSupport.getSelectedFile();
         animation.setOutput(output);
@@ -218,5 +217,9 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         } else {
             Dirs.setLastSave(output.getParentFile());
         }
+    }
+
+    private TweenOutputType getOutputType() {
+        return (TweenOutputType) outputTypeCB.getSelectedItem();
     }
 }

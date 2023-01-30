@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ class AdjustmentLayerTest {
         filter = new MockFilter("Filter");
         Composition comp = TestHelper.createComp(1, false, true);
         layer = new AdjustmentLayer(comp, "adjustment", filter);
-        comp.addLayerInInitMode(layer);
+        comp.addLayerNoUI(layer);
         comp.getCompositeImage();
         assert filter.getNumTransformCalls() == 1;
     }

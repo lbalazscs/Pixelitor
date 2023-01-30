@@ -23,7 +23,7 @@ import pixelitor.gui.utils.Themes;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
 import java.net.URL;
 
 import static java.awt.Component.CENTER_ALIGNMENT;
@@ -56,17 +56,17 @@ public class AboutDialog {
 
     private static JPanel createCreditsPanel() {
         JPanel p = new JPanel();
-        String text = "<html>Pixelitor was written by <b>L\u00e1szl\u00f3 Bal\u00e1zs-Cs\u00edki</b>." +
-                      "<br><br><b>Anirudh Sharma</b> and <b>Łukasz Kurzaj</b> contributed many" +
-                      "<br>improvements, see the release notes." +
-                      "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
-                      "<br><br>Pixelitor includes <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
-                      "<li>many components by <b>Jeremy Wood</b>" +
-                      "<li>the fast math library by <b>Jeff Hain</b>" +
-                      "<li>the TwelveMonkeys library by <b>Harald Kuhr</b>" +
-                      "<li>the metadata-extractor library by <b>Drew Noakes</b>" +
-                      "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
-                      "<li>the GIF decoder by <b>Dhyan Blum</b>" +
+        String text = "<html>Pixelitor was written by <b>László Balázs-Csíki</b>." +
+                "<br><br><b>Anirudh Sharma</b> and <b>Łukasz Kurzaj</b> contributed many" +
+                "<br>improvements, see the release notes." +
+                "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
+                "<br><br>Pixelitor includes <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
+                "<li>many components by <b>Jeremy Wood</b>" +
+                "<li>the fast math library by <b>Jeff Hain</b>" +
+                "<li>the TwelveMonkeys library by <b>Harald Kuhr</b>" +
+                "<li>the metadata-extractor library by <b>Drew Noakes</b>" +
+                "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
+                "<li>the GIF decoder by <b>Dhyan Blum</b>" +
                       "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
                       "<li>the SwingX library";
         p.add(new JLabel(text));
@@ -82,7 +82,7 @@ public class AboutDialog {
         addLabel(p, "<html><b><font size=+1>Pixelitor</font></b></html>");
         addLabel(p, "Version " + Pixelitor.VERSION_NUMBER);
         p.add(Box.createRigidArea(new Dimension(10, 20)));
-        addLabel(p, "<html><center> Copyright \u00A9 2009-2023 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
+        addLabel(p, "<html><center> Copyright © 2009-2023 László Balázs-Csíki " +
                 "<br>and Contributors<br><br>");
         addLabel(p, "lbalazscs@gmail.com");
 
