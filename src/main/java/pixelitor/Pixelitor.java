@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,11 +120,8 @@ public class Pixelitor {
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
         Theme theme = Themes.DEFAULT;
-        // if a LaF was set from the command line, then don't override it
-        if (System.getProperty("swing.defaultlaf") == null) {
-            theme = AppPreferences.loadTheme();
-            Themes.install(theme, false, true);
-        }
+        theme = AppPreferences.loadTheme();
+        Themes.install(theme, false, true);
 
         int uiFontSize = AppPreferences.loadUIFontSize();
         String uiFontType = AppPreferences.loadUIFontType();
