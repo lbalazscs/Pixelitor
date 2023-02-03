@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,8 @@ import javax.swing.*;
 import java.awt.Dimension;
 
 /**
- * A button that resets a Resettable, and displays an arrow when the
- * Resettable is not set to its default value
+ * A button that resets a {@link Resettable} object, and displays an arrow
+ * icon when the Resettable is not set to its default value.
  */
 public class ResetButton extends JButton {
     private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
@@ -32,10 +32,10 @@ public class ResetButton extends JButton {
 
     public ResetButton(Resettable resettable) {
         setPreferredSize(PREFERRED_SIZE);
-        init(resettable);
+        initialize(resettable);
     }
 
-    private void init(Resettable resettable) {
+    private void initialize(Resettable resettable) {
         this.resettable = resettable;
         addActionListener(e -> resettable.reset(true));
         setToolTipText(resettable.getResetToolTip());

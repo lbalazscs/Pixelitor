@@ -165,13 +165,13 @@ public class LayerTest {
         checkShown(layer2);
     }
 
-    private void checkShown(Layer layer) {
+    private static void checkShown(Layer layer) {
         assertThat(layer)
             .isVisible()
             .uiIsVisible();
     }
 
-    private void checkHidden(Layer layer) {
+    private static void checkHidden(Layer layer) {
         assertThat(layer)
             .isNotVisible()
             .uiIsNotVisible();
@@ -179,13 +179,13 @@ public class LayerTest {
 
     @Test
     public void duplicating() {
-        Layer copy = layer.copy(CopyType.LAYER_DUPLICATE, true, comp);
+        Layer copy = layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
         checkCopy(copy, "layer 1 copy");
 
-        Layer copy2 = copy.copy(CopyType.LAYER_DUPLICATE, true, comp);
+        Layer copy2 = copy.copy(CopyType.DUPLICATE_LAYER, true, comp);
         checkCopy(copy2, "layer 1 copy 2");
 
-        Layer copy3 = copy2.copy(CopyType.LAYER_DUPLICATE, true, comp);
+        Layer copy3 = copy2.copy(CopyType.DUPLICATE_LAYER, true, comp);
         checkCopy(copy3, "layer 1 copy 3");
 
         // in this case the name shouldn't change

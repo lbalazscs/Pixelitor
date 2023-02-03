@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -152,41 +152,50 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         add(previewPanel, c);
     }
 
-    private int getNorth(int height) {
-        if (btnUsePixels.isSelected()) {
+    private int getNorth(Canvas canvas) {
+        if (usePixels()) {
             return northPixels.getValue();
         } else {
-            return (int) (height * northPercent.getValueAsFloat() / 100);
+            return percentToPixels(northPercent, canvas.getHeight());
         }
     }
 
-    private int getSouth(int height) {
-        if (btnUsePixels.isSelected()) {
+    private int getSouth(Canvas canvas) {
+        if (usePixels()) {
             return southPixels.getValue();
         } else {
-            return (int) (height * southPercent.getValueAsFloat() / 100);
+            return percentToPixels(southPercent, canvas.getHeight());
         }
     }
 
-    private int getWest(int width) {
-        if (btnUsePixels.isSelected()) {
+    private int getWest(Canvas canvas) {
+        if (usePixels()) {
             return westPixels.getValue();
         } else {
-            return (int) (width * westPercent.getValueAsFloat() / 100);
+            return percentToPixels(westPercent, canvas.getWidth());
         }
     }
 
-    private int getEast(int width) {
-        if (btnUsePixels.isSelected()) {
+    private int getEast(Canvas canvas) {
+        if (usePixels()) {
             return eastPixels.getValue();
         } else {
-            return (int) (width * eastPercent.getValueAsFloat() / 100);
+            return percentToPixels(eastPercent, canvas.getWidth());
         }
+    }
+
+    private boolean usePixels() {
+        return btnUsePixels.isSelected();
+    }
+
+    private static int percentToPixels(RangeParam percentParam, int fullSize) {
+        return (int) (fullSize * percentParam.getValueAsDouble() / 100.0);
     }
 
     public EnlargeCanvas getCompAction(Canvas canvas) {
-        int w = canvas.getWidth(), h = canvas.getHeight();
-        return new EnlargeCanvas(getNorth(h), getEast(w), getSouth(h), getWest(w));
+        return new EnlargeCanvas(
+            getNorth(canvas), getEast(canvas),
+            getSouth(canvas), getWest(canvas));
     }
 
     @Override
@@ -196,7 +205,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        boolean usePixels = btnUsePixels.isSelected();
+        boolean usePixels = usePixels();
         preset.putBoolean("Pixels", usePixels);
         if (usePixels) {
             northPixels.saveStateTo(preset);
@@ -276,17 +285,17 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
 
             Canvas canvas = Views.getActiveComp().getCanvas();
 
-            // Actual canvas Width and Height.
+            // Actual canvas width and height.
             float canvasW = canvas.getWidth(), canvasH = canvas.getHeight();
 
-            float N = getNorth(canvas.getHeight());
-            float W = getWest(canvas.getWidth());
-            float newCanvasW = W + canvasW + getEast(canvas.getWidth());
-            float newCanvasH = N + canvasH + getSouth(canvas.getHeight());
+            float N = getNorth(canvas);
+            float W = getWest(canvas);
+            float newCanvasW = W + canvasW + getEast(canvas);
+            float newCanvasH = N + canvasH + getSouth(canvas);
 
             // These represent the total space in which we can draw!
-            int drawW = getWidth(), drawH = getHeight();
-            int ox = drawW / 2, oy = drawH / 2; // Origin
+            float drawW = getWidth(), drawH = getHeight();
+            float ox = drawW / 2.0f, oy = drawH / 2.0f; // Origin
 
             float factor;
             if (newCanvasW / drawW > newCanvasH / drawH) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,26 +33,26 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel that can be used to select a single directory
  * and optionally an output format
  */
-public class SingleDirChooser extends ValidatedPanel {
-    private final BrowseFilesSupport dirChooser;
-    private FileFormatSelector fileFormatSelector;
+public class DirectoryChooser extends ValidatedPanel {
+    private final BrowseFilesSupport chooserSupport;
+    private FileFormatSelector outputFormatSelector;
 
-    private SingleDirChooser(String label, String initialPath,
-                             String fileChooserTitle,
-                             FileFormat outputFormat) {
-        dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
-        JTextField dirTF = dirChooser.getNameTF();
-        JButton browseButton = dirChooser.getBrowseButton();
+    private DirectoryChooser(String label, String initialPath,
+                             String chooserDialogTitle,
+                             FileFormat defaultOutputFormat) {
+        chooserSupport = new BrowseFilesSupport(initialPath, chooserDialogTitle, DIRECTORY);
+        JTextField dirTF = chooserSupport.getNameTF();
+        JButton browseButton = chooserSupport.getBrowseButton();
 
-        boolean addOutputChooser = outputFormat != null;
+        boolean addOutputChooser = defaultOutputFormat != null;
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
             var gbh = new GridBagHelper(this);
             gbh.addLabelAndTwoControls(label, dirTF, browseButton);
 
-            fileFormatSelector = new FileFormatSelector(outputFormat);
+            outputFormatSelector = new FileFormatSelector(defaultOutputFormat);
 
-            gbh.addLabelAndControlNoStretch("Output Format:", fileFormatSelector);
+            gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
         } else {
             setLayout(new BorderLayout());
             add(new JLabel(label), WEST);
@@ -62,15 +62,15 @@ public class SingleDirChooser extends ValidatedPanel {
     }
 
     private FileFormat getSelectedFormat() {
-        return fileFormatSelector.getSelectedFormat();
+        return outputFormatSelector.getSelectedFormat();
     }
 
     private File getSelectedDir() {
-        return dirChooser.getSelectedFile();
+        return chooserSupport.getSelectedFile();
     }
 
     @Override
-    public ValidationResult checkValidity() {
+    public ValidationResult validateSettings() {
         File selectedDir = getSelectedDir();
         boolean exists = selectedDir.exists();
         boolean isDir = selectedDir.isDirectory();
@@ -100,7 +100,7 @@ public class SingleDirChooser extends ValidatedPanel {
      * Returns true if a selection was made, false if the operation was cancelled.
      */
     public static boolean selectOutputDir(FileFormat defaultFormat) {
-        var chooserPanel = new SingleDirChooser("Output Folder:",
+        var chooserPanel = new DirectoryChooser("Output Folder:",
             Dirs.getLastSave().getAbsolutePath(),
             "Select Output Folder", defaultFormat);
 

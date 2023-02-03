@@ -336,7 +336,7 @@ public class ImageUtils {
      * Returns the pixel array behind the given BufferedImage.
      * If the array data is modified, the image itself is modified.
      */
-    public static int[] getPixelsAsArray(BufferedImage src) {
+    public static int[] getPixelArray(BufferedImage src) {
         assert src != null;
 
         int[] pixels;
@@ -358,7 +358,7 @@ public class ImageUtils {
         return pixels;
     }
 
-    public static byte[] getGrayPixelsAsByteArray(BufferedImage img) {
+    public static byte[] getGrayPixelByteArray(BufferedImage img) {
         assert img.getType() == TYPE_BYTE_GRAY;
 
         WritableRaster raster = img.getRaster();
@@ -367,7 +367,7 @@ public class ImageUtils {
         return db.getData();
     }
 
-    public static BufferedImage getGrayImageFromByteArray(byte[] pixels, int width, int height) {
+    public static BufferedImage createGrayImageFromByteArray(byte[] pixels, int width, int height) {
         assert pixels.length == width * height;
 
         DataBuffer data = new DataBufferByte(pixels, 1);
@@ -828,7 +828,7 @@ public class ImageUtils {
         int radius2 = radius * radius;
         Random random = new Random();
 
-        int[] pixels = getPixelsAsArray(brushImage);
+        int[] pixels = getPixelArray(brushImage);
         for (int x = 0; x < diameter; x++) {
             for (int y = 0; y < diameter; y++) {
                 int dx = x - radius;
@@ -871,7 +871,7 @@ public class ImageUtils {
 
     public static BufferedImage createSoftTransparencyImage(int size) {
         BufferedImage image = createSoftBWBrush(size);
-        int[] pixels = getPixelsAsArray(image);
+        int[] pixels = getPixelArray(image);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
             int pixelValue = pixels[i] & 0xFF; // take the blue channel: they are all the same
             int alpha = 255 - pixelValue;
@@ -1051,10 +1051,7 @@ public class ImageUtils {
         Graphics2D g = image.createGraphics();
         g.setColor(BLACK);
 
-//        ZoomLevel zoomLevel = OpenComps.getActiveView().getZoomLevel();
-
 //        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
 //        g.setStroke(zoomLevel.getOuterStroke());
 
         for (Shape shape : shapes) {
@@ -1195,29 +1192,29 @@ public class ImageUtils {
         return tmpG;
     }
 
-    public static BufferedImage copyToBufferedImage(Image img) {
+    public static BufferedImage copyToBufferedImage(Image src) {
         BufferedImage copy;
-        if (img instanceof BufferedImage bufferedImage) {
+        if (src instanceof BufferedImage bufferedImage) {
             if (bufferedImage.getColorModel() instanceof IndexColorModel) {
                 copy = convertToARGB(bufferedImage, false);
             } else {
                 copy = copyImage(bufferedImage);
             }
-        } else if (img instanceof VolatileImage volatileImage) {
+        } else if (src instanceof VolatileImage volatileImage) {
             copy = volatileImage.getSnapshot();
         } else {
-            throw new UnsupportedOperationException("img class is " + img.getClass().getName());
+            throw new UnsupportedOperationException("src class is " + src.getClass().getName());
         }
         return copy;
     }
 
     public static void unpremultiply(BufferedImage dest) {
-        int[] pixels = getPixelsAsArray(dest);
+        int[] pixels = getPixelArray(dest);
         ImageMath.unpremultiply(pixels);
     }
 
     public static void premultiply(BufferedImage src) {
-        int[] pixels = getPixelsAsArray(src);
+        int[] pixels = getPixelArray(src);
         ImageMath.premultiply(pixels);
     }
 
@@ -1268,20 +1265,20 @@ public class ImageUtils {
             }
         }
 
-        var imageSoFar = new BufferedImage(
+        var compositeImg = new BufferedImage(
             canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
-        Graphics2D g = imageSoFar.createGraphics();
+        Graphics2D g = compositeImg.createGraphics();
 
         boolean firstVisibleLayer = true;
         for (Layer layer : layers) {
             if (layer.isVisible()) {
-                BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
+                BufferedImage result = layer.applyLayer(g, compositeImg, firstVisibleLayer);
                 if (result != null) { // adjustment layer or watermarking text layer
-                    imageSoFar = result;
+                    compositeImg = result;
                     if (g != null) {
                         g.dispose();
                     }
-                    g = imageSoFar.createGraphics();
+                    g = compositeImg.createGraphics();
                 }
                 firstVisibleLayer = false;
             }
@@ -1289,7 +1286,7 @@ public class ImageUtils {
 
         g.dispose();
 
-        return imageSoFar;
+        return compositeImg;
     }
 
     public static BufferedImage createCircleThumb(Color color) {
@@ -1303,9 +1300,9 @@ public class ImageUtils {
     }
 
     public static Rectangle getNonTransparentBounds(BufferedImage image) {
-        WritableRaster raster = image.getAlphaRaster();
-        int width = raster.getWidth();
-        int height = raster.getHeight();
+        WritableRaster alphaRaster = image.getAlphaRaster();
+        int width = alphaRaster.getWidth();
+        int height = alphaRaster.getHeight();
         int left = 0;
         int top = 0;
         int right = width - 1;
@@ -1316,7 +1313,7 @@ public class ImageUtils {
         top:
         for (; top < bottom; top++) {
             for (int x = 0; x < width; x++) {
-                if (raster.getSample(x, top, 0) != 0) {
+                if (alphaRaster.getSample(x, top, 0) != 0) {
                     minRight = x;
                     minBottom = top;
                     break top;
@@ -1327,7 +1324,7 @@ public class ImageUtils {
         left:
         for (; left < minRight; left++) {
             for (int y = height - 1; y > top; y--) {
-                if (raster.getSample(left, y, 0) != 0) {
+                if (alphaRaster.getSample(left, y, 0) != 0) {
                     minBottom = y;
                     break left;
                 }
@@ -1337,7 +1334,7 @@ public class ImageUtils {
         bottom:
         for (; bottom > minBottom; bottom--) {
             for (int x = width - 1; x >= left; x--) {
-                if (raster.getSample(x, bottom, 0) != 0) {
+                if (alphaRaster.getSample(x, bottom, 0) != 0) {
                     minRight = x;
                     break bottom;
                 }
@@ -1347,7 +1344,7 @@ public class ImageUtils {
         right:
         for (; right > minRight; right--) {
             for (int y = bottom; y >= top; y--) {
-                if (raster.getSample(right, y, 0) != 0) {
+                if (alphaRaster.getSample(right, y, 0) != 0) {
                     break right;
                 }
             }
@@ -1358,10 +1355,10 @@ public class ImageUtils {
 
     public static BufferedImage mask(BufferedImage srcA, BufferedImage srcB, BufferedImage mask) {
         BufferedImage dest = createImageWithSameCM(srcA);
-        int[] srcAPixels = getPixelsAsArray(srcA);
-        int[] srcBPixels = getPixelsAsArray(srcB);
-        int[] maskPixels = getPixelsAsArray(mask);
-        int[] destPixels = getPixelsAsArray(dest);
+        int[] srcAPixels = getPixelArray(srcA);
+        int[] srcBPixels = getPixelArray(srcB);
+        int[] maskPixels = getPixelArray(mask);
+        int[] destPixels = getPixelArray(dest);
 
         for (int i = 0, numPixels = destPixels.length; i < numPixels; i++) {
             // take the blue channel, assuming that all channels are the same

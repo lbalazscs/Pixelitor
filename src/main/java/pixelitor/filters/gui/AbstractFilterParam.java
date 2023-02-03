@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public abstract class AbstractFilterParam implements FilterParam {
      * Called by the subclasses only, after the GUI is initialized
      */
     protected void guiCreated() {
-        setGUIEnabledState();
+        updateGUIEnabledState();
         if (toolTip != null) {
             paramGUI.setToolTip(toolTip);
         }
@@ -100,16 +100,16 @@ public abstract class AbstractFilterParam implements FilterParam {
             }
         }
 
-        setEnabledState();
+        updateEnabledState();
     }
 
-    protected void setEnabledState() {
+    protected void updateEnabledState() {
         if (paramGUI != null) {
-            setGUIEnabledState();
+            updateGUIEnabledState();
         }
     }
 
-    private void setGUIEnabledState() {
+    private void updateGUIEnabledState() {
         paramGUI.setEnabled(isEnabled());
     }
 
@@ -118,13 +118,13 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     @Override
-    public boolean allowRandomize() {
+    public boolean canRandomize() {
         return randomizePolicy == ALLOW_RANDOMIZE && enabledByAppLogic;
     }
 
     @Override
     public void randomize() {
-        if (allowRandomize()) {
+        if (canRandomize()) {
             doRandomize();
         }
     }

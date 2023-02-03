@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,8 @@ public class Colorize extends ParametrizedFilter {
 
     public static BufferedImage colorize(BufferedImage src, BufferedImage dest,
                                          Color color, float briShift, float opacity) {
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] destData = ImageUtils.getPixelArray(dest);
 
         int red = color.getRed();
         int green = color.getGreen();

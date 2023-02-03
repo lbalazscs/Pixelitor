@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,16 +72,16 @@ public class Automate {
         var worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-                return processFilesOutsideTheEDT(inputFiles, action, saveDir, pm);
+                return processFilesInBackground(inputFiles, action, saveDir, pm);
             } // end of doInBackground
         };
         worker.execute();
     }
 
-    private static Void processFilesOutsideTheEDT(List<File> inputFiles,
-                                                  CompAction action,
-                                                  File saveDir,
-                                                  ProgressMonitor monitor) {
+    private static Void processFilesInBackground(List<File> inputFiles,
+                                                 CompAction action,
+                                                 File saveDir,
+                                                 ProgressMonitor monitor) {
         assert calledOutsideEDT() : "on EDT";
 
         overwriteAll = false;
@@ -91,14 +91,10 @@ public class Automate {
                 break;
             }
 
-            File file = inputFiles.get(i);
             monitor.setProgress((int) ((float) i * 100 / numFiles));
+            monitor.setNote("Processing " + (i + 1) + " of " + numFiles);
 
-            String msg = "Processing " + (i + 1) + " of " + numFiles;
-            monitor.setNote(msg);
-            System.out.println(msg);
-
-            processFile(file, action, saveDir);
+            processFile(inputFiles.get(i), action, saveDir);
         }
         monitor.close();
         return null;
@@ -107,25 +103,14 @@ public class Automate {
     private static void processFile(File file, CompAction action, File saveDir) {
         assert calledOutsideEDT() : "on EDT";
         IO.openFileAsync(file, false)
-            .thenComposeAsync(comp -> process(comp, action), onEDT)
+            .thenComposeAsync(action::process, onEDT)
             .thenComposeAsync(comp -> saveAndClose(comp, saveDir), onEDT)
             .exceptionally(Messages::showExceptionOnEDT)
             .join();
     }
 
-    private static CompletableFuture<Composition> process(Composition comp,
-                                                          CompAction action) {
-        assert calledOnEDT() : threadInfo();
-        assert comp.getView() != null : "no view for " + comp.getName();
-
-        return action.process(comp);
-    }
-
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
         assert calledOnEDT() : threadInfo();
-
-        View view = comp.getView();
-        assert view != null : "no view for " + comp.getName();
 
         var format = FileFormat.getLastOutput();
         File file = calcOutputFile(comp, lastSaveDir, format);
@@ -135,6 +120,9 @@ public class Automate {
 
         var saveSettings = new SaveSettings(format, file);
         CompletableFuture<Void> retVal = null;
+
+        View view = comp.getView();
+        assert view != null : "no view for " + comp.getName();
 
         if (file.exists() && !overwriteAll) {
             String answer = showOverwriteWarningDialog(file);
@@ -186,13 +174,13 @@ public class Automate {
 
         JDialog dialog = optionPane.createDialog(PixelitorWindow.get(), "Warning");
         dialog.setVisible(true);
-        String value = (String) optionPane.getValue();
-        String answer;
+        String selectedValue = (String) optionPane.getValue();
 
-        if (value == null) { // cancelled
+        String answer;
+        if (selectedValue == null) { // cancelled
             answer = OVERWRITE_CANCEL;
         } else {
-            answer = value;
+            answer = selectedValue;
         }
         return answer;
     }

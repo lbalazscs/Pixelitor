@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,9 +83,9 @@ public class Fade extends ParametrizedFilter {
 
         double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
-        int[] srcData = ImageUtils.getPixelsAsArray(after);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
-        int[] prevData = ImageUtils.getPixelsAsArray(before);
+        int[] srcData = ImageUtils.getPixelArray(after);
+        int[] destData = ImageUtils.getPixelArray(dest);
+        int[] prevData = ImageUtils.getPixelArray(before);
 
         int length = srcData.length;
         for (int i = 0; i < length; i++) {
@@ -120,9 +120,9 @@ public class Fade extends ParametrizedFilter {
         double fadeFactor = opacity.getPercentage();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
 
-        byte[] srcData = ImageUtils.getGrayPixelsAsByteArray(after);
-        byte[] destData = ImageUtils.getGrayPixelsAsByteArray(dest);
-        byte[] prevData = ImageUtils.getGrayPixelsAsByteArray(before);
+        byte[] srcData = ImageUtils.getGrayPixelByteArray(after);
+        byte[] destData = ImageUtils.getGrayPixelByteArray(dest);
+        byte[] prevData = ImageUtils.getGrayPixelByteArray(before);
 
         int length = srcData.length;
         for (int i = 0; i < length; i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
         defaultInnerColor = innerColor;
         innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
-        GUIUtils.addColorDialogListener(innerColorSwatch, this::innerColorSwatchClicked);
+        GUIUtils.makeButton(innerColorSwatch, this::innerColorSwatchClicked);
 
         Colors.setupFilterColorsPopupMenu(this, innerColorSwatch,
             this::getInnerColor, c -> setInnerColor(c, true));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,8 @@ public class Invert extends Filter {
         // normal case
         dest = ImageUtils.createImageWithSameCM(src);
 
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] destData = ImageUtils.getPixelArray(dest);
 
         boolean simple = !src.isAlphaPremultiplied();
 
@@ -129,7 +129,7 @@ public class Invert extends Filter {
     }
 
     public static void quickInvert(BufferedImage dest) {
-        int[] pixels = ImageUtils.getPixelsAsArray(dest);
+        int[] pixels = ImageUtils.getPixelArray(dest);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
             pixels[i] ^= 0x00_FF_FF_FF;
         }

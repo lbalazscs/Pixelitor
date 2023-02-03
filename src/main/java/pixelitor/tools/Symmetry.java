@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -208,7 +208,7 @@ public enum Symmetry {
             brush.startAt(2, p2);
         }
 
-        private PPoint getRotatedPoint1(View view, double relX, double relY) {
+        private static PPoint getRotatedPoint1(View view, double relX, double relY) {
             // coordinates rotated with 120 degrees
             double rotX = relX * cos120 - relY * sin120;
             double rotY = relX * sin120 + relY * cos120;
@@ -219,7 +219,7 @@ public enum Symmetry {
             return PPoint.eagerFromIm(finalX, finalY, view);
         }
 
-        private PPoint getRotatedPoint2(View view, double relX, double relY) {
+        private static PPoint getRotatedPoint2(View view, double relX, double relY) {
             // coordinates rotated with 240 degrees
             double rotX = relX * cos240 - relY * sin240;
             double rotY = relX * sin240 + relY * cos240;

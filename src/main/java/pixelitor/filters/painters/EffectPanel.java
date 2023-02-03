@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,7 +81,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
 
-        GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
+        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
 
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             this::getColor, c -> setColor(c, true));

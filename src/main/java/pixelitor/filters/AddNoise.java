@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,8 +78,8 @@ public class AddNoise extends ParametrizedFilter {
 
     private BufferedImage addNoiseToRGB(BufferedImage src, BufferedImage dest,
                                         boolean coverageAnim, SplittableRandom rand) {
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] destData = ImageUtils.getPixelArray(dest);
         int numPixels = destData.length;
 
         boolean fullSaturation = saturationParam.getValue() == 100;
@@ -165,8 +165,8 @@ public class AddNoise extends ParametrizedFilter {
 
     private BufferedImage addNoiseToGray(BufferedImage src, BufferedImage dest,
                                          SplittableRandom rand) {
-        byte[] srcPixels = ImageUtils.getGrayPixelsAsByteArray(src);
-        byte[] destPixels = ImageUtils.getGrayPixelsAsByteArray(dest);
+        byte[] srcPixels = ImageUtils.getGrayPixelByteArray(src);
+        byte[] destPixels = ImageUtils.getGrayPixelByteArray(dest);
 
         // fill the dest with random values
         rand.nextBytes(destPixels);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import pixelitor.filters.AngularWaves;
  * Angular waves in a polar coordinate system
  */
 public class AngularWavesFilter extends CenteredTransformFilter {
-    private double radialWL; // Radial Wavelength
+    private double radialWavelength;
     private double phase;
     private double zoom;
     private double amount;
@@ -42,7 +42,7 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
         double angle = FastMath.atan2(dy, dx);
 
-        double na = r / radialWL - phase;
+        double na = r / radialWavelength - phase;
 
         double fa = WaveType.wave(na, waveType);
 
@@ -56,8 +56,8 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         out[1] = (float) (v + cy);
     }
 
-    public void setRadialWL(double radialWL) {
-        this.radialWL = radialWL;
+    public void setRadialWavelength(double radialWavelength) {
+        this.radialWavelength = radialWavelength;
     }
 
     public void setPhase(double phase) {

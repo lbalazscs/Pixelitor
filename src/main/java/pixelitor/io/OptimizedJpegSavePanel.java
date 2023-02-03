@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         comparePanel.add(originalSP);
         comparePanel.add(optimizedSP);
 
-        GUIUtils.shareScrollModels(originalSP, optimizedSP);
+        GUIUtils.synchronizeScrollPanes(originalSP, optimizedSP);
     }
 
     private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {

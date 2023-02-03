@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,10 +74,10 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     private void sliderModelChanged(AngleParam angleParam, RangeParam sliderModel) {
         if (userChangedSlider) {
+            int newValue = sliderModel.getValue();
             boolean trigger = !sliderModel.getValueIsAdjusting();
 
-            int value = sliderModel.getValue();
-            angleParam.setValueInDegrees(value, trigger);
+            angleParam.setValueInDegrees(newValue, trigger);
         }
     }
 

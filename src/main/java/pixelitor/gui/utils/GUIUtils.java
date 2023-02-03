@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,12 +115,14 @@ public final class GUIUtils {
     }
 
     public static Container getTopContainer(Container c) {
-        while (c.getParent() != null) {
-            c = c.getParent();
-            if (c instanceof Dialog) {
+        Container parent = c.getParent();
+        while (parent != null) {
+            if (parent instanceof Dialog) {
                 // don't jump from dialogs to their parents
-                return c;
+                return parent;
             }
+            c = parent;
+            parent = c.getParent();
         }
         return c;
     }
@@ -167,7 +169,7 @@ public final class GUIUtils {
         }
     }
 
-    public static void randomizeWidgets(JPanel panel) {
+    public static void randomizeChildren(JPanel panel) {
         int count = panel.getComponentCount();
 
         for (int i = 0; i < count; i++) {
@@ -216,28 +218,35 @@ public final class GUIUtils {
         }
     }
 
-    public static void setupCancelWhenTheDialogIsClosed(JDialog d, Runnable cancelAction) {
+    /**
+     * Prevents the given dialog from closing when the user
+     * clicks the X button, and instead triggers the given action.
+     */
+    public static void setupCloseAction(JDialog d, Runnable action) {
         d.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         d.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // the user pressed the X button...
-                cancelAction.run();
+                action.run();
             }
         });
     }
 
-    public static void setupCancelWhenEscIsPressed(JDialog d, Runnable cancelAction) {
+    /**
+     * Registers the given action to be run when the
+     * escape key is pressed in the given dialog.
+     */
+    public static void setupEscAction(JDialog d, Runnable action) {
         JComponent contentPane = (JComponent) d.getContentPane();
-        contentPane.registerKeyboardAction(e -> cancelAction.run(),
+        contentPane.registerKeyboardAction(e -> action.run(),
             ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     public static void runWithBusyCursor(Runnable task) {
-        runWithBusyCursor(PixelitorWindow.get(), task);
+        runWithBusyCursor(task, PixelitorWindow.get());
     }
 
-    public static void runWithBusyCursor(Component parent, Runnable task) {
+    public static void runWithBusyCursor(Runnable task, Component parent) {
         java.util.Timer timer = new Timer();
         var startBusyCursorTask = new TimerTask() {
             @Override
@@ -258,7 +267,7 @@ public final class GUIUtils {
         }
     }
 
-    public static void shareScrollModels(JScrollPane from, JScrollPane to) {
+    public static void synchronizeScrollPanes(JScrollPane from, JScrollPane to) {
         var sharedVerticalModel = from.getVerticalScrollBar().getModel();
         to.getVerticalScrollBar().setModel(sharedVerticalModel);
 
@@ -266,18 +275,23 @@ public final class GUIUtils {
         to.getHorizontalScrollBar().setModel(sharedHorizontalModel);
     }
 
-    public static void addColorDialogListener(JComponent colorSwatch, Runnable showDialogAction) {
-        colorSwatch.addMouseListener(new MouseAdapter() {
+    /**
+     * Adds a button-like behavior to the given component by
+     * attaching a mouse listener to it that will trigger
+     * the given Runnable when the left mouse button is released.
+     */
+    public static void makeButton(JComponent c, Runnable action) {
+        c.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 // on Linux/Mac the popup trigger check is not enough
                 // probably because the popups are started by mousePressed
-                boolean showDialog = colorSwatch.isEnabled()
+                boolean showDialog = c.isEnabled()
                     && !e.isPopupTrigger()
                     && SwingUtilities.isLeftMouseButton(e);
 
                 if (showDialog) {
-                    showDialogAction.run();
+                    action.run();
                 }
             }
         });
@@ -360,14 +374,14 @@ public final class GUIUtils {
     }
 
     public static JButton createResetAllButton(ActionListener action) {
-        JButton button = new JButton("Reset all", Icons.getWestArrowIcon());
+        JButton button = new JButton("Reset All", Icons.getWestArrowIcon());
         button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
         button.addActionListener(action);
         return button;
     }
 
     public static JButton createResetChannelButton(ActionListener action) {
-        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
+        JButton resetChannel = new JButton("Reset Channel", Icons.getWestArrowIcon());
         resetChannel.addActionListener(action);
         return resetChannel;
     }

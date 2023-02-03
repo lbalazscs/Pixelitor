@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.utils.ImageUtils.getPixelsAsArray;
+import static pixelitor.utils.ImageUtils.getPixelArray;
 
 /**
  * PXC file format support.
@@ -140,7 +140,7 @@ public class PXCFormat {
         if (imgType == TYPE_BYTE_GRAY) {
             ImageIO.write(img, "PNG", out);
         } else {
-            int[] pixels = getPixelsAsArray(img);
+            int[] pixels = getPixelArray(img);
             int length = pixels.length;
             int progress = 0;
             int fiveUnits = length / 20;
@@ -166,7 +166,7 @@ public class PXCFormat {
             return ImageIO.read(in);
         } else {
             BufferedImage img = new BufferedImage(width, height, type);
-            int[] pixels = getPixelsAsArray(img);
+            int[] pixels = getPixelArray(img);
 
             int length = pixels.length;
             for (int i = 0; i < length; i++) {

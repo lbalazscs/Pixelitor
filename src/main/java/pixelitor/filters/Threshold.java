@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,8 +59,8 @@ public class Threshold extends ParametrizedFilter {
 
         double threshold = thresholdParam.getValueAsDouble();
         Channel channel = channelParam.getSelected();
-        int[] inputData = ImageUtils.getPixelsAsArray(input);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] inputData = ImageUtils.getPixelArray(input);
+        int[] destData = ImageUtils.getPixelArray(dest);
 
         int width = src.getWidth();
         int length = inputData.length;

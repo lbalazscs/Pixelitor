@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -139,7 +139,7 @@ public class DialogBuilder {
     public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
         content = validatedPanel;
         return validator(d -> {
-            ValidationResult validationResult = validatedPanel.checkValidity();
+            ValidationResult validationResult = validatedPanel.validateSettings();
             if (validationResult.isOK()) {
                 return true; // valid, let the dialog close
             } else {
@@ -266,8 +266,8 @@ public class DialogBuilder {
         addButtons(dialog);
 
         Runnable cancelTask = () -> dialogCancelled(dialog);
-        GUIUtils.setupCancelWhenTheDialogIsClosed(dialog, cancelTask);
-        GUIUtils.setupCancelWhenEscIsPressed(dialog, cancelTask);
+        GUIUtils.setupCloseAction(dialog, cancelTask);
+        GUIUtils.setupEscAction(dialog, cancelTask);
 
         if (enableCopyVisibleShortcut) {
             JComponent contentPane = (JComponent) dialog.getContentPane();

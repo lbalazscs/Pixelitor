@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,11 +34,11 @@ import static pixelitor.utils.Texts.i18n;
 public class ZoomMenu extends PMenu {
     public static final String ACTUAL_PIXELS_TOOLTIP = format(
         "Set the zoom level to 100%% (%s)",
-        Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
+        Utils.keystrokeToText(ACTUAL_PIXELS_KEY));
 
     public static final String FIT_SPACE_TOOLTIP = format(
         "Display the image at the largest zoom that can fit in the available space (%s)",
-        Utils.keystrokeAsText(FIT_SPACE_KEY));
+        Utils.keystrokeToText(FIT_SPACE_KEY));
 
     private static final String ACTION_MAP_KEY_INCREASE = "increase";
     private static final String ACTION_MAP_KEY_DECREASE = "decrease";

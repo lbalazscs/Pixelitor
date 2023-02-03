@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ public class BatchResize {
             add(openSaveDirsPanel);
         }
 
-        private JTextField addTextField(String label, String name, int defaultValue, JPanel sizePanel, IntDocumentFilter documentFilter) {
+        private static JTextField addTextField(String label, String name, int defaultValue, JPanel sizePanel, IntDocumentFilter documentFilter) {
             sizePanel.add(new JLabel(label));
 
             JTextField tf = new JTextField(String.valueOf(defaultValue), 5);
@@ -90,8 +90,8 @@ public class BatchResize {
         }
 
         @Override
-        public ValidationResult checkValidity() {
-            return openSaveDirsPanel.checkValidity()
+        public ValidationResult validateSettings() {
+            return openSaveDirsPanel.validateSettings()
                 .addErrorIf(widthTF.getText().trim().isEmpty(),
                     "The 'width' field is empty")
                 .addErrorIf(heightTF.getText().trim().isEmpty(),

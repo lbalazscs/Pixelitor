@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,13 +31,10 @@ import static java.awt.FlowLayout.LEFT;
  * The GUI for a {@link ColorParam}
  */
 public class ColorParamGUI extends JPanel implements ParamGUI {
-    private final ColorParam model;
-//    private JButton button;
-
-    private final ColorSwatch colorSwatch;
-
     private static final int BUTTON_SIZE = 30;
-    private ResetButton resetButton;
+    private final ColorParam model;
+    private final ColorSwatch colorSwatch;
+    private final ResetButton resetButton;
 
     public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addResetButton) {
         super(new FlowLayout(LEFT));
@@ -48,7 +45,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
         add(colorSwatch);
 
-        GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
+        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
 
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             model::getColor, this::updateColor);
@@ -60,6 +57,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         if (addResetButton) {
             resetButton = new ResetButton(model);
             add(resetButton);
+        } else {
+            resetButton = null;
         }
     }
 
@@ -77,8 +76,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void updateGUI() {
-//        button.setBackground(model.getColor());
-
         colorSwatch.setForeground(model.getColor());
         if (resetButton != null) {
             resetButton.updateIcon();
@@ -88,8 +85,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         colorSwatch.setToolTipText(tip);
-
-//        button.setToolTipText(tip);
     }
 
     @Override

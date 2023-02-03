@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,11 +61,11 @@ public class AutoPaint {
             .validatedContent(configPanel)
             .title(i18n("auto_paint"))
             .menuBar(new DialogMenuBar(configPanel))
-            .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
+            .okAction(() -> autoPaint(dr, configPanel.getSettings()))
             .show();
     }
 
-    private static void paintStrokes(Drawable dr, AutoPaintSettings settings) {
+    private static void autoPaint(Drawable dr, AutoPaintSettings settings) {
         assert calledOnEDT() : threadInfo();
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
@@ -73,10 +73,10 @@ public class AutoPaint {
         ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
 
         try {
-            saveOriginalFgBgColors();
+            saveFgBgColors();
             History.setIgnoreEdits(true);
 
-            runStrokes(settings, dr, progressHandler);
+            doAllStrokes(settings, dr, progressHandler);
         } catch (Exception e) {
             Messages.showException(e);
         } finally {
@@ -87,13 +87,13 @@ public class AutoPaint {
             progressHandler.stopProgress();
             Messages.showPlainInStatusBar(msg + "finished.");
 
-            restoreOriginalFgBgColors(settings);
+            restoreFgBgColors(settings);
         }
     }
 
-    private static void runStrokes(AutoPaintSettings settings,
-                                   Drawable dr,
-                                   ProgressHandler progressHandler) {
+    private static void doAllStrokes(AutoPaintSettings settings,
+                                     Drawable dr,
+                                     ProgressHandler progressHandler) {
         assert calledOnEDT() : threadInfo();
 
         var random = new SplittableRandom();
@@ -103,15 +103,15 @@ public class AutoPaint {
         for (int i = 0; i < numStrokes; i++) {
             progressHandler.updateProgress(i);
 
-            paintSingleStroke(dr, settings, comp, random);
+            doSingleStroke(dr, settings, comp, random);
             comp.getView().paintImmediately();
         }
     }
 
-    private static void paintSingleStroke(Drawable dr,
-                                          AutoPaintSettings settings,
-                                          Composition comp,
-                                          SplittableRandom rand) {
+    private static void doSingleStroke(Drawable dr,
+                                       AutoPaintSettings settings,
+                                       Composition comp,
+                                       SplittableRandom rand) {
         assert calledOnEDT() : threadInfo();
 
         setFgBgColors(settings, rand);
@@ -152,12 +152,12 @@ public class AutoPaint {
         return path;
     }
 
-    private static void saveOriginalFgBgColors() {
+    private static void saveFgBgColors() {
         origFg = getFGColor();
         origBg = getBGColor();
     }
 
-    private static void restoreOriginalFgBgColors(AutoPaintSettings settings) {
+    private static void restoreFgBgColors(AutoPaintSettings settings) {
         // if colors were changed, restore the original
         if (settings.changeColors()) {
             setFGColor(origFg);

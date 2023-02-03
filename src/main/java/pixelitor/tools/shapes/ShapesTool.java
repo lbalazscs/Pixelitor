@@ -50,7 +50,10 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -488,7 +491,7 @@ public class ShapesTool extends DragTool {
         assert hasStyledShape();
         assert !isEditingShapesLayer();
 
-        styledShape.rasterizeTo(comp, transformBox, this);
+        styledShape.rasterize(comp, transformBox, this);
 
         setNoInteractionState();
     }

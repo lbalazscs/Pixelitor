@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,7 +137,7 @@ public class ChaosGame extends ParametrizedFilter {
         int height = dest.getHeight();
         List<Vertex> vertices = createVertices(numVertices, colorsValue, width, height);
 
-        int[] destPixels = ImageUtils.getPixelsAsArray(dest);
+        int[] destPixels = ImageUtils.getPixelArray(dest);
         Arrays.fill(destPixels, 0xFF_FF_FF_FF); // fill the image with white
 
         Random r = ThreadLocalRandom.current();

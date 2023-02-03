@@ -68,7 +68,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     }
 
     @Override
-    public ValidationResult checkValidity() {
+    public ValidationResult validateSettings() {
         File inputDir = inputChooser.getSelectedFile();
         File outputDir = outputChooser.getSelectedFile();
 

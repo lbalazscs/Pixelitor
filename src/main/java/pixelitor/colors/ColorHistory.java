@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 public class ColorHistory {
     public static final ColorHistory INSTANCE = new ColorHistory();
 
-    private static final int MAX_SIZE = 200;
+    private static final int MAX_HISTORY_SIZE = 200;
 
     private final List<Color> colors;
 
@@ -53,16 +53,16 @@ public class ColorHistory {
             }
         }
         colors.add(newColor);
-        if (colors.size() > MAX_SIZE) {
+        if (colors.size() > MAX_HISTORY_SIZE) {
             colors.remove(0);
         }
     }
 
-    public static void remember(Color c) {
-        INSTANCE.add(c);
+    public static void remember(Color newColor) {
+        INSTANCE.add(newColor);
     }
 
-    public void showDialog(Window window, ColorSwatchClickHandler clickHandler, boolean isFilter) {
+    public void showDialog(Window window, ColorSwatchClickHandler clickHandler, boolean forFilters) {
         assert window != null;
         assert clickHandler != null;
 
@@ -75,7 +75,7 @@ public class ColorHistory {
             panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
         }
 
-        Messages.showInStatusBar("Color History: " + (isFilter ?
+        Messages.showInStatusBar("Color History: " + (forFilters ?
             ColorSwatchClickHandler.FILTER_HTML_HELP :
             ColorSwatchClickHandler.STANDARD_HTML_HELP));
 

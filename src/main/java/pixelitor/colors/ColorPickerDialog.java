@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ public class ColorPickerDialog {
     public ColorPickerDialog(ColorSwatch colorSwatch, Consumer<Color> action) {
         this.colorSwatch = colorSwatch;
         this.action = action;
-        GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
+        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
     }
 
     private void showColorDialog() {

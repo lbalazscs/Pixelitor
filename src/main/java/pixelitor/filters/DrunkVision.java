@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,10 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -100,12 +100,12 @@ public class DrunkVision extends ParametrizedFilter {
                 } else { // to the left
                     firstPointAngle = PI - 0.75 + r;
                 }
-                retVal[i] = Utils.offsetFromPolar(maxDistance, firstPointAngle);
+                retVal[i] = Geometry.polarToCartesian(maxDistance, firstPointAngle);
             } else if (i == 1) {
                 // put it more or less opposing the first point
                 double rangeStart = firstPointAngle + 3 * PI / 4;
                 double angle = rangeStart + PI * rand.nextDouble() / 2;
-                retVal[i] = Utils.offsetFromPolar(maxDistance, angle);
+                retVal[i] = Geometry.polarToCartesian(maxDistance, angle);
             } else if (i < 4) {
                 double rangeStart;
                 if (i == 2) {
@@ -114,7 +114,7 @@ public class DrunkVision extends ParametrizedFilter {
                     rangeStart = firstPointAngle + 5 * PI / 4;
                 }
                 double angle = rangeStart + PI * rand.nextDouble() / 2;
-                retVal[i] = Utils.offsetFromPolar(maxDistance, angle);
+                retVal[i] = Geometry.polarToCartesian(maxDistance, angle);
             } else {
                 double randomAngle = rand.nextDouble() * PI * 2;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -295,7 +295,7 @@ public class CustomConvolveGUI extends FilterGUI {
         for (int i = 0; i < values.length; i++) {
             String s = textFields[i].getText();
             try {
-                values[i] = Utils.string2float(s);
+                values[i] = Utils.stringToFloat(s);
             } catch (NotANumberException ex) {
                 Messages.showError("Wrong Number Format", ex.getMessage(), this);
                 return;
@@ -322,7 +322,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
         float sum = 0;
         for (int i = 0; i < textFields.length; i++) {
-            textFields[i].setText(Utils.float2String(values[i]));
+            textFields[i].setText(Utils.floatToString(values[i]));
             sum += values[i];
         }
 

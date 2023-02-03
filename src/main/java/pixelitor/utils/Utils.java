@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import net.jafama.FastMath;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
@@ -58,14 +57,14 @@ public final class Utils {
     private Utils() {
     }
 
-    public static String float2String(float f) {
+    public static String floatToString(float f) {
         if (f == 0.0f) {
             return "";
         }
         return format("%.3f", f);
     }
 
-    public static float string2float(String s) throws NotANumberException {
+    public static float stringToFloat(String s) throws NotANumberException {
         String trimmed = s.trim();
         if (trimmed.isEmpty()) {
             return 0.0f;
@@ -117,9 +116,8 @@ public final class Utils {
     }
 
     /**
-     * Input: an angle between -PI and PI, as returned form Math.atan2
-     * Output: an angle between 0 and 2*PI, and in the intuitive
-     * (counter-clockwise) direction
+     * Converts an angle between -PI and PI, as returned form Math.atan2,
+     * to an angle between 0 and 2*PI in the counter-clockwise direction.
      */
     public static double atan2AngleToIntuitive(double angleInRadians) {
         double angle;
@@ -152,14 +150,7 @@ public final class Utils {
         return degrees;
     }
 
-    public static Point2D offsetFromPolar(double distance, double angle) {
-        double offsetX = distance * FastMath.cos(angle);
-        double offsetY = distance * FastMath.sin(angle);
-
-        return new Point2D.Double(offsetX, offsetY);
-    }
-
-    public static double clamp01(double d) {
+    public static double clampTo01(double d) {
         if (d < 0) {
             return 0;
         }
@@ -167,6 +158,10 @@ public final class Utils {
             return 1;
         }
         return d;
+    }
+
+    public static double parseDouble(String s) throws ParseException {
+        return NumberFormat.getInstance().parse(s).doubleValue();
     }
 
     public static float parseFloat(String input, float defaultValue) {
@@ -186,7 +181,7 @@ public final class Utils {
         return defaultValue;
     }
 
-    public static void makeSureAssertionsAreEnabled() {
+    public static void ensureAssertionsEnabled() {
         boolean assertsEnabled = false;
         //noinspection AssertWithSideEffects
         assert assertsEnabled = true;
@@ -195,7 +190,7 @@ public final class Utils {
         }
     }
 
-    public static void sleep(int duration, TimeUnit unit) {
+    public static void sleep(long duration, TimeUnit unit) {
         try {
             Thread.sleep(unit.toMillis(duration));
         } catch (InterruptedException e) {
@@ -204,7 +199,7 @@ public final class Utils {
         }
     }
 
-    public static String keystrokeAsText(KeyStroke keyStroke) {
+    public static String keystrokeToText(KeyStroke keyStroke) {
         String s = "";
         int modifiers = keyStroke.getModifiers();
         if (modifiers > 0) {
@@ -221,7 +216,7 @@ public final class Utils {
         return s;
     }
 
-    public static String keyEventAsText(KeyEvent e) {
+    public static String keyEventToText(KeyEvent e) {
         String keyText = KeyEvent.getKeyText(e.getKeyCode());
         int modifiers = e.getModifiersEx();
         if (modifiers != 0) {
@@ -246,35 +241,35 @@ public final class Utils {
     /**
      * Creates names of type "something copy", "something copy 2"
      */
-    public static String createCopyName(String orig) {
+    public static String createCopyName(String input) {
         String copyString = "copy";
 
         // could be longer or shorter in other languages
         int copyStringLength = copyString.length();
 
-        int index = orig.lastIndexOf(copyString);
+        int index = input.lastIndexOf(copyString);
         if (index == -1) {
             // "name" => "name copy"
-            return orig + ' ' + copyString;
+            return input + ' ' + copyString;
         }
-        if (index == orig.length() - copyStringLength) {
+        if (index == input.length() - copyStringLength) {
             // "name copy" => "name copy 2"
-            return orig + " 2";
+            return input + " 2";
         }
 
         // "name copy x" => "name copy y", where y = x + 1
-        String afterCopyPart = orig.substring(index + copyStringLength);
+        String afterCopyPart = input.substring(index + copyStringLength);
 
         int copyNr;
         try {
             copyNr = Integer.parseInt(afterCopyPart.trim());
         } catch (NumberFormatException e) {
             // the part after copy was not a number...
-            return orig + ' ' + copyString;
+            return input + ' ' + copyString;
         }
         copyNr++;
 
-        return orig.substring(0, index + copyStringLength) + ' ' + copyNr;
+        return input.substring(0, index + copyStringLength) + ' ' + copyNr;
     }
 
     public static int getJavaMainVersion() {
@@ -375,10 +370,6 @@ public final class Utils {
         }
 
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
-    }
-
-    public static double parseDouble(String s) throws ParseException {
-        return NumberFormat.getInstance().parse(s).doubleValue();
     }
 
     public static String removePrefix(String s, String prefix) {

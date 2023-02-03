@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -125,7 +125,7 @@ public class GenericBlurredShape implements BlurredShape {
         blurFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
         img = blurFilter.filter(img, null);
 
-        pixels = ImageUtils.getGrayPixelsAsByteArray(img);
+        pixels = ImageUtils.getGrayPixelByteArray(img);
     }
 
     private void recenter(Point2D center) {

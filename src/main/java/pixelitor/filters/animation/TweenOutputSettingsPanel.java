@@ -135,10 +135,10 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         TweenOutputType selected = getOutputType();
         if (selected.needsDirectory()) {
             browseFilesSupport.setSelectionMode(DIRECTORY);
-            browseFilesSupport.setFileChooserTitle("Select Output Folder");
+            browseFilesSupport.setChooserDialogTitle("Select Output Folder");
         } else {
             browseFilesSupport.setSelectionMode(FILE);
-            browseFilesSupport.setFileChooserTitle("Select Output File");
+            browseFilesSupport.setChooserDialogTitle("Select Output File");
             browseFilesSupport.setFileFilter(selected.getFileFilter());
         }
         if (fileNameTF != null) { // not the initial setup
@@ -174,7 +174,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     }
 
     @Override
-    public ValidationResult checkValidity() {
+    public ValidationResult validateSettings() {
         return check(numSecondsTF)
             .and(check(fpsTF))
             .and(check(fileNameTF));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
-import pixelitor.automate.SingleDirChooser;
+import pixelitor.automate.DirectoryChooser;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
@@ -41,10 +41,10 @@ import pixelitor.layers.TextLayer;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
-import pixelitor.utils.Utils;
 
 import java.awt.Font;
 import java.awt.font.TextAttribute;
@@ -82,7 +82,7 @@ public class SplashImageCreator {
     public static void saveManySplashImages(int numImages) {
         assert calledOnEDT() : threadInfo();
 
-        boolean okPressed = SingleDirChooser.selectOutputDir(FileFormat.PNG);
+        boolean okPressed = DirectoryChooser.selectOutputDir(FileFormat.PNG);
         if (!okPressed) {
             return;
         }
@@ -203,7 +203,7 @@ public class SplashImageCreator {
         var effects = new AreaEffects();
         var dropShadowEffect = new ShadowPathEffect(0.6f);
         dropShadowEffect.setEffectWidth(3);
-        dropShadowEffect.setOffset(Utils.offsetFromPolar(4, 0.7));
+        dropShadowEffect.setOffset(Geometry.polarToCartesian(4, 0.7));
         effects.setDropShadow(dropShadowEffect);
         return effects;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,14 +34,6 @@ public class TweenWizard extends Wizard {
             "Render", 500, 500, dr);
     }
 
-    @Override
-    protected void finalCleanup() {
-        ParametrizedFilter filter = animation.getFilter();
-        if (filter != null) { // a filter was already selected
-            filter.getParamSet().setFinalAnimationSettingMode(false);
-        }
-    }
-
     public TweenAnimation getAnimation() {
         return animation;
     }
@@ -49,6 +41,14 @@ public class TweenWizard extends Wizard {
     @Override
     protected void finalAction() {
         new RenderTweenFramesTask(animation, dr).execute();
+    }
+
+    @Override
+    protected void finalCleanup() {
+        ParametrizedFilter filter = animation.getFilter();
+        if (filter != null) { // a filter was already selected
+            filter.getParamSet().setFinalAnimationSettingMode(false);
+        }
     }
 }
 

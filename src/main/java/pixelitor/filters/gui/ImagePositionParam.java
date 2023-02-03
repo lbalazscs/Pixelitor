@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -157,7 +157,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public Object getParamValue() {
+    public Point2D getParamValue() {
         return new Point2D.Double(getRelativeX(), getRelativeY());
     }
 

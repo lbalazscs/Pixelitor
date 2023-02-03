@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,7 +92,6 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
 
     static void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
         g2.setStroke(ARROW_STROKE);
-
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
         g2.draw(new Line2D.Float(startX, startY, endX, endY));

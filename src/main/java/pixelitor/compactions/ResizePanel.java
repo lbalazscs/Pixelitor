@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,10 +64,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private final int oldHeight;
     private static final int NUM_TF_COLUMNS = 5;
 
-    private final Validator widthValidator = new Validator("Width");
-    private final Validator heightValidator = new Validator("Height");
+    private final Validator widthFieldValidator = new Validator("Width");
+    private final Validator heightFieldValidator = new Validator("Height");
     private final TitledBorder titledBorder;
-    private String arrowString;
 
     private ResizePanel(Canvas canvas) {
         oldWidth = canvas.getWidth();
@@ -89,7 +88,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         updateWidthTextPixels();
         var pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
         var widthLayer = new JLayer<>(widthTF,
-            TFValidationLayerUI.fromValidator(widthValidator));
+            TFValidationLayerUI.fromValidator(widthFieldValidator));
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
         heightTF = new JTextField(NUM_TF_COLUMNS);
@@ -98,7 +97,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         heightTF.addKeyListener(this);
         var pixelPercentChooser2 = new JComboBox<>(sharedComboBoxModel);
         var heightLayer = new JLayer<>(heightTF,
-            TFValidationLayerUI.fromValidator(heightValidator));
+            TFValidationLayerUI.fromValidator(heightFieldValidator));
         gbh.addLabelAndTwoControls("Height:", heightLayer, pixelPercentChooser2);
 
         titledBorder = BorderFactory.createTitledBorder("");
@@ -118,17 +117,6 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         pixelPercentChooser2.addItemListener(this);
 
         constrainProportionsCB.addItemListener(this);
-    }
-
-    @Override
-    public void updateUI() {
-        super.updateUI();
-
-        if (Themes.getCurrent().isNimbus()) {
-            arrowString = " \u2794 ";
-        } else {
-            arrowString = " to ";
-        }
     }
 
     private boolean unitsArePixels() {
@@ -171,13 +159,13 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     private void unitChanged() {
         if (unitsArePixels()) {
-            widthValidator.setPixels(true);
-            heightValidator.setPixels(true);
+            widthFieldValidator.setPixels(true);
+            heightFieldValidator.setPixels(true);
             updateWidthTextPixels();
             updateHeightTextPixels();
         } else {
-            widthValidator.setPixels(false);
-            heightValidator.setPixels(false);
+            widthFieldValidator.setPixels(false);
+            heightFieldValidator.setPixels(false);
             updateWidthTextPercent();
             updateHeightTextPercent();
         }
@@ -314,9 +302,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private void updateStatusLine() {
-        String oldSize = oldWidth + "\u00d7" + oldHeight + arrowString;
+        String oldSize = oldWidth + "x" + oldHeight + " to ";
         if (newWidth > 0 && newHeight > 0) {
-            titledBorder.setTitle(oldSize + newWidth + "\u00d7" + newHeight);
+            titledBorder.setTitle(oldSize + newWidth + "x" + newHeight);
         } else {
             titledBorder.setTitle(oldSize + "??");
         }
@@ -325,9 +313,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     @Override
-    public ValidationResult checkValidity() {
-        return widthValidator.check(widthTF)
-            .and(heightValidator.check(heightTF));
+    public ValidationResult validateSettings() {
+        return widthFieldValidator.check(widthTF)
+            .and(heightFieldValidator.check(heightTF));
     }
 
     private String getWidthText() {

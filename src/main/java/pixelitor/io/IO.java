@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.io;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
-import pixelitor.automate.SingleDirChooser;
+import pixelitor.automate.DirectoryChooser;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
@@ -219,7 +219,7 @@ public class IO {
     public static void exportLayersToPNGAsync(Composition comp) {
         assert calledOnEDT() : threadInfo();
 
-        boolean okPressed = SingleDirChooser.selectOutputDir();
+        boolean okPressed = DirectoryChooser.selectOutputDir();
         if (!okPressed) {
             return;
         }
@@ -260,7 +260,7 @@ public class IO {
     }
 
     public static void saveInAllFormats(Composition comp) {
-        boolean canceled = !SingleDirChooser.selectOutputDir();
+        boolean canceled = !DirectoryChooser.selectOutputDir();
         if (canceled) {
             return;
         }

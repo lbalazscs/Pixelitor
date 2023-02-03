@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,10 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
 import pixelitor.tools.shapes.ShapeType;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.Utils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -127,7 +127,7 @@ public class PhotoCollage extends ParametrizedFilter {
 
         BufferedImage shadowImage = createShadowImage(xSize, ySize, shadowSoftness, softShadowRoom, shapeType);
 
-        Point2D offset = Utils.offsetFromPolar(
+        Point2D offset = Geometry.polarToCartesian(
             shadowDistance.getValue(),
             shadowAngleParam.getValueInRadians());
         double shadowOffsetX = offset.getX();

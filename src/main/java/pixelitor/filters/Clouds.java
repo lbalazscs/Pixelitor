@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -87,7 +87,7 @@ public class Clouds extends ParametrizedFilter {
                                     Color c1, Color c2, ProgressTracker pt) {
         int width = dest.getWidth();
         int height = dest.getHeight();
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] destData = ImageUtils.getPixelArray(dest);
         int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
         int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 

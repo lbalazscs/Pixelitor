@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,6 +38,14 @@ public class BatchFilterWizard extends Wizard {
             "Start Processing", 490, 500, dr);
     }
 
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
     @Override
     protected void finalAction() {
         var busyCursorParent = PixelitorWindow.get();
@@ -53,13 +61,5 @@ public class BatchFilterWizard extends Wizard {
     @Override
     protected void finalCleanup() {
         // nothing to do
-    }
-
-    public Filter getFilter() {
-        return filter;
-    }
-
-    public void setFilter(Filter filter) {
-        this.filter = filter;
     }
 }

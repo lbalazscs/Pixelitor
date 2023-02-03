@@ -116,4 +116,9 @@ public class TileSeamless extends ParametrizedFilter {
             return 0xFF_00_00_00 | bri << 16 | bri << 8 | bri;
         }
     }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 }

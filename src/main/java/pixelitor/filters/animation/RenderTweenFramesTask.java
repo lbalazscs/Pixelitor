@@ -50,9 +50,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
     private void onPropertyChange(PropertyChangeEvent evt) {
         if ("progress".equals(evt.getPropertyName())) {
-            int progress = (Integer) evt.getNewValue();
-
-            onProgress(progress);
+            onProgress((Integer) evt.getNewValue());
         }
     }
 
@@ -82,7 +80,6 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         int numFrames = animation.getNumFrames();
         ParametrizedFilter filter = animation.getFilter();
-
         AnimationWriter animationWriter = animation.createWriter();
 
         dr.startTweening();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -527,7 +527,7 @@ public class ImageLayerTest {
 
     @Test
     public void duplicate() {
-        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.LAYER_DUPLICATE, true, comp);
+        ImageLayer duplicate = (ImageLayer) layer.copy(CopyType.DUPLICATE_LAYER, true, comp);
 
         assertThat(duplicate)
             .contentBoundsIsEqualTo(layer.getContentBounds())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.filters.gui.AngleUI;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.utils.Utils;
+import pixelitor.utils.Geometry;
 
 import javax.swing.event.ChangeListener;
 import java.awt.Color;
@@ -75,7 +75,7 @@ public class DropShadowPanel extends EffectPanel {
         double distance = distanceParam.getValueAsDouble();
         double angle = angleParam.getValueInRadians();
 
-        return Utils.offsetFromPolar(distance, angle);
+        return Geometry.polarToCartesian(distance, angle);
     }
 
     @Override

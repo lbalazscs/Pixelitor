@@ -24,7 +24,7 @@ import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.powQuick;
 
 public class SparkleFilter extends PointFilter {
-    private int rays = 50;
+    private int numRays = 50;
     private int radius = 25;
     private int amount = 50;
     private int color = 0xffffffff;
@@ -83,12 +83,12 @@ public class SparkleFilter extends PointFilter {
         return amount;
     }
 
-    public void setRays(int rays) {
-        this.rays = rays;
+    public void setNumRays(int numRays) {
+        this.numRays = numRays;
     }
 
-    public int getRays() {
-        return rays;
+    public int getNumRays() {
+        return numRays;
     }
 
     /**
@@ -120,8 +120,8 @@ public class SparkleFilter extends PointFilter {
         centreY = (int) (height * relativeCentreY);
         super.setDimensions(width, height);
 //        random.setSeed(seed);
-        rayLengths = new float[rays];
-        for (int i = 0; i < rays; i++) {
+        rayLengths = new float[numRays];
+        for (int i = 0; i < numRays; i++) {
             rayLengths[i] = radius + randomness / 100.0f * radius * (float) random.nextGaussian();
         }
         power = (100 - amount) / 50.0;
@@ -133,23 +133,24 @@ public class SparkleFilter extends PointFilter {
         float dy = y - centreY;
         float distance = dx * dx + dy * dy;
         float angle = (float) atan2(dy, dx);
-        float d = (angle + PI) / TWO_PI * rays;
+
+        float d = (angle + PI) / TWO_PI * numRays;
         int i = (int) d;
+
         float f = d - i;
 
-        if (radius != 0) {
-            float length = lerp(f, rayLengths[i % rays], rayLengths[(i + 1) % rays]);
-            float g = length * length / (distance + 0.0001f);
+        float length = lerp(f, rayLengths[i % numRays], rayLengths[(i + 1) % numRays]);
+        float g = length * length / (distance + 0.0001f);
 
-            if (amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
-                g = (float) powQuick(g, power);
-            }
-
-            f -= 0.5f;
-//			f *= amount/50.0f;
-            f = 1 - f * f;
-            f *= g;
+        if (amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
+            g = (float) powQuick(g, power);
         }
+
+        f -= 0.5f;
+//			f *= amount/50.0f;
+        f = 1 - f * f;
+        f *= g;
+
         f = clamp01(f);
         if (lightOnly) {
             return mixColors(f, 0, color);

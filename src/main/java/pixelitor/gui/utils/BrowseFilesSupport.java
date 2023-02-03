@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 public class BrowseFilesSupport {
     private JTextField nameTF;
     private final JButton button = new JButton("Browse...");
-    private String fileChooserTitle;
+    private String chooserDialogTitle;
     private FileNameExtensionFilter fileFilter; // used for filtering when in file selection mode
 
     public enum SelectionMode {DIRECTORY, FILE}
@@ -47,9 +47,9 @@ public class BrowseFilesSupport {
     }
 
     public BrowseFilesSupport(String initialPath,
-                              String fileChooserTitle,
+                              String chooserDialogTitle,
                               SelectionMode mode) {
-        this.fileChooserTitle = fileChooserTitle;
+        this.chooserDialogTitle = chooserDialogTitle;
         this.mode = mode;
         init(initialPath);
     }
@@ -57,14 +57,14 @@ public class BrowseFilesSupport {
     private void init(String initialPath) {
         nameTF = new JTextField(25);
         nameTF.setText(initialPath);
-        button.addActionListener(e -> browseButtonClicked(fileChooserTitle));
+        button.addActionListener(e -> browseButtonClicked(chooserDialogTitle));
     }
 
     public void setSelectionMode(SelectionMode mode) {
         this.mode = mode;
     }
 
-    private void browseButtonClicked(String fileChooserTitle) {
+    private void browseButtonClicked(String chooserDialogTitle) {
         JFileChooser chooser;
 
         if (mode == DIRECTORY) {
@@ -73,7 +73,7 @@ public class BrowseFilesSupport {
             chooser = createChooserForFileSelection();
         }
 
-        chooser.setDialogTitle(fileChooserTitle);
+        chooser.setDialogTitle(chooserDialogTitle);
         chooser.showOpenDialog(PixelitorWindow.get());
         fillFileNameTextField(chooser.getSelectedFile());
     }
@@ -136,8 +136,8 @@ public class BrowseFilesSupport {
         return new File(s);
     }
 
-    public void setFileChooserTitle(String fileChooserTitle) {
-        this.fileChooserTitle = fileChooserTitle;
+    public void setChooserDialogTitle(String chooserDialogTitle) {
+        this.chooserDialogTitle = chooserDialogTitle;
     }
 
     public void setFileFilter(FileNameExtensionFilter fileFilter) {

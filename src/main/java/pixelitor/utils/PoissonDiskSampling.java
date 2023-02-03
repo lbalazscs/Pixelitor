@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,26 +38,27 @@ public class PoissonDiskSampling {
     private final int height;
     private final double r;
     private final List<Point2D> samples;
-    private final int gridWidth;
-    private final int gridHeight;
+    private final int numHorCells;
+    private final int numVerCells;
     private final int[][] grid;
-    private final double gridPixelWidth;
-    private final double gridPixelHeight;
+    private final double cellWidth;
+    private final double cellHeight;
 
-    public PoissonDiskSampling(int width, int height, double r, int k,
+    public PoissonDiskSampling(int width, int height, double minDist, int k,
                                boolean improved, SplittableRandom rnd) {
         this.width = width;
         this.height = height;
-        this.r = r;
+        this.r = minDist;
 
-        double cellSize = r / 1.414213562373095;
-        gridWidth = (int) Math.ceil(width / cellSize);
-        gridHeight = (int) Math.ceil(height / cellSize);
-        gridPixelWidth = width / (double) gridWidth;
-        gridPixelHeight = height / (double) gridHeight;
-        grid = new int[gridWidth][gridHeight];
-        for (int x = 0; x < gridWidth; x++) {
-            for (int y = 0; y < gridHeight; y++) {
+        // ensures that each grid cell contains at most one point
+        double cellSize = minDist / 1.414213562373095;
+        numHorCells = (int) Math.ceil(width / cellSize);
+        numVerCells = (int) Math.ceil(height / cellSize);
+        cellWidth = width / (double) numHorCells;
+        cellHeight = height / (double) numVerCells;
+        grid = new int[numHorCells][numVerCells];
+        for (int x = 0; x < numHorCells; x++) {
+            for (int y = 0; y < numVerCells; y++) {
                 grid[x][y] = -1;
             }
         }
@@ -79,11 +80,11 @@ public class PoissonDiskSampling {
                 Vector2D candidate;
                 double angle = 2 * Math.PI * rnd.nextDouble();
                 if (improved) {
-                    double dist = r + 0.0000001;
+                    double dist = minDist + 0.0000001;
                     candidate = Vector2D.createFromPolar(angle, dist);
                 } else {
                     candidate = Vector2D.createUnitVector(angle);
-                    double dist = r + rnd.nextDouble() * r;
+                    double dist = minDist + rnd.nextDouble() * minDist;
                     candidate.setMagnitudeOfUnitVector(dist);
                 }
                 candidate.add(activePoint);
@@ -113,20 +114,20 @@ public class PoissonDiskSampling {
     }
 
     private void putPointInGrid(Point2D p, int atIndex) {
-        int gridX = (int) (p.getX() / gridPixelWidth);
-        int gridY = (int) (p.getY() / gridPixelHeight);
+        int gridX = (int) (p.getX() / cellWidth);
+        int gridY = (int) (p.getY() / cellHeight);
         grid[gridX][gridY] = atIndex;
     }
 
     private boolean checkNeighbours(Vector2D candidate) {
-        int gridX = (int) (candidate.x / gridPixelWidth);
-        int gridY = (int) (candidate.y / gridPixelHeight);
+        int gridX = (int) (candidate.x / cellWidth);
+        int gridY = (int) (candidate.y / cellHeight);
         for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
-            if (gx < 0 || gx >= gridWidth) {
+            if (gx < 0 || gx >= numHorCells) {
                 continue;
             }
             for (int gy = gridY - 1; gy <= gridY + 1; gy++) {
-                if (gy < 0 || gy >= gridHeight) {
+                if (gy < 0 || gy >= numVerCells) {
                     continue;
                 }
                 int index = grid[gx][gy];
@@ -144,13 +145,13 @@ public class PoissonDiskSampling {
     public void showGrid(Graphics2D g2) {
         double yy = 0;
         while (yy < height) {
-            yy += gridPixelHeight;
+            yy += cellHeight;
             Line2D line = new Line2D.Double(0, yy, width, yy);
             g2.draw(line);
         }
         double xx = 0;
         while (xx < width) {
-            xx += gridPixelWidth;
+            xx += cellWidth;
             Line2D line = new Line2D.Double(xx, 0, xx, height);
             g2.draw(line);
         }
@@ -192,16 +193,16 @@ public class PoissonDiskSampling {
 
     private int findClosestPointTo(double x, double y, int searchDist,
                                    DistanceFunction distanceFunction) {
-        int gridX = (int) (x / gridPixelWidth);
-        int gridY = (int) (y / gridPixelHeight);
+        int gridX = (int) (x / cellWidth);
+        int gridY = (int) (y / cellHeight);
         double minDistSoFar = Double.POSITIVE_INFINITY;
         int indexOfClosest = -1;
         for (int gx = gridX - searchDist; gx <= gridX + searchDist; gx++) {
-            if (gx < 0 || gx >= gridWidth) {
+            if (gx < 0 || gx >= numHorCells) {
                 continue;
             }
             for (int gy = gridY - searchDist; gy <= gridY + searchDist; gy++) {
-                if (gy < 0 || gy >= gridHeight) {
+                if (gy < 0 || gy >= numVerCells) {
                     continue;
                 }
                 int index = grid[gx][gy];

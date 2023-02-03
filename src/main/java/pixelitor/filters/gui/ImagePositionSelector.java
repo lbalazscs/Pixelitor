@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,11 +120,9 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         if (!isEnabled()) {
             return;
         }
-        int mouseX = e.getX();
-        int mouseY = e.getY();
 
-        float relX = ((float) mouseX) / thumb.getWidth();
-        float relY = ((float) mouseY) / thumb.getHeight();
+        double relX = ((double) e.getX()) / thumb.getWidth();
+        double relY = ((double) e.getY()) / thumb.getHeight();
         model.setRelativeValues(relX, relY, false, isAdjusting, true);
 
         parentGUI.updateSlidersFromModel();

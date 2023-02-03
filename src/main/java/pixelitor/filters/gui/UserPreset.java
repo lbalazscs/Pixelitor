@@ -195,17 +195,17 @@ public class UserPreset implements Preset {
     }
 
     // not using Properties because it is ugly to escape the spaces in keys
-    private void load() throws IOException {
+    private void loadFromFile() throws IOException {
         assert !loaded;
         InputStream input = new FileInputStream(file);
         Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
         try (BufferedReader br = new BufferedReader(reader)) {
-            loadFrom(br);
+            loadFromReader(br);
         }
         loaded = true;
     }
 
-    private void loadFrom(BufferedReader br) throws IOException {
+    private void loadFromReader(BufferedReader br) throws IOException {
         String line;
         while ((line = br.readLine()) != null) {
             int index = line.indexOf('=');
@@ -219,7 +219,7 @@ public class UserPreset implements Preset {
 
     public void loadFromString(String s) {
         try {
-            loadFrom(new BufferedReader(new StringReader(s)));
+            loadFromReader(new BufferedReader(new StringReader(s)));
         } catch (IOException e) {
             Messages.showException(e);
         }
@@ -229,7 +229,7 @@ public class UserPreset implements Preset {
         assert file == null;
         assert loaded;
 
-        File outFile = calcSaveFile(true);
+        File outFile = getSaveFile(true);
         try (PrintWriter writer = new PrintWriter(outFile, StandardCharsets.UTF_8)) {
             saveTo(writer);
         } catch (IOException e) {
@@ -258,7 +258,7 @@ public class UserPreset implements Preset {
         return new PAction(name, () -> {
             if (!loaded) {
                 try {
-                    load();
+                    loadFromFile();
                 } catch (IOException ex) {
                     throw new UncheckedIOException(ex);
                 }
@@ -268,7 +268,7 @@ public class UserPreset implements Preset {
     }
 
     public static List<UserPreset> loadPresets(String presetDirName) {
-        File presetsDir = calcSaveDir(presetDirName);
+        File presetsDir = getSaveDir(presetDirName);
         if (!presetsDir.exists()) {
             return List.of();
         }
@@ -287,18 +287,18 @@ public class UserPreset implements Preset {
     }
 
     public boolean fileExists() {
-        return calcSaveFile(false).exists();
+        return getSaveFile(false).exists();
     }
 
-    private File calcSaveFile(boolean createDirs) {
-        File dir = calcSaveDir(presetDirName);
+    private File getSaveFile(boolean createDirs) {
+        File dir = getSaveDir(presetDirName);
         if (createDirs && !dir.exists()) {
             dir.mkdirs();
         }
         return new File(dir, name + ".txt");
     }
 
-    private static File calcSaveDir(String presetDirName) {
+    private static File getSaveDir(String presetDirName) {
         return new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
     }
 

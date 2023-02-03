@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,6 +75,14 @@ public class Rnd {
     public static int intInRange(int min, int max) {
         assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
         return min + rand.nextInt(max - min + 1);
+    }
+
+    public static float floatInRange(float min, float max) {
+        return min + rand.nextFloat() * (max - min);
+    }
+
+    public static double doubleInRange(double min, double max) {
+        return min + rand.nextDouble() * (max - min);
     }
 
     public static long nextLong() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,8 +108,8 @@ public class ImageDabsBrush extends DabsBrush {
     private void createColoredBrushImage(Color color) {
         coloredBrushImg = new BufferedImage(
             templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
-        int[] srcPixels = ImageUtils.getPixelsAsArray(templateImg);
-        int[] destPixels = ImageUtils.getPixelsAsArray(coloredBrushImg);
+        int[] srcPixels = ImageUtils.getPixelArray(templateImg);
+        int[] destPixels = ImageUtils.getPixelArray(coloredBrushImg);
 
         int destR = color.getRed();
         int destG = color.getGreen();

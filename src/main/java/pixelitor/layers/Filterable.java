@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public interface Filterable {
         long startTime = System.nanoTime();
 
         Runnable task = () -> runFilter(filter, context);
-        GUIUtils.runWithBusyCursor(busyCursorParent, task);
+        GUIUtils.runWithBusyCursor(task, busyCursorParent);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
         Messages.showPerformanceMessage(filter.getName(), totalTime);

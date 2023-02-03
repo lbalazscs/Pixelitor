@@ -463,7 +463,7 @@ public class TestHelper {
         }
         AppContext.setUnitTestingMode();
 
-        Utils.makeSureAssertionsAreEnabled();
+        Utils.ensureAssertionsEnabled();
         Utils.preloadUnitTestFontNames();
 
         Language.setCurrent(Language.ENGLISH);

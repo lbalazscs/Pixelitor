@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -146,7 +146,7 @@ public class AssertJSwingTest {
     private static final boolean FILTER_TESTS_WITH_WIDTH_1 = false;
 
     public static void main(String[] args) {
-        Utils.makeSureAssertionsAreEnabled();
+        Utils.ensureAssertionsEnabled();
         FailOnThreadViolationRepaintManager.install();
 
         // enable quick mode with -Dquick=true
@@ -861,7 +861,7 @@ public class AssertJSwingTest {
         preferencesTested = true;
     }
 
-    private void testPreferencesUIChooser(DialogFixture dialog) {
+    private static void testPreferencesUIChooser(DialogFixture dialog) {
         var uiChooser = dialog.comboBox("uiChooser");
         if (EDT.call(() -> ImageArea.currentModeIs(FRAMES))) {
             uiChooser.requireSelection("Internal Windows");

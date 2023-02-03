@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,10 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
- * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
- * The slider and the spinner are synchronized
+ * A GUI Component that allows users to select a value from a range.
+ * It consists of a JSlider and a JSpinner which are synchronized with each other,
+ * so changing the value in one component will also change the value in the other one.
+ * It also optionally includes a {@link ResetButton} for resetting the value to its default.
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
@@ -47,6 +49,9 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final int orientation;
     private final JPanel spinnerPanel;
 
+    /**
+     * The possible positions of the label of a SliderSpinner.
+     */
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
     }
@@ -155,25 +160,22 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         SpinnerNumberModel spinnerModel;
         int decimalPlaces = model.getDecimalPlaces();
         if (decimalPlaces > 0) {
-            double stepSize;
-            if (decimalPlaces == 1) {
-                stepSize = 0.1;
-            } else if (decimalPlaces == 2) {
-                stepSize = 0.01;
-            } else {
-                throw new IllegalStateException();
-            }
+            double stepSize = switch (decimalPlaces) {
+                case 1 -> 0.1;
+                case 2 -> 0.01;
+                default -> throw new IllegalStateException();
+            };
             spinnerModel = new SpinnerNumberModel(
-                model.getValueAsDouble(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                stepSize);
+                    model.getValueAsDouble(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    stepSize);
         } else {
             spinnerModel = new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1);
+                    model.getValue(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    1);
         }
         JSpinner s = new JSpinner(spinnerModel);
 
@@ -181,6 +183,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             var editor = (JSpinner.NumberEditor) s.getEditor();
             DecimalFormat format = editor.getFormat();
             format.setMinimumFractionDigits(decimalPlaces);
+            format.setMaximumFractionDigits(decimalPlaces);
 
             // make sure that the fractional form is displayed
             editor.getTextField().setValue(model.getValueAsDouble());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -453,7 +453,7 @@ public class FlowField extends ParametrizedFilter {
         Color[][] fieldColors = getIf(useColorField, () -> new Color[fieldWidth][fieldHeight]);
         Stroke[] strokes = getIf(randomizeWidth, () -> new Stroke[100]);
         Vector2D[][] fieldAccelerations = new Vector2D[fieldWidth][fieldHeight];
-        int[] sourcePixels = getIf(useColorField || inheritSpawnPoints, () -> ImageUtils.getPixelsAsArray(src));
+        int[] sourcePixels = getIf(useColorField || inheritSpawnPoints, () -> ImageUtils.getPixelArray(src));
 
         if (randomizeWidth) {
             fill(strokes, strokes.length, () -> strokeParam.createStrokeWithRandomWidth(r, widthRandomness));

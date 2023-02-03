@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -232,6 +232,11 @@ public final class ConsistencyChecks {
             return true;
         }
 
+        if (!comp.getActiveLayer().hasUI()) {
+            // an inconsistent state is OK while adding a layer
+            return true;
+        }
+
         LayerHolder parent = comp.getActiveHolder();
 
         boolean enabled = action.isEnabled();
@@ -273,10 +278,15 @@ public final class ConsistencyChecks {
         }
 
         Layer layer = comp.getActiveLayer();
+        if (!layer.hasUI()) {
+            // an inconsistent state is OK while adding a layer
+            return true;
+        }
+
         String msg = checkLayerMask(layer);
         if (msg != null) {
             throw new IllegalStateException(
-                msg.formatted(layer.getTypeStringLC(), layer.getName()));
+                    msg.formatted(layer.getTypeStringLC(), layer.getName()));
         }
 
         return true;

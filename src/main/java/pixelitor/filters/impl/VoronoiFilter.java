@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -184,7 +184,7 @@ public class VoronoiFilter extends PointFilter {
     public void antiAlias(BufferedImage imgSoFar) {
         assert aaRes != 0;
         int width = imgSoFar.getWidth();
-        int[] pixels = ImageUtils.getPixelsAsArray(imgSoFar);
+        int[] pixels = ImageUtils.getPixelArray(imgSoFar);
 
         // since this code runs outside the superclass-powered
         // parallelization, use parallel streams

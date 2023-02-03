@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -387,7 +387,7 @@ public class SubPath implements Serializable, Transformable {
         this.closed = closed;
     }
 
-    private void setFinished(boolean finished) {
+    public void setFinished(boolean finished) {
         this.finished = finished;
         if (finished) {
             setMovingPoint(null);

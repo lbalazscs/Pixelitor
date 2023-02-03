@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,8 +78,8 @@ public class ThemedImageIcon extends ImageIcon {
             imageForLightTheme = ImageUtils.convertToARGB(imageForLightTheme, true);
         }
 
-        int[] srcData = ImageUtils.getPixelsAsArray(imageForLightTheme);
-        int[] dstData = ImageUtils.getPixelsAsArray(imageForDarkTheme);
+        int[] srcData = ImageUtils.getPixelArray(imageForLightTheme);
+        int[] dstData = ImageUtils.getPixelArray(imageForDarkTheme);
         for (int i = 0; i < srcData.length; i++) {
             int pixel = srcData[i];
             int a = pixel & 0xFF000000;

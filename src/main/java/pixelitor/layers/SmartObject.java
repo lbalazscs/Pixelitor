@@ -107,10 +107,19 @@ public class SmartObject extends CompositeLayer {
 
         Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
         // the mask stays outside the content, and will become the mask of the smart object
-        Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
-        contentLayer.setName("original content", false);
-        contentLayer.setHolder(newContent);
-        newContent.addLayerNoUI(contentLayer);
+        if (layer instanceof LayerGroup group) {
+            // flatten the contents of the group
+            int numLayers = group.getNumLayers();
+            for (int i = 0; i < numLayers; i++) {
+                Layer layerCopy = group.getLayer(i).copy(CopyType.UNDO, true, newContent);
+                newContent.addLayerNoUI(layerCopy);
+            }
+        } else {
+            Layer contentLayer = layer.copy(CopyType.UNDO, false, newContent);
+            contentLayer.setName("original content", false);
+            contentLayer.setHolder(newContent);
+            newContent.addLayerNoUI(contentLayer);
+        }
         newContent.setName(getName());
         newContent.createDebugName();
         setContent(newContent);
@@ -142,7 +151,7 @@ public class SmartObject extends CompositeLayer {
     private SmartObject(SmartObject orig, CopyType copyType, Composition newComp) {
         super(orig.comp, copyType.createLayerCopyName(orig.getName()));
         assert orig.content.checkInvariants();
-        if (copyType.doDeepContentCopy()) {
+        if (copyType.isDeepContentCopy()) {
             Composition origContent = orig.content;
             Composition newContent = origContent.copy(copyType, true);
             setContent(newContent);
@@ -391,7 +400,7 @@ public class SmartObject extends CompositeLayer {
         if (SmartFilter.copiedSmartFilter != null) {
             popup.add(new PAction("Paste " + SmartFilter.copiedSmartFilter.getName(), () -> {
                 // copy again, because it could be pasted multiple times
-                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.LAYER_DUPLICATE, true, comp);
+                SmartFilter newSF = (SmartFilter) SmartFilter.copiedSmartFilter.copy(CopyType.DUPLICATE_LAYER, true, comp);
                 newSF.setSmartObject(this);
                 addSmartFilter(newSF, true, true);
             }));
@@ -812,8 +821,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     public SmartObject shallowDuplicate() {
-        SmartObject d = new SmartObject(this, CopyType.SMART_OBJECT_CLONE, comp);
-        duplicateMask(d, CopyType.SMART_OBJECT_CLONE, comp);
+        SmartObject d = new SmartObject(this, CopyType.CLONE_SMART_OBJECT, comp);
+        duplicateMask(d, CopyType.CLONE_SMART_OBJECT, comp);
         return d;
     }
 

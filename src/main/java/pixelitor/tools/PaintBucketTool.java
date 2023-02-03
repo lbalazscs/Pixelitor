@@ -192,7 +192,7 @@ public class PaintBucketTool extends Tool {
         int imgHeight = img.getHeight();
         int imgWidth = img.getWidth();
 
-        int[] pixels = ImageUtils.getPixelsAsArray(img);
+        int[] pixels = ImageUtils.getPixelArray(img);
 
         // Needed because the tolerance: we cannot assume that
         // if the pixel is within the target range, it has been processed
@@ -298,7 +298,7 @@ public class PaintBucketTool extends Tool {
     private static Rectangle globalReplaceColor(BufferedImage img,
                                                 int tolerance,
                                                 int rgbAtMouse, int newRGB) {
-        int[] pixels = ImageUtils.getPixelsAsArray(img);
+        int[] pixels = ImageUtils.getPixelArray(img);
         for (int i = 0; i < pixels.length; i++) {
             if (isSimilar(pixels[i], rgbAtMouse, tolerance)) {
                 pixels[i] = newRGB;

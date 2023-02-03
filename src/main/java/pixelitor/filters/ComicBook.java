@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,8 +83,8 @@ public class ComicBook extends ParametrizedFilter {
     public static BufferedImage gray(BufferedImage src) {
         BufferedImage out = ImageUtils.createImageWithSameCM(src);
 
-        int[] src_pixels = ImageUtils.getPixelsAsArray(src);
-        int[] out_pixels = ImageUtils.getPixelsAsArray(out);
+        int[] src_pixels = ImageUtils.getPixelArray(src);
+        int[] out_pixels = ImageUtils.getPixelArray(out);
 
         for (int i = 0; i < src_pixels.length; i++) {
             int rgb = src_pixels[i];
@@ -102,7 +102,7 @@ public class ComicBook extends ParametrizedFilter {
     public static BufferedImage stairs(BufferedImage src, int stair_steps) {
         Stairs stairs = new Stairs(stair_steps);
         BufferedImage out = ImageUtils.copyImage(src);
-        int[] pixels = ImageUtils.getPixelsAsArray(out);
+        int[] pixels = ImageUtils.getPixelArray(out);
         for (int i = 0; i < pixels.length; i++) {
             int rgb = pixels[i];
             int r = (rgb >>> 16) & 0xFF;
@@ -125,8 +125,8 @@ public class ComicBook extends ParametrizedFilter {
 
     public static BufferedImage threshold(BufferedImage bias_src, BufferedImage src, int threshold) {
         BufferedImage out = ImageUtils.copyImage(src);
-        int[] bias_pix = ImageUtils.getPixelsAsArray(bias_src);
-        int[] out_pix = ImageUtils.getPixelsAsArray(out);
+        int[] bias_pix = ImageUtils.getPixelArray(bias_src);
+        int[] out_pix = ImageUtils.getPixelArray(out);
 
         int blackRGB = Color.BLACK.getRGB();
         for (int i = 0; i < bias_pix.length; i++) {

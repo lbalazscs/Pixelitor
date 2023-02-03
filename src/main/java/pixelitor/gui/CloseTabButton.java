@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,14 +37,12 @@ class CloseTabButton extends JButton {
     private static final MouseListener buttonMouseListener = new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
-            CloseTabButton button = (CloseTabButton) e.getComponent();
-            button.setBorderPainted(true);
+            ((CloseTabButton) e.getComponent()).setBorderPainted(true);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            CloseTabButton button = (CloseTabButton) e.getComponent();
-            button.setBorderPainted(false);
+            ((CloseTabButton) e.getComponent()).setBorderPainted(false);
         }
     };
     private static final int MARGIN = 5;

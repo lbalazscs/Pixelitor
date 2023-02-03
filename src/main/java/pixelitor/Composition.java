@@ -580,7 +580,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             activeLayer = sf.getSmartObject();
         }
 
-        Layer duplicate = activeLayer.copy(CopyType.LAYER_DUPLICATE, true, this);
+        Layer duplicate = activeLayer.copy(CopyType.DUPLICATE_LAYER, true, this);
         if (duplicate == null) {
             // there was an out of memory error
             return;
@@ -2031,6 +2031,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                 }
             }
             holder.addLayerToList(newLayerIndex, newLayer);
+            comp.setActiveLayer(newLayer);
 
             if (addToUI) {
                 if (holder == comp) {
@@ -2047,10 +2048,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                     holder.update();
                 }
             }
-
-            // activate only after it has an ui to keep
-            // the consistency checks happy
-            comp.setActiveLayer(newLayer);
 
             if (needsHistory()) {
                 History.add(new NewLayerEdit(editName,

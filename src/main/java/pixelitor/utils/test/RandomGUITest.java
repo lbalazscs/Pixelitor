@@ -966,7 +966,10 @@ public class RandomGUITest {
             }
         } else {
             log("change layer blending mode for " + layer.getName());
-            BlendingMode randomBM = Rnd.chooseFrom(BlendingMode.values());
+
+            BlendingMode[] blendingModes = (layer instanceof LayerGroup) ?
+                    BlendingMode.ALL_MODES : BlendingMode.LAYER_MODES;
+            BlendingMode randomBM = Rnd.chooseFrom(blendingModes);
             layer.setBlendingMode(randomBM, true, true);
         }
     }

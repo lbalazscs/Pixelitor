@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -129,7 +129,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         int[] blues = new int[HISTOGRAM_RESOLUTION];
         int[] greens = new int[HISTOGRAM_RESOLUTION];
 
-        int[] data = ImageUtils.getPixelsAsArray(image);
+        int[] data = ImageUtils.getPixelArray(image);
         for (int rgb : data) {
             int a = (rgb >>> 24) & 0xFF;
             if (a > 0) {

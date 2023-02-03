@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -434,9 +434,9 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public List<Object> getParamValue() {
+    public List<Double> getParamValue() {
         return Stream.of(children)
-            .map(FilterParam::getParamValue)
+            .map(RangeParam::getParamValue)
             .collect(toList());
     }
 

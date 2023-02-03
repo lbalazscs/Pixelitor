@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,17 +58,17 @@ public class Geometry {
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
     public static void perpendiculars(Point2D a, Point2D b, double dist, Point2D outA, Point2D outB) {
-        Point2D temp2 = new Point2D.Double();
+        Point2D direction = new Point2D.Double();
 
         // direction with magnitude = B - A
-        subtract(b, a, temp2);
+        subtract(b, a, direction);
         // unit vector
-        normalize(temp2);
+        normalize(direction);
         // to scale to fit distance
-        scale(temp2, dist);
+        scale(direction, dist);
 
-        // outA, outB = temp2 rotated 90 degrees either way
-        perpendiculars(temp2, outA, outB);
+        // outA, outB = direction rotated 90 degrees either way
+        perpendiculars(direction, outA, outB);
 
         // translating the results at A
         add(outA, a, outA);
@@ -97,15 +97,15 @@ public class Geometry {
      * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
      */
     public static void perpendiculars(Point2D a, Point2D b, Point2D outA, Point2D outB) {
-        Point2D temp2 = new Point2D.Double();
+        Point2D direction = new Point2D.Double();
 
         // direction with magnitude = B - A
-        subtract(b, a, temp2);
+        subtract(b, a, direction);
         // unit vector
-        normalize(temp2);
+        normalize(direction);
 
-        // outA, outB = temp2 rotated 90 degrees either way
-        perpendiculars(temp2, outA, outB);
+        // outA, outB = direction rotated 90 degrees either way
+        perpendiculars(direction, outA, outB);
 
         // translating the results at A
         add(outA, a, outA);
@@ -308,5 +308,15 @@ public class Geometry {
         double dx = x2 - x1;
         double dy = y2 - y1;
         return dx * dx + dy * dy;
+    }
+
+    /**
+     * Converts from polar coordinates to the corresponding Cartesian coordinates.
+     */
+    public static Point2D polarToCartesian(double distance, double angle) {
+        double x = distance * FastMath.cos(angle);
+        double y = distance * FastMath.sin(angle);
+
+        return new Point2D.Double(x, y);
     }
 }

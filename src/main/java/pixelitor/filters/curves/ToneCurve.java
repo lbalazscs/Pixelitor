@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import java.awt.geom.Point2D;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurve {
-    private static final int MAX_KNOTS = 16;
+    private static final int MAX_NUM_KNOTS = 16;
     private static final int KNOT_RADIUS_PX = 6;
     private static final float KNOT_RADIUS = 0.04F;
     private static final float NEARBY_RADIUS = 0.08F;
@@ -45,7 +45,7 @@ public class ToneCurve {
     private int width = 255;
     private int height = 255;
     private int[] curvePlotData;
-    private boolean dirty = true;
+    private boolean curveChanged = true;
     private boolean active = false;
     private final BasicStroke curveStroke = new BasicStroke(1);
     private final BasicStroke pointStroke = new BasicStroke(2);
@@ -62,12 +62,12 @@ public class ToneCurve {
     public void reset() {
         curve.x = new float[]{0, 1};
         curve.y = new float[]{0, 1};
-        dirty = true;
+        curveChanged = true;
     }
 
     private void initCurvePlotData() {
-        if (dirty) {
-            dirty = false;
+        if (curveChanged) {
+            curveChanged = false;
             curvePlotData = curve.makeTable();
         }
     }
@@ -107,11 +107,11 @@ public class ToneCurve {
             }
         }
 
-        if (curve.x.length >= MAX_KNOTS) {
+        if (curve.x.length >= MAX_NUM_KNOTS) {
             return -1;
         }
 
-        dirty = true;
+        curveChanged = true;
         return curve.addKnot(p.x, p.y);
     }
 
@@ -124,7 +124,7 @@ public class ToneCurve {
             return;
         }
 
-        dirty = true;
+        curveChanged = true;
         curve.removeKnot(index);
     }
 
@@ -150,7 +150,7 @@ public class ToneCurve {
 
         curve.x[index] = ImageMath.clamp01(p.x);
         curve.y[index] = ImageMath.clamp01(p.y);
-        dirty = true;
+        curveChanged = true;
     }
 
     /**
@@ -282,6 +282,6 @@ public class ToneCurve {
             curve.x[i] = Float.parseFloat(pairX);
             curve.y[i] = Float.parseFloat(pairY);
         }
-        dirty = true;
+        curveChanged = true;
     }
 }

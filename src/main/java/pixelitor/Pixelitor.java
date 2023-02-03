@@ -65,7 +65,7 @@ public class Pixelitor {
         // the app can be put into development mode by
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
-            Utils.makeSureAssertionsAreEnabled();
+            Utils.ensureAssertionsEnabled();
             AppContext.CURRENT = AppContext.DEVELOPMENT_GUI;
         }
 
@@ -119,8 +119,7 @@ public class Pixelitor {
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
-        Theme theme = Themes.DEFAULT;
-        theme = AppPreferences.loadTheme();
+        Theme theme = AppPreferences.loadTheme();
         Themes.install(theme, false, true);
 
         int uiFontSize = AppPreferences.loadUIFontSize();

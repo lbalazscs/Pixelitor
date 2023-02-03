@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,8 +81,8 @@ public class BrightnessContrast extends ParametrizedFilter {
         }
 
         // transform the image
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] destData = ImageUtils.getPixelArray(dest);
         for (int i = 0; i < destData.length; i++) {
             int rgb = srcData[i];
 

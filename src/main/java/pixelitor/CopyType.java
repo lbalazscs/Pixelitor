@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ public enum CopyType {
     /**
      * A layer is duplicated
      */
-    LAYER_DUPLICATE(true) {
+    DUPLICATE_LAYER(true) {
         @Override
-        public String createLayerCopyName(String orig) {
-            return Utils.createCopyName(orig);
+        public String createLayerCopyName(String originalName) {
+            return Utils.createCopyName(originalName);
         }
     },
     /**
@@ -37,26 +37,26 @@ public enum CopyType {
      */
     UNDO(false) {
         @Override
-        public String createLayerCopyName(String orig) {
-            return orig;
+        public String createLayerCopyName(String originalName) {
+            return originalName;
         }
     },
     /**
      * A composition is duplicated (Image/Duplicate)
      */
-    COMP_DUPLICATE(true) {
+    DUPLICATE_COMP(true) {
         @Override
-        public String createLayerCopyName(String orig) {
-            return orig;
+        public String createLayerCopyName(String originalName) {
+            return originalName;
         }
     },
     /**
      * A shallow duplicate of a smart layer.
      */
-    SMART_OBJECT_CLONE(false) {
+    CLONE_SMART_OBJECT(false) {
         @Override
-        public String createLayerCopyName(String orig) {
-            return orig + " clone";
+        public String createLayerCopyName(String originalName) {
+            return originalName + " clone";
         }
     };
 
@@ -66,9 +66,9 @@ public enum CopyType {
         this.deepContentCopy = deepContentCopy;
     }
 
-    public boolean doDeepContentCopy() {
+    public boolean isDeepContentCopy() {
         return deepContentCopy;
     }
 
-    public abstract String createLayerCopyName(String orig);
+    public abstract String createLayerCopyName(String originalName);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -54,7 +54,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
         nameTF = new JTextField(NewImage.generateTitle());
         nameTF.setName("nameTF");
-        gbh.addLabelAndControl("Name", nameTF);
+        gbh.addLabelAndLastControl("Name", nameTF);
 
         widthTF = addTextField("widthTF", "Width:", NewImage.lastSize.width, gbh);
         heightTF = addTextField("heightTF", "Height:", NewImage.lastSize.height, gbh);
@@ -76,7 +76,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
     }
 
     @Override
-    public ValidationResult checkValidity() {
+    public ValidationResult validateSettings() {
         var retVal = ValidationResult.ok();
         int width = 0;
         try {

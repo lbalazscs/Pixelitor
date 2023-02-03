@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,18 +32,18 @@ import java.util.Optional;
 public abstract class Wizard {
     private OKCancelDialog dialog = null;
     private WizardPage currentPage;
-    private final String dialogTitle;
+    private final String title;
     private final String finishButtonText;
-    private final int initialDialogWidth;
-    private final int initialDialogHeight;
+    private final int initialWidth;
+    private final int initialHeight;
     protected final Drawable dr;
 
-    protected Wizard(WizardPage initialPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, Drawable dr) {
+    protected Wizard(WizardPage initialPage, String title, String finishButtonText, int initialWidth, int initialHeight, Drawable dr) {
         currentPage = initialPage;
-        this.dialogTitle = dialogTitle;
+        this.title = title;
         this.finishButtonText = finishButtonText;
-        this.initialDialogWidth = initialDialogWidth;
-        this.initialDialogHeight = initialDialogHeight;
+        this.initialWidth = initialWidth;
+        this.initialHeight = initialHeight;
         this.dr = Objects.requireNonNull(dr);
     }
 
@@ -52,7 +52,7 @@ public abstract class Wizard {
      */
     public void showDialog(JFrame dialogParent) {
         try {
-            showDialog(dialogParent, dialogTitle);
+            showDialog(dialogParent, title);
         } finally {
             finalCleanup();
         }
@@ -77,7 +77,7 @@ public abstract class Wizard {
 
         // It's packed already, but not correctly, because of the header message,
         // and anyway we don't know the size of the filter dialogs in advance.
-        dialog.setSize(initialDialogWidth, initialDialogHeight);
+        dialog.setSize(initialWidth, initialHeight);
         currentPage.onShowingInDialog(dialog);
         GUIUtils.showDialog(dialog);
     }
@@ -110,7 +110,14 @@ public abstract class Wizard {
         }
     }
 
+    /**
+     * Called when the wizard is finished (the "Finish" button was clicked).
+     */
     protected abstract void finalAction();
 
+    /**
+     * Called when the wizard is closed, either by the user
+     * clicking the "Cancel" button or by the wizard finishing.
+     */
     protected abstract void finalCleanup();
 }

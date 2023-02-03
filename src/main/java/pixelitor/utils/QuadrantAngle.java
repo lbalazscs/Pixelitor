@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
  * A rotation by a given number of quadrants.
  */
 public enum QuadrantAngle {
-    ANGLE_90(90, "90\u00B0 CW") {
+    ANGLE_90(90, "90° CW") {
         @Override
         public void changeCanvasSize(Canvas canvas, View view) {
             // switch width and height
@@ -52,7 +52,7 @@ public enum QuadrantAngle {
 
             return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
         }
-    }, ANGLE_180(180, "180\u00B0") {
+    }, ANGLE_180(180, "180°") {
         @Override
         public void changeCanvasSize(Canvas canvas, View view) {
             // do nothing
@@ -74,7 +74,7 @@ public enum QuadrantAngle {
 
             return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
         }
-    }, ANGLE_270(270, "90\u00B0 CCW") {
+    }, ANGLE_270(270, "90° CCW") {
         @Override
         public void changeCanvasSize(Canvas canvas, View view) {
             // same as for 90

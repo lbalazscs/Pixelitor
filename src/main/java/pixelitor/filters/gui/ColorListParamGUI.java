@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,7 +85,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         swatches.add(swatch);
         colorsPanel.add(swatch);
 
-        GUIUtils.addColorDialogListener(swatch, () -> showColorDialog(index));
+        GUIUtils.makeButton(swatch, () -> showColorDialog(index));
         Colors.setupFilterColorsPopupMenu(this, swatch,
             () -> model.getColor(index), c -> updateColor(c, index));
 

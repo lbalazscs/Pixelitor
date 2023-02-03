@@ -177,7 +177,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public boolean isValid(Wizard wizard, Component dialogParent) {
-            ValidationResult validity = outputSettingsPanel.checkValidity();
+            ValidationResult validity = outputSettingsPanel.validateSettings();
             if (!validity.isOK()) {
                 validity.showErrorDialog(dialogParent);
                 return false;

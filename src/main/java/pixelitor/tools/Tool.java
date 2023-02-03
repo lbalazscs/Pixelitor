@@ -38,7 +38,8 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -190,7 +191,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     }
 
     public void randomize() {
-        GUIUtils.randomizeWidgets(settingsPanel);
+        GUIUtils.randomizeChildren(settingsPanel);
     }
 
     @Override
