@@ -20,10 +20,8 @@ jobs:
         java-version: ${{ matrix.java-version }}
         cache: 'maven'
 
-    - name: Build with Maven
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: mvn -B package --file pom.xml
+    - name: Build with Maven (Linux)
+      run: xvfb-run -a mvn -B package --file pom.xml
 
     - name: Get current date
       id: date
