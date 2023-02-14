@@ -29,6 +29,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.Dimension;
 import java.io.Serial;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntPredicate;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -102,7 +103,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void setupEnableOtherIfNotZero(FilterSetting other) {
         other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC);
         addChangeListener(e ->
-            other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC));
+                other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC));
+    }
+
+    public void setupDisableOtherIf(FilterSetting other, IntPredicate condition) {
+        other.setEnabled(true, EnabledReason.APP_LOGIC);
+        addChangeListener(e ->
+                other.setEnabled(!condition.test(getValue()), EnabledReason.APP_LOGIC));
     }
 
     /**

@@ -1705,9 +1705,10 @@ public class AssertJSwingTest {
         testFilterWithDialog("Displacement Map", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog(JHKaleidoscope.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog(Mirror.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Slice", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog(Mirror.NAME, Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Tile Seamless", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Video Feedback", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
@@ -1729,14 +1730,15 @@ public class AssertJSwingTest {
 
     private void testRenderFilters() {
         testFilterWithDialog("Clouds", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Abstract Lights", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
 
         testFilterWithDialog("Chaos Game", Randomize.YES, Reseed.NO, ShowOriginal.NO);

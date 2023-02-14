@@ -870,8 +870,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(DisplacementMap.NAME, DisplacementMap::new);
         sub.addFilter(DrunkVision.NAME, DrunkVision::new);
         sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
-        sub.addFilter(JHOffset.NAME, JHOffset::new);
         sub.addFilter(Mirror.NAME, Mirror::new);
+        sub.addFilter(JHOffset.NAME, JHOffset::new);
         sub.addFilter(Slice.NAME, Slice::new);
 //        sub.addFilter(SlippingTiles.NAME, SlippingTiles::new);
         sub.addFilter(TileSeamless.NAME, TileSeamless::new);
@@ -997,6 +997,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.addFilter(AbstractLights.NAME, AbstractLights::new);
         sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
         sub.addFilter(JHCaustics.NAME, JHCaustics::new);
         sub.addFilter(JHCells.NAME, JHCells::new);
