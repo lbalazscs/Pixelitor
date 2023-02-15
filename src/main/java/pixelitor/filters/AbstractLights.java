@@ -17,11 +17,10 @@
 
 package pixelitor.filters;
 
+import net.jafama.FastMath;
 import pixelitor.colors.Colors;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.DialogParam;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -51,6 +50,16 @@ public class AbstractLights extends ParametrizedFilter {
 
     public static String NAME = "Abstract Lights";
 
+    private static final int TYPE_CHAOS = 1;
+    private static final int TYPE_STAR = 2;
+
+    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
+        new Item("Chaos", TYPE_CHAOS),
+        new Item("Star", TYPE_STAR),
+    });
+    private final GroupedRangeParam starSizeParam = new GroupedRangeParam("Size", 0, 20, 100);
+    private final ImagePositionParam starCenterParam = new ImagePositionParam("Center");
+
     private final RangeParam iterationsParam = new RangeParam("Iterations", 1, 1000, 5000);
     private final RangeParam complexityParam = new RangeParam("Complexity", 1, 10, 20);
     private final RangeParam brightnessParam = new RangeParam("Brightness", 1, 6, 10);
@@ -72,14 +81,21 @@ public class AbstractLights extends ParametrizedFilter {
         whiteParam.setupDisableOtherIf(hueRandomnessParam, value -> value == 100);
 
         DialogParam advancedParam = new DialogParam("Advanced",
-                hueRandomnessParam, whiteParam, blurParam, speedParam, bounceParam);
+            hueRandomnessParam, whiteParam, blurParam, speedParam, bounceParam);
         advancedParam.setRandomizePolicy(IGNORE_RANDOMIZE);
 
-        setParams(iterationsParam,
-                complexityParam,
-                brightnessParam,
-                hueParam,
-                advancedParam
+        DialogParam starSettingsParam = new DialogParam("Star Settings",
+            starSizeParam, starCenterParam);
+        typeParam.setupEnableOtherIf(starSettingsParam, type -> type.getValue() == TYPE_STAR);
+
+        setParams(
+            typeParam,
+            starSettingsParam,
+            iterationsParam,
+            complexityParam,
+            brightnessParam,
+            hueParam,
+            advancedParam
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -114,11 +130,12 @@ public class AbstractLights extends ParametrizedFilter {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         float colorBri = 1.0f / darkening;
-        List<FPoint> points = createPoints(width, height, random, colorBri);
+        List<Particle> points = createPoints(width, height, random, colorBri);
 
         for (int i = 0; i < iterations; i++) {
-            for (FPoint p : points) {
-                p.updateAndDraw(width, height, g2);
+            for (Particle p : points) {
+                p.update(width, height);
+                p.draw(g2);
             }
             pt.unitDone();
         }
@@ -127,7 +144,7 @@ public class AbstractLights extends ParametrizedFilter {
         return dest;
     }
 
-    private List<FPoint> createPoints(int width, int height, Random random, float bri) {
+    private List<Particle> createPoints(int width, int height, Random random, float bri) {
         int numPoints = complexityParam.getValue() + 1;
         int baseHue = hueParam.getValueInNonIntuitiveDegrees();
         int hueRandomness = (int) (hueRandomnessParam.getValue() * 3.6);
@@ -135,60 +152,73 @@ public class AbstractLights extends ParametrizedFilter {
         boolean bounce = bounceParam.isChecked();
         double speed = speedParam.getValueAsDouble();
 
-        ArrayList<FPoint> points = new ArrayList<>();
+        ArrayList<Particle> points = new ArrayList<>();
         for (int i = 0; i < numPoints; i++) {
             int x = random.nextInt(width);
             int y = random.nextInt(height);
-//            int x = width / 2;
-//            int y = height / 2;
-
-            int hue;
-            if (hueRandomness > 0) {
-                hue = (baseHue + random.nextInt(hueRandomness) - hueRandomness / 2) % 360;
-            } else {
-                hue = baseHue;
-                random.nextInt(); // keep the same image 
-            }
-
-            Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
-            if (whiteParam.getValue() > 0) {
-                color = Colors.rgbInterpolate(color, Color.WHITE, (float) whiteParam.getPercentage());
-            }
-
+            Color color = createRandomColor(random, bri, baseHue, hueRandomness);
             double angle = 2 * random.nextDouble() * Math.PI;
-//            double angle = 2.0 * i * Math.PI / numPoints;
 
-            points.add(new FPoint(x, y, speed, angle, color, bounce));
+            points.add(new Particle(x, y, speed, angle, color, bounce));
         }
 
-        for (int i = 0; i < numPoints; i++) {
-            int siblingIndex = i - 1;
-            if (i == 0) {
-                siblingIndex = numPoints - 1;
+        int connect = typeParam.getValue();
+        if (connect == TYPE_CHAOS) {
+            for (int i = 0; i < numPoints; i++) {
+                int siblingIndex = i - 1;
+                if (i == 0) {
+                    siblingIndex = numPoints - 1;
+                }
+                points.get(i).sibling = points.get(siblingIndex);
             }
-            points.get(i).sibling = points.get(siblingIndex);
+        } else { // TYPE_STAR
+            // replace the first particle with a star particle
+            Color c = points.get(0).color;
+            StarParticle starParticle = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
+            points.set(0, starParticle);
+
+            for (int i = 1; i < numPoints; i++) {
+                points.get(i).sibling = starParticle;
+            }
         }
 
         return points;
     }
 
-    static class FPoint {
-        private double x, y;
+    private Color createRandomColor(Random random, float bri, int baseHue, int hueRandomness) {
+        int hue;
+        if (hueRandomness > 0) {
+            hue = (baseHue + random.nextInt(hueRandomness) - hueRandomness / 2) % 360;
+        } else {
+            hue = baseHue;
+            random.nextInt(); // keep the same image
+        }
+
+        Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
+        if (whiteParam.getValue() > 0) {
+            color = Colors.rgbInterpolate(color, Color.WHITE, (float) whiteParam.getPercentage());
+        }
+        return color;
+    }
+
+    private static class Particle {
+        protected double x;
+        protected double y;
         private double vx, vy;
         private final Color color;
-        public FPoint sibling;
+        public Particle sibling;
         private final boolean bounce;
 
-        public FPoint(int x, int y, double speed, double angle, Color color, boolean bounce) {
+        public Particle(int x, int y, double speed, double angle, Color color, boolean bounce) {
             this.x = x;
             this.y = y;
-            this.vx = speed * Math.cos(angle);
-            this.vy = speed * Math.sin(angle);
+            this.vx = speed * FastMath.cos(angle);
+            this.vy = speed * FastMath.sin(angle);
             this.color = color;
             this.bounce = bounce;
         }
 
-        public void updateAndDraw(int width, int height, Graphics2D g) {
+        public void update(int width, int height) {
             x += vx;
             y += vy;
 
@@ -201,8 +231,49 @@ public class AbstractLights extends ParametrizedFilter {
                 }
             }
 
+        }
+
+        public void draw(Graphics2D g) {
+            if (sibling == null) {
+                return;
+            }
             g.setColor(color);
             g.draw(new Line2D.Double(x, y, sibling.x, sibling.y));
+        }
+    }
+
+    private static class StarParticle extends Particle {
+        private final double speed;
+        double angle = 0;
+        private final double cx, cy;
+        private final double radiusX;
+        private final double radiusY;
+        private final double angleIncrement;
+
+        public StarParticle(int x, int y, double speed, Color color, GroupedRangeParam starSize, int width, int height, ImagePositionParam starCenterParam) {
+            super(x, y, speed, 0, color, false);
+            this.speed = speed;
+            double maxRadius = Math.min(width, height) / 2.0;
+            radiusX = maxRadius * starSize.getPercentage(0);
+            radiusY = maxRadius * starSize.getPercentage(1);
+            cx = width * starCenterParam.getRelativeX();
+            cy = height * starCenterParam.getRelativeY();
+
+            // For small angles the particle moves approximately
+            // a distance of radius * angle pixels.
+            angleIncrement = speed / Math.max(radiusX, radiusY);
+        }
+
+        @Override
+        public void update(int width, int height) {
+            if (radiusX == 0 && radiusY == 0) {
+                x = cx;
+                y = cy;
+            } else {
+                angle += angleIncrement;
+                x = cx + radiusX * FastMath.cos(angle);
+                y = cy + radiusY * FastMath.sin(angle);
+            }
         }
     }
 }
