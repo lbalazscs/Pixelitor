@@ -44,11 +44,11 @@ public class PolarFilter extends TransformFilter {
 
     private int type;
     private float width, height;
-    private float centreX, centreY;
+    private float centerX, centerY;
     private float radius;
 
-    private float relativeCentreX = 0.5f;
-    private float relativeCentreY = 0.5f;
+    private float relativeCenterX = 0.5f;
+    private float relativeCenterY = 0.5f;
 
 
     /**
@@ -63,10 +63,10 @@ public class PolarFilter extends TransformFilter {
         width = src.getWidth();
         height = src.getHeight();
 
-        centreX = width * relativeCentreX;
-        centreY = height * relativeCentreY;
+        centerX = width * relativeCenterX;
+        centerY = height * relativeCenterY;
 
-        radius = Math.max(centreY, centreX);
+        radius = Math.max(centerY, centerX);
         return super.filter(src, dst);
     }
 
@@ -97,64 +97,40 @@ public class PolarFilter extends TransformFilter {
     @Override
     protected void transformInverse(int x, int y, float[] out) {
         float theta;
-//        float m, xmax, ymax;
         float r = 0;
 
         switch (type) {
             case RECT_TO_POLAR:
                 theta = 0;
-                if (x >= centreX) {
-                    if (y > centreY) {
-                        theta = ImageMath.PI - (float) FastMath.atan((x - centreX) / (y - centreY));
-                        r = (float) Math.sqrt(sqr(x - centreX) + sqr(y - centreY));
-                    } else if (y < centreY) {
-                        theta = (float) FastMath.atan((x - centreX) / (centreY - y));
-                        r = (float) Math.sqrt(sqr(x - centreX) + sqr(centreY - y));
+                if (x >= centerX) {
+                    if (y > centerY) {
+                        theta = ImageMath.PI - (float) FastMath.atan((x - centerX) / (y - centerY));
+                        r = (float) Math.sqrt(sqr(x - centerX) + sqr(y - centerY));
+                    } else if (y < centerY) {
+                        theta = (float) FastMath.atan((x - centerX) / (centerY - y));
+                        r = (float) Math.sqrt(sqr(x - centerX) + sqr(centerY - y));
                     } else {
                         theta = ImageMath.HALF_PI;
-                        r = x - centreX;
+                        r = x - centerX;
                     }
-                } else if (x < centreX) {
-                    if (y < centreY) {
-                        theta = ImageMath.TWO_PI - (float) FastMath.atan((centreX - x) / (centreY - y));
-                        r = (float) Math.sqrt(sqr(centreX - x) + sqr(centreY - y));
-                    } else if (y > centreY) {
-                        theta = ImageMath.PI + (float) FastMath.atan((centreX - x) / (y - centreY));
-                        r = (float) Math.sqrt(sqr(centreX - x) + sqr(y - centreY));
+                } else if (x < centerX) {
+                    if (y < centerY) {
+                        theta = ImageMath.TWO_PI - (float) FastMath.atan((centerX - x) / (centerY - y));
+                        r = (float) Math.sqrt(sqr(centerX - x) + sqr(centerY - y));
+                    } else if (y > centerY) {
+                        theta = ImageMath.PI + (float) FastMath.atan((centerX - x) / (y - centerY));
+                        r = (float) Math.sqrt(sqr(centerX - x) + sqr(y - centerY));
                     } else {
                         theta = 1.5f * ImageMath.PI;
-                        r = centreX - x;
+                        r = centerX - x;
                     }
                 }
-/* lbalazscs: commented out because not used
-                if (x != centreX)
-                    m = Math.abs(((float) (y - centreY)) / ((float) (x - centreX)));
-                else
-                    m = 0;
-
-                if (m <= ((float) height / (float) width)) {
-                    if (x == centreX) {
-                        xmax = 0;
-                        ymax = centreY;
-                    } else {
-                        xmax = centreX;
-                        ymax = m * xmax;
-                    }
-                } else {
-                    ymax = centreY;
-                    xmax = ymax / m;
-                }
-*/
                 theta += angle;
 
                 r /= zoom;
 
-//                out[0] = (width - 1) - (width - 1) / ImageMath.TWO_PI * theta;
-//                out[1] = height * r / radius;
-
                 out[0] = (width - 1) - (((width - 1) / ImageMath.TWO_PI) * theta);
                 out[1] = height * r / radius;
-
 
                 break;
             case POLAR_TO_RECT:
@@ -173,27 +149,6 @@ public class PolarFilter extends TransformFilter {
                 } else {
                     theta2 = theta;
                 }
- /*
- lbalazscs: commented out because not used
-                t = (float) Math.tan(theta2);
-                if (t != 0)
-                    m = 1.0f / t;
-                else
-                    m = 0;
-
-                if (m <= ((float) (height) / (float) (width))) {
-                    if (theta2 == 0) {
-                        xmax = 0;
-                        ymax = centreY;
-                    } else {
-                        xmax = centreX;
-                        ymax = m * xmax;
-                    }
-                } else {
-                    ymax = centreY;
-                    xmax = ymax / m;
-                }
-  */
                 r = radius * y / height;
                 r /= zoom;
 
@@ -201,61 +156,58 @@ public class PolarFilter extends TransformFilter {
                 float ny = r * (float) FastMath.cos(theta2);
 
                 if (theta >= 1.5f * ImageMath.PI) {
-                    out[0] = centreX - nx;
-                    out[1] = centreY - ny;
+                    out[0] = centerX - nx;
+                    out[1] = centerY - ny;
                 } else if (theta >= Math.PI) {
-                    out[0] = centreX - nx;
-                    out[1] = centreY + ny;
+                    out[0] = centerX - nx;
+                    out[1] = centerY + ny;
                 } else if (theta >= 0.5 * Math.PI) {
-                    out[0] = centreX + nx;
-                    out[1] = centreY + ny;
+                    out[0] = centerX + nx;
+                    out[1] = centerY + ny;
                 } else {
-                    out[0] = centreX + nx;
-                    out[1] = centreY - ny;
+                    out[0] = centerX + nx;
+                    out[1] = centerY - ny;
                 }
                 break;
             case INVERT_IN_CIRCLE:
-                float dx = x - centreX;
-                float dy = y - centreY;
+                float dx = x - centerX;
+                float dy = y - centerY;
                 float distance2 = dx * dx + dy * dy;
 
-                float relX = centreX * centreX * dx / distance2;
-                float relY = centreY * centreY * dy / distance2;
+                float relX = centerX * centerX * dx / distance2;
+                float relY = centerY * centerY * dy / distance2;
 
                 relX *= zoom;
                 relY *= zoom;
 
-                out[0] = centreX + relX;
-                out[1] = centreY + relY;
+                out[0] = centerX + relX;
+                out[1] = centerY + relY;
 
                 // lbalazscs: interesting effect...
                 out[0] -= (width - 1) / ImageMath.TWO_PI * angle;
 
                 break;
         }
-
-//        out[0] *= divideFactor;
-//        out[1] *= divideFactor;
     }
 
     public void setZoom(float zoom) {
         this.zoom = zoom;
     }
 
-    public void setRelativeCentreX(float relativeCentreX) {
-        this.relativeCentreX = relativeCentreX;
+    public void setRelativeCenterX(float relativeCenterX) {
+        this.relativeCenterX = relativeCenterX;
     }
 
-    public void setRelativeCentreY(float relativeCentreY) {
-        this.relativeCentreY = relativeCentreY;
+    public void setRelativeCenterY(float relativeCenterY) {
+        this.relativeCenterY = relativeCenterY;
     }
 
-    public float getRelativeCentreX() {
-        return relativeCentreX;
+    public float getRelativeCenterX() {
+        return relativeCenterX;
     }
 
-    public float getRelativeCentreY() {
-        return relativeCentreY;
+    public float getRelativeCenterY() {
+        return relativeCenterY;
     }
 
     @Override

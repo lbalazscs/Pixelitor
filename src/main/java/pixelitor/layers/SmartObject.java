@@ -189,9 +189,6 @@ public class SmartObject extends CompositeLayer {
         }
 
         // more initialization happens later in afterDeserialization()
-
-//        System.out.printf("SmartObject::readObject: '%s' FINISHED on '%s'%n",
-//            getName(), Thread.currentThread().getName());
     }
 
     @Serial

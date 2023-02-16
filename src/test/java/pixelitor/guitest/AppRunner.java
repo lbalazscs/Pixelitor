@@ -624,8 +624,8 @@ public class AppRunner {
             @Override
             protected boolean isMatching(JLabel label) {
                 return (label.getParent() instanceof LayerGUI layerGUI)
-                        && label.getName().equals(iconType)
-                        && layerGUI.getLayer().getName().equals(layerName);
+                       && label.getName().equals(iconType)
+                       && layerGUI.getLayer().getName().equals(layerName);
             }
         });
     }

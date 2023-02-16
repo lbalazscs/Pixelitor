@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -299,9 +299,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         for (EffectPanel panel : panels) {
-            if (!panel.isSetToDefault()) {
+            if (!panel.hasDefault()) {
                 return false;
             }
         }

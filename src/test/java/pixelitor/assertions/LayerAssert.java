@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.assertions;
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerUI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -53,8 +52,7 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
 
     public S opacityIs(float expected) {
         isNotNull();
-        assertThat(actual.getOpacity())
-            .isCloseTo(expected, within(0.001f));
+        assertThat(actual.getOpacity()).isCloseTo(expected, within(0.001f));
         return myself;
     }
 
@@ -78,15 +76,13 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
 
     public S uiIsVisible() {
         isNotNull();
-        LayerUI layerUI = actual.getUI();
-        assertThat(layerUI.isEyeOpen()).isTrue();
+        assertThat(actual.getUI().isEyeOpen()).isTrue();
         return myself;
     }
 
     public S uiIsNotVisible() {
         isNotNull();
-        LayerUI layerUI = actual.getUI();
-        assertThat(layerUI.isEyeOpen()).isFalse();
+        assertThat(actual.getUI().isEyeOpen()).isFalse();
         return myself;
     }
 

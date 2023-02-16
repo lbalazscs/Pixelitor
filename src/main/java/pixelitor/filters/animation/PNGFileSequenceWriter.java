@@ -32,7 +32,7 @@ import static java.lang.String.format;
  */
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;
-    private int fileSequenceNumber;
+    private int sequenceNumber;
     private int numWrittenImages = 0;
 
     public PNGFileSequenceWriter(File outputDir) {
@@ -41,8 +41,8 @@ public class PNGFileSequenceWriter implements AnimationWriter {
 
     @Override
     public void addFrame(BufferedImage image) throws IOException {
-        String fileName = format("frame_%05d.png", fileSequenceNumber);
-        fileSequenceNumber++;
+        String fileName = format("frame_%05d.png", sequenceNumber);
+        sequenceNumber++;
         File outputFile = new File(outputDir, fileName);
 
         TrackedIO.write(image, "PNG", outputFile, null);

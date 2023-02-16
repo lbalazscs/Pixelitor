@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,21 +31,21 @@ public class DebugProgressTracker implements ProgressTracker {
     private final long startTimeMillis;
     private final List<CallInfo> callInfos;
     private final String name;
-    private final int expectedTotalUnits;
+    private final int totalUnitsExpected;
     private final ProgressTracker delegateTracker;
     private long lastTime;
-    private int calledUnits;
+    private int unitsCalled;
 
-    public DebugProgressTracker(String name, int expectedTotalUnits,
+    public DebugProgressTracker(String name, int totalUnitsExpected,
                                 ProgressTracker delegateTracker) {
         this.name = name;
-        this.expectedTotalUnits = expectedTotalUnits;
+        this.totalUnitsExpected = totalUnitsExpected;
         this.delegateTracker = delegateTracker;
         startTimeMillis = System.currentTimeMillis();
         lastTime = 0;
-        calledUnits = 0;
+        unitsCalled = 0;
         callInfos = new ArrayList<>();
-        log("created " + name + ", expectedTotalUnits = " + expectedTotalUnits);
+        log("created " + name + ", totalUnitsExpected = " + totalUnitsExpected);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DebugProgressTracker implements ProgressTracker {
             delegateTracker.unitDone();
         }
 
-        calledUnits++;
+        unitsCalled++;
         log("unitDone");
     }
 
@@ -64,7 +64,7 @@ public class DebugProgressTracker implements ProgressTracker {
             delegateTracker.unitsDone(units);
         }
 
-        calledUnits += units;
+        unitsCalled += units;
         log("addUnits " + units);
     }
 
@@ -76,18 +76,18 @@ public class DebugProgressTracker implements ProgressTracker {
 
         log("finish");
 
-        System.out.print("Progress for " + name + ", received units = " + calledUnits);
-        if (calledUnits == expectedTotalUnits) {
+        System.out.print("Progress for " + name + ", received units = " + unitsCalled);
+        if (unitsCalled == totalUnitsExpected) {
             System.out.println(", OK");
         } else {
-            System.out.println(", NOK, expectedTotalUnits = " + expectedTotalUnits);
+            System.out.println(", NOK, expectedTotalUnits = " + totalUnitsExpected);
         }
 
-        printStatisticsAboutEachCall();
+        printCallInfoStatistics();
         System.out.println();
     }
 
-    private void printStatisticsAboutEachCall() {
+    private void printCallInfoStatistics() {
         long totalDuration = System.currentTimeMillis() - startTimeMillis;
 
         callInfos.stream()
@@ -103,7 +103,7 @@ public class DebugProgressTracker implements ProgressTracker {
         long time = System.currentTimeMillis() - startTimeMillis;
         StackTraceElement ste = new Throwable().getStackTrace()[2];
 
-        callInfos.add(new CallInfo(method, time, lastTime, ste, expectedTotalUnits));
+        callInfos.add(new CallInfo(method, time, lastTime, ste, totalUnitsExpected));
 
         lastTime = time;
     }

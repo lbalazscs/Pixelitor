@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -106,7 +106,7 @@ public class FontInfo {
         this.tracking = tracking;
     }
 
-    public Font createFont() {
+    public Font createStyledFont() {
         Font font = createFont(name, size, bold, italic);
 
         Map<TextAttribute, Object> map = new HashMap<>();
@@ -158,7 +158,7 @@ public class FontInfo {
         return kerning;
     }
 
-    public boolean hasUnderLine() {
+    public boolean hasUnderline() {
         return underline;
     }
 

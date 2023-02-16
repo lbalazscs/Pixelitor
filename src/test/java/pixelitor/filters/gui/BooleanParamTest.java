@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,23 +46,23 @@ class BooleanParamTest {
     void setValue() {
         var param = new BooleanParam("Test", true);
         assertThat(param.isChecked()).isTrue();
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
 
         var adjListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjListener);
 
         param.setValue(true, false, true);
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
         param.setValue(false, false, true);
-        assertThat(param.isSetToDefault()).isFalse();
+        assertThat(param.hasDefault()).isFalse();
         // expect one triggering
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(true, false, false);
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }

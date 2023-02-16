@@ -163,7 +163,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return !areThumbPositionsChanged() && !areColorsChanged();
     }
 

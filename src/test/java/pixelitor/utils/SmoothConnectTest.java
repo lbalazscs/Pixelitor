@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,12 +42,8 @@ public class SmoothConnectTest extends JPanel {
     private final List<Point2D> pointList;
 
     public SmoothConnectTest() {
-        //<editor-fold defaultstate="collapsed" desc="Initializing Particle System">
-
         int particleCount = 5;
-
         pointList = new ArrayList<>(particleCount);
-
         system = ParticleSystem.<IndexedParticle>createSystem(particleCount)
             .setParticleCreator(() -> {
                 IndexedParticle particle = new IndexedParticle();
@@ -56,8 +52,6 @@ public class SmoothConnectTest extends JPanel {
             })
             .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, ReseedSupport.getLastSeedRandom()))
             .build();
-
-        //</editor-fold>
 
         add(isClosed);
         isClosed.setBackground(Color.WHITE);
@@ -101,7 +95,6 @@ public class SmoothConnectTest extends JPanel {
         }
     }
 
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(SmoothConnectTest::buildGUI);
     }
@@ -109,7 +102,7 @@ public class SmoothConnectTest extends JPanel {
     private static void buildGUI() {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -131,7 +124,6 @@ public class SmoothConnectTest extends JPanel {
         }).start();
     }
 
-
     private class IndexedParticle extends Particle {
         private static int idx = 0;
         public final int index;
@@ -145,7 +137,6 @@ public class SmoothConnectTest extends JPanel {
 
         @Override
         public void flush() {
-
         }
 
         @Override
@@ -172,7 +163,5 @@ public class SmoothConnectTest extends JPanel {
                 vel.set(vel.x, vel.y * -1);
             }
         }
-
     }
-
 }

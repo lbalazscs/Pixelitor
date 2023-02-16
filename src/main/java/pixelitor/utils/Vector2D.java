@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class Vector2D {
         this.y = y;
     }
 
-    public static Vector2D createUnitVector(double angle) {
+    public static Vector2D createUnitFromAngle(double angle) {
         return new Vector2D(FastMath.cos(angle), FastMath.sin(angle));
     }
 
@@ -115,7 +115,11 @@ public class Vector2D {
         divide(length());
     }
 
-    public void normalizeIfNonzero() {
+    private void normalizeQuick() {
+        multiply(FastMath.invSqrtQuick(x * x + y * y));
+    }
+
+    public void normalizeIfNonZero() {
         if (x == 0 && y == 0) {
             return;
         }
@@ -146,10 +150,10 @@ public class Vector2D {
         return hypot(point.getX() - x, point.getY() - y);
     }
 
-    public void perpendicular() {
-        double oy = y;
+    public void rotateBy90Degrees() {
+        double tmp = y;
         y = x;
-        x = -oy;
+        x = -tmp;
     }
 
     public Point2D asPoint() {

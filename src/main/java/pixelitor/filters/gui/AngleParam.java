@@ -109,7 +109,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return angle == defaultVal;
     }
 

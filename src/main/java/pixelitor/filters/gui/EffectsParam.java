@@ -161,9 +161,9 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         if (effectsPanel != null) {
-            return effectsPanel.isSetToDefault();
+            return effectsPanel.hasDefault();
         }
         return true;
     }

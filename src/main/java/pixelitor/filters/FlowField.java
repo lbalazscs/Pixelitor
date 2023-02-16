@@ -83,9 +83,9 @@ public class FlowField extends ParametrizedFilter {
 
         out.set(center);
         out.subtract(position);
-        out.perpendicular();
+        out.rotateBy90Degrees();
         out.setMagnitude(magnitude);
-        out.normalizeIfNonzero();
+        out.normalizeIfNonZero();
         out.multiply(magnitude);
 
         return out;
@@ -401,7 +401,7 @@ public class FlowField extends ParametrizedFilter {
         Color particleColor = particleColorParam.getColor();
         ColorSource colorSource = initialColorsParam.getSelected();
         boolean inheritSpawnPoints = startFlowFromSourceParam.isChecked();
-        float colorRandomness = (float) colorRandomnessParam.getPercentage();
+        double colorRandomness = colorRandomnessParam.getPercentage();
         float widthRandomness = (float) widthRandomnessParam.getPercentage();
 
         float quality = min(QUALITY, SMOOTHNESS / zoom);

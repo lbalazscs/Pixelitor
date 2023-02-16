@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,6 +64,10 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
 
         public int getValue() {
             return value;
+        }
+
+        public boolean valueIs(int v) {
+            return getValue() == v;
         }
 
         @Override
@@ -146,7 +150,7 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
 
         // enable the "Reseed Noise" button only if the wave type is "Noise"
         icp.setupEnableOtherIf(reseedNoise,
-            selected -> selected.getValue() == WaveType.NOISE);
+            selected -> selected.valueIs(WaveType.NOISE));
         return icp;
     }
 

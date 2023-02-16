@@ -136,7 +136,7 @@ public class ColorListParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return Arrays.equals(colors, defaultColors);
     }
 

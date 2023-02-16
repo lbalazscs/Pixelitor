@@ -43,13 +43,13 @@ public class ResetButton extends JButton {
     }
 
     public void updateIcon() {
-        boolean isSetToDefault = resettable.isSetToDefault();
-        setArrowIcon(isSetToDefault);
-        setEnabled(!isSetToDefault);
+        boolean isDefault = resettable.hasDefault();
+        setArrowIcon(isDefault);
+        setEnabled(!isDefault);
     }
 
-    private void setArrowIcon(boolean isSetToDefault) {
-        if (isSetToDefault) {
+    private void setArrowIcon(boolean isDefault) {
+        if (isDefault) {
             setIcon(null);
         } else {
             setIcon(Icons.getWestArrowIcon());
@@ -58,6 +58,6 @@ public class ResetButton extends JButton {
 
     @Override
     public void setEnabled(boolean b) {
-        super.setEnabled(b && !resettable.isSetToDefault());
+        super.setEnabled(b && !resettable.hasDefault());
     }
 }

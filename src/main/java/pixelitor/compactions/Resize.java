@@ -114,7 +114,7 @@ public class Resize implements CompAction {
         var canvasTransform = newCanvas.createImTransformToSize(newCanvasSize);
         newComp.imCoordsChanged(canvasTransform, false, view);
 
-        newCanvas.changeSize(newCanvasSize.width, newCanvasSize.height, view, false);
+        newCanvas.resize(newCanvasSize.width, newCanvasSize.height, view, false);
 
         History.add(new CompositionReplacedEdit("Resize",
             view, oldComp, newComp, canvasTransform, false));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,9 +59,9 @@ class RandomFilterSourceTest {
     @Test
     void newSource() {
         assertThat(source)
-                .doesNotHavePrevious()
-                .doesNotHaveNext()
-                .lastFilterIsNull();
+            .doesNotHavePrevious()
+            .doesNotHaveNext()
+            .lastFilterIsNull();
     }
 
     @Test
@@ -71,10 +71,10 @@ class RandomFilterSourceTest {
         Filter one = source.choose();
 
         assertThat(source)
-                .doesNotHavePrevious()
-                .doesNotHaveNext()
-                .lastFilterIsNotNull()
-                .lastFilterIs(one);
+            .doesNotHavePrevious()
+            .doesNotHaveNext()
+            .lastFilterIsNotNull()
+            .lastFilterIs(one);
     }
 
     @Test
@@ -85,22 +85,22 @@ class RandomFilterSourceTest {
         Filter two = source.choose();
 
         assertThat(source)
-                .hasPrevious()
-                .doesNotHaveNext()
-                .previousFilterIs(one) // this calls getPrevious, and changes the state
-                .doesNotHavePrevious()
-                .hasNext()
-                .nextFilterIs(two) // this calls getNext, and changes the state
-                .hasPrevious()
-                .doesNotHaveNext();
+            .hasPrevious()
+            .doesNotHaveNext()
+            .previousFilterIs(one) // this calls getPrevious, and changes the state
+            .doesNotHavePrevious()
+            .hasNext()
+            .nextFilterIs(two) // this calls getNext, and changes the state
+            .hasPrevious()
+            .doesNotHaveNext();
 
         source.choose(); // three
         assertThat(source)
-                .hasPrevious()
-                .doesNotHaveNext()
-                .previousFilterIs(two) // this calls getPrevious, and changes the state
-                .hasPrevious()
-                .hasNext();
+            .hasPrevious()
+            .doesNotHaveNext()
+            .previousFilterIs(two) // this calls getPrevious, and changes the state
+            .hasPrevious()
+            .hasNext();
     }
 
     @Test
@@ -112,12 +112,12 @@ class RandomFilterSourceTest {
 
         for (int i = 0; i < 3; i++) {
             assertThat(source)
-                    .previousFilterIs(one) // this calls getPrevious, and changes the state
-                    .doesNotHavePrevious()
-                    .hasNext()
-                    .nextFilterIs(two) // this calls getNext, and changes the state
-                    .hasPrevious()
-                    .doesNotHaveNext();
+                .previousFilterIs(one) // this calls getPrevious, and changes the state
+                .doesNotHavePrevious()
+                .hasNext()
+                .nextFilterIs(two) // this calls getNext, and changes the state
+                .hasPrevious()
+                .doesNotHaveNext();
         }
     }
 
@@ -131,26 +131,26 @@ class RandomFilterSourceTest {
         source.choose(); // four
 
         assertThat(source)
-                .previousFilterIs(three)
-                .previousFilterIs(two);
+            .previousFilterIs(three)
+            .previousFilterIs(two);
 
         // after going back a while start generating new filters
         Filter five = source.choose();
         assertThat(source)
-                .hasPrevious()
-                .doesNotHaveNext();
+            .hasPrevious()
+            .doesNotHaveNext();
 
         source.choose(); // six
         assertThat(source)
-                .hasPrevious()
-                .doesNotHaveNext();
+            .hasPrevious()
+            .doesNotHaveNext();
 
         // and now go back to verify the history
         assertThat(source)
-                .previousFilterIs(five)
-                .previousFilterIs(two)
-                .previousFilterIs(one)
-                .doesNotHavePrevious()
-                .hasNext();
+            .previousFilterIs(five)
+            .previousFilterIs(two)
+            .previousFilterIs(one)
+            .doesNotHavePrevious()
+            .hasNext();
     }
 }

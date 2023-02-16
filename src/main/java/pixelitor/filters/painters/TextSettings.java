@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -260,7 +260,7 @@ public class TextSettings implements Serializable, Debuggable {
         horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
         verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
 
-        font = new FontInfo(preset).createFont();
+        font = new FontInfo(preset).createStyledFont();
 
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);

@@ -168,7 +168,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
                 endEffect.getOpacity(), progressF);
             var newDropShadow = new ShadowPathEffect(newOpacity);
             Color newBrushColor = dropShadowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progressF);
+                endEffect.getBrushColor(), progress);
             newDropShadow.setBrushColor(newBrushColor);
             retVal.setDropShadow(newDropShadow);
         }
@@ -178,7 +178,7 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
                 endEffect.getOpacity(), progressF);
             var newGlowEffect = new GlowPathEffect(newOpacity);
             Color newBrushColor = glowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progressF);
+                endEffect.getBrushColor(), progress);
             glowEffect.setBrushColor(newBrushColor);
 
             retVal.setGlow(newGlowEffect);
@@ -189,16 +189,16 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
                 endEffect.getOpacity(), progressF);
             var newInnerGlow = new InnerGlowPathEffect(newOpacity);
             Color newBrushColor = innerGlowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progressF);
+                endEffect.getBrushColor(), progress);
             newInnerGlow.setBrushColor(newBrushColor);
             retVal.setInnerGlow(newInnerGlow);
         }
         if (neonBorderEffect != null) {
             var endEffect = endState.getNeonBorder();
             Color newEdgeColor = neonBorderEffect.interpolateEdgeColor(
-                endEffect.getEdgeColor(), progressF);
+                endEffect.getEdgeColor(), progress);
             Color newCenterColor = neonBorderEffect.interpolateCenterColor(
-                endEffect.getCenterColor(), progressF);
+                endEffect.getCenterColor(), progress);
             float newOpacity = neonBorderEffect.interpolateOpacity(
                 endEffect.getOpacity(), progressF);
             double newWidth = neonBorderEffect.interpolateEffectWidth(

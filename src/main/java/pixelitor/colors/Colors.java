@@ -63,8 +63,8 @@ public class Colors {
     }
 
     // linear interpolation in the RGB space
-    public static Color rgbInterpolate(Color startColor, Color endColor, float progress) {
-        int interpolatedRGB = ImageMath.mixColors(progress,
+    public static Color rgbInterpolate(Color startColor, Color endColor, double progress) {
+        int interpolatedRGB = ImageMath.mixColors((float) progress,
             startColor.getRGB(), endColor.getRGB());
         return new Color(interpolatedRGB, true);
     }

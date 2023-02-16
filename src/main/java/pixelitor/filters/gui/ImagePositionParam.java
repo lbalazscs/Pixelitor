@@ -63,7 +63,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
     }
 

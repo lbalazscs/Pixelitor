@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,7 +77,7 @@ class TaperingStrokeTest {
 
         path.moveTo(25, 80);
         path.lineTo(75, 70);
-        path.lineTo(80, 20 );
+        path.lineTo(80, 20);
 
         Shapes.debugPathIterator(path);
         Shapes.debugPathIterator(new TaperingStroke(30).createStrokedShape(path));

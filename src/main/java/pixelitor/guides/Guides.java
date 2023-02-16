@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,7 @@ public class Guides implements Serializable {
     private String name;
 
     public Guides copyForNewComp(View view) {
-        Guides copy = createCopyGuides();
+        Guides copy = createCopy();
 
         copy.horizontals.addAll(horizontals);
         copy.verticals.addAll(verticals);
@@ -72,7 +72,7 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForFlip(Flip.Direction direction, View view) {
-        Guides copy = createCopyGuides();
+        Guides copy = createCopy();
 
         if (direction == HORIZONTAL) {
             copy.horizontals.addAll(horizontals);
@@ -94,7 +94,7 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForRotate(QuadrantAngle angle, View view) {
-        Guides copy = createCopyGuides();
+        Guides copy = createCopy();
 
         switch (angle) {
             case ANGLE_90 -> copyLinesRotating90(copy);
@@ -130,7 +130,7 @@ public class Guides implements Serializable {
         }
     }
 
-    private Guides createCopyGuides() {
+    private Guides createCopy() {
         Guides copy = new Guides();
         copy.setName(name + " copy");
         return copy;
@@ -154,8 +154,8 @@ public class Guides implements Serializable {
             int newWidth = oldWidth + east + west;
             for (Double h : verticals) {
                 double oldAbs = h * oldWidth;
-                double adjustedRel = (oldAbs + west) / newWidth;
-                copy.verticals.add(adjustedRel);
+                double adjustedRatio = (oldAbs + west) / newWidth;
+                copy.verticals.add(adjustedRatio);
             }
         } else {
             copy.verticals.addAll(verticals);

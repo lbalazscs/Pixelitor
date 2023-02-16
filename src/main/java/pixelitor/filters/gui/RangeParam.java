@@ -163,7 +163,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return Math.abs(getValueAsDouble() - defaultValue) < 0.005;
     }
 

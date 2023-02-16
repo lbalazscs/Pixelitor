@@ -28,6 +28,7 @@ jobs:
       run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
     - name: Archive artifacts
+      if: matrix.java-version == 17
       uses: actions/upload-artifact@v3
       with:
         name: PixelitorJAR-${{ steps.date.outputs.date }}

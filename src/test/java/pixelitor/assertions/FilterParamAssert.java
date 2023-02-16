@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,10 +38,10 @@ public class FilterParamAssert<S extends FilterParamAssert<S, T>, T extends Filt
         return myself;
     }
 
-    public S isSetToDefault() {
+    public S isDefault() {
         isNotNull();
 
-        assertThat(actual.isSetToDefault()).isTrue();
+        assertThat(actual.hasDefault()).isTrue();
 
         return myself;
     }
@@ -49,7 +49,7 @@ public class FilterParamAssert<S extends FilterParamAssert<S, T>, T extends Filt
     public S isNotSetToDefault() {
         isNotNull();
 
-        assertThat(actual.isSetToDefault()).isFalse();
+        assertThat(actual.hasDefault()).isFalse();
 
         return myself;
     }

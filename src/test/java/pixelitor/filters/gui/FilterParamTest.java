@@ -142,7 +142,7 @@ public class FilterParamTest {
         param.reset(false);
 
         checkThatFilterWasNotCalled();
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
     }
 
     @Test
@@ -158,7 +158,7 @@ public class FilterParamTest {
         // through randomize
         if (!param.canRandomize()) {
             param.reset(true);
-            assertThat(param).isSetToDefault();
+            assertThat(param).isDefault();
             return;
         }
 
@@ -167,7 +167,7 @@ public class FilterParamTest {
         while (!changed) {
             param.randomize();
             checkThatFilterWasNotCalled();
-            changed = !param.isSetToDefault();
+            changed = !param.hasDefault();
         }
         assertThat(param.getParamValue())
             .isNotNull()
@@ -175,7 +175,7 @@ public class FilterParamTest {
 
         param.reset(true);
 
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
         assertThat(param.getParamValue())
             .isNotNull()
             .isEqualTo(defaultValue);

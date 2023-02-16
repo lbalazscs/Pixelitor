@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ class IntChoiceParamTest {
         var param = new IntChoiceParam("Test", new Item[]{v1, v2});
 
         assertThat(param)
-            .isSetToDefault()
+            .isDefault()
             .valueIs(1)
             .selectedAsStringIs("Item 1");
 
@@ -64,25 +64,25 @@ class IntChoiceParamTest {
 
         param.setSelectedItem(v1, true);
         assertThat(param)
-                .isSetToDefault()
-                .valueIs(1)
-                .selectedAsStringIs("Item 1");
+            .isDefault()
+            .valueIs(1)
+            .selectedAsStringIs("Item 1");
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
         param.setSelectedItem(v2, true);
         assertThat(param)
-                .isNotSetToDefault()
-                .valueIs(2)
-                .selectedAsStringIs("Item 2");
+            .isNotSetToDefault()
+            .valueIs(2)
+            .selectedAsStringIs("Item 2");
         // expect one triggering
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setSelectedItem(v1, false);
         assertThat(param)
-                .isSetToDefault()
-                .valueIs(1)
-                .selectedAsStringIs("Item 1");
+            .isDefault()
+            .valueIs(1)
+            .selectedAsStringIs("Item 1");
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }

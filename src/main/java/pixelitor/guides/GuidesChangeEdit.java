@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ public class GuidesChangeEdit extends PixelitorEdit {
     private final Guides newGuides;
 
     public GuidesChangeEdit(Composition comp, Guides oldGuides, Guides newGuides) {
-        super(genName(oldGuides, newGuides), comp);
+        super(createEditName(oldGuides, newGuides), comp);
         this.oldGuides = oldGuides;
         this.newGuides = newGuides;
     }
@@ -61,7 +61,7 @@ public class GuidesChangeEdit extends PixelitorEdit {
         }
     }
 
-    private static String genName(Guides oldGuides, Guides newGuides) {
+    private static String createEditName(Guides oldGuides, Guides newGuides) {
         if (oldGuides == null) {
             assert newGuides != null;
             return "Create Guides";

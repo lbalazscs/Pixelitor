@@ -317,7 +317,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     private void setResetButtonBgColor() {
-        if (model.isSetToDefault()) {
+        if (model.hasDefault()) {
             resetButton.setBackground(GRAY);
         } else {
             if (model.getValue() > model.getDefaultValue()) {

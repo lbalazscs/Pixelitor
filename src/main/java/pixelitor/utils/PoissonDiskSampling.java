@@ -83,7 +83,7 @@ public class PoissonDiskSampling {
                     double dist = minDist + 0.0000001;
                     candidate = Vector2D.createFromPolar(angle, dist);
                 } else {
-                    candidate = Vector2D.createUnitVector(angle);
+                    candidate = Vector2D.createUnitFromAngle(angle);
                     double dist = minDist + rnd.nextDouble() * minDist;
                     candidate.setMagnitudeOfUnitVector(dist);
                 }

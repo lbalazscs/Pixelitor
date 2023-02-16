@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -286,9 +286,9 @@ public class CompActionTest {
         }
 
         int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT
-            + withTranslation.getExpectedTY();
+                                      + withTranslation.getExpectedTY();
         int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
-            + withTranslation.getExpectedTX();
+                                     + withTranslation.getExpectedTX();
 
         switch (angle) {
             case ANGLE_90 -> assertThat(newComp).activeLayerTranslationIs(

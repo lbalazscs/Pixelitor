@@ -112,7 +112,7 @@ public class Crop implements CompAction {
         newComp.forEachNestedLayerAndMask(layer ->
             layer.crop(cropRect, deleteCroppedPixels, allowGrowing));
 
-        newCanvas.changeSize(cropRect.width, cropRect.height, view, false);
+        newCanvas.resize(cropRect.width, cropRect.height, view, false);
 
         // The intersected selection, tool widgets etc. have to be moved
         // into the coordinate system of the new, cropped image.

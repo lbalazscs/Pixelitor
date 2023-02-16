@@ -59,7 +59,7 @@ class LayerBlendingModesTest {
         TestHelper.setupMockViewFor(comp);
 
         upperLayer = TestHelper.createImageLayer(
-                comp, create1x1Image(upperColor), "Layer 2");
+            comp, create1x1Image(upperColor), "Layer 2");
         comp.addLayerNoUI(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);

@@ -250,7 +250,7 @@ public class Debug {
         comp.getActiveDrawableOrThrow().setImage(copy);
 
         if (canvas.hasDifferentSizeThan(copy)) {
-            canvas.changeSize(copy.getWidth(), copy.getHeight(), comp.getView(), true);
+            canvas.resize(copy.getWidth(), copy.getHeight(), comp.getView(), true);
         }
 
         comp.repaint();

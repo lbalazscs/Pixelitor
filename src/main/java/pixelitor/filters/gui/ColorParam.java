@@ -69,7 +69,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return Objects.equals(color, defaultColor);
     }
 
@@ -81,7 +81,7 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         setColor(Rnd.createRandomColor(
-            transparencyPolicy.allowTransparencyWhenRandomized), false);
+            transparencyPolicy.randomizeTransparency), false);
     }
 
     public Color getColor() {
@@ -168,7 +168,7 @@ public class ColorParam extends AbstractFilterParam {
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
             return new ColorParamState(Colors.rgbInterpolate(
-                color, endState.color, (float) progress));
+                color, endState.color, progress));
         }
 
         @Override
@@ -185,7 +185,7 @@ public class ColorParam extends AbstractFilterParam {
 
         /**
          * The user can select an alpha value, but randomizing will
-         * always use opaque colors
+         * always create opaque colors
          */
         USER_ONLY_TRANSPARENCY(true, false),
 
@@ -196,11 +196,11 @@ public class ColorParam extends AbstractFilterParam {
         FREE_TRANSPARENCY(true, true);
 
         private final boolean allowTransparency;
-        private final boolean allowTransparencyWhenRandomized;
+        private final boolean randomizeTransparency;
 
-        TransparencyPolicy(boolean allowTransparency, boolean allowTransparencyWhenRandomized) {
+        TransparencyPolicy(boolean allowTransparency, boolean randomizeTransparency) {
             this.allowTransparency = allowTransparency;
-            this.allowTransparencyWhenRandomized = allowTransparencyWhenRandomized;
+            this.randomizeTransparency = randomizeTransparency;
         }
     }
 }

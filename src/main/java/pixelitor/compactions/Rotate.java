@@ -37,8 +37,8 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvasSize(Canvas newCanvas, View view) {
-        angle.changeCanvasSize(newCanvas, view);
+    protected void resizeNewCanvas(Canvas newCanvas, View view) {
+        angle.resizeNewCanvas(newCanvas, view);
     }
 
     @Override

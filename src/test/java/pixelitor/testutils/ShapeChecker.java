@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,35 +49,35 @@ public class ShapeChecker {
     public void assertNumMoveTosWas(int expected) {
         if (numMoveTos != expected) {
             throw new AssertionError("numMoveTos = " + numMoveTos
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 
     public void assertNumLineTosWas(int expected) {
         if (numLineTos != expected) {
             throw new AssertionError("numLineTos = " + numLineTos
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 
     public void assertNumQuadTosWas(int expected) {
         if (numQuadTos != expected) {
             throw new AssertionError("numQuadTos = " + numQuadTos
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 
     public void assertNumCubicTosWas(int expected) {
         if (numCubicTos != expected) {
             throw new AssertionError("numCubicTos = " + numCubicTos
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 
     public void assertNumClosesWas(int expected) {
         if (numCloses != expected) {
             throw new AssertionError("numCloses = " + numCloses
-                + ", expected = " + expected);
+                                     + ", expected = " + expected);
         }
     }
 

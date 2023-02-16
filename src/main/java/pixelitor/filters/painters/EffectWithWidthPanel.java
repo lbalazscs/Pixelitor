@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,9 +59,8 @@ public class EffectWithWidthPanel extends EffectPanel {
     }
 
     @Override
-    public boolean isSetToDefault() {
-        return super.isSetToDefault()
-            && widthRange.isSetToDefault();
+    public boolean hasDefault() {
+        return super.hasDefault() && widthRange.hasDefault();
     }
 
     @Override

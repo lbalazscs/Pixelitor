@@ -37,7 +37,7 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvasSize(Canvas newCanvas, View view) {
+    protected void resizeNewCanvas(Canvas newCanvas, View view) {
         // a flip doesn't change the canvas size
         throw new IllegalStateException("should not be called");
     }

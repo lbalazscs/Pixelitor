@@ -76,7 +76,7 @@ public class Canvas implements Serializable, Debuggable {
     /**
      * Changes the size with values given in image space
      */
-    public void changeSize(int newWidth, int newHeight, View view, boolean notify) {
+    public void resize(int newWidth, int newHeight, View view, boolean notify) {
         width = newWidth;
         height = newHeight;
 

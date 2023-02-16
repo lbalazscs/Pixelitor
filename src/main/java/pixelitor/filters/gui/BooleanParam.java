@@ -106,7 +106,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return defaultValue == currentValue;
     }
 

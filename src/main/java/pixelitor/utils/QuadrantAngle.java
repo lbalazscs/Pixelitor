@@ -29,11 +29,11 @@ import java.awt.image.BufferedImage;
 public enum QuadrantAngle {
     ANGLE_90(90, "90° CW") {
         @Override
-        public void changeCanvasSize(Canvas canvas, View view) {
+        public void resizeNewCanvas(Canvas canvas, View view) {
             // switch width and height
             int newWidth = canvas.getHeight();
             int newHeight = canvas.getWidth();
-            canvas.changeSize(newWidth, newHeight, view, false);
+            canvas.resize(newWidth, newHeight, view, false);
         }
 
         @Override
@@ -54,7 +54,7 @@ public enum QuadrantAngle {
         }
     }, ANGLE_180(180, "180°") {
         @Override
-        public void changeCanvasSize(Canvas canvas, View view) {
+        public void resizeNewCanvas(Canvas canvas, View view) {
             // do nothing
         }
 
@@ -76,9 +76,9 @@ public enum QuadrantAngle {
         }
     }, ANGLE_270(270, "90° CCW") {
         @Override
-        public void changeCanvasSize(Canvas canvas, View view) {
+        public void resizeNewCanvas(Canvas canvas, View view) {
             // same as for 90
-            ANGLE_90.changeCanvasSize(canvas, view);
+            ANGLE_90.resizeNewCanvas(canvas, view);
         }
 
         @Override
@@ -113,7 +113,7 @@ public enum QuadrantAngle {
         return guiName;
     }
 
-    public abstract void changeCanvasSize(Canvas canvas, View view);
+    public abstract void resizeNewCanvas(Canvas canvas, View view);
 
     /**
      * Returns the rotation as a transform in

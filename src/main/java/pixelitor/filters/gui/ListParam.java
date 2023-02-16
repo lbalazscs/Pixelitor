@@ -66,7 +66,7 @@ public class ListParam<E>
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return defaultChoice.equals(currentChoice);
     }
 

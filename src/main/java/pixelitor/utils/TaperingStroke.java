@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,9 +32,12 @@ import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 import static pixelitor.utils.Geometry.*;
 
+/**
+ * A {@link Stroke} implementation that creates a tapered stroke effect.
+ */
 public class TaperingStroke implements Stroke {
     private final float thickness;
-    private final boolean reverse;
+    private final boolean reverse; // switches the tapering direction
 
     public TaperingStroke(float thickness) {
         this(thickness, false);
@@ -46,53 +49,54 @@ public class TaperingStroke implements Stroke {
     }
 
     @Override
-    public Shape createStrokedShape(Shape p) {
-        float[] points = new float[6];
+    public Shape createStrokedShape(Shape shape) {
+        float[] coords = new float[6];
 
-        GeneralPath path = new GeneralPath();
-        List<Point2D> pts = new ArrayList<>();
+        GeneralPath taperedOutline = new GeneralPath();
+        List<Point2D> points = new ArrayList<>();
 
-        for (var it = new FlatteningPathIterator(p.getPathIterator(null), 1); !it.isDone(); it.next()) {
-            switch (it.currentSegment(points)) {
+        // processes the path segments of the input shape and
+        // tapers the stroke based on the distance along the path.
+        for (var it = new FlatteningPathIterator(shape.getPathIterator(null), 1); !it.isDone(); it.next()) {
+            switch (it.currentSegment(coords)) {
                 case SEG_MOVETO:
-                    if (!pts.isEmpty()) {
+                    if (!points.isEmpty()) {
                         if (reverse) {
-                            Collections.reverse(pts);
+                            Collections.reverse(points);
                         }
-                        createTaperingOutline(pts, path);
-                        pts.clear();
+                        createTaperedOutline(points, taperedOutline);
+                        points.clear();
                     }
                     //noinspection fallthrough
                 case SEG_LINETO:
-                    pts.add(new Point2D.Float(points[0], points[1]));
+                    points.add(new Point2D.Float(coords[0], coords[1]));
                     break;
             }
         }
 
-
-        if (!pts.isEmpty()) {
+        if (!points.isEmpty()) {
             if (reverse) {
-                Collections.reverse(pts);
+                Collections.reverse(points);
             }
-            createTaperingOutline(pts, path);
+            createTaperedOutline(points, taperedOutline);
         }
 
-        return path;
+        return taperedOutline;
     }
 
-    private void createTaperingOutline(List<Point2D> pts, GeneralPath path) {
-        float[] distances = new float[pts.size() - 1];
+    private void createTaperedOutline(List<Point2D> points, GeneralPath taperedOutline) {
+        float[] distances = new float[points.size() - 1];
         float totalDistance = 0;
         for (int i = 0; i < distances.length; i++) {
-            Point2D a = pts.get(i);
-            Point2D b = pts.get(i + 1);
+            Point2D a = points.get(i);
+            Point2D b = points.get(i + 1);
             totalDistance += distances[i] = (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
         }
 
         // first point
-        Point2D P1 = pts.get(0);
+        Point2D P1 = points.get(0);
         // second point
-        Point2D P2 = pts.get(1);
+        Point2D P2 = points.get(1);
 
         // first quad point
         Point2D Q1 = new Point2D.Float();
@@ -101,50 +105,50 @@ public class TaperingStroke implements Stroke {
 
         perpendiculars(P1, P2, thickness / 2, Q1, Q2);
 
-        path.moveTo(Q1.getX(), Q1.getY());
+        taperedOutline.moveTo(Q1.getX(), Q1.getY());
 
-        float distanceSoFar = distances[0];
+        float distanceTraversed = distances[0];
 
-        Point2D[] returnPath = new Point2D[pts.size() - 1];
+        Point2D[] returnPath = new Point2D[points.size() - 1];
 
         returnPath[0] = Q2;
 
-        for (int i = 1, s = pts.size() - 1; i < s; i++) {
+        for (int i = 1, s = points.size() - 1; i < s; i++) {
             // For now onwards, P1 will represent (i-1)th and P2 will represent ith point and P3 is (i+1)th point
             // But they can still be called first and second (as of context)
             // THE third point of consideration. the ith point.
-            P1 = pts.get(i - 1);
-            P2 = pts.get(i);
-            Point2D P3 = pts.get(i + 1);
+            P1 = points.get(i - 1);
+            P2 = points.get(i);
+            Point2D P3 = points.get(i + 1);
 
             // Our target?
             // To calculate a line passing through P2
             // such that it is equally aligned with P2P1 and P2P3
-            // and has a length equal to thickness - thickness * distanceSoFar / totalDistance
-            float requiredThickness = (thickness - thickness * distanceSoFar / totalDistance) / 2;
-            distanceSoFar += distances[i - 1];
+            // and has a length equal to thickness - thickness * distanceTraversed / totalDistance
+            float requiredThickness = (thickness - thickness * distanceTraversed / totalDistance) / 2;
+            distanceTraversed += distances[i - 1];
 
             // Our method?
             // We will first calculate the perpendiculars of P2P1 and P2P3 through P2
             // Later we can just take the mid-points to get the two points Q3 and Q4.
 
-            var perpendicularToP2P1_1 = new Point2D.Float();
-            var perpendicularToP2P1_2 = new Point2D.Float();
+            var firstPerpendicularToP2P1 = new Point2D.Float();
+            var secondPerpendicularToP2P1 = new Point2D.Float();
 
-            perpendiculars(P2, P1, perpendicularToP2P1_1, perpendicularToP2P1_2);
+            perpendiculars(P2, P1, firstPerpendicularToP2P1, secondPerpendicularToP2P1);
 
-            var perpendicularToP2P3_1 = new Point2D.Float();
-            var perpendicularToP2P3_2 = new Point2D.Float();
+            var firstPerpendicularToP2P3 = new Point2D.Float();
+            var secondPerpendicularToP2P3 = new Point2D.Float();
 
-            perpendiculars(P2, P3, perpendicularToP2P3_1, perpendicularToP2P3_2);
+            perpendiculars(P2, P3, firstPerpendicularToP2P3, secondPerpendicularToP2P3);
 
             // third quad point
-            Point2D Q3 = new Point2D.Float((perpendicularToP2P1_1.x + perpendicularToP2P3_2.x) / 2, (perpendicularToP2P1_1.y + perpendicularToP2P3_2.y) / 2);
+            Point2D Q3 = new Point2D.Float((firstPerpendicularToP2P1.x + secondPerpendicularToP2P3.x) / 2, (firstPerpendicularToP2P1.y + secondPerpendicularToP2P3.y) / 2);
             // Q3 = Q3 - P2
             subtract(Q3, P2, Q3);
 
             // fourth quad point
-            Point2D Q4 = new Point2D.Float((perpendicularToP2P1_2.x + perpendicularToP2P3_1.x) / 2, (perpendicularToP2P1_2.y + perpendicularToP2P3_1.y) / 2);
+            Point2D Q4 = new Point2D.Float((secondPerpendicularToP2P1.x + firstPerpendicularToP2P3.x) / 2, (secondPerpendicularToP2P1.y + firstPerpendicularToP2P3.y) / 2);
             // Q4 = Q4 - P2
             subtract(Q4, P2, Q4);
 
@@ -157,18 +161,17 @@ public class TaperingStroke implements Stroke {
             add(Q4, P2, Q4);
 
             returnPath[i] = Q3;
-            path.lineTo(Q4.getX(), Q4.getY());
-
+            taperedOutline.lineTo(Q4.getX(), Q4.getY());
         }
 
-        Point2D Ql = pts.get(pts.size() - 1);
-        path.lineTo(Ql.getX(), Ql.getY());
+        Point2D Ql = points.get(points.size() - 1);
+        taperedOutline.lineTo(Ql.getX(), Ql.getY());
 
         for (int i = returnPath.length - 1; i >= 0; i--) {
             Point2D P = returnPath[i];
-            path.lineTo(P.getX(), P.getY());
+            taperedOutline.lineTo(P.getX(), P.getY());
         }
 
-        path.closePath();
+        taperedOutline.closePath();
     }
 }

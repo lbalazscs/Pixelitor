@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -99,15 +99,15 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         int expectedLayerCount = expected.length;
         if (expectedLayerCount != actual.getNumLayers()) {
             failWithMessage(String.format(
-                    "\nFound %d layers instead of the expected %d.",
-                    actual.getNumLayers(), expectedLayerCount));
+                "\nFound %d layers instead of the expected %d.",
+                actual.getNumLayers(), expectedLayerCount));
         }
         for (int i = 0; i < expectedLayerCount; i++) {
             String layerName = actual.getLayer(i).getName();
             if (!layerName.equals(expected[i])) {
                 failWithMessage(String.format(
-                        "\nIn layer nr. %d the layer name was '%s', while expecting '%s'.",
-                        i, layerName, expected[i]));
+                    "\nIn layer nr. %d the layer name was '%s', while expecting '%s'.",
+                    i, layerName, expected[i]));
             }
         }
 
@@ -118,8 +118,8 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         assertThat(actual.getLayer(n)
-                .hasMask())
-                .isTrue();
+            .hasMask())
+            .isTrue();
 
         return this;
     }
@@ -301,17 +301,17 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         LayerUI layerUI = layer.getUI();
         if (layerUI == null) {
             failWithMessage("%s #%d ('%s') has no UI",
-                    layerClassName, i, layer.getName());
+                layerClassName, i, layer.getName());
         }
         if (layer.hasMask()) {
             LayerUI maskUI = layer.getMask().getUI();
             if (maskUI == null) {
                 failWithMessage("The mask of %s #%d ('%s') has no UI",
-                        layerClassName, i, layer.getName());
+                    layerClassName, i, layer.getName());
             }
             if (maskUI != layerUI) {
                 failWithMessage("The mask of the %s #%d ('%s') has a different UI than the layer",
-                        layerClassName, i, layer.getName());
+                    layerClassName, i, layer.getName());
             }
             if (!maskUI.hasMaskIcon()) {
                 failWithMessage("The mask UI of the %s #%d ('%s') has no mask icon",

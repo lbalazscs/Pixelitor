@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class Spiral extends ShapeFilter {
         );
 
         typeParam.setupEnableOtherIf(sidesParam, type ->
-            type.getValue() == TYPE_POLYGON);
+            type.valueIs(TYPE_POLYGON));
 
         helpURL = "https://en.wikipedia.org/wiki/Spiral";
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,31 +42,31 @@ class ParamStateTest {
         // this method runs before beforeAllTests
         TestHelper.setUnitTestingMode();
 
-        FilterParam angleParamStart = new AngleParam("AngleParam", 0);
-        FilterParam angleParamEnd = new AngleParam("AngleParam", 180, CCW_DEGREES);
+        var angleParamStart = new AngleParam("AngleParam", 0);
+        var angleParamEnd = new AngleParam("AngleParam", 180, CCW_DEGREES);
 
-        FilterParam rangeParamStart = new RangeParam("RangeParam", 0, 10, 100);
-        FilterParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
+        var rangeParamStart = new RangeParam("RangeParam", 0, 10, 100);
+        var rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
 
-        FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
-        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 100, 200);
+        var groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
+        var groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 100, 200);
 
-        FilterParam gradientParamStart = new GradientParam("GradientParam", BLACK, GREEN);
-        FilterParam gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);
+        var gradientParamStart = new GradientParam("GradientParam", BLACK, GREEN);
+        var gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);
 
-        FilterParam imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
-        FilterParam imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
+        var imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
+        var imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
 
-        FilterParam colorParamStart = new ColorParam("ColorParam", RED, FREE_TRANSPARENCY);
-        FilterParam colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_TRANSPARENCY);
+        var colorParamStart = new ColorParam("ColorParam", RED, FREE_TRANSPARENCY);
+        var colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_TRANSPARENCY);
 
         return Stream.of(
-                Arguments.of(angleParamStart.copyState(), angleParamEnd.copyState()),
-                Arguments.of(rangeParamStart.copyState(), rangeParamEnd.copyState()),
-                Arguments.of(groupedRangeParamStart.copyState(), groupedRangeParamEnd.copyState()),
-                Arguments.of(gradientParamStart.copyState(), gradientParamEnd.copyState()),
-                Arguments.of(imagePositionParamStart.copyState(), imagePositionParamEnd.copyState()),
-                Arguments.of(colorParamStart.copyState(), colorParamEnd.copyState())
+            Arguments.of(angleParamStart.copyState(), angleParamEnd.copyState()),
+            Arguments.of(rangeParamStart.copyState(), rangeParamEnd.copyState()),
+            Arguments.of(groupedRangeParamStart.copyState(), groupedRangeParamEnd.copyState()),
+            Arguments.of(gradientParamStart.copyState(), gradientParamEnd.copyState()),
+            Arguments.of(imagePositionParamStart.copyState(), imagePositionParamEnd.copyState()),
+            Arguments.of(colorParamStart.copyState(), colorParamEnd.copyState())
         );
     }
 

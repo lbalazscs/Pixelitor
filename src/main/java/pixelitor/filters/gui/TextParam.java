@@ -48,7 +48,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         return defaultValue.equals(getValue());
     }
 

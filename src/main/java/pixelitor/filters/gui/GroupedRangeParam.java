@@ -286,12 +286,12 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isSetToDefault() {
+    public boolean hasDefault() {
         if (isLinked() != linkedByDefault) {
             return false;
         }
         for (RangeParam child : children) {
-            if (!child.isSetToDefault()) {
+            if (!child.hasDefault()) {
                 return false;
             }
         }

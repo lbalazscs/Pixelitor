@@ -131,9 +131,7 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            Color interpolated = Colors.rgbInterpolate(
-                origFg, origBg, (float) rand.nextDouble());
-            setFGColor(interpolated);
+            setFGColor(Colors.rgbInterpolate(origFg, origBg, rand.nextDouble()));
         }
     }
 

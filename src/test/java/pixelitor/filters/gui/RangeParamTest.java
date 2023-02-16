@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,13 +49,13 @@ class RangeParamTest {
     void setValue() {
         var param = new RangeParam("Test", 0, 50, 100);
         assertThat(param.getValue()).isEqualTo(50);
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
 
         var adjListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjListener);
 
         param.setValue(50, true);
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
         // expect no triggering because the value didn't change
         verify(adjListener, never()).paramAdjusted();
 
@@ -65,7 +65,7 @@ class RangeParamTest {
         verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(50, false);
-        assertThat(param).isSetToDefault();
+        assertThat(param).isDefault();
         // expect no new triggering, because triggering was set to false
         verify(adjListener, times(1)).paramAdjusted();
     }
@@ -74,27 +74,27 @@ class RangeParamTest {
     @DisplayName("invalid arguments: min == max")
     void invalidArgsMinIsMax() {
         assertThrows(AssertionError.class, () ->
-                new RangeParam("name", 10, 10, 10));
+            new RangeParam("name", 10, 10, 10));
     }
 
     @Test
     @DisplayName("invalid arguments: min > max")
     void invalidArgsMinBiggerThanMax() {
         assertThrows(AssertionError.class, () ->
-                new RangeParam("name", 11, 10, 10));
+            new RangeParam("name", 11, 10, 10));
     }
 
     @Test
     @DisplayName("invalid arguments: default < min")
     void invalidArgsDefaultSmallerThanMin() {
         assertThrows(AssertionError.class, () ->
-                new RangeParam("name", 5, 2, 10));
+            new RangeParam("name", 5, 2, 10));
     }
 
     @Test
     @DisplayName("invalid arguments: default > max")
     void invalidArgsDefaultBiggerThanMax() {
         assertThrows(AssertionError.class, () ->
-                new RangeParam("name", 5, 15, 10));
+            new RangeParam("name", 5, 15, 10));
     }
 }

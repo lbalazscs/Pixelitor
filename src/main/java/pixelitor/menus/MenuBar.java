@@ -919,14 +919,13 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFindEdgesSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("find_edges"));
 
+        sub.addFilter(Canny.NAME, Canny::new);
         sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
+        sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
 
         String laplacianFilterName = "Laplacian";
         sub.addNoGrayForwardingFilter(laplacianFilterName,
             () -> new LaplaceFilter(laplacianFilterName));
-
-        sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
-        sub.addFilter("Canny", Canny::new);
 
         return sub;
     }

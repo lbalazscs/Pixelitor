@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ package pixelitor.filters.gui;
 public interface Resettable {
     public static final String RESET_ALL_TOOLTIP = "Reset all settings to their default values.";
 
-    boolean isSetToDefault();
+    /**
+     * Whether this {@link Resettable} is currently set to its default value.
+     */
+    boolean hasDefault();
 
     /**
-     * @param trigger If true, then the resetting can trigger
-     *                a GUI update such as the recalculating
-     *                of a filter preview
+     * Reset this {@link Resettable} to its default value.
+     *
+     * @param trigger If true, then the resetting can trigger a GUI update
+     *                such as the recalculating of a filter preview
      */
     void reset(boolean trigger);
 

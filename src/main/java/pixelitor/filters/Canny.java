@@ -26,6 +26,7 @@ import pixelitor.utils.Messages;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
 
@@ -34,6 +35,11 @@ import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
  * based on CannyEdgeDetector by Tom Gibara - http://www.tomgibara.com/computer-vision/canny-edge-detector
  */
 public class Canny extends ParametrizedFilter {
+    public static final String NAME = "Canny";
+
+    @Serial
+    private static final long serialVersionUID = -9029134855407310420L;
+
     private final RangeParam lowThreshold = new RangeParam(
         "Low Threshold", 1, 250, 961);
     private final RangeParam highThreshold = new RangeParam(

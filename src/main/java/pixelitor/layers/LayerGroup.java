@@ -75,6 +75,7 @@ public class LayerGroup extends CompositeLayer {
 
         cachedImage = null;
         thumb = null;
+        needsIconUpdate = false;
     }
 
     @Override

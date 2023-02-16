@@ -72,7 +72,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
         newComp.forEachNestedLayerAndMask(this::processLayer);
 
         if (affectsCanvasSize) {
-            changeCanvasSize(newCanvas, view);
+            resizeNewCanvas(newCanvas, view);
         }
 
         History.add(new CompositionReplacedEdit(
@@ -106,7 +106,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
         }
     }
 
-    protected abstract void changeCanvasSize(Canvas newCanvas, View view);
+    protected abstract void resizeNewCanvas(Canvas newCanvas, View view);
 
     protected abstract String getEditName();
 

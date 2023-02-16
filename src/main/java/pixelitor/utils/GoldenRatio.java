@@ -27,10 +27,10 @@ public class GoldenRatio {
     public static final float GOLDEN_RATIO_CONJUGATE = 0.618034f;
 
     private final Color root;
-    private final float colorRandomness;
+    private final double colorRandomness;
     private final float[] hsbColors;
 
-    public GoldenRatio(Random random, Color root, float colorRandomness) {
+    public GoldenRatio(Random random, Color root, double colorRandomness) {
         this.root = root;
         this.colorRandomness = colorRandomness;
         hsbColors = Colors.toHSB(Rnd.createRandomColor(random, false));

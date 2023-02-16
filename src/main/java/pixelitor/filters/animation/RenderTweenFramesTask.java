@@ -147,8 +147,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         };
         GUIUtils.invokeAndWait(filterRunTask);
 
-        long runCountAfter = Filter.runCount;
-        assert runCountAfter == runCountBefore + 1;
+        assert Filter.runCount == runCountBefore + 1;
 
         var comp = dr.getComp();
         comp.repaint();

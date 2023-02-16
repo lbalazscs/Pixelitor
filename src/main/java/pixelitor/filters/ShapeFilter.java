@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -141,7 +141,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         double relY = center.getRelativeY();
         boolean hasTranslation = relX != 0.5 || relY != 0.5;
 
-        boolean hasRotation = !rotate.isSetToDefault();
+        boolean hasRotation = !rotate.hasDefault();
 
         if (hasTranslation || hasRotation || hasScaling) {
             double cx = srcWidth * relX;

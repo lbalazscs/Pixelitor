@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,57 +44,57 @@ class CompositionIOTest {
 
     @Test
     void readJPEG() {
-        checkSingleLayerRead("jpeg_test_input.jpg");
+        checkReadSingleLayerImage("jpeg_test_input.jpg");
     }
 
     @Test
     void readPNG() {
-        checkSingleLayerRead("png_test_input.png");
+        checkReadSingleLayerImage("png_test_input.png");
     }
 
     @Test
     void readBMP() {
-        checkSingleLayerRead("bmp_test_input.bmp");
+        checkReadSingleLayerImage("bmp_test_input.bmp");
     }
 
     @Test
     void readGIF() {
-        checkSingleLayerRead("gif_test_input.gif");
+        checkReadSingleLayerImage("gif_test_input.gif");
     }
 
     @Test
     void readTiff() {
-        checkSingleLayerRead("tiff_test_input.tiff");
+        checkReadSingleLayerImage("tiff_test_input.tiff");
     }
 
     @Test
     void readTGA() {
-        checkSingleLayerRead("tga_test_input.tga");
+        checkReadSingleLayerImage("tga_test_input.tga");
     }
 
     @Test
     void readPAM() {
-        checkSingleLayerRead("pam_test_input.pam");
+        checkReadSingleLayerImage("pam_test_input.pam");
     }
 
     @Test
     void readPBM() {
-        checkSingleLayerRead("pbm_test_input.pbm");
+        checkReadSingleLayerImage("pbm_test_input.pbm");
     }
 
     @Test
     void readPGM() {
-        checkSingleLayerRead("pgm_test_input.pgm");
+        checkReadSingleLayerImage("pgm_test_input.pgm");
     }
 
     @Test
     void readPPM() {
-        checkSingleLayerRead("ppm_test_input.ppm");
+        checkReadSingleLayerImage("ppm_test_input.ppm");
     }
 
     @Test
     void readPFM() {
-        checkSingleLayerRead("pfm_test_input.pfm");
+        checkReadSingleLayerImage("pfm_test_input.pfm");
     }
 
     @Test
@@ -134,19 +134,19 @@ class CompositionIOTest {
 
         for (int i = 0; i < fileNames.length; i++) {
             try {
-                File f = new File(TEST_IMAGES_DIR, fileNames[i]);
-                var comp = checkMultiLayerRead(f, extraChecks.get(i));
+                File inputFile = new File(TEST_IMAGES_DIR, fileNames[i]);
+                var comp = checkMultiLayerRead(inputFile, extraChecks.get(i));
 
                 // write to tmp file
-                File tmp = File.createTempFile("pix_tmp", ".pxc");
-                PXCFormat.write(comp, tmp);
+                File tmpFile = File.createTempFile("pix_tmp", ".pxc");
+                PXCFormat.write(comp, tmpFile);
 
                 // read back and test
-                checkMultiLayerRead(tmp, extraChecks.get(i));
+                checkMultiLayerRead(tmpFile, extraChecks.get(i));
 
-                boolean deleted = tmp.delete();
+                boolean deleted = tmpFile.delete();
                 if (!deleted) {
-                    throw new IllegalStateException("could not delete " + tmp.getAbsolutePath());
+                    throw new IllegalStateException("could not delete " + tmpFile.getAbsolutePath());
                 }
             } catch (Exception e) {
                 throw new IllegalStateException("Error while testing " + fileNames[i], e);
@@ -157,9 +157,9 @@ class CompositionIOTest {
     @Test
     void readPXCWithAllFeatures() {
         String fileName = "pxc_all_features.pxc";
-        File f = new File(TEST_IMAGES_DIR, fileName);
+        File inputFile = new File(TEST_IMAGES_DIR, fileName);
 
-        var future = IO.loadCompAsync(f);
+        var future = IO.loadCompAsync(inputFile);
         var comp = future.join();
         assertThat(comp)
             .numLayersIs(6)
@@ -185,21 +185,21 @@ class CompositionIOTest {
                 .opacityIs(0.75f);
 
         // read and test
-        File f = new File(TEST_IMAGES_DIR, "gimp_ora_test_input.ora");
-        var comp = checkMultiLayerRead(f, extraCheck);
+        File inputFile = new File(TEST_IMAGES_DIR, "gimp_ora_test_input.ora");
+        var comp = checkMultiLayerRead(inputFile, extraCheck);
 
-        File tmp = File.createTempFile("pix_tmp", ".ora");
-        OpenRaster.write(comp, tmp);
+        File tmpFile = File.createTempFile("pix_tmp", ".ora");
+        OpenRaster.write(comp, tmpFile);
 
         // read back and test
-        checkMultiLayerRead(tmp, extraCheck);
+        checkMultiLayerRead(tmpFile, extraCheck);
 
-        tmp.delete();
+        tmpFile.delete();
     }
 
-    private static void checkSingleLayerRead(String fileName) {
-        File f = new File(TEST_IMAGES_DIR, fileName);
-        var future = IO.loadCompAsync(f);
+    private static void checkReadSingleLayerImage(String fileName) {
+        File inputFile = new File(TEST_IMAGES_DIR, fileName);
+        var future = IO.loadCompAsync(inputFile);
 
         var comp = future.join();
         assertThat(comp)

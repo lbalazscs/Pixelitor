@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,8 +41,8 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dy = Math.abs(actual.y - y);
         if (dx > 0.1 || dy > 0.1) {
             throw new AssertionError(format(
-                    "found (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
-                    actual.x, actual.y, x, y));
+                "found (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
+                actual.x, actual.y, x, y));
         }
 
         return this;
@@ -55,8 +55,8 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dImY = Math.abs(actual.imY - y);
         if (dImX > 2 || dImY > 2) {
             throw new AssertionError(format(
-                    "found image coords (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
-                    actual.imX, actual.imY, x, y));
+                "found image coords (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
+                actual.imX, actual.imY, x, y));
         }
 
         return this;
@@ -89,8 +89,8 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         if (!cp.isRetracted()) {
             AnchorPoint anchor = cp.getAnchor();
             throw new AssertionError(format(
-                    "Not retracted: control is at (%.1f, %.1f), anchor is at (%.1f, %.1f)",
-                    cp.getX(), cp.getY(), anchor.getX(), anchor.getY()));
+                "Not retracted: control is at (%.1f, %.1f), anchor is at (%.1f, %.1f)",
+                cp.getX(), cp.getY(), anchor.getX(), anchor.getY()));
         }
 
         return this;

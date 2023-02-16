@@ -1777,10 +1777,10 @@ public class AssertJSwingTest {
     }
 
     private void testFindEdgesFilters() {
-        testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testNoDialogFilter("Laplacian");
-        testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Canny", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testNoDialogFilter("Laplacian");
     }
 
     private void testOtherFilters() {
