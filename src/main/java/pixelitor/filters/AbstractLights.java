@@ -52,10 +52,12 @@ public class AbstractLights extends ParametrizedFilter {
 
     private static final int TYPE_CHAOS = 1;
     private static final int TYPE_STAR = 2;
+    private static final int TYPE_FRAME = 3;
 
     private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
         new Item("Chaos", TYPE_CHAOS),
         new Item("Star", TYPE_STAR),
+        new Item("Frame", TYPE_FRAME),
     });
     private final GroupedRangeParam starSizeParam = new GroupedRangeParam("Size", 0, 20, 100);
     private final ImagePositionParam starCenterParam = new ImagePositionParam("Center");
@@ -86,7 +88,8 @@ public class AbstractLights extends ParametrizedFilter {
 
         DialogParam starSettingsParam = new DialogParam("Star Settings",
             starSizeParam, starCenterParam);
-        typeParam.setupEnableOtherIf(starSettingsParam, type -> type.getValue() == TYPE_STAR);
+        typeParam.setupEnableOtherIf(starSettingsParam, type -> type.valueIs(TYPE_STAR));
+        typeParam.setupDisableOtherIf(bounceParam, type -> type.valueIs(TYPE_FRAME));
 
         setParams(
             typeParam,
@@ -151,6 +154,7 @@ public class AbstractLights extends ParametrizedFilter {
 
         boolean bounce = bounceParam.isChecked();
         double speed = speedParam.getValueAsDouble();
+        int type = typeParam.getValue();
 
         ArrayList<Particle> points = new ArrayList<>();
         for (int i = 0; i < numPoints; i++) {
@@ -159,11 +163,21 @@ public class AbstractLights extends ParametrizedFilter {
             Color color = createRandomColor(random, bri, baseHue, hueRandomness);
             double angle = 2 * random.nextDouble() * Math.PI;
 
-            points.add(new Particle(x, y, speed, angle, color, bounce));
+            if (type == TYPE_FRAME) {
+                points.add(new FrameParticle(i % 4, speed, angle, color, bounce, x, y, width, height));
+            } else {
+                points.add(new Particle(x, y, speed, angle, color, bounce));
+            }
         }
 
+        connectParticles(width, height, numPoints, speed, points);
+
+        return points;
+    }
+
+    private void connectParticles(int width, int height, int numPoints, double speed, ArrayList<Particle> points) {
         int connect = typeParam.getValue();
-        if (connect == TYPE_CHAOS) {
+        if (connect == TYPE_CHAOS || connect == TYPE_FRAME) {
             for (int i = 0; i < numPoints; i++) {
                 int siblingIndex = i - 1;
                 if (i == 0) {
@@ -171,7 +185,7 @@ public class AbstractLights extends ParametrizedFilter {
                 }
                 points.get(i).sibling = points.get(siblingIndex);
             }
-        } else { // TYPE_STAR
+        } else if (connect == TYPE_STAR) {
             // replace the first particle with a star particle
             Color c = points.get(0).color;
             StarParticle starParticle = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
@@ -180,9 +194,9 @@ public class AbstractLights extends ParametrizedFilter {
             for (int i = 1; i < numPoints; i++) {
                 points.get(i).sibling = starParticle;
             }
+        } else {
+            throw new IllegalStateException("connect = " + connect);
         }
-
-        return points;
     }
 
     private Color createRandomColor(Random random, float bri, int baseHue, int hueRandomness) {
@@ -196,7 +210,7 @@ public class AbstractLights extends ParametrizedFilter {
 
         Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
         if (whiteParam.getValue() > 0) {
-            color = Colors.rgbInterpolate(color, Color.WHITE, (float) whiteParam.getPercentage());
+            color = Colors.rgbInterpolate(color, Color.WHITE, whiteParam.getPercentage());
         }
         return color;
     }
@@ -204,7 +218,8 @@ public class AbstractLights extends ParametrizedFilter {
     private static class Particle {
         protected double x;
         protected double y;
-        private double vx, vy;
+        protected double speed;
+        protected double vx, vy;
         private final Color color;
         public Particle sibling;
         private final boolean bounce;
@@ -212,6 +227,7 @@ public class AbstractLights extends ParametrizedFilter {
         public Particle(int x, int y, double speed, double angle, Color color, boolean bounce) {
             this.x = x;
             this.y = y;
+            this.speed = speed;
             this.vx = speed * FastMath.cos(angle);
             this.vy = speed * FastMath.sin(angle);
             this.color = color;
@@ -243,7 +259,6 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     private static class StarParticle extends Particle {
-        private final double speed;
         double angle = 0;
         private final double cx, cy;
         private final double radiusX;
@@ -252,7 +267,6 @@ public class AbstractLights extends ParametrizedFilter {
 
         public StarParticle(int x, int y, double speed, Color color, GroupedRangeParam starSize, int width, int height, ImagePositionParam starCenterParam) {
             super(x, y, speed, 0, color, false);
-            this.speed = speed;
             double maxRadius = Math.min(width, height) / 2.0;
             radiusX = maxRadius * starSize.getPercentage(0);
             radiusY = maxRadius * starSize.getPercentage(1);
@@ -273,6 +287,79 @@ public class AbstractLights extends ParametrizedFilter {
                 angle += angleIncrement;
                 x = cx + radiusX * FastMath.cos(angle);
                 y = cy + radiusY * FastMath.sin(angle);
+            }
+        }
+    }
+
+    private static class FrameParticle extends AbstractLights.Particle {
+        private static final int STATE_TOP = 0;
+        private static final int STATE_RIGHT = 1;
+        private static final int STATE_BOTTOM = 2;
+        private static final int STATE_LEFT = 3;
+        private int state;
+
+        public FrameParticle(int initialState, double speed, double angle, Color color, boolean bounce, int x, int y, int width, int height) {
+            super(x, y, speed, angle, color, bounce);
+            state = initialState;
+            switch (state) {
+                case STATE_TOP -> {
+                    this.y = 0;
+                    vx = speed;
+                    vy = 0;
+                }
+                case STATE_RIGHT -> {
+                    this.x = width;
+                    vx = 0;
+                    vy = speed;
+                }
+                case STATE_BOTTOM -> {
+                    this.y = height;
+                    vx = -speed;
+                    vy = 0;
+                }
+                case STATE_LEFT -> {
+                    this.x = 0;
+                    vx = 0;
+                    vy = -speed;
+                }
+                default -> throw new IllegalStateException("state = " + state);
+            }
+        }
+
+        @Override
+        public void update(int width, int height) {
+            x += vx;
+            y += vy;
+            switch (state) {
+                case STATE_TOP -> {
+                    if (x >= width) {
+                        state = STATE_RIGHT;
+                        vx = 0;
+                        vy = speed;
+                    }
+                }
+                case STATE_RIGHT -> {
+                    if (y >= height) {
+                        state = STATE_BOTTOM;
+                        vx = -speed;
+                        vy = 0;
+                    }
+                }
+                case STATE_BOTTOM -> {
+                    if (x <= 0) {
+                        state = STATE_LEFT;
+                        vx = 0;
+                        vy = -speed;
+                    }
+                }
+                case STATE_LEFT -> {
+                    if (y <= 0) {
+                        state = STATE_TOP;
+                        vx = speed;
+                        vy = 0;
+                    }
+                }
+                default -> throw new IllegalStateException("state = " + state);
             }
         }
     }
