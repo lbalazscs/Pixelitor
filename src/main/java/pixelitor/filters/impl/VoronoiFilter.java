@@ -22,7 +22,6 @@ import pixelitor.AppContext;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
 import pixelitor.utils.PoissonDiskSampling;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -49,8 +48,14 @@ public class VoronoiFilter extends PointFilter {
     private PoissonDiskSampling sampling;
     private int[] colors;
 
+    private SplittableRandom rand;
+
     public VoronoiFilter(String filterName) {
         super(filterName);
+    }
+
+    public void setRand(SplittableRandom rand) {
+        this.rand = rand;
     }
 
     public void setDistanceBetweenPoints(double distanceBetweenPoints) {
@@ -74,8 +79,6 @@ public class VoronoiFilter extends PointFilter {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
-
-        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
 
         sampling = new PoissonDiskSampling(width, height, distanceBetweenPoints, 10, true, rand);
         List<Point2D> points = sampling.getSamples();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -86,7 +85,7 @@ public class Spheres extends ParametrizedFilter {
 
         opacity.setPresetKey("Opacity");
 
-        FilterButtonModel reseedAction = ReseedSupport.createAction();
+        FilterButtonModel reseedAction = paramSet.createReseedAction();
         layout.setupEnableOtherIf(reseedAction, layoutType -> layoutType == LayoutType.RANDOM);
 
         setParams(
@@ -131,7 +130,7 @@ public class Spheres extends ParametrizedFilter {
 
         boolean addHighlights = addHighLightsCB.isChecked();
 
-        Random rand = ReseedSupport.getLastSeedRandom();
+        Random rand = paramSet.getLastSeedRandom();
         double deltaR = (maxR - minR) / numCircles;
         for (int i = 0; i < numCircles; i++) {
             double r;

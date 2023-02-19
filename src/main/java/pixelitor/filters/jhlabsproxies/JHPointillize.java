@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,19 +18,16 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PointillizeFilter;
-import com.jhlabs.math.Noise;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Pointillize filter based on the JHLabs PointillizeFilter
@@ -60,10 +57,7 @@ public class JHPointillize extends ParametrizedFilter {
             edgeColor,
             dotSize,
             fuzziness
-        ).withAction(reseedByCalling(() -> {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        }));
+        ).withAction(paramSet.createReseedCachedAndNoiseAction());
 
         fadeEdges.setupDisableOtherIfChecked(edgeColor);
         fadeEdges.setupDisableOtherIfChecked(dotSize);

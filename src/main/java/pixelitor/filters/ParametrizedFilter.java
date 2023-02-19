@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     protected ParametrizedFilter(boolean addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
+        paramSet = new ParamSet();
     }
 
     protected void showAffectedArea() {
@@ -78,24 +79,16 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     public abstract BufferedImage doTransform(BufferedImage src, BufferedImage dest);
 
-    private void setParamSet(ParamSet paramSet) {
-        this.paramSet = paramSet;
-        // switch the affected area functionality here on-off
-//        paramSet.addCommonActions(showAffectedAreaParam);
-
-        paramSet.addCommonActions(isNonTrivial());
-    }
-
     public ParamSet setParams(FilterParam param) {
-        ParamSet ps = new ParamSet(param);
-        setParamSet(ps);
-        return ps;
+        paramSet.addParam(param);
+        paramSet.addCommonActions(isNonTrivial());
+        return paramSet;
     }
 
     public ParamSet setParams(FilterParam... params) {
-        ParamSet ps = new ParamSet(params);
-        setParamSet(ps);
-        return ps;
+        paramSet.addParams(params);
+        paramSet.addCommonActions(isNonTrivial());
+        return paramSet;
     }
 
     public ParamSet getParamSet() {

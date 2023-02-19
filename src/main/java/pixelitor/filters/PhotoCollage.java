@@ -24,7 +24,6 @@ import pixelitor.gui.GUIText;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
@@ -87,7 +86,7 @@ public class PhotoCollage extends ParametrizedFilter {
             bgColor,
             marginColor,
             shadowDialog
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
@@ -95,7 +94,7 @@ public class PhotoCollage extends ParametrizedFilter {
         int numImages = numImagesParam.getValue();
         var pt = new StatusBarProgressTracker(NAME, numImages);
 
-        Random rand = ReseedSupport.getLastSeedRandom();
+        Random rand = paramSet.getLastSeedRandom();
 
         int xSize = size.getValue(0);
         int ySize = size.getValue(1);

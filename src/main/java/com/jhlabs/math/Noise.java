@@ -26,8 +26,8 @@ import java.util.Random;
 public class Noise implements Function1D, Function2D, Function3D {
     private static final Random randomGenerator = new Random();
 
-    public static void reseed() {
-        randomGenerator.setSeed(System.nanoTime());
+    public static void reseed(long newSeed) {
+        randomGenerator.setSeed(newSeed);
         init();
     }
 

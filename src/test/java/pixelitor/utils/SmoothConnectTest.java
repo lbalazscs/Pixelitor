@@ -28,6 +28,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -44,13 +45,14 @@ public class SmoothConnectTest extends JPanel {
     public SmoothConnectTest() {
         int particleCount = 5;
         pointList = new ArrayList<>(particleCount);
+        Random random = new Random();
         system = ParticleSystem.<IndexedParticle>createSystem(particleCount)
             .setParticleCreator(() -> {
                 IndexedParticle particle = new IndexedParticle();
                 pointList.add(particle.pos);
                 return particle;
             })
-            .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, ReseedSupport.getLastSeedRandom()))
+            .addModifier(new Modifier.RandomizePosition<>(size.width, size.height, random))
             .build();
 
         add(isClosed);

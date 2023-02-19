@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.VoronoiFilter;
 import pixelitor.utils.Metric;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
 
@@ -56,7 +55,7 @@ public class Voronoi extends ParametrizedFilter {
             showPoints,
             useImageColors,
             antiAliasing
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
 
         if (AppContext.isDevelopment()) {
             paramSet.addParams(new FilterParam[]{debugGrid});
@@ -71,6 +70,7 @@ public class Voronoi extends ParametrizedFilter {
             filter = new VoronoiFilter(NAME);
         }
 
+        filter.setRand(paramSet.getLastSeedSRandom());
         filter.setDistanceBetweenPoints(distance.getValueAsDouble());
         filter.setMetric(metric.getSelected());
         filter.setUseImageColors(useImageColors.isChecked());

@@ -23,10 +23,8 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
@@ -50,7 +48,7 @@ public class JHSparkle extends ParametrizedFilter {
     public JHSparkle() {
         super(true);
 
-        var reseed = ReseedSupport.createAction("", "Reseed Randomness");
+        var reseed = paramSet.createReseedAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseed);
         setParams(
             center,
@@ -69,8 +67,6 @@ public class JHSparkle extends ParametrizedFilter {
             filter = new SparkleFilter(NAME);
         }
 
-        Random rand = ReseedSupport.getLastSeedRandom();
-
         filter.setLightOnly(lightOnly.isChecked());
         filter.setRelativeCentreX((float) center.getRelativeX());
         filter.setRelativeCentreY((float) center.getRelativeY());
@@ -79,7 +75,7 @@ public class JHSparkle extends ParametrizedFilter {
         filter.setAmount(shine.getValue());
         filter.setRandomness(randomness.getValue());
         filter.setColor(color.getColor().getRGB());
-        filter.setRandom(rand);
+        filter.setRandom(paramSet.getLastSeedRandom());
 
         return filter.filter(src, dest);
     }

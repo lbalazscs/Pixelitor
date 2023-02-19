@@ -26,7 +26,6 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * A filter parameter for selecting a choice from a list of values
@@ -39,7 +38,6 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     public IntChoiceParam(String name, Item[] choices, RandomizePolicy randomizePolicy) {
         super(name, choices, randomizePolicy);
     }
-
 
     public int getValue() {
         return currentChoice.getValue();
@@ -143,15 +141,18 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     };
 
     public static IntChoiceParam forWaveType() {
-        var reseedNoise = reseedNoise("Reseed Noise",
+        return new IntChoiceParam("Wave Type", waveTypeChoices);
+    }
+
+    public FilterParam configureWaveType(ParamSet paramSet) {
+        FilterButtonModel reseedNoise = paramSet.createReseedNoiseAction("Reseed Noise",
             "Reinitialize the randomness of the noise.");
-        var icp = new IntChoiceParam("Wave Type", waveTypeChoices);
-        icp.withAction(reseedNoise);
 
         // enable the "Reseed Noise" button only if the wave type is "Noise"
-        icp.setupEnableOtherIf(reseedNoise,
+        setupEnableOtherIf(reseedNoise,
             selected -> selected.valueIs(WaveType.NOISE));
-        return icp;
+
+        return withAction(reseedNoise);
     }
 
     public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {

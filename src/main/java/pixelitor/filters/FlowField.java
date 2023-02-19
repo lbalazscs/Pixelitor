@@ -271,7 +271,7 @@ public class FlowField extends ParametrizedFilter {
 
             advancedParam
 
-        ).withAction(ReseedSupport.createSimplexAction());
+        ).withAction(paramSet.createReseedSimplexAction());
 
         UserPreset confetti = new UserPreset("Confetti");
         confetti.put("Force Mixer", "60.00,20.00,20.00,false");
@@ -421,8 +421,8 @@ public class FlowField extends ParametrizedFilter {
         float fieldDensity = fieldWidth * 1.0f / imgWidth;
         int fieldHeight = (int) (imgHeight * fieldDensity);
 
-        Random r = ReseedSupport.getLastSeedRandom();
-        OpenSimplex2F noise = ReseedSupport.getLastSeedSimplex();
+        Random r = paramSet.getLastSeedRandom();
+        OpenSimplex2F noise = paramSet.getLastSeedSimplex();
 
         Vector2D center = new Vector2D(fieldWidth / 2.0f, fieldHeight / 2.0f);
         Rectangle bounds = new Rectangle(-PAD, -PAD,

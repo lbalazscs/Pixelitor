@@ -26,16 +26,19 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.*;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
-import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Plasma filter based on the JHLabs PlasmaFilter
  */
 public class JHPlasma extends ParametrizedFilter {
     public static final String NAME = "Plasma";
+
+    @Serial
+    private static final long serialVersionUID = 5878378907746251031L;
 
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 100, 600);
 
@@ -49,7 +52,8 @@ public class JHPlasma extends ParametrizedFilter {
         new Item("Use Gradient", GRADIENT_COLORS),
     }, ALLOW_RANDOMIZE);
 
-    private PlasmaFilter filter;
+    // initialize here, otherwise it doesn't load from pxc smart filter
+    private final PlasmaFilter filter = new PlasmaFilter(NAME);
 
     private final float[] defaultThumbPositions = {0.0f, 0.3f, 0.7f, 1.0f};
     private final Color[] defaultValues = {BLACK, RED, ORANGE, YELLOW};
@@ -64,19 +68,16 @@ public class JHPlasma extends ParametrizedFilter {
             turbulence,
             type,
             gradient
-        ).withAction(reseedByCalling(() -> filter.randomize()));
+        ).withAction(paramSet.createReseedAction(newSeed -> filter.setSeed(newSeed)));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (filter == null) {
-            filter = new PlasmaFilter(NAME);
-        }
-
         filter.setLessColors(type.getValue() != MORE_COLORS);
         filter.setTurbulence((float) turbulence.getPercentage());
         filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
         filter.setColormap(gradient.getValue());
+        filter.setSeed(paramSet.getLastSeed());
 
         return filter.filter(src, dest);
     }

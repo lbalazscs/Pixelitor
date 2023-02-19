@@ -35,7 +35,7 @@ public class SmearFilter extends WholeImageFilter {
     private float angle = 0;
     private float density = 0.5f;
     private int distance = 8;
-    private Random randomGenerator;
+    private Random random;
     //    private long seed = 567;
     private int shape = LINES;
     private float mix = 0.5f;
@@ -126,10 +126,9 @@ public class SmearFilter extends WholeImageFilter {
         pt = createProgressTracker(numShapes);
 
         for (int i = 0; i < numShapes; i++) {
-            int x = (randomGenerator.nextInt() & 0x7fffffff) % width;
-            int y = (randomGenerator.nextInt() & 0x7fffffff) % height;
-//            int length = randomGenerator.nextInt() % distance + 1;
-            int length = randomGenerator.nextInt(distance) + 1;
+            int x = (random.nextInt() & 0x7fffffff) % width;
+            int y = (random.nextInt() & 0x7fffffff) % height;
+            int length = random.nextInt(distance) + 1;
             int rgb = inPixels[y * width + x];
             for (int x1 = x - length; x1 < x + length + 1; x1++) {
                 if (x1 >= 0 && x1 < width) {
@@ -172,10 +171,10 @@ public class SmearFilter extends WholeImageFilter {
     }
 
     private void renderOneLine(int width, int height, int[] inPixels, int[] outPixels, float sin, float cos) {
-        int sx = (randomGenerator.nextInt() & 0x7fffffff) % width;
-        int sy = (randomGenerator.nextInt() & 0x7fffffff) % height;
+        int sx = (random.nextInt() & 0x7fffffff) % width;
+        int sy = (random.nextInt() & 0x7fffffff) % height;
         int rgb = inPixels[sy * width + sx];
-        int length = (randomGenerator.nextInt() & 0x7fffffff) % distance;
+        int length = (random.nextInt() & 0x7fffffff) % distance;
         int dx = (int) (length * cos);
         int dy = (int) (length * sin);
 
@@ -265,8 +264,8 @@ public class SmearFilter extends WholeImageFilter {
     }
 
     private void renderOneShape(int width, int height, int[] inPixels, int[] outPixels, int radius, int radius2) {
-        int sx = (randomGenerator.nextInt() & 0x7fffffff) % width;
-        int sy = (randomGenerator.nextInt() & 0x7fffffff) % height;
+        int sx = (random.nextInt() & 0x7fffffff) % width;
+        int sy = (random.nextInt() & 0x7fffffff) % height;
         int rgb = inPixels[sy * width + sx];
         int minSx = sx - radius;
         int maxSx = sx + radius + 1;
@@ -338,7 +337,7 @@ public class SmearFilter extends WholeImageFilter {
         return "Effects/Smear...";
     }
 
-    public void setRandomGenerator(Random randomGenerator) {
-        this.randomGenerator = randomGenerator;
+    public void setRandom(Random random) {
+        this.random = random;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,6 @@ import static com.jhlabs.image.WaveType.wave;
 import static com.jhlabs.image.WaveType.wave01;
 import static com.jhlabs.math.Noise.*;
 import static net.jafama.FastMath.*;
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Marble filter
@@ -86,7 +85,7 @@ public class Marble extends ParametrizedFilter {
             details.notLinkable(),
             smoothDetails,
             gradient
-        ).withAction(reseedNoise());
+        ).withReseedNoiseAction();
     }
 
     @Override

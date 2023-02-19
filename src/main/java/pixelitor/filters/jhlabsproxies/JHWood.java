@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -65,7 +64,7 @@ public class JHWood extends ParametrizedFilter {
             turbulence,
             fibres,
             gain
-        ).withAction(reseedNoise());
+        ).withReseedNoiseAction();
 
         stretch.setupEnableOtherIfNotZero(angle);
     }

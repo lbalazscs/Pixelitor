@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
-import pixelitor.utils.ReseedSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -39,8 +38,9 @@ class ParamSetTest {
 
     @BeforeEach
     void beforeEachTest() {
-        params = new ParamSet(ParamTest.getTestParams())
-            .withAction(ReseedSupport.createAction());
+        params = new ParamSet();
+        params.addParams(ParamTest.getTestParams());
+        params.withReseedAction();
         params.addCommonActions(true);
 
         adjustmentListener = mock(ParamAdjustmentListener.class);

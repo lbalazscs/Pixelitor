@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
@@ -99,12 +98,12 @@ public class AbstractLights extends ParametrizedFilter {
             brightnessParam,
             hueParam,
             advancedParam
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random random = ReseedSupport.getLastSeedRandom();
+        Random random = paramSet.getLastSeedRandom();
         int iterations = iterationsParam.getValue();
 
         var pt = new StatusBarProgressTracker(NAME, iterations);

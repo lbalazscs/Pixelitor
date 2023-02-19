@@ -118,8 +118,20 @@ public class UserPreset implements Preset {
         return defaultValue;
     }
 
-    public void putInt(String key, int i) {
-        put(key, String.valueOf(i));
+    public long getLong(String key, long defaultValue) {
+        String value = get(key);
+        if (value != null) {
+            return Long.parseLong(value);
+        }
+        return defaultValue;
+    }
+
+    public void putInt(String key, int value) {
+        put(key, String.valueOf(value));
+    }
+
+    public void putLong(String key, long value) {
+        put(key, String.valueOf(value));
     }
 
     public boolean getBoolean(String key) {

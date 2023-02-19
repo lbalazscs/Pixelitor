@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,6 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
-
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Polar Glass Tiles filter
@@ -54,7 +52,7 @@ public class PolarTiles extends ParametrizedFilter {
     public PolarTiles() {
         super(true);
 
-        var reseedRandomness = reseedNoise("", "Reseed Randomness");
+        var reseedRandomness = paramSet.createReseedNoiseAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
         setParams(
             modeParam,

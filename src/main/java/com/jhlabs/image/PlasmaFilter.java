@@ -27,26 +27,20 @@ public class PlasmaFilter extends WholeImageFilter {
     private float scaling = 0.0f;
     private Colormap colormap = new LinearColormap();
     private SplittableRandom random;
-    private long seed = 567;
     private boolean useColormap = false;
 
     private boolean lessColors = false;
 
     public PlasmaFilter(String filterName) {
         super(filterName);
-        random = new SplittableRandom();
     }
 
     public void setLessColors(boolean lessColors) {
         this.lessColors = lessColors;
     }
 
-    public void setSeed(int seed) {
-        this.seed = seed;
-    }
-
-    public int getSeed() {
-        return (int) seed;
+    public void setSeed(long newSeed) {
+        this.random = new SplittableRandom(newSeed);
     }
 
     /**
@@ -105,10 +99,6 @@ public class PlasmaFilter extends WholeImageFilter {
 
     public boolean getUseColormap() {
         return useColormap;
-    }
-
-    public void randomize() {
-        seed = System.currentTimeMillis();
     }
 
     private int randomRGB() {
@@ -259,7 +249,7 @@ public class PlasmaFilter extends WholeImageFilter {
             return outPixels;
         }
 
-        random = new SplittableRandom(seed);
+//        random = new SplittableRandom(seed);
         //random.setSeed(seed);
 
         int w1 = width - 1;

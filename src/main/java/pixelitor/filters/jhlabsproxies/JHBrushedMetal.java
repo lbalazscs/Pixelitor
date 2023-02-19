@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.BrushedMetalFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
@@ -48,12 +47,12 @@ public class JHBrushedMetal extends ParametrizedFilter {
             radius.withAdjustedRange(0.5),
             amount,
             shine
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
+        SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         var filter = new BrushedMetalFilter(color.getColor().getRGB(),
             radius.getValue(),

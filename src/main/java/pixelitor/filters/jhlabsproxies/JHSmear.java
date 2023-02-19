@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,8 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import static pixelitor.gui.GUIText.OPACITY;
 
@@ -59,7 +57,7 @@ public class JHSmear extends ParametrizedFilter {
 
         setParams(
             distance.withAdjustedRange(0.1),
-            shape.withAction(ReseedSupport.createAction()),
+            shape.withAction(paramSet.createReseedAction()),
             angle,
             density,
             mix
@@ -77,8 +75,6 @@ public class JHSmear extends ParametrizedFilter {
             return src;
         }
 
-        Random rand = ReseedSupport.getLastSeedRandom();
-
         if (filter == null) {
             filter = new SmearFilter(NAME);
         }
@@ -88,7 +84,7 @@ public class JHSmear extends ParametrizedFilter {
         filter.setAngle((float) angle.getValueInRadians());
         filter.setMix((float) mix.getPercentage());
         filter.setShape(shape.getValue());
-        filter.setRandomGenerator(rand);
+        filter.setRandom(paramSet.getLastSeedRandom());
 
         return filter.filter(src, dest);
     }

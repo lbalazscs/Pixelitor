@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.*;
 import pixelitor.io.IO;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 
 import java.awt.Color;
@@ -94,7 +93,7 @@ public class ConcentricShapes extends ParametrizedFilter {
     public ConcentricShapes() {
         super(false);
 
-        FilterButtonModel reseedAction = ReseedSupport.createAction("", "Reseed Randomness");
+        FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
         type.setupEnableOtherIf(polySides, selectedType -> selectedType == ConcentricShapeType.POLYGONS);
 
         setParams(
@@ -119,7 +118,8 @@ public class ConcentricShapes extends ParametrizedFilter {
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        List<ColoredShape> coloredShapes = createShapes(dest.getWidth(), dest.getHeight());
+        Random random = paramSet.getLastSeedRandom();
+        List<ColoredShape> coloredShapes = createShapes(dest.getWidth(), dest.getHeight(), random);
         for (ColoredShape coloredShape : coloredShapes) {
             g.setColor(coloredShape.color());
             g.fill(coloredShape.shape());
@@ -129,9 +129,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         return dest;
     }
 
-    private List<ColoredShape> createShapes(int width, int height) {
-        Random rng = ReseedSupport.getLastSeedRandom();
-
+    private List<ColoredShape> createShapes(int width, int height, Random rng) {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
@@ -167,7 +165,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         content.append("\n");
 
         Canvas canvas = Views.getActiveComp().getCanvas();
-        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight());
+        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom());
         for (ColoredShape coloredShape : coloredShapes) {
             String svgPath = Shapes.toSVGPath(coloredShape.shape());
             String svgColor = Colors.toHTMLHex(coloredShape.color(), false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CellularFilter;
-import com.jhlabs.math.Noise;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
@@ -26,11 +25,9 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
-import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -80,10 +77,7 @@ public class JHCells extends ParametrizedFilter {
             scale.withAdjustedRange(0.5),
             stretch,
             angle
-        ).withAction(reseedByCalling(() -> {
-            CachedFloatRandom.reseedCache();
-            Noise.reseed();
-        }));
+        ).withAction(paramSet.createReseedCachedAndNoiseAction());
     }
 
     @Override

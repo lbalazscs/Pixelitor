@@ -27,13 +27,13 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.Random;
 import java.util.concurrent.Future;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 import static pixelitor.gui.GUIText.ZOOM;
 
 /**
@@ -42,11 +42,10 @@ import static pixelitor.gui.GUIText.ZOOM;
 public class Clouds extends ParametrizedFilter {
     public static final String NAME = "Clouds";
 
-    private static int[] p;
+    @Serial
+    private static final long serialVersionUID = 201867762435136383L;
 
-    static {
-        reseed();
-    }
+    private int[] p;
 
     private final RangeParam scaleParam = new RangeParam(ZOOM, 3, 100, 300);
     private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 0, 50, 100);
@@ -64,12 +63,16 @@ public class Clouds extends ParametrizedFilter {
             roughnessParam,
             color1,
             color2
-        ).withAction(reseedByCalling(Clouds::reseed));
+        ).withAction(paramSet.createReseedAction(this::reseed));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         var pt = new StatusBarProgressTracker(NAME, src.getHeight());
+
+        if (p == null) {
+            reseed(paramSet.getLastSeed());
+        }
 
         renderClouds(dest,
             scaleParam.getValueAsFloat(),
@@ -82,27 +85,27 @@ public class Clouds extends ParametrizedFilter {
         return dest;
     }
 
-    public static void renderClouds(BufferedImage dest,
-                                    float scale, float roughness,
-                                    Color c1, Color c2, ProgressTracker pt) {
+    private void renderClouds(BufferedImage dest,
+                              float scale, float roughness,
+                              Color c1, Color c2, ProgressTracker pt) {
         int width = dest.getWidth();
         int height = dest.getHeight();
         int[] destData = ImageUtils.getPixelArray(dest);
-        int[] color1 = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
-        int[] color2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
+        int[] c1Arr = {c1.getAlpha(), c1.getRed(), c1.getGreen(), c1.getBlue()};
+        int[] c2Arr = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, color1, color2);
+            Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, c1Arr, c2Arr);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
     }
 
-    private static void calculateLine(float startingScale, float roughness,
-                                      int width, int y, int[] destData,
-                                      int[] color1, int[] color2) {
+    private void calculateLine(float startingScale, float roughness,
+                               int width, int y, int[] destData,
+                               int[] color1, int[] color2) {
         for (int x = 0; x < width; x++) {
             float scale = startingScale;
             float noiseValue = 0.0f;
@@ -132,7 +135,7 @@ public class Clouds extends ParametrizedFilter {
     /**
      * A 2D version of the algorithm from http://mrl.nyu.edu/~perlin/noise/
      */
-    private static float perlinNoise2D(float x, float y) {
+    private float perlinNoise2D(float x, float y) {
         // find unit grid cell containing point + wrap the integer cells at 255
         int gridX = ((int) x) & 255;
         int gridY = ((int) y) & 255;
@@ -179,13 +182,12 @@ public class Clouds extends ParametrizedFilter {
      * Fill the permutation table is with all the values with
      * between 1 and 256, in random order, and duplicate it
      */
-    public static void reseed() {
+    public void reseed(long newSeed) {
+        Random random = new Random(newSeed);
         p = new int[512];
         for (int i = 0; i < 256; i++) {
             p[i] = i;
         }
-
-        Random random = new Random();
 
         for (int i = 0; i < 256; i++) {
             int j = random.nextInt(256);

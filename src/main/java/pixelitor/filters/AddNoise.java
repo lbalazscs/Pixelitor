@@ -22,7 +22,6 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
@@ -61,12 +60,12 @@ public class AddNoise extends ParametrizedFilter {
             saturationParam,
             opacityParam,
             method
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
+        SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         if (src.getType() == TYPE_BYTE_GRAY) {
             return addNoiseToGray(src, dest, rand);

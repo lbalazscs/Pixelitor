@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,18 +29,17 @@ import java.util.Random;
  */
 public class CachedFloatRandom {
     private static final int CACHE_SIZE = 100;
-    private static final float[] randomCache = new float[CACHE_SIZE];
+    private static final float[] cache = new float[CACHE_SIZE];
 
     private final Random instanceRandom = new Random();
 
     static {
-        reseedCache();
+        reseedCache(new Random());
     }
 
-    public static void reseedCache() {
-        Random staticRandom = new Random();
-        for (int i = 0; i < randomCache.length; i++) {
-            randomCache[i] = staticRandom.nextFloat();
+    public static void reseedCache(Random staticRandom) {
+        for (int i = 0; i < CACHE_SIZE; i++) {
+            cache[i] = staticRandom.nextFloat();
         }
     }
 
@@ -51,7 +50,7 @@ public class CachedFloatRandom {
         if (index >= CACHE_SIZE) {
             index = 0;
         }
-        return randomCache[index];
+        return cache[index];
     }
 
     // this does not have a short period

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorListParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.PoissonDiskSampling;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -61,12 +60,12 @@ public class PoissonDiskTester extends ParametrizedFilter {
             improved,
             debugGrid,
             colors
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
+        SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         Graphics2D g2 = dest.createGraphics();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

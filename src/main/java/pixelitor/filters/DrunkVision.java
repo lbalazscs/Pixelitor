@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
@@ -49,7 +48,7 @@ public class DrunkVision extends ParametrizedFilter {
         setParams(
             drunkenness,
             numEyes
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
@@ -65,7 +64,7 @@ public class DrunkVision extends ParametrizedFilter {
 
         Graphics2D g = dest.createGraphics();
 
-        Random rand = ReseedSupport.getLastSeedRandom();
+        Random rand = paramSet.getLastSeedRandom();
 
         int maxDistance = (int) (drunkenness.getPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
 

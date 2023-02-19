@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import com.jhlabs.math.Noise;
 import pixelitor.utils.Icons;
 
 /**
@@ -29,27 +28,14 @@ public class ReseedActions {
         // utility class, should not be instantiated
     }
 
-    public static FilterButtonModel reseedNoise() {
-        return reseedNoise("Reseed", "Reinitialize the randomness.");
-    }
-
-    public static FilterButtonModel reseedNoise(String text, String toolTip) {
-        return reseedByCalling(Noise::reseed, text, toolTip);
-    }
-
-    public static FilterButtonModel reseedByCalling(Runnable beforeTriggeringTask) {
-        return reseedByCalling(beforeTriggeringTask, "Reseed");
-    }
-
-    public static FilterButtonModel reseedByCalling(Runnable beforeTriggeringTask,
-                                                    String text) {
-        return reseedByCalling(beforeTriggeringTask, text,
+    public static FilterButtonModel reseedByCalling(Runnable reseedTask) {
+        return reseedByCalling(reseedTask, "Reseed",
             "Reinitialize the randomness");
     }
 
-    public static FilterButtonModel reseedByCalling(Runnable beforeTriggeringTask,
+    public static FilterButtonModel reseedByCalling(Runnable reseedTask,
                                                     String text, String toolTip) {
-        var filterAction = new FilterButtonModel(text, beforeTriggeringTask,
+        var filterAction = new FilterButtonModel(text, reseedTask,
             Icons.getTwoDicesIcon(), toolTip, "reseed");
         filterAction.setIgnoreFinalAnimationSettingMode(false);
         return filterAction;

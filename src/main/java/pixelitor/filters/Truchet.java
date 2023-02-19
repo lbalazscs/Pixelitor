@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
-import pixelitor.utils.ReseedSupport;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -266,7 +265,7 @@ public class Truchet extends ParametrizedFilter {
         helpURL = "https://en.wikipedia.org/wiki/Truchet_tiles";
 
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
-        FilterButtonModel reseedAction = ReseedSupport.createAction();
+        FilterButtonModel reseedAction = paramSet.createReseedAction();
         patternParam.setupDisableOtherIf(reseedAction, item -> item.getValue() != PATTERN_RANDOM);
 
         setParams(
@@ -282,7 +281,7 @@ public class Truchet extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        Random rand = ReseedSupport.getLastSeedRandom();
+        Random rand = paramSet.getLastSeedRandom();
         int size = sizeParam.getValue();
 
         // generates 4 images, although with the current tiles only 2 will be different

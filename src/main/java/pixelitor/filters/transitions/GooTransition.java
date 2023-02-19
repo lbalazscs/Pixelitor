@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.transitions;
 import com.bric.image.transition.GooTransition2D;
 import com.bric.image.transition.Transition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedActions;
 
 public class GooTransition extends AbstractTransition {
     public static final String NAME = "Goo Transition";
@@ -35,8 +34,8 @@ public class GooTransition extends AbstractTransition {
 
     public GooTransition() {
         addParamsToFront(columns, strokeWidth);
-        paramSet.withAction(ReseedActions.reseedByCalling(this::reseed));
-        reseed();
+        paramSet.withAction(paramSet.createReseedAction(this::reseed));
+        reseed(paramSet.getLastSeed());
         lastSeed = seed;
     }
 
@@ -52,7 +51,7 @@ public class GooTransition extends AbstractTransition {
         return transition;
     }
 
-    private void reseed() {
-        seed = System.currentTimeMillis();
+    private void reseed(long newSeed) {
+        seed = newSeed;
     }
 }

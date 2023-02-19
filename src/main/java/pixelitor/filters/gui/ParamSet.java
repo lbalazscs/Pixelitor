@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,14 +17,18 @@
 
 package pixelitor.filters.gui;
 
+import com.jhlabs.math.Noise;
+import pd.OpenSimplex2F;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.layers.Filterable;
+import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Icons;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
 import java.util.*;
+import java.util.function.LongConsumer;
 
 import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
@@ -41,23 +45,27 @@ public class ParamSet implements Debuggable {
     private Preset[] builtinPresets;
     private boolean nonTrivialFilter;
 
-    public ParamSet(FilterParam... params) {
-        paramList.addAll(List.of(params));
+    // reseed support
+    private static final String SEED_KEY = "Seed";
+    private long seed;
+    private Random random;
+    private OpenSimplex2F simplex;
+    private boolean savesSeed;
+    private LongConsumer seedChangedAction;
+
+    public ParamSet() {
     }
 
-    public ParamSet(FilterParam param) {
+    public void addParam(FilterParam param) {
         paramList.add(param);
     }
 
-    public ParamSet(List<FilterParam> params) {
-        paramList.addAll(params);
-    }
-
-    /**
-     * Adds the given parameters after the existing ones
-     */
     public void addParams(FilterParam[] params) {
         Collections.addAll(paramList, params);
+    }
+
+    public void addParams(List<FilterParam> params) {
+        paramList.addAll(params);
     }
 
     /**
@@ -214,16 +222,16 @@ public class ParamSet implements Debuggable {
     /**
      * Sets the state without triggering the filter.
      */
-    public void setState(FilterState newStateSet, boolean forAnimation) {
+    public void setState(FilterState newState, boolean forAnimation) {
         for (FilterParam param : paramList) {
             if (forAnimation && !param.isAnimatable()) {
                 continue;
             }
             String name = param.getName();
-            ParamState<?> newState = newStateSet.get(name);
+            ParamState<?> newParamState = newState.get(name);
 
-            if (newState != null) { // a preset doesn't have to contain all key-value pairs
-                param.loadStateFrom(newState, !forAnimation);
+            if (newParamState != null) { // a preset doesn't have to contain all key-value pairs
+                param.loadStateFrom(newParamState, !forAnimation);
             }
         }
     }
@@ -236,26 +244,17 @@ public class ParamSet implements Debuggable {
         runFilter();
     }
 
-    public void setBuiltinPresets(Preset... presets) {
-        this.builtinPresets = presets;
-    }
-
-    public Preset[] getBuiltinPresets() {
-        return builtinPresets;
-    }
-
-    public boolean hasBuiltinPresets() {
-        return builtinPresets != null;
-    }
-
-    public boolean canHaveUserPresets() {
-        return nonTrivialFilter;
-    }
-
     public void loadUserPreset(UserPreset preset) {
         long runCountBefore = Filter.runCount;
         for (FilterParam param : paramList) {
             param.loadStateFrom(preset);
+        }
+        if (savesSeed) {
+            seed = preset.getLong(SEED_KEY, seed);
+            simplex = null; // make sure getLastSeedSimplex() is also reset
+            if (seedChangedAction != null) {
+                seedChangedAction.accept(seed);
+            }
         }
 
         // check that the loading didn't trigger the filter
@@ -271,6 +270,9 @@ public class ParamSet implements Debuggable {
             Locale.setDefault(FORMAT, Locale.US);
             for (FilterParam param : paramList) {
                 param.saveStateTo(preset);
+            }
+            if (savesSeed) {
+                preset.putLong(SEED_KEY, seed);
             }
         } finally {
             Locale.setDefault(FORMAT, locale);
@@ -289,6 +291,139 @@ public class ParamSet implements Debuggable {
         }
         modified.loadStateFrom(value);
     }
+
+    public void setBuiltinPresets(Preset... presets) {
+        this.builtinPresets = presets;
+    }
+
+    public Preset[] getBuiltinPresets() {
+        return builtinPresets;
+    }
+
+    public boolean hasBuiltinPresets() {
+        return builtinPresets != null;
+    }
+
+    public boolean canHaveUserPresets() {
+        return nonTrivialFilter;
+    }
+
+    // reseed support methods form here
+
+    public ParamSet withReseedAction() {
+        return withAction(createReseedAction());
+    }
+
+    public ParamSet withReseedNoiseAction() {
+        return withAction(createReseedNoiseAction());
+    }
+
+    private void initReseedSupport() {
+        if (random != null) {
+            throw new IllegalStateException(); // call only once
+        }
+        seed = System.nanoTime();
+        random = new Random(seed);
+        savesSeed = true;
+    }
+
+    private void reseedNoise() {
+        Noise.reseed(seed);
+    }
+
+    /**
+     * Returns the random number generator reseeded to the last value
+     * in order to make sure that the filter runs with the same random
+     * numbers as before.
+     * This must be called at the beginning of the filter.
+     */
+    public Random getLastSeedRandom() {
+        random.setSeed(seed);
+        return random;
+    }
+
+    public SplittableRandom getLastSeedSRandom() {
+        return new SplittableRandom(seed);
+    }
+
+    /**
+     * Similar to the method above, but for simplex noise
+     */
+    public OpenSimplex2F getLastSeedSimplex() {
+        if (simplex == null) {
+            simplex = new OpenSimplex2F(seed);
+        }
+        return simplex;
+    }
+
+    public long getLastSeed() {
+        return seed;
+    }
+
+    /**
+     * Called then the user presses the "reseed" button
+     */
+    public void reseed() {
+        seed = System.nanoTime();
+    }
+
+    private void reseedSimplex() {
+        seed = System.nanoTime();
+        simplex = new OpenSimplex2F(seed);
+    }
+
+    public FilterButtonModel createReseedNoiseAction() {
+        return createReseedNoiseAction("Reseed", "Reinitialize the randomness");
+    }
+
+    public FilterButtonModel createReseedNoiseAction(String text, String toolTip) {
+        initReseedSupport();
+        seedChangedAction = Noise::reseed;
+
+        return ReseedActions.reseedByCalling(this::reseedNoise, text, toolTip);
+    }
+
+    public FilterButtonModel createReseedCachedAndNoiseAction() {
+        initReseedSupport();
+
+        seedChangedAction = newSeed -> {
+            Noise.reseed(newSeed);
+            random.setSeed(newSeed);
+            CachedFloatRandom.reseedCache(random);
+        };
+
+        return ReseedActions.reseedByCalling(() -> {
+            reseed();
+            seedChangedAction.accept(seed);
+        });
+    }
+
+    public FilterButtonModel createReseedAction() {
+        initReseedSupport();
+        return ReseedActions.reseedByCalling(this::reseed);
+    }
+
+    public FilterButtonModel createReseedAction(String name, String toolTipText) {
+        initReseedSupport();
+        return ReseedActions.reseedByCalling(this::reseed, name, toolTipText);
+    }
+
+    public FilterButtonModel createReseedSimplexAction() {
+        initReseedSupport();
+        return ReseedActions.reseedByCalling(this::reseedSimplex);
+    }
+
+    public FilterButtonModel createReseedAction(LongConsumer seedChangedAction) {
+        initReseedSupport();
+
+        this.seedChangedAction = seedChangedAction;
+        return ReseedActions.reseedByCalling(() -> {
+            reseed();
+            seedChangedAction.accept(seed);
+        });
+    }
+
+    // end of reseed support
 
     @Override
     public String toString() {

@@ -50,7 +50,7 @@ public class AngularWaves extends ParametrizedFilter {
         zoom.setPresetKey("Zoom (%)");
 
         setParams(
-            waveType,
+            waveType.configureWaveType(paramSet),
             center,
             radialWL.withAdjustedRange(0.05).withDecimalPlaces(1),
             amount,

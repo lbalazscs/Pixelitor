@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.*;
@@ -102,12 +101,12 @@ public class FractalTree extends ParametrizedFilter {
             width.notLinkable().withAdjustedRange(0.5),
             colors,
             quality
-        ).withAction(ReseedSupport.createAction());
+        ).withReseedAction();
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        SplittableRandom rand = ReseedSupport.getLastSeedSRandom();
+        SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         leftFirst = true;
 

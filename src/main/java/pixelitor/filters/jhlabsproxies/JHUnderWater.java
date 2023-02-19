@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,6 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
-
 /**
  * Underwater filter based on JHLabs SwimFilter
  */
@@ -46,7 +44,7 @@ public class JHUnderWater extends ParametrizedFilter {
     public JHUnderWater() {
         super(true);
 
-        var reseed = reseedNoise();
+        var reseed = paramSet.createReseedNoiseAction();
         setParams(
             amount.withAdjustedRange(0.1),
             scale.withAdjustedRange(0.3),

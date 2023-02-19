@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,10 +73,8 @@ public class FilterButtonModel implements FilterSetting {
                 adjustmentListener.paramAdjusted();
             });
         } else {
-            button.addActionListener(e -> {
-                // just the given task
-                task.run();
-            });
+            // just the given task
+            button.addActionListener(e -> task.run());
         }
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);

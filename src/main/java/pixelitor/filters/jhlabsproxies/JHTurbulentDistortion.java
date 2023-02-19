@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
-import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Turbulent Distortion filter based on the JHLabs MarbleFilter
@@ -52,7 +51,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
             time,
             edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
             interpolation
-        ).withAction(reseedNoise());
+        ).withReseedNoiseAction();
     }
 
     @Override
