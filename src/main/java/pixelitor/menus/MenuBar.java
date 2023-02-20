@@ -536,6 +536,9 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new OpenViewEnabledAction("Add Linked...", comp -> {
             File file = FileChoosers.getSupportedOpenFile();
+            if (file == null) {
+                return; // the user cancelled the dialog
+            }
 
             IO.loadCompAsync(file)
                 .thenAcceptAsync(content -> {
