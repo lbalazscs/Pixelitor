@@ -82,7 +82,7 @@ public class ChaosGame extends ParametrizedFilter {
             centerJump,
             midpointJump,
             restrict,
-            showPoly).withAction(ReseedActions.noOpReseed());
+            showPoly).withAction(FilterButtonModel.createNoOpReseed());
 
         FilterState triangle = new FilterState("Sierpinski Triangle (defaults)")
             .with(numVerticesParam, new RangeParamState(3))

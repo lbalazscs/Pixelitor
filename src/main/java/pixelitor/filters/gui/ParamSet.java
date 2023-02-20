@@ -327,15 +327,10 @@ public class ParamSet implements Debuggable {
         savesSeed = true;
     }
 
-    private void reseedNoise() {
-        Noise.reseed(seed);
-    }
-
     /**
      * Returns the random number generator reseeded to the last value
      * in order to make sure that the filter runs with the same random
      * numbers as before.
-     * This must be called at the beginning of the filter.
      */
     public Random getLastSeedRandom() {
         random.setSeed(seed);
@@ -360,9 +355,6 @@ public class ParamSet implements Debuggable {
         return seed;
     }
 
-    /**
-     * Called then the user presses the "reseed" button
-     */
     public void reseed() {
         seed = System.nanoTime();
     }
@@ -380,7 +372,10 @@ public class ParamSet implements Debuggable {
         initReseedSupport();
         seedChangedAction = Noise::reseed;
 
-        return ReseedActions.reseedByCalling(this::reseedNoise, text, toolTip);
+        return FilterButtonModel.createReseed(() -> {
+            reseed();
+            Noise.reseed(seed);
+        }, text, toolTip);
     }
 
     public FilterButtonModel createReseedCachedAndNoiseAction() {
@@ -392,7 +387,7 @@ public class ParamSet implements Debuggable {
             CachedFloatRandom.reseedCache(random);
         };
 
-        return ReseedActions.reseedByCalling(() -> {
+        return FilterButtonModel.createReseed(() -> {
             reseed();
             seedChangedAction.accept(seed);
         });
@@ -400,24 +395,24 @@ public class ParamSet implements Debuggable {
 
     public FilterButtonModel createReseedAction() {
         initReseedSupport();
-        return ReseedActions.reseedByCalling(this::reseed);
+        return FilterButtonModel.createReseed(this::reseed);
     }
 
     public FilterButtonModel createReseedAction(String name, String toolTipText) {
         initReseedSupport();
-        return ReseedActions.reseedByCalling(this::reseed, name, toolTipText);
+        return FilterButtonModel.createReseed(this::reseed, name, toolTipText);
     }
 
     public FilterButtonModel createReseedSimplexAction() {
         initReseedSupport();
-        return ReseedActions.reseedByCalling(this::reseedSimplex);
+        return FilterButtonModel.createReseed(this::reseedSimplex);
     }
 
     public FilterButtonModel createReseedAction(LongConsumer seedChangedAction) {
         initReseedSupport();
 
         this.seedChangedAction = seedChangedAction;
-        return ReseedActions.reseedByCalling(() -> {
+        return FilterButtonModel.createReseed(() -> {
             reseed();
             seedChangedAction.accept(seed);
         });

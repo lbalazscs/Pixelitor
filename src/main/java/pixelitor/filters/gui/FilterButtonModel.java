@@ -17,16 +17,18 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.Icons;
+
 import javax.swing.*;
 
 import static java.lang.String.format;
 
 /**
- * A model for a button on a filter GUI, which runs a task
- * when pushed, before triggering the filter
+ * A model for a button on a filter GUI that runs an action
+ * when pushed, before triggering the filter preview.
  */
 public class FilterButtonModel implements FilterSetting {
-    private final Runnable task;
+    private final Runnable action;
     private final Icon icon;
     private final String toolTipText;
     private final String lookupName; // for AssertJSwing tests
@@ -42,24 +44,45 @@ public class FilterButtonModel implements FilterSetting {
 
     private final boolean triggerFilter;
 
-    public FilterButtonModel(String text, Runnable task, String toolTipText) {
-        this(text, task, null, toolTipText, null, true);
+    public FilterButtonModel(String text, Runnable action, String toolTipText) {
+        this(text, action, null, toolTipText, null, true);
     }
 
-    public FilterButtonModel(String text, Runnable task, Icon icon,
+    public FilterButtonModel(String text, Runnable action, Icon icon,
                              String toolTipText, String lookupName) {
-        this(text, task, icon, toolTipText, lookupName, true);
+        this(text, action, icon, toolTipText, lookupName, true);
     }
 
-    public FilterButtonModel(String text, Runnable task, Icon icon,
+    public FilterButtonModel(String text, Runnable action, Icon icon,
                              String toolTipText, String lookupName,
                              boolean triggerFilter) {
         this.text = text;
-        this.task = task;
+        this.action = action;
         this.icon = icon;
         this.toolTipText = toolTipText;
         this.lookupName = lookupName;
         this.triggerFilter = triggerFilter;
+    }
+
+    public static FilterButtonModel createReseed(Runnable reseedTask) {
+        return createReseed(reseedTask, "Reseed",
+            "Reinitialize the randomness");
+    }
+
+    public static FilterButtonModel createReseed(Runnable reseedTask,
+                                                 String text, String toolTip) {
+        var filterAction = new FilterButtonModel(text, reseedTask,
+            Icons.getTwoDicesIcon(), toolTip, "reseed");
+        filterAction.setIgnoreFinalAnimationSettingMode(false);
+        return filterAction;
+    }
+
+    /**
+     * The returned action only re-runs the filter
+     * (can be useful when using ThreadLocalRandom)
+     */
+    public static FilterButtonModel createNoOpReseed() {
+        return createReseed(() -> {});
     }
 
     @Override
@@ -68,13 +91,13 @@ public class FilterButtonModel implements FilterSetting {
         if (triggerFilter) {
             button.addActionListener(e -> {
                 // first run the given task...
-                task.run();
+                action.run();
                 // ... and then trigger the filter preview
                 adjustmentListener.paramAdjusted();
             });
         } else {
             // just the given task
-            button.addActionListener(e -> task.run());
+            button.addActionListener(e -> action.run());
         }
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);

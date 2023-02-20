@@ -274,14 +274,34 @@ You can then apply filters and transformations to the smart object as a whole.
 These edits are non-destructive, meaning that you can easily adjust or remove them at any time without affecting the underlying image data.
 </p><p>
 To convert a layer into a smart object, right-click on the layer's thumbnail and choose the "Convert to Smart Object" option from the menu.  
-</p><p>  
+</p><p>
+The <b>content</b> of a smart object is a separate composition that can contain its own layers and can be edited like a regular composition.
 To edit the content of a smart object, right-click on the smart object's thumbnail and choose the "Edit Contents" option from the menu. 
 This will open the content composition in a separate tab/window.
 You can now edit the contents of the smart object just as you would any other image. 
 This may include adding, deleting, or rearranging layers, using tools and filters.
 When you are satisfied with the changes you have made to the smart object, just close the tab/window.
 </p><p>
-A <b>smart filter</b> is a filter applied to a smart object. 
+The content composition of a smart object can be either <b>embedded</b> or <b>linked</b>.
+Embedded content is saved in the same pxc file as the original composition, and it is the default option when creating a smart object.
+Linked content, on the other hand, is stored in a different file, which is conceptually similar to how web pages link to each other.
+Linked smart objects offer some advantages over embedded ones:
+<ul>
+  <li>The linked file, which doesn't have to be in the pxc format, can be edited in other image editors.
+  When the parent pxc file is opened in Pixelitor, the changes will be automatically reflected.</li>
+  <li>The linked file can be used as a template that is shared between multiple pxc files.</li>
+</ul>
+However, linked files have the downside that you need to keep track of multiple files instead of having just one.
+If the linked file is lost, its content will also be lost.
+</p><p>
+A smart object can be <b>duplicated</b> or <b>cloned</b>.
+Duplicating a smart object (<kbd>Ctrl</kbd>+<kbd>J</kbd>) is similar to duplicating any other type of layer.
+The two smart objects will be completely independent of each other.
+Cloning, on the other hand, results in two smart objects sharing the same content composition.
+Any changes made to the content of one smart object will be reflected in its clone.
+However, the two smart objects can still have their own independent opacity, blending mode, and smart filters.
+</p><p>
+A <b>smart filter</b> is a filter applied to a smart object.
 They are non-destructive, because you can easily adjust or remove the filter at any time without affecting the original image data.  
 To create a smart filter, just start a filter while the selected layer is a smart object. 
 The filter will then be attached to that smart object as a smart filter. 

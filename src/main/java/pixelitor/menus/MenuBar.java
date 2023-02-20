@@ -548,8 +548,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new RestrictedLayerAction("Clone", isSmartObject) {
             @Override
             public void onActiveLayer(Layer layer) {
-                SmartObject so = (SmartObject) layer;
-                layer.getComp().shallowDuplicate(so);
+                layer.getComp().shallowDuplicate((SmartObject) layer);
             }
         });
 
