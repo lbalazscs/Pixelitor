@@ -88,7 +88,7 @@ public class SplashImageCreator {
         var progressHandler = Messages.startProgress(msg, numImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
-        FileFormat format = FileFormat.getLastOutput();
+        FileFormat format = FileFormat.getLastSaved();
         for (int i = 0; i < numImages; i++) {
             int seqNo = i;
             cf = cf.thenCompose(v -> makeSplashAsync(progressHandler, seqNo, format));

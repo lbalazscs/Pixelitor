@@ -604,8 +604,8 @@ public class RandomToolTest {
         if (EDT.getActiveSelection() != null) {
             printed += Ansi.red(" SEL");
         }
-        if (EDT.active(Composition::getBuiltSelection) != null) {
-            printed += Ansi.red(" BuiltSEL");
+        if (EDT.active(Composition::getInProgressSelection) != null) {
+            printed += Ansi.red(" IP SEL");
         }
         System.out.println(printed);
     }

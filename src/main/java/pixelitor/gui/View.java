@@ -136,7 +136,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return IO.loadCompAsync(file)
             .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
             .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.checkForReadingProblems(e));
+            .whenComplete((v, e) -> IO.handleReadingProblems(e));
     }
 
     private void setComp(Composition comp) {
@@ -336,8 +336,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         layersPanel.removeLayerGUI((LayerGUI) ui);
     }
 
-    public void thumbSizeChanged(int newThumbSize) {
-        layersPanel.thumbSizeChanged(newThumbSize);
+    public void updateThumbSize(int newThumbSize) {
+        layersPanel.updateThumbSize(newThumbSize);
         comp.updateAllIconImages();
     }
 

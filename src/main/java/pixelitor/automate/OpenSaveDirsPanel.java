@@ -51,7 +51,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
-        outputFormatSelector = new FileFormatSelector(FileFormat.getLastOutput());
+        outputFormatSelector = new FileFormatSelector(FileFormat.getLastSaved());
         gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
@@ -101,6 +101,6 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         File out = outputChooser.getSelectedFile();
         Dirs.setLastSave(out);
 
-        FileFormat.setLastOutput(getSelectedFormat());
+        FileFormat.setLastSaved(getSelectedFormat());
     }
 }

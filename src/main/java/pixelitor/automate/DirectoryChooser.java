@@ -116,7 +116,7 @@ public class DirectoryChooser extends ValidatedPanel {
             .show();
 
         if (defaultFormat != null) {
-            FileFormat.setLastOutput(chooserPanel.getSelectedFormat());
+            FileFormat.setLastSaved(chooserPanel.getSelectedFormat());
         }
 
         return selectionWasMade[0];

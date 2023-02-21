@@ -68,7 +68,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     // Most often false, but when opening serialized pxc files,
     // the mask/smart filter label might be added before the drag handler
     // and in unit tests the drag handler is not added at all.
-    private boolean lateDragHandler;
+    private boolean hasLateDragHandler;
 
     // for debugging only: each layer GUI has a different id
     private static int idCounter = 0;
@@ -258,9 +258,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         visibilityCB.setSelected(layer.isVisible());
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.<br><b>Alt-click</b> to isolate this layer.");
         add(visibilityCB, LayerGUILayout.CHECKBOX);
-
-//        visibilityCB.addItemListener(e ->
-//            layer.setVisible(visibilityCB.isSelected(), true));
     }
 
     private JCheckBox createVisibilityCheckBox(boolean smartFilter) {
@@ -366,7 +363,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         handler.attachTo(nameEditor);
         handler.attachTo(layerIconLabel);
 
-        if (lateDragHandler) {
+        if (hasLateDragHandler) {
             if (maskIconLabel != null) {
                 handler.attachTo(maskIconLabel);
             }
@@ -508,9 +505,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         if (dragReorderHandler != null) {
             dragReorderHandler.attachTo(maskIconLabel);
-            lateDragHandler = false;
+            hasLateDragHandler = false;
         } else {
-            lateDragHandler = true;
+            hasLateDragHandler = true;
         }
 
         // don't call layer.getMask().updateIconImage(); because
@@ -577,7 +574,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         repaint();
         maskIconLabel = null;
 
-        lateDragHandler = false;
+        hasLateDragHandler = false;
     }
 
     @Override
@@ -626,12 +623,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     protected void paintComponent(Graphics g) {
-//        super.paintComponent(g);
-
-//        if (!isSelected() || owner != null) {
-//            return;
-//        }
-
         if (!layer.getTopLevelLayer().isActiveRoot()) {
             // no custom painting if not selected or semi-selected
             return;
@@ -678,10 +669,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         return layout.getPreferredHeight();
     }
 
-    public void thumbSizeChanged(int newThumbSize) {
-        layout.thumbSizeChanged(newThumbSize);
+    public void updateThumbSize(int newThumbSize) {
+        layout.updateHeight(newThumbSize);
         for (LayerGUI child : children) {
-            child.thumbSizeChanged(newThumbSize);
+            child.updateThumbSize(newThumbSize);
         }
     }
 
@@ -730,7 +721,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));
         }
 
-        node.addBoolean("lateDragHandler", lateDragHandler);
+        node.addBoolean("lateDragHandler", hasLateDragHandler);
         node.addAsString("selectionState", selectionState);
         node.addString("layer name", layer.getName());
 

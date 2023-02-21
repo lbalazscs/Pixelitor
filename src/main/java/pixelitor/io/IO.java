@@ -66,7 +66,7 @@ public class IO {
         }
         return loadCompAsync(file)
             .thenApplyAsync(Views::addJustLoadedComp, onEDT)
-            .whenComplete((comp, e) -> checkForReadingProblems(e));
+            .whenComplete((comp, e) -> handleReadingProblems(e));
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
@@ -81,21 +81,21 @@ public class IO {
         return format.readSync(file);
     }
 
-    public static CompletableFuture<Void> loadToNewImageLayerAsync(File file,
-                                                                   Composition comp) {
+    public static CompletableFuture<Void> loadNewImageLayerAsync(File file,
+                                                                 Composition comp) {
         return CompletableFuture
             .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                     img, file.getName(), "Dropped Layer"),
                 onEDT)
-            .whenComplete((v, e) -> checkForReadingProblems(e));
+            .whenComplete((v, e) -> handleReadingProblems(e));
     }
 
     /**
      * Utility method designed to be used with CompletableFuture.
      * Can be called on any thread.
      */
-    public static void checkForReadingProblems(Throwable e) {
+    public static void handleReadingProblems(Throwable e) {
         if (e == null) {
             // do nothing if the stage didn't complete exceptionally
             return;
@@ -103,7 +103,7 @@ public class IO {
         if (e instanceof CompletionException) {
             // if the exception was thrown in a previous
             // stage, handle it the same way
-            checkForReadingProblems(e.getCause());
+            handleReadingProblems(e.getCause());
             return;
         }
         if (e instanceof DecodingException de) {
@@ -196,7 +196,7 @@ public class IO {
         EventQueue.invokeLater(() -> Messages.showError("Can't save", msg));
     }
 
-    public static void openAllImagesInDir(File dir) {
+    public static void openAllSupportedImagesInDir(File dir) {
         List<File> files = FileUtils.listSupportedInputFilesIn(dir);
         boolean found = false;
         for (File file : files) {
@@ -212,7 +212,7 @@ public class IO {
     public static void addAllImagesInDirAsLayers(File dir, Composition comp) {
         List<File> files = FileUtils.listSupportedInputFilesIn(dir);
         for (File file : files) {
-            loadToNewImageLayerAsync(file, comp);
+            loadNewImageLayerAsync(file, comp);
         }
     }
 

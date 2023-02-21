@@ -20,6 +20,7 @@ package pixelitor.gui;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.AppContext;
+import pixelitor.Views;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ListParam;
@@ -383,7 +384,7 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void updateThumbSize() {
         int newSize = ((Item) thumbSizeCB.getSelectedItem()).getValue();
-        LayerGUILayout.setStaticThumbSize(newSize);
+        Views.updateThumbSize(newSize);
     }
 
     private void setupRememberingTabSelection() {

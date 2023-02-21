@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.layers.LayerGUILayout.thumbSize;
+import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 

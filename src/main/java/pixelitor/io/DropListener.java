@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -140,7 +140,7 @@ public class DropListener extends DropTargetAdapter {
                 + "<br>Do you want to open all image files inside it?", file.getName());
 
             if (Dialogs.showYesNoQuestionDialog(target, "Question", question)) {
-                IO.openAllImagesInDir(file);
+                IO.openAllSupportedImagesInDir(file);
             }
         } else if (file.isFile()) {
             if (!Files.isReadable(file.toPath())) {
@@ -165,7 +165,7 @@ public class DropListener extends DropTargetAdapter {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            IO.loadToNewImageLayerAsync(file, comp);
+            IO.loadNewImageLayerAsync(file, comp);
         }
     }
 }

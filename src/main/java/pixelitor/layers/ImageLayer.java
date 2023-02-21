@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,9 +53,9 @@ import static java.util.Objects.requireNonNull;
 import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
+import static pixelitor.Views.thumbSize;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.*;
-import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;

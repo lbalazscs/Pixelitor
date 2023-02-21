@@ -112,7 +112,7 @@ public class Automate {
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
         assert calledOnEDT() : threadInfo();
 
-        var format = FileFormat.getLastOutput();
+        var format = FileFormat.getLastSaved();
         File file = calcOutputFile(comp, lastSaveDir, format);
 
         // so that it doesn't ask to save again after we just saved it

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerGUILayout.thumbSize;
+import static pixelitor.Views.thumbSize;
 
 public class ColorFillLayer extends Layer {
     @Serial

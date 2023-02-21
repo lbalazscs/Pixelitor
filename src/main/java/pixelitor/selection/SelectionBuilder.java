@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class SelectionBuilder {
 
         assert existingSelection.isAlive() : "dead selection";
 
-        comp.setBuiltSelection(new Selection(null, comp.getView()));
+        comp.setInProgressSelection(new Selection(null, comp.getView()));
 
         if (combinator == ShapeCombinator.REPLACE) {
             replacedShape = existingSelection.getShape();
@@ -70,24 +70,24 @@ public class SelectionBuilder {
 
     /**
      * As the mouse is dragged or released, the current
-     * built selection shape is continuously updated
+     * in-progress-selection shape is continuously updated
      */
-    public void updateBuiltSelection(Object mouseInfo, Composition comp) {
-        Selection builtSelection = comp.getBuiltSelection();
-        boolean noPreviousSelection = builtSelection == null;
+    public void updateInProgressSelection(Object mouseInfo, Composition comp) {
+        Selection inProgressSelection = comp.getInProgressSelection();
+        boolean noPreviousSelection = inProgressSelection == null;
 
         if (noPreviousSelection) {
             Shape newShape = selectionType.createShape(mouseInfo, null);
-            builtSelection = new Selection(newShape, comp.getView());
-            comp.setBuiltSelection(builtSelection);
+            inProgressSelection = new Selection(newShape, comp.getView());
+            comp.setInProgressSelection(inProgressSelection);
         } else {
-            assert builtSelection.isAlive() : "dead selection";
+            assert inProgressSelection.isAlive() : "dead selection";
 
-            Shape shape = builtSelection.getShape();
+            Shape shape = inProgressSelection.getShape();
             Shape newShape = selectionType.createShape(mouseInfo, shape);
-            builtSelection.setShape(newShape);
-            if (!builtSelection.isMarching()) {
-                builtSelection.startMarching();
+            inProgressSelection.setShape(newShape);
+            if (!inProgressSelection.isMarching()) {
+                inProgressSelection.startMarching();
             }
         }
     }
@@ -98,9 +98,9 @@ public class SelectionBuilder {
      */
     public void combineShapes(Composition comp) {
         Selection oldSelection = comp.getSelection();
-        Selection builtSelection = comp.getBuiltSelection();
+        Selection inProgressSelection = comp.getInProgressSelection();
 
-        Shape newShape = builtSelection.getShape();
+        Shape newShape = inProgressSelection.getShape();
         newShape = comp.clipToCanvasBounds(newShape);
         if (newShape.getBounds2D().isEmpty()) {
             return;
@@ -113,7 +113,7 @@ public class SelectionBuilder {
             Rectangle newBounds = combinedShape.getBounds();
 
             if (newBounds.isEmpty()) { // nothing after combine
-                builtSelection.setShape(oldShape); // for the correct deselect undo
+                inProgressSelection.setShape(oldShape); // for the correct deselect undo
                 oldSelection.die();
                 comp.promoteSelection();
                 comp.deselect(true);
@@ -124,7 +124,7 @@ public class SelectionBuilder {
                 Messages.showInfo("Nothing selected", msg, comp.getDialogParent());
             } else {
                 oldSelection.die();
-                builtSelection.setShape(combinedShape);
+                inProgressSelection.setShape(combinedShape);
                 comp.promoteSelection();
 
                 History.add(new SelectionShapeChangeEdit(
@@ -137,7 +137,7 @@ public class SelectionBuilder {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(false);
             } else {
-                builtSelection.setShape(newShape);
+                inProgressSelection.setShape(newShape);
                 comp.promoteSelection();
 
                 PixelitorEdit edit;
@@ -155,10 +155,10 @@ public class SelectionBuilder {
 
     public void cancelIfNotFinished(Composition comp) {
         if (!finished) {
-            Selection builtSelection = comp.getBuiltSelection();
-            if (builtSelection != null) {
-                builtSelection.die();
-                comp.setBuiltSelection(null);
+            Selection inProgressSelection = comp.getInProgressSelection();
+            if (inProgressSelection != null) {
+                inProgressSelection.die();
+                comp.setInProgressSelection(null);
             }
 
             // if we had a frozen selection, unfreeze

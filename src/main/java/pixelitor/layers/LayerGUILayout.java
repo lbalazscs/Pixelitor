@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.layers;
 import pixelitor.Views;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
-import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -58,24 +57,18 @@ public class LayerGUILayout implements LayoutManager {
 
     private static boolean isNimbus = Themes.getCurrent().isNimbus();
 
-    public static int thumbSize;
-
     // The labels will appear to have thumbSize, but in reality
     // they must be larger in order to leave space to the borders
     private int labelSize;
 
     private int height;
 
-    static {
-        setStaticThumbSize(AppPreferences.loadThumbSize());
-    }
-
     public LayerGUILayout(Layer layer) {
         layerIconShowsThumbnail = layer.hasRasterThumbnail();
-        thumbSizeChanged(thumbSize);
+        updateHeight(Views.thumbSize);
     }
 
-    public void thumbSizeChanged(int newThumbSize) {
+    public void updateHeight(int newThumbSize) {
         if (layerIconShowsThumbnail) {
             height = newThumbSize + 2 * GAP;
         } else {
@@ -187,17 +180,7 @@ public class LayerGUILayout implements LayoutManager {
     }
 
     public static int getThumbSize() {
-        return thumbSize;
-    }
-
-    public static void setStaticThumbSize(int newThumbSize) {
-        if (thumbSize == newThumbSize) {
-            return;
-        }
-
-        thumbSize = newThumbSize;
-
-        Views.thumbSizeChanged(newThumbSize);
+        return Views.thumbSize;
     }
 
     public static void themeChanged(Theme theme) {

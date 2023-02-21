@@ -1268,7 +1268,7 @@ public class AssertJSwingTest {
         EDT.run(() -> {
             Dirs.setLastOpen(inputDir);
             Dirs.setLastSave(batchResizeOutputDir);
-            FileFormat.setLastOutput(FileFormat.JPG);
+            FileFormat.setLastSaved(FileFormat.JPG);
         });
 
         runMenuCommand("Batch Resize...");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,18 +88,18 @@ public enum FileFormat {
     }, TIFF(false, null, FileChoosers.tiffFilter) {
     };
 
-    private final boolean hasLayers;
+    private final boolean multiLayered;
     private final Function<BufferedImage, BufferedImage> converter;
     private final FileFilter fileFilter;
 
-    FileFormat(boolean hasLayers, Function<BufferedImage, BufferedImage> converter, FileFilter fileFilter) {
-        this.hasLayers = hasLayers;
+    FileFormat(boolean multiLayered, Function<BufferedImage, BufferedImage> converter, FileFilter fileFilter) {
+        this.multiLayered = multiLayered;
         this.converter = converter;
         this.fileFilter = fileFilter;
     }
 
     public Runnable createSaveTask(Composition comp, SaveSettings settings) {
-        assert !hasLayers; // overwritten for multi-layered formats
+        assert !multiLayered; // overwritten for multi-layered formats
 
         return () -> saveSingleLayered(comp, settings);
     }
@@ -169,11 +169,11 @@ public enum FileFormat {
 
     private static volatile FileFormat lastOutput = AppPreferences.loadLastSaveFormat();
 
-    public static FileFormat getLastOutput() {
+    public static FileFormat getLastSaved() {
         return lastOutput;
     }
 
-    public static void setLastOutput(FileFormat format) {
+    public static void setLastSaved(FileFormat format) {
         lastOutput = format;
     }
 }

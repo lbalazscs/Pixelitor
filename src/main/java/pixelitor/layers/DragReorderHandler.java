@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public class DragReorderHandler extends MouseInputAdapter {
     private final LayersPanel layersPanel;
     private int dragStartYInLayerGUI;
     private boolean dragging = false;
-    private long lastNameEditorPressedMillis;
+    private long lastNameEditorPressTime;
 
     public DragReorderHandler(LayersPanel layersPanel) {
         this.layersPanel = layersPanel;
@@ -44,11 +44,11 @@ public class DragReorderHandler extends MouseInputAdapter {
         Component c = e.getComponent();
         if (c instanceof LayerNameEditor editor) {
             long when = e.getWhen();
-            long diffMillis = when - lastNameEditorPressedMillis;
+            long diffMillis = when - lastNameEditorPressTime;
             if (diffMillis < 250) {
                 editor.enableEditing();
             }
-            lastNameEditorPressedMillis = when;
+            lastNameEditorPressTime = when;
         }
 
         layerGUIForEvent(e); // the call is necessary for translating the mouse event
@@ -71,7 +71,6 @@ public class DragReorderHandler extends MouseInputAdapter {
         int newY = layerGUI.getY() + e.getY() - dragStartYInLayerGUI;
         layerGUI.setLocation(DRAG_X_INDENT, newY);
 
-//        assert layersPanel.containsGUI(layerGUI) : layerGUI.getLayer().getName() + " GUI not contained";
         layersPanel.updateDrag(layerGUI, newY, !dragging);
         dragging = true;
 

@@ -129,10 +129,10 @@ public final class ConsistencyChecks {
         } else {
             msg += "(no selection) ";
         }
-        if (comp.hasBuiltSelection()) {
-            msg += "(has built selection) ";
+        if (comp.hasInProgressSelection()) {
+            msg += "(has in-progress selection) ";
         } else {
-            msg += "(no built selection) ";
+            msg += "(no in-progress selection) ";
         }
 
         throw new IllegalStateException(msg + " on " + Threads.threadName());

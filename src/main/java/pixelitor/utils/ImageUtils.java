@@ -59,9 +59,9 @@ import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
+import static pixelitor.Views.thumbSize;
 import static pixelitor.colors.Colors.packedIntToString;
 import static pixelitor.colors.Colors.toPackedARGB;
-import static pixelitor.layers.LayerGUILayout.thumbSize;
 import static pixelitor.utils.Threads.onPool;
 
 /**

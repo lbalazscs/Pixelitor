@@ -30,10 +30,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -61,6 +58,7 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Views {
     private static final List<View> views = new ArrayList<>();
+    public static int thumbSize;
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
@@ -73,6 +71,12 @@ public class Views {
 
     public static final Action CLOSE_UNMODIFIED_ACTION = new OpenViewEnabledAction(
         "Close Unmodified", comp -> warnAndCloseUnmodified());
+
+    static {
+        // this call must be somewhere in the GUI code,
+        // when the AppPreferences is already initialized
+        updateThumbSize(AppPreferences.loadThumbSize());
+    }
 
     private Views() {
     }
@@ -574,14 +578,6 @@ public class Views {
         return null;
     }
 
-    public static void thumbSizeChanged(int newThumbSize) {
-        // since the layer GUIs are cached, all views have
-        // to be notified to update their buttons
-        for (View view : views) {
-            view.thumbSizeChanged(newThumbSize);
-        }
-    }
-
     public static void appActivated() {
         // Check if any views need to be automatically reloaded
         CompletableFuture<Composition> cf = CompletableFuture.completedFuture(null);
@@ -589,6 +585,19 @@ public class Views {
             // make sure that the next reload is not started
             // before the previous one is finished
             cf = cf.thenCompose(comp -> view.checkForAutoReload());
+        }
+    }
+
+    public static void updateThumbSize(int newThumbSize) {
+        if (thumbSize == newThumbSize) {
+            return;
+        }
+        thumbSize = newThumbSize;
+
+        // since the layer GUIs are cached, all views have
+        // to be notified to update their buttons
+        for (View view : views) {
+            view.updateThumbSize(newThumbSize);
         }
     }
 }

@@ -117,9 +117,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private transient Selection selection;
 
-    // a temporary, new selection which is currently built
-    // by dragging with a tool, but not finalized yet
-    private transient Selection builtSelection;
+    // a temporary, new selection which is currently created
+    // by dragging with a tool, but it's not finalized yet
+    private transient Selection inProgressSelection;
 
     /**
      * The constructor is private: a {@link Composition}
@@ -189,7 +189,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         dirty = false;
         view = null; // will be set later
         selection = null; // the selection is not saved
-        builtSelection = null;
+        inProgressSelection = null;
 
         in.defaultReadObject();
 
@@ -1179,8 +1179,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private void paintSelectionAsMarchingAnts(Graphics2D g) {
-        if (builtSelection != null) {
-            builtSelection.paintMarchingAnts(g);
+        if (inProgressSelection != null) {
+            inProgressSelection.paintMarchingAnts(g);
         }
         if (selection != null) {
             selection.paintMarchingAnts(g);
@@ -1199,8 +1199,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private Shape calcTotalSelectionShape() {
         Shape totalShape = null;
-        if (builtSelection != null) {
-            totalShape = builtSelection.getShape();
+        if (inProgressSelection != null) {
+            totalShape = inProgressSelection.getShape();
         }
         if (selection != null) {
             if (totalShape == null) {
@@ -1214,9 +1214,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public DeselectEdit deselect(boolean addToHistory) {
-        if (builtSelection != null) {
-            builtSelection.die();
-            builtSelection = null;
+        if (inProgressSelection != null) {
+            inProgressSelection.die();
+            inProgressSelection = null;
         }
 
         DeselectEdit edit = null;
@@ -1255,12 +1255,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return null;
     }
 
-    public Selection getBuiltSelection() {
-        return builtSelection;
+    public Selection getInProgressSelection() {
+        return inProgressSelection;
     }
 
-    public void setBuiltSelection(Selection selection) {
-        builtSelection = selection;
+    public void setInProgressSelection(Selection selection) {
+        inProgressSelection = selection;
     }
 
     /**
@@ -1328,13 +1328,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Promote a "built selection" into a final one.
+     * Promote an "in progress selection" into a final one.
      */
     public void promoteSelection() {
         assert selection == null || !selection.isAlive() : "selection = " + selection;
-        assert builtSelection != null;
-        setSelectionRef(builtSelection);
-        setBuiltSelection(null);
+        assert inProgressSelection != null;
+        setSelectionRef(inProgressSelection);
+        setInProgressSelection(null);
     }
 
     public boolean hasSelection() {
@@ -1342,8 +1342,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @VisibleForTesting
-    public boolean hasBuiltSelection() {
-        return builtSelection != null;
+    public boolean hasInProgressSelection() {
+        return inProgressSelection != null;
     }
 
     /**
@@ -1640,7 +1640,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         FileFormat format = saveSettings.getFormat();
         Runnable saveTask = format.createSaveTask(this, saveSettings);
-        FileFormat.setLastOutput(format);
+        FileFormat.setLastSaved(format);
 
         // prevents starting a new save on the EDT while an asynchronous
         // save is already scheduled or running on the IO thread
@@ -1900,10 +1900,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         node.addBoolean("is smart object content", isSmartObjectContent());
         node.addBoolean("dirty", isDirty());
 
-        if (hasBuiltSelection()) {
-            node.add(getBuiltSelection().createDebugNode("built selection"));
+        if (hasInProgressSelection()) {
+            node.add(getInProgressSelection().createDebugNode("in-progress selection"));
         } else {
-            node.addBoolean("has built selection", false);
+            node.addBoolean("has in-progress selection", false);
         }
 
         if (hasSelection()) {

@@ -38,7 +38,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.layers.LayerGUILayout.thumbSize;
+import static pixelitor.Views.thumbSize;
 
 public class GradientFillLayer extends ContentLayer {
     @Serial
