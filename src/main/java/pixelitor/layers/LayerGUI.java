@@ -133,7 +133,14 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 }
             }
 
+            // TODO it's not nice to detach all layer GUIs and
+            //   then attach again those which weren't changed
+            for (LayerGUI child : children) {
+                child.removeDragReorderHandler();
+                child.setOwner(null);
+            }
             children.clear();
+
             // children are added from the bottom up
             for (int i = numChildren - 1; i >= 0; i--) {
                 Layer child = holder.getLayer(i);
@@ -153,10 +160,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             if (numChildren > 0) {
                 add(childrenPanel, LayerGUILayout.CHILDREN);
             }
-        } else {
-            if (childrenPanel != null) {
-                // The layer isn't a holder, but it has a children
-                // panel: can happen after holder rasterization.
+        } else { // the layer isn't a holder
+            if (childrenPanel != null) { // can happen after holder rasterization.
                 remove(childrenPanel);
                 childrenPanel = null;
             }
@@ -372,6 +377,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         for (LayerGUI child : children) {
             // if it was already set, then the call will be ignored
             child.setDragReorderHandler(handler);
+        }
+    }
+
+    private void removeDragReorderHandler() {
+        if (dragReorderHandler != null) {
+            removeDragReorderHandler(dragReorderHandler);
         }
     }
 

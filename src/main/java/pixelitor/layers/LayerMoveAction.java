@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.utils.Icons;
 
@@ -30,9 +29,7 @@ import static pixelitor.utils.Texts.i18n;
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends OpenViewEnabledAction.Checked
-    implements ActiveHolderListener {
-
+public class LayerMoveAction extends OpenViewEnabledAction.Checked {
     // menu and history names (also for selection movements)
     public static final String RAISE_LAYER = i18n("raise_layer");
     public static final String LOWER_LAYER = i18n("lower_layer");
@@ -50,50 +47,11 @@ public class LayerMoveAction extends OpenViewEnabledAction.Checked
         super(getName(up), getIcon(up));
         this.up = up;
         setToolTip(up ? i18n("raise_layer_tt") : i18n("lower_layer_tt"));
-        setEnabled(false);
-        Layers.addHolderListener(this);
     }
 
     @Override
     protected void onClick(Composition comp) {
-        LayerHolder holder = comp.getActiveHolder();
-        if (up) {
-            holder.moveActiveLayerUp();
-        } else {
-            holder.moveActiveLayerDown();
-        }
-    }
-
-    @Override
-    public void viewActivated(View oldView, View newView) {
-        enableDisable(newView.getComp().getActiveHolder());
-    }
-
-    public void enableDisable(LayerHolder holder) {
-        if (holder != null) {
-            int activeLayerIndex = holder.getActiveLayerIndex();
-            if (up) {
-                int numLayers = holder.getNumLayers();
-                setEnabled(activeLayerIndex < numLayers - 1);
-            } else {
-                setEnabled(activeLayerIndex > 0);
-            }
-        }
-    }
-
-    @Override
-    public void numLayersChanged(LayerHolder holder, int newLayerCount) {
-        enableDisable(holder);
-    }
-
-    @Override
-    public void layerActivated(Layer layer) {
-        enableDisable(layer.getHolder());
-    }
-
-    @Override
-    public void layersReordered(LayerHolder holder) {
-        enableDisable(holder);
+        comp.getActiveHolder().moveActiveLayer(up);
     }
 
     private static Icon getIcon(boolean up) {

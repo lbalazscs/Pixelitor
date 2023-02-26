@@ -1054,7 +1054,7 @@ public abstract class Layer implements Serializable, Debuggable {
         return layer == this;
     }
 
-    public boolean containsClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerClass(Class<? extends Layer> clazz) {
         return getClass() == clazz;
     }
 

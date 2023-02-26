@@ -842,6 +842,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
+    public boolean containsLayer(Layer layer) {
+        return layerList.contains(layer);
+    }
+
+    @Override
     public Stream<? extends Layer> levelStream() {
         return layerList.stream();
     }
@@ -1544,9 +1549,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return false;
     }
 
+    @Override
     public boolean containsLayerClass(Class<? extends Layer> clazz) {
         for (Layer layer : layerList) {
-            if (layer.containsClass(clazz)) {
+            if (layer.containsLayerClass(clazz)) {
                 return true;
             }
         }

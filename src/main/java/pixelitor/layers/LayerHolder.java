@@ -19,10 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.history.GroupingEdit;
-import pixelitor.history.History;
-import pixelitor.history.LayerOrderChangeEdit;
-import pixelitor.history.MergeDownEdit;
+import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.Debuggable;
 
@@ -47,24 +44,72 @@ public interface LayerHolder extends Debuggable {
 
     void addLayerToList(int index, Layer newLayer);
 
+    boolean containsLayer(Layer layer);
+
+    boolean containsLayerClass(Class<? extends Layer> clazz);
+
     default void addLayerNoUI(Layer newLayer) {
         new Composition.LayerAdder(this).noUI().add(newLayer);
     }
 
     default void moveActiveLayerUp() {
-        assert isHolderOfActiveLayer();
-
-        int oldIndex = indexOf(getComp().getActiveLayer());
-        changeLayerOrder(oldIndex, oldIndex + 1,
-                true, LayerMoveAction.RAISE_LAYER);
+        moveActiveLayer(true);
     }
 
     default void moveActiveLayerDown() {
-        assert isHolderOfActiveLayer();
+        moveActiveLayer(false);
+    }
 
-        int oldIndex = indexOf(getComp().getActiveLayer());
-        changeLayerOrder(oldIndex, oldIndex - 1,
-            true, LayerMoveAction.LOWER_LAYER);
+    default void moveActiveLayer(boolean up) {
+        assert isHolderOfActiveLayer();
+        Layer activeLayer = getComp().getActiveLayer();
+        String editName = up ? LayerMoveAction.RAISE_LAYER : LayerMoveAction.LOWER_LAYER;
+
+        int index = indexOf(activeLayer);
+        // if the layer is already at the edge of its current holder,
+        // and that holder is a group, then get it out of the group
+        if ((up && index == getNumLayers() - 1) || (!up && index == 0)) {
+            if (this instanceof LayerGroup group) {
+                LayerHolder groupHolder = group.getHolder();
+                int groupIndex = groupHolder.indexOf(group);
+                int targetIndex = up ? groupIndex + 1 : groupIndex;
+                moveLayerInto(activeLayer, groupHolder, targetIndex, editName);
+                return;
+            }
+        }
+
+        int newIndex = up ? index + 1 : index - 1;
+        if (newIndex < 0 || newIndex > getNumLayers() - 1) {
+            return;
+        }
+        if (getLayer(newIndex) instanceof LayerGroup group) {
+            // special case: move the layer into the group
+
+            int groupIndex = up ? 0 : group.getNumLayers();
+            moveLayerInto(activeLayer, group, groupIndex, editName);
+        } else {
+            changeLayerOrder(index, newIndex, true, editName);
+        }
+    }
+
+    // moves the given layer from this holder into the given holder
+    default void moveLayerInto(Layer layer, LayerHolder targetHolder, int targetIndex, String editName) {
+        assert targetHolder != this;
+        assert containsLayer(layer);
+        assert !targetHolder.containsLayer(layer);
+        assert targetIndex >= 0;
+
+        if (editName != null) {
+            int oldIndex = indexOf(layer);
+            assert oldIndex >= 0;
+
+            History.add(new ChangeHolderEdit(editName, layer, this, oldIndex, targetHolder, targetIndex));
+        }
+
+        deleteLayer(layer, false);
+        new Composition.LayerAdder(targetHolder)
+            .atIndex(targetIndex)
+            .add(layer);
     }
 
     default void moveActiveLayerToTop() {
@@ -275,7 +320,7 @@ public interface LayerHolder extends Debuggable {
             newGroup.updateChildrenUI();
         } else {
             assert addHistory;
-            newGroup = new LayerGroup(getComp(), "Layer Group", movedLayers);
+            newGroup = new LayerGroup(getComp(), LayerGroup.createName(), movedLayers);
         }
 
         int lastMovedIndex = indices[indices.length - 1];
@@ -288,7 +333,7 @@ public interface LayerHolder extends Debuggable {
     }
 
     default void addEmptyGroup() {
-        LayerGroup group = new LayerGroup(getComp(), "Layer Group");
+        LayerGroup group = new LayerGroup(getComp(), LayerGroup.createName());
         new Composition.LayerAdder(this)
             .withHistory("New Layer Group")
             .add(group);

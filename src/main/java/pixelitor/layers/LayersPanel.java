@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.utils.VisibleForTesting;
 
@@ -28,8 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
-import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
 
 /**
  * The GUI container for {@link LayerGUI} objects.
@@ -156,11 +153,6 @@ public class LayersPanel extends JLayeredPane {
         }
         draggedGUI = null;
         doLayout();
-
-        // notify the raise/lower layer menu items
-        var comp = Views.getActiveComp();
-        MOVE_LAYER_UP.enableDisable(comp);
-        MOVE_LAYER_DOWN.enableDisable(comp);
     }
 
     @Override

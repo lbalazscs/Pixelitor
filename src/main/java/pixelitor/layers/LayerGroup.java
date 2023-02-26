@@ -24,6 +24,7 @@ import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
@@ -59,6 +60,8 @@ public class LayerGroup extends CompositeLayer {
     // used only for isolated images
     private transient BufferedImage cachedImage;
 
+    private static int groupCounter = 0;
+
     public LayerGroup(Composition comp, String name) {
         this(comp, name, new ArrayList<>());
     }
@@ -76,6 +79,10 @@ public class LayerGroup extends CompositeLayer {
         cachedImage = null;
         thumb = null;
         needsIconUpdate = false;
+    }
+
+    public static String createName() {
+        return "Layer Group " + (++groupCounter);
     }
 
     @Override
@@ -273,7 +280,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean containsClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerClass(Class<? extends Layer> clazz) {
         if (getClass() == clazz) {
             return true;
         }
@@ -304,6 +311,11 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public Layer getLayer(int index) {
         return layers.get(index);
+    }
+
+    @Override
+    public boolean containsLayer(Layer layer) {
+        return layers.contains(layer);
     }
 
     @Override
@@ -427,6 +439,11 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void unGroup() {
+        if (layers.isEmpty() && isTopLevel() && comp.getNumLayers() == 1) {
+            String msg = "<html>The empty layer group <b>" + name + "</b> can't be ungrouped<br>because a composition must always have at least one layer.";
+            Messages.showInfo("Can't Ungroup", msg);
+            return;
+        }
         replaceWithUnGrouped(null, true);
     }
 

@@ -83,6 +83,8 @@ public class SmartObject extends CompositeLayer {
     // the real list of smart filters
     private List<SmartFilter> filters = new ArrayList<>();
 
+    // the source of the starting image for the smart filters:
+    // either the content or the transformer, if there is one.
     private ImageSource baseSource;
 
     // transformer in old pxc files
@@ -1057,6 +1059,11 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
+    public boolean containsLayer(Layer layer) {
+        return filters.contains((SmartFilter) layer);
+    }
+
+    @Override
     public Stream<? extends Layer> levelStream() {
         return filters.stream();
     }
@@ -1068,18 +1075,14 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void moveActiveLayerUp() {
+    public void moveActiveLayer(boolean up) {
         SmartFilter sf = getSelectedSmartFilter();
         if (sf != null) {
-            moveUp(sf);
-        }
-    }
-
-    @Override
-    public void moveActiveLayerDown() {
-        SmartFilter sf = getSelectedSmartFilter();
-        if (sf != null) {
-            moveDown(sf);
+            if (up) {
+                moveUp(sf);
+            } else {
+                moveDown(sf);
+            }
         }
     }
 
