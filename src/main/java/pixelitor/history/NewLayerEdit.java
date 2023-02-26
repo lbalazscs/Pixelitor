@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.history;
 
-import pixelitor.Composition.LayerAdder;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerHolder;
 import pixelitor.layers.MaskViewMode;
@@ -31,49 +30,49 @@ import javax.swing.undo.CannotUndoException;
  */
 public class NewLayerEdit extends PixelitorEdit {
     private LayerHolder holder;
-    private Layer activeLayerBefore;
-    private Layer newLayer;
-    private final int newLayerIndex;
-    private final MaskViewMode viewModeBefore;
+    private Layer previousActiveLayer;
+    private Layer layer;
+    private final int layerIndex;
+    private final MaskViewMode previousMaskViewMode;
 
-    public NewLayerEdit(String editName, LayerHolder holder,
-                        Layer newLayer, Layer activeLayerBefore,
-                        MaskViewMode viewModeBefore) {
-        super(editName, holder.getComp());
+    public NewLayerEdit(String editName,
+                        Layer layer, Layer previousActiveLayer,
+                        MaskViewMode previousMaskViewMode) {
+        super(editName, layer.getComp());
 
-        assert activeLayerBefore != newLayer;
+        assert previousActiveLayer != layer;
 
-        this.holder = holder;
-        this.activeLayerBefore = activeLayerBefore;
-        this.viewModeBefore = viewModeBefore;
-        this.newLayer = newLayer;
-        newLayerIndex = holder.indexOf(newLayer);
+        this.holder = layer.getHolder();
+        this.previousActiveLayer = previousActiveLayer;
+        this.previousMaskViewMode = previousMaskViewMode;
+        this.layer = layer;
+        layerIndex = this.holder.indexOf(layer);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        holder.deleteLayer(newLayer, false);
-        comp.setActiveLayer(activeLayerBefore);
-        viewModeBefore.activate(comp, activeLayerBefore);
+        holder.deleteLayer(layer, false);
+        comp.setActiveLayer(previousActiveLayer);
+        previousMaskViewMode.activate(comp, previousActiveLayer);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        new LayerAdder(holder)
-            .atIndex(newLayerIndex)
-            .add(newLayer);
+        holder.adder()
+            .atIndex(layerIndex)
+            .add(layer);
     }
 
     @Override
     public void die() {
         super.die();
 
-        newLayer = null;
-        activeLayerBefore = null;
+        layer = null;
+        previousActiveLayer = null;
         holder = null;
     }
 
@@ -82,10 +81,10 @@ public class NewLayerEdit extends PixelitorEdit {
         DebugNode node = super.createDebugNode(key);
 
         node.add(holder.createDebugNode("holder"));
-        node.add(activeLayerBefore.createDebugNode("active layer before"));
-        node.add(newLayer.createDebugNode("new layer"));
-        node.addInt("new layer index", newLayerIndex);
-        node.addAsString("view mode before", viewModeBefore);
+        node.add(previousActiveLayer.createDebugNode("previous active layer"));
+        node.add(layer.createDebugNode("layer"));
+        node.addInt("layer index", layerIndex);
+        node.addAsString("previous mask view mode", previousMaskViewMode);
 
         return node;
     }

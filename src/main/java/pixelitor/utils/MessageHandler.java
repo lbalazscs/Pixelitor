@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,8 @@ public interface MessageHandler {
     // *** dialog messages ***
 
     void showInfo(String title, String msg, Component parent);
+
+    void showWarning(String title, String msg, Component parent);
 
     void showError(String title, String msg, Component parent);
 

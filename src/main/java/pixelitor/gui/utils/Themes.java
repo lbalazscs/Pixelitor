@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,9 +34,10 @@ public class Themes {
     public static final Color LIGHT_ICON_COLOR = new ColorUIResource(187, 187, 187);
 //    public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
 
-    // this theme will be used for the unit tests, otherwise it's overwritten at startup
-    private static Theme currentTheme = Theme.NIMBUS;
     public static final Theme DEFAULT = Theme.NIMBUS;
+
+    // this theme will be used for the unit tests, otherwise it's overwritten at startup
+    private static Theme currentTheme = DEFAULT;
 
     public static void install(Theme theme, boolean updateGUI, boolean force) {
         if (theme != currentTheme || force) {

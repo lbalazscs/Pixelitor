@@ -62,7 +62,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;
 
-    private LayerGUI owner;
+    // this field can't be called parent, because the setters/getters
+    // would conflict with the methods in java.awt.Component
+    private LayerGUI parentUI;
+
     private final List<LayerGUI> children = new ArrayList<>();
 
     // Most often false, but when opening serialized pxc files,
@@ -116,55 +119,54 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateChildrenPanel() {
-        if (layer instanceof LayerHolder holder) {
-            int numChildren = holder.getNumLayers();
-            if (numChildren > 0) {
-                if (childrenPanel == null) {
-                    VerticalLayout innerLayout = new VerticalLayout();
-                    childrenPanel = new JPanel(innerLayout);
-                } else {
-                    childrenPanel.removeAll();
-                }
-            } else {
-                if (childrenPanel != null) {
-                    // all children have been removed
-                    remove(childrenPanel);
-                    childrenPanel = null;
-                }
-            }
-
-            // TODO it's not nice to detach all layer GUIs and
-            //   then attach again those which weren't changed
-            for (LayerGUI child : children) {
-                child.removeDragReorderHandler();
-                child.setOwner(null);
-            }
-            children.clear();
-
-            // children are added from the bottom up
-            for (int i = numChildren - 1; i >= 0; i--) {
-                Layer child = holder.getLayer(i);
-                LayerGUI childUI = (LayerGUI) child.createUI();
-                childUI.setOwner(this);
-                assert !children.contains(childUI);
-                children.add(childUI);
-
-                // when duplicating a smart object with filters
-                // this is null, and it's only set later
-                if (dragReorderHandler != null) {
-                    childUI.setDragReorderHandler(dragReorderHandler);
-                }
-                assert childUI != null;
-                childrenPanel.add(childUI);
-            }
-            if (numChildren > 0) {
-                add(childrenPanel, LayerGUILayout.CHILDREN);
-            }
-        } else { // the layer isn't a holder
+        if (!(layer instanceof LayerHolder holder)) {
             if (childrenPanel != null) { // can happen after holder rasterization.
                 remove(childrenPanel);
                 childrenPanel = null;
             }
+            return;
+        }
+        int numChildLayers = holder.getNumLayers();
+        if (numChildLayers > 0) {
+            if (childrenPanel == null) {
+                VerticalLayout innerLayout = new VerticalLayout();
+                childrenPanel = new JPanel(innerLayout);
+            } else {
+                childrenPanel.removeAll();
+            }
+        } else {
+            if (childrenPanel != null) {
+                // all children have been removed
+                remove(childrenPanel);
+                childrenPanel = null;
+            }
+        }
+
+        // TODO it's not elegant to detach all layer GUIs and
+        //   then attach again those which weren't changed
+        for (LayerGUI child : children) {
+            child.detach();
+        }
+        children.clear();
+
+        // children are added from the bottom up
+        for (int i = numChildLayers - 1; i >= 0; i--) {
+            Layer child = holder.getLayer(i);
+            LayerGUI childUI = (LayerGUI) child.createUI();
+            childUI.setParentUI(this);
+            assert !children.contains(childUI);
+            children.add(childUI);
+
+            // when duplicating a smart object with filters
+            // this is null, and it's only set later
+            if (dragReorderHandler != null) {
+                childUI.setDragReorderHandler(dragReorderHandler);
+            }
+            assert childUI != null;
+            childrenPanel.add(childUI);
+        }
+        if (numChildLayers > 0) {
+            add(childrenPanel, LayerGUILayout.CHILDREN);
         }
     }
 
@@ -380,26 +382,21 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    private void removeDragReorderHandler() {
-        if (dragReorderHandler != null) {
-            removeDragReorderHandler(dragReorderHandler);
+    public void removeDragReorderHandler() {
+        if (dragReorderHandler == null) {
+            return;
         }
-    }
 
-    public void removeDragReorderHandler(DragReorderHandler handler) {
-        assert dragReorderHandler != null;
-        assert dragReorderHandler == handler;
-
-        handler.detachFrom(this);
-        handler.detachFrom(nameEditor);
-        handler.detachFrom(layerIconLabel);
+        dragReorderHandler.detachFrom(this);
+        dragReorderHandler.detachFrom(nameEditor);
+        dragReorderHandler.detachFrom(layerIconLabel);
 
         if (hasMaskIcon()) {
-            handler.detachFrom(maskIconLabel);
+            dragReorderHandler.detachFrom(maskIconLabel);
         }
 
         for (LayerGUI child : children) {
-            child.removeDragReorderHandler(handler);
+            child.removeDragReorderHandler();
         }
 
         dragReorderHandler = null;
@@ -688,12 +685,18 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void setOwner(LayerUI owner) {
-        this.owner = (LayerGUI) owner;
+    public void setParentUI(LayerUI parentUI) {
+        this.parentUI = (LayerGUI) parentUI;
     }
 
-    public LayerGUI getOwner() {
-        return owner;
+    public LayerGUI getParentUI() {
+        return parentUI;
+    }
+
+    @Override
+    public void detach() {
+        setParentUI(null);
+        removeDragReorderHandler();
     }
 
     public List<LayerGUI> getChildren() {
@@ -701,19 +704,28 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     public boolean isEmbedded() {
-        return owner != null;
+        return parentUI != null;
     }
 
     @Override
     public boolean checkInvariants() {
-        if (owner != null) {
-            assert owner.containsChild(this);
+        if (parentUI != null) {
+            if (!parentUI.containsChild(this)) {
+                throw new AssertionError(parentUI.getLayerName() + " UI doesn't contain " + this.getLayerName() + " UI");
+            }
         }
-        if (layer.getHolder() instanceof Layer parentLayer) {
-            assert owner != null;
-            assert parentLayer.getUI() == owner;
+        if (!layer.isTopLevel()) {
+            if (parentUI == null) {
+                throw new AssertionError("null parentUI in " + getLayerName() + " UI");
+            }
+
+            LayerUI holderUI = ((CompositeLayer) layer.getHolder()).getUI();
+            if (holderUI != parentUI) {
+                throw new AssertionError("mismatched UIs: holderUI = " + holderUI.getLayerName()
+                                         + ", parentUI = " + parentUI.getLayerName());
+            }
         }
-        return false;
+        return true;
     }
 
     private boolean containsChild(LayerGUI layerGUI) {
@@ -726,7 +738,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         node.addInt("unique id", uniqueId);
 
         node.addNullableProperty("dragReorderHandler", dragReorderHandler);
-        node.addNullableProperty("owner", owner);
+        node.addNullableProperty("parentUI", parentUI);
 
         for (LayerGUI child : children) {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));

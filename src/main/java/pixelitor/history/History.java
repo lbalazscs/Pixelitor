@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,13 +29,10 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 
-import javax.swing.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -101,41 +98,6 @@ public class History {
         }
     }
 
-    public static PartialImageEdit createPartialImageEdit(Rectangle rect,
-                                                          BufferedImage origImage,
-                                                          Drawable dr,
-                                                          boolean relativeToImage,
-                                                          String editName) {
-        assert rect.width > 0 : "rectangle.width = " + rect.width;
-        assert rect.height > 0 : "rectangle.height = " + rect.height;
-        assert origImage != null;
-
-        if (!relativeToImage) {
-            // if the coordinates are relative to the canvas,
-            // translate them to be relative to the image
-            int dx = -dr.getTx();
-            int dy = -dr.getTy();
-            rect.translate(dx, dy);
-        }
-
-        rect = SwingUtilities.computeIntersection(0, 0,
-            origImage.getWidth(), origImage.getHeight(), // full image bounds
-            rect
-        );
-
-        if (rect.isEmpty()) {
-            return null;
-        }
-
-        var comp = dr.getComp();
-
-        // we could also intersect with the selection bounds,
-        // but typically the extra savings would be minimal
-
-        return new PartialImageEdit(editName, comp,
-            dr, origImage, rect);
-    }
-
     public static String getUndoPresentationName() {
         return undoManager.getUndoPresentationName();
     }
@@ -180,7 +142,7 @@ public class History {
         if (RandomGUITest.isRunning()) {
             throw new RuntimeException("No " + type + " available", e);
         } else {
-            Messages.showInfo("No " + type + " available",
+            Messages.showWarning("No " + type + " available",
                 "<html>No " + type + " is available, possible reasons are:<ul>" +
                 "<li>The edited image was closed" +
                 "<li>The " + type + " image was discarded by Pixelitor in order to save memory");

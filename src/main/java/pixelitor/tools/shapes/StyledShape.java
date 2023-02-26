@@ -482,7 +482,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
             if (!shapeBounds.isEmpty()) {
                 BufferedImage originalImage = dr.getImage();
-                imageEdit = History.createPartialImageEdit(
+                imageEdit = PartialImageEdit.create(
                     shapeBounds, originalImage, dr, false, "Shape");
             }
         }

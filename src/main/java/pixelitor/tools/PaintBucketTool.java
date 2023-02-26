@@ -149,7 +149,7 @@ public class PaintBucketTool extends Tool {
         };
 
         if (replacedArea != null) { // something was replaced
-            PartialImageEdit edit = History.createPartialImageEdit(replacedArea, backupForUndo, dr,
+            PartialImageEdit edit = PartialImageEdit.create(replacedArea, backupForUndo, dr,
                 true, getName());
             if (edit != null) {
                 History.add(edit);

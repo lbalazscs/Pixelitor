@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,19 +43,20 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
     private final AffineTransform canvasTransform;
     private AffineTransform inverseCanvasTransform;
-    private final boolean reload;
+    private final boolean isReload;
 
     public CompositionReplacedEdit(String name, View view,
                                    Composition oldComp, Composition newComp,
-                                   AffineTransform canvasTransform, boolean reload) {
+                                   AffineTransform canvasTransform, boolean isReload) {
         super(name, newComp, true);
-        this.reload = reload;
+        this.isReload = isReload;
 
         assert oldComp != null;
         assert newComp != null;
 
-        if (canvasTransform != null || reload) {
-            if (!oldComp.hasSameFileAs(newComp, !reload)) {
+        if (canvasTransform != null || isReload) {
+            boolean allowNull = !isReload;
+            if (!oldComp.hasSameFileAs(newComp, allowNull)) {
                 throw new IllegalStateException("old = " + oldComp.getFile() + ", new = " + newComp.getFile());
             }
         }
@@ -91,7 +92,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             }
         }
 
-        view.replaceComp(oldComp, oldMaskViewMode, reload);
+        view.replaceComp(oldComp, oldMaskViewMode, isReload);
 
         if (oldDeselectEdit != null) {
             oldDeselectEdit.undo();
@@ -134,7 +135,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             oldDeselectEdit.redo();
         }
 
-        view.replaceComp(newComp, MaskViewMode.NORMAL, reload);
+        view.replaceComp(newComp, MaskViewMode.NORMAL, isReload);
 
         if (newDeselectEdit != null) {
             newDeselectEdit.undo();
@@ -156,7 +157,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     @Override
     public boolean makesDirty() {
         // reloading should not result in a dirty comp
-        return !reload;
+        return !isReload;
     }
 
     @Override

@@ -317,7 +317,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return scaling;
     }
 
-    public void updateTitle() {
+    public void updateViewContainerTitle() {
         if (viewContainer != null) {
             viewContainer.updateTitle(this);
         }
@@ -587,7 +587,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         canvas.recalcCoSize(this, true);
 
         if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
-            updateTitle();
+            updateViewContainerTitle();
         } else {
             // otherwise the scrollbars don't appear
             // when using the tabbed UI

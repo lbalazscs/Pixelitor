@@ -68,7 +68,7 @@ public class LayersPanel extends JLayeredPane {
         revalidate();
         repaint();
 
-        gui.removeDragReorderHandler(dragReorderHandler);
+        gui.detach();
     }
 
     public void changeLayerGUIOrder(int oldIndex, int newIndex) {

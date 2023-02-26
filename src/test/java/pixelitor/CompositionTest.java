@@ -18,7 +18,6 @@
 package pixelitor;
 
 import org.junit.jupiter.api.*;
-import pixelitor.Composition.LayerAdder;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
@@ -26,11 +25,11 @@ import pixelitor.layers.Layer;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
 
 @DisplayName("Composition tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -157,7 +156,7 @@ class CompositionTest {
     @Test
     void layerAdder() {
         // add bellow active
-        new LayerAdder(comp)
+        comp.adder()
             .withHistory("bellow active")
             .atPosition(BELLOW_ACTIVE)
             .add(createEmptyImageLayer(comp, "layer A"));
@@ -170,7 +169,7 @@ class CompositionTest {
             .activeLayerNameIs("layer A");
 
         // add above active
-        new LayerAdder(comp)
+        comp.adder()
             .withHistory("above active")
             .atPosition(ABOVE_ACTIVE)
             .add(createEmptyImageLayer(comp, "layer B"));
@@ -182,7 +181,7 @@ class CompositionTest {
             .activeLayerNameIs("layer B");
 
         // add to position 0
-        new LayerAdder(comp)
+        comp.adder()
             .withHistory("position 0")
             .atIndex(0)
             .add(createEmptyImageLayer(comp, "layer C"));
@@ -194,7 +193,7 @@ class CompositionTest {
             .activeLayerNameIs("layer C");
 
         // add to position 2
-        new LayerAdder(comp)
+        comp.adder()
             .withHistory("position 2")
             .atIndex(2)
             .add(createEmptyImageLayer(comp, "layer D"));
@@ -342,7 +341,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.moveActiveLayerUp();
+        comp.getActiveHolder().moveActiveLayer(true);
         // nothing changes as the active layer is already at the top
         assertThat(comp)
             .isNotDirty()
@@ -350,7 +349,7 @@ class CompositionTest {
             .secondLayerIsActive();
         History.assertNumEditsIs(0);
 
-        comp.moveActiveLayerDown();
+        comp.getActiveHolder().moveActiveLayer(false);
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 2", "layer 1")
@@ -366,7 +365,7 @@ class CompositionTest {
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();
 
-        comp.moveActiveLayerUp();
+        comp.getActiveHolder().moveActiveLayer(true);
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -381,7 +380,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.moveActiveLayerToBottom();
+        comp.getActiveHolder().moveActiveLayerToBottom();
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();
@@ -396,7 +395,7 @@ class CompositionTest {
             .layerNamesAre("layer 2", "layer 1")
             .firstLayerIsActive();
 
-        comp.moveActiveLayerToTop();
+        comp.getActiveHolder().moveActiveLayerToTop();
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -435,7 +434,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
 
-        comp.lowerLayerSelection(); // make the first layer active
+        comp.getActiveHolder().lowerLayerSelection(); // make the first layer active
         assertThat(comp)
             .isDirty()
             .layerNamesAre("layer 1", "layer 2")
@@ -451,7 +450,7 @@ class CompositionTest {
             .layerNamesAre("layer 1", "layer 2")
             .firstLayerIsActive();
 
-        comp.raiseLayerSelection(); // make the second layer active
+        comp.getActiveHolder().raiseLayerSelection(); // make the second layer active
         assertThat(comp)
             .layerNamesAre("layer 1", "layer 2")
             .secondLayerIsActive();
@@ -842,5 +841,20 @@ class CompositionTest {
 
         // There is no undo at this level
         History.assertNumEditsIs(0);
+    }
+
+    @Test
+    void rename() {
+        comp.setView(null); // avoid the creation of the main window
+        assertThat(comp).hasName("Test").isNotOpen();
+
+        comp.rename("Test", "new name");
+        assertThat(comp).hasName("new name");
+
+        History.undo("Rename Image");
+        assertThat(comp).hasName("Test");
+
+        History.redo("Rename Image");
+        assertThat(comp).hasName("new name");
     }
 }

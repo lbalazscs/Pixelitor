@@ -131,7 +131,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
             newLayer = Views.getActiveLayer();
         }
 
-        if (newLayer instanceof LayerGroup) {
+        if (newLayer.isGroup()) {
             if (!lastActiveWasGroup) {
                 bmCombo.setModel(groupModel);
                 lastActiveWasGroup = true;

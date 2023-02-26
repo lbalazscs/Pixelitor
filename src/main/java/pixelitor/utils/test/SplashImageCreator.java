@@ -22,7 +22,6 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Composition.LayerAdder;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.automate.DirectoryChooser;
@@ -55,8 +54,8 @@ import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.font.TextAttribute.*;
 import static java.lang.String.format;
-import static pixelitor.Composition.LayerAdder.Position.TOP;
 import static pixelitor.layers.BlendingMode.NORMAL;
+import static pixelitor.layers.LayerAdder.Position.TOP;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 import static pixelitor.utils.Threads.*;
 
@@ -145,7 +144,7 @@ public class SplashImageCreator {
         lights.randomize();
 
         SmartFilter lightsSF = new SmartFilter(lights, so.getContent(), so);
-        so.addSmartFilter(lightsSF, false, true);
+        so.addSmartFilter(lightsSF, true, true);
 
         addTextLayers(comp);
 
@@ -190,7 +189,10 @@ public class SplashImageCreator {
 
         layer.setTranslation(0, translationY);
 
-        new LayerAdder(comp).atPosition(TOP).add(layer);
+        comp.adder()
+            .withHistory("add " + name)
+            .atPosition(TOP)
+            .add(layer);
         return layer;
     }
 

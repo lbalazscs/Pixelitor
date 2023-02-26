@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,11 @@ import pixelitor.Composition;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-public class CompRenamedEdit extends PixelitorEdit {
+public class CompositionRenamedEdit extends PixelitorEdit {
     private final String oldName;
     private final String newName;
 
-    public CompRenamedEdit(Composition comp, String oldName, String newName) {
+    public CompositionRenamedEdit(Composition comp, String oldName, String newName) {
         super("Rename Image", comp);
         this.oldName = oldName;
         this.newName = newName;

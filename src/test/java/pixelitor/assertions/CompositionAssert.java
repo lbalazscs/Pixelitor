@@ -80,6 +80,27 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
+    public CompositionAssert isOpen() {
+        isNotNull();
+
+        if (!actual.isOpen()) {
+            failWithMessage("\nExpecting that actual Composition is open but is not.");
+        }
+
+        return this;
+    }
+
+    public CompositionAssert isNotOpen() {
+        isNotNull();
+
+        if (actual.isOpen()) {
+            failWithMessage("\nExpecting that actual Composition is not open but is.");
+        }
+
+        return this;
+    }
+
+
     public CompositionAssert numLayersIs(int numLayers) {
         isNotNull();
 

@@ -115,7 +115,7 @@ public class DragReorderHandler extends MouseInputAdapter {
         // guis move the whole smart object
         while (layerGUI.isEmbedded()) {
             e.translatePoint(layerGUI.getX(), layerGUI.getY());
-            layerGUI = layerGUI.getOwner();
+            layerGUI = layerGUI.getParentUI();
         }
 
         return layerGUI;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.*;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
+import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.brushes.*;
@@ -380,7 +381,7 @@ public abstract class AbstractBrushTool extends Tool {
         assert !affectedRect.isEmpty() : "brush radius = " + maxBrushRadius
                                          + ", affected area = " + affectedArea;
 
-        var imageEdit = History.createPartialImageEdit(
+        var imageEdit = PartialImageEdit.create(
             affectedRect, originalImage, dr, false, getName());
         if (imageEdit != null) {
             if (hasBrushType() && getBrushType() == BrushType.CONNECT) {

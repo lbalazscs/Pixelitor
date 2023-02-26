@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition.LayerAdder;
 import pixelitor.Views;
 import pixelitor.filters.Colorize;
 import pixelitor.filters.Filter;
@@ -42,6 +41,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static java.awt.event.ActionEvent.CTRL_MASK;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
@@ -111,7 +111,8 @@ public class AddAdjLayerAction extends NamedAction implements ViewActivationList
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, name, filter);
 
-        new LayerAdder(comp.getHolderForNewLayers())
+        comp.getHolderForNewLayers().adder()
+            .atPosition(ABOVE_ACTIVE)
             .withHistory("New Adjustment Layer")
             .add(adjustmentLayer);
 

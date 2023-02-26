@@ -1162,20 +1162,20 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * to the transparency of the layer
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
-        BufferedImage oldImage = copyImage(image);
-        LayerMask oldMask = mask;
-        MaskViewMode oldMode = comp.getView().getMaskViewMode();
+        BufferedImage previousLayerImage = copyImage(image);
+        LayerMask previousMask = mask;
+        MaskViewMode previousMaskViewMode = comp.getView().getMaskViewMode();
 
         mask.applyTo(image);
         deleteMask(false);
 
         if (addToHistory) {
-            History.add(new ApplyLayerMaskEdit(
-                comp, this, oldMask, oldImage, oldMode));
+            History.add(new ApplyLayerMaskEdit(this, previousMask,
+                previousLayerImage, previousMaskViewMode));
         }
 
         updateIconImage();
-        return oldImage;
+        return previousLayerImage;
     }
 
     @Override

@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
+
 /**
  * Something that contains an ordered collection of layers, like a
  * composition, layer group or smart object.
@@ -46,18 +48,10 @@ public interface LayerHolder extends Debuggable {
 
     boolean containsLayer(Layer layer);
 
-    boolean containsLayerClass(Class<? extends Layer> clazz);
+    boolean containsLayerWithClass(Class<? extends Layer> clazz);
 
     default void addLayerNoUI(Layer newLayer) {
-        new Composition.LayerAdder(this).noUI().add(newLayer);
-    }
-
-    default void moveActiveLayerUp() {
-        moveActiveLayer(true);
-    }
-
-    default void moveActiveLayerDown() {
-        moveActiveLayer(false);
+        adder().noUI().add(newLayer);
     }
 
     default void moveActiveLayer(boolean up) {
@@ -107,7 +101,7 @@ public interface LayerHolder extends Debuggable {
         }
 
         deleteLayer(layer, false);
-        new Composition.LayerAdder(targetHolder)
+        targetHolder.adder()
             .atIndex(targetIndex)
             .add(layer);
     }
@@ -325,7 +319,7 @@ public interface LayerHolder extends Debuggable {
 
         int lastMovedIndex = indices[indices.length - 1];
         int newIndex = lastMovedIndex + 1 - indices.length;
-        new Composition.LayerAdder(this).atIndex(newIndex).add(newGroup);
+        adder().atIndex(newIndex).add(newGroup);
 
         if (addHistory) {
             History.add(new GroupingEdit(this, newGroup, indices, true));
@@ -334,8 +328,13 @@ public interface LayerHolder extends Debuggable {
 
     default void addEmptyGroup() {
         LayerGroup group = new LayerGroup(getComp(), LayerGroup.createName());
-        new Composition.LayerAdder(this)
+        new LayerAdder(this)
+            .atPosition(ABOVE_ACTIVE)
             .withHistory("New Layer Group")
             .add(group);
+    }
+
+    default LayerAdder adder() {
+        return new LayerAdder(this);
     }
 }

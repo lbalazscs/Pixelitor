@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,8 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
@@ -69,7 +70,7 @@ public class Crop implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.containsLayerClass(SmartObject.class)) {
+        if (oldComp.containsLayerWithClass(SmartObject.class)) {
             Messages.showNotImplementedForSmartObjects("Cropping");
             return CompletableFuture.completedFuture(oldComp);
         }

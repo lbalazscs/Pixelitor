@@ -38,14 +38,19 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Views.thumbSize;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
+/**
+ * A color fill layer that fills the entire canvas with a given color.
+ */
 public class ColorFillLayer extends Layer {
     @Serial
     private static final long serialVersionUID = -5181774134094137901L;
 
     private Color color;
+
+    private static int count;
 
     public ColorFillLayer(Composition comp, String name, Color color) {
         super(comp, name);
@@ -54,12 +59,12 @@ public class ColorFillLayer extends Layer {
 
     public static void createNew(Composition comp) {
         Tools.forceFinish();
-        ColorFillLayer layer = new ColorFillLayer(comp, "color fill", null);
+        ColorFillLayer layer = new ColorFillLayer(comp, createName(), null);
         var activeLayerBefore = comp.getActiveLayer();
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
-        new Composition.LayerAdder(holder)
+        holder.adder()
             .atPosition(ABOVE_ACTIVE)
             .add(layer);
 
@@ -70,11 +75,15 @@ public class ColorFillLayer extends Layer {
             defaultColor, true, c -> layer.changeColor(c, false))) {
             // dialog accepted, now it is safe to add it to the history
             History.add(new NewLayerEdit(title,
-                holder, layer, activeLayerBefore, oldViewMode));
+                layer, activeLayerBefore, oldViewMode));
         } else {
             // dialog cancelled
             holder.deleteLayer(layer, false);
         }
+    }
+
+    private static String createName() {
+        return "color fill " + (++count);
     }
 
     @Override

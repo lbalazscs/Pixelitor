@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
 
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.containsLayerClass(SmartObject.class)) {
+        if (oldComp.containsLayerWithClass(SmartObject.class)) {
             Messages.showNotImplementedForSmartObjects(getText());
             return CompletableFuture.completedFuture(oldComp);
         }

@@ -83,13 +83,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Views.*;
 import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.Condition.*;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.utils.Keys.*;
@@ -543,7 +543,7 @@ public class MenuBar extends JMenuBar {
             IO.loadCompAsync(file)
                 .thenAcceptAsync(content -> {
                     SmartObject so = new SmartObject(file, comp, content);
-                    new Composition.LayerAdder(comp).atPosition(ABOVE_ACTIVE).add(so);
+                    comp.adder().atPosition(ABOVE_ACTIVE).add(so);
                 }, Threads.onEDT)
                 .exceptionally(Messages::showExceptionOnEDT);
         }));
@@ -1225,11 +1225,14 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDebugSubmenu() {
         PMenu sub = new PMenu("Debug");
 
+        sub.add(new OpenViewEnabledAction("Run comp.checkInvariants()",
+            Composition::checkInvariants));
+
         sub.add(new PAction("Copy Internal State to Clipboard",
-                Debug::copyInternalState), CTRL_ALT_D);
+            Debug::copyInternalState), CTRL_ALT_D);
 
         sub.add(new OpenViewEnabledAction("Debug Active Composite Image",
-                comp -> Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName())));
+            comp -> Debug.debugImage(comp.getCompositeImage(), "Composite of " + comp.getDebugName())));
 
         sub.add(new DrawableAction("Debug ImageLayer Images") {
             @Override

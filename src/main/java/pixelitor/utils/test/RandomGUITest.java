@@ -20,7 +20,6 @@ package pixelitor.utils.test;
 import com.bric.util.JVM;
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Views;
 import pixelitor.compactions.EnlargeCanvas;
@@ -68,7 +67,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
@@ -76,6 +74,7 @@ import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.utils.QuadrantAngle.*;
 
 /**
@@ -844,32 +843,32 @@ public class RandomGUITest {
 
     private static void moveActiveLayerToTop(Composition comp) {
         log("layer order change: active to top");
-        comp.moveActiveLayerToTop();
+        comp.getActiveHolder().moveActiveLayerToTop();
     }
 
     private static void moveActiveLayerToBottom(Composition comp) {
         log("layer order change: active to bottom");
-        comp.moveActiveLayerToBottom();
+        comp.getActiveHolder().moveActiveLayerToBottom();
     }
 
     private static void raiseLayerSelection(Composition comp) {
         log("layer selection change: raise selection");
-        comp.raiseLayerSelection();
+        comp.getActiveHolder().raiseLayerSelection();
     }
 
     private static void lowerLayerSelection(Composition comp) {
         log("layer selection change: lower selection");
-        comp.lowerLayerSelection();
+        comp.getActiveHolder().lowerLayerSelection();
     }
 
     private static void moveActiveLayerUp(Composition comp) {
         log("layer order change: active up");
-        comp.moveActiveLayerUp();
+        comp.getActiveHolder().moveActiveLayer(true);
     }
 
     private static void moveActiveLayerDown(Composition comp) {
         log("layer order change: active down");
-        comp.moveActiveLayerDown();
+        comp.getActiveHolder().moveActiveLayer(false);
     }
 
     private static void layerMerge() {
@@ -967,9 +966,8 @@ public class RandomGUITest {
         } else {
             log("change layer blending mode for " + layer.getName());
 
-            BlendingMode[] blendingModes = (layer instanceof LayerGroup) ?
-                    BlendingMode.ALL_MODES : BlendingMode.LAYER_MODES;
-            BlendingMode randomBM = Rnd.chooseFrom(blendingModes);
+            BlendingMode randomBM = Rnd.chooseFrom(layer.isGroup() ?
+                BlendingMode.ALL_MODES : BlendingMode.LAYER_MODES);
             layer.setBlendingMode(randomBM, true, true);
         }
     }
@@ -1025,7 +1023,7 @@ public class RandomGUITest {
         TextLayer textLayer = TextLayer.createNew(comp, settings);
 
         // has to be called explicitly, since no dialog will be shown
-        textLayer.finalizeCreation(comp, activeLayerBefore, oldMaskViewMode);
+        textLayer.finalizeCreation(activeLayerBefore, oldMaskViewMode);
 
         log("new text layer: " + textLayer.getName());
     }
@@ -1043,6 +1041,16 @@ public class RandomGUITest {
     private static void newShapesLayer() {
         log("new shapes layer");
         ShapesLayer.createNew(Views.getActiveComp());
+    }
+
+    private static void newEmptyLayerGroup() {
+        log("new empty layer group");
+        Views.getActiveComp().getHolderForNewLayers().addEmptyGroup();
+    }
+
+    private static void convertVisibleToGroup() {
+        log("convert visible to group");
+        Views.getActiveComp().getHolderForGrouping().convertVisibleLayersToGroup();
     }
 
     private static void convertToSmartObject() {
@@ -1065,7 +1073,7 @@ public class RandomGUITest {
         log("new adj layer");
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        new LayerAdder(comp)
+        comp.adder()
             .withHistory("New Random Adj Layer")
             .atPosition(ABOVE_ACTIVE)
             .add(adjustmentLayer);
@@ -1254,6 +1262,8 @@ public class RandomGUITest {
         weightedCaller.registerAction(1, RandomGUITest::newColorFillLayer);
         weightedCaller.registerAction(1, RandomGUITest::newGradientFillLayer);
         weightedCaller.registerAction(1, RandomGUITest::newShapesLayer);
+        weightedCaller.registerAction(1, RandomGUITest::newEmptyLayerGroup);
+        weightedCaller.registerAction(1, RandomGUITest::convertVisibleToGroup);
         weightedCaller.registerAction(1, RandomGUITest::convertToSmartObject);
         weightedCaller.registerAction(5, RandomGUITest::randomRasterizeLayer);
         weightedCaller.registerAction(4, RandomGUITest::randomGuides);

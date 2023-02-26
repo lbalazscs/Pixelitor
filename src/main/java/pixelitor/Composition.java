@@ -59,9 +59,10 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.LayerAdder.Position.*;
 import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.io.FileUtils.stripExtension;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.Utils.createCopyName;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
@@ -477,17 +478,21 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         String oldName = getName();
         String newName = JOptionPane.showInputDialog(owner,
             "New Name:", oldName);
+        rename(oldName, newName);
+    }
+
+    public void rename(String oldName, String newName) {
         if (newName.equals(oldName)) {
             return;
         }
         setName(newName);
-        History.add(new CompRenamedEdit(this, oldName, newName));
+        History.add(new CompositionRenamedEdit(this, oldName, newName));
     }
 
     public void setName(String name) {
         this.name = name;
         if (isOpen()) {
-            view.updateTitle();
+            view.updateViewContainerTitle();
             PixelitorWindow.get().updateTitle(this);
         }
     }
@@ -545,7 +550,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public ImageLayer addNewEmptyImageLayer(String name, boolean bellowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
-        new LayerAdder(getHolderForNewLayers())
+        getHolderForNewLayers().adder()
             .withHistory("New Empty Layer")
             .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
             .noRefresh()
@@ -555,11 +560,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String editName) {
-        var newLayer = ImageLayer.fromExternalImage(image, this, layerName);
-        new LayerAdder(this)
-            .withHistory(editName)
-            .atPosition(ABOVE_ACTIVE)
-            .add(newLayer);
+        Layer newLayer = ImageLayer.fromExternalImage(image, this, layerName);
+        adder().withHistory(editName).atPosition(ABOVE_ACTIVE).add(newLayer);
     }
 
     public void addNewLayerFromComposite() {
@@ -585,7 +587,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // there was an out of memory error
             return;
         }
-        new LayerAdder(getActiveHolder())
+        getActiveHolder().adder()
             .withHistory("Duplicate Layer")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
@@ -603,7 +605,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         BufferedImage bi = getCompositeImage();
 
         Layer flattened = new ImageLayer(this, bi, "flattened");
-        new LayerAdder(this)
+        adder()
             .atIndex(numLayers) // add to the top
             .noRefresh()
             .add(flattened);
@@ -1550,9 +1552,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public boolean containsLayerClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
         for (Layer layer : layerList) {
-            if (layer.containsLayerClass(clazz)) {
+            if (layer.containsLayerWithClass(clazz)) {
                 return true;
             }
         }
@@ -1823,7 +1825,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         SmartObject so = new SmartObject(newComp, this);
         newComp.addLayerNoUI(so);
         History.add(new CompositionReplacedEdit("Convert All to Smart Object",
-                view, this, newComp, null, false));
+            view, this, newComp, null, false));
         view.replaceComp(newComp);
         setName("Contents of " + name);
     }
@@ -1854,7 +1856,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         SmartObject so = new SmartObject(newMainComp, content);
         newMainComp.addLayerNoUI(so);
         History.add(new CompositionReplacedEdit("Convert Visible to Smart Object",
-                view, this, newMainComp, null, false));
+            view, this, newMainComp, null, false));
         view.replaceComp(newMainComp);
     }
 
@@ -1864,7 +1866,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         SmartObject duplicate = so.shallowDuplicate();
-        new Composition.LayerAdder(this)
+        new LayerAdder(this)
             .withHistory("Clone")
             .atPosition(ABOVE_ACTIVE)
             .add(duplicate);
@@ -1947,123 +1949,5 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     @Override
     public String toString() {
         return "Composition ('" + debugName + "')";
-    }
-
-    public static class LayerAdder {
-        private final LayerHolder holder;
-        private final Composition comp;
-        private String editName; // null if the add should not be added to history
-        private int newLayerIndex = -1;
-        private boolean refresh = true;
-
-        public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
-
-        private Position position = TOP;
-        private boolean addToUI = true;
-
-        public LayerAdder(LayerHolder holder) {
-            this.comp = holder.getComp();
-            this.holder = holder;
-        }
-
-        public LayerAdder withHistory(String editName) {
-            this.editName = editName;
-            return this;
-        }
-
-        public LayerAdder atPosition(Position position) {
-            this.position = position;
-            return this;
-        }
-
-        /**
-         * Means that this is part of the construction,
-         * the layer is not added as a result of a user interaction
-         */
-        public LayerAdder noUI() {
-            addToUI = false;
-            return this;
-        }
-
-        /**
-         * Used when the composite image does not change
-         */
-        public LayerAdder noRefresh() {
-            refresh = false;
-            return this;
-        }
-
-        private void calcIndexBasedOnRelPosition() {
-            int activeLayerIndex = holder.getActiveLayerIndex();
-            if (activeLayerIndex == -1) { // no active layer
-                if (position == BELLOW_ACTIVE) {
-                    newLayerIndex = 0;
-                } else {
-                    newLayerIndex = holder.getNumLayers();
-                }
-            } else {
-                if (position == BELLOW_ACTIVE) {
-                    newLayerIndex = activeLayerIndex;
-                } else if (position == ABOVE_ACTIVE) {
-                    newLayerIndex = activeLayerIndex + 1;
-                } else {
-                    throw new IllegalStateException("position = " + position);
-                }
-            }
-        }
-
-        public LayerAdder atIndex(int newLayerIndex) {
-            this.newLayerIndex = newLayerIndex;
-            return this;
-        }
-
-        /**
-         * The final operation which actually adds the layer.
-         */
-        public void add(Layer newLayer) {
-            newLayer.setHolder(holder);
-            Layer activeLayerBefore = null;
-            MaskViewMode oldViewMode = null;
-            if (needsHistory()) {
-                activeLayerBefore = comp.activeLayer;
-                oldViewMode = comp.view.getMaskViewMode();
-            }
-
-            if (newLayerIndex == -1) { // no index was explicitly set
-                if (position == TOP) {
-                    newLayerIndex = holder.getNumLayers();
-                } else {
-                    calcIndexBasedOnRelPosition();
-                }
-            }
-            holder.addLayerToList(newLayerIndex, newLayer);
-            comp.setActiveLayer(newLayer);
-
-            if (addToUI) {
-                if (holder == comp) {
-                    comp.view.addLayerToGUI(newLayer, newLayerIndex);
-                } else {
-                    ((CompositeLayer) holder).updateChildrenUI();
-                }
-
-                // mocked views will not set a UI
-                assert AppContext.isUnitTesting() || newLayer.hasUI();
-
-                comp.setDirty(true);
-                if (refresh) {
-                    holder.update();
-                }
-            }
-
-            if (needsHistory()) {
-                History.add(new NewLayerEdit(editName,
-                        holder, newLayer, activeLayerBefore, oldViewMode));
-            }
-            assert comp.checkInvariants();
-        }
-
-        private boolean needsHistory() {
-            return editName != null;
-        }
     }
 }

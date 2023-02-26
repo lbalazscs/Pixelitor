@@ -52,6 +52,14 @@ public class Messages {
         msgHandler.showInfo(title, message, parent);
     }
 
+    public static void showWarning(String title, String message) {
+        msgHandler.showWarning(title, message, null);
+    }
+
+    public static void showWarning(String title, String message, Component parent) {
+        msgHandler.showWarning(title, message, parent);
+    }
+
     public static void showError(String title, String message) {
         msgHandler.showError(title, message, null);
     }

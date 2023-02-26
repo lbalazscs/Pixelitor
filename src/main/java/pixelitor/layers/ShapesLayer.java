@@ -40,8 +40,8 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Views.thumbSize;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 public class ShapesLayer extends ContentLayer {
     @Serial
@@ -63,7 +63,7 @@ public class ShapesLayer extends ContentLayer {
 
     public static void createNew(Composition comp) {
         var layer = new ShapesLayer(comp, "shape layer " + (++count));
-        new Composition.LayerAdder(comp.getHolderForNewLayers())
+        comp.getHolderForNewLayers().adder()
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Shape Layer")
             .add(layer);

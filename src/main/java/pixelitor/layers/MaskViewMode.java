@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.layers;
 
 import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
@@ -122,17 +121,13 @@ public enum MaskViewMode {
             if (editMask) {
                 canFade = History.canFade(layer.getMask());
             } else {
-                if (layer instanceof ImageLayer) {
-                    canFade = History.canFade((ImageLayer) layer);
+                if (layer instanceof ImageLayer imageLayer) {
+                    canFade = History.canFade(imageLayer);
                 } else {
                     canFade = false;
                 }
             }
             FadeAction.INSTANCE.refresh(canFade);
-
-            if (AppContext.isDevelopment()) {
-                assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
-            }
         }
     }
 

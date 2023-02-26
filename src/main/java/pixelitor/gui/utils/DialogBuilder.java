@@ -379,7 +379,6 @@ public class DialogBuilder {
     }
 
     private void closeDialog(JDialog d) {
-        assert d.isVisible();
         GUIUtils.closeDialog(d, disposeWhenClosing);
     }
 
@@ -392,7 +391,7 @@ public class DialogBuilder {
         }
     }
 
-    static class BuiltDialog extends JDialog {
+    private static class BuiltDialog extends JDialog {
         private final boolean isModal;
         private final boolean rootDialog; // true if the owner is the main window
 

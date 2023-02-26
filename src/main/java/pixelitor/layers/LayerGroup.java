@@ -82,7 +82,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     public static String createName() {
-        return "Layer Group " + (++groupCounter);
+        return "layer group " + (++groupCounter);
     }
 
     @Override
@@ -280,12 +280,12 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean containsLayerClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
         if (getClass() == clazz) {
             return true;
         }
         for (Layer layer : layers) {
-            if (layer.getClass() == clazz) {
+            if (layer.containsLayerWithClass(clazz)) {
                 return true;
             }
         }
@@ -373,7 +373,7 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public void insertLayer(Layer layer, int index, boolean update) {
         if (update) {
-            new Composition.LayerAdder(this).atIndex(index).add(layer);
+            new LayerAdder(this).atIndex(index).add(layer);
         } else {
             layers.add(index, layer);
         }
@@ -448,27 +448,24 @@ public class LayerGroup extends CompositeLayer {
     }
 
     public void replaceWithUnGrouped(int[] prevIndices, boolean addToHistory) {
-        int indexInParent = holder.indexOf(this);
-        holder.deleteTemporarily(this);
-
         Layer activeBefore = comp.getActiveLayer();
         boolean activeWasThis = this == activeBefore;
         boolean activeWasInside = !activeWasThis && contains(activeBefore);
+
+        int indexInHolder = holder.indexOf(this);
+        holder.deleteTemporarily(this);
 
         int numLayers = layers.size();
         int[] insertIndices = new int[numLayers];
         for (int i = 0; i < numLayers; i++) {
             Layer layer = layers.get(i);
 
-            // The owner field in LayerGUIs can cause problems later
-            // because if the new holder is a Composition,
-            // then it won't be automatically updated.
-            layer.getUI().setOwner(null);
+            layer.getUI().detach();
 
-            int insertIndex = prevIndices != null ? prevIndices[i] : indexInParent;
+            int insertIndex = prevIndices != null ? prevIndices[i] : indexInHolder;
             holder.insertLayer(layer, insertIndex, true);
             insertIndices[i] = insertIndex;
-            indexInParent++;
+            indexInHolder++;
         }
 
         if (activeWasInside) {

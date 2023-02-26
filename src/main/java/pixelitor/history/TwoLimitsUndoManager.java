@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,9 @@ public class TwoLimitsUndoManager extends UndoManager {
     }
 
     public TwoLimitsUndoManager(int heavyEditLimit, int lightEditLimit) {
-        setHeavyEditLimit(heavyEditLimit);
-        setLightEditLimit(lightEditLimit);
+        this.heavyEditLimit = heavyEditLimit;
+        this.lightEditLimit = lightEditLimit;
+
         int limit = getLimit();
         edits.ensureCapacity(limit);
         super.setLimit(limit);
@@ -45,26 +46,18 @@ public class TwoLimitsUndoManager extends UndoManager {
         return getHeavyEditLimit() + getLightEditLimit();
     }
 
-    public synchronized int getHeavyEditLimit() {
+    public int getHeavyEditLimit() {
         return heavyEditLimit;
     }
 
-    public synchronized int getLightEditLimit() {
+    public int getLightEditLimit() {
         return lightEditLimit;
     }
 
     @Override
-    public synchronized void setLimit(int lightEditLimit) {
-        setHeavyEditLimit(lightEditLimit);
+    public synchronized void setLimit(int limit) {
+        this.heavyEditLimit = limit;
         super.setLimit(getLimit());
-    }
-
-    public synchronized void setHeavyEditLimit(int heavyEditLimit) {
-        this.heavyEditLimit = heavyEditLimit;
-    }
-
-    public synchronized void setLightEditLimit(int lightEditLimit) {
-        this.lightEditLimit = lightEditLimit;
     }
 
     @Override

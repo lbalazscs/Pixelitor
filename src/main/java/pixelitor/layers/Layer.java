@@ -290,8 +290,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
-        // this method is overridden for layer groups
-        assert newMode != BlendingMode.PASS_THROUGH;
+        assert newMode != BlendingMode.PASS_THROUGH || isGroup();
 
         if (blendingMode == newMode) {
             return;
@@ -395,7 +394,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public boolean isTopLevel() {
-        return comp == holder;
+        return holder == comp;
     }
 
     /**
@@ -958,7 +957,7 @@ public abstract class Layer implements Serializable, Debuggable {
         so.setHolder(holder);
 
         holder.replaceLayer(this, so);
-        History.add(new ReplaceLayerEdit(holder, this, so, "Convert to Smart Object"));
+        History.add(new ReplaceLayerEdit(this, so, "Convert to Smart Object"));
 
         Messages.showInStatusBar(format(
             "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
@@ -1010,8 +1009,8 @@ public abstract class Layer implements Serializable, Debuggable {
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
         newImageLayer.setHolder(holder);
         newImageLayer.copyLayerLevelPropertiesFrom(this);
-        History.add(new ReplaceLayerEdit(holder, this, newImageLayer, "Rasterize " + getTypeString()));
         holder.replaceLayer(this, newImageLayer);
+        History.add(new ReplaceLayerEdit(this, newImageLayer, "Rasterize " + getTypeString()));
         Messages.showInStatusBar(format(
             "The %s <b>\"%s\"</b> was rasterized.", getTypeStringLC(), getName()));
 
@@ -1028,9 +1027,12 @@ public abstract class Layer implements Serializable, Debuggable {
         return null;
     }
 
-
     public boolean isSmartFilter() {
         return this instanceof SmartFilter;
+    }
+
+    public boolean isGroup() {
+        return this instanceof LayerGroup;
     }
 
 //    public Drawable getActiveDrawable() {
@@ -1054,7 +1056,7 @@ public abstract class Layer implements Serializable, Debuggable {
         return layer == this;
     }
 
-    public boolean containsLayerClass(Class<? extends Layer> clazz) {
+    public boolean containsLayerWithClass(Class<? extends Layer> clazz) {
         return getClass() == clazz;
     }
 

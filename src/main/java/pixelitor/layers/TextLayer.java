@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
-import pixelitor.Composition.LayerAdder;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
 import pixelitor.filters.gui.DialogMenuBar;
@@ -50,8 +49,8 @@ import java.util.concurrent.CompletableFuture;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.utils.Keys.CTRL_T;
 
 /**
@@ -107,7 +106,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
-        new LayerAdder(holder)
+        holder.adder()
             .atPosition(ABOVE_ACTIVE)
             .add(textLayer);
 
@@ -119,18 +118,18 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() ->
-                textLayer.finalizeCreation(holder, activeLayerBefore, oldViewMode))
+                textLayer.finalizeCreation(activeLayerBefore, oldViewMode))
             .cancelAction(() -> holder.deleteLayer(textLayer, false))
             .show();
         return textLayer;
     }
 
-    public void finalizeCreation(LayerHolder holder, Layer activeLayerBefore, MaskViewMode oldViewMode) {
+    public void finalizeCreation(Layer activeLayerBefore, MaskViewMode oldViewMode) {
         updateLayerName();
 
         // now it is safe to add it to the history
         History.add(new NewLayerEdit("Add Text Layer",
-            holder, this, activeLayerBefore, oldViewMode));
+            this, activeLayerBefore, oldViewMode));
     }
 
     @Override

@@ -40,7 +40,9 @@ import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
@@ -80,32 +82,33 @@ public class WorkflowTest {
     private static final int EXTRA_WIDTH = 50;
 
     private static File referenceImagesDir;
+    private final Set<String> loadedRefImages = new HashSet<>();
 
     /**
      * Enables running all tests within a group
      */
-    enum WithinGroup {
+    enum GroupSetting {
         NO_GROUP("") {
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 // do nothing
             }
         }, PASS_THROUGH("P") {
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.selectActiveLayer("layer 1");
             }
         }, ISOLATED("I") {
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.selectActiveLayer("layer 1");
             }
         }, DOUBLE_PP("PP") {
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 // two nested pass-through groups
                 app.runMenuCommand("Convert Visible to Group");
                 app.runMenuCommand("Convert Visible to Group");
@@ -113,7 +116,7 @@ public class WorkflowTest {
             }
         }, DOUBLE_II("II") {
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 // two nested isolated groups
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
@@ -124,7 +127,7 @@ public class WorkflowTest {
         }, DOUBLE_PI("PI") {
             // inner pass-through, outer isolated
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
@@ -133,7 +136,7 @@ public class WorkflowTest {
         }, DOUBLE_IP("IP") {
             // inner isolated, outer pass-through
             @Override
-            public void group(AppRunner app) {
+            public void configure(AppRunner app) {
                 app.runMenuCommand("Convert Visible to Group");
                 app.changeLayerBlendingMode(BlendingMode.NORMAL);
                 app.runMenuCommand("Convert Visible to Group");
@@ -143,11 +146,11 @@ public class WorkflowTest {
 
         private final String nameSuffix;
 
-        WithinGroup(String nameSuffix) {
+        GroupSetting(String nameSuffix) {
             this.nameSuffix = nameSuffix;
         }
 
-        public abstract void group(AppRunner app);
+        public abstract void configure(AppRunner app);
 
         public String getNameSuffix() {
             return nameSuffix;
@@ -177,28 +180,26 @@ public class WorkflowTest {
         keyboard = app.getKeyboard();
 //        app.runSlowly();
 
-        List<WithinGroup> groupSettings = List.of(
-            WithinGroup.values()
+        List<GroupSetting> groupSettings = List.of(
+            GroupSetting.values()
 //            WithinGroup.NO_GROUP,
 //            WithinGroup.PASS_THROUGH,
 //            WithinGroup.ISOLATED
         );
 
-        switch (arg) {
-            case "all" -> {
-                groupSettings.forEach(this::wfTest1);
-                groupSettings.forEach(this::wfTest2);
-                groupSettings.forEach(this::wfTest3);
-                groupSettings.forEach(this::wfTest4);
-                groupSettings.forEach(this::wfTest5);
-            }
-            case "1" -> groupSettings.forEach(this::wfTest1);
-            case "2" -> groupSettings.forEach(this::wfTest2);
-            case "3" -> groupSettings.forEach(this::wfTest3);
-            case "4" -> groupSettings.forEach(this::wfTest4);
-            case "5" -> groupSettings.forEach(this::wfTest5);
+        List<Consumer<GroupSetting>> tests = switch (arg) {
+            case "all" -> List.of(this::wfTest1, this::wfTest2, this::wfTest3, this::wfTest4, this::wfTest5);
+            case "1" -> List.of(this::wfTest1);
+            case "2" -> List.of(this::wfTest2);
+            case "3" -> List.of(this::wfTest3);
+            case "4" -> List.of(this::wfTest4);
+            case "5" -> List.of(this::wfTest5);
             default -> throw new IllegalArgumentException("arg = " + arg);
-        }
+        };
+
+        groupSettings.forEach(groupSetting ->
+            tests.forEach(test ->
+                test.accept(groupSetting)));
 
         if (!experimentalWasEnabled) {
             EDT.run(() -> AppContext.enableExperimentalFeatures = false);
@@ -207,11 +208,11 @@ public class WorkflowTest {
         System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());
     }
 
-    private void wfTest1(WithinGroup withinGroup) {
-        String compName = createCompName(1, withinGroup);
+    private void wfTest1(GroupSetting groupSetting) {
+        String compName = createCompName(1, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        withinGroup.group(app);
+        groupSetting.configure(app);
 
         addGuide();
         runFilterWithDialog("Wood");
@@ -259,8 +260,8 @@ public class WorkflowTest {
         loadReferenceImage("wf1.png");
     }
 
-    private static String createCompName(int testNr, WithinGroup withinGroup) {
-        String compName = "wf " + testNr + withinGroup.getNameSuffix();
+    private static String createCompName(int testNr, GroupSetting groupSetting) {
+        String compName = "wf " + testNr + groupSetting.getNameSuffix();
         return compName;
     }
 
@@ -268,11 +269,11 @@ public class WorkflowTest {
         app.runMenuCommand("Ungroup");
     }
 
-    private void wfTest2(WithinGroup withinGroup) {
-        String compName = createCompName(2, withinGroup);
+    private void wfTest2(GroupSetting groupSetting) {
+        String compName = createCompName(2, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        withinGroup.group(app);
+        groupSetting.configure(app);
 
         runFilterWithDialog("Spider Web");
         editSpiderWebImage(compName);
@@ -381,11 +382,11 @@ public class WorkflowTest {
         app.mergeDown();
     }
 
-    private void wfTest3(WithinGroup withinGroup) {
-        String compName = createCompName(3, withinGroup);
+    private void wfTest3(GroupSetting groupSetting) {
+        String compName = createCompName(3, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        withinGroup.group(app);
+        groupSetting.configure(app);
 
         runFilterWithDialog("Spirograph");
 
@@ -444,11 +445,11 @@ public class WorkflowTest {
         loadReferenceImage("wf3.png");
     }
 
-    private void wfTest4(WithinGroup withinGroup) {
-        String compName = createCompName(4, withinGroup);
+    private void wfTest4(GroupSetting groupSetting) {
+        String compName = createCompName(4, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        withinGroup.group(app);
+        groupSetting.configure(app);
 
         runFilterWithDialog("Checker Pattern", dialog -> {
             dialog.slider("Width").slideTo(25);
@@ -518,11 +519,11 @@ public class WorkflowTest {
         loadReferenceImage("wf4.png");
     }
 
-    private void wfTest5(WithinGroup withinGroup) {
-        String compName = createCompName(5, withinGroup);
+    private void wfTest5(GroupSetting groupSetting) {
+        String compName = createCompName(5, groupSetting);
         app.createNewImage(INITIAL_WIDTH, INITIAL_HEIGHT, compName);
 
-        withinGroup.group(app);
+        groupSetting.configure(app);
 
         runFilterWithDialog("Marble");
         convertLayerToSmartObject();
@@ -828,6 +829,10 @@ public class WorkflowTest {
     }
 
     private void loadReferenceImage(String fileName) {
-//        app.openFileWithDialog("Open...", referenceImagesDir, fileName);
+        if (loadedRefImages.contains(fileName)) {
+            return;
+        }
+        app.openFileWithDialog("Open...", referenceImagesDir, fileName);
+        loadedRefImages.add(fileName);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class TextLayerTest {
         comp = TestHelper.createEmptyComp();
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
-        new Composition.LayerAdder(comp).add(layer);
+        comp.adder().add(layer);
 
         withMask.setupForLayer(layer);
         LayerMask mask = null;

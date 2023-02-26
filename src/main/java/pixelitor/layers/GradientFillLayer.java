@@ -37,9 +37,12 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Views.thumbSize;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
+/**
+ * A gradient fill layer that fills the entire canvas with a given gradient.
+ */
 public class GradientFillLayer extends ContentLayer {
     @Serial
     private static final long serialVersionUID = 109261602799761359L;
@@ -48,17 +51,23 @@ public class GradientFillLayer extends ContentLayer {
     private transient Gradient backupGradient;
     private transient BufferedImage cachedImage;
 
+    private static int count;
+
     public GradientFillLayer(Composition comp, String name) {
         super(comp, name);
     }
 
     public static void createNew(Composition comp) {
-        var layer = new GradientFillLayer(comp, "gradient fill");
-        new Composition.LayerAdder(comp.getHolderForNewLayers())
+        var layer = new GradientFillLayer(comp, createName());
+        comp.getHolderForNewLayers().adder()
             .atPosition(ABOVE_ACTIVE)
             .withHistory("Add Gradient Fill Layer")
             .add(layer);
         Tools.GRADIENT.activate();
+    }
+
+    private static String createName() {
+        return "gradient fill " + (++count);
     }
 
     @Override

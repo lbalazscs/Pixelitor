@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
+import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.Rectangle;
@@ -43,8 +44,8 @@ public class PartialImageEdit extends FadeableEdit {
 
     private final Drawable dr;
 
-    public PartialImageEdit(String name, Composition comp, Drawable dr,
-                            BufferedImage image, Rectangle saveRect) {
+    private PartialImageEdit(String name, Composition comp, Drawable dr,
+                             BufferedImage image, Rectangle saveRect) {
         super(name, comp, dr);
 
         this.dr = dr;
@@ -52,6 +53,43 @@ public class PartialImageEdit extends FadeableEdit {
 
         Raster backupRaster = image.getData(this.saveRect);
         backupRasterRef = new SoftReference<>(backupRaster);
+    }
+
+    /**
+     * Returns a new {@link PartialImageEdit} or null if the given
+     * rectangle is outside the image.
+     */
+    public static PartialImageEdit create(Rectangle affectedArea,
+                                          BufferedImage origImage,
+                                          Drawable dr,
+                                          boolean relativeToImage,
+                                          String editName) {
+        assert affectedArea.width > 0 : "width = " + affectedArea.width;
+        assert affectedArea.height > 0 : "height = " + affectedArea.height;
+        assert origImage != null;
+
+        if (!relativeToImage) {
+            // if the coordinates are relative to the canvas,
+            // translate them to be relative to the image
+            int dx = -dr.getTx();
+            int dy = -dr.getTy();
+            affectedArea.translate(dx, dy);
+        }
+
+        affectedArea = SwingUtilities.computeIntersection(0, 0,
+            origImage.getWidth(), origImage.getHeight(), // full image bounds
+            affectedArea
+        );
+
+        if (affectedArea.isEmpty()) {
+            return null;
+        }
+
+        // we could also intersect with the selection bounds,
+        // but typically the extra savings would be minimal
+
+        return new PartialImageEdit(editName, dr.getComp(),
+            dr, origImage, affectedArea);
     }
 
     @Override
@@ -88,10 +126,8 @@ public class PartialImageEdit extends FadeableEdit {
             tmpRaster = image.getData(saveRect);
             image.setData(backupRaster);
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("PartialImageEdit.swapRasters saveRect = " + saveRect);
-            int width = image.getWidth();
-            int height = image.getHeight();
-            System.out.println("PartialImageEdit.swapRasters width = " + width + ", height = " + height);
+            System.out.printf("PartialImageEdit.swapRasters saveRect = %s, width = %d, height = %d%n",
+                saveRect, image.getWidth(), image.getHeight());
 
             debugRaster("tmpRaster", tmpRaster);
             debugRaster("backupRaster", backupRaster);
@@ -122,7 +158,7 @@ public class PartialImageEdit extends FadeableEdit {
         int numDataElements = raster.getNumDataElements();
 
         String msg = format("className = %s, rasterBounds = %s, dataType = %d, " +
-                "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
+                            "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
             className, rasterBounds, dataType,
             typeAsString, numBanks, numBands, numDataElements);
 
