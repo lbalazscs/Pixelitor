@@ -31,10 +31,12 @@ public class OctTreeQuantizer implements Quantizer {
     /**
      * The greatest depth the tree is allowed to reach
      */
-    static final int MAX_LEVEL = 5;
+    private static final int MAX_LEVEL = 5;
 
     /**
-     * An Octtree node.
+     * Each node of the tree represents a range of colors.
+     * The root node represents the entire color space, and the children
+     * recursively divide the color space into smaller subspaces.
      */
     static class OctTreeNode {
         int numChildren;
@@ -58,8 +60,7 @@ public class OctTreeQuantizer implements Quantizer {
             if (numAssignedPixels == 0) {
                 System.out.println(index + ": count=" + numAssignedPixels);
             } else {
-                System.out
-                        .println(index + ": count=" + numAssignedPixels + " red=" + (totalRed / numAssignedPixels) + " green=" + (totalGreen / numAssignedPixels) + " blue=" + (totalBlue / numAssignedPixels));
+                System.out.println(index + ": count=" + numAssignedPixels + " red=" + (totalRed / numAssignedPixels) + " green=" + (totalGreen / numAssignedPixels) + " blue=" + (totalBlue / numAssignedPixels));
             }
             for (int i = 0; i < 8; i++) {
                 if (children[i] != null) {
@@ -69,7 +70,7 @@ public class OctTreeQuantizer implements Quantizer {
         }
     }
 
-//    private int nodes = 0;
+    //    private int nodes = 0;
     private final OctTreeNode root;
     private int reduceColors;
     private int maximumColors;
@@ -134,9 +135,18 @@ public class OctTreeQuantizer implements Quantizer {
 
         OctTreeNode node = root;
 
+        // traverses the octree, starting from the root,
+        // and follows the path that corresponds to the binary
+        // representation of the RGB color
         for (int level = 0; level <= MAX_LEVEL; level++) {
+            // A bit mask that has only one bit set.
+            // If the maximum depth of tree is less than 8,
+            // only first bits of color will matter.
             int bit = 0x80 >> level;
 
+            // The index of the child node that corresponds to the color
+            // being processed. It will be in the range 0..7.
+            // It tries to group similar colors.
             int index = 0;
             if ((red & bit) != 0) {
                 index += 4;
@@ -148,6 +158,8 @@ public class OctTreeQuantizer implements Quantizer {
                 index += 1;
             }
 
+            // move to the child node corresponding to the computed
+            // index and repeat the process until a leaf node is reached.
             OctTreeNode child = node.children[index];
 
             if (child == null) {
@@ -221,6 +233,7 @@ public class OctTreeQuantizer implements Quantizer {
         System.out.println("insertColor failed");
     }
 
+    // Reduces the number of colors in the octree by merging similar nodes.
     private void reduceTree(int numColors) {
         for (int level = MAX_LEVEL - 1; level >= 0; level--) {
             List<OctTreeNode> v = colorList[level];
@@ -234,6 +247,7 @@ public class OctTreeQuantizer implements Quantizer {
                                     System.out.println("not a leaf!");
                                 }
                                 node.numAssignedPixels += child.numAssignedPixels;
+                                // the palette will be filled with averaged colors
                                 node.totalRed += child.totalRed;
                                 node.totalGreen += child.totalGreen;
                                 node.totalBlue += child.totalBlue;
@@ -247,6 +261,7 @@ public class OctTreeQuantizer implements Quantizer {
                         node.isLeaf = true;
                         colors++;
                         if (colors <= numColors) {
+                            // no more reducing is necessary
                             return;
                         }
                     }
@@ -297,9 +312,9 @@ public class OctTreeQuantizer implements Quantizer {
         if (node.isLeaf) {
             int count = node.numAssignedPixels;
             table[index] = 0xff000000 |
-                    ((node.totalRed / count) << 16) |
-                    ((node.totalGreen / count) << 8) |
-                    node.totalBlue / count;
+                           ((node.totalRed / count) << 16) |
+                           ((node.totalGreen / count) << 8) |
+                           node.totalBlue / count;
             node.index = index++;
         } else {
             for (int i = 0; i < 8; i++) {

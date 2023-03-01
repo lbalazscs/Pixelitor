@@ -1396,6 +1396,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
         sub.addFilter(XYZTest.NAME, XYZTest::new);
         sub.addFilter(PoissonDiskTester.NAME, PoissonDiskTester::new);
+        sub.addFilter(KMeans.NAME, KMeans::new);
 
         return sub;
     }
