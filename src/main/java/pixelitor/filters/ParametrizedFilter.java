@@ -36,7 +36,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     @Serial
     private static final long serialVersionUID = 3796358314893014182L;
 
-    protected transient ParamSet paramSet;
+    protected final transient ParamSet paramSet;
 
     private transient BooleanParam showAffectedAreaParam = null;
     private final transient boolean addShowOriginal;

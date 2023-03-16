@@ -766,9 +766,8 @@ public class TransformBox implements ToolWidget, Serializable {
     public TransformBoxChangedEdit createMovementEdit(Composition comp, String editName) {
         assert editName != null;
         Memento afterMovement = copyState();
-        TransformBoxChangedEdit edit = new TransformBoxChangedEdit(editName, comp,
+        return new TransformBoxChangedEdit(editName, comp,
             this, beforeMovement, afterMovement);
-        return edit;
     }
 
     /**

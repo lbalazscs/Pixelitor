@@ -30,7 +30,6 @@ import static pixelitor.utils.Texts.i18n;
  * Invert filter
  */
 public class Invert extends Filter {
-    // for compatibility with older adjustment layer tests
     @Serial
     private static final long serialVersionUID = -6279018636064203421L;
 

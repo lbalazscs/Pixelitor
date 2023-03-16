@@ -909,10 +909,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private List<Layer> getVisibleTopLevelLayers() {
-        List<Layer> visibleLayers = layerList.stream()
+        return layerList.stream()
             .filter(Layer::isVisible)
             .toList();
-        return visibleLayers;
     }
 
     public void forEachTopLevelLayer(Consumer<Layer> action) {

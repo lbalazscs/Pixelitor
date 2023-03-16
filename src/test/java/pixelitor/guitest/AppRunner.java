@@ -965,13 +965,12 @@ public class AppRunner {
     private JTextComponentFixture findLayerOpacityTF() {
         // the name of the inner textfield can't be set directly,
         // because Nimbus uses it => use the name of the parent combo box
-        JTextComponentFixture layerOpacity = pw.textBox(new GenericTypeMatcher<>(JTextField.class) {
+        return pw.textBox(new GenericTypeMatcher<>(JTextField.class) {
             @Override
             protected boolean isMatching(JTextField c) {
                 return "layerOpacity".equals(c.getParent().getName());
             }
         });
-        return layerOpacity;
     }
 
     public enum Randomize {YES, NO}

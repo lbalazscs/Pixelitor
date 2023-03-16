@@ -876,10 +876,7 @@ public class AssertJSwingTest {
 
     private void testpreferencesUndoLevels(DialogFixture dialog) {
         var undoLevelsTF = dialog.textBox("undoLevelsTF");
-        boolean undoWas5 = false;
-        if (undoLevelsTF.text().equals("5")) {
-            undoWas5 = true;
-        }
+        boolean undoWas5 = undoLevelsTF.text().equals("5");
         undoLevelsTF.deleteText().enterText("n");
 
         // try to accept the error dialog

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.*;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
@@ -34,6 +35,11 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARE
  * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
  */
 public class ParamTest extends ParametrizedFilter {
+    public static final String NAME = "Param Test";
+
+    @Serial
+    private static final long serialVersionUID = 7920135228910788174L;
+
     public ParamTest() {
         super(true);
 

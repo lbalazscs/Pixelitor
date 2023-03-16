@@ -68,7 +68,7 @@ public class JHPlasma extends ParametrizedFilter {
             turbulence,
             type,
             gradient
-        ).withAction(paramSet.createReseedAction(newSeed -> filter.setSeed(newSeed)));
+        ).withAction(paramSet.createReseedAction(filter::setSeed));
     }
 
     @Override

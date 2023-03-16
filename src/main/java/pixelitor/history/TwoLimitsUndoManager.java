@@ -26,7 +26,7 @@ import javax.swing.undo.UndoableEdit;
  */
 public class TwoLimitsUndoManager extends UndoManager {
     private int heavyEditLimit;
-    private int lightEditLimit;
+    private final int lightEditLimit;
 
     public TwoLimitsUndoManager() {
         this(64, 256);

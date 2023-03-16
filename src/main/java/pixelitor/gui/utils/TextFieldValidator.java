@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public interface TextFieldValidator {
         try {
             value = Utils.parseDouble(text);
         } catch (ParseException ex) {
-            return ValidationResult.error("" + text + " is not a valid number for <b>" + label + "</b>");
+            return ValidationResult.error(text + " is not a valid number for <b>" + label + "</b>");
         }
         if (value > 0) {
             return ValidationResult.ok();

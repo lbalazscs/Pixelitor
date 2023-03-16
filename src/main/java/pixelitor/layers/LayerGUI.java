@@ -443,11 +443,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         assert calledOnEDT() : threadInfo();
         assert layer.hasRasterThumbnail();
 
-        boolean synchronousUpdate = false;
-        if (layer instanceof CompositeLayer) {
-            // the synchronous update avoids starting a filter twice
-            synchronousUpdate = true;
-        }
+        // the synchronous update avoids starting a filter twice
+        boolean synchronousUpdate = layer instanceof CompositeLayer;
 
         if (synchronousUpdate) {
             BufferedImage thumb = layer.createIconThumbnail();

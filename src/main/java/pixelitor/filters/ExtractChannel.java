@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,17 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.LookupTable;
 import java.awt.image.ShortLookupTable;
+import java.io.Serial;
 
 /**
  * Extract a channel from the image
  */
 public class ExtractChannel extends ParametrizedFilter {
+    public static final String NAME = "Extract Channel";
+
+    @Serial
+    private static final long serialVersionUID = -3743488918392302889L;
+
     private static final int RED_CHANNEL = 1;
     private static final int REMOVE_RED_CHANNEL = 2;
 

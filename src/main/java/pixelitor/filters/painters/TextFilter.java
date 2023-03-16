@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,8 @@ import java.io.Serial;
  * It has the same GUI as a {@link TextLayer}.
  */
 public class TextFilter extends FilterWithGUI {
+    public static final String NAME = "Text";
+
     private TextSettings settings;
 
     @Serial

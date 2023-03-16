@@ -739,7 +739,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createExtractChannelsSubmenu() {
         PMenu sub = new PMenu("Extract Channels");
 
-        sub.addFilter("Extract Channel", ExtractChannel::new);
+        sub.addFilter(ExtractChannel.NAME, ExtractChannel::new);
 
         sub.addSeparator();
 
@@ -969,12 +969,12 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
         sub.addFilter(Morphology.NAME, Morphology::new);
-        sub.addFilter("Random Filter", RandomFilter::new);
+        sub.addFilter(RandomFilter.NAME, RandomFilter::new);
 
         // the text as filter is still useful for batch operations
-        sub.addFilter("Text", TextFilter::new);
+        sub.addFilter(TextFilter.NAME, TextFilter::new);
 
-        sub.addFilter("Transform Layer", TransformLayer::new);
+        sub.addFilter(TransformLayer.NAME, TransformLayer::new);
 
         sub.addSeparator();
 
@@ -1374,7 +1374,7 @@ public class MenuBar extends JMenuBar {
 
         sub.add(new PAction("Create All Filters", Filters::createAllFilters));
 
-        sub.addFilter("ParamTest", ParamTest::new);
+        sub.addFilter(ParamTest.NAME, ParamTest::new);
 
         sub.add(new PAction("Random GUI Test", RandomGUITest::start), CTRL_R);
 

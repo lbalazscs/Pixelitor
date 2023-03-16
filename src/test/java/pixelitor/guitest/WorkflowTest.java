@@ -261,8 +261,7 @@ public class WorkflowTest {
     }
 
     private static String createCompName(int testNr, GroupSetting groupSetting) {
-        String compName = "wf " + testNr + groupSetting.getNameSuffix();
-        return compName;
+        return "wf " + testNr + groupSetting.getNameSuffix();
     }
 
     private void ungroup() {

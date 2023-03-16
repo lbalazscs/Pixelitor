@@ -47,7 +47,7 @@ public class AbstractLights extends ParametrizedFilter {
     private static final long serialVersionUID = 1L;
     private static final float CRITICAL_ALPHA = 0.002f;
 
-    public static String NAME = "Abstract Lights";
+    public static final String NAME = "Abstract Lights";
 
     private static final int TYPE_CHAOS = 1;
     private static final int TYPE_STAR = 2;
@@ -217,7 +217,7 @@ public class AbstractLights extends ParametrizedFilter {
     private static class Particle {
         protected double x;
         protected double y;
-        protected double speed;
+        protected final double speed;
         protected double vx, vy;
         private final Color color;
         public Particle sibling;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,8 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
 public class TransformLayer extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 9039647019976237114L;
+
+    public static final String NAME = "Transform Layer";
 
     private final ImagePositionParam center = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);

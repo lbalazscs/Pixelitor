@@ -55,7 +55,6 @@ import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.*;
-import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;

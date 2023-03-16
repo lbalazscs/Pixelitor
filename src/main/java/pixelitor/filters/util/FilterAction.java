@@ -182,11 +182,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         }
 
         FilterAction filterAction = (FilterAction) o;
-        if (!name.equals(filterAction.name)) {
-            return false;
-        }
-
-        return true;
+        return name.equals(filterAction.name);
     }
 
     @Override

@@ -422,7 +422,7 @@ public class ParamSet implements Debuggable {
 
     @Override
     public String toString() {
-        return "ParamSet {" + paramList.toString() + "}";
+        return "ParamSet {" + paramList + "}";
     }
 
     @Override

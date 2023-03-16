@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import java.awt.image.BufferedImage;
  * A filter that delegates the filtering to a randomly chosen filter
  */
 public class RandomFilter extends FilterWithGUI {
+    public static final String NAME = "Random Filter";
+
     @Override
     public FilterGUI createGUI(Filterable layer, boolean reset) {
         return new RandomFilterGUI(layer);
