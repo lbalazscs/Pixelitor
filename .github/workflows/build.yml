@@ -23,15 +23,15 @@ jobs:
     - name: Build with Maven (Linux)
       run: xvfb-run -a mvn -B package --file pom.xml
 
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
+    - name: Put the current date in the environment file
+      run: |
+        echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+       
     - name: Archive artifacts
       if: matrix.java-version == 17
       uses: actions/upload-artifact@v3
       with:
-        name: PixelitorJAR-${{ steps.date.outputs.date }}
+        name: PixelitorJAR-${{ env.DATE }}
         path: |
           target/*.jar
           !target/original-*.jar
