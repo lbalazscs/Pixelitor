@@ -85,7 +85,7 @@ public class BatchResize {
             JTextField tf = new JTextField(String.valueOf(defaultValue), 5);
             tf.setName(name);
             sizePanel.add(createPositiveIntLayer(label, tf, false));
-            documentFilter.useFor(tf);
+            documentFilter.setOn(tf);
             return tf;
         }
 

@@ -37,8 +37,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
@@ -218,26 +217,27 @@ public class Crop implements CompAction {
     private static void selectionCropWithQuestion(Composition comp, Selection sel) {
         String title = "Selection Crop Type";
         String question = "<html>You have a non-rectangular selection, but every image has to be rectangular." +
-                          "<br>Pixelitor can crop to the rectangular bounds of the selection." +
-                          "<br>It can also hide parts of the image using layer masks.";
-        // the yes-no-cancel dialog can actually show more than 3 options
-        int answer = Dialogs.showYesNoCancelDialog(comp.getDialogParent(), title, question,
-            new String[]{"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL},
-            JOptionPane.QUESTION_MESSAGE);
-        if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {
-            // canceled, do nothing
-        } else if (answer == 0) {
-            // crop and hide
-            rectangularSelectionCrop(comp, sel, true);
-        } else if (answer == 1) {
-            // only crop
-            rectangularSelectionCrop(comp, sel, false);
-        } else if (answer == 2) {
-            // only hide
-            addHidingMask(comp, sel.getShape(), true);
-            comp.update(FULL);
-        } else {
-            throw new IllegalStateException("answer = " + answer);
+                "<br>Pixelitor can crop to the rectangular bounds of the selection." +
+                "<br>It can also hide parts of the image using layer masks.";
+        int answer = Dialogs.showManyOptionsDialog(comp.getDialogParent(), title, question,
+                new String[]{"Crop and Hide", "Only Crop", "Only Hide", GUIText.CANCEL},
+                JOptionPane.QUESTION_MESSAGE);
+        switch (answer) {
+            case 0: // crop and hide
+                rectangularSelectionCrop(comp, sel, true);
+                break;
+            case 1: // only crop
+                rectangularSelectionCrop(comp, sel, false);
+                break;
+            case 2: // only hide
+                addHidingMask(comp, sel.getShape(), true);
+                comp.update(FULL);
+                break;
+            case JOptionPane.CLOSED_OPTION:
+            case 3: // canceled
+                break;
+            default:
+                throw new IllegalStateException("answer = " + answer);
         }
     }
 

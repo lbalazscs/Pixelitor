@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -190,27 +190,27 @@ public record DiamondGradientPaint(Drag drag, Color startColor,
             double interpolated = v1 + v2;
 
             switch (cycleMethod) {
-                case NO_CYCLE:
+                case NO_CYCLE -> {
                     if (interpolated > 1.0) {
                         interpolated = 1.0f;
                     }
-                    break;
-                case REFLECT:
+                }
+                case REFLECT -> {
                     interpolated %= 1.0;
                     if (interpolated < 0.5) {
                         interpolated = 2.0f * interpolated;
                     } else {
                         interpolated = 2.0f * (1 - interpolated);
                     }
-                    break;
-                case REPEAT:
+                }
+                case REPEAT -> {
                     interpolated %= 1.0;
                     if (interpolated < 0.5) {
                         interpolated = 2.0f * interpolated;
                     } else {
                         interpolated = 2.0f * (interpolated - 0.5f);
                     }
-                    break;
+                }
             }
             return interpolated;
         }

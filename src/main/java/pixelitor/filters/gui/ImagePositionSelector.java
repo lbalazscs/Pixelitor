@@ -17,15 +17,13 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -52,7 +50,7 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             return;
         }
         Drawable dr = Views.getActiveDrawable();

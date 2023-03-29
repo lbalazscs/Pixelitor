@@ -18,8 +18,8 @@
 package pixelitor.tools.pen;
 
 import com.bric.geom.ShapeUtils;
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -35,8 +35,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -121,7 +120,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void setMovingPoint(MovingPoint p) {
-        if (finished && p != null && AppContext.isDevelopment()) {
+        if (finished && p != null && GUIMode.isDevelopment()) {
             throw new IllegalStateException();
         }
         moving = p;

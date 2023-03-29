@@ -50,7 +50,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
-import pixelitor.gui.utils.RestrictedLayerAction.Condition;
+import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -88,7 +88,7 @@ import static pixelitor.colors.FillType.*;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.utils.RestrictedLayerAction.Condition.*;
+import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.*;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
@@ -111,7 +111,7 @@ public class MenuBar extends JMenuBar {
         add(createFilterMenu(texts));
         add(createViewMenu(pw, texts));
 
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
@@ -303,7 +303,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerStackSubmenu(texts));
         layersMenu.add(createLayerMaskSubmenu(texts));
 
-        if (AppContext.enableExperimentalFeatures) {
+        if (GUIMode.enableExperimentalFeatures) {
             layersMenu.addSeparator();
 
             layersMenu.add(createAdjustmentLayersSubmenu());
@@ -442,7 +442,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("New Text Layer...",
             TextLayer::createNew), T);
 
-        Condition isTextLayer = new ClassCondition(TextLayer.class, "text layer");
+        var isTextLayer = new LayerClassRestriction(TextLayer.class, "text layer");
 
         sub.add(new RestrictedLayerAction("Edit Text Layer...", isTextLayer) {
             @Override
@@ -508,7 +508,7 @@ public class MenuBar extends JMenuBar {
             Composition::convertVisibleLayersToSmartObject));
         sub.addSeparator();
 
-        Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
+        var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
 
         sub.add(new RestrictedLayerAction("Rasterize Smart Object", isSmartObject) {
             @Override
@@ -564,7 +564,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("New Color Fill Layer...",
             ColorFillLayer::createNew));
 
-        Condition isColorFillLayer = new ClassCondition(ColorFillLayer.class, "color fill layer");
+        var isColorFillLayer = new LayerClassRestriction(ColorFillLayer.class, "color fill layer");
 
         sub.add(new RestrictedLayerAction("Edit Color Fill Layer...", isColorFillLayer) {
             @Override
@@ -589,7 +589,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("New Gradient Fill Layer...",
             GradientFillLayer::createNew), CTRL_ALT_G);
 
-        Condition isGradientFillLayer = new ClassCondition(GradientFillLayer.class, "gradient fill layer");
+        var isGradientFillLayer = new LayerClassRestriction(GradientFillLayer.class, "gradient fill layer");
 
         sub.add(new RestrictedLayerAction("Rasterize Gradient Fill Layer", isGradientFillLayer) {
             @Override
@@ -607,7 +607,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("New Shape Layer...",
             ShapesLayer::createNew), CTRL_ALT_S);
 
-        Condition isShapeLayer = new ClassCondition(ShapesLayer.class, "shape layer");
+        var isShapeLayer = new LayerClassRestriction(ShapesLayer.class, "shape layer");
 
         sub.add(new RestrictedLayerAction("Rasterize Shape Layer", isShapeLayer) {
             @Override
@@ -655,7 +655,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.add(new OpenViewEnabledAction("Duplicate",
                 comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true))));
 
-        if (AppContext.enableImageMode) {
+        if (GUIMode.enableImageMode) {
             imageMenu.add(createModeSubmenu());
         }
 
@@ -1178,7 +1178,7 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createSplashSubmenu());
         developMenu.add(createTestSubmenu());
 
-        Condition isSmartObject = new ClassCondition(SmartObject.class, "smart object");
+        var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
         abstract class ActiveSmartObjectAction extends RestrictedLayerAction {
             protected ActiveSmartObjectAction(String name) {
                 super(name, isSmartObject);

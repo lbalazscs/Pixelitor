@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
@@ -25,9 +25,7 @@ import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
@@ -76,7 +74,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         southPanel.add(new LayerActionButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
         southPanel.add(new LayerActionButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        if (AppContext.enableExperimentalFeatures) {
+        if (GUIMode.enableExperimentalFeatures) {
             southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
 
 //            southPanel.add(new LayerActionButton(LayerMoveAction.MOVE_LAYER_UP, "moveLayerUp"));

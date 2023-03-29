@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -25,7 +25,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -143,7 +143,7 @@ public class PathEditor implements PenToolMode {
         if (path == null) {
             // shouldn't happen, but it is very annoying for the user
             // if an exception dialog is shown whenever the mouse moves
-            if (AppContext.isDevelopment()) {
+            if (GUIMode.isDevelopment()) {
                 throw new IllegalStateException("null path in path edit mode");
             }
             return false;

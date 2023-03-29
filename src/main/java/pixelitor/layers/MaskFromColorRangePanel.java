@@ -84,7 +84,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
     private Color lastColor;
     private final Layer layer;
-    private ColorPickerThumbnailPanel colorPickerPanel;
+    private ColorPickerPanel colorPickerPanel;
 
     private MaskFromColorRangePanel(Composition comp, Layer layer) {
         super(new BorderLayout());
@@ -179,7 +179,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void createColorPickerPanel(Dimension thumbDim) {
-        colorPickerPanel = new ColorPickerThumbnailPanel(colorPickerImg, c -> {
+        colorPickerPanel = new ColorPickerPanel(colorPickerImg, c -> {
             lastColor = c;
             updatePreview(c);
         });

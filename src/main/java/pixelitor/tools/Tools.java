@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
@@ -172,7 +172,7 @@ public class Tools {
     }
 
     public static void activeLayerChanged(Layer layer) {
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             return;
         }
         assert currentTool != null;

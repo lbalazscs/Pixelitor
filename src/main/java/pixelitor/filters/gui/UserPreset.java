@@ -18,16 +18,17 @@
 package pixelitor.filters.gui;
 
 import com.bric.util.JVM;
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.colors.Colors;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.Color;
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.*;
 
 /**
@@ -92,7 +93,7 @@ public class UserPreset implements Preset {
             if ("Ray Colors".equals(key)) {
                 value = content.get("Ray Color");
             }
-            if (AppContext.isDevelopment()) {
+            if (GUIMode.isDevelopment()) {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
         }

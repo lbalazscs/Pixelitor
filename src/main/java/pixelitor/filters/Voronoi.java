@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.VoronoiFilter;
@@ -57,7 +57,7 @@ public class Voronoi extends ParametrizedFilter {
             antiAliasing
         ).withReseedAction();
 
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             paramSet.addParams(new FilterParam[]{debugGrid});
         }
 

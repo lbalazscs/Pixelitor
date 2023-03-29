@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
@@ -329,7 +329,7 @@ public abstract class AbstractBrushTool extends Tool {
             if (visiblePart.contains(mousePos)) {
                 startOutlinePaintingAt(mousePos.x, mousePos.y, view);
             }
-        } else if (!AppContext.isUnitTesting()) {
+        } else if (!GUIMode.isUnitTesting()) {
             throw new IllegalStateException();
         }
     }

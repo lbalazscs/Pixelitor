@@ -31,8 +31,8 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
     /**
      * On which layer types is a {@link RestrictedLayerAction} allowed to run
      */
-    public interface Condition {
-        boolean isAllowed(Layer layer);
+    public interface LayerRestriction {
+        boolean allows(Layer layer);
 
         String getErrorMessage(Layer layer);
 
@@ -42,9 +42,9 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             Messages.showInfo(getErrorTitle(), getErrorMessage(layer));
         }
 
-        Condition ALWAYS = new Condition() {
+        LayerRestriction ALLOW_ALL = new LayerRestriction() {
             @Override
-            public boolean isAllowed(Layer layer) {
+            public boolean allows(Layer layer) {
                 return true;
             }
 
@@ -59,9 +59,9 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
             }
         };
 
-        Condition HAS_LAYER_MASK = new Condition() {
+        LayerRestriction HAS_LAYER_MASK = new LayerRestriction() {
             @Override
-            public boolean isAllowed(Layer layer) {
+            public boolean allows(Layer layer) {
                 return layer.hasMask();
             }
 
@@ -72,13 +72,13 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
 
             @Override
             public String getErrorTitle() {
-                return "No layer mask";
+                return "No Layer Mask";
             }
         };
 
-        Condition NO_LAYER_MASK = new Condition() {
+        LayerRestriction NO_LAYER_MASK = new LayerRestriction() {
             @Override
-            public boolean isAllowed(Layer layer) {
+            public boolean allows(Layer layer) {
                 return !layer.hasMask();
             }
 
@@ -89,13 +89,13 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
 
             @Override
             public String getErrorTitle() {
-                return "Has layer mask";
+                return "Has Layer Mask";
             }
         };
 
-        record ClassCondition(Class<? extends Layer> clazz, String desc) implements Condition {
+        record LayerClassRestriction(Class<? extends Layer> clazz, String desc) implements LayerRestriction {
             @Override
-            public boolean isAllowed(Layer layer) {
+            public boolean allows(Layer layer) {
                 return layer.getClass() == clazz;
             }
 
@@ -112,20 +112,20 @@ public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checke
         }
     }
 
-    private final Condition layerType;
+    private final LayerRestriction restriction;
 
-    protected RestrictedLayerAction(String name, Condition layerType) {
+    protected RestrictedLayerAction(String name, LayerRestriction restriction) {
         super(name);
-        this.layerType = layerType;
+        this.restriction = restriction;
     }
 
     @Override
     protected void onClick(Composition comp) {
         Layer activeLayer = comp.getActiveLayer();
-        if (layerType.isAllowed(activeLayer)) {
+        if (restriction.allows(activeLayer)) {
             onActiveLayer(activeLayer);
         } else {
-            layerType.showErrorMessage(activeLayer);
+            restriction.showErrorMessage(activeLayer);
         }
     }
 

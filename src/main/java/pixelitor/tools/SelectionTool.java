@@ -18,9 +18,9 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
@@ -36,7 +36,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 import static pixelitor.selection.ShapeCombinator.*;
 
@@ -233,7 +233,7 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
     }

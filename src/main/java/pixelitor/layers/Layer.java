@@ -18,9 +18,9 @@
 package pixelitor.layers;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.CopyType;
+import pixelitor.GUIMode;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -165,7 +165,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void activateUI() {
-        assert AppContext.isUnitTesting() || calledOnEDT();
+        assert GUIMode.isUnitTesting() || calledOnEDT();
         ui.setSelected(true);
     }
 
@@ -439,7 +439,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public void addMask(LayerMaskAddType addType) {
         if (hasMask()) {
-            RestrictedLayerAction.Condition.NO_LAYER_MASK.showErrorMessage(this);
+            RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK.showErrorMessage(this);
             return;
         }
         if (addType.needsSelection() && !comp.hasSelection()) {
@@ -929,7 +929,7 @@ public abstract class Layer implements Serializable, Debuggable {
             popup.add(new PAction("Rasterize", this::replaceWithRasterized));
         }
 
-        if (AppContext.enableExperimentalFeatures) {
+        if (GUIMode.enableExperimentalFeatures) {
             if (popup == null) {
                 popup = new JPopupMenu();
             }

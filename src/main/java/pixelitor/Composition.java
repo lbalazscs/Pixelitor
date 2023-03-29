@@ -98,8 +98,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     //
 
     // Not null if this is the content of a smart object.
-    // A composition can have multiple smart object owners after
-    // "Shallow Duplicate", which belong to the same composition.
+    // A single content can have multiple smart object owners
+    // within the same composition due to the "Shallow Duplicate" feature.
     // Transient because the parent compositions should not be written out.
     private transient List<SmartObject> owners;
 
@@ -141,7 +141,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
 
         ImageMode mode;
-        if (AppContext.enableImageMode && img.getColorModel() instanceof IndexColorModel) {
+        if (GUIMode.enableImageMode && img.getColorModel() instanceof IndexColorModel) {
             mode = ImageMode.Indexed;
         } else {
             mode = ImageMode.RGB;
@@ -191,6 +191,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         view = null; // will be set later
         selection = null; // the selection is not saved
         inProgressSelection = null;
+        owners = null; // will be set from the owners when they are deserialized
 
         in.defaultReadObject();
 
@@ -987,14 +988,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public boolean activeLayerAcceptsToolDrawing() {
-        if (activeLayer instanceof Drawable) {
-            return true;
-        }
-        if (activeLayer.isMaskEditing()) {
-            return true;
-        }
-
-        return false;
+        return activeLayer instanceof Drawable || activeLayer.isMaskEditing();
     }
 
     private Layer getActiveMaskOrLayer() {
@@ -1282,11 +1276,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         PixelitorEdit edit;
         if (selection != null) {
-            int answer = Dialogs.showYesNoCancelDialog(getDialogParent(), "Existing Selection",
-                "<html>There is already a selection on " + getName() +
-                ".<br>How do you want to combine new selection with the existing one?",
-                new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
-                JOptionPane.QUESTION_MESSAGE);
+            int answer = Dialogs.showManyOptionsDialog(getDialogParent(), "Existing Selection",
+                    "<html>There is already a selection on " + getName() +
+                            ".<br>How do you want to combine new selection with the existing one?",
+                    new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
+                    JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
                 // canceled
                 return null;
@@ -1564,7 +1558,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariants() {
         if (layerList.isEmpty()) {
-            if (AppContext.isUnitTesting()) {
+            if (GUIMode.isUnitTesting()) {
                 // TODO this skips all checks for empty compositions.
                 //   Empty compositions should not be used in tests.
                 return true;
@@ -1899,7 +1893,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         node.addQuotedString("debug name", getDebugName());
 
         String filePath = "";
-        File file = getFile();
         if (file != null) {
             filePath = file.getAbsolutePath();
         }

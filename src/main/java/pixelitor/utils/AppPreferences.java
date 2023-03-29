@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import com.bric.util.JVM;
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
@@ -42,10 +42,7 @@ import pixelitor.tools.Tools;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -563,7 +560,7 @@ public final class AppPreferences {
     }
 
     private static void saveExperimentalFeatures() {
-        mainNode.putBoolean(EXPERIMENTAL_KEY, AppContext.enableExperimentalFeatures);
+        mainNode.putBoolean(EXPERIMENTAL_KEY, GUIMode.enableExperimentalFeatures);
     }
 
     public static boolean loadNativeChoosers() {

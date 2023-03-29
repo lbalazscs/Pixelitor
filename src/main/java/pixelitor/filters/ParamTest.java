@@ -17,14 +17,14 @@
 
 package pixelitor.filters;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
@@ -48,7 +48,7 @@ public class ParamTest extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (AppContext.isDevelopment() && !RandomGUITest.isRunning()) {
+        if (GUIMode.isDevelopment() && !RandomGUITest.isRunning()) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 

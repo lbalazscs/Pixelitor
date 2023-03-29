@@ -21,13 +21,14 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 /**
  * The left panel used in the "Mask from Color Range"
  */
-public class ColorPickerThumbnailPanel extends ImagePanel {
-    public ColorPickerThumbnailPanel(BufferedImage img,
-                                     ColorSelectionListener changeListener) {
+public class ColorPickerPanel extends ImagePanel {
+    public ColorPickerPanel(BufferedImage img,
+                            Consumer<Color> changeListener) {
         super(true);
         setImage(img);
         var ma = new MouseAdapter() {
@@ -44,7 +45,7 @@ public class ColorPickerThumbnailPanel extends ImagePanel {
             private void sampleColor(int x, int y) {
                 if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
                     int rgb = image.getRGB(x, y);
-                    changeListener.selectedColorChanged(new Color(rgb));
+                    changeListener.accept(new Color(rgb));
                 }
             }
         };

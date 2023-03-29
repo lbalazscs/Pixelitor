@@ -16,10 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class MiscComposite implements Composite {
@@ -161,10 +158,9 @@ public final class MiscComposite implements Composite {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof MiscComposite)) {
+        if (!(o instanceof MiscComposite c)) {
             return false;
         }
-        MiscComposite c = (MiscComposite) o;
 
         if (rule != c.rule) {
             return false;

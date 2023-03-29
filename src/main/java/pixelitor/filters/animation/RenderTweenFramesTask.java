@@ -139,11 +139,10 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         // all sorts of problems can happen
         // if filters run outside of EDT
-        var busyCursorParent = PixelitorWindow.get();
         Runnable filterRunTask = () -> {
             FilterState intermediateState = animation.tween(time);
             filter.getParamSet().setState(intermediateState, true);
-            dr.startFilter(filter, TWEEN_PREVIEW, busyCursorParent);
+            dr.startFilter(filter, TWEEN_PREVIEW);
         };
         GUIUtils.invokeAndWait(filterRunTask);
 

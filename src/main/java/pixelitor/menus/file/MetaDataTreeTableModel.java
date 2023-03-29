@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -87,11 +87,6 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     @Override
     public String getColumnName(int column) {
         return COLUMN_NAMES[column];
-    }
-
-    @Override
-    public boolean isCellEditable(Object node, int column) {
-        return false;
     }
 
     @Override

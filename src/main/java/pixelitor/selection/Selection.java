@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -77,7 +77,7 @@ public class Selection implements Debuggable {
         this.view = view;
 
         // hack to prevent unit tests from starting the marching
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             frozen = true;
         }
 

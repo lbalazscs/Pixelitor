@@ -619,8 +619,7 @@ public class DialogFooter extends JPanel {
             }
         }
 
-        DialogFooter footer = new DialogFooter(leftComponents, dismissControls, true, theDefaultButton);
-        return footer;
+        return new DialogFooter(leftComponents, dismissControls, true, theDefaultButton);
     }
 
     /**
@@ -1069,8 +1068,7 @@ public class DialogFooter extends JPanel {
      */
     public JButton getButton(int buttonType) {
         for (int a = 0; a < getComponentCount(); a++) {
-            if (getComponent(a) instanceof JButton) {
-                JButton button = (JButton) getComponent(a);
+            if (getComponent(a) instanceof JButton button) {
                 Object value = button.getClientProperty(PROPERTY_OPTION);
                 int intValue = -1;
                 if (value instanceof Number) {

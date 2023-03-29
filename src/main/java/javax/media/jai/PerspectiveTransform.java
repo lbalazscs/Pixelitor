@@ -1319,11 +1319,9 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof PerspectiveTransform)) {
+        if (!(obj instanceof PerspectiveTransform a)) {
             return false;
         }
-
-        PerspectiveTransform a = (PerspectiveTransform) obj;
 
         return ((m00 == a.m00) && (m10 == a.m10) && (m20 == a.m20) &&
                 (m01 == a.m01) && (m11 == a.m11) && (m21 == a.m21) &&

@@ -34,8 +34,7 @@ import pixelitor.utils.*;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Cursor;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -369,10 +368,6 @@ public class Views {
         return null;
     }
 
-    public static Optional<Composition> getActiveCompOpt() {
-        return Optional.ofNullable(getActiveComp());
-    }
-
     public static void onActiveComp(Consumer<Composition> action) {
         if (activeView != null) {
             var comp = activeView.getComp();
@@ -398,10 +393,6 @@ public class Views {
             .map(View::getComp)
             .filter(c -> c.getName().equals(name))
             .findFirst();
-    }
-
-    public static LayerHolder getActiveHolder() {
-        return getActiveComp().getActiveHolder();
     }
 
     public static List<Composition> getUnsavedComps() {

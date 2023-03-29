@@ -48,11 +48,10 @@ public class BatchFilterWizard extends Wizard {
 
     @Override
     protected void finalAction() {
-        var busyCursorParent = PixelitorWindow.get();
         var dialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
-            comp.getActiveDrawableOrThrow().startFilter(filter, BATCH_AUTOMATE, busyCursorParent);
+            comp.getActiveDrawableOrThrow().startFilter(filter, BATCH_AUTOMATE);
             return CompletableFuture.completedFuture(comp);
         };
         Automate.processFiles(batchFilterAction, dialogTitle);

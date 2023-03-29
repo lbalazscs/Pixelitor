@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 
@@ -127,7 +127,7 @@ public class LayerAdder {
             }
 
             // mocked views will not set a UI
-            assert AppContext.isUnitTesting() || layer.hasUI();
+            assert GUIMode.isUnitTesting() || layer.hasUI();
 
             comp.setDirty(true);
             if (refresh) {

@@ -86,7 +86,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private static boolean showPixelGrid = false;
 
     public View(Composition comp) {
-        assert !AppContext.isUnitTesting() : "Swing component in unit test";
+        assert !GUIMode.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
         setComp(comp);
@@ -532,11 +532,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         MaskViewMode oldMode = this.maskViewMode;
         this.maskViewMode = maskViewMode;
 
-        boolean change = oldMode != maskViewMode;
-        if (change) {
+        boolean changed = oldMode != maskViewMode;
+        if (changed) {
             repaint();
         }
-        return change;
+        return changed;
     }
 
     public void canvasCoSizeChanged() {

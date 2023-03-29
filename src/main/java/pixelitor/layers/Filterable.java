@@ -62,9 +62,6 @@ public interface Filterable {
 
     void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName);
 
-    /**
-     * This method never shows a dialog.
-     */
     default void startFilter(Filter filter, FilterContext context) {
         startFilter(filter, context, PixelitorWindow.get());
     }

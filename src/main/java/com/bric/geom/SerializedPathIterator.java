@@ -157,8 +157,7 @@ class SerializedPathIterator implements PathIterator {
             return Double.parseDouble(string);
         } catch (RuntimeException e) {
             //just constructing this prints data to System.err:
-            ParserException e2 = new ParserException(e.getMessage(), ctr, i - ctr);
-            throw e2;
+            throw new ParserException(e.getMessage(), ctr, i - ctr);
         } finally {
             ctr = i;
         }

@@ -40,7 +40,7 @@ public class IntDocumentFilter extends DocumentFilter {
         checkRange = true;
     }
 
-    public void useFor(JTextField tf) {
+    public void setOn(JTextField tf) {
         ((AbstractDocument) tf.getDocument()).setDocumentFilter(this);
     }
 

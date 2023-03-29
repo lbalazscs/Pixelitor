@@ -17,8 +17,8 @@
 
 package pixelitor.history;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
@@ -61,7 +61,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
     public void undo() throws CannotUndoException {
         super.undo();
 
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             return;
         }
 
@@ -85,7 +85,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
     public void redo() throws CannotRedoException {
         super.redo();
 
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             return;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -26,7 +26,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -365,9 +365,9 @@ public class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
-                "where = '%s, active = %s'%n", where, view.isActive());
+                    "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         path.setBuildState(MOVING_TO_NEXT_ANCHOR);
@@ -377,9 +377,9 @@ public class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
-                "where = '%s, active = %s'%n", where, view.isActive());
+                    "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         BuildState dragState = NO_INTERACTION;

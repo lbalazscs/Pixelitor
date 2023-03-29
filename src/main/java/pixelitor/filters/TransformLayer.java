@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.AngleParam;
@@ -27,7 +27,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.gui.GUIText;
 import pixelitor.layers.Drawable;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -103,7 +103,7 @@ public class TransformLayer extends ParametrizedFilter {
         int ty = 0;
         // if this can run as a smart filter, then it shouldn't assume
         // that the active layer is the owner of the image
-        if (!AppContext.enableExperimentalFeatures) {
+        if (!GUIMode.enableExperimentalFeatures) {
             Drawable dr = Views.getActiveDrawableOrThrow();
             tx = -dr.getTx();
             ty = -dr.getTy();

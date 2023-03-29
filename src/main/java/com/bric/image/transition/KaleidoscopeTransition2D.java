@@ -19,7 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -55,10 +55,9 @@ public class KaleidoscopeTransition2D extends Transition2D {
         v2.add(new ImageInstruction(false));
         float dx = 10; //(float)(0*FastMath.cos(2*(1-progress)*Math.PI));
         float dy = 10; //(float)(0*FastMath.sin(2*(1-progress)*Math.PI));
-        for (Rectangle2D rectangle2D : v1) {
+        for (Rectangle2D rectangle : v1) {
             try {
-                Rectangle2D r = rectangle2D;
-                p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
+                p1 = new Point2D.Double(rectangle.getCenterX(), rectangle.getCenterY());
                 AffineTransform transform = new AffineTransform();
 
                 double halfWidth = size.width / 2.0;
@@ -72,7 +71,7 @@ public class KaleidoscopeTransition2D extends Transition2D {
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                v2.add(new ImageInstruction(false, progress, transform.createInverse(), r));
+                v2.add(new ImageInstruction(false, progress, transform.createInverse(), rectangle));
 
                 transform.setToRotation(-2 * PI * (1 - Math.sqrt(progress)),
                     halfWidth + dx, halfHeight + dy);
@@ -80,7 +79,7 @@ public class KaleidoscopeTransition2D extends Transition2D {
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                v2.add(new ImageInstruction(true, progress * progress, transform.createInverse(), r));
+                v2.add(new ImageInstruction(true, progress * progress, transform.createInverse(), rectangle));
             } catch (Exception e) {
                 e.printStackTrace();
             }

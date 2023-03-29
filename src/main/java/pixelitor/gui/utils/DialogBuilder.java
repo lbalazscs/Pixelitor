@@ -230,7 +230,7 @@ public class DialogBuilder {
      */
     public DialogBuilder show() {
         if (RandomGUITest.isRunning()) {
-            return null; // avoid dialogs
+            return this; // avoid dialogs
         }
 
         JDialog d = build();

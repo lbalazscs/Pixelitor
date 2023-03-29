@@ -17,13 +17,13 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
-import pixelitor.gui.utils.RestrictedLayerAction.Condition;
+import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.history.History;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeAction;
@@ -40,29 +40,29 @@ import static pixelitor.utils.Keys.*;
  */
 public enum MaskViewMode {
     NORMAL("Show and Edit Layer", false, false, false,
-        Condition.ALWAYS, CTRL_1) {
+        LayerRestriction.ALLOW_ALL, CTRL_1) {
     }, SHOW_MASK("Show and Edit Mask", true, true, false,
-        Condition.HAS_LAYER_MASK, CTRL_2) {
+        LayerRestriction.HAS_LAYER_MASK, CTRL_2) {
     }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
-        Condition.HAS_LAYER_MASK, CTRL_3) {
+        LayerRestriction.HAS_LAYER_MASK, CTRL_3) {
     }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
-        Condition.HAS_LAYER_MASK, CTRL_4) {
+        LayerRestriction.HAS_LAYER_MASK, CTRL_4) {
     };
 
     private final String guiName;
     private final boolean showRuby;
-    private final Condition condition;
+    private final LayerRestriction layerRestriction;
     private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
     MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby,
-                 Condition condition, KeyStroke keyStroke) {
+                 LayerRestriction layerRestriction, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;
         this.showRuby = showRuby;
-        this.condition = condition;
+        this.layerRestriction = layerRestriction;
         this.keyStroke = keyStroke;
     }
 
@@ -70,7 +70,7 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the active layer of the active image
      */
     public void addToMenuBar(PMenu sub) {
-        var action = new RestrictedLayerAction(guiName, condition) {
+        var action = new RestrictedLayerAction(guiName, layerRestriction) {
             @Override
             public void onActiveLayer(Layer layer) {
                 activate(layer);
@@ -102,15 +102,15 @@ public enum MaskViewMode {
         assert view != null;
         assert layer.isActive();
 
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
         }
 
         assert canBeAssignedTo(layer);
 
-        boolean change = view.setMaskViewMode(this);
+        boolean changed = view.setMaskViewMode(this);
         layer.setMaskEditing(editMask);
-        if (change) {
+        if (changed) {
             FgBgColors.setLayerMaskEditing(editMask);
 
             if (!view.isMock()) {
@@ -143,14 +143,13 @@ public enum MaskViewMode {
         return showRuby;
     }
 
-    // used in asserts
-    public boolean canBeAssignedTo(Layer layer) {
+    private boolean canBeAssignedTo(Layer layer) {
         if (editMask || showMask) {
             boolean hasMask = layer.hasMask();
             if (!hasMask) {
                 throw new AssertionError("layer " + layer.getName()
-                                         + " has no mask, view mode = " + this
-                                         + ", mask icon = " + layer.getUI().hasMaskIcon());
+                        + " has no mask, view mode = " + this
+                        + ", mask icon = " + layer.getUI().hasMaskIcon());
             }
             return hasMask;
         }

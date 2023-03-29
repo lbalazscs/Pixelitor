@@ -19,7 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -56,10 +56,9 @@ public class RefractiveTransition2D extends Transition2D {
         // 1 -> 0, 0 -> PI,
         float angleProgress = (float) (1 - Math.pow(progress, 0.2));
         v2.add(new ImageInstruction(true));
-        for (Rectangle2D rectangle2D : v1) {
+        for (Rectangle2D rectangle : v1) {
             try {
-                Rectangle2D r = rectangle2D;
-                p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
+                p1 = new Point2D.Double(rectangle.getCenterX(), rectangle.getCenterY());
                 AffineTransform transform = new AffineTransform();
 
                 double anchorX = size.width / 2.0;
@@ -72,14 +71,14 @@ public class RefractiveTransition2D extends Transition2D {
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                v2.add(new ImageInstruction(false, (float) Math.pow(progress, 0.4), transform.createInverse(), r));
+                v2.add(new ImageInstruction(false, (float) Math.pow(progress, 0.4), transform.createInverse(), rectangle));
 
                 transform.setToRotation(2 * PI * angleProgress, anchorX, anchorY);
 
                 p2 = new Point2D.Double();
                 transform.transform(p1, p2);
                 transform.setToTranslation(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-                v2.add(new ImageInstruction(false, progress * progress, transform.createInverse(), r));
+                v2.add(new ImageInstruction(false, progress * progress, transform.createInverse(), rectangle));
             } catch (Exception e) {
                 e.printStackTrace();
             }

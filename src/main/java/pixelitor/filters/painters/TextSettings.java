@@ -20,8 +20,8 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
@@ -30,10 +30,7 @@ import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
@@ -271,7 +268,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public void checkFontIsInstalled(TextLayer textLayer) {
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             // the fonts are not found when testing in the cloud, but that's OK
             return;
         }

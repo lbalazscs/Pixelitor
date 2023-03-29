@@ -21,15 +21,15 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Lazy;
 
-import java.awt.EventQueue;
+import java.awt.*;
 
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * The context in which Pixelitor code is running.
+ * The way in which the GUI is created.
  */
-public enum AppContext {
+public enum GUIMode {
     /**
      * The mode used by end-users.
      */
@@ -52,10 +52,10 @@ public enum AppContext {
 //    public static final boolean enableAdjLayers = false;
     public static final boolean enableImageMode = false;
 
-    public static AppContext CURRENT = FINAL_GUI;
+    public static GUIMode CURRENT = FINAL_GUI;
 
     // Lazy because it should be calculated after the CURRENT is set.
-    private static final Lazy<String> fixTitle = Lazy.of(AppContext::calcFixTitle);
+    private static final Lazy<String> fixTitle = Lazy.of(GUIMode::calcFixTitle);
 
     public static boolean isDevelopment() {
         return CURRENT == DEVELOPMENT_GUI;

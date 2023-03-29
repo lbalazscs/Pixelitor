@@ -22,8 +22,8 @@ import org.assertj.swing.data.Index;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.filters.Starburst;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
@@ -38,7 +38,7 @@ import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.Utils;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -170,9 +170,9 @@ public class WorkflowTest {
     }
 
     private WorkflowTest(String arg) {
-        boolean experimentalWasEnabled = EDT.call(() -> AppContext.enableExperimentalFeatures);
+        boolean experimentalWasEnabled = EDT.call(() -> GUIMode.enableExperimentalFeatures);
         // enable it before building the menus so that shortcuts work
-        EDT.run(() -> AppContext.enableExperimentalFeatures = true);
+        EDT.run(() -> GUIMode.enableExperimentalFeatures = true);
 
         app = new AppRunner(null);
         mouse = app.getMouse();
@@ -202,7 +202,7 @@ public class WorkflowTest {
                 test.accept(groupSetting)));
 
         if (!experimentalWasEnabled) {
-            EDT.run(() -> AppContext.enableExperimentalFeatures = false);
+            EDT.run(() -> GUIMode.enableExperimentalFeatures = false);
         }
 
         System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());

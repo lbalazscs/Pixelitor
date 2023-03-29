@@ -30,7 +30,7 @@ import pixelitor.utils.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -247,8 +247,7 @@ public class OpenRaster {
         }
     }
 
-    private static void readLayer(Map<String, BufferedImage> images, LayerHolder holder, Element node) {
-        Element element = node;
+    private static void readLayer(Map<String, BufferedImage> images, LayerHolder holder, Element element) {
         String layerName = element.getAttribute("name");
         String layerImageSource = element.getAttribute("src");
 

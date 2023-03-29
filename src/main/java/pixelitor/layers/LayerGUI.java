@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import org.jdesktop.swingx.VerticalLayout;
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
@@ -30,10 +30,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.plaf.ButtonUI;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -96,7 +93,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     public LayerGUI(Layer layer) {
         assert calledOnEDT() : threadInfo();
-        assert !AppContext.isUnitTesting() : "Swing component in unit test";
+        assert !GUIMode.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
 
@@ -239,9 +236,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private void layerPopupTriggered(MouseEvent e) {
         JPopupMenu popup = layer.createLayerIconPopupMenu();
         if (popup != null) {
-            if (AppContext.isDevelopment()) {
+            if (GUIMode.isDevelopment()) {
                 popup.add(new PAction("Internal State...", () ->
-                    Debug.showTree(layer, layer.getTypeString())));
+                        Debug.showTree(layer, layer.getTypeString())));
             }
 
             popup.show(this, e.getX(), e.getY());

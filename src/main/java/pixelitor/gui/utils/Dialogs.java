@@ -19,7 +19,7 @@ package pixelitor.gui.utils;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
@@ -95,19 +95,19 @@ public class Dialogs {
         return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
     }
 
-    public static int showYesNoCancelDialog(String title, String question,
+    public static int showManyOptionsDialog(String title, String question,
                                             Object[] options, int messageType) {
-        return showYesNoCancelDialog(getMainWindow(), title, question, options, messageType);
+        return showManyOptionsDialog(getMainWindow(), title, question, options, messageType);
     }
 
-    public static int showYesNoCancelDialog(Component parent, String title,
+    public static int showManyOptionsDialog(Component parent, String title,
                                             String question, Object[] options,
                                             int messageType) {
         assert !(parent instanceof View);
         GlobalEvents.dialogOpened(title);
         int answer = showOptionDialog(parent, new JLabel(question),
-            title, YES_NO_CANCEL_OPTION,
-            messageType, null, options, options[0]);
+                title, YES_NO_CANCEL_OPTION,
+                messageType, null, options, options[0]);
         GlobalEvents.dialogClosed(title);
         return answer;
     }
@@ -289,7 +289,7 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (AppContext.isFinal()) {
+        if (GUIMode.isFinal()) {
             return;
         }
 
@@ -347,7 +347,7 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +
@@ -366,8 +366,8 @@ public class Dialogs {
                 "<br>Your changes will be lost if you don't save them.</html>",
             compName);
 
-        return showYesNoCancelDialog("Unsaved changes",
-            question, options, WARNING_MESSAGE);
+        return showManyOptionsDialog("Unsaved changes",
+                question, options, WARNING_MESSAGE);
     }
 
     public static void showFileNotReadableError(Component parent, File f) {

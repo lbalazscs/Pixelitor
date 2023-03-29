@@ -19,8 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -87,7 +86,7 @@ public class RadialWipeTransition2D extends Transition2D {
         //for a good time, don't make multiplier1 = 0
         int multiplier1 = 0; //multiplier2;
         int k = Math.max(size.width, size.height);
-        Area area = new Area(new Arc2D.Double(new Rectangle2D.Double(size.width / 2 - 2 * k, size.height / 2 - 2 * k, k * 4, k * 4),
+        Area area = new Area(new Arc2D.Double(new Rectangle2D.Double(size.width / 2.0 - 2 * k, size.height / 2.0 - 2 * k, k * 4, k * 4),
                 90 + multiplier1 * progress * 360, multiplier2 * progress * 360, Arc2D.PIE));
         area.intersect(new Area(new Rectangle(0, 0, size.width, size.height)));
 

@@ -21,8 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.*;
 
-import java.awt.Dimension;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -273,8 +272,7 @@ public class StarsTransition2D extends AbstractClippedTransition2D {
         //meddle with the resulting frames...
         Transition2DInstruction[] instr = super.getInstructions(progress, size);
         for (Transition2DInstruction transition2DInstruction : instr) {
-            if (transition2DInstruction instanceof ImageInstruction) {
-                ImageInstruction i = (ImageInstruction) transition2DInstruction;
+            if (transition2DInstruction instanceof ImageInstruction i) {
                 i.isFirstFrame = !i.isFirstFrame;
                 i.setSoftClipping(false);
             }

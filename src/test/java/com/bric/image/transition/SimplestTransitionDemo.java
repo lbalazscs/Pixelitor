@@ -22,10 +22,9 @@ package com.bric.image.transition;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
@@ -36,6 +35,7 @@ import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
  * in this object.
  */
 public class SimplestTransitionDemo extends JPanel {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -73,7 +73,7 @@ public class SimplestTransitionDemo extends JPanel {
         frame.setVisible(true);
     }
 
-    private Transition transition = new BlendTransition2D();
+    private final Transition transition = new BlendTransition2D();
 
     public SimplestTransitionDemo() {
         setPreferredSize(new Dimension(bi1.getWidth(), bi1.getHeight()));

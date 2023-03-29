@@ -21,7 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.RectangularTransform;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Random;
@@ -85,8 +85,8 @@ public class SquaresTransition2D extends Transition2D {
         Random random = new Random();
         for (int x = 0; x < columns; x++) {
             for (int y = 0; y < rows; y++) {
-                float offset = (y - rows / 2) * (y - rows / 2) + (x - columns / 2) * (x - columns / 2);
-                offset = offset / (rows * rows / 4 + columns * columns / 4);
+                float offset = (y - rows / 2.0f) * (y - rows / 2.0f) + (x - columns / 2.0f) * (x - columns / 2.0f);
+                offset = offset / (rows * rows / 4.0f + columns * columns / 4.0f);
                 //float offset = ((float)(y+x))/((float)(rows+columns));
                 delays[x][y] = 0.3f * offset + 0.1f * random.nextFloat();
                 accels[x][y] = (0.5f + 0.8f * random.nextFloat());

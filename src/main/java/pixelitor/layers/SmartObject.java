@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.CopyType;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.filters.Filter;
@@ -404,7 +404,7 @@ public class SmartObject extends CompositeLayer {
                 addSmartFilter(newSF, true, true);
             }));
         }
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             popup.add(new PAction("Debug Images", this::debugImages));
         }
     }

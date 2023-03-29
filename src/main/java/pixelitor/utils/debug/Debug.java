@@ -431,19 +431,19 @@ public class Debug {
     }
 
     public static void throwTestException() {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             throw new IllegalStateException("Test");
         }
     }
 
     public static void throwTestIOException() throws IOException {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             throw new IOException("Test");
         }
     }
 
     public static void throwTestError() {
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             throw new AssertionError("Test");
         }
     }

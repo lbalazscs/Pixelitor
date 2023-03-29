@@ -37,9 +37,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +64,7 @@ public class Pixelitor {
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.ensureAssertionsEnabled();
-            AppContext.CURRENT = AppContext.DEVELOPMENT_GUI;
+            GUIMode.CURRENT = GUIMode.DEVELOPMENT_GUI;
         }
 
         // Force using English locale, because using the default system
@@ -241,7 +239,7 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions() {
-        if (AppContext.isFinal()) {
+        if (GUIMode.isFinal()) {
             // in the final builds nothing should run
             return;
         }

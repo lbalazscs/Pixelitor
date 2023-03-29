@@ -19,7 +19,7 @@ package pixelitor.gui;
 
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -41,10 +41,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.io.File;
 
 import static java.lang.Integer.parseInt;
@@ -323,7 +320,7 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private void addExperimentalCB(GridBagHelper gbh) {
-        experimentalCB = new JCheckBox("", AppContext.enableExperimentalFeatures);
+        experimentalCB = new JCheckBox("", GUIMode.enableExperimentalFeatures);
         gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
@@ -373,7 +370,7 @@ public class PreferencesPanel extends JTabbedPane {
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         AppPreferences.magickDirName = magickDirName;
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
-        AppContext.enableExperimental(experimentalCB.isSelected());
+        GUIMode.enableExperimental(experimentalCB.isSelected());
 
         return true;
     }

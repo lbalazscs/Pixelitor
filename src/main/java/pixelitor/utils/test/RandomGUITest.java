@@ -18,9 +18,9 @@
 package pixelitor.utils.test;
 
 import com.bric.util.JVM;
-import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
@@ -122,7 +122,7 @@ public class RandomGUITest {
     }
 
     public static void start() {
-        if (AppContext.isFinal()) {
+        if (GUIMode.isFinal()) {
             Messages.showError("Error", "Build is FINAL");
             return;
         }
@@ -233,9 +233,7 @@ public class RandomGUITest {
             GUIUtils.invokeAndWait(() -> {
                 try {
                     weightedCaller.runRandomAction();
-                    var comp = Views.getActiveCompOpt().orElseThrow(() ->
-                        new IllegalStateException("no active composition"));
-                    ConsistencyChecks.checkAll(comp, true);
+                    ConsistencyChecks.checkAll(Views.getActiveComp(), true);
                 } catch (Throwable e) {
                     Messages.showException(e);
                 }
@@ -540,10 +538,8 @@ public class RandomGUITest {
         // run everything without showing a modal dialog
         dr.startTweening();
 
-        PixelitorWindow busyCursorParent = PixelitorWindow.get();
-
         try {
-            dr.startFilter(filter, PREVIEWING, busyCursorParent);
+            dr.startFilter(filter, PREVIEWING);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
@@ -1269,7 +1265,7 @@ public class RandomGUITest {
         weightedCaller.registerAction(4, RandomGUITest::randomGuides);
         weightedCaller.registerAction(4, RandomGUITest::setPathsToNull);
 
-        if (AppContext.enableExperimentalFeatures) {
+        if (GUIMode.enableExperimentalFeatures) {
             weightedCaller.registerAction(2, RandomGUITest::randomNewAdjustmentLayer);
         }
 

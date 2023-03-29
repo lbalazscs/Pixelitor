@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
@@ -40,10 +40,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
@@ -171,7 +168,7 @@ public class PenTool extends Tool {
 
     public void startMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null && mode != BUILD) {
-            if (AppContext.isUnitTesting()) {
+            if (GUIMode.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
             if (RandomGUITest.isRunning()) {

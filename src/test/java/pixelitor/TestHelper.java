@@ -457,11 +457,11 @@ public class TestHelper {
     }
 
     public static void setUnitTestingMode() {
-        if (AppContext.isUnitTesting()) {
+        if (GUIMode.isUnitTesting()) {
             // unit testing mode is already set
             return;
         }
-        AppContext.setUnitTestingMode();
+        GUIMode.setUnitTestingMode();
 
         Utils.ensureAssertionsEnabled();
         Utils.preloadUnitTestFontNames();

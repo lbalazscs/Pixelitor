@@ -17,8 +17,8 @@
 
 package pixelitor.tools.move;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
@@ -69,11 +69,11 @@ public class MoveTool extends DragTool {
         settingsPanel.addWithLabel("Auto Select Layer:",
             autoSelectCheckBox, "autoSelectCheckBox");
 
-        if (AppContext.enableFreeTransform) {
+        if (GUIMode.enableFreeTransform) {
             settingsPanel.addWithLabel("Free Transform:",
-                freeTransformCheckBox, "freeTransformCheckBox");
+                    freeTransformCheckBox, "freeTransformCheckBox");
             freeTransformCheckBox.addActionListener(e ->
-                setFreeTransformMode(freeTransformCheckBox.isSelected()));
+                    setFreeTransformMode(freeTransformCheckBox.isSelected()));
         }
     }
 

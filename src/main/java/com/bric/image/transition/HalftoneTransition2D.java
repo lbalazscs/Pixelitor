@@ -19,8 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.Dimension;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.RectangularShape;
@@ -111,16 +110,19 @@ public class HalftoneTransition2D extends Transition2D {
         ImageInstruction[] instr = new ImageInstruction[v.size() + 1];
         instr[0] = new ImageInstruction(false);
         for (int a = 0; a < v.size(); a++) {
-            float progress2 = progress; //(float)Math.pow(progress, .9+.2*random.nextFloat());
             RectangularShape r = v.get(a);
-            Point2D p1 = new Point2D.Double(r.getCenterX(), r.getCenterY());
-            Point2D p2 = new Point2D.Double(r.getCenterX(), r.getCenterY());
+            double cx = r.getCenterX();
+            double cy = r.getCenterY();
+            Point2D p1 = new Point2D.Double(cx, cy);
+            Point2D p2 = new Point2D.Double(cx, cy);
             AffineTransform transform = new AffineTransform();
-            transform.translate(r.getCenterX(), r.getCenterY());
-            transform.scale(30 * (1 - progress) + 1, 30 * (1 - progress) + 1);
-            transform.translate(-r.getCenterX(), -r.getCenterY());
+            transform.translate(cx, cy);
 
-            transform.rotate(0.3 * (1 - progress2), size.width / 3.0, size.height / 2.0);
+            transform.scale(30 * (1 - progress) + 1, 30 * (1 - progress) + 1);
+
+            transform.translate(-cx, -cy);
+
+            transform.rotate(0.3 * (1 - progress), size.width / 3.0, size.height / 2.0);
 
             transform.transform(p1, p2);
             transform.setToTranslation(p1.getX() - p2.getX(), p1.getY() - p2.getY());

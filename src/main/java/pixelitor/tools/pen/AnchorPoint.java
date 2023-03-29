@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
@@ -29,9 +29,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.IllegalComponentStateException;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.Serial;
@@ -251,7 +249,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        if (AppContext.isDevelopment()) {
+        if (GUIMode.isDevelopment()) {
             popup.add(new PAction("Dump", this::dump));
         }
 

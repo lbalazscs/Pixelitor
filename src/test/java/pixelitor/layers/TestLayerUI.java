@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppContext;
+import pixelitor.GUIMode;
 import pixelitor.utils.debug.DebugNode;
 
 /**
@@ -34,7 +34,7 @@ public class TestLayerUI implements LayerUI {
 
     public TestLayerUI(Layer layer) {
         this.layer = layer;
-        assert AppContext.isUnitTesting();
+        assert GUIMode.isUnitTesting();
     }
 
     @Override

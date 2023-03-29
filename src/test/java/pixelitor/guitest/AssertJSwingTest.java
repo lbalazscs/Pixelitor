@@ -27,9 +27,9 @@ import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
 import org.fest.util.Files;
-import pixelitor.AppContext;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.AutoPaintPanel;
@@ -69,9 +69,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -348,7 +346,7 @@ public class AssertJSwingTest {
         testTextLayers();
         testMaskFromColorRange();
 
-        if (AppContext.enableExperimentalFeatures) {
+        if (GUIMode.enableExperimentalFeatures) {
             testAdjLayers();
         }
 

@@ -17,8 +17,8 @@
 
 package pixelitor.tools;
 
-import pixelitor.AppContext;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
 import pixelitor.gui.GlobalEvents;
@@ -38,8 +38,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.Cursor;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -322,7 +321,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
             button.setSelected(true);
             button.requestFocus();
         } else {
-            assert AppContext.isUnitTesting();
+            assert GUIMode.isUnitTesting();
             Tools.start(this);
         }
     }

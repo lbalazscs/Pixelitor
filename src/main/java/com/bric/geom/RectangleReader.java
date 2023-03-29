@@ -21,15 +21,12 @@ package com.bric.geom;
 
 import com.bric.math.MathG;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * This can identify if a shape is a Rectangle, Rectangle2D or other.
@@ -92,8 +89,7 @@ public class RectangleReader {
             return (Rectangle) shape;
         }
 
-        if (shape instanceof Rectangle2D && transform == null) {
-            Rectangle2D rect = (Rectangle2D) shape;
+        if (shape instanceof Rectangle2D rect && transform == null) {
             return getRectangle(rect);
         }
 

@@ -21,7 +21,7 @@ package com.bric.image.transition;
 
 import com.bric.geom.TransformUtils;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
@@ -200,11 +200,10 @@ public class TossTransition2D extends Transition2D {
             transform = TransformUtils.tween(identity, transform3, progress, true);
         }
 
-        Transition2DInstruction[] instr = {
+        return new Transition2DInstruction[]{
                 new ImageInstruction(true),
                 new ImageInstruction(false, transform, null)
         };
-        return instr;
     }
 
     @Override

@@ -34,12 +34,12 @@ public class ValidationResult {
         = new ValidationResult(true, null);
 
     private ValidationResult(boolean valid, String errorMsg) {
-        this.valid = valid;
-        this.errorMsg = errorMsg;
-
         if (!valid && errorMsg == null) {
             throw new IllegalArgumentException("missing error message");
         }
+
+        this.valid = valid;
+        this.errorMsg = errorMsg;
     }
 
     /**
@@ -72,7 +72,7 @@ public class ValidationResult {
             if (other.isOK()) {
                 return this; // with our error message
             } else {
-                return error(composeMessages(errorMsg, other.errorMsg));
+                return error(composeErrorMessages(errorMsg, other.errorMsg));
             }
         }
     }
@@ -82,12 +82,8 @@ public class ValidationResult {
             assert this == okInstance;
             return new ValidationResult(false, msg);
         } else {
-            return new ValidationResult(false, composeMessages(errorMsg, msg));
+            return new ValidationResult(false, composeErrorMessages(errorMsg, msg));
         }
-    }
-
-    public ValidationResult addErrorIfNot(boolean condition, String msg) {
-        return addErrorIf(!condition, msg);
     }
 
     public ValidationResult addErrorIf(boolean condition, String msg) {
@@ -100,7 +96,7 @@ public class ValidationResult {
             }
         } else {
             if (condition) {
-                return error(composeMessages(errorMsg, msg));
+                return error(composeErrorMessages(errorMsg, msg));
             } else {
                 return this;
             }
@@ -132,7 +128,7 @@ public class ValidationResult {
         }
     }
 
-    private static String composeMessages(String first, String second) {
+    private static String composeErrorMessages(String first, String second) {
         return first + "<br>" + second;
     }
 }

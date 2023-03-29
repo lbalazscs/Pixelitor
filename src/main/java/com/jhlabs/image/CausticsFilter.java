@@ -399,9 +399,7 @@ public class CausticsFilter extends WholeImageFilter {
     private float evaluate(float x, float y) {
         float xt = x + time;
         float tt = x - time;
-//        float f = turbulence == 0.0 ? Noise.noise3(xt, y, tt) : turbulence2(xt, y, tt, turbulence);
-        float f = turbulence2(xt, y, tt, turbulence);
-        return f;
+        return turbulence2(xt, y, tt, turbulence);
     }
 
     @Override

@@ -286,8 +286,7 @@ public class ColorPickerPanel extends JPanel {
         if (mode == SAT || mode == BRI) {
             shape = new Ellipse2D.Float(0, 0, size, size);
         } else {
-            Rectangle r = new Rectangle(0, 0, size, size);
-            shape = r;
+            shape = new Rectangle(0, 0, size, size);
         }
 
         if (hasFocus()) {

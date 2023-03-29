@@ -34,15 +34,8 @@
 
 package org.jdesktop.swingx.graphics;
 
-import java.awt.Composite;
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DirectColorModel;
-import java.awt.image.Raster;
-import java.awt.image.RasterFormatException;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 
 /**
  * <p>A blend composite defines the rule according to which a drawing primitive
@@ -273,18 +266,16 @@ public final class BlendComposite implements Composite {
      */
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof BlendComposite)) {
+        if (!(obj instanceof BlendComposite bc)) {
             return false;
         }
 
-        BlendComposite bc = (BlendComposite) obj;
         return mode == bc.mode && alpha == bc.alpha;
     }
 
     private static boolean isRgbColorModel(ColorModel cm) {
-        if (cm instanceof DirectColorModel &&
+        if (cm instanceof DirectColorModel directCM &&
                 cm.getTransferType() == DataBuffer.TYPE_INT) {
-            DirectColorModel directCM = (DirectColorModel) cm;
 
             return directCM.getRedMask() == 0x00FF0000 &&
                     directCM.getGreenMask() == 0x0000FF00 &&
@@ -297,9 +288,8 @@ public final class BlendComposite implements Composite {
     }
 
     private static boolean isBgrColorModel(ColorModel cm) {
-        if (cm instanceof DirectColorModel &&
+        if (cm instanceof DirectColorModel directCM &&
                 cm.getTransferType() == DataBuffer.TYPE_INT) {
-            DirectColorModel directCM = (DirectColorModel) cm;
 
             return directCM.getRedMask() == 0x000000FF &&
                     directCM.getGreenMask() == 0x0000FF00 &&
@@ -315,7 +305,7 @@ public final class BlendComposite implements Composite {
      * {@inheritDoc}
      */
     @Override
-	public CompositeContext createContext(ColorModel srcColorModel,
+    public CompositeContext createContext(ColorModel srcColorModel,
                                           ColorModel dstColorModel,
                                           RenderingHints hints) {
         if (isRgbColorModel(srcColorModel) && isRgbColorModel(dstColorModel)) {
@@ -337,7 +327,7 @@ public final class BlendComposite implements Composite {
         }
 
         @Override
-		public void dispose() {
+        public void dispose() {
         }
     }
 
@@ -347,7 +337,7 @@ public final class BlendComposite implements Composite {
         }
 
         @Override
-		public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+        public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
 
@@ -396,7 +386,7 @@ public final class BlendComposite implements Composite {
         }
 
         @Override
-		public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+        public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
 
