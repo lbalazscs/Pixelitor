@@ -25,9 +25,6 @@ import java.awt.Component;
  * A non-GUI message handler for tests
  */
 public class TestMessageHandler implements MessageHandler {
-    @Override
-    public void showInStatusBar(String msg) {
-    }
 
     @Override
     public ProgressHandler startProgress(String msg, int max) {

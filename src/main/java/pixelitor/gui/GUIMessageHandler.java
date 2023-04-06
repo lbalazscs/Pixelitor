@@ -35,7 +35,6 @@ public class GUIMessageHandler implements MessageHandler {
     public GUIMessageHandler() {
     }
 
-    @Override
     public void showInStatusBar(String msg) {
         assert calledOnEDT() : threadInfo();
 

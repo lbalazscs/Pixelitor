@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.Composition;
+import pixelitor.gui.GUIMessageHandler;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGroup;
 
@@ -103,7 +104,9 @@ public class Messages {
      */
     public static void showInStatusBar(String msg) {
         assert !msg.startsWith("<html>");
-        msgHandler.showInStatusBar("<html>" + msg);
+        if (msgHandler instanceof GUIMessageHandler guiMessageHandler) {
+            guiMessageHandler.showInStatusBar("<html>" + msg);
+        }
     }
 
     /**
@@ -111,7 +114,9 @@ public class Messages {
      */
     public static void showPlainInStatusBar(String msg) {
         assert !msg.startsWith("<html>");
-        msgHandler.showInStatusBar(msg);
+        if (msgHandler instanceof GUIMessageHandler guiMessageHandler) {
+            guiMessageHandler.showInStatusBar(msg);
+        }
     }
 
     public static ProgressHandler startProgress(String msg, int max) {

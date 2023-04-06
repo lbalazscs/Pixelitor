@@ -28,8 +28,6 @@ import java.awt.Component;
 public interface MessageHandler {
     // *** status bar messages ***
 
-    void showInStatusBar(String msg);
-
     ProgressHandler startProgress(String msg, int max);
 
     // *** dialog messages ***
