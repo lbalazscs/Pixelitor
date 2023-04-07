@@ -370,6 +370,17 @@ public class Selection implements Debuggable {
         return node;
     }
 
+    public void update(SelectionType selectionType, Object mouseInfo) {
+        assert this.isAlive() : "dead selection";
+
+        Shape shape = this.getShape();
+        Shape newShape = selectionType.createShape(mouseInfo, shape);
+        this.setShape(newShape);
+        if (!this.isMarching()) {
+            this.startMarching();
+        }
+    }
+
     @Override
     public String toString() {
         return "Selection{" +

@@ -81,14 +81,7 @@ public class SelectionBuilder {
             inProgressSelection = new Selection(newShape, comp.getView());
             comp.setInProgressSelection(inProgressSelection);
         } else {
-            assert inProgressSelection.isAlive() : "dead selection";
-
-            Shape shape = inProgressSelection.getShape();
-            Shape newShape = selectionType.createShape(mouseInfo, shape);
-            inProgressSelection.setShape(newShape);
-            if (!inProgressSelection.isMarching()) {
-                inProgressSelection.startMarching();
-            }
+            inProgressSelection.update(selectionType, mouseInfo);
         }
     }
 
