@@ -47,6 +47,7 @@ public class BristleStroke implements Stroke {
      * and triangles is sufficient.)
      */
     private static final int shape = SHAPE_TRIANGLE_OR_SQUARE;
+    public static final float HALF_UNIT = 0.5f;
 
     private final float width;
     private final float thickness;
@@ -85,7 +86,7 @@ public class BristleStroke implements Stroke {
         this.width = width;
         this.thickness = thickness;
         this.grain = getGrain(width, thickness);
-        this.spacing = 0.5f + 0.5f * thickness;
+        this.spacing = HALF_UNIT + HALF_UNIT * thickness;
         this.randomSeed = randomSeed;
 //        int l = (int) ((1 + 2 * thickness) * width) + 10;
 //        if (l > 20) {
@@ -97,7 +98,7 @@ public class BristleStroke implements Stroke {
     private static float getGrain(float width, float thickness) {
         double k = width;
         if (width > 1) {
-            k = Math.pow(width, 0.5f);
+            k = Math.pow(width, HALF_UNIT);
             if (k > 4) {
                 k = 4;
             }
@@ -143,7 +144,7 @@ public class BristleStroke implements Stroke {
 
     private void drawStrokedShapes(GeneralPath path, Random r, MeasuredShape[] paths, int a) {
         float k1 = ((float) a) / ((float) (layers - 1));
-        float k2 = (k1 - 0.5f) * 2; //range from [-1,1]
+        float k2 = (k1 - HALF_UNIT) * 2; //range from [-1,1]
 
         float k3 = thickness;
         float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
