@@ -548,7 +548,7 @@ public abstract class Clipper {
                         y2 = (float) yf.evaluate((intersectionTimes[a] + intersectionTimes[a - 1]) / 2);
                         midValueInvalid = !contains(x2, y2);
 
-                        if ((xf instanceof LFunction) || thisValueIsCapped || lastValueWasCapped || midValueInvalid) {
+                        if (satisfied(lastValueWasCapped, thisValueIsCapped, midValueInvalid, xf)) {
                             p.lineTo(point.x, point.y);
                         } else if ((xf instanceof QFunction) || (xf instanceof CFunction)) {
                             p.curveTo(xf, yf, intersectionTimes[a - 1], intersectionTimes[a]);
@@ -570,6 +570,10 @@ public abstract class Clipper {
         }
         p.flush();
         return p.g;
+    }
+
+    private static boolean satisfied(boolean lastValueWasCapped, boolean thisValueIsCapped, boolean midValueInvalid, Function xf) {
+        return (xf instanceof LFunction) || thisValueIsCapped || lastValueWasCapped || midValueInvalid;
     }
 
     /**
