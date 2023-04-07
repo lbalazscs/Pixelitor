@@ -70,46 +70,6 @@ public class Equations {
         return v1 - v2;
     }
 
-    public static String toString(double[][] d) {
-        String s = "";
-        for (double[] doubles : d) {
-            s = s + toString(doubles) + "\n";
-        }
-        return s.trim();
-    }
-
-    public static String toString(double[] d) {
-        String s = "[";
-        for (int a = 0; a < d.length; a++) {
-            if (a == 0) {
-                s = s + " " + d[a];
-            } else {
-                s = s + ", " + d[a];
-            }
-        }
-        return s + " ]";
-    }
-
-    public static String toString(BigDecimal[][] d) {
-        String s = "";
-        for (BigDecimal[] bigDecimals : d) {
-            s = s + toString(bigDecimals) + "\n";
-        }
-        return s.trim();
-    }
-
-    public static String toString(BigDecimal[] d) {
-        String s = "[";
-        for (int a = 0; a < d.length; a++) {
-            if (a == 0) {
-                s = s + " " + d[a];
-            } else {
-                s = s + ", " + d[a];
-            }
-        }
-        return s + " ]";
-    }
-
     /**
      * Given a matrix of variable coefficients for a linear system of equations,
      * this will solve for each variable.
@@ -277,7 +237,7 @@ public class Equations {
             row = row % coefficients.length;
             if (errorCounter > coefficients.length) {
                 if (VERBOSE_EXCEPTIONS) {
-                    throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions:\n" + toString(coefficients));
+                    throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions:\n" + StringConverter.toString(coefficients));
                 } else {
                     throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions.");
                 }
@@ -415,7 +375,7 @@ public class Equations {
             row = row % coefficients.length;
             if (errorCounter > coefficients.length) {
                 if (VERBOSE_EXCEPTIONS) {
-                    throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions:\n" + toString(coefficients));
+                    throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions:\n" + StringConverter.toString(coefficients));
                 } else {
                     throw new IllegalArgumentException("The coefficient matrix cannot be solved.  Either it has infinitely many solutions, or zero solutions.");
                 }
