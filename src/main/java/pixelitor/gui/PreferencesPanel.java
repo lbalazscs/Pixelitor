@@ -43,6 +43,7 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.io.File;
+import java.util.function.Consumer;
 
 import static java.lang.Integer.parseInt;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -116,22 +117,41 @@ public class PreferencesPanel extends JTabbedPane {
 
     private void addThemeChooser(GridBagHelper gbh) {
         EnumComboBoxModel<Theme> themes = new EnumComboBoxModel<>(Theme.class);
-        themes.setSelectedItem(Themes.getCurrent());
+        Theme currentTheme = Themes.getCurrent();
+        themes.setSelectedItem(currentTheme);
 
         @SuppressWarnings("unchecked")
         JComboBox<Theme> themeChooser = new JComboBox<>(themes);
 
         themeChooser.setName("themeChooser");
         gbh.addLabelAndControlNoStretch("Theme: ", themeChooser);
+
+        JLabel accentColorLabel = new JLabel("Accent Color (Flat Themes)");
+        EnumComboBoxModel<AccentColor> accentColors = new EnumComboBoxModel<>(AccentColor.class);
+        @SuppressWarnings("unchecked")
+        JComboBox<Theme> accentColorChooser = new JComboBox<>(accentColors);
+
+        Consumer<Boolean> accentColorEnabler = enable -> {
+            accentColorLabel.setEnabled(enable);
+            accentColorChooser.setEnabled(enable);
+        };
+        accentColorEnabler.accept(currentTheme.isFlat());
+
+        gbh.addTwoControlsNoStretch(accentColorLabel, accentColorChooser);
+
         themeChooser.addActionListener(e -> {
             Theme theme = themes.getSelectedItem();
             setCursor(Cursors.BUSY);
+
             EventQueue.invokeLater(() -> {
                 Themes.install(theme, true, false);
+                accentColorEnabler.accept(theme.isFlat());
                 SwingUtilities.getWindowAncestor(this).pack();
                 setCursor(Cursors.DEFAULT);
             });
         });
+
+        accentColorChooser.addActionListener(e -> Themes.changeAccentColor(accentColors.getSelectedItem()));
     }
 
     private void addFontChoosers(GridBagHelper gbh) {

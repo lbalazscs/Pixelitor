@@ -40,7 +40,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
  */
 public class ToolButton extends JToggleButton {
     public static final int TOOL_ICON_SIZE = 28;
-    private static final Color DARK_THEME_SELECTED_COLOR = new Color(117, 255, 136);
+    private static Color darkThemeSelectedColor = Themes.DEFAULT_ACCENT_COLOR.asColor();
 
     private final Tool tool;
 
@@ -90,7 +90,7 @@ public class ToolButton extends JToggleButton {
         setIcon(toolIcon);
 
         if (Themes.getCurrent().isDark()) {
-            setSelectedIcon(toolIcon.copy(DARK_THEME_SELECTED_COLOR));
+            setSelectedIcon(toolIcon.copy(darkThemeSelectedColor));
         } else {
             // set it explicitly, so that it's updated
             // when the theme changes from dark to light
@@ -160,5 +160,9 @@ public class ToolButton extends JToggleButton {
             g2d.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
         }
         super.paintComponent(g2d);
+    }
+
+    public static void setDarkThemeSelectedColor(Color darkThemeSelectedColor) {
+        ToolButton.darkThemeSelectedColor = darkThemeSelectedColor;
     }
 }

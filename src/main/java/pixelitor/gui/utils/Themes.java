@@ -17,14 +17,16 @@
 
 package pixelitor.gui.utils;
 
+import com.formdev.flatlaf.FlatLaf;
 import pixelitor.colors.FgBgColors;
 import pixelitor.layers.LayerGUILayout;
 import pixelitor.layers.SelectionState;
+import pixelitor.tools.gui.ToolButton;
 
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
-import java.awt.Color;
-import java.awt.Window;
+import java.awt.*;
+import java.util.Collections;
 
 public class Themes {
     private Themes() {
@@ -39,6 +41,9 @@ public class Themes {
     // this theme will be used for the unit tests, otherwise it's overwritten at startup
     private static Theme currentTheme = DEFAULT;
 
+    public static final AccentColor DEFAULT_ACCENT_COLOR = AccentColor.BLUE;
+    private static AccentColor currentAccentColor = DEFAULT_ACCENT_COLOR;
+
     public static void install(Theme theme, boolean updateGUI, boolean force) {
         if (theme != currentTheme || force) {
             setLookAndFeel(theme);
@@ -50,6 +55,23 @@ public class Themes {
                 updateAllUI();
             }
         }
+    }
+
+    public static void changeAccentColor(AccentColor newColor) {
+        if (!currentTheme.isFlat()) {
+            throw new IllegalStateException("Current theme is " + currentTheme.getLAFClassName());
+        }
+        if (newColor == currentAccentColor) {
+            return;
+        }
+        currentAccentColor = newColor;
+        useAccentColor(newColor.asColor());
+        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", newColor.asHexCode()));
+        install(currentTheme, true, true);
+    }
+
+    public static void useAccentColor(Color color) {
+        ToolButton.setDarkThemeSelectedColor(color);
     }
 
     public static void updateAllUI() {
@@ -73,5 +95,9 @@ public class Themes {
 
     public static Theme getCurrent() {
         return currentTheme;
+    }
+
+    public static AccentColor getCurrentAccentColor() {
+        return currentAccentColor;
     }
 }
