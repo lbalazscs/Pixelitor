@@ -1,6 +1,13 @@
 name: GitHub Build
 
-on: [push]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -10,28 +17,40 @@ jobs:
       matrix:
         java-version: [ 17, 20 ]
 
+    name: Build with Java ${{ matrix.java-version }}
+
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: ${{ matrix.java-version }}
-        cache: 'maven'
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+          cache: 'maven'
 
-    - name: Build with Maven (Linux)
-      run: xvfb-run -a mvn -B package --file pom.xml
+      - name: Build with Maven (Linux)
+        run: |
+          xvfb-run -a mvn -B package --file pom.xml
+          rm target/original-*.jar
 
-    - name: Put the current date in the environment file
-      run: |
-        echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-       
-    - name: Archive artifacts
-      if: matrix.java-version == 17
-      uses: actions/upload-artifact@v3
-      with:
-        name: PixelitorJAR-${{ env.DATE }}
-        path: |
-          target/*.jar
-          !target/original-*.jar
+      - name: Put the current date in the environment file
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Archive artifacts
+        if: matrix.java-version == 17
+        uses: actions/upload-artifact@v3
+        with:
+          name: PixelitorJAR-${{ env.DATE }}
+          path: target/*.jar
+          if-no-files-found: error
+
+      - name: Draft a release if a v* tag is pushed
+        if: matrix.java-version == 17 && startsWith(github.ref, 'refs/tags/v')
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        run: |
+          DATE=$(date +"%b %-d, %Y")
+          TAG_NAME=${GITHUB_REF#refs/tags/v}
+          gh release create "v$TAG_NAME" --draft --title "$TAG_NAME - released on $DATE" target/*.jar
+            
