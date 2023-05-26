@@ -412,9 +412,6 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private TransformBox createRotatedBox(View view, double angle) {
-//        System.out.printf("StyledShape::createRotatedBox: angle = %.2f, transformedDrag = %s%n",
-//            angle, transformedDrag.toString());
-
         ShapeTypeSettings settings = null;
         if (shapeType.hasSettings()) {
             // this instance is independent of the tool's type settings

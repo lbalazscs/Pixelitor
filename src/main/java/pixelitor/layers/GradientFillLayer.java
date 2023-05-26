@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
@@ -37,7 +36,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Views.thumbSize;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
@@ -118,9 +116,7 @@ public class GradientFillLayer extends ContentLayer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        Canvas canvas = comp.getCanvas();
-        Dimension thumbDim = ImageUtils.calcThumbDimensions(
-            canvas.getWidth(), canvas.getHeight(), thumbSize, true);
+        Dimension thumbDim = comp.getCanvas().getThumbSize();
 
         BufferedImage img = ImageUtils.createSysCompatibleImage(
             thumbDim.width, thumbDim.height);
@@ -130,7 +126,7 @@ public class GradientFillLayer extends ContentLayer {
             thumbCheckerBoardPainter.paint(g2, null, thumbDim.width, thumbDim.height);
         }
         if (gradient != null) {
-            gradient.paintIconThumbnail(g2, canvas, thumbDim);
+            gradient.paintIconThumbnail(g2, comp.getCanvas(), thumbDim);
         }
 
         g2.dispose();

@@ -35,9 +35,6 @@ public class TileSeamless extends ParametrizedFilter {
     private final ImagePositionParam center =
             new ImagePositionParam("Center");
 
-//    enum Show { Mask, Offset, Final }
-//    EnumParam<Show> showParam = new EnumParam<>("Show", Show.class);
-
     private MaskMaker maskMaker = null;
     private OffsetFilter offsetFilter = null;
 

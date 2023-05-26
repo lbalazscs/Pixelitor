@@ -24,10 +24,7 @@ import pixelitor.colors.Colors;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.io.Serial;
 import java.util.List;
@@ -117,10 +114,6 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private boolean shouldStartFilter(PropertyChangeEvent evt) {
-//        if (evt.getPropertyName().equals("UI")) {
-//            debugParents();
-//        }
-
         if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
             return switch (evt.getPropertyName()) {
                 case "ancestor", "selected thumb", "enabled",

@@ -1606,7 +1606,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (view != null && !view.isMock()) {
             if (view.getComp() != this) {
-                throw new AssertionError("bad view reference for " + getDebugName());
+                throw new AssertionError("bad view reference for " + getDebugName()
+                        + ", unexpected comp is " + view.getComp().getDebugName());
             }
             if (view.getCanvas() != canvas) {
                 throw new AssertionError("bad canvas for " + getDebugName());
@@ -1814,6 +1815,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         } else {
             newComp.setName(name);
         }
+        newComp.createDebugName();
 
         SmartObject so = new SmartObject(newComp, this);
         newComp.addLayerNoUI(so);
@@ -1842,8 +1844,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         for (Layer layer : visibleLayers) {
             newMainComp.deleteLayer(layer, false, false);
-            content.addLayerNoUI(layer);
             layer.setComp(content);
+            content.addLayerNoUI(layer);
         }
 
         SmartObject so = new SmartObject(newMainComp, content);

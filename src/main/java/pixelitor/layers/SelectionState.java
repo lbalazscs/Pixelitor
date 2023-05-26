@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -104,8 +104,6 @@ public enum SelectionState {
         } else {
             Border darkBorder = createLineBorder(LayerGUI.SELECTED_COLOR, 1);
             selectedBorder = createCompoundBorder(lightBorder, darkBorder);
-//            unselectedIconOnSelectedLayerBorder = createLineBorder(LayerGUI.SELECTED_COLOR, LayerGUI.BORDER_WIDTH);
-//            unselectedIconOnUnselectedLayerBorder = createLineBorder(LayerGUI.UNSELECTED_COLOR, LayerGUI.BORDER_WIDTH);
             unselectedIconOnSelectedLayerBorder = null;
             unselectedIconOnUnselectedLayerBorder = null;
         }

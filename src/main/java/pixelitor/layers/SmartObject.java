@@ -596,20 +596,6 @@ public class SmartObject extends CompositeLayer {
         }
     }
 
-//    @Override
-//    public BufferedImage getCanvasSizedSubImage() {
-//        // workaround for moved layers
-//        BufferedImage img = ImageUtils.createSysCompatibleImage(comp.getCanvas());
-//        Graphics2D g = img.createGraphics();
-//
-//        // don't call applyLayer, because the mask should NOT be considered
-//        setupDrawingComposite(g, true);
-//        paintLayerOnGraphics(g, true);
-//
-//        g.dispose();
-//        return img;
-//    }
-
     public View getParentView() {
         if (isContentOpen()) {
             return content.getView();
@@ -1116,8 +1102,7 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        BufferedImage visibleImage = getVisibleImage();
-        g.drawImage(visibleImage, getTx(), getTy(), null);
+        g.drawImage(getVisibleImage(), getTx(), getTy(), null);
     }
 
     /**

@@ -76,9 +76,6 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
 
         if (GUIMode.enableExperimentalFeatures) {
             southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
-
-//            southPanel.add(new LayerActionButton(LayerMoveAction.MOVE_LAYER_UP, "moveLayerUp"));
-//            southPanel.add(new LayerActionButton(LayerMoveAction.MOVE_LAYER_DOWN, "moveLayerDown"));
         }
 
         return southPanel;

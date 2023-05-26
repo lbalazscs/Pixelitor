@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import javax.swing.*;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.InputEvent;
 
 import static java.awt.event.KeyEvent.*;
@@ -90,15 +90,12 @@ public class Keys {
     public static final KeyStroke CTRL_SHIFT_F = getKeyStroke('F', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_G = getKeyStroke('G', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', CTRL | SHIFT);
-    //    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL | SHIFT);
-//    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_S = getKeyStroke('S', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_V = getKeyStroke('V', CTRL | SHIFT);
     public static final KeyStroke CTRL_SHIFT_Z = getKeyStroke('Z', CTRL | SHIFT);
+    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL | SHIFT);
 
     public static final KeyStroke CTRL_SHIFT_ALT_E = getKeyStroke('E', CTRL | ALT | SHIFT);
-//    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL | ALT | SHIFT);
-//    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL | ALT | SHIFT);
 
     public static final KeyStroke CTRL_MINUS = getKeyStroke(VK_MINUS, CTRL);
     public static final KeyStroke CTRL_PLUS = getKeyStroke(VK_PLUS, CTRL);

@@ -179,10 +179,8 @@ public class LayerGroup extends CompositeLayer {
         // TODO this totally ignores the arguments
         //   (it was only implemented to support the
         //   shortcut in Composition.getCompositeImage)
-        // Actually this should return non-null only if
-        //  canExportImage() returns true, but if this group is the
-        // single layer (or the first layer!) then even a pass-trough
-        // group behaves like an isolated one
+        // TODO If this group is the single layer or the first layer
+        //   then even a pass-trough group behaves like an isolated one
         if (isPassThrough()) {
             return ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
         } else {
@@ -255,8 +253,8 @@ public class LayerGroup extends CompositeLayer {
             layer.forEachNestedLayer(action, includeMasks);
         }
 
-        // run on itself only after the childern, this is useful
-        // if the action is some sort of initialization
+        // Run on itself only after the childern.
+        // This ordering is needed for initialization actions.
         action.accept(this);
         if (includeMasks && hasMask()) {
             action.accept(getMask());

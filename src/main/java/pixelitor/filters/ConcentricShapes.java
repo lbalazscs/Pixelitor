@@ -26,9 +26,7 @@ import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.ArrayList;
@@ -83,8 +81,6 @@ public class ConcentricShapes extends ParametrizedFilter {
     private final ColorListParam colorsParam = new ColorListParam("Colors",
         2, 2, WHITE, BLACK, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET);
-    //    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
-//    private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 0, 100);
 
     private record ColoredShape(Color color, Shape shape) {
@@ -103,8 +99,6 @@ public class ConcentricShapes extends ParametrizedFilter {
             distanceParam,
             colorsParam,
             randomnessParam.withAction(reseedAction)
-//            scale
-//            rotate
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
             null, "Export the current image to an SVG file",
             null, false));

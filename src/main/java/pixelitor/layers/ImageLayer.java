@@ -1004,9 +1004,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public CompletableFuture<Void> resize(Dimension newSize) {
-//        System.out.printf("ImageLayer::resize: CALLED on '%s', newSize = %dx%d, thread = %s%n",
-//            getName(), newSize.width, newSize.height, Thread.currentThread().getName());
-
         boolean bigLayer = isBigLayer();
 
         int imgTargetWidth = newSize.width;

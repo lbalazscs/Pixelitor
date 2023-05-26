@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.FlowLayout;
+import java.awt.*;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BoxLayout.X_AXIS;
@@ -38,12 +38,6 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
 
         resetButton = new ResetButton((Resettable) model);
         comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateIcon());
-
-        // workaround for nimbus bug
-//        var origPS = comboBox.getPreferredSize();
-//        comboBox.setPreferredSize(new Dimension(
-//            origPS.width + 3,
-//            origPS.height));
 
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));

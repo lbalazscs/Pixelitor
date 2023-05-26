@@ -505,21 +505,6 @@ public class ImageUtils {
             BLACK,
             ImageUtil.COLOR_SELECTION_QUALITY + ImageUtil.TRANSPARENCY_BITMASK);
 
-// the old solution was based on http://gman.eichberger.de/2007/07/transparent-gifs-in-java.html
-//        var dest = new BufferedImage(
-//            src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
-//
-//        Graphics2D g = dest.createGraphics();
-//        // this hideous color will be transparent
-//        Colors.fillWith(new Color(231, 20, 189), g, src.getWidth(), src.getHeight());
-//        g.dispose();
-//
-//        dest = makeIndexedTransparent(dest, 0, 0);
-//
-//        g = dest.createGraphics();
-//        g.drawImage(src, 0, 0, null);
-//        g.dispose();
-
         if (flushOld) {
             src.flush();
         }

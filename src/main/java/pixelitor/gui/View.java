@@ -195,6 +195,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         Composition oldComp = comp;
         setComp(newComp);
+        oldComp.dispose();
 
         newComp.createLayerUIs();
 
@@ -205,7 +206,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         newComp.getCompositeImage();
 
         newComp.addLayersToUI();
-        oldComp.dispose();
 
         if (isActive()) {
             LayersContainer.showLayersOf(this);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,7 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -35,6 +33,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+
+import static pixelitor.Views.thumbSize;
 
 /**
  * The canvas represents the size of the composition.
@@ -53,6 +53,8 @@ public class Canvas implements Serializable, Debuggable {
     // size in component space
     private transient int coWidth;
     private transient int coHeight;
+
+    private transient Dimension thumbDimension;
 
     @Serial
     private static final long serialVersionUID = -1459254568616232274L;
@@ -80,16 +82,15 @@ public class Canvas implements Serializable, Debuggable {
         width = newWidth;
         height = newHeight;
 
-        // also update the component space values
-        recalcCoSize(view, notify);
-
+        thumbDimension = null; // invalidate cache
+        recalcCoSize(view, notify); // update the component space values
         activeCanvasSizeChanged(this);
     }
 
     /**
      * Recalculates the component-space size
      */
-    public void recalcCoSize(View view, boolean notify) {
+    public void recalcCoSize(View view, boolean updateView) {
         double viewScale = view.getScaling();
 
         int oldCoWidth = coWidth;
@@ -98,7 +99,7 @@ public class Canvas implements Serializable, Debuggable {
         coWidth = (int) (viewScale * width);
         coHeight = (int) (viewScale * height);
 
-        if (notify && (coWidth != oldCoWidth || coHeight != oldCoHeight)) {
+        if (updateView && (coWidth != oldCoWidth || coHeight != oldCoHeight)) {
             view.canvasCoSizeChanged();
         }
     }
@@ -125,7 +126,7 @@ public class Canvas implements Serializable, Debuggable {
      */
     public Rectangle getCoBounds(View view) {
         return new Rectangle(
-            view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
+                view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
     }
 
     /**
@@ -236,6 +237,14 @@ public class Canvas implements Serializable, Debuggable {
 
     public PPoint getRandomPoint(View view) {
         return PPoint.lazyFromIm(Rnd.nextInt(width), Rnd.nextInt(height), view);
+    }
+
+    public Dimension getThumbSize() {
+        if (thumbDimension == null) {
+            thumbDimension = ImageUtils.calcThumbDimensions(
+                    width, height, thumbSize, true);
+        }
+        return thumbDimension;
     }
 
     @Override

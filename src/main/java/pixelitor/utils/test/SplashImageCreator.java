@@ -43,7 +43,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
 
-import java.awt.Font;
+import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.util.HashMap;
@@ -63,8 +63,6 @@ import static pixelitor.utils.Threads.*;
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
-    //    private static final String SPLASH_SMALL_FONT = "Irish Grover";
-//    private static final String SPLASH_MAIN_FONT = "Irish Grover";
     private static final String SPLASH_SMALL_FONT = "Mochiy Pop One";
     private static final String SPLASH_MAIN_FONT = "Mochiy Pop One";
     private static final int MAIN_FONT_SIZE = 62;

@@ -30,15 +30,12 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Views.thumbSize;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
@@ -111,9 +108,7 @@ public class ColorFillLayer extends Layer {
 
     @Override
     public BufferedImage createIconThumbnail() {
-        Canvas canvas = comp.getCanvas();
-        Dimension thumbDim = ImageUtils.calcThumbDimensions(
-            canvas.getWidth(), canvas.getHeight(), thumbSize, true);
+        Dimension thumbDim = comp.getCanvas().getThumbSize();
         BufferedImage thumb = ImageUtils.createSysCompatibleImage(thumbDim.width, thumbDim.height);
         Graphics2D g2 = thumb.createGraphics();
         Colors.fillWith(color, g2, thumbDim.width, thumbDim.height);

@@ -50,7 +50,6 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.OpenViewEnabledAction;
 import pixelitor.gui.utils.PAction;
 import pixelitor.gui.utils.RestrictedLayerAction;
-import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -505,7 +504,7 @@ public class MenuBar extends JMenuBar {
             Composition::replaceWithSmartObject));
 
         sub.add(new OpenViewEnabledAction("Convert Visible to Smart Object",
-            Composition::convertVisibleLayersToSmartObject));
+                Composition::convertVisibleLayersToSmartObject), CTRL_SHIFT_L);
         sub.addSeparator();
 
         var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");

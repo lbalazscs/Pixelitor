@@ -404,11 +404,6 @@ public abstract class Layer implements Serializable, Debuggable {
         return this;
     }
 
-//    public void activate(boolean addToHistory) {
-//        assert isTopLevel();
-//        comp.setActiveLayer(this, addToHistory, null);
-//    }
-
     public void activate() {
         comp.setActiveLayer(this);
     }
@@ -1034,23 +1029,6 @@ public abstract class Layer implements Serializable, Debuggable {
     public boolean isGroup() {
         return this instanceof LayerGroup;
     }
-
-//    public Drawable getActiveDrawable() {
-//        if (isMaskEditing()) {
-//            return getMask();
-//        }
-//        if (this instanceof Drawable) {
-//            return (Drawable) this;
-//        }
-//        return null;
-//    }
-
-//    public LayerMask getActiveMask() {
-//        if (isMaskEditing()) {
-//            return getMask();
-//        }
-//        return null;
-//    }
 
     public boolean contains(Layer layer) {
         return layer == this;

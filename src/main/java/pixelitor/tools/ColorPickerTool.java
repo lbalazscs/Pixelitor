@@ -184,11 +184,6 @@ public class ColorPickerTool extends Tool {
             g.setColor(new Color(0x68_00_00_00, true));
             g.fill(glassPath);
 
-//            if (dark) {
-//                g.setPaint(Themes.LIGHT_ICON_COLOR);
-//            } else {
-//                g.setPaint(new Color(0xA5_00_00_00, true));
-//            }
             g.setColor(color);
 
             g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
@@ -207,11 +202,6 @@ public class ColorPickerTool extends Tool {
 
             g.setColor(color);
 
-//            if (dark) {
-//                g.setColor(Themes.LIGHTER_ICON_COLOR);
-//            } else {
-//                g.setColor(Color.BLACK);
-//            }
             g.fill(handlePath);
             g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(handlePath);

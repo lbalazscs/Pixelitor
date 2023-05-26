@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 import static java.awt.Color.BLACK;
@@ -221,11 +220,7 @@ public class FgBgColorSelector extends JLayeredPane {
                             String name, ActionListener action) {
         button.setSize(size, size);
         button.addActionListener(action);
-//        button.setContentAreaFilled(false);
-//        button.setOpaque(true);
         button.setBorderPainted(true);
-//        button.setDefaultCapable(false);
-
         button.setToolTipText(toolTip);
         button.setName(name);
         add(button, Integer.valueOf(layer));

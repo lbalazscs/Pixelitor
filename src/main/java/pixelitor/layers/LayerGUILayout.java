@@ -22,10 +22,7 @@ import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.LayoutManager;
+import java.awt.*;
 
 /**
  * The layout manager for a {@link LayerGUI}
@@ -37,8 +34,6 @@ public class LayerGUILayout implements LayoutManager {
     private JLabel layerLabel;
     private JLabel maskLabel;
     private JPanel childrenPanel;
-//    private JLabel sfLabel;
-//    private JCheckBox sfCheckBox;
 
     private final boolean layerIconShowsThumbnail;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 
-import java.awt.FileDialog;
+import java.awt.*;
 import java.io.File;
 
 import static pixelitor.utils.Threads.calledOnEDT;
@@ -48,18 +48,6 @@ public class AWTFilePicker implements FilePicker {
     @Override
     public File showSaveDialog(FileChooserInfo chooserInfo) {
         initSavePicker();
-//        if (suggestedFileName != null) {
-//            saveDialog.setFile(suggestedFileName);
-//        } else if (comp != null) { // null for svg export
-//            File file = comp.getFile();
-//            if (file != null) {
-//                saveDialog.setDirectory(file.getParent());
-//                saveDialog.setFile(file.getName());
-//            } else {
-//                String name = comp.getName();
-//                saveDialog.setFile(name + ".png");
-//            }
-//        }
 
         if (chooserInfo.singleFormat()) {
             saveDialog.setFilenameFilter((dir, name) ->

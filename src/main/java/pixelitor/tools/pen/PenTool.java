@@ -113,10 +113,6 @@ public class PenTool extends Tool {
             "Convert the path to a selection");
         settingsPanel.addButton(exportSVGAction, "exportSVGButton",
             "Export the path to an SVG file");
-
-//        settingsPanel.addButton(traceAction, "traceAction",
-//                "Trace the path with a stroke or with a tool");
-
         settingsPanel.addButton(traceWithBrushAction, "traceWithBrush",
             "Stroke the path using the current settings of the Brush Tool");
         settingsPanel.addButton(traceWithEraserAction, "traceWithEraser",

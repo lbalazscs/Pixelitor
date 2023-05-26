@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,10 +78,7 @@ public class ImageTransformer implements ImageSource, Serializable {
     }
 
     public void concatenate(AffineTransform newScaling, int targetWidth, int targetHeight) {
-//        debug(transform, "transform before");
-//        debug(newScaling, "newScaling");
         transform.concatenate(newScaling);
-//        debug(transform, "transform after");
         setTargetSize(targetWidth, targetHeight);
         invalidateCache();
     }

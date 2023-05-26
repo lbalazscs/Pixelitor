@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,7 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
-import java.awt.BasicStroke;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.*;
 
 /**
@@ -393,16 +391,6 @@ public enum ShapeType {
     }
 
     public abstract Shape createShape(double x, double y, double width, double height);
-
-//    /**
-//     * Return the directional shape that would result
-//     * from the given drag if it was horizontal
-//     */
-//    public Shape createHorizontalShape(Drag drag, ShapeTypeSettings settings) {
-//        // overridden in directional types
-//        assert !directional;
-//        throw new UnsupportedOperationException("not directional");
-//    }
 
     public DragDisplayType getDragDisplayType() {
         // overridden if necessary
