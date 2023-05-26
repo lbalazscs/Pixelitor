@@ -251,12 +251,15 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
+        for (Layer layer : layers) {
+            layer.forEachNestedLayer(action, includeMasks);
+        }
+
+        // run on itself only after the childern, this is useful
+        // if the action is some sort of initialization
         action.accept(this);
         if (includeMasks && hasMask()) {
             action.accept(getMask());
-        }
-        for (Layer layer : layers) {
-            layer.forEachNestedLayer(action, includeMasks);
         }
     }
 

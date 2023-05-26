@@ -1117,12 +1117,6 @@ public class SmartObject extends CompositeLayer {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         BufferedImage visibleImage = getVisibleImage();
-        paintLayerOnGraphicsWOTmpLayer(g, visibleImage, firstVisibleLayer);
-    }
-
-    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
-                                                  BufferedImage visibleImage,
-                                                  boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTx(), getTy(), null);
     }
 
