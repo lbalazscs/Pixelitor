@@ -60,6 +60,8 @@ import static pixelitor.utils.Threads.*;
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
  */
 public class View extends JComponent implements MouseListener, MouseMotionListener, Debuggable {
+    private static final boolean pixelSnapping = true;
+
     private Composition comp;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
@@ -703,11 +705,19 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public double componentXToImageSpace(double coX) {
-        return ((coX - canvasStartX) / scaling);
+        if (pixelSnapping) {
+            return (int) (((coX - canvasStartX) / scaling) + 0.5);
+        } else {
+            return ((coX - canvasStartX) / scaling);
+        }
     }
 
     public double componentYToImageSpace(double coY) {
-        return ((coY - canvasStartY) / scaling);
+        if (pixelSnapping) {
+            return (int) (((coY - canvasStartY) / scaling) + 0.5);
+        } else {
+            return ((coY - canvasStartY) / scaling);
+        }
     }
 
     public double imageXToComponentSpace(double imX) {
@@ -747,12 +757,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public Rectangle2D componentToImageSpace(Rectangle2D co) {
-        return new Rectangle2D.Double(
-            componentXToImageSpace(co.getX()),
-            componentYToImageSpace(co.getY()),
-            co.getWidth() / scaling,
-            co.getHeight() / scaling
-        );
+        double imX = componentXToImageSpace(co.getX());
+        double imY = componentYToImageSpace(co.getY());
+        double imWidth, imHeight;
+        if (pixelSnapping) {
+            imWidth = (int) ((co.getWidth() / scaling) + 0.5);
+            imHeight = (int) ((co.getHeight() / scaling) + 0.5);
+        } else {
+            imWidth = co.getWidth() / scaling;
+            imHeight = co.getHeight() / scaling;
+        }
+        return new Rectangle2D.Double(imX, imY, imWidth, imHeight);
     }
 
     public Rectangle imageToComponentSpace(Rectangle2D im) {

@@ -270,7 +270,12 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     // called during the initial drag, when there is no transform box yet
     public void updateFromDrag(Drag drag, boolean altDown, boolean shiftDown) {
         assert !Tools.SHAPES.hasBox();
-        assert !drag.isImClick();
+
+        if (drag.isImClick()) {
+            // can happen with pixel snapping
+            return;
+        }
+//        assert !drag.isImClick();
 
         drag.setStartFromCenter(altDown);
         if (shapeType.isDirectional()) {
