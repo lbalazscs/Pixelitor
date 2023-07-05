@@ -373,9 +373,9 @@ public class Selection implements Debuggable {
     @Override
     public String toString() {
         return "Selection{" +
-               "composition=" + view.getComp().getName() +
-               ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
-               ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
-               '}';
+            "composition=" + view.getComp().getName() +
+            ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
+            ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
+            '}';
     }
 }

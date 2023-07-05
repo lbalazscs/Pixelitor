@@ -112,7 +112,7 @@ public abstract class DrawableAction extends OpenViewEnabledAction.Checked {
             }
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
-                    name + " can't be used on adjustment layers.");
+                name + " can't be used on adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
             assert group.isPassThrough(); // isolated groups can be rasterized
             Messages.showUnrasterizableLayerGroupError(group, name);

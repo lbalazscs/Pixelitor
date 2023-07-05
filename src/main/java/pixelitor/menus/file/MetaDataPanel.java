@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -192,7 +192,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         if (!file.exists()) {
             String msg = format(
                 "<html>The metadata for <b>%s</b> cannot be shown because the file<br>" +
-                "<b>%s</b><br>" +
+                    "<b>%s</b><br>" +
                     "doesn't exist anymore.",
                 comp.getName(), file.getAbsolutePath());
             Messages.showError("File not found", msg, comp.getDialogParent());

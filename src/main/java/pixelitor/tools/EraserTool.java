@@ -20,7 +20,8 @@ package pixelitor.tools;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.utils.Cursors;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 
 import static java.awt.AlphaComposite.DST_OUT;

@@ -321,7 +321,7 @@ public class IO {
         if (strokeParam != null) {
             exportFilled = switch (strokeParam.getStrokeType()) {
                 case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV -> true;
-                default -> false;
+                case BASIC, WOBBLE, CHARCOAL, BRISTLE, OUTLINE -> false;
             };
         }
         if (exportFilled) {
@@ -338,26 +338,19 @@ public class IO {
             };
         }
 
-        String svg;
-        if (exportFilled) {
-            svg = """
-                %s
-                  <path d="%s" fill="black" stroke="none" fill-rule="%s"/>
-                </svg>
-                """.formatted(createSVGElement(), svgPath, svgFillRule);
-        } else {
-            String strokeDescr = "";
-            if (strokeParam != null) {
-                strokeDescr = strokeParam.copyState().toSVGString();
-            }
-            svg = """
-                %s
-                  <path d="%s" fill="none" stroke="black" fill-rule="%s" %s/>
-                </svg>
-                """.formatted(createSVGElement(),
-                svgPath, svgFillRule, strokeDescr);
+        String svgFillAttr = exportFilled ? "black" : "none";
+        String svgStrokeAttr = exportFilled ? "none" : "black";
+        String svgStrokeDescr = "";
+        if (strokeParam != null && !exportFilled) {
+            svgStrokeDescr = strokeParam.copyState().toSVGString();
         }
-        return svg;
+
+        return """
+            %s
+              <path d="%s" fill="%s" stroke="%s" fill-rule="%s" %s/>
+            </svg>
+            """.formatted(createSVGElement(), svgPath,
+            svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeDescr);
     }
 
     public static String createSVGElement() {

@@ -44,8 +44,11 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -84,8 +87,8 @@ public class GradientTool extends DragTool {
     public GradientTool() {
         super("Gradient", 'G',
             "<b>click</b> and <b>drag</b> to draw a gradient, " +
-            "<b>Shift-drag</b> to constrain the direction. " +
-            "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
+                "<b>Shift-drag</b> to constrain the direction. " +
+                "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
             Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
         state = NO_INTERACTION;

@@ -30,7 +30,10 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.plaf.ButtonUI;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -238,7 +241,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (popup != null) {
             if (GUIMode.isDevelopment()) {
                 popup.add(new PAction("Internal State...", () ->
-                        Debug.showTree(layer, layer.getTypeString())));
+                    Debug.showTree(layer, layer.getTypeString())));
             }
 
             popup.show(this, e.getX(), e.getY());
@@ -487,11 +490,11 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel.setToolTipText("<html>" +
-                                     "<b>Click</b> activates mask editing,<br>" +
-                                     "<b>Shift-click</b> disables/enables the mask,<br>" +
-                                     "<b>Alt-click</b> toggles mask/layer view,<br>" +
-                                     "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
-                                     "<b>Right-click</b> shows more options");
+            "<b>Click</b> activates mask editing,<br>" +
+            "<b>Shift-click</b> disables/enables the mask,<br>" +
+            "<b>Alt-click</b> toggles mask/layer view,<br>" +
+            "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
+            "<b>Right-click</b> shows more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         maskIconLabel.setName("maskIcon");
@@ -716,7 +719,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             LayerUI holderUI = ((CompositeLayer) layer.getHolder()).getUI();
             if (holderUI != parentUI) {
                 throw new AssertionError("mismatched UIs: holderUI = " + holderUI.getLayerName()
-                                         + ", parentUI = " + parentUI.getLayerName());
+                    + ", parentUI = " + parentUI.getLayerName());
             }
         }
         return true;
@@ -748,9 +751,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     @Override
     public String toString() {
         return "LayerGUI{" +
-               "name='" + getLayerName() + '\'' +
-               ", id='" + getId() + '\'' +
-               ", has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
-               '}';
+            "name='" + getLayerName() + '\'' +
+            ", id='" + getId() + '\'' +
+            ", has mask icon: " + (hasMaskIcon() ? "YES" : "NO") +
+            '}';
     }
 }

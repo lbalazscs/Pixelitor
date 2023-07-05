@@ -43,7 +43,7 @@ public class AddLayerMaskAction extends NamedAction
     private AddLayerMaskAction() {
         super("Add Layer Mask", Icons.loadThemed("add_layer_mask.png", ThemedImageIcon.GREEN));
         setToolTip("<html>Adds a layer mask to the active layer. " +
-                   "<br><b>Ctrl-click</b> to add an inverted layer mask.");
+            "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         Views.addActivationListener(this);
         Layers.addHolderListener(this);

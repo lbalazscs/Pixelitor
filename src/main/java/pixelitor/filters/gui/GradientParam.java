@@ -24,7 +24,9 @@ import pixelitor.colors.Colors;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.io.Serial;
 import java.util.List;
@@ -101,15 +103,6 @@ public class GradientParam extends AbstractFilterParam {
                 gui.updateResetButtonIcon();
             }
             adjustmentListener.paramAdjusted();
-        }
-    }
-
-    private void debugParents() {
-        Container parent = gradientSlider.getParent();
-        while (parent != null) {
-            System.out.println("GradientParam::debugParents: parent = " + (parent == null ? "null" :
-                (parent + ", class = " + parent.getClass().getName())));
-            parent = parent.getParent();
         }
     }
 

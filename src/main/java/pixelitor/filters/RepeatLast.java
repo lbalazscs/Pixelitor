@@ -48,7 +48,7 @@ public class RepeatLast extends DrawableAction {
         // an action (deserialized smart filter). Perhaps an action could be searched
         // by the filter name.
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
-                showDialog, false);
+            showDialog, false);
         this.showDialog = showDialog;
         setEnabled(false);
     }

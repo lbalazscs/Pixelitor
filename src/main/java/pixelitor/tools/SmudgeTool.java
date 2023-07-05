@@ -30,7 +30,8 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -48,7 +49,7 @@ public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
         super("Smudge", 'K',
             "<b>click and drag</b> to smudge. " +
-            "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
+                "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
             Cursors.HAND, false);
 
         drawDestination = DrawDestination.DIRECT;

@@ -148,8 +148,8 @@ public enum MaskViewMode {
             boolean hasMask = layer.hasMask();
             if (!hasMask) {
                 throw new AssertionError("layer " + layer.getName()
-                        + " has no mask, view mode = " + this
-                        + ", mask icon = " + layer.getUI().hasMaskIcon());
+                    + " has no mask, view mode = " + this
+                    + ", mask icon = " + layer.getUI().hasMaskIcon());
             }
             return hasMask;
         }

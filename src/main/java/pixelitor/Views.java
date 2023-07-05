@@ -34,7 +34,8 @@ import pixelitor.utils.*;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -116,7 +117,7 @@ public class Views {
     private static void makeSureAViewIsActive() {
         if (!views.isEmpty()) {
             boolean activeFound = views.stream()
-                    .anyMatch(view -> view == activeView);
+                .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
                 activate(views.get(0));
@@ -552,7 +553,7 @@ public class Views {
         activate(view);
         String title = "File already opened";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
-                     + "</b> is already opened.";
+            + "</b> is already opened.";
         String[] options = {"Open Again", GUIText.CANCEL};
         boolean again = Dialogs.showOKCancelDialog(view.getDialogParent(),
             msg, title, options, 1, WARNING_MESSAGE);

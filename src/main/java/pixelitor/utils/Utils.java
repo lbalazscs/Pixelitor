@@ -47,6 +47,7 @@ import static java.lang.String.format;
  * Utility class with static methods
  */
 public final class Utils {
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
     private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
     public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];

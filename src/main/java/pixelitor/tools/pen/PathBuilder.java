@@ -26,7 +26,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -367,7 +367,7 @@ public class PathBuilder implements PenToolMode {
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
         if (GUIMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
-                    "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         path.setBuildState(MOVING_TO_NEXT_ANCHOR);
@@ -379,7 +379,7 @@ public class PathBuilder implements PenToolMode {
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
         if (GUIMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
-                    "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         BuildState dragState = NO_INTERACTION;

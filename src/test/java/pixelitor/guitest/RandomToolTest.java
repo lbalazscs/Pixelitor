@@ -237,7 +237,7 @@ public class RandomToolTest {
         } catch (TimeoutException e) {
             stopped = true;
             System.err.printf("%s: task unexpectedly timed out, exiting.%n" +
-                              "Active comp is: %s%n",
+                    "Active comp is: %s%n",
                 AppRunner.getCurrentTimeHMS(),
                 EDT.active(Composition::toString));
             exitInNewThread();
@@ -316,7 +316,7 @@ public class RandomToolTest {
             case "Selection Crop Type" -> optionPane.buttonWithText("Crop and Hide").click();
             case "Existing Selection" -> optionPane.buttonWithText("Replace").click();
             default -> System.out.println("RandomToolTest::closeRareDialog: tool = "
-                                          + tool + ", title = " + title);
+                + tool + ", title = " + title);
         }
         Utils.sleep(200, MILLISECONDS);
         EDT.assertNumModalDialogsIs(0);

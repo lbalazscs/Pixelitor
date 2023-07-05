@@ -38,7 +38,9 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -85,7 +87,7 @@ public class CloneTool extends BlendingModeBrushTool {
     protected CloneTool() {
         super("Clone Stamp", 'S',
             "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
-            "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
+                "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
             Cursors.CROSSHAIR, false);
     }
 
@@ -175,10 +177,10 @@ public class CloneTool extends BlendingModeBrushTool {
         if (showUndefinedSourceDialog) {
             showUndefinedSourceDialog = false;
             String msg = "<html>Define a source point first with " +
-                         "<b>Alt-Click</b> or with <b>right-click</b>.";
+                "<b>Alt-Click</b> or with <b>right-click</b>.";
             if (JVM.isLinux) {
                 msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
-                       "<br><b>Alt-Click</b> for window dragging in the window manager)";
+                    "<br><b>Alt-Click</b> for window dragging in the window manager)";
             }
             Messages.showError("No source point", msg, e.getView().getDialogParent());
         }

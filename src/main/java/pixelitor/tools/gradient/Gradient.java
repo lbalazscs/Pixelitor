@@ -84,7 +84,7 @@ public class Gradient implements Serializable, Debuggable {
         colors = initColors(colorType, reverted);
     }
 
-    public Gradient(Gradient other) {
+    private Gradient(Gradient other) {
         this.drag = other.drag;
         this.type = other.type;
         this.cycleMethod = other.cycleMethod;
@@ -175,8 +175,8 @@ public class Gradient implements Serializable, Debuggable {
      */
     public boolean fullyCovers() {
         return colorType != GradientColorType.FG_TO_TRANSPARENT
-               && blendingMode == BlendingMode.NORMAL
-               && opacity == 1.0f;
+            && blendingMode == BlendingMode.NORMAL
+            && opacity == 1.0f;
     }
 
     public GradientType getType() {
@@ -247,10 +247,10 @@ public class Gradient implements Serializable, Debuggable {
         return colorType.hasTransparency() && isCustom();
     }
 
-    public boolean isCustom() {
+    private boolean isCustom() {
         return switch (type) {
             case LINEAR, RADIAL -> false;
-            default -> true;
+            case ANGLE, SPIRAL_CW, SPIRAL_CCW, DIAMOND -> true;
         };
     }
 

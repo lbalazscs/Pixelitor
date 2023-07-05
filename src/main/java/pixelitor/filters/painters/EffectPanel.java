@@ -173,8 +173,8 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     @Override
     public boolean hasDefault() {
         return enabledCB.isSelected() == defaultEnabled
-               && Objects.equals(color, defaultColor)
-               && opacityRange.hasDefault();
+            && Objects.equals(color, defaultColor)
+            && opacityRange.hasDefault();
     }
 
     @Override

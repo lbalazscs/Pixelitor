@@ -57,18 +57,18 @@ public class AboutDialog {
     private static JPanel createCreditsPanel() {
         JPanel p = new JPanel();
         String text = "<html>Pixelitor was written by <b>László Balázs-Csíki</b>." +
-                "<br><br><b>Anirudh Sharma</b> and <b>Łukasz Kurzaj</b> contributed many" +
-                "<br>improvements, see the release notes." +
-                "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
-                "<br><br>Pixelitor includes <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
-                "<li>many components by <b>Jeremy Wood</b>" +
-                "<li>the fast math library by <b>Jeff Hain</b>" +
-                "<li>the TwelveMonkeys library by <b>Harald Kuhr</b>" +
-                "<li>the metadata-extractor library by <b>Drew Noakes</b>" +
-                "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
-                "<li>the GIF decoder by <b>Dhyan Blum</b>" +
-                      "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
-                      "<li>the SwingX library";
+            "<br><br><b>Anirudh Sharma</b> and <b>Łukasz Kurzaj</b> contributed many" +
+            "<br>improvements, see the release notes." +
+            "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
+            "<br><br>Pixelitor includes <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
+            "<li>many components by <b>Jeremy Wood</b>" +
+            "<li>the fast math library by <b>Jeff Hain</b>" +
+            "<li>the TwelveMonkeys library by <b>Harald Kuhr</b>" +
+            "<li>the metadata-extractor library by <b>Drew Noakes</b>" +
+            "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
+            "<li>the GIF decoder by <b>Dhyan Blum</b>" +
+            "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
+            "<li>the SwingX library";
         p.add(new JLabel(text));
 
         return p;
@@ -83,7 +83,7 @@ public class AboutDialog {
         addLabel(p, "Version " + Pixelitor.VERSION_NUMBER);
         p.add(Box.createRigidArea(new Dimension(10, 20)));
         addLabel(p, "<html><center> Copyright © 2009-2023 László Balázs-Csíki " +
-                "<br>and Contributors<br><br>");
+            "<br>and Contributors<br><br>");
         addLabel(p, "lbalazscs@gmail.com");
 
         p.add(createLinkButton(p));

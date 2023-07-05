@@ -123,7 +123,7 @@ public class BlendingModePanel extends JPanel {
 
     public boolean isNormalAndOpaque() {
         return getBlendingMode() == BlendingMode.NORMAL
-               && getOpacity() > CRITICAL_OPACITY;
+            && getOpacity() > CRITICAL_OPACITY;
     }
 
     public void saveStateTo(UserPreset preset) {

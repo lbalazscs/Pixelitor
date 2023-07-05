@@ -23,7 +23,8 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
 import pixelitor.utils.PoissonDiskSampling;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -123,7 +124,7 @@ public class VoronoiFilter extends PointFilter {
             // there wasn't a point in the cell or in its neighbours
             if (GUIMode.isDevelopment()) {
                 throw new IllegalStateException(String.format(
-                        "x = %d, y = %d", x, y));
+                    "x = %d, y = %d", x, y));
             }
             return 0xFF_FF_FF_FF;
         }

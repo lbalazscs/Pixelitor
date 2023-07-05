@@ -322,7 +322,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         assert image.getRaster().getBounds().contains(selBounds) :
             "image bounds = " + image.getRaster().getBounds()
-            + ", selection bounds = " + selBounds;
+                + ", selection bounds = " + selBounds;
 
         return image.getSubimage(
             selBounds.x, selBounds.y,
@@ -620,7 +620,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // with settings without its dialog
             if (context != REPEAT_LAST && context != BATCH_AUTOMATE) {
                 throw new IllegalStateException(filterName
-                                                + " returned the original image, context = " + context);
+                    + " returned the original image, context = " + context);
             } else {
                 return;
             }
@@ -851,8 +851,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
             assert allowGrowing;
 
             boolean imageCoversNewCanvas = cropX >= 0 && cropY >= 0
-                                           && cropX + cropWidth <= image.getWidth()
-                                           && cropY + cropHeight <= image.getHeight();
+                && cropX + cropWidth <= image.getWidth()
+                && cropY + cropHeight <= image.getHeight();
             if (imageCoversNewCanvas) {
                 // no need to change the image, just set the translation
                 super.crop(cropRect, false, allowGrowing);
@@ -1031,11 +1031,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
                 ", tx = " + getTx() + ", ty = " + getTy()
-                + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
-                + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
-                + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
-                + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
-                + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
+                    + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
+                    + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
+                    + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
+                    + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
+                    + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
         }
 
         int finalTx = newTx;

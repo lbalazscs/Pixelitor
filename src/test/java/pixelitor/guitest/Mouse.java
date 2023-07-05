@@ -140,12 +140,12 @@ public class Mouse {
 
     private int createRandomScreenXWithinCanvas() {
         return canvasBounds.x + CANVAS_SAFETY_DIST
-               + random.nextInt(canvasBounds.width - CANVAS_SAFETY_DIST * 2);
+            + random.nextInt(canvasBounds.width - CANVAS_SAFETY_DIST * 2);
     }
 
     private int createRandomScreenYWithinCanvas() {
         return canvasBounds.y + CANVAS_SAFETY_DIST
-               + random.nextInt(canvasBounds.height - CANVAS_SAFETY_DIST * 2);
+            + random.nextInt(canvasBounds.height - CANVAS_SAFETY_DIST * 2);
     }
 
     void shiftMoveClickRandom() {

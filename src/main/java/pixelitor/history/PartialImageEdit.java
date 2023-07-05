@@ -158,7 +158,7 @@ public class PartialImageEdit extends FadeableEdit {
         int numDataElements = raster.getNumDataElements();
 
         String msg = format("className = %s, rasterBounds = %s, dataType = %d, " +
-                            "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
+                "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
             className, rasterBounds, dataType,
             typeAsString, numBanks, numBands, numDataElements);
 

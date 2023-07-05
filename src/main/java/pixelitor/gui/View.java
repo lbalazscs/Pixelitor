@@ -121,8 +121,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         if (!file.exists()) {
             String msg = format(
                 "<html>The image <b>%s</b> can't be reloaded because the file" +
-                "<br><b>%s</b>" +
-                "<br>doesn't exist anymore.",
+                    "<br><b>%s</b>" +
+                    "<br>doesn't exist anymore.",
                 comp.getName(), path);
             Messages.showError("File not found", msg, getDialogParent());
             return CompletableFuture.completedFuture(null);

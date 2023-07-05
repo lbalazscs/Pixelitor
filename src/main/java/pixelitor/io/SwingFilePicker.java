@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,8 +132,8 @@ public class SwingFilePicker implements FilePicker {
                 if (!f.exists()) {
                     Dialogs.showErrorDialog(this, "File not found",
                         "<html>The file <b>" + f.getAbsolutePath()
-                        + " </b> doesn't exist. " +
-                        "<br>Check the file name and try again."
+                            + " </b> doesn't exist. " +
+                            "<br>Check the file name and try again."
                     );
                     return;
                 }

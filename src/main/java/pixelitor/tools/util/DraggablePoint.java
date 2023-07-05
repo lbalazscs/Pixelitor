@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -225,9 +225,9 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean handleContains(double x, double y) {
         return x > this.x - HANDLE_RADIUS
-               && x < this.x + HANDLE_RADIUS
-               && y > this.y - HANDLE_RADIUS
-               && y < this.y + HANDLE_RADIUS;
+            && x < this.x + HANDLE_RADIUS
+            && y > this.y - HANDLE_RADIUS
+            && y < this.y + HANDLE_RADIUS;
     }
 
     public void paintHandle(Graphics2D g) {
@@ -344,7 +344,7 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean sameImPositionAs(DraggablePoint that, double epsilon) {
         return Math.abs(imX - that.imX) < epsilon
-               && Math.abs(imY - that.imY) < epsilon;
+            && Math.abs(imY - that.imY) < epsilon;
     }
 
     public void copyPositionFrom(DraggablePoint that) {

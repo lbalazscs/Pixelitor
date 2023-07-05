@@ -128,8 +128,8 @@ public class ShapesTool extends DragTool {
     public ShapesTool() {
         super("Shapes", 'U',
             "<b>drag</b> to draw a shape. " +
-            "<b>Alt</b> starts from the center, <b>Shift</b> constrains. " +
-            "Hold <b>SPACE</b> down while drawing to move the shape. ",
+                "<b>Alt</b> starts from the center, <b>Shift</b> constrains. " +
+                "Hold <b>SPACE</b> down while drawing to move the shape. ",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
@@ -264,18 +264,6 @@ public class ShapesTool extends DragTool {
             .notModal();
         strokeParam.configureSettingsDialog(builder);
         return builder.build();
-    }
-
-    public boolean hasStroke() {
-        return getSelectedStrokePaint() != NONE;
-    }
-
-    public boolean hasFill() {
-        return getSelectedFillPaint() != NONE;
-    }
-
-    public StrokeParam getStrokeParam() {
-        return strokeParam;
     }
 
     private void setGUIDefaultsFrom(StyledShape styledShape) {
@@ -476,8 +464,8 @@ public class ShapesTool extends DragTool {
         state = newState;
 
         assert state.isOK(this) : "state = " + state
-                                  + ", has styledShape = " + hasStyledShape()
-                                  + ", hasBox = " + hasBox();
+            + ", has styledShape = " + hasStyledShape()
+            + ", hasBox = " + hasBox();
 
         convertToSelectionAction.setEnabled(newState == TRANSFORM);
     }
@@ -799,7 +787,7 @@ public class ShapesTool extends DragTool {
     public double calcThickness() {
         double thickness = 0;
         double extraStrokeThickness = 0;
-        if (hasStroke()) {
+        if (getSelectedStrokePaint() != NONE) {
             thickness = strokeParam.getStrokeWidth();
 
             StrokeType strokeType = strokeParam.getStrokeType();
@@ -951,9 +939,9 @@ public class ShapesTool extends DragTool {
     @Override
     public String getStateInfo() {
         return getSelectedType()
-               + ", fp=" + getSelectedFillPaint()
-               + ", sp=" + getSelectedStrokePaint()
-               + ", state=" + state;
+            + ", fp=" + getSelectedFillPaint()
+            + ", sp=" + getSelectedStrokePaint()
+            + ", state=" + state;
     }
 
     @Override

@@ -25,11 +25,12 @@ import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.*;
+
+import static pixelitor.utils.Utils.FILE_SEPARATOR;
 
 /**
  * Represents a user-created preset.
@@ -43,16 +44,15 @@ public class UserPreset implements Preset {
     private boolean loaded; // whether the preset is in the memory
     private final Map<String, String> content = new LinkedHashMap<>();
 
-    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
     public static final String PRESETS_DIR;
 
     static {
         if (JVM.isWindows) {
             PRESETS_DIR = System.getenv("APPDATA") +
-                          FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
+                FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
         } else {
             PRESETS_DIR = System.getProperty("user.home") +
-                          FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
+                FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
         }
     }
 
@@ -73,7 +73,7 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * Used then the existence of a preset file is detected
+     * Used when the existence of a preset file is detected
      */
     public UserPreset(File file, String presetDirName) {
         this.name = FileUtils.stripExtension(file.getName());
@@ -97,7 +97,6 @@ public class UserPreset implements Preset {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
         }
-//        assert value != null;
         return value;
     }
 

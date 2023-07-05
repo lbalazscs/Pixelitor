@@ -85,7 +85,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
             // adjustment layers are Filterable, so this must be
             // checked first to prevent running unrelated filters on them.
             Dialogs.showErrorDialog("Adjustment Layer",
-                    name + " can't be used on adjustment layers.");
+                name + " can't be used on adjustment layers.");
         } else if (layer instanceof Filterable filterable) {
             processFilterable(filterable);
         } else if (layer instanceof SmartObject so) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -703,7 +703,7 @@ public class Drag implements Serializable {
             // display it so that it has no sudden jumps
             x = coEndX - displayBgWidth / 2.0
                 + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                   * coDx / displayBgWidth);
+                * coDx / displayBgWidth);
         }
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
         if (xDistIsSmall) {
@@ -723,7 +723,7 @@ public class Drag implements Serializable {
             // display it so that it has no sudden jumps
             y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
                 + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                   * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
+                * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
         }
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());

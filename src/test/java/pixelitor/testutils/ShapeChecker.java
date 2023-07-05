@@ -46,39 +46,38 @@ public class ShapeChecker {
         }
     }
 
-    public void assertNumMoveTosWas(int expected) {
+    public void assertNumMoveTosIs(int expected) {
         if (numMoveTos != expected) {
             throw new AssertionError("numMoveTos = " + numMoveTos
-                                     + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
-    public void assertNumLineTosWas(int expected) {
+    public void assertNumLineTosIs(int expected) {
         if (numLineTos != expected) {
             throw new AssertionError("numLineTos = " + numLineTos
-                                     + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
-    public void assertNumQuadTosWas(int expected) {
+    public void assertNumQuadTosIs(int expected) {
         if (numQuadTos != expected) {
             throw new AssertionError("numQuadTos = " + numQuadTos
-                                     + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
-    public void assertNumCubicTosWas(int expected) {
+    public void assertNumCubicTosIs(int expected) {
         if (numCubicTos != expected) {
             throw new AssertionError("numCubicTos = " + numCubicTos
-                                     + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
-    public void assertNumClosesWas(int expected) {
+    public void assertNumClosesIs(int expected) {
         if (numCloses != expected) {
             throw new AssertionError("numCloses = " + numCloses
-                                     + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
-
 }

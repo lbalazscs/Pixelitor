@@ -26,7 +26,9 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Path2D;
 
 import static pixelitor.colors.FgBgColors.getBGColor;
@@ -42,8 +44,8 @@ public class BrushTool extends BlendingModeBrushTool {
     public BrushTool() {
         super(NAME, 'B',
             "<b>click</b> or <b>drag</b> to draw with the current brush, " +
-            "<b>Shift-click</b> to draw lines, " +
-            "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
+                "<b>Shift-click</b> to draw lines, " +
+                "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
             Cursors.CROSSHAIR, true
         );
     }

@@ -63,7 +63,7 @@ public final class GUIUtils {
     }
 
     public static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
-                                                       && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
+        && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
     private static final int BUSY_CURSOR_DELAY = 300; // in milliseconds
 
@@ -339,9 +339,9 @@ public final class GUIUtils {
         return new PAction("Print...", () -> {
             if (comp.isDirty()) {
                 String msg = "<html>The file <i>" + file.getName() +
-                             "</i> contains unsaved changes.<br>" +
-                             "Only the saved changes can be printed.<br>" +
-                             "Do you want to save your changes now?";
+                    "</i> contains unsaved changes.<br>" +
+                    "Only the saved changes can be printed.<br>" +
+                    "Do you want to save your changes now?";
 
                 String[] options = {"Save and Print", GUIText.CANCEL};
                 boolean saveAndPrint = Dialogs.showOKCancelDialog(parent, msg,

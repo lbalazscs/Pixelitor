@@ -30,7 +30,7 @@ import pixelitor.utils.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -136,7 +136,7 @@ public class OpenRaster {
 
         String xml = format(Locale.ENGLISH,
             "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
-            "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+                "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
             layer.getName(),
             layer.getVisibilityAsORAString(),
             layer.getBlendingMode().toSVGName(),
@@ -296,8 +296,10 @@ public class OpenRaster {
         int numImageFiles = 0;
         while (fileEntries.hasMoreElements()) {
             ZipEntry entry = fileEntries.nextElement();
-            String name = entry.getName().toLowerCase();
-            if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME) && !name.equals(THUMBNAIL_IMAGE_NAME)) {
+            String name = entry.getName();
+            String nameLC = name.toLowerCase();
+
+            if (nameLC.endsWith("png") && !name.equals(MERGED_IMAGE_NAME) && !name.equals(THUMBNAIL_IMAGE_NAME)) {
                 numImageFiles++;
             }
         }

@@ -28,7 +28,9 @@ import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -45,8 +47,8 @@ public class ZoomTool extends DragTool {
     public ZoomTool() { // Do I need this false in super call?
         super("Zoom", 'Z',
             "<b>click</b> to zoom in, " +
-            "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
-            "<b>Drag</b> to select an area.",
+                "<b>right-click</b> (or <b>Alt-click</b>) to zoom out. " +
+                "<b>Drag</b> to select an area.",
             Cursors.HAND, false);
         spaceDragStartPoint = true;
     }

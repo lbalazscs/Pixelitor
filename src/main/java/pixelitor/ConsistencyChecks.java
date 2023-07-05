@@ -209,8 +209,8 @@ public final class ConsistencyChecks {
         var img = dr.getImage();
 
         String msg = format("canvas width = %d, canvas height = %d, " +
-                            "image width = %d, image height = %d, " +
-                            "tx = %d, ty = %d, class = %s, dr = %s",
+                "image width = %d, image height = %d, " +
+                "tx = %d, ty = %d, class = %s, dr = %s",
             canvas.getWidth(), canvas.getHeight(),
             img.getWidth(), img.getHeight(),
             dr.getTx(), dr.getTy(), dr.getClass().getSimpleName(), dr.getName());
@@ -286,7 +286,7 @@ public final class ConsistencyChecks {
         String msg = checkLayerMask(layer);
         if (msg != null) {
             throw new IllegalStateException(
-                    msg.formatted(layer.getTypeStringLC(), layer.getName()));
+                msg.formatted(layer.getTypeStringLC(), layer.getName()));
         }
 
         return true;

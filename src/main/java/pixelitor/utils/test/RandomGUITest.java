@@ -305,9 +305,9 @@ public class RandomGUITest {
         if (maxX <= 0 || maxY <= 0) {
             // probably the mouse was moved, and the window is too small
             System.out.printf("RandomGUITest::generateRandomPoint: " +
-                            "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
-                            "windowBounds = %s%n",
-                    minX, minY, maxX, maxY, windowBounds);
+                    "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
+                    "windowBounds = %s%n",
+                minX, minY, maxX, maxY, windowBounds);
             stop();
             throw new IllegalStateException("small window");
         }
@@ -367,7 +367,7 @@ public class RandomGUITest {
         }
         String modifiers = runWithModifiers(robot, () -> robot.mouseMove(x, y));
         log(tool.getName() + stateInfo + " " + modifiers
-                + "drag to (" + x + ", " + y + ')');
+            + "drag to (" + x + ", " + y + ')');
     }
 
     private static void randomClick(Robot robot) {
@@ -449,7 +449,7 @@ public class RandomGUITest {
         if (preferredFilter == null) {
             filter = Filters.getRandomFilter(f ->
                 (!(f instanceof RandomFilter)
-                 && !(f instanceof FlowField))
+                    && !(f instanceof FlowField))
             );
         } else {
             filter = preferredFilter;
@@ -472,12 +472,12 @@ public class RandomGUITest {
                     ParamSet paramSet = pf.getParamSet();
                     System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                        "src.width = %d, src.height = %d, params = %s%n",
+                            "src.width = %d, src.height = %d, params = %s%n",
                         filterName, src.getWidth(), src.getHeight(), paramSet);
                 } else {
                     System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                        "src.width = %d, src.height = %d%n",
+                            "src.width = %d, src.height = %d%n",
                         filterName, src.getWidth(), src.getHeight());
                 }
                 throw e;
@@ -503,7 +503,7 @@ public class RandomGUITest {
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                 "runCountBefore = " + runCountBefore
-                + ", runCountAfter = " + runCountAfter);
+                    + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -544,8 +544,8 @@ public class RandomGUITest {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
                 "Exception in random tween: filter name = %s, " +
-                "srcWidth = %d, srcHeight = %d, " +
-                "isMaskEditing = %b, params = %s",
+                    "srcWidth = %d, srcHeight = %d, " +
+                    "isMaskEditing = %b, params = %s",
                 filterName, src.getWidth(), src.getHeight(),
                 dr.isMaskEditing(), paramSet);
             throw new IllegalStateException(msg, e);
@@ -557,7 +557,7 @@ public class RandomGUITest {
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                 "runCountBefore = " + runCountBefore
-                + ", runCountAfter = " + runCountAfter);
+                    + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -1203,7 +1203,7 @@ public class RandomGUITest {
     private static void dispatchKey(int keyCode, char keyChar, int modifiers) {
         var pw = PixelitorWindow.get();
         pw.dispatchEvent(new KeyEvent(pw, KEY_PRESSED,
-                System.currentTimeMillis(), modifiers, keyCode, keyChar));
+            System.currentTimeMillis(), modifiers, keyCode, keyChar));
     }
 
     private static void resetTabsUI() {

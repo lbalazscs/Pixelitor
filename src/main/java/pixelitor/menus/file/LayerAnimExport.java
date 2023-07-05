@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public class LayerAnimExport {
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
                 "Animation frames are based on the layers of the image.\n" +
-                comp.getName() + " has only one layer.");
+                    comp.getName() + " has only one layer.");
             return;
         }
 

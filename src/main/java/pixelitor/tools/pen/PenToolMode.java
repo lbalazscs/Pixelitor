@@ -28,7 +28,7 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -78,8 +78,8 @@ public interface PenToolMode {
                 if (path.getComp() != comp) {
                     if (GUIMode.isDevelopment()) {
                         throw new IllegalStateException(
-                                "path's comp is %s, active comp is %s".formatted(
-                                        path.getComp().getName(), comp.getName()));
+                            "path's comp is %s, active comp is %s".formatted(
+                                path.getComp().getName(), comp.getName()));
                     }
                     // the pen tool has a path, but it does not belong to the
                     // active composition - happened in random gui tests

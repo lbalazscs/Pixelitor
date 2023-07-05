@@ -60,7 +60,7 @@ public class PXCFormat {
                 // identification bytes OK
             } else {
                 throw new BadPxcFormatException(file.getName()
-                                                + " is not in the pxc format.");
+                    + " is not in the pxc format.");
             }
             int versionByte = is.read();
             if (versionByte == 0) {

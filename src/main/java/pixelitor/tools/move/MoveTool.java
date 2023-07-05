@@ -34,7 +34,8 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -55,8 +56,8 @@ public class MoveTool extends DragTool {
     public MoveTool() {
         super("Move", 'V',
             "<b>drag</b> to move the active layer, " +
-            "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
-            "<b>Shift-drag</b> to constrain the movement.",
+                "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
+                "<b>Shift-drag</b> to constrain the movement.",
             Cursors.DEFAULT, true);
     }
 
@@ -71,9 +72,9 @@ public class MoveTool extends DragTool {
 
         if (GUIMode.enableFreeTransform) {
             settingsPanel.addWithLabel("Free Transform:",
-                    freeTransformCheckBox, "freeTransformCheckBox");
+                freeTransformCheckBox, "freeTransformCheckBox");
             freeTransformCheckBox.addActionListener(e ->
-                    setFreeTransformMode(freeTransformCheckBox.isSelected()));
+                setFreeTransformMode(freeTransformCheckBox.isSelected()));
         }
     }
 

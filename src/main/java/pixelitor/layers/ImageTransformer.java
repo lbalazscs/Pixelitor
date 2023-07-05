@@ -83,12 +83,6 @@ public class ImageTransformer implements ImageSource, Serializable {
         invalidateCache();
     }
 
-    private static void debug(AffineTransform at, String msg) {
-        double scaleX = at.getScaleX();
-        double scaleY = at.getScaleY();
-        System.out.printf("%s:, scaleX = %.2f, scaleY = %.2f%n", msg, scaleX, scaleY);
-    }
-
     public BufferedImage getCachedImage() {
         return cachedImage;
     }

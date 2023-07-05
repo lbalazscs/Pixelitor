@@ -379,7 +379,7 @@ public abstract class AbstractBrushTool extends Tool {
         double maxBrushRadius = brush.getMaxEffectiveRadius();
         var affectedRect = affectedArea.asRectangle(maxBrushRadius);
         assert !affectedRect.isEmpty() : "brush radius = " + maxBrushRadius
-                                         + ", affected area = " + affectedArea;
+            + ", affected area = " + affectedArea;
 
         var imageEdit = PartialImageEdit.create(
             affectedRect, originalImage, dr, false, getName());
@@ -407,11 +407,11 @@ public abstract class AbstractBrushTool extends Tool {
 
         // when editing masks, no tmp drawing layer should be used
         assert !(dr instanceof LayerMask)
-               || drawDestination == DrawDestination.DIRECT :
+            || drawDestination == DrawDestination.DIRECT :
             "dr is " + dr.getClass().getSimpleName()
-            + ", comp = " + comp.getName()
-            + ", tool = " + getClass().getSimpleName()
-            + ", drawDestination = " + drawDestination;
+                + ", comp = " + comp.getName()
+                + ", tool = " + getClass().getSimpleName()
+                + ", drawDestination = " + drawDestination;
 
         var g = drawDestination.createGraphics(dr, getComposite());
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

@@ -30,7 +30,9 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;

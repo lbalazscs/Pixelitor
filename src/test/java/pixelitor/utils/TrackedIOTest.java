@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link TrackedIO}
  */
-public class TrackedIOTest {
+class TrackedIOTest {
     @ParameterizedTest(name = "{0}x{1} image => {2} cols")
     @CsvSource({"5000, 2000, 50", "2000, 5000, 50", "250, 250, 3"})
     void calcSubsamplingCols(int imgWidth, int imgHeight, int expected) {

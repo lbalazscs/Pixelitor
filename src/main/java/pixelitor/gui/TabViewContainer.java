@@ -24,7 +24,8 @@ import pixelitor.gui.utils.PAction;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
@@ -138,7 +139,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
 
         if (GUIMode.isDevelopment()) {
             popup.add(new PAction("Debug View...", () ->
-                    Debug.showTree(view, "View " + view.getName())));
+                Debug.showTree(view, "View " + view.getName())));
         }
 
         popup.show(e.getComponent(), e.getX(), e.getY());

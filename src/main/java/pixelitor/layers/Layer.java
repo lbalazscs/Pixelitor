@@ -776,7 +776,7 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     protected boolean isNormalAndOpaque() {
         return blendingMode == BlendingMode.NORMAL
-               && opacity > BlendingModePanel.CRITICAL_OPACITY;
+            && opacity > BlendingModePanel.CRITICAL_OPACITY;
     }
 
     /**
@@ -944,7 +944,7 @@ public abstract class Layer implements Serializable, Debuggable {
     public void replaceWithSmartObject() {
         if (!isConvertibleToSmartObject()) {
             String msg = format("<html>The layer <b>%s</b> can't be converted to a smart object because it's %s.",
-                    getName(), Utils.addArticle(getTypeStringLC()));
+                getName(), Utils.addArticle(getTypeStringLC()));
             Messages.showInfo("Convert Layer to Smart Object", msg);
             return;
         }

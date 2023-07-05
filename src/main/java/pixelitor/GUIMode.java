@@ -21,7 +21,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Lazy;
 
-import java.awt.*;
+import java.awt.EventQueue;
 
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -49,7 +49,7 @@ public enum GUIMode {
     // feature flags to avoid diverging branches
     public static boolean enableExperimentalFeatures = AppPreferences.loadExperimentalFeatures();
     public static final boolean enableFreeTransform = false;
-//    public static final boolean enableAdjLayers = false;
+    //    public static final boolean enableAdjLayers = false;
     public static final boolean enableImageMode = false;
 
     public static GUIMode CURRENT = FINAL_GUI;
@@ -92,16 +92,16 @@ public enum GUIMode {
             enableExperimentalFeatures = newValue;
             if (newValue) {
                 String msg = "<html>The following experimental features have been enabled:<ul>" +
-                        "<li>Smart objects</li>" +
-                        "<li>Layer groups</li>" +
-                        "<li>Gradient fill layers</li>" +
-                        "<li>Color fill layers</li>" +
-                        "<li>Shape layers</li>" +
-                        "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental features." +
-                        "<br><br>Some experimental features will be fully activated<br>only after restarting Pixelitor.";
+                    "<li>Smart objects</li>" +
+                    "<li>Layer groups</li>" +
+                    "<li>Gradient fill layers</li>" +
+                    "<li>Color fill layers</li>" +
+                    "<li>Shape layers</li>" +
+                    "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental features." +
+                    "<br><br>Some experimental features will be fully activated<br>only after restarting Pixelitor.";
                 // show the new dialog only after the main dialog is closed
                 EventQueue.invokeLater(() ->
-                        Dialogs.showWarningDialog("Experimental Features", msg));
+                    Dialogs.showWarningDialog("Experimental Features", msg));
             }
         }
     }

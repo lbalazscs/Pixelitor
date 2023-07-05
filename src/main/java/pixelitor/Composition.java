@@ -1031,7 +1031,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
             throw new IllegalStateException("not drawable in '" + getName() + "': "
-                                            + activeLayer.getClass().getSimpleName());
+                + activeLayer.getClass().getSimpleName());
         }
         return dr;
     }
@@ -1277,10 +1277,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         PixelitorEdit edit;
         if (selection != null) {
             int answer = Dialogs.showManyOptionsDialog(getDialogParent(), "Existing Selection",
-                    "<html>There is already a selection on " + getName() +
-                            ".<br>How do you want to combine new selection with the existing one?",
-                    new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
-                    JOptionPane.QUESTION_MESSAGE);
+                "<html>There is already a selection on " + getName() +
+                    ".<br>How do you want to combine new selection with the existing one?",
+                new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
+                JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
                 // canceled
                 return null;
@@ -1607,7 +1607,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (view != null && !view.isMock()) {
             if (view.getComp() != this) {
                 throw new AssertionError("bad view reference for " + getDebugName()
-                        + ", unexpected comp is " + view.getComp().getDebugName());
+                    + ", unexpected comp is " + view.getComp().getDebugName());
             }
             if (view.getCanvas() != canvas) {
                 throw new AssertionError("bad canvas for " + getDebugName());
@@ -1719,7 +1719,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (path != null && path.getComp() != this) {
             throw new IllegalArgumentException(
                 "path belongs to other comp, this = " + toPathDebugString() +
-                ", path.comp = " + path.getComp().toPathDebugString());
+                    ", path.comp = " + path.getComp().toPathDebugString());
         }
 
         if (paths == null) {
@@ -1935,9 +1935,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public String toPathDebugString() {
         return "Composition{'" + debugName + '\''
-               + ", active = " + isActive()
-               + ", path = " + getActivePath()
-               + '}';
+            + ", active = " + isActive()
+            + ", path = " + getActivePath()
+            + '}';
     }
 
     @Override

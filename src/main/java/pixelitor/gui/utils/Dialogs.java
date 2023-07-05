@@ -106,8 +106,8 @@ public class Dialogs {
         assert !(parent instanceof View);
         GlobalEvents.dialogOpened(title);
         int answer = showOptionDialog(parent, new JLabel(question),
-                title, YES_NO_CANCEL_OPTION,
-                messageType, null, options, options[0]);
+            title, YES_NO_CANCEL_OPTION,
+            messageType, null, options, options[0]);
         GlobalEvents.dialogClosed(title);
         return answer;
     }
@@ -367,14 +367,14 @@ public class Dialogs {
             compName);
 
         return showManyOptionsDialog("Unsaved changes",
-                question, options, WARNING_MESSAGE);
+            question, options, WARNING_MESSAGE);
     }
 
     public static void showFileNotReadableError(Component parent, File f) {
         showErrorDialog(parent, "File not readable",
             "<html>The file <b>" + f.getAbsolutePath()
-            + " </b> isn't readable. " +
-            "<br>Change the file's permissions and try again."
+                + " </b> isn't readable. " +
+                "<br>Change the file's permissions and try again."
         );
     }
 
@@ -402,9 +402,9 @@ public class Dialogs {
 
         String typeStringLC = layer.getTypeStringLC();
         String msg = format("<html>The active layer <i>\"%s\"</i> is a %s.<br><br>" +
-                            "%s cannot be used on %ss.<br>" +
-                            "If you rasterize this %s, you can use %s,<br>" +
-                            "but the layer will become a regular image layer.",
+                "%s cannot be used on %ss.<br>" +
+                "If you rasterize this %s, you can use %s,<br>" +
+                "but the layer will become a regular image layer.",
             layer.getName(), typeStringLC, firstName,
             typeStringLC, typeStringLC, secondName);
 

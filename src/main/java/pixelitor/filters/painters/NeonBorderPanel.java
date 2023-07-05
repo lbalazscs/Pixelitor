@@ -72,7 +72,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
     @Override
     public boolean hasDefault() {
         return super.hasDefault()
-               && innerColor.equals(defaultInnerColor);
+            && innerColor.equals(defaultInnerColor);
     }
 
     @Override

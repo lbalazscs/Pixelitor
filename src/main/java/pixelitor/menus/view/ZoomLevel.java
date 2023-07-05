@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -104,7 +104,7 @@ public class ZoomLevel {
     private final double scale;
     private final int sliderValue;
 
-    public ZoomLevel(double percent, int sliderValue) {
+    private ZoomLevel(double percent, int sliderValue) {
         this.percent = percent;
         this.scale = percent / 100.0;
         this.sliderValue = sliderValue;
@@ -121,11 +121,11 @@ public class ZoomLevel {
         return sliderValue % 4 == 0;
     }
 
-    public void setIn(ZoomLevel in) {
+    private void setIn(ZoomLevel in) {
         this.in = in;
     }
 
-    public void setOut(ZoomLevel out) {
+    private void setOut(ZoomLevel out) {
         this.out = out;
     }
 

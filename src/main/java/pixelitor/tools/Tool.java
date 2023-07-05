@@ -38,7 +38,8 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -102,10 +103,6 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
 
     public void setButton(ToolButton toolButton) {
         this.toolButton = toolButton;
-    }
-
-    public ToolButton getButton() {
-        return toolButton;
     }
 
     public abstract void initSettingsPanel();
@@ -317,9 +314,8 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     public void activate() {
         if (toolButton != null) {
             // this will also call Tools.start() indirectly via the event handlers.
-            ToolButton button = getButton();
-            button.setSelected(true);
-            button.requestFocus();
+            toolButton.setSelected(true);
+            toolButton.requestFocus();
         } else {
             assert GUIMode.isUnitTesting();
             Tools.start(this);

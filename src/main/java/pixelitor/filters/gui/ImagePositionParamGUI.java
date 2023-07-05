@@ -48,10 +48,10 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
         int decimalPlaces = model.getDecimalPlaces();
         xSliderModel = new RangeParam("Horizontal Position (%)",
-                0, defaultX, 100, true, NORTH);
+            0, defaultX, 100, true, NORTH);
         xSliderModel.setDecimalPlaces(decimalPlaces);
         ySliderModel = new RangeParam("Vertical Position (%)",
-                0, defaultY, 100, true, NORTH);
+            0, defaultY, 100, true, NORTH);
         ySliderModel.setDecimalPlaces(decimalPlaces);
 
         // add the image position selector

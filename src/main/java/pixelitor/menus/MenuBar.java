@@ -504,7 +504,7 @@ public class MenuBar extends JMenuBar {
             Composition::replaceWithSmartObject));
 
         sub.add(new OpenViewEnabledAction("Convert Visible to Smart Object",
-                Composition::convertVisibleLayersToSmartObject), CTRL_SHIFT_L);
+            Composition::convertVisibleLayersToSmartObject), CTRL_SHIFT_L);
         sub.addSeparator();
 
         var isSmartObject = new LayerClassRestriction(SmartObject.class, "smart object");
@@ -652,7 +652,7 @@ public class MenuBar extends JMenuBar {
             ResizePanel::showInDialog), CTRL_ALT_I);
 
         imageMenu.add(new OpenViewEnabledAction("Duplicate",
-                comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true))));
+            comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true))));
 
         if (GUIMode.enableImageMode) {
             imageMenu.add(createModeSubmenu());
@@ -850,7 +850,7 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("blur")
-                              + "/" + texts.getString("sharpen"));
+            + "/" + texts.getString("sharpen"));
 
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);

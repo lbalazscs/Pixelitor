@@ -29,7 +29,9 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.Serial;

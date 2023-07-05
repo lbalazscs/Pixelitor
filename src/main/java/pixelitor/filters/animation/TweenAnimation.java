@@ -78,8 +78,16 @@ public class TweenAnimation {
         this.outputType = outputType;
     }
 
+    public void setPingPong(boolean pingPong) {
+        this.pingPong = pingPong;
+    }
+
+    public boolean isPingPong() {
+        return pingPong;
+    }
+
     public AnimationWriter createWriter() {
-        return outputType.createAnimationWriter(output, millisBetweenFrames);
+        return outputType.createWriter(output, millisBetweenFrames);
     }
 
     public FilterState tween(double time) {
@@ -139,13 +147,5 @@ public class TweenAnimation {
     private boolean showFileExistsDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
             output.getAbsolutePath() + " exists already. Overwrite?");
-    }
-
-    public void setPingPong(boolean pingPong) {
-        this.pingPong = pingPong;
-    }
-
-    public boolean isPingPong() {
-        return pingPong;
     }
 }

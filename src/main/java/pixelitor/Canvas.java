@@ -25,7 +25,9 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -126,7 +128,7 @@ public class Canvas implements Serializable, Debuggable {
      */
     public Rectangle getCoBounds(View view) {
         return new Rectangle(
-                view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
+            view.getCanvasStartX(), view.getCanvasStartY(), coWidth, coHeight);
     }
 
     /**
@@ -242,7 +244,7 @@ public class Canvas implements Serializable, Debuggable {
     public Dimension getThumbSize() {
         if (thumbDimension == null) {
             thumbDimension = ImageUtils.calcThumbDimensions(
-                    width, height, thumbSize, true);
+                width, height, thumbSize, true);
         }
         return thumbDimension;
     }

@@ -29,7 +29,9 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
@@ -47,7 +49,7 @@ public class ColorPickerTool extends Tool {
     private static final String SAMPLE_LABEL_TEXT = "Sample Only the Active Layer/Mask";
     private static final String HELP_TEXT =
         "<b>click</b> to pick the foreground color, " +
-        "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
+            "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
 
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
@@ -122,7 +124,7 @@ public class ColorPickerTool extends Tool {
         } else {
             float[] hsbValues = Color.RGBtoHSB(r, g, b, null);
             msg += format(", alpha = %d, red = %d, green = %d, blue = %d, " +
-                          "hue = %.2f, saturation = %.2f, brightness = %.2f",
+                    "hue = %.2f, saturation = %.2f, brightness = %.2f",
                 a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 

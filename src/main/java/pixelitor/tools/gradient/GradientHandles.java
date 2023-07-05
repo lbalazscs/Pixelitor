@@ -29,7 +29,8 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 /**
@@ -123,7 +124,7 @@ public class GradientHandles implements ToolWidget {
         } else { // in random tests they can be different
             if (GUIMode.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
-                        + ImageArea.getMode());
+                    + ImageArea.getMode());
             }
         }
     }

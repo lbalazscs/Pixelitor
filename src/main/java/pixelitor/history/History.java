@@ -144,8 +144,8 @@ public class History {
         } else {
             Messages.showWarning("No " + type + " available",
                 "<html>No " + type + " is available, possible reasons are:<ul>" +
-                "<li>The edited image was closed" +
-                "<li>The " + type + " image was discarded by Pixelitor in order to save memory");
+                    "<li>The edited image was closed" +
+                    "<li>The " + type + " image was discarded by Pixelitor in order to save memory");
             clear();
         }
     }

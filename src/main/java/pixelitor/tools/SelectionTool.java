@@ -36,7 +36,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
 
 import static pixelitor.selection.ShapeCombinator.*;
 
@@ -54,9 +54,9 @@ public class SelectionTool extends DragTool {
         "<b>Shift</b> adds to an existing selection, " +
         "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.";
     private static final String FREEHAND_HELP_TEXT = "Freehand selection: " +
-                                                     "simply drag around the area that you want to select. " +
-                                                     "<b>Shift-drag</b> adds to an existing selection, " +
-                                                     "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+        "simply drag around the area that you want to select. " +
+        "<b>Shift-drag</b> adds to an existing selection, " +
+        "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
     private static final String NEW_SELECTION_TEXT = "New Selection";
 
     private boolean altMeansSubtract = false;

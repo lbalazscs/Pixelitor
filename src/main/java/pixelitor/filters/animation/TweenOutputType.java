@@ -30,7 +30,7 @@ import static java.lang.String.format;
 public enum TweenOutputType {
     PNG_FILE_SEQUENCE("PNG File Sequence") {
         @Override
-        AnimationWriter createAnimationWriter(File file, int delayMillis) {
+        AnimationWriter createWriter(File file, int delayMillis) {
             return new PNGFileSequenceWriter(file);
         }
 
@@ -50,7 +50,7 @@ public enum TweenOutputType {
         }
     }, ANIM_GIF("Animated GIF File") {
         @Override
-        AnimationWriter createAnimationWriter(File file, int delayMillis) {
+        AnimationWriter createWriter(File file, int delayMillis) {
             return new AnimGIFWriter(file, delayMillis);
         }
 
@@ -76,7 +76,7 @@ public enum TweenOutputType {
         this.guiName = guiName;
     }
 
-    abstract AnimationWriter createAnimationWriter(File file, int delayMillis);
+    abstract AnimationWriter createWriter(File file, int delayMillis);
 
     /**
      * Returns the error message or null if the argument is OK as output
@@ -91,9 +91,9 @@ public enum TweenOutputType {
         if (output.exists()) {
             if (output.isDirectory()) {
                 return format("%s is a folder." +
-                                "<br>For the \"%s\" output type, " +
-                                "select a (new or existing) %s file in an existing folder.",
-                        output.getAbsolutePath(), type, fileType);
+                        "<br>For the \"%s\" output type, " +
+                        "select a (new or existing) %s file in an existing folder.",
+                    output.getAbsolutePath(), type, fileType);
             }
         } else { // if it does not exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
@@ -115,8 +115,8 @@ public enum TweenOutputType {
         // we expect it to be an existing directory
         if (!output.isDirectory()) {
             return format("\"<b>%s</b>\" is not a folder." +
-                            "<br>For the \"%s\" output type, select an existing folder.",
-                    output.getAbsolutePath(), type);
+                    "<br>For the \"%s\" output type, select an existing folder.",
+                output.getAbsolutePath(), type);
         }
         if (!output.exists()) {
             return output.getAbsolutePath() + " does not exist.";

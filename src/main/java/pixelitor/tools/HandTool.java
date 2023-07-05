@@ -22,7 +22,8 @@ import pixelitor.gui.utils.VectorIcon;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 
 import static java.awt.BasicStroke.CAP_ROUND;

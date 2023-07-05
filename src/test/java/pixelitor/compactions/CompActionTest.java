@@ -286,9 +286,9 @@ public class CompActionTest {
         }
 
         int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT
-                                      + withTranslation.getExpectedTY();
+            + withTranslation.getExpectedTY();
         int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
-                                     + withTranslation.getExpectedTX();
+            + withTranslation.getExpectedTX();
 
         switch (angle) {
             case ANGLE_90 -> assertThat(newComp).activeLayerTranslationIs(

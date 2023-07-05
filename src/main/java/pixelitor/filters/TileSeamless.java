@@ -33,7 +33,7 @@ public class TileSeamless extends ParametrizedFilter {
     public static final String NAME = "Tile Seamless";
 
     private final ImagePositionParam center =
-            new ImagePositionParam("Center");
+        new ImagePositionParam("Center");
 
     private MaskMaker maskMaker = null;
     private OffsetFilter offsetFilter = null;

@@ -166,16 +166,16 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 default -> throw new IllegalStateException();
             };
             spinnerModel = new SpinnerNumberModel(
-                    model.getValueAsDouble(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    stepSize);
+                model.getValueAsDouble(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                stepSize);
         } else {
             spinnerModel = new SpinnerNumberModel(
-                    model.getValue(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    1);
+                model.getValue(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                1);
         }
         JSpinner s = new JSpinner(spinnerModel);
 

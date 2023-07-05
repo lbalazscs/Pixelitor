@@ -459,8 +459,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             return DoubleStream.of(values)
-                       .mapToObj("%.2f"::formatted)
-                       .collect(joining(",")) + "," + linked;
+                .mapToObj("%.2f"::formatted)
+                .collect(joining(",")) + "," + linked;
         }
     }
 }

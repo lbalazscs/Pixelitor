@@ -93,8 +93,8 @@ public class GradientFillLayer extends ContentLayer {
             int height = comp.getCanvasHeight();
             // the custom blending modes don't work with gradients
             boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
-                                     // and custom gradients using transparency also have a problem
-                                     || gradient.isCustomTransparency();
+                // and custom gradients using transparency also have a problem
+                || gradient.isCustomTransparency();
             if (useCachedImage) {
                 if (cachedImage == null) {
                     cachedImage = ImageUtils.createSysCompatibleImage(width, height);

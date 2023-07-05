@@ -150,9 +150,9 @@ public class Debug {
             && cm.getTransferType() == DataBuffer.TYPE_INT) {
 
             return dcm.getRedMask() == 0x00_FF_00_00
-                   && dcm.getGreenMask() == 0x00_00_FF_00
-                   && dcm.getBlueMask() == 0x00_00_00_FF
-                   && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
+                && dcm.getGreenMask() == 0x00_00_FF_00
+                && dcm.getBlueMask() == 0x00_00_00_FF
+                && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;
@@ -163,9 +163,9 @@ public class Debug {
             cm.getTransferType() == DataBuffer.TYPE_INT) {
 
             return dcm.getRedMask() == 0x00_00_00_FF
-                   && dcm.getGreenMask() == 0x00_00_FF_00
-                   && dcm.getBlueMask() == 0x00_FF_00_00
-                   && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
+                && dcm.getGreenMask() == 0x00_00_FF_00
+                && dcm.getBlueMask() == 0x00_FF_00_00
+                && (dcm.getNumComponents() == 3 || dcm.getAlphaMask() == 0xFF_00_00_00);
         }
 
         return false;
@@ -231,8 +231,8 @@ public class Debug {
         View previousView = Views.getActive();
 
         findCompByName(name).ifPresentOrElse(
-                comp -> replaceImageInDebugComp(comp, copy),
-                () -> addNew(copy, null, name));
+            comp -> replaceImageInDebugComp(comp, copy),
+            () -> addNew(copy, null, name));
 
         if (previousView != null) {
             Views.activate(previousView);
@@ -384,7 +384,7 @@ public class Debug {
 
         JLabel explainLabel = new JLabel(
             "<html>If you are reporting a bug that cannot be reproduced," +
-            "<br>please include the following information:");
+                "<br>please include the following information:");
         explainLabel.setBorder(createEmptyBorder(5, 5, 5, 5));
 
         JPanel form = new JPanel(new BorderLayout());

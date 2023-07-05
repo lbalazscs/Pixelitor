@@ -144,8 +144,8 @@ public class Messages {
     public static boolean reloadFileQuestion(File file) {
         String title = "Reload " + file.getName() + "?";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
-                     + "</b><br> has been modified by another program." +
-                     "<br><br>Do you want to reload it?";
+            + "</b><br> has been modified by another program." +
+            "<br><br>Do you want to reload it?";
         return showYesNoQuestion(title, msg);
     }
 
@@ -156,8 +156,8 @@ public class Messages {
 
     public static void showUnrasterizableLayerGroupError(LayerGroup group, String name) {
         String msg = "<html>The active layer <i>\"%s\"</i> is a layer group." +
-                "<br><br>%s can't be used on layer groups." +
-                "<br>Pass through groups can't even be rasterized.";
+            "<br><br>%s can't be used on layer groups." +
+            "<br>Pass through groups can't even be rasterized.";
         showError("Layer Group", msg.formatted(group.getName(), name));
     }
 }

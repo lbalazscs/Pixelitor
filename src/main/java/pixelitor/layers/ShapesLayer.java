@@ -100,7 +100,7 @@ public class ShapesLayer extends ContentLayer {
         if (styledShape != null) {
             // the custom blending modes don't work with gradients
             boolean useCachedImage = g.getComposite().getClass() != AlphaComposite.class
-                                     && styledShape.hasBlendingIssue();
+                && styledShape.hasBlendingIssue();
             if (useCachedImage) {
                 if (cachedImage == null) {
                     int width = comp.getCanvasWidth();

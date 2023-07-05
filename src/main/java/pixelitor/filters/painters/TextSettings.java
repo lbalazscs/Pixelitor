@@ -30,7 +30,10 @@ import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
@@ -282,7 +285,7 @@ public class TextSettings implements Serializable, Debuggable {
             }
             EventQueue.invokeLater(() -> Messages.showError("Font Not Found",
                 "<html>The font <b>" + fontName + "</b> was not found on this computer." +
-                "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>."));
+                    "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>."));
         }
     }
 

@@ -103,7 +103,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
                 // theoretical limit, as the pixels ultimately will be stored in an array
                 return retVal.addError(format(
                     "Pixelitor doesn't support images with more than %d pixels." +
-                    "<br>%dx%d would be %d pixels.",
+                        "<br>%dx%d would be %d pixels.",
                     Integer.MAX_VALUE, width, height, numPixels));
             } else if (numPixels > 1_000_000) { // don't check for smaller images
                 Runtime rt = Runtime.getRuntime();
@@ -112,8 +112,8 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
                 if (numPixels * 4 > availableMemory) {
                     return retVal.addError(format(
                         "The image would not fit into memory." +
-                        "<br>An image of %dx%d pixels needs at least %d megabytes." +
-                        "<br>Available memory is at most %d megabytes.",
+                            "<br>An image of %dx%d pixels needs at least %d megabytes." +
+                            "<br>Available memory is at most %d megabytes.",
                         width, height,
                         numPixels * 4 / NUM_BYTES_IN_MEGABYTE,
                         availableMemory / NUM_BYTES_IN_MEGABYTE));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -309,21 +309,52 @@ public class Shapes {
         double[] coords = new double[6];
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
-            sb.append(switch (type) {
-                case SEG_MOVETO -> format("M %.2f,%.2f ",
-                    coords[0], coords[1]);
-                case SEG_LINETO -> format("L %.2f,%.2f ",
-                    coords[0], coords[1]);
-                case SEG_QUADTO -> format("Q %.2f,%.2f,%.2f,%.2f ",
-                    coords[0], coords[1], coords[2], coords[3]);
-                case SEG_CUBICTO -> format("C %.2f,%.2f,%.2f,%.2f,%.2f,%.2f ",
-                    coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-                case SEG_CLOSE -> "Z ";
-                default -> throw new IllegalArgumentException("type = " + type);
-            });
+            addSVGPathSegment(coords, type, sb);
             pathIterator.next();
         }
         return sb.toString();
+    }
+
+    private static void addSVGPathSegment(double[] coords, int type, StringBuilder sb) {
+        int numCoords;
+        String prefix;
+
+        switch (type) {
+            case SEG_MOVETO -> {
+                numCoords = 2;
+                prefix = "M ";
+            }
+            case SEG_LINETO -> {
+                numCoords = 2;
+                prefix = "L ";
+            }
+            case SEG_QUADTO -> {
+                numCoords = 4;
+                prefix = "Q ";
+            }
+            case SEG_CUBICTO -> {
+                numCoords = 6;
+                prefix = "C ";
+            }
+            case SEG_CLOSE -> {
+                numCoords = 0;
+                prefix = "Z ";
+            }
+            default -> throw new IllegalArgumentException("type = " + type);
+        }
+
+        // NaNs are not a problem if they are in the unused part of the array
+        for (int i = 0; i < numCoords; i++) {
+            if (Double.isNaN(coords[i])) {
+                return;
+            }
+        }
+
+        sb.append(prefix);
+        for (int i = 0; i < numCoords; i++) {
+            sb.append(format("%.3f ", coords[i]));
+        }
+        sb.append("\n");
     }
 
     public static void debugPathIterator(Shape shape) {

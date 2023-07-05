@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -107,9 +107,9 @@ public interface Drawable extends Filterable {
         } catch (Throwable e) {
             String errorDetails = String.format(
                 "Error while running the filter '%s'%n" +
-                "composition = '%s'%n" +
-                "layer = '%s' (%s)%n" +
-                "params = %s",
+                    "composition = '%s'%n" +
+                    "layer = '%s' (%s)%n" +
+                    "params = %s",
                 filter.getName(),
                 getComp().getDebugName(),
                 getName(), getClass().getSimpleName(),

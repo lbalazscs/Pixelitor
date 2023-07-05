@@ -40,7 +40,10 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
@@ -384,8 +387,8 @@ public class PenTool extends Tool {
         }
         if (hasPath() && path.getComp() != activeComp) {
             throw new IllegalStateException("foreign path " + path
-                                            + ", path comp = " + path.getComp().toPathDebugString()
-                                            + ", active comp = " + activeComp.toPathDebugString());
+                + ", path comp = " + path.getComp().toPathDebugString()
+                + ", active comp = " + activeComp.toPathDebugString());
         }
         if (hasPath()) {
             path.checkConsistency();

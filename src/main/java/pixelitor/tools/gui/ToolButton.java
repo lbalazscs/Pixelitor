@@ -59,7 +59,7 @@ public class ToolButton extends JToggleButton {
         setIcons(tool);
 
         setToolTipText("<html>" + tool.getName()
-                       + " (<b>" + tool.getActivationKey() + "</b>)");
+            + " (<b>" + tool.getActivationKey() + "</b>)");
 
         // An item listener is better than an action listener because it
         // is also triggered by keyboard focus traversal selections.
@@ -106,7 +106,7 @@ public class ToolButton extends JToggleButton {
 
         if (GUIMode.isDevelopment()) {
             popup.add(new PAction("Internal State...", () ->
-                    Debug.showTree(tool, tool.getName())));
+                Debug.showTree(tool, tool.getName())));
             popup.addSeparator();
         }
 

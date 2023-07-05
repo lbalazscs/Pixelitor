@@ -79,7 +79,7 @@ public enum TweenWizardPage implements WizardPage {
         public String getHelpText(Wizard wizard) {
             String color = Themes.getCurrent().isDark() ? "#76ABFF" : "blue";
             return "<html><b><font color=" + color + " size=+1>Initial</font></b> settings for the <i>"
-                   + getFilter(wizard).getName() + "</i> filter.";
+                + getFilter(wizard).getName() + "</i> filter.";
         }
 
         @Override
@@ -110,7 +110,7 @@ public enum TweenWizardPage implements WizardPage {
         public String getHelpText(Wizard wizard) {
             String color = Themes.getCurrent().isDark() ? "#5DCF6E" : "blue";
             String text = "<html><b><font color=" + color + " size=+1>Final</font></b> settings for the <i>"
-                          + getFilter(wizard).getName() + "</i> filter.";
+                + getFilter(wizard).getName() + "</i> filter.";
             boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
             if (hasGradient) {
                 text += "<br>Don't change the number of thumbs for the gradient, only their color or position.";

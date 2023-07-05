@@ -163,7 +163,7 @@ public class ValueNoise extends ParametrizedFilter {
         return interpolate(i1, i2, y - (int) y, interp);
     }
 
-    public void reseed(long newSeed) {
+    private void reseed(long newSeed) {
         rand.setSeed(newSeed);
         r1 = 1000 + rand.nextInt(90000);
         r2 = 10000 + rand.nextInt(900000);

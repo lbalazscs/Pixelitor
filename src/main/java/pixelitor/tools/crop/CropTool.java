@@ -86,9 +86,9 @@ public class CropTool extends DragTool {
     public CropTool() {
         super("Crop", 'C',
             "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
-            "After the handles appear: " +
-            "<b>Shift-drag</b> keeps the aspect ratio, " +
-            "<b>Double-click</b> crops, <b>Esc</b> cancels.",
+                "After the handles appear: " +
+                "<b>Shift-drag</b> keeps the aspect ratio, " +
+                "<b>Double-click</b> crops, <b>Esc</b> cancels.",
             Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
 
@@ -149,8 +149,8 @@ public class CropTool extends DragTool {
     private void addGuidesSelector() {
         guidesCB = GUIUtils.createComboBox(CompositionGuideType.values());
         guidesCB.setToolTipText("<html>Composition guides." +
-                                "<br><br>Press <b>O</b> to select the next guide." +
-                                "<br>Press <b>Shift-O</b> to change the orientation.");
+            "<br><br>Press <b>O</b> to select the next guide." +
+            "<br>Press <b>Shift-O</b> to change the orientation.");
         guidesCB.addActionListener(e -> Views.repaintActive());
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }

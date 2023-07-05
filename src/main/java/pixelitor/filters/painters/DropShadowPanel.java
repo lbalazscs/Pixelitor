@@ -99,9 +99,9 @@ public class DropShadowPanel extends EffectPanel {
     @Override
     public boolean hasDefault() {
         return super.hasDefault()
-               && angleParam.hasDefault()
-               && distanceParam.hasDefault()
-               && spreadParam.hasDefault();
+            && angleParam.hasDefault()
+            && distanceParam.hasDefault()
+            && spreadParam.hasDefault();
     }
 
     @Override

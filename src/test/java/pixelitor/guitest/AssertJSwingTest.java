@@ -69,7 +69,9 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -183,8 +185,8 @@ public class AssertJSwingTest {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
             System.out.println("Quick = " + quick
-                               + ", target = " + target
-                               + ", mask modes = " + Arrays.toString(maskModes));
+                + ", target = " + target
+                + ", mask modes = " + Arrays.toString(maskModes));
 
             for (int i = 0; i < maskModes.length; i++) {
                 MaskMode mode = maskModes[i];
@@ -239,7 +241,7 @@ public class AssertJSwingTest {
             target = TestTarget.valueOf(targetProp.toUpperCase());
         } catch (IllegalArgumentException e) {
             String msg = "Target " + targetProp.toUpperCase() + " not found.\n" +
-                         "Available targets: " + Arrays.toString(TestTarget.values());
+                "Available targets: " + Arrays.toString(TestTarget.values());
             System.err.println(msg);
             System.exit(1);
         }
@@ -259,7 +261,7 @@ public class AssertJSwingTest {
                 mode = MaskMode.valueOf(maskMode.toUpperCase());
             } catch (IllegalArgumentException e) {
                 String msg = "Mask mode " + maskMode.toUpperCase() + " not found.\n" +
-                             "Available mask modes: " + Arrays.toString(MaskMode.values());
+                    "Available mask modes: " + Arrays.toString(MaskMode.values());
                 System.err.println(msg);
                 System.exit(1);
             }
@@ -1244,7 +1246,7 @@ public class AssertJSwingTest {
 
         runMenuCommand("Show Metadata...");
         var dialog = findDialogByTitle("Metadata for "
-                                       + EDT.active(Composition::getName));
+            + EDT.active(Composition::getName));
 
         dialog.button("expandButton").click();
         dialog.button("collapseButton").click();
@@ -3048,7 +3050,7 @@ public class AssertJSwingTest {
             cleanerScriptExt = ".sh";
         }
         cleanerScript = new File(baseDir + File.separator
-                                 + "0000_clean_outputs" + cleanerScriptExt);
+            + "0000_clean_outputs" + cleanerScriptExt);
 
         if (!cleanerScript.exists()) {
             System.err.printf("Cleaner script %s not found.%n", cleanerScript.getName());
@@ -3113,8 +3115,8 @@ public class AssertJSwingTest {
             System.out.print("    ");
         }
         System.out.println(getCurrentTimeHM() + ": " + msg
-                           + " (" + maskMode + ", "
-                           + ImageArea.getMode() + ")");
+            + " (" + maskMode + ", "
+            + ImageArea.getMode() + ")");
     }
 
     private DialogFixture findDialogByTitle(String title) {

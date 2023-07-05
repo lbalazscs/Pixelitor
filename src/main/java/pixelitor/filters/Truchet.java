@@ -321,8 +321,10 @@ public class Truchet extends ParametrizedFilter {
                     case PATTERN_17 -> indexFromArray(ARRAY_17, i, j);
                     case PATTERN_18 -> indexFromArray(ARRAY_18, i, j);
                     case PATTERN_19 -> indexFromArray(ARRAY_19, i, j);
-                    case PATTERN_20 -> (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 0 : 1) : ((j < numTilesVer / 2) ? 3 : 2);
-                    case PATTERN_21 -> (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 1 : 0) : ((j < numTilesVer / 2) ? 2 : 3);
+                    case PATTERN_20 ->
+                        (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 0 : 1) : ((j < numTilesVer / 2) ? 3 : 2);
+                    case PATTERN_21 ->
+                        (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 1 : 0) : ((j < numTilesVer / 2) ? 2 : 3);
                     default -> throw new IllegalStateException("Unexpected value: " + pattern);
                 };
                 g.drawImage(tiles[tileIndex], i * size, j * size, null);

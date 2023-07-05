@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * The settings of a configurable {@link ShapeType}.
  */
 public abstract class ShapeTypeSettings extends Configurable {
-    public abstract List<FilterParam> getParams();
+    protected abstract List<FilterParam> getParams();
 
     @Override
     protected JPanel createConfigPanel() {

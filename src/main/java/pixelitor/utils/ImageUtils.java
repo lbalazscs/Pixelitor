@@ -149,7 +149,7 @@ public class ImageUtils {
 
     public static BufferedImage resize(BufferedImage img, int targetWidth, int targetHeight) {
         boolean progressiveBilinear = targetWidth < img.getWidth() / 2
-                                      || targetHeight < img.getHeight() / 2;
+            || targetHeight < img.getHeight() / 2;
         return getFasterScaledInstance(img, targetWidth, targetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
     }
 
@@ -659,7 +659,7 @@ public class ImageUtils {
     public static Boolean isSubImage(BufferedImage src) {
         WritableRaster raster = src.getRaster();
         return raster.getSampleModelTranslateX() != 0
-               || raster.getSampleModelTranslateY() != 0;
+            || raster.getSampleModelTranslateY() != 0;
     }
 
     // Can copy an image which was created by BufferedImage.getSubimage

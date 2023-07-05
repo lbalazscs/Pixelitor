@@ -276,7 +276,7 @@ public class SmartObject extends CompositeLayer {
 
         String title = linkedContentFile.getName() + " not found.";
         String msg = "<html>The linked file <b>" + linkedContentFile.getAbsolutePath() +
-                     "</b> was not found.<br>You can search for it or use a transparent image.";
+            "</b> was not found.<br>You can search for it or use a transparent image.";
         boolean search = Dialogs.showOKCancelDialog(msg, title,
             new String[]{"Search...", "Use Transparent Image"}, 0, JOptionPane.ERROR_MESSAGE);
 
@@ -378,7 +378,7 @@ public class SmartObject extends CompositeLayer {
     @Override
     public void replaceWithSmartObject() {
         String msg = format("<html>The layer <b>%s</b> is already a smart object.",
-                getName());
+            getName());
         Messages.showInfo("Already a Smart Object", msg);
     }
 
@@ -391,7 +391,7 @@ public class SmartObject extends CompositeLayer {
     protected void addSmartObjectMenus(JPopupMenu popup) {
         popup.add(new PAction("Edit Contents", this::edit));
         popup.add(new PAction("Clone", () ->
-                comp.shallowDuplicate(this)));
+            comp.shallowDuplicate(this)));
         if (isContentLinked()) {
             popup.add(new PAction("Embed Contents", this::embedLinkedContent));
             popup.add(new PAction("Reload Contents", this::reloadLinkedContent));
@@ -989,9 +989,9 @@ public class SmartObject extends CompositeLayer {
 
     public String debugSmartFilters() {
         return "Filters of " + getName() + ":\n"
-               + filters.stream()
-                   .map(SmartFilter::toString)
-                   .collect(Collectors.joining("\n"));
+            + filters.stream()
+            .map(SmartFilter::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     public void debugImages() {

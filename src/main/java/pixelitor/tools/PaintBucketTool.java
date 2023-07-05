@@ -325,9 +325,9 @@ public class PaintBucketTool extends Tool {
         int b2 = color2 & 0xFF;
 
         return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
-               (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
-               (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
-               (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
+            (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
+            (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
+            (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
     }
 
     @Override
