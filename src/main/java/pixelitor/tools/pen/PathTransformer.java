@@ -26,7 +26,7 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.List;
@@ -95,8 +95,8 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        double x = e.getCoX();
-        double y = e.getCoY();
+        double x = e.getOrigCoX();
+        double y = e.getOrigCoY();
 
         // first look for a handle hit in all the boxes so that
         // handles can be manipulated even when the boxes are overlapping

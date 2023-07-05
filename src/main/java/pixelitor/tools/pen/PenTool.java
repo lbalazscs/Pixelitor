@@ -93,6 +93,7 @@ public class PenTool extends Tool {
             "", // getStatusBarMessage() is overridden
             Cursors.DEFAULT);
 
+        pixelSnapping = true;
         toSelectionAction = new PAction("Convert to Selection", this::convertToSelection);
         exportSVGAction = new PAction("Export SVG...", PenTool::exportSVG);
 

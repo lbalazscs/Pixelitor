@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,13 +28,17 @@ import java.awt.event.MouseEvent;
  * the standard {@link MouseEvent} with some
  * practical added functionality
  */
-public class PMouseEvent extends PPoint.LazyCo {
+public class PMouseEvent extends PPoint {
     private final MouseEvent e;
 
     public PMouseEvent(MouseEvent e, View view) {
-        super(view, e.getX(), e.getY());
-        assert e.getSource() == view;
+        super(e.getX(), e.getY(), view);
 
+        if (View.isPixelSnapping()) {
+            updateSnappedCoValues();
+        }
+
+        assert e.getSource() == view;
         this.e = e;
     }
 

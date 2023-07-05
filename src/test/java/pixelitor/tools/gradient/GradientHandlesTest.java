@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,8 +51,8 @@ class GradientHandlesTest {
     @BeforeEach
     void beforeEachTest() {
         view = TestHelper.createMockViewWithoutComp();
-        PPoint startPos = PPoint.eagerFromCo(START_X_INIT, START_Y_INIT, view);
-        PPoint endPos = PPoint.eagerFromCo(END_X_INIT, END_Y_INIT, view);
+        PPoint startPos = new PPoint(START_X_INIT, START_Y_INIT, view);
+        PPoint endPos = new PPoint(END_X_INIT, END_Y_INIT, view);
         handles = new GradientHandles(startPos, endPos, view);
         start = handles.getStart();
         end = handles.getEnd();

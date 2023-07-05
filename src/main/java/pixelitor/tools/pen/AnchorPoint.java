@@ -65,7 +65,7 @@ public class AnchorPoint extends DraggablePoint {
     public static AnchorPoint recentlyEditedPoint = null;
 
     public AnchorPoint(double coX, double coY, View view, SubPath subPath) {
-        this(PPoint.eagerFromCo(coX, coY, view), view, subPath);
+        this(new PPoint(coX, coY, view), view, subPath);
     }
 
     public AnchorPoint(PPoint p, View view, SubPath subPath) {

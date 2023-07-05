@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -40,7 +39,7 @@ import static java.lang.String.format;
  * {@link View} and the image zooming into account.
  */
 public class PPoint {
-    final View view;
+    protected final View view;
 
     // All the coordinates are initialized in subclasses.
 
@@ -52,6 +51,10 @@ public class PPoint {
     protected double coX;
     protected double coY;
 
+    // the original component-space coordinates (before snapping)
+    private double origCoX;
+    private double origCoY;
+
     protected PPoint(View view) {
         // the view can be null for example if a composition
         // with shape layers but without a view is duplicated
@@ -61,9 +64,31 @@ public class PPoint {
     public PPoint(double coX, double coY, double imX, double imY, View view) {
         this.coX = coX;
         this.coY = coY;
+        this.origCoX = coX;
+        this.origCoY = coY;
         this.imX = imX;
         this.imY = imY;
         this.view = view;
+    }
+
+    public PPoint(double coX, double coY, View view) {
+        this(coX, coY,
+            view.componentXToImageSpace(coX),
+            view.componentYToImageSpace(coY),
+            view);
+    }
+
+    public static PPoint fromIm(double imX, double imY, View view) {
+        double coX = view.imageXToComponentSpace(imX);
+        double coY = view.imageYToComponentSpace(imY);
+        return new PPoint(coX, coY, imX, imY, view);
+    }
+
+    public void updateSnappedCoValues() {
+        // the image-space coordinates are assumed to be already snapped,
+        // and we just want to draw the helper widgets correctly
+        coX = view.imageXToComponentSpace(imX);
+        coY = view.imageYToComponentSpace(imY);
     }
 
     /**
@@ -78,6 +103,14 @@ public class PPoint {
      */
     public double getCoY() {
         return coY;
+    }
+
+    public double getOrigCoX() {
+        return origCoX;
+    }
+
+    public double getOrigCoY() {
+        return origCoY;
     }
 
     /**
@@ -117,15 +150,15 @@ public class PPoint {
     }
 
     public PPoint mirrorVertically(int compWidth) {
-        return new EagerIm(view, compWidth - getImX(), getImY());
+        return fromIm(compWidth - getImX(), getImY(), view);
     }
 
     public PPoint mirrorHorizontally(int compHeight) {
-        return new EagerIm(view, getImX(), compHeight - getImY());
+        return fromIm(getImX(), compHeight - getImY(), view);
     }
 
     public PPoint mirrorBoth(int compWidth, int compHeight) {
-        return new EagerIm(view, compWidth - getImX(), compHeight - getImY());
+        return fromIm(compWidth - getImX(), compHeight - getImY(), view);
     }
 
     public void drawLineTo(PPoint end, Graphics2D g) {
@@ -169,26 +202,6 @@ public class PPoint {
         return new PPoint(coX, coY, imX, imY, view);
     }
 
-    public static PPoint lazyFromCo(double x, double y, View view) {
-        return new LazyCo(view, x, y);
-    }
-
-    public static PPoint lazyFromCo(MouseEvent e, View view) {
-        return new LazyCo(view, e.getX(), e.getY());
-    }
-
-    public static PPoint eagerFromCo(double x, double y, View view) {
-        return new EagerCo(view, x, y);
-    }
-
-    public static PPoint eagerFromIm(double imX, double imY, View view) {
-        return new EagerIm(view, imX, imY);
-    }
-
-    public static PPoint eagerFromIm(Point2D im, View view) {
-        return new EagerIm(view, im.getX(), im.getY());
-    }
-
     public static PPoint lazyFromIm(double imX, double imY, View view) {
         return new LazyIm(view, imX, imY);
     }
@@ -198,7 +211,7 @@ public class PPoint {
         double y = (p1.getImY() + p2.getImY()) / 2.0;
         View p1view = p1.getView();
         if (p1view != null) {
-            return eagerFromIm(x, y, p1view);
+            return fromIm(x, y, p1view);
         } else {
             return lazyFromIm(x, y, p1view);
         }
@@ -211,68 +224,6 @@ public class PPoint {
     @Override
     public String toString() {
         return format("[imX = %.1f, imY = %.1f]", getImX(), getImY());
-    }
-
-    /**
-     * A lazy {@link PPoint}, which converts component
-     * space coordinates to image space coordinates only
-     * on demand
-     */
-    public static class LazyCo extends PPoint {
-        private boolean xConverted = false;
-        private boolean yConverted = false;
-
-        public LazyCo(View view, double x, double y) {
-            super(view);
-            coX = x;
-            coY = y;
-            // image space coordinates are not yet initialized
-        }
-
-        @Override
-        public double getImX() {
-            if (!xConverted) {
-                imX = view.componentXToImageSpace(coX);
-                xConverted = true;
-            }
-            return imX;
-        }
-
-        @Override
-        public double getImY() {
-            if (!yConverted) {
-                imY = view.componentYToImageSpace(coY);
-                yConverted = true;
-            }
-            return imY;
-        }
-    }
-
-    /**
-     * An eager {@link PPoint}, which converts component
-     * space coordinates to image space coordinates immediately
-     */
-    public static class EagerCo extends PPoint {
-        public EagerCo(View view, double x, double y) {
-            super(view);
-            coX = x;
-            coY = y;
-            imX = view.componentXToImageSpace(coX);
-            imY = view.componentYToImageSpace(coY);
-        }
-    }
-
-    /**
-     * A {@link PPoint} eagerly initialized with image-space coordinates
-     */
-    private static class EagerIm extends PPoint {
-        public EagerIm(View view, double imX, double imY) {
-            super(view);
-            this.imX = imX;
-            this.imY = imY;
-            coX = (int) view.imageXToComponentSpace(imX);
-            coY = (int) view.imageYToComponentSpace(imY);
-        }
     }
 
     /**

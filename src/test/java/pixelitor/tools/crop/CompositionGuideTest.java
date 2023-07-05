@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ class CompositionGuideTest {
         lines[2] = new Line2D.Double(0, 4, 90, 4);
         lines[3] = new Line2D.Double(0, 8, 90, 8);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -99,7 +99,7 @@ class CompositionGuideTest {
         lines[2] = new Line2D.Double(0, sectionHeight, 90, sectionHeight);
         lines[3] = new Line2D.Double(0, 12 - sectionHeight, 90, 12 - sectionHeight);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -116,7 +116,7 @@ class CompositionGuideTest {
         lines[2] = new Line2D.Double(90, 0, 90 - 12, 12);
         lines[3] = new Line2D.Double(90, 12, 90 - 12, 0);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -133,7 +133,7 @@ class CompositionGuideTest {
         lines[2] = new Line2D.Double(0, 90, 12, 90 - 12);
         lines[3] = new Line2D.Double(0, 90 - 12, 12, 90);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -151,7 +151,7 @@ class CompositionGuideTest {
         lines[1] = new Line2D.Double(0, 10, p.getX(), p.getY());
         lines[2] = new Line2D.Double(10, 0, p.getX(), p.getY());
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -169,7 +169,7 @@ class CompositionGuideTest {
         lines[1] = new Line2D.Double(0, 0, p.getX(), p.getY());
         lines[2] = new Line2D.Double(10, 10, p.getX(), p.getY());
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -184,7 +184,7 @@ class CompositionGuideTest {
         lines[0] = new Line2D.Double(0, 45, 90, 45);
         lines[1] = new Line2D.Double(45, 0, 45, 90);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -206,7 +206,7 @@ class CompositionGuideTest {
         lines[4] = new Line2D.Double(50, 0, 50, 100);
         lines[5] = new Line2D.Double(100, 0, 100, 100);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -227,7 +227,7 @@ class CompositionGuideTest {
         lines[4] = new Line2D.Double(51, 0, 51, 102);
         lines[5] = new Line2D.Double(101, 0, 101, 102);
 
-        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
+        verify(guidesRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(lines)));
     }
 
     @Test
@@ -246,8 +246,8 @@ class CompositionGuideTest {
 class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
     private final List<Line2D> shapes;
 
-    public DrawMatcherLine2D(List<Line2D> shapes) {
-        this.shapes = shapes;
+    public DrawMatcherLine2D(Line2D[] shapes) {
+        this.shapes = Arrays.asList(shapes);
     }
 
     @Override

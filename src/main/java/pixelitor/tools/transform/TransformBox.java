@@ -31,8 +31,7 @@ import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.io.IOException;
@@ -73,6 +72,10 @@ public class TransformBox implements ToolWidget, Serializable {
     private transient Transformable owner;
 
     private transient View view;
+
+    // Keep track of the rotated status because pixel
+    // snapping should not work after rotating.
+    private boolean rotated;
 
     // the starting positions of the box in component and image space,
     // corresponding to the initial size of the transformed object
@@ -121,10 +124,10 @@ public class TransformBox implements ToolWidget, Serializable {
         double northY = origImRect.getY();
         double southY = northY + origImRect.getHeight();
 
-        PPoint nwLoc = PPoint.eagerFromIm(westX, northY, view);
-        PPoint neLoc = PPoint.eagerFromIm(eastX, northY, view);
-        PPoint seLoc = PPoint.eagerFromIm(eastX, southY, view);
-        PPoint swLoc = PPoint.eagerFromIm(westX, southY, view);
+        PPoint nwLoc = PPoint.fromIm(westX, northY, view);
+        PPoint neLoc = PPoint.fromIm(eastX, northY, view);
+        PPoint seLoc = PPoint.fromIm(eastX, southY, view);
+        PPoint swLoc = PPoint.fromIm(westX, southY, view);
 
         // initialize the corner handles
         nw = new CornerHandle("NW", this, true,
@@ -138,7 +141,7 @@ public class TransformBox implements ToolWidget, Serializable {
 
         // initialize the rotation handle
         Point2D center = Geometry.midPoint(ne, sw);
-        PPoint rotPos = PPoint.eagerFromCo(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE, view);
+        PPoint rotPos = new PPoint(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE, view);
         rot = new RotationHandle("rot", this, rotPos, view);
 
         initBox();
@@ -255,6 +258,7 @@ public class TransformBox implements ToolWidget, Serializable {
         double cx = c.getX();
         double cy = c.getY();
         coTransform(AffineTransform.getRotateInstance(rad - angleBefore, cx, cy));
+        setRotated(true);
     }
 
     /**
@@ -383,8 +387,8 @@ public class TransformBox implements ToolWidget, Serializable {
      * Returns true if the transform box handles the given mouse pressed event
      */
     public boolean processMousePressed(PMouseEvent e) {
-        double x = e.getCoX();
-        double y = e.getCoY();
+        double x = e.getOrigCoX();
+        double y = e.getOrigCoY();
         DraggablePoint hit = findHandleAt(x, y);
         if (hit != null) {
             mousePressedOn(hit, x, y);
@@ -392,7 +396,7 @@ public class TransformBox implements ToolWidget, Serializable {
         } else {
             activePoint = null;
             if (contains(x, y)) {
-                startWholeBoxDrag(x, y);
+                startWholeBoxDrag(e.getCoX(), e.getCoY());
                 return true;
             }
         }
@@ -401,6 +405,8 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     public void mousePressedOn(DraggablePoint handle, double x, double y) {
+        View.toolSnappingChanged(!rotated && handle.shouldSnap(), false);
+
         handle.setActive(true);
         saveState();
         handle.mousePressed(x, y);
@@ -412,6 +418,7 @@ public class TransformBox implements ToolWidget, Serializable {
         wholeBoxDragStartCoX = coX;
         wholeBoxDragStartCoY = coY;
         saveState();
+        View.toolSnappingChanged(!rotated, false);
     }
 
     /**
@@ -573,6 +580,10 @@ public class TransformBox implements ToolWidget, Serializable {
         updateDirections();
     }
 
+    public void setRotated(boolean rotated) {
+        this.rotated = rotated;
+    }
+
     /**
      * Transforms the box geometry with the given component-space transformation
      */
@@ -698,8 +709,7 @@ public class TransformBox implements ToolWidget, Serializable {
         node.addDouble("scale Y", calcScaleY());
 
         AffineTransform at = calcImTransform();
-        DebugNode transformNode = DebugNodes.createTransformNode(at, "transform");
-        node.add(transformNode);
+        node.add(DebugNodes.createTransformNode(at, "transform"));
 
         return node;
     }
@@ -726,6 +736,7 @@ public class TransformBox implements ToolWidget, Serializable {
         m.se = se.getLocationCopy();
         m.sw = sw.getLocationCopy();
         m.angle = angle;
+        m.rotated = rotated;
         return m;
     }
 
@@ -735,6 +746,7 @@ public class TransformBox implements ToolWidget, Serializable {
         se.setLocationOnlyForThis(m.se);
         sw.setLocationOnlyForThis(m.sw);
         setAngle(m.angle);
+        rotated = m.rotated;
 
         cornerHandlesMoved();
 
@@ -779,6 +791,7 @@ public class TransformBox implements ToolWidget, Serializable {
         private PPoint ne;
         private PPoint se;
         private PPoint sw;
+        private boolean rotated = false;
 
         private double angle = 0.0;
 
@@ -790,6 +803,8 @@ public class TransformBox implements ToolWidget, Serializable {
             copy.ne = ne;
             copy.se = se;
             copy.sw = sw;
+
+            copy.rotated = rotated;
             return copy;
         }
     }

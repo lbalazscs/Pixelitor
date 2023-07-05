@@ -2617,11 +2617,11 @@ public class AssertJSwingTest {
 
         app.clickTool(Tools.CROP);
 
-        List<Boolean> checkBoxStates = Arrays.asList(Boolean.TRUE, Boolean.FALSE);
+        List<Boolean> checkBoxStates = List.of(Boolean.TRUE, Boolean.FALSE);
         for (Boolean allowGrowing : checkBoxStates) {
-            for (Boolean deleteCroppedPixels : checkBoxStates) {
+            for (Boolean deleteCropped : checkBoxStates) {
                 selectCheckBox("allowGrowingCB", allowGrowing);
-                selectCheckBox("deleteCroppedPixelsCB", deleteCroppedPixels);
+                selectCheckBox("deleteCroppedCB", deleteCropped);
 
                 cropFromCropTool();
             }

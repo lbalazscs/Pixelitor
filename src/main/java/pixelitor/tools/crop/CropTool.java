@@ -78,7 +78,7 @@ public class CropTool extends DragTool {
     private JSpinner widthSpinner;
     private JSpinner heightSpinner;
 
-    private JCheckBox deleteCroppedPixelsCB;
+    private JCheckBox deleteCroppedCB;
     private JCheckBox allowGrowingCB;
     private static final String DELETE_CROPPED_TEXT = "Delete Cropped Pixels";
     private static final String ALLOW_GROWING_TEXT = "Allow Growing";
@@ -94,6 +94,7 @@ public class CropTool extends DragTool {
 
         GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
         compositionGuide = new CompositionGuide(renderer);
+        pixelSnapping = true;
     }
 
     /**
@@ -191,8 +192,8 @@ public class CropTool extends DragTool {
     }
 
     private void addCropControlCheckboxes() {
-        deleteCroppedPixelsCB = settingsPanel.addCheckBox(
-            DELETE_CROPPED_TEXT, true, "deleteCroppedPixelsCB",
+        deleteCroppedCB = settingsPanel.addCheckBox(
+            DELETE_CROPPED_TEXT, true, "deleteCroppedCB",
             "If not checked, only the canvas gets smaller");
 
         allowGrowingCB = settingsPanel.addCheckBox(
@@ -202,12 +203,12 @@ public class CropTool extends DragTool {
 
     private void addCropButton() {
         cropButton = new JButton("Crop");
-        cropButton.addActionListener(e -> executeCropCommand());
+        cropButton.addActionListener(e -> crop());
         settingsPanel.add(cropButton);
     }
 
     private void addCancelButton() {
-        cancelButton.addActionListener(e -> executeCancelCommand());
+        cancelButton.addActionListener(e -> cancel());
         settingsPanel.add(cancelButton);
     }
 
@@ -228,7 +229,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        if (executeCropCommand()) {
+        if (crop()) {
             e.consume();
         }
     }
@@ -328,7 +329,7 @@ public class CropTool extends DragTool {
         Rectangle coCanvasBounds = comp.getCanvas().getCoBounds(view);
 
         Area darkAreaShape = new Area(coCanvasBounds);
-        darkAreaShape.subtract(new Area(cropRect.getCo2D()));
+        darkAreaShape.subtract(new Area(cropRect.getCo()));
 
         g2.setColor(BLACK);
         g2.setComposite(maskComposite);
@@ -341,7 +342,7 @@ public class CropTool extends DragTool {
     // Paint the handles and the guides.
     private void paintBox(Graphics2D g2, PRectangle cropRect) {
         compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
-        compositionGuide.draw(cropRect.getCo2D(), g2);
+        compositionGuide.draw(cropRect.getCo(), g2);
 
         cropBox.paint(g2);
     }
@@ -372,7 +373,7 @@ public class CropTool extends DragTool {
     /**
      * Returns the crop rectangle
      */
-    public PRectangle getCropRect(View view) {
+    private PRectangle getCropRect(View view) {
         if (state == INITIAL_DRAG) {
             return drag.toPosPRect(view);
         } else if (state == TRANSFORM) {
@@ -441,27 +442,31 @@ public class CropTool extends DragTool {
 
     @Override
     public void escPressed() {
-        executeCancelCommand();
+        cancel();
     }
 
-    // return true if a crop was executed
-    private boolean executeCropCommand() {
+    // returns true if a crop was executed
+    private boolean crop() {
         if (state != TRANSFORM) {
             return false;
         }
 
         Rectangle2D cropRect = getCropRect(Views.getActive()).getIm();
         if (cropRect.isEmpty()) {
+            Messages.showInfo("Empty crop rectangle",
+                    "Can't crop to %dx%d image.".formatted(
+                            (int) cropRect.getWidth(),
+                            (int) cropRect.getHeight()));
             return false;
         }
 
         Crop.toolCropActiveImage(cropRect,
-            allowGrowingCB.isSelected(), deleteCroppedPixelsCB.isSelected());
+            allowGrowingCB.isSelected(), deleteCroppedCB.isSelected());
         resetInitialState();
         return true;
     }
 
-    private void executeCancelCommand() {
+    private void cancel() {
         if (state != TRANSFORM) {
             return;
         }
@@ -473,7 +478,7 @@ public class CropTool extends DragTool {
     @Override
     public void otherKeyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            if (executeCropCommand()) {
+            if (crop()) {
                 e.consume();
             }
             // otherwise the "Enter" key event might be used elsewhere,
@@ -516,7 +521,7 @@ public class CropTool extends DragTool {
         maskOpacity.saveStateTo(preset);
         preset.put("Guides", guidesCB.getSelectedItem().toString());
 
-        preset.putBoolean(DELETE_CROPPED_TEXT, deleteCroppedPixelsCB.isSelected());
+        preset.putBoolean(DELETE_CROPPED_TEXT, deleteCroppedCB.isSelected());
         preset.putBoolean(ALLOW_GROWING_TEXT, allowGrowingCB.isSelected());
     }
 
@@ -527,7 +532,7 @@ public class CropTool extends DragTool {
         CompositionGuideType guideType = preset.getEnum("Guides", CompositionGuideType.class);
         guidesCB.setSelectedItem(guideType);
 
-        deleteCroppedPixelsCB.setSelected(preset.getBoolean(DELETE_CROPPED_TEXT));
+        deleteCroppedCB.setSelected(preset.getBoolean(DELETE_CROPPED_TEXT));
         allowGrowingCB.setSelected(preset.getBoolean(ALLOW_GROWING_TEXT));
     }
 

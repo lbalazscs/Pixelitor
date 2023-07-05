@@ -82,8 +82,7 @@ public class FilterButtonModel implements FilterSetting {
      * (can be useful when using ThreadLocalRandom)
      */
     public static FilterButtonModel createNoOpReseed() {
-        return createReseed(() -> {
-        });
+        return createReseed(() -> {});
     }
 
     @Override

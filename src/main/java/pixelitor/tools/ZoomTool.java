@@ -116,7 +116,7 @@ public class ZoomTool extends DragTool {
             return;
         }
 
-        Shapes.drawVisibly(g2, zoomRect.getCo2D());
+        Shapes.drawVisibly(g2, zoomRect.getCo());
     }
 
     private PRectangle getZoomRect(View view) {

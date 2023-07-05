@@ -29,9 +29,11 @@ import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
@@ -60,8 +62,6 @@ import static pixelitor.utils.Threads.*;
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
  */
 public class View extends JComponent implements MouseListener, MouseMotionListener, Debuggable {
-    private static final boolean pixelSnapping = true;
-
     private Composition comp;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
@@ -86,6 +86,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
 
     private static boolean showPixelGrid = false;
+
+    // true if the snapping preference is set and the tool also approves
+    private static boolean pixelSnapping = false;
 
     public View(Composition comp) {
         assert !GUIMode.isUnitTesting() : "Swing component in unit test";
@@ -702,6 +705,28 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         imToCo.invalidate();
         coToIm.invalidate();
+    }
+
+    public static boolean isPixelSnapping() {
+        return pixelSnapping;
+    }
+
+    public static void toolSnappingChanged(boolean newValue, boolean force) {
+        if (force) {
+            pixelSnapping = newValue;
+        } else {
+            pixelSnapping = newValue && AppPreferences.getFlag(AppPreferences.FLAG_PIXEL_SNAP);
+        }
+    }
+
+    public static void snappingSettingChanged(boolean newValue) {
+        AppPreferences.setFlag(AppPreferences.FLAG_PIXEL_SNAP, newValue);
+        Tool currentTool = Tools.getCurrent();
+        if (currentTool == Tools.CROP) {
+            pixelSnapping = true; // the crop tool always snaps
+        } else {
+            pixelSnapping = newValue && currentTool.hasPixelSnapping();
+        }
     }
 
     public double componentXToImageSpace(double coX) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class CornerHandle extends PositionHandle {
         // always accurate, even in boxes in inactive shape layers
         PPoint pos;
         if (view != null) {
-            pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+            pos = PPoint.fromIm(getImX(), getImY(), view);
         } else {
             pos = PPoint.lazyFromIm(getImX(), getImY(), view);
         }

@@ -67,6 +67,10 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     // altPressed calls, but only the first one is relevant
     protected boolean altDown = false;
 
+    // Whether pixel snapping should be turned on as far as the tool is concerned.
+    // The actual snapping also depends on the setting in the Preferences.
+    protected boolean pixelSnapping = false;
+
     protected Tool(String name, char activationKey, String toolMessage, Cursor cursor) {
         this.activationKey = activationKey;
         assert Character.isUpperCase(activationKey);
@@ -125,9 +129,14 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         return activationKey;
     }
 
+    public boolean hasPixelSnapping() {
+        return pixelSnapping;
+    }
+
     protected void toolStarted() {
         GlobalEvents.setKeyListener(this);
         Views.setCursorForAll(cursor);
+        View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
     }
 
     protected void toolEnded() {

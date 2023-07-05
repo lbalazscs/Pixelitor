@@ -134,6 +134,7 @@ public class ShapesTool extends DragTool {
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
         typeSettingsMap = new EnumMap<>(ShapeType.class);
+        pixelSnapping = true;
     }
 
     @Override

@@ -20,10 +20,7 @@ package pixelitor;
 import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.GUIMessageHandler;
-import pixelitor.gui.MouseZoomMethod;
-import pixelitor.gui.PanMethod;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
@@ -37,7 +34,9 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-import java.awt.*;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -242,6 +241,10 @@ public class Pixelitor {
         if (GUIMode.isFinal()) {
             // in the final builds nothing should run
             return;
+        }
+
+        if (Views.getNumViews() > 0) {
+            AutoZoom.FIT_SPACE_ACTION.actionPerformed(null);
         }
 
 //        NewImage.addNewImage(FillType.WHITE, 700, 500, "Test");

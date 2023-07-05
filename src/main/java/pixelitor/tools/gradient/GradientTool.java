@@ -92,6 +92,7 @@ public class GradientTool extends DragTool {
             Cursors.DEFAULT, true);
         spaceDragStartPoint = true;
         state = NO_INTERACTION;
+        pixelSnapping = true;
     }
 
     @Override

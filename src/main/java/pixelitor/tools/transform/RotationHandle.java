@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class RotationHandle extends DraggablePoint {
     public RotationHandle copy(TransformBox newBox) {
         PPoint pos;
         if (view != null) {
-            pos = PPoint.eagerFromIm(getImX(), getImY(), view);
+            pos = PPoint.fromIm(getImX(), getImY(), view);
         } else {
             pos = PPoint.lazyFromIm(getImX(), getImY(), view);
         }
@@ -86,6 +86,7 @@ public class RotationHandle extends DraggablePoint {
         double angle = reCalcAngle(newX, newY, false);
 
         box.coTransform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+        box.setRotated(true);
     }
 
     @Override
@@ -133,4 +134,7 @@ public class RotationHandle extends DraggablePoint {
         }
     }
 
+    public boolean shouldSnap() {
+        return false;
+    }
 }

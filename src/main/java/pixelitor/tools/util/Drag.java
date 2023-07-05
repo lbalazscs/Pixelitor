@@ -144,12 +144,16 @@ public class Drag implements Serializable {
     public void setStart(PPoint e) {
         assert e.getView() != null;
 
-        View view = e.getView();
+//        View view = e.getView();
+
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
-        imStartX = view.componentXToImageSpace(coStartX);
-        imStartY = view.componentYToImageSpace(coStartY);
+
+        imStartX = e.getImX();
+        imStartY = e.getImY();
+//        imStartX = view.componentXToImageSpace(coStartX);
+//        imStartY = view.componentYToImageSpace(coStartY);
 
         hasCoCoords = true;
     }

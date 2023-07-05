@@ -62,6 +62,7 @@ public class PreferencesPanel extends JTabbedPane {
     private JComboBox<Item> thumbSizeCB;
     private JComboBox<MouseZoomMethod> zoomMethodCB;
     private JComboBox<PanMethod> panMethodCB;
+    private JCheckBox snapCB;
     private JTextField magickDirTF;
     private JCheckBox nativeChoosersCB;
     private JCheckBox experimentalCB;
@@ -248,6 +249,10 @@ public class PreferencesPanel extends JTabbedPane {
         panMethodCB.setName("panMethod");
         gbh.addLabelAndControlNoStretch("Pan with:", panMethodCB);
 
+        snapCB = new JCheckBox("", AppPreferences.getFlag(AppPreferences.FLAG_PIXEL_SNAP));
+        snapCB.setToolTipText("Snap vector tools to the pixel grid");
+        gbh.addLabelAndControl("Snap Vector Tools to Pixels:", snapCB);
+
         mousePanel.setBorder(EMPTY_BORDER);
         return mousePanel;
     }
@@ -388,6 +393,7 @@ public class PreferencesPanel extends JTabbedPane {
         // these can't be set interactively => set it here
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
+        View.snappingSettingChanged(snapCB.isSelected());
         AppPreferences.magickDirName = magickDirName;
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
         GUIMode.enableExperimental(experimentalCB.isSelected());

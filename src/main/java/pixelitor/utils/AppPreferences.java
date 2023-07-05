@@ -42,7 +42,10 @@ import pixelitor.tools.Tools;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -107,12 +110,18 @@ public final class AppPreferences {
     private static final String UI_FONT_SIZE_KEY = "ui_font_size";
     private static final String UI_FONT_TYPE_KEY = "ui_font_type";
 
+    // each bit of the "flags" represents a boolean flag in the app
+    private static final String FLAGS_KEY = "flags";
+    private static long flags = 0;
+    public static final int FLAG_PIXEL_SNAP = 0;
+
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
     public static String magickDirName = "";
 
     static {
         loadMagickDir();
+        loadFlags();
     }
 
     private AppPreferences() {
@@ -399,6 +408,7 @@ public final class AppPreferences {
         saveMouseZoom();
         savePan();
         saveMagickDir();
+        saveFlags();
         saveExperimentalFeatures();
         saveNativeChoosers();
     }
@@ -553,6 +563,24 @@ public final class AppPreferences {
 
     private static void saveMagickDir() {
         mainNode.put(MAGICK_DIR_KEY, magickDirName);
+    }
+
+    private static void loadFlags() {
+        flags = mainNode.getLong(FLAGS_KEY, 0);
+    }
+
+    private static void saveFlags() {
+        mainNode.putLong(FLAGS_KEY, flags);
+    }
+
+    public static boolean getFlag(int index) {
+        long mask = 1L << index;
+        return (flags & mask) != 0;
+    }
+
+    public static void setFlag(int index, boolean newValue) {
+        long mask = 1L << index;
+        flags = newValue ? (flags | mask) : (flags & ~mask);
     }
 
     public static boolean loadExperimentalFeatures() {

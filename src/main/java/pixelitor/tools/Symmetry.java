@@ -216,7 +216,7 @@ public enum Symmetry {
             // translate back to the original coordinate system
             double finalX = compCenterX + rotX;
             double finalY = compCenterY - rotY;
-            return PPoint.eagerFromIm(finalX, finalY, view);
+            return PPoint.fromIm(finalX, finalY, view);
         }
 
         private static PPoint getRotatedPoint2(View view, double relX, double relY) {
@@ -227,7 +227,7 @@ public enum Symmetry {
             // translate back to the original coordinate system
             double finalX = compCenterX + rotX;
             double finalY = compCenterY - rotY;
-            return PPoint.eagerFromIm(finalX, finalY, view);
+            return PPoint.fromIm(finalX, finalY, view);
         }
 
         @Override

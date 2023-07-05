@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,7 +121,7 @@ public class LazyMouseBrush extends BrushDecorator {
             drawX += advanceDX;
             drawY += advanceDY;
 
-            PPoint drawPoint = PPoint.eagerFromIm(drawX, drawY, view);
+            PPoint drawPoint = PPoint.fromIm(drawX, drawY, view);
             delegate.continueTo(drawPoint);
 
             dx = mouseX - drawX;
@@ -147,6 +147,6 @@ public class LazyMouseBrush extends BrushDecorator {
     }
 
     public PPoint getDrawPoint() {
-        return PPoint.eagerFromIm(drawX, drawY, view);
+        return PPoint.fromIm(drawX, drawY, view);
     }
 }

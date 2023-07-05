@@ -74,6 +74,7 @@ public class SelectionTool extends DragTool {
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
         spaceDragStartPoint = true;
+        pixelSnapping = true;
     }
 
     @Override

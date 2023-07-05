@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class MovingPoint extends DraggablePoint {
     private final AnchorPoint prevAnchor;
 
     public MovingPoint(double coX, double coY, AnchorPoint prevAnchor, View view) {
-        super("moving", PPoint.eagerFromCo(coX, coY, view), view, null, null);
+        super("moving", new PPoint(coX, coY, view), view, null, null);
         this.prevAnchor = prevAnchor;
     }
 

@@ -266,6 +266,17 @@ public class DraggablePoint extends Point2D.Double {
         double dy = y - dragStartY;
         double newX = origX + dx;
         double newY = origY + dy;
+
+//        if (View.pixelSnapping) {
+//            System.out.printf("DraggablePoint::mouseDragged: BEFORE newX = %.2f, newY = %.2f%n", newX, newY);
+//            imX = view.componentXToImageSpace(newX);
+//            imY = view.componentYToImageSpace(newY);
+//            // TODO this has unnecessary conversions
+//            newX = view.imageXToComponentSpace(imX);
+//            newY = view.imageYToComponentSpace(imY);
+//            System.out.printf("DraggablePoint::mouseDragged AFTER: newX = %.2f, newY = %.2f%n", newX, newY);
+//        }
+
         if (constrained) {
             setConstrainedLocation(newX, newY);
         } else {
@@ -384,7 +395,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public PPoint asPPoint() {
-        return PPoint.lazyFromCo(x, y, view);
+        return new PPoint(x, y, imX, imY, view);
     }
 
     // this is supposed to be called after a mouse released event
@@ -419,6 +430,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public String getName() {
         return name;
+    }
+
+    public boolean shouldSnap() {
+        return true;
     }
 
     @Override
