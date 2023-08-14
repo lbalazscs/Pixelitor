@@ -134,6 +134,7 @@ public class RotationHandle extends DraggablePoint {
         }
     }
 
+    @Override
     public boolean shouldSnap() {
         return false;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
     public static final ShapeType DEFAULT_SHAPE = ShapeType.ARROW;
     public static final double DEFAULT_SPACING_RATIO = 2.3;
+    private static final int DEFAULT_SPACING = (int) Math.round(DEFAULT_SPACING_RATIO * 100);
     private final ShapeDabsBrushSettings settings;
     private BooleanParam angleAware;
     private RangeParam angleJitter;
@@ -54,8 +55,7 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
 
     private void addSpacingSelector(DabsBrushSettings settings) {
         RangeParam spacing = new RangeParam("Spacing (radius %)", 1,
-            (int) Math.round(DEFAULT_SPACING_RATIO * 100),
-            1000, true, NONE);
+            DEFAULT_SPACING, 1000, true, NONE);
         addSlider(spacing, "spacing");
         spacing.setAdjustmentListener(
             () -> settings.changeSpacing(new RadiusRatioSpacing(spacing.getPercentage())));

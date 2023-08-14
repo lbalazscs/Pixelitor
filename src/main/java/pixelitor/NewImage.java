@@ -81,10 +81,6 @@ public final class NewImage {
         return new PAction(NEW_IMAGE_STRING + "...", NewImage::showInDialog);
     }
 
-    public static Dimension getLastSize() {
-        return lastSize;
-    }
-
     public static String generateTitle() {
         return "Untitled " + untitledCount++;
     }

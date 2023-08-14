@@ -43,7 +43,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
 
-import java.awt.*;
+import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.util.HashMap;
@@ -120,21 +120,6 @@ public class SplashImageCreator {
         var comp = NewImage.addNewImage(FillType.WHITE,
             SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
-
-//        for (int i = 0; i < 3; i++) {
-//            GradientType gradientType = Rnd.chooseFrom(GradientType.values());
-//
-//            Drag randomDrag = Drag.createRandom(
-//                SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
-//            Gradient gradient = new Gradient(randomDrag,
-//                gradientType, REFLECT, FG_TO_BG, false, MULTIPLY, 1.0f);
-//            gradient.drawOn(layer);
-//        }
-//
-//        layer = addNewLayer(comp, "rendered");
-//        var brushedMetal = new JHBrushedMetal();
-//        layer.startFilter(brushedMetal, FILTER_WITHOUT_DIALOG);
-//        layer.setBlendingMode(MULTIPLY, true, true);
 
         layer.replaceWithSmartObject();
         SmartObject so = (SmartObject) comp.getLayer(0);

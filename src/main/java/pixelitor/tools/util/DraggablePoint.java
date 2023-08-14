@@ -267,16 +267,6 @@ public class DraggablePoint extends Point2D.Double {
         double newX = origX + dx;
         double newY = origY + dy;
 
-//        if (View.pixelSnapping) {
-//            System.out.printf("DraggablePoint::mouseDragged: BEFORE newX = %.2f, newY = %.2f%n", newX, newY);
-//            imX = view.componentXToImageSpace(newX);
-//            imY = view.componentYToImageSpace(newY);
-//            // TODO this has unnecessary conversions
-//            newX = view.imageXToComponentSpace(imX);
-//            newY = view.imageYToComponentSpace(imY);
-//            System.out.printf("DraggablePoint::mouseDragged AFTER: newX = %.2f, newY = %.2f%n", newX, newY);
-//        }
-
         if (constrained) {
             setConstrainedLocation(newX, newY);
         } else {
@@ -307,10 +297,6 @@ public class DraggablePoint extends Point2D.Double {
             // this shouldn't happen, but it does very rarely in random GUI tests
             assert this.view != null;
             assert view != null;
-//            if (RandomGUITest.isRunning()) {
-//                throw new AssertionError("this view = " + this.view.getName()
-//                    + ", argument view = " + view.getName());
-//            }
             this.view = view; // the new view must be correct
         }
 
@@ -392,10 +378,6 @@ public class DraggablePoint extends Point2D.Double {
         Point p = new Point((int) x, (int) y);
         SwingUtilities.convertPointToScreen(p, view);
         return p;
-    }
-
-    public PPoint asPPoint() {
-        return new PPoint(x, y, imX, imY, view);
     }
 
     // this is supposed to be called after a mouse released event

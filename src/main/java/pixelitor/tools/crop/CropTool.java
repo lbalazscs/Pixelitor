@@ -185,7 +185,7 @@ public class CropTool extends DragTool {
             0, 0, max, 1));
         spinner.addChangeListener(whChangeListener);
         spinner.setToolTipText(toolTip);
-        // In fact setting it to 3 columns seems enough
+        // Setting it to 3 columns seems enough
         // for the range 1-9999, but leave it as 4 for safety
         ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setColumns(4);
         return spinner;
@@ -454,9 +454,9 @@ public class CropTool extends DragTool {
         Rectangle2D cropRect = getCropRect(Views.getActive()).getIm();
         if (cropRect.isEmpty()) {
             Messages.showInfo("Empty crop rectangle",
-                    "Can't crop to %dx%d image.".formatted(
-                            (int) cropRect.getWidth(),
-                            (int) cropRect.getHeight()));
+                "Can't crop to %dx%d image.".formatted(
+                    (int) cropRect.getWidth(),
+                    (int) cropRect.getHeight()));
             return false;
         }
 

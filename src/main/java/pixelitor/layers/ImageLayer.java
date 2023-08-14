@@ -348,16 +348,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
-//    private BufferedImage getMaskedImage() {
-//        if (mask == null || !isMaskEnabled()) {
-//            return image;
-//        } else {
-//            BufferedImage copy = copyImage(image);
-//            mask.applyToImage(copy);
-//            return copy;
-//        }
-//    }
-
     /**
      * Returns the image that should be shown by this layer
      * without considering the canvas or the translation.

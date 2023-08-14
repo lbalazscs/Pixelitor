@@ -223,10 +223,9 @@ public final class AppPreferences {
     }
 
     private static void saveNewImageSize() {
-        Dimension lastSize = NewImage.getLastSize();
-        if (lastSize != null) {
-            mainNode.putInt(NEW_IMAGE_WIDTH, lastSize.width);
-            mainNode.putInt(NEW_IMAGE_HEIGHT, lastSize.height);
+        if (NewImage.lastSize != null) {
+            mainNode.putInt(NEW_IMAGE_WIDTH, NewImage.lastSize.width);
+            mainNode.putInt(NEW_IMAGE_HEIGHT, NewImage.lastSize.height);
         }
     }
 

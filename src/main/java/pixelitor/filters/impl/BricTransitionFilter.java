@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
     public static final int COLLAPSE = 10;
     public static final int CURTAIN = 11;
     public static final int DIAMONDS = 12;
-//    public static final int DOCUMENTARY = 13;
+    //    public static final int DOCUMENTARY = 13;
     public static final int DOTS = 14;
     public static final int FLURRY = 15;
     public static final int FUNKY_WIPE = 16;

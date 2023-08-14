@@ -31,7 +31,8 @@ import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.io.IOException;
@@ -202,7 +203,9 @@ public class TransformBox implements ToolWidget, Serializable {
         if (other.beforeMovement == null) {
             this.beforeMovement = null;
         } else {
-            this.beforeMovement = other.beforeMovement.copy();
+            // sharing the references is OK,
+            // because memento objects are immutable
+            this.beforeMovement = other.beforeMovement;
         }
     }
 
@@ -730,14 +733,7 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     private Memento copyState() {
-        Memento m = new Memento();
-        m.nw = nw.getLocationCopy();
-        m.ne = ne.getLocationCopy();
-        m.se = se.getLocationCopy();
-        m.sw = sw.getLocationCopy();
-        m.angle = angle;
-        m.rotated = rotated;
-        return m;
+        return new Memento(this);
     }
 
     public void restoreFrom(Memento m) {
@@ -787,25 +783,22 @@ public class TransformBox implements ToolWidget, Serializable {
      * so that it can be returned to this state later.
      */
     public static class Memento {
-        private PPoint nw;
-        private PPoint ne;
-        private PPoint se;
-        private PPoint sw;
-        private boolean rotated = false;
+        private final PPoint nw;
+        private final PPoint ne;
+        private final PPoint se;
+        private final PPoint sw;
 
-        private double angle = 0.0;
+        private final double angle;
+        private final boolean rotated;
 
-        public Memento copy() {
-            Memento copy = new Memento();
-            // sharing the references should be OK,
-            // because memento objects are never mutated
-            copy.nw = nw;
-            copy.ne = ne;
-            copy.se = se;
-            copy.sw = sw;
+        public Memento(TransformBox box) {
+            this.nw = box.nw.getLocationCopy();
+            this.ne = box.ne.getLocationCopy();
+            this.se = box.se.getLocationCopy();
+            this.sw = box.sw.getLocationCopy();
 
-            copy.rotated = rotated;
-            return copy;
+            this.angle = box.angle;
+            this.rotated = box.rotated;
         }
     }
 }

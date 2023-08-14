@@ -385,7 +385,7 @@ public class ShapesTool extends DragTool {
         setState(TRANSFORM);
         History.add(new CreateBoxedShapeEdit(e.getComp(), styledShape, transformBox));
 
-        updateStroke(); // is this still necessary?
+        updateStroke(); // TODO is this still necessary?
 
         if (isEditingShapesLayer()) {
             shapesLayer.setTransformBox(transformBox);

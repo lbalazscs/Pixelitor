@@ -95,8 +95,8 @@ public class GradientHandles implements ToolWidget {
         Drag drag;
         if (movingPoint == end) {
             drag = new Drag();
-            drag.setStart(start.asPPoint());
-            drag.setEnd(end.asPPoint());
+            drag.setStart(start.getLocationCopy());
+            drag.setEnd(end.getLocationCopy());
         } else if (movingPoint == start) {
             // if the user is moving the start point, then return
             // a Drag that points backwards, but calculates
@@ -107,8 +107,8 @@ public class GradientHandles implements ToolWidget {
                     return calcReversedAngle();
                 }
             };
-            drag.setStart(end.asPPoint());
-            drag.setEnd(start.asPPoint());
+            drag.setStart(end.getLocationCopy());
+            drag.setEnd(start.getLocationCopy());
         } else {
             throw new IllegalStateException("movingPoint = " + movingPoint);
         }

@@ -119,22 +119,21 @@ public class FileChoosers {
     }
 
     private static boolean saveSelectedFile(Composition comp, File file, Object extraInfo) {
-        if (file != null) {
-            String extension = picker.getSelectedSaveExtension(file);
-            if (extension == null) {
-                extension = FileFormat.getLastSaved().toString();
-                file = new File(file.getAbsolutePath() + "." + extension);
-            }
-            if (!FileUtils.isSupportedOutputExt(extension)) {
-                Messages.showError("Unsupported Extension",
-                    "<html> The extension <b>" + extension + "</b> isn't supported.");
-                return false;
-            }
-            IO.saveToChosenFile(comp, file, extraInfo, extension);
-            return true;
+        if (file == null) {
+            return false;
         }
-
-        return false;
+        String extension = picker.getSelectedSaveExtension(file);
+        if (extension == null) {
+            extension = FileFormat.getLastSaved().toString();
+            file = new File(file.getAbsolutePath() + "." + extension);
+        }
+        if (!FileUtils.isSupportedOutputExt(extension)) {
+            Messages.showError("Unsupported Extension",
+                "<html> The extension <b>" + extension + "</b> isn't supported.");
+            return false;
+        }
+        IO.saveToChosenFile(comp, file, extraInfo, extension);
+        return true;
     }
 
     /**

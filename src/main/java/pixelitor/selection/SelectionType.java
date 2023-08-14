@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,16 +47,8 @@ public enum SelectionType {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             Drag drag = (Drag) mouseInfo;
-            boolean createNew;
-            if (oldShape == null) {
-                createNew = true;
-            } else if (oldShape instanceof GeneralPath) {
-                createNew = false;
-            } else { // it is an Area, meaning that a new shape has been started
-                createNew = true;
-            }
 
-            if (createNew) {
+            if (createNewShape(oldShape)) {
                 GeneralPath p = new GeneralPath();
                 p.moveTo(drag.getStartX(), drag.getStartY());
                 p.lineTo(drag.getEndX(), drag.getEndY());
@@ -72,16 +64,8 @@ public enum SelectionType {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             PMouseEvent pe = (PMouseEvent) mouseInfo;
-            boolean createNew;
-            if (oldShape == null) {
-                createNew = true;
-            } else if (oldShape instanceof GeneralPath) {
-                createNew = false;
-            } else { // it is an Area, meaning that a new shape has been started
-                createNew = true;
-            }
 
-            if (createNew) {
+            if (createNewShape(oldShape)) {
                 GeneralPath p = new GeneralPath();
                 p.moveTo(pe.getImX(), pe.getImY());
                 return p;
@@ -108,6 +92,18 @@ public enum SelectionType {
 
     public boolean displayWidthHeight() {
         return displayWH;
+    }
+
+    private static boolean createNewShape(Shape oldShape) {
+        boolean createNew;
+        if (oldShape == null) {
+            createNew = true;
+        } else if (oldShape instanceof GeneralPath) {
+            createNew = false;
+        } else { // it is an Area, meaning that a new shape has been started
+            createNew = true;
+        }
+        return createNew;
     }
 
     @Override

@@ -152,8 +152,6 @@ public class Drag implements Serializable {
 
         imStartX = e.getImX();
         imStartY = e.getImY();
-//        imStartX = view.componentXToImageSpace(coStartX);
-//        imStartY = view.componentYToImageSpace(coStartY);
 
         hasCoCoords = true;
     }

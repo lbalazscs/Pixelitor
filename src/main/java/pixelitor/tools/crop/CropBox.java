@@ -25,7 +25,9 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;

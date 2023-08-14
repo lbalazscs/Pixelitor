@@ -654,8 +654,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void increaseZoom(Point mousePos) {
-        ZoomLevel newZoom = zoomLevel.zoomIn();
-        setZoom(newZoom, mousePos);
+        setZoom(zoomLevel.zoomIn(), mousePos);
     }
 
     public void decreaseZoom() {
@@ -663,8 +662,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void decreaseZoom(Point mousePos) {
-        ZoomLevel newZoom = zoomLevel.zoomOut();
-        setZoom(newZoom, mousePos);
+        setZoom(zoomLevel.zoomOut(), mousePos);
     }
 
     // it seems that all Swing resizing goes through this method, so we don't
@@ -932,7 +930,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         node.addInt("view width", getWidth());
         node.addInt("view height", getHeight());
 
-        var viewContainer = getViewContainer();
         if (viewContainer instanceof ImageFrame frame) {
             node.addInt("frame width", frame.getWidth());
             node.addInt("frame height", frame.getHeight());

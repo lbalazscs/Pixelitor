@@ -652,6 +652,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
         if (shape == null) {
             throw new IllegalStateException("state = " + state);
         }
+
         return true;
     }
 

@@ -151,10 +151,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         }
 
         String fileName = file.getName().toLowerCase();
-        if (fileName.endsWith("pxc")) {
-            return false;
-        }
-        if (fileName.endsWith("ora")) {
+        if (fileName.endsWith("pxc") || fileName.endsWith("ora")) {
             return false;
         }
 
