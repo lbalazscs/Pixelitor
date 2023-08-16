@@ -529,7 +529,7 @@ public class Shapes {
             double cp2X = cx + distantRadius * Math.cos(startAngle);
             double cp2Y = cy + distantRadius * Math.sin(startAngle);
 
-            // p2 is at half point between cp2 and cp3
+            // p2 is exactly halfway between cp2 and cp3
             double cp3X = p2X + (p2X - cp2X);
             double cp3Y = p2Y + (p2Y - cp2Y);
 

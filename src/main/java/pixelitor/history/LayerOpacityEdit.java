@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.history;
 
 import pixelitor.layers.Layer;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -69,7 +68,6 @@ public class LayerOpacityEdit extends PixelitorEdit {
         layer = null;
     }
 
-    @VisibleForTesting
     public Layer getLayer() {
         return layer;
     }

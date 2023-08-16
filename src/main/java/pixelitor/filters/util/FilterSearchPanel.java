@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import java.util.Locale;
 
 import static java.awt.event.KeyEvent.*;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
@@ -173,12 +174,12 @@ public class FilterSearchPanel extends JPanel {
     }
 
     private void searchTermChanged() {
-        String filterText = searchTF.getText().trim().toLowerCase();
+        String filterText = searchTF.getText().trim().toLowerCase(Locale.getDefault());
 
         filtersList.setRowFilter(new RowFilter<ListModel<FilterAction>, Integer>() {
             @Override
             public boolean include(Entry<? extends ListModel<FilterAction>, ? extends Integer> entry) {
-                String filterName = entry.getStringValue(0).toLowerCase();
+                String filterName = entry.getStringValue(0).toLowerCase(Locale.getDefault());
                 return filterText.isEmpty() || filterName.contains(filterText);
             }
         });

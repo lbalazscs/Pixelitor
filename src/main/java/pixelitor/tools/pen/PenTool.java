@@ -35,7 +35,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -217,7 +216,6 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
-    @VisibleForTesting
     public PenToolMode getMode() {
         return mode;
     }
@@ -227,7 +225,6 @@ public class PenTool extends Tool {
         return mode.getToolMessage();
     }
 
-    @VisibleForTesting
     public void convertToSelection() {
         Path oldPath = path;
 
@@ -463,7 +460,6 @@ public class PenTool extends Tool {
         deletePath.setEnabled(b);
     }
 
-    @VisibleForTesting
     public boolean arePathActionsEnabled() {
         return toSelectionAction.isEnabled();
     }
@@ -497,9 +493,9 @@ public class PenTool extends Tool {
     @Override
     public void loadUserPreset(UserPreset preset) {
         String modeString = preset.get("Mode");
-        for (PenToolMode mode : MODES) {
-            if (mode.toString().equals(modeString)) {
-                startMode(mode, false);
+        for (PenToolMode toolMode : MODES) {
+            if (toolMode.toString().equals(modeString)) {
+                startMode(toolMode, false);
                 break;
             }
         }

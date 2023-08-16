@@ -30,7 +30,10 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.*;
+import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -442,7 +445,6 @@ public class Views {
         }
     }
 
-    @VisibleForTesting
     public static void assertNumLayersIs(int expected) {
         int found = getNumLayersInActiveHolder();
         if (found != expected) {
@@ -450,7 +452,6 @@ public class Views {
         }
     }
 
-    @VisibleForTesting
     public static int getNumLayersInActiveHolder() {
         var comp = getActiveComp();
         if (comp == null) {

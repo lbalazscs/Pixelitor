@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class DialogMenuBar extends JMenuBar {
 
         if (owner.hasHelp()) {
             JMenu helpMenu = new JMenu(GUIText.HELP);
-            helpMenu.add(new OpenInBrowserAction("Online Help", owner.getHelpURL()));
+            helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
             add(helpMenu);
         }
     }

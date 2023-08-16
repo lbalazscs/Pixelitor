@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,10 @@ package pixelitor.io;
 
 import pd.GifDecoder;
 import pixelitor.gui.utils.ThumbInfo;
-import pixelitor.utils.*;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.TrackerReadProgressListener;
+import pixelitor.utils.TrackerWriteProgressListener;
 
 import javax.imageio.*;
 import javax.imageio.stream.ImageInputStream;
@@ -286,7 +289,6 @@ public class TrackedIO {
      * In order to preserve the aspect ratio, the same number is used
      * for the horizontal and vertical subsampling.
      */
-    @VisibleForTesting
     public static int calcSubsamplingCols(int imgWidth, int imgHeight,
                                           int thumbMaxWidth, int thumbMaxHeight) {
         assert imgWidth >= thumbMaxWidth * 2;

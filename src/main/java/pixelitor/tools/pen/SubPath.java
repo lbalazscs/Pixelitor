@@ -31,11 +31,11 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -114,7 +114,6 @@ public class SubPath implements Serializable, Transformable {
         anchorPoints.add(p);
     }
 
-    @VisibleForTesting
     public void addPoint(double x, double y) {
         addPoint(new AnchorPoint(x, y, comp.getView(), this));
     }
@@ -767,7 +766,6 @@ public class SubPath implements Serializable, Transformable {
         return node;
     }
 
-    @VisibleForTesting
     public String getId() {
         return id;
     }

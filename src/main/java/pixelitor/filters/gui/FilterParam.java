@@ -18,7 +18,6 @@
 package pixelitor.filters.gui;
 
 import pixelitor.layers.Filterable;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debuggable;
 
 /**
@@ -97,7 +96,6 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
      */
     boolean canRandomize();
 
-    @VisibleForTesting
     void setRandomizePolicy(RandomizePolicy policy);
 
     void setToolTip(String tip);
@@ -107,6 +105,5 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
      * The return type can't be more specific than Object,
      * but this is still useful for testing.
      */
-    @VisibleForTesting
     Object getParamValue();
 }

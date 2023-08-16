@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,8 +16,6 @@
  */
 
 package pixelitor.filters.levels;
-
-import pixelitor.utils.VisibleForTesting;
 
 import java.awt.image.LookupTable;
 import java.awt.image.ShortLookupTable;
@@ -110,7 +108,6 @@ public class RGBLookup {
         }
     }
 
-    @VisibleForTesting
     int mapRGBValue(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
@@ -126,17 +123,14 @@ public class RGBLookup {
         return rgb;
     }
 
-    @VisibleForTesting
     int mapRed(int input) {
         return redLUT[input];
     }
 
-    @VisibleForTesting
     int mapGreen(int input) {
         return greenLUT[input];
     }
 
-    @VisibleForTesting
     int mapBlue(int input) {
         return blueLUT[input];
     }

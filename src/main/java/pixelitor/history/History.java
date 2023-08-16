@@ -24,7 +24,6 @@ import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -196,7 +195,6 @@ public class History {
         return "";
     }
 
-    @VisibleForTesting
     public static PixelitorEdit getLastEdit() {
         return undoManager.getLastEdit();
     }
@@ -258,7 +256,6 @@ public class History {
         undoManager.showHistory();
     }
 
-    @VisibleForTesting
     public static void clear() {
         undoManager.discardAllEdits();
         assertNumEditsIs(0);
@@ -267,7 +264,6 @@ public class History {
         RedoAction.INSTANCE.setEnabled(false);
     }
 
-    @VisibleForTesting
     public static void assertNumEditsIs(int expected) {
         int numEdits = undoManager.getSize();
         if (numEdits != expected) {
@@ -276,7 +272,6 @@ public class History {
         }
     }
 
-    @VisibleForTesting
     public static void assertLastEditNameIs(String expected) {
         String lastEditName = undoManager.getLastEdit().getName();
         if (!lastEditName.equals(expected)) {
@@ -286,7 +281,6 @@ public class History {
         }
     }
 
-    @VisibleForTesting
     public static void assertEditToBeUndoneNameIs(String expected) {
         String name = getEditToBeUndoneName();
         if (!name.equals(expected)) {
@@ -295,7 +289,6 @@ public class History {
         }
     }
 
-    @VisibleForTesting
     public static String getEditToBeUndoneName() {
         PixelitorEdit editToBeUndone = undoManager.getEditToBeUndone();
         if (editToBeUndone == null) {
@@ -304,7 +297,6 @@ public class History {
         return editToBeUndone.getName();
     }
 
-    @VisibleForTesting
     public static void assertEditToBeRedoneNameIs(String expected) {
         String name = getEditToBeRedoneName();
         if (!name.equals(expected)) {
@@ -313,7 +305,6 @@ public class History {
         }
     }
 
-    @VisibleForTesting
     public static String getEditToBeRedoneName() {
         PixelitorEdit editToBeRedone = undoManager.getEditToBeRedone();
         if (editToBeRedone == null) {
@@ -347,23 +338,19 @@ public class History {
         return node;
     }
 
-    @VisibleForTesting
     public static void dump() {
         undoManager.dump();
     }
 
-    @VisibleForTesting
     public static List<String> getEditNames() {
         return undoManager.getEditNames();
     }
 
-    @VisibleForTesting
     public static void undo(String editName) {
         assertEditToBeUndoneNameIs(editName);
         undo();
     }
 
-    @VisibleForTesting
     public static void redo(String editName) {
         assertEditToBeRedoneNameIs(editName);
         redo();

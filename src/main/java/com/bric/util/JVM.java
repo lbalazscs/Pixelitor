@@ -19,6 +19,8 @@
  */
 package com.bric.util;
 
+import java.util.Locale;
+
 /**
  * Static methods relating to the JVM environment.
  * <P>Instead of burying a constant like "isQuartz" in its most
@@ -28,14 +30,14 @@ package com.bric.util;
  */
 public class JVM {
 
-    private static final String osName = System.getProperty("os.name").toLowerCase();
+    private static final String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
     /**
      * Whether this session is on a Mac.
      */
     public static final boolean isMac = osName.contains("mac");
 
-    public static final boolean isLinux = osName.toLowerCase().contains("linux");
+    public static final boolean isLinux = osName.contains("linux");
 
     /**
      * Whether this session is on Windows.

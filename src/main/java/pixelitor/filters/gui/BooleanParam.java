@@ -25,6 +25,7 @@ import java.awt.event.ItemListener;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -202,7 +203,7 @@ public class BooleanParam extends AbstractFilterParam {
         private final String saveString;
 
         BooleanParamState() {
-            this.saveString = super.toString().toLowerCase();
+            this.saveString = super.toString().toLowerCase(Locale.ENGLISH);
         }
 
         @Override

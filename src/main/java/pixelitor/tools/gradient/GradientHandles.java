@@ -26,7 +26,6 @@ import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
@@ -141,17 +140,14 @@ public class GradientHandles implements ToolWidget {
         middle.arrowKeyPressed(key);
     }
 
-    @VisibleForTesting
     public GradientDefiningPoint getStart() {
         return start;
     }
 
-    @VisibleForTesting
     public GradientDefiningPoint getEnd() {
         return end;
     }
 
-    @VisibleForTesting
     public GradientCenterPoint getMiddle() {
         return middle;
     }

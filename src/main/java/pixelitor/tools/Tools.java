@@ -29,7 +29,10 @@ import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.*;
+import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -93,7 +96,6 @@ public class Tools {
         }
     }
 
-    @VisibleForTesting
     public static void setCurrentTool(Tool newTool) {
         currentTool = newTool;
     }

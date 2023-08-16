@@ -26,7 +26,6 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -108,7 +107,6 @@ public class Path implements Serializable {
         this.preferredPenToolMode = preferredPenToolMode;
     }
 
-    @VisibleForTesting
     public SubPath getActiveSubpath() {
         return activeSubPath;
     }
@@ -394,14 +392,12 @@ public class Path implements Serializable {
         return activeSubPath.tryClosing(x, y);
     }
 
-    @VisibleForTesting
     public void assertStateIs(BuildState state) {
         if (buildState != state) {
             throw new AssertionError("Expected " + state + ", found " + buildState);
         }
     }
 
-    @VisibleForTesting
     public String getId() {
         return id;
     }
@@ -417,7 +413,6 @@ public class Path implements Serializable {
         return boxes;
     }
 
-    @VisibleForTesting
     public Rectangle getImBounds() {
         Shape shape = toImageSpaceShape();
         return shape.getBounds();

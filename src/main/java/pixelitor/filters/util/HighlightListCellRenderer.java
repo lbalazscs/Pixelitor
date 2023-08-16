@@ -21,6 +21,7 @@ import org.jdesktop.swingx.renderer.DefaultListRenderer;
 
 import javax.swing.*;
 import java.awt.Component;
+import java.util.Locale;
 
 public class HighlightListCellRenderer extends DefaultListRenderer {
     private String filterText;
@@ -30,7 +31,7 @@ public class HighlightListCellRenderer extends DefaultListRenderer {
     }
 
     private static String highlight(String text, String filter) {
-        int index = text.toLowerCase().indexOf(filter);
+        int index = text.toLowerCase(Locale.getDefault()).indexOf(filter);
         if (index == -1) {
             return text;
         }

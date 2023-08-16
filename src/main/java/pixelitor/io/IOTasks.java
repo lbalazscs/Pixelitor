@@ -20,7 +20,6 @@ package pixelitor.io;
 import pixelitor.ThreadPool;
 import pixelitor.utils.SerialExecutor;
 import pixelitor.utils.Utils;
-import pixelitor.utils.VisibleForTesting;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -107,7 +106,6 @@ public class IOTasks {
     /**
      * Waits until all IO operations have finished
      */
-    @VisibleForTesting
     public static void waitForIdle() {
         // make sure that the IO task is started
         Utils.sleep(200, TimeUnit.MILLISECONDS);

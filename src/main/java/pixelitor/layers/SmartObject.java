@@ -994,7 +994,7 @@ public class SmartObject extends CompositeLayer {
             .collect(Collectors.joining("\n"));
     }
 
-    public void debugImages() {
+    private void debugImages() {
         BufferedImage soImage = image;
         BufferedImage contentImage = content.getCompositeImage();
 //        BufferedImage calcContentImage = content.calculateCompositeImage();

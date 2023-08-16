@@ -25,6 +25,7 @@ import pixelitor.utils.Utils;
 import javax.swing.filechooser.FileFilter;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -151,7 +152,7 @@ public enum FileFormat {
     }
 
     public static Optional<FileFormat> fromExtension(String extension) {
-        String extLC = extension.toLowerCase();
+        String extLC = extension.toLowerCase(Locale.ROOT);
         return switch (extLC) {
             case "bmp" -> Optional.of(BMP);
             case "gif" -> Optional.of(GIF);

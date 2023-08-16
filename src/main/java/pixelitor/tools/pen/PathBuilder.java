@@ -422,15 +422,15 @@ public class PathBuilder implements PenToolMode {
 
         BuildState state = path.getBuildState();
         if (state == MOVING_TO_NEXT_ANCHOR || state == DRAGGING_THE_CONTROL_OF_LAST) {
-            // if we are in the act of building a new subpath,
-            // then move the last placed anchor point
+            // If a new subpath is being created,
+            // move the most recently placed anchor point
             AnchorPoint last = path.getLast();
             if (last != null) {
                 last.arrowKeyPressed(key);
                 return true;
             }
         } else {
-            // move the last active
+            // move the last active point
             if (lastActive != null) {
                 lastActive.arrowKeyPressed(key);
                 return true;

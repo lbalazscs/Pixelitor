@@ -22,10 +22,11 @@ import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
@@ -112,12 +113,10 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         INSTANCE.changeLayersPanel(view.getLayersPanel());
     }
 
-    @VisibleForTesting
     public int getNumLayerGUIs() {
         return layersPanel.getNumLayerGUIs();
     }
 
-    @VisibleForTesting
     public List<String> getLayerNames() {
         return layersPanel.getLayerNames();
     }

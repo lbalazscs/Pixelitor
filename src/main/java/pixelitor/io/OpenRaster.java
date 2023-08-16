@@ -297,7 +297,7 @@ public class OpenRaster {
         while (fileEntries.hasMoreElements()) {
             ZipEntry entry = fileEntries.nextElement();
             String name = entry.getName();
-            String nameLC = name.toLowerCase();
+            String nameLC = name.toLowerCase(Locale.ROOT);
 
             if (nameLC.endsWith("png") && !name.equals(MERGED_IMAGE_NAME) && !name.equals(THUMBNAIL_IMAGE_NAME)) {
                 numImageFiles++;

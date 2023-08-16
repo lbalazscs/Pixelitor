@@ -24,7 +24,6 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -32,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.utils.AppPreferences.magickDirName;
@@ -52,7 +52,7 @@ public class ImageMagick {
     private static File magickCommand;
 
     public static void export(Composition comp) {
-        if (!isInstalled()) {
+        if (!installed) {
             showNotInstalledDialog();
             return;
         }
@@ -94,7 +94,7 @@ public class ImageMagick {
         if (ext == null) {
             return ExportSettings.DEFAULTS;
         }
-        return switch (ext.toLowerCase()) {
+        return switch (ext.toLowerCase(Locale.ROOT)) {
             case "png" -> PNGExportSettingsPanel.INSTANCE;
             case "webp" -> WebpExportSettingsPanel.INSTANCE;
             default -> ExportSettings.DEFAULTS;
@@ -102,7 +102,7 @@ public class ImageMagick {
     }
 
     public static void importComposition() {
-        if (!isInstalled()) {
+        if (!installed) {
             showNotInstalledDialog();
             return;
         }
@@ -113,7 +113,7 @@ public class ImageMagick {
     }
 
     public static void importComposition(File file, boolean checkAlreadyOpen) {
-        if (!isInstalled()) {
+        if (!installed) {
             showNotInstalledDialog();
             return;
         }
@@ -139,7 +139,6 @@ public class ImageMagick {
             });
     }
 
-    @VisibleForTesting
     public static void exportImage(BufferedImage img, File outFile,
                                    ExportSettings settings) {
         List<String> command = new ArrayList<>();
@@ -255,10 +254,6 @@ public class ImageMagick {
         } catch (InterruptedException | IOException e) {
             return false;
         }
-    }
-
-    public static boolean isInstalled() {
-        return installed;
     }
 
     private static void showNotInstalledDialog() {

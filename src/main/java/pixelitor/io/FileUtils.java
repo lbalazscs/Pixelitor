@@ -82,7 +82,7 @@ public class FileUtils {
         if (extOpt.isEmpty()) {
             return false;
         }
-        String ext = extOpt.get().toLowerCase();
+        String ext = extOpt.get().toLowerCase(Locale.ROOT);
         return ext.equals("pxc") || ext.equals("ora");
     }
 
@@ -100,14 +100,14 @@ public class FileUtils {
 
     public static boolean hasSupportedInputExt(String fileName) {
         return findExtension(fileName)
-            .map(String::toLowerCase)
+            .map(s -> s.toLowerCase(Locale.ROOT))
             .filter(SUPPORTED_OPEN_EXTENSIONS::contains)
             .isPresent();
     }
 
     public static boolean hasSupportedOutputExt(String fileName) {
         return findExtension(fileName)
-            .map(String::toLowerCase)
+            .map(s -> s.toLowerCase(Locale.ROOT))
             .filter(FileUtils::isSupportedOutputExt)
             .isPresent();
     }

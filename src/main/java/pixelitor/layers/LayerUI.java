@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debuggable;
 
 /**
@@ -30,12 +29,10 @@ public interface LayerUI extends Debuggable {
 
     String getLayerName();
 
-    @VisibleForTesting
     Layer getLayer();
 
     void setOpenEye(boolean newVisibility);
 
-    @VisibleForTesting
     boolean isEyeOpen();
 
     void addMaskIcon();

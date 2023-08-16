@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.history;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -246,7 +245,6 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         }
     }
 
-    @VisibleForTesting
     public ListSelectionModel getSelectionModel() {
         return selectionModel;
     }
@@ -290,7 +288,6 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         return node;
     }
 
-    @VisibleForTesting
     public void dump() {
         int numEdits = getSize();
         for (int i = 0; i < numEdits; i++) {
@@ -299,7 +296,6 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         }
     }
 
-    @VisibleForTesting
     public List<String> getEditNames() {
         return edits.stream()
             .map(UndoableEdit::getPresentationName)

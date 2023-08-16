@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,9 @@ import pixelitor.utils.debug.Debuggable;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * The source of the image for a smart filter.
+ */
 public interface ImageSource extends Debuggable {
     BufferedImage getImage();
 }

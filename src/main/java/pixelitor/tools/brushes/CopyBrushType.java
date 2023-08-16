@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,17 +69,6 @@ public enum CopyBrushType {
         public void afterDrawImage(Graphics2D g) {
             // do nothing
         }
-//    }, SQUARE("Square") {
-//        @Override
-//        public void beforeDrawImage(Graphics2D g) {
-//            // important in the areas where there is no source defined
-//            ImageUtils.fillWithTransparentRectangle(g, size);
-//        }
-//
-//        @Override
-//        public void afterDrawImage(Graphics2D g) {
-//            // do nothing
-//        }
     };
 
     private final String guiName;

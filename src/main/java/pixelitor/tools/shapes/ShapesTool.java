@@ -46,7 +46,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -767,7 +766,6 @@ public class ShapesTool extends DragTool {
         closeShapeSettingsDialog();
     }
 
-    @VisibleForTesting
     public DragToolState getState() {
         return state;
     }
@@ -932,7 +930,6 @@ public class ShapesTool extends DragTool {
         }
     }
 
-    @VisibleForTesting
     public void setSelectedType(ShapeType type) {
         typeModel.setSelectedItem(type);
     }

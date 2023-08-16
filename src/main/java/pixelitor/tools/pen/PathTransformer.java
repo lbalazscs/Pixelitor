@@ -23,10 +23,9 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.List;
@@ -210,7 +209,6 @@ public class PathTransformer implements PenToolMode {
         return true;
     }
 
-    @VisibleForTesting
     public TransformBox getBox(int index) {
         return boxes.get(index);
     }

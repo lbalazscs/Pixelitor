@@ -46,6 +46,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1013,7 +1014,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public final String getTypeStringLC() {
-        return getTypeString().toLowerCase();
+        return getTypeString().toLowerCase(Locale.ENGLISH);
     }
 
     public abstract String getTypeString();

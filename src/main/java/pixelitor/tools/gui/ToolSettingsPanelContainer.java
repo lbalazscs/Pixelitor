@@ -19,7 +19,6 @@ package pixelitor.tools.gui;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.CardLayout;
@@ -49,7 +48,6 @@ public class ToolSettingsPanelContainer extends JPanel {
         return instance;
     }
 
-    @VisibleForTesting
     public static void setInstance(ToolSettingsPanelContainer instance) {
         ToolSettingsPanelContainer.instance = instance;
     }

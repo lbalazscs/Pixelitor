@@ -25,7 +25,6 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.QuadrantAngle;
-import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -248,12 +247,10 @@ public class Guides implements Serializable {
         }
     }
 
-    @VisibleForTesting
     public List<Double> getHorizontals() {
         return horizontals;
     }
 
-    @VisibleForTesting
     public List<Double> getVerticals() {
         return verticals;
     }

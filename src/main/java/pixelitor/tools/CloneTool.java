@@ -33,7 +33,6 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Mirror;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -251,7 +250,6 @@ public class CloneTool extends BlendingModeBrushTool {
         throw new UnsupportedOperationException("no symmetry");
     }
 
-    @VisibleForTesting
     protected void setState(State state) {
         this.state = state;
     }

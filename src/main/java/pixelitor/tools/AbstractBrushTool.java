@@ -36,7 +36,6 @@ import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -628,12 +627,10 @@ public abstract class AbstractBrushTool extends Tool {
         return true;
     }
 
-    @VisibleForTesting
     protected Brush getBrush() {
         return brush;
     }
 
-    @VisibleForTesting
     protected void setBrush(Brush brush) {
         this.brush = brush;
     }

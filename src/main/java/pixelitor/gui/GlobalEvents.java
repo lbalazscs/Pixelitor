@@ -22,7 +22,6 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.Keys;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Events;
 
@@ -200,7 +199,6 @@ public class GlobalEvents {
         return spaceDown;
     }
 
-    @VisibleForTesting
     public static void setSpaceDown(boolean spaceDown) {
         GlobalEvents.spaceDown = spaceDown;
     }
@@ -230,7 +228,6 @@ public class GlobalEvents {
 //        System.out.printf("dialog '%s' closed, numModalDialogs = %d%n", title, numModalDialogs);
     }
 
-    @VisibleForTesting
     public static void assertDialogNestingIs(int expected) {
         if (numModalDialogs != expected) {
             throw new AssertionError("numNestedDialogs = " + numModalDialogs
@@ -238,7 +235,6 @@ public class GlobalEvents {
         }
     }
 
-    @VisibleForTesting
     public static int getNumModalDialogs() {
         return numModalDialogs;
     }

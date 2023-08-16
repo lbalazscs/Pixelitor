@@ -30,6 +30,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serial;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -403,7 +404,7 @@ public class ColorPicker extends JPanel {
          * characters and is not longer than <code>charLimit</code>.
          */
         private String stripToHex(String s, int charLimit) {
-            s = s.toUpperCase();
+            s = s.toUpperCase(Locale.ENGLISH);
             StringBuilder returnValue = new StringBuilder(6);
             for (int a = 0; a < s.length() && returnValue.length() < charLimit; a++) {
                 char c = s.charAt(a);
@@ -1081,7 +1082,7 @@ public class ColorPicker extends JPanel {
             int b = blue.getIntValue();
 
             int i = (r << 16) + (g << 8) + b;
-            String s = Integer.toHexString(i).toUpperCase();
+            String s = Integer.toHexString(i).toUpperCase(Locale.ENGLISH);
             while (s.length() < 6) {
                 s = "0" + s;
             }

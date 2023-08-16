@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.gui.utils;
 
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -43,7 +42,6 @@ public abstract class NamedAction extends AbstractAction {
         putValue(Action.NAME, newName);
     }
 
-    @VisibleForTesting
     public String getText() {
         return (String) getValue(Action.NAME);
     }

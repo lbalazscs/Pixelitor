@@ -39,7 +39,10 @@ import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
@@ -98,8 +101,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     //
 
     // Not null if this is the content of a smart object.
-    // A single content can have multiple smart object owners
-    // within the same composition due to the "Shallow Duplicate" feature.
+    // A single content can have multiple smart object owners within the
+    // same composition due to the "Clone" feature (shallow duplication).
     // Transient because the parent compositions should not be written out.
     private transient List<SmartObject> owners;
 
@@ -1318,7 +1321,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Changing the selection reference should be done only by using this method
      * (in order to make debugging easier)
      */
-    @VisibleForTesting
     public void setSelectionRef(Selection selection) {
         this.selection = selection;
         if (isActive()) {
@@ -1341,7 +1343,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return selection != null;
     }
 
-    @VisibleForTesting
     public boolean hasInProgressSelection() {
         return inProgressSelection != null;
     }
@@ -1499,7 +1500,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Useful for testing, but not exposed in the UI, because
      * it could create multiple undo events instead of just one.
      */
-    @VisibleForTesting
     public void allImageLayersToCanvasSize() {
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer imageLayer) {

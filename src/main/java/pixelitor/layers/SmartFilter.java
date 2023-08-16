@@ -57,7 +57,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     private transient BufferedImage cachedImage;
     private SmartObject smartObject;
 
-    // the next smart filter in the chain of smart filters
+    // the smart filter that is applied after this one.
     private SmartFilter next;
 
     // static field for the copy-paste of smart filters
@@ -127,7 +127,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             return transformed;
         } else {
             // unlike an adjustment layer, this makes sure that imgSoFar
-            // (which could be cached in the image source is not modified
+            // (which could be cached in the image source) is not modified
             BufferedImage copy = ImageUtils.copyImage(imgSoFar);
 
             Graphics2D g = copy.createGraphics();
@@ -199,23 +199,23 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public void invalidateChain() {
         invalidateCache();
         if (next != null) {
+            //noinspection TailRecursion
             next.invalidateChain();
         }
     }
 
-    public Stream<SmartFilter> getChain() {
+    private Stream<SmartFilter> getChainStream() {
         return Stream.iterate(this, Objects::nonNull, SmartFilter::getNext);
     }
 
     public String debugChain() {
-        return getChain()
+        return getChainStream()
             .limit(5) // prevent infinite recursion
             .map(SmartFilter::toString)
             .collect(Collectors.joining(", ", "[", "]"));
     }
 
     private void invalidateCache() {
-//        System.out.println("SmartFilter::invalidateCache: CALLED for " + getName());
         if (cachedImage != null) {
             cachedImage.flush();
             cachedImage = null;

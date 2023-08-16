@@ -47,6 +47,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.File;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 
 import static javax.swing.SwingConstants.*;
@@ -113,7 +114,14 @@ public final class AppPreferences {
     // each bit of the "flags" represents a boolean flag in the app
     private static final String FLAGS_KEY = "flags";
     private static long flags = 0;
-    public static final int FLAG_PIXEL_SNAP = 0;
+
+    // binary masks for the flags
+    public static final long FLAG_PIXEL_SNAP = 1L;
+    // subsequent flag masks would be 1L << 1, 1L << 2, etc.
+
+    // the default settings for the flags (binary OR between
+    // the masks of the flags that are true by default)
+    private static final long FLAG_DEFAULTS = 0;
 
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
@@ -311,7 +319,7 @@ public final class AppPreferences {
         }
         FileFormat fileFormat;
         try {
-            fileFormat = FileFormat.valueOf(name.toUpperCase());
+            fileFormat = FileFormat.valueOf(name.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {
             // can happen only if the preferences were manually edited
             return FileFormat.JPG;
@@ -565,20 +573,18 @@ public final class AppPreferences {
     }
 
     private static void loadFlags() {
-        flags = mainNode.getLong(FLAGS_KEY, 0);
+        flags = mainNode.getLong(FLAGS_KEY, FLAG_DEFAULTS);
     }
 
     private static void saveFlags() {
         mainNode.putLong(FLAGS_KEY, flags);
     }
 
-    public static boolean getFlag(int index) {
-        long mask = 1L << index;
+    public static boolean getFlag(long mask) {
         return (flags & mask) != 0;
     }
 
-    public static void setFlag(int index, boolean newValue) {
-        long mask = 1L << index;
+    public static void setFlag(long mask, boolean newValue) {
         flags = newValue ? (flags | mask) : (flags & ~mask);
     }
 

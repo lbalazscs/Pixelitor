@@ -27,7 +27,10 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.*;
+import pixelitor.utils.AngleUnit;
+import pixelitor.utils.Geometry;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
@@ -251,7 +254,6 @@ public class TransformBox implements ToolWidget, Serializable {
     }
 
     // rotates the box to the given angle
-    @VisibleForTesting
     public void rotateTo(double angle, AngleUnit unit) {
         saveState(); // so that transform works
         double rad = unit.toRadians(angle);
@@ -642,7 +644,6 @@ public class TransformBox implements ToolWidget, Serializable {
      * by dividing the 0-360 range of angles into eight equal parts,
      * corresponding to the eight cursors
      */
-    @VisibleForTesting
     static int calcCursorOffset(int angleDeg) {
         if (angleDeg > 338) { // 360 - (45/2) = 338
             return 0;
@@ -666,27 +667,22 @@ public class TransformBox implements ToolWidget, Serializable {
         rot.reCalcAngle(rot.x, rot.y, true);
     }
 
-    @VisibleForTesting
     public CornerHandle getNW() {
         return nw;
     }
 
-    @VisibleForTesting
     public CornerHandle getNE() {
         return ne;
     }
 
-    @VisibleForTesting
     public CornerHandle getSE() {
         return se;
     }
 
-    @VisibleForTesting
     public CornerHandle getSW() {
         return sw;
     }
 
-    @VisibleForTesting
     public RotationHandle getRot() {
         return rot;
     }

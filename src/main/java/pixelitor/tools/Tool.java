@@ -34,7 +34,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -190,7 +189,6 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         this.settingsPanel = settingsPanel;
     }
 
-    @VisibleForTesting
     public boolean hasSettingsPanel() {
         return settingsPanel != null;
     }

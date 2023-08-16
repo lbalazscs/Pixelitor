@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.gui.View;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -164,12 +163,10 @@ public class LayersPanel extends JLayeredPane {
         return new Dimension(10, totalHeight);
     }
 
-    @VisibleForTesting
     public int getNumLayerGUIs() {
         return layerGUIs.size();
     }
 
-    @VisibleForTesting
     public List<String> getLayerNames() {
         return layerGUIs.stream()
             .map(LayerGUI::getLayerName)

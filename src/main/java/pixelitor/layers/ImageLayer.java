@@ -31,7 +31,6 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.QuadrantAngle;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
@@ -1170,7 +1169,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         throw new UnsupportedOperationException();
     }
 
-    @VisibleForTesting
     public BufferedImage getPreviewImage() {
         return previewImage;
     }

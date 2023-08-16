@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Locale;
 
 import static java.awt.BorderLayout.CENTER;
 import static pixelitor.utils.Texts.i18n;
@@ -150,7 +151,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
             return false;
         }
 
-        String fileName = file.getName().toLowerCase();
+        String fileName = file.getName().toLowerCase(Locale.ROOT);
         if (fileName.endsWith("pxc") || fileName.endsWith("ora")) {
             return false;
         }

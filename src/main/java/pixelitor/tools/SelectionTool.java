@@ -32,7 +32,6 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -338,12 +337,10 @@ public class SelectionTool extends DragTool {
         stopBuildingSelection();
     }
 
-    @VisibleForTesting
     public SelectionType getSelectionType() {
         return typeModel.getSelectedItem();
     }
 
-    @VisibleForTesting
     public ShapeCombinator getCombinator() {
         return combinatorModel.getSelectedItem();
     }

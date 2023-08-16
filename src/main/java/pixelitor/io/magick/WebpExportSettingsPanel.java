@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.util.List;
+import java.util.Locale;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition;
 
@@ -66,7 +67,7 @@ class WebpExportSettingsPanel extends JPanel implements ExportSettings {
 
         command.add("-define");
         command.add("webp:lossless=" + lossless.isChecked());
-        command.add("webp:image-hint=" + imageHint.getSelectedItem().toString().toLowerCase());
+        command.add("webp:image-hint=" + imageHint.getSelectedItem().toString().toLowerCase(Locale.ENGLISH));
     }
 
     @Override

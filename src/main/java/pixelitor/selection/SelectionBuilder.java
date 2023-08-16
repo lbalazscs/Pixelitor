@@ -26,6 +26,7 @@ import pixelitor.utils.Messages;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.util.Locale;
 
 /**
  * A utility class for creating selections
@@ -119,7 +120,7 @@ public class SelectionBuilder {
                 comp.deselect(true);
 
                 String msg = "As a result of the "
-                    + combinator.toString().toLowerCase()
+                    + combinator.toString().toLowerCase(Locale.ENGLISH)
                     + " operation, nothing is selected now.";
                 Messages.showInfo("Nothing selected", msg, comp.getDialogParent());
             } else {

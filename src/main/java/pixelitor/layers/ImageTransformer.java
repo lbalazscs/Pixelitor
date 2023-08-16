@@ -27,6 +27,10 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * An object that can apply an affine transformation to the output image
+ * of a smart object's content before the image is processed by the smart filters.
+ */
 public class ImageTransformer implements ImageSource, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

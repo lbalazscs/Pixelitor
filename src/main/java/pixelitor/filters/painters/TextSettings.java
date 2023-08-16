@@ -26,7 +26,10 @@ import pixelitor.Views;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -128,7 +131,6 @@ public class TextSettings implements Serializable, Debuggable {
         return color;
     }
 
-    @VisibleForTesting
     public void setColor(Color color) {
         this.color = color;
     }
@@ -137,7 +139,6 @@ public class TextSettings implements Serializable, Debuggable {
         return font;
     }
 
-    @VisibleForTesting
     public void setFont(Font font) {
         this.font = font;
     }
