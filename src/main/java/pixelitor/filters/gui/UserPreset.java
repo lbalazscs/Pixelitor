@@ -89,10 +89,14 @@ public class UserPreset implements Preset {
     public String get(String key) {
         String value = content.get(key);
         if (value == null) {
-            // oct 2021: temporary hack for compatible color list upgrade of starburst
             if ("Ray Colors".equals(key)) {
+                // oct 2021: temporary hack for compatible color list upgrade of starburst
                 value = content.get("Ray Color");
+            } else if ("Sides".equals(key)) {
+                // sept 2023: 4.3.0 => 4.3.1 migration in Concentric Shapes
+                value = content.get("Polygon Sides");
             }
+
             if (GUIMode.isDevelopment()) {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }

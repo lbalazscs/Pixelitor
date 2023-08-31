@@ -512,6 +512,37 @@ public class Shapes {
         return path;
     }
 
+    public static Shape createFlower(int n, double cx, double cy, double radius) {
+        double angleIncrement = Math.PI * 2 / n;
+        double halfAngleIncrement = angleIncrement / 2;
+        double angle = -Math.PI / 2;
+        double distantRadius = radius / Math.cos(halfAngleIncrement);
+
+        Path2D path = new Path2D.Double();
+        for (int i = 0; i < n; i++) {
+            path.moveTo(cx, cy);
+
+            double p2X = cx + radius * Math.cos(angle);
+            double p2Y = cy + radius * Math.sin(angle);
+
+            double startAngle = angle - halfAngleIncrement;
+            double cp2X = cx + distantRadius * Math.cos(startAngle);
+            double cp2Y = cy + distantRadius * Math.sin(startAngle);
+
+            // p2 is at half point between cp2 and cp3
+            double cp3X = p2X + (p2X - cp2X);
+            double cp3Y = p2Y + (p2Y - cp2Y);
+
+            path.curveTo(cx, cy, cp2X, cp2Y, p2X, p2Y);
+            path.curveTo(cp3X, cp3Y, cx, cy, cx, cy);
+
+            angle += angleIncrement;
+            path.closePath();
+        }
+
+        return path;
+    }
+
     public static Shape createHexagon(double cx, double cy, double radius) {
         double cos60 = 0.5;
         double sin60 = 0.86602540378443864676372317075294;
@@ -906,6 +937,7 @@ public class Shapes {
         epY = y + 0.9044799f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
 
+        path.closePath();
         return path;
     }
 
@@ -1178,6 +1210,7 @@ public class Shapes {
         epY = y + 0.8711912f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
 
+        path.closePath();
         return path;
     }
 
@@ -1418,6 +1451,7 @@ public class Shapes {
             cp1XLeft, cp1Y,
             centerX, bottomY);
 
+        path.closePath();
         return path;
     }
 
@@ -1666,6 +1700,7 @@ public class Shapes {
         epY = y + 0.4113421f * height;
         path.curveTo(cp1X, cp1Y, cp2X, cp2Y, epX, epY);
 
+        path.closePath();
         return path;
     }
 

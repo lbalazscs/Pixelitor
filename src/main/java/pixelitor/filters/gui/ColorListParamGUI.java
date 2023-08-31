@@ -75,7 +75,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         add(colorsPanel);
 
         numColorsModel.setAdjustmentListener(() ->
-            changeNumVisibleSwatches(numColorsModel.getValue()));
+            numColorsChanged(numColorsModel.getValue()));
 
         setBorder(createTitledBorder(model.getName()));
     }
@@ -90,6 +90,11 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
             () -> model.getColor(index), c -> updateColor(c, index));
 
         return swatch;
+    }
+
+    private void numColorsChanged(int newNum) {
+        changeNumVisibleSwatches(newNum);
+        updateModelColors();
     }
 
     private void changeNumVisibleSwatches(int newNum) {
@@ -114,6 +119,9 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
             }
         }
         numVisibleSwatches = newNum;
+    }
+
+    private void updateModelColors() {
         Color[] newColors = new Color[numVisibleSwatches];
         for (int i = 0; i < numVisibleSwatches; i++) {
             newColors[i] = swatches.get(i).getForeground();
@@ -139,6 +147,8 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     public void updateGUI() {
         Color[] colors = model.getColors();
         int numColors = colors.length;
+
+        changeNumVisibleSwatches(numColors);
 
         for (int i = 0; i < numColors; i++) {
             Color color = colors[i];
