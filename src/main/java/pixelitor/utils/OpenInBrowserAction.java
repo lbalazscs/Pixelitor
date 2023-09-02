@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static java.awt.Desktop.Action.BROWSE;
+
 /**
  * An action that opens a URL in an external browser
  */
 public class OpenInBrowserAction extends AbstractAction {
+    public static final boolean CAN_BROWSE = Desktop.isDesktopSupported()
+        && Desktop.getDesktop().isSupported(BROWSE);
+
     private URI uri;
 
     public OpenInBrowserAction(String name, String url) {
@@ -44,13 +49,13 @@ public class OpenInBrowserAction extends AbstractAction {
     }
 
     private static void openURI(URI uri) {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            try {
-                desktop.browse(uri);
-            } catch (IOException e) {
-                Messages.showException(e);
-            }
+        if (!CAN_BROWSE) {
+            return;
+        }
+        try {
+            Desktop.getDesktop().browse(uri);
+        } catch (IOException e) {
+            Messages.showException(e);
         }
     }
 }

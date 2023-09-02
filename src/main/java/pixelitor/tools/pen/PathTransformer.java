@@ -97,8 +97,8 @@ public class PathTransformer implements PenToolMode {
         double x = e.getOrigCoX();
         double y = e.getOrigCoY();
 
-        // first look for a handle hit in all the boxes so that
-        // handles can be manipulated even when the boxes are overlapping
+        // First, check all boxes for a handle hit so that handles
+        // can be manipulated even when the boxes overlap.
         boolean handleWasHit = false;
         for (TransformBox box : boxes) {
             DraggablePoint hit = box.findHandleAt(x, y);
@@ -115,7 +115,7 @@ public class PathTransformer implements PenToolMode {
         }
         activePoint = null;
 
-        // if no handle was hit, then look for whole-box movements
+        // if no handle was hit, then check for whole-box movements
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {
                 box.startWholeBoxDrag(x, y);

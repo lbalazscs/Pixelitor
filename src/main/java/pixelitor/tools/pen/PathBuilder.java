@@ -85,11 +85,11 @@ public class PathBuilder implements PenToolMode {
 
         if (state == NO_INTERACTION) {
             if (controlDown) {
-                if (handleCtrlPressHitBeforeSubpath(altDown, x, y)) {
+                if (handleCtrlPressBeforeSubpath(altDown, x, y)) {
                     return;
                 }
             } else if (altDown) {
-                if (handleAltPressHitBeforeSubpath(x, y)) {
+                if (handleAltPressBeforeSubpath(x, y)) {
                     return;
                 }
             }
@@ -144,8 +144,8 @@ public class PathBuilder implements PenToolMode {
         assert path.checkConsistency();
     }
 
-    private static boolean handleCtrlPressHitBeforeSubpath(boolean altDown,
-                                                           double x, double y) {
+    private static boolean handleCtrlPressBeforeSubpath(boolean altDown,
+                                                        double x, double y) {
         // if we are over an old point, just move it
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
@@ -155,8 +155,8 @@ public class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private static boolean handleAltPressHitBeforeSubpath(double x, double y) {
-        // if only alt is down, then break control points
+    private static boolean handleAltPressBeforeSubpath(double x, double y) {
+        // if only alt is down, then break the control points
         DraggablePoint hit = path.handleWasHit(x, y, true);
         if (hit != null) {
             if (hit instanceof ControlPoint cp) {
@@ -190,10 +190,10 @@ public class PathBuilder implements PenToolMode {
 
     private static void breakAndStartMoving(ControlPoint cp, double x, double y) {
         if (!cp.isRetracted()) {
-            // alt-press on an anchor point should break the handle
+            // alt-press on an anchor point should break the handle...
             cp.getAnchor().setType(CUSP);
         } else {
-            // except when it is retracted: then drag out symmetrically
+            // ...except when it is retracted: then drag out symmetrically
             cp.getAnchor().setType(SYMMETRIC);
         }
         // after breaking, move it as usual
@@ -318,7 +318,6 @@ public class PathBuilder implements PenToolMode {
             return false;
         }
         BuildState state = path.getBuildState();
-//        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             state = recoverFromUnexpectedDragState("mouseMoved", view);
         }

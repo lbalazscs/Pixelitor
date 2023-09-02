@@ -51,7 +51,7 @@ public class DialogMenuBar extends JMenuBar {
             addPresetsMenu();
         }
 
-        if (owner.hasHelp()) {
+        if (OpenInBrowserAction.CAN_BROWSE && owner.hasHelp()) {
             JMenu helpMenu = new JMenu(GUIText.HELP);
             helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
             add(helpMenu);

@@ -535,7 +535,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     PixelitorEdit createMovementEdit(int oldTx, int oldTy) {
-        return null; // the group has no content on its own
+        return null; // the group has no content of its own
     }
 
     @Override
