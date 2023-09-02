@@ -109,6 +109,7 @@ public final class AppPreferences {
     private static GuideStyle cropGuideStyle;
 
     private static final String MAGICK_DIR_KEY = "magick_dir";
+    private static final String GMIC_DIR_KEY = "gmic_dir";
     private static final String EXPERIMENTAL_KEY = "experimental";
 
     private static final String UI_FONT_SIZE_KEY = "ui_font_size";
@@ -129,9 +130,10 @@ public final class AppPreferences {
     // loaded and stored here to avoid initializing the ImageMagick class
     // (which also searches for this directory), if ImageMagick is not needed
     public static String magickDirName = "";
+    public static String gmicDirName = "";
 
     static {
-        loadMagickDir();
+        loadPaths();
         loadFlags();
     }
 
@@ -417,7 +419,7 @@ public final class AppPreferences {
         saveLanguage();
         saveMouseZoom();
         savePan();
-        saveMagickDir();
+        savePaths();
         saveFlags();
         saveExperimentalFeatures();
         saveNativeChoosers();
@@ -567,12 +569,14 @@ public final class AppPreferences {
         mainNode.put(PAN_KEY, PanMethod.CURRENT.saveCode());
     }
 
-    private static void loadMagickDir() {
+    private static void loadPaths() {
         magickDirName = mainNode.get(MAGICK_DIR_KEY, "");
+        gmicDirName = mainNode.get(GMIC_DIR_KEY, "");
     }
 
-    private static void saveMagickDir() {
+    private static void savePaths() {
         mainNode.put(MAGICK_DIR_KEY, magickDirName);
+        mainNode.put(GMIC_DIR_KEY, gmicDirName);
     }
 
     private static void loadFlags() {

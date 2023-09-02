@@ -34,6 +34,7 @@ import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.convolve.Convolve;
 import pixelitor.filters.curves.ToneCurvesFilter;
+import pixelitor.filters.gmic.GMICFilter;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
@@ -827,6 +828,13 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createDistortSubmenu(texts));
         filterMenu.add(createFindEdgesSubmenu(texts));
         filterMenu.add(createLightSubmenu(texts));
+
+        File gmicExe = Utils.checkExecutable(AppPreferences.gmicDirName, "gmic");
+        if (gmicExe != null) {
+            GMICFilter.GMIC_PATH = gmicExe;
+            filterMenu.add(createGMICSubmenu());
+        }
+
         filterMenu.add(createNoiseSubmenu(texts));
         filterMenu.add(createOtherSubmenu());
         filterMenu.add(createRenderSubmenu(texts));
@@ -944,6 +952,24 @@ public class MenuBar extends JMenuBar {
         String laplacianFilterName = "Laplacian";
         sub.addNoGrayForwardingFilter(laplacianFilterName,
             () -> new LaplaceFilter(laplacianFilterName));
+
+        return sub;
+    }
+
+    private static JMenu createGMICSubmenu() {
+        PMenu sub = new PMenu("G'MIC");
+
+        sub.addFilter(GMICFilter.NAME_ANISOTHROPIC, GMICFilter::createAnisothropic);
+        sub.addFilter(GMICFilter.NAME_BILATERAL, GMICFilter::createBilateral);
+        sub.addFilter(GMICFilter.NAME_BOKEH, GMICFilter::createBokeh);
+        sub.addFilter(GMICFilter.NAME_BOXFITTING, GMICFilter::createBoxFitting);
+        sub.addFilter(GMICFilter.NAME_BRUSHIFY, GMICFilter::createBrushify);
+        sub.addFilter(GMICFilter.NAME_CUBISM, GMICFilter::createCubism);
+        sub.addFilter(GMICFilter.NAME_GENERIC, GMICFilter::createGeneric);
+//        sub.addFilter(GMICFilter.NAME_KUWAHARA, GMICFilter::createKuwahara);
+        sub.addFilter(GMICFilter.NAME_LIGHT_GLOW, GMICFilter::createLightGlow);
+        sub.addFilter(GMICFilter.NAME_LOCAL_NORMALIZATION, GMICFilter::createLocalNormalization);
+        sub.addFilter(GMICFilter.NAME_RODILIUS, GMICFilter::createRodilius);
 
         return sub;
     }

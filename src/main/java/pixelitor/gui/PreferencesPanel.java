@@ -59,6 +59,7 @@ public class PreferencesPanel extends JTabbedPane {
         BorderFactory.createEmptyBorder(5, 10, 5, 0);
     private static final String UNDO_LEVELS_LABEL = "Minimum Undo/Redo Levels";
     private static final String IMAGEMAGICK_FOLDER_LABEL = "ImageMagick 7 Folder";
+    private static final String GMIC_FOLDER_LABEL = "G'MIC Folder";
 
     private JTextField undoLevelsTF;
     private JComboBox<Item> thumbSizeCB;
@@ -66,6 +67,7 @@ public class PreferencesPanel extends JTabbedPane {
     private JComboBox<PanMethod> panMethodCB;
     private JCheckBox snapCB;
     private JTextField magickDirTF;
+    private JTextField gmicDirTF;
     private JCheckBox nativeChoosersCB;
     private JCheckBox experimentalCB;
 
@@ -319,6 +321,7 @@ public class PreferencesPanel extends JTabbedPane {
         addNativeChoosersCB(gbh);
         addUndoLevelsChooser(gbh);
         addMagickDirField(gbh);
+        addGmicDirField(gbh);
         addExperimentalCB(gbh);
 
         advancedPanel.setBorder(EMPTY_BORDER);
@@ -344,6 +347,12 @@ public class PreferencesPanel extends JTabbedPane {
         magickDirTF = new JTextField(AppPreferences.magickDirName);
         magickDirTF.setColumns(10);
         gbh.addLabelAndControl(IMAGEMAGICK_FOLDER_LABEL + ": ", magickDirTF);
+    }
+
+    private void addGmicDirField(GridBagHelper gbh) {
+        gmicDirTF = new JTextField(AppPreferences.gmicDirName);
+        gmicDirTF.setColumns(10);
+        gbh.addLabelAndControl(GMIC_FOLDER_LABEL + ": ", gmicDirTF);
     }
 
     private void addExperimentalCB(GridBagHelper gbh) {
@@ -374,22 +383,13 @@ public class PreferencesPanel extends JTabbedPane {
             return false;
         }
 
-        // validate the given ImageMagick directory
-        String magickDirName = magickDirTF.getText().trim();
-        if (!magickDirName.isEmpty()) {
-            File dir = new File(magickDirName);
-            if (!dir.exists()) {
-                Dialogs.showErrorDialog(d, "Error",
-                    String.format("<html>The %s <b>\"%s\"</b> doesn't exist.",
-                        IMAGEMAGICK_FOLDER_LABEL, magickDirName));
-                return false;
-            }
-            if (!dir.isDirectory()) {
-                Dialogs.showErrorDialog(d, "Error",
-                    String.format("<html>The %s <b>\"%s\"</b> isn't a directory.",
-                        IMAGEMAGICK_FOLDER_LABEL, magickDirName));
-                return false;
-            }
+        String magickDirName = validateDirectoryPath(magickDirTF, IMAGEMAGICK_FOLDER_LABEL, d);
+        if (magickDirName == null) {
+            return false;
+        }
+        String gmicDirName = validateDirectoryPath(gmicDirTF, GMIC_FOLDER_LABEL, d);
+        if (gmicDirName == null) {
+            return false;
         }
 
         // these can't be set interactively => set it here
@@ -397,10 +397,31 @@ public class PreferencesPanel extends JTabbedPane {
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         View.snappingSettingChanged(snapCB.isSelected());
         AppPreferences.magickDirName = magickDirName;
+        AppPreferences.gmicDirName = gmicDirName;
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
         Features.enableExperimental(experimentalCB.isSelected());
 
         return true;
+    }
+
+    private static String validateDirectoryPath(JTextField textField, String label, JDialog d) {
+        String dirName = textField.getText().trim();
+        if (!dirName.isEmpty()) {
+            File dir = new File(dirName);
+            if (!dir.exists()) {
+                Dialogs.showErrorDialog(d, "Error",
+                    String.format("<html>The %s <b>\"%s\"</b> doesn't exist.",
+                        label, dirName));
+                return null;
+            }
+            if (!dir.isDirectory()) {
+                Dialogs.showErrorDialog(d, "Error",
+                    String.format("<html>The %s <b>\"%s\"</b> isn't a directory.",
+                        label, dirName));
+                return null;
+            }
+        }
+        return dirName;
     }
 
     private int getUndoLevels() {

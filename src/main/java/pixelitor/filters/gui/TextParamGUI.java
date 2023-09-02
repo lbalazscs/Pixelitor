@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,36 +31,39 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     private final JTextField tf;
 
     public TextParamGUI(TextParam param, String defaultValue, ParamAdjustmentListener adjustmentListener) {
-        tf = new JTextField(defaultValue);
+        tf = new JTextField(defaultValue, 25);
 
         setLayout(new FlowLayout(LEFT));
-        add(new JLabel(getName() + ": "));
-
-        if (adjustmentListener != null) {
-            tf.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if (param.isTrigger()) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if (param.isTrigger()) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    if (param.isTrigger()) {
-                        adjustmentListener.paramAdjusted();
-                    }
-                }
-            });
-        }
+        add(new JLabel(param.getName() + ": "));
         add(tf);
+
+        if (param.isCommand()) {
+            JButton runButton = new JButton("Run");
+            runButton.addActionListener(e ->
+                param.setValue(getText(), true));
+            add(runButton);
+        } else if (adjustmentListener != null) {
+            addDocumentListener(adjustmentListener);
+        }
+    }
+
+    private void addDocumentListener(ParamAdjustmentListener adjustmentListener) {
+        tf.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                adjustmentListener.paramAdjusted();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                adjustmentListener.paramAdjusted();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                adjustmentListener.paramAdjusted();
+            }
+        });
     }
 
     @Override

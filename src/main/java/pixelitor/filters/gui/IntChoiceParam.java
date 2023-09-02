@@ -31,6 +31,10 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * A filter parameter for selecting a choice from a list of values
  */
 public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
+    public IntChoiceParam(String name, String[] choices) {
+        this(name, toItemArray(choices));
+    }
+
     public IntChoiceParam(String name, Item[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
     }
@@ -39,12 +43,30 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
         super(name, choices, randomizePolicy);
     }
 
+    private static Item[] toItemArray(String[] input) {
+        Item[] out = new Item[input.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = new Item(input[i], i);
+        }
+        return out;
+    } 
+
     public int getValue() {
         return currentChoice.getValue();
     }
 
     public IntChoiceParam withDefaultChoice(Item defaultChoice) {
         this.defaultChoice = defaultChoice;
+        return this;
+    }
+
+    public IntChoiceParam withDefaultChoice(int defaultValue) {
+        for (Item choice : choices) {
+            if (choice.getValue() == defaultValue) {
+                this.defaultChoice = choice;
+                break;
+            }
+        }
         return this;
     }
 

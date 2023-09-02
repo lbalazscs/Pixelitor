@@ -39,6 +39,10 @@ public class ColorParam extends AbstractFilterParam {
 
     private final TransparencyPolicy transparencyPolicy;
 
+    public ColorParam(String name, Color defaultColor) {
+        this(name, defaultColor, TransparencyPolicy.FREE_TRANSPARENCY);
+    }
+
     public ColorParam(String name, Color defaultColor,
                       TransparencyPolicy transparencyPolicy) {
         super(name, ALLOW_RANDOMIZE);
@@ -86,6 +90,10 @@ public class ColorParam extends AbstractFilterParam {
 
     public Color getColor() {
         return color;
+    }
+
+    public String getColorStr() {
+        return "%d,%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     }
 
     public void setColor(Color newColor, boolean trigger) {

@@ -27,18 +27,17 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Result;
 import pixelitor.utils.Shapes;
 
+import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -361,5 +360,69 @@ public class IO {
         Canvas canvas = Views.getActiveComp().getCanvas();
         return "<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">"
             .formatted(canvas.getWidth(), canvas.getHeight());
+    }
+
+    public static Result<BufferedImage, String> commandLineFilterImage(BufferedImage src, List<String> command) {
+        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
+        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+        pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+
+        BufferedImage out;
+
+        try {
+            Process p = pb.start();
+
+            // Write the source image to the standard input
+            // of the external process
+            try (OutputStream processInput = p.getOutputStream()) {
+                writeToOutStream(src, processInput);
+                processInput.flush();
+            }
+
+            // Read the filtered image the from the standard output
+            // of the external process
+            try (InputStream processOutput = p.getInputStream()) {
+                out = ImageIO.read(processOutput);
+            }
+            String errorMsg = null;
+            if (out == null) {
+                // There was an error. Try to get an error message.
+                try (InputStream processError = p.getErrorStream()) {
+                    errorMsg = new String(processError.readAllBytes());
+                }
+            }
+            p.waitFor();
+            if (errorMsg != null) {
+                return Result.error(errorMsg);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return Result.success(out);
+    }
+
+    public static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
+        // Write as png to ImageMagick and let it do
+        // the conversion to the final format.
+        // Explicitly setting a low compression level doesn't seem
+        // to make it faster (why?), so use the simple approach.
+        ImageIO.write(img, "png", magickInput);
+
+//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(magickInput)) {
+//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+//            ImageWriter writer = writers.next();
+//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
+//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
+//            try {
+//                writer.setOutput(ios);
+//                writer.write(img);
+//            } finally {
+//                writer.dispose();
+//                ios.flush();
+//            }
+//        }
     }
 }

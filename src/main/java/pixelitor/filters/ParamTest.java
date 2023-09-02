@@ -24,11 +24,14 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
@@ -79,7 +82,7 @@ public class ParamTest extends ParametrizedFilter {
             new ElevationAngleParam("ElevationAngleParam", 0),
             new BlendingModeParam(BlendingMode.values()),
             new BooleanParam("BooleanParam", false),
-            new TextParam("TextParam", "default value"),
+            new TextParam("TextParam", "default value", true),
             new LogZoomParam("Zoom", 200, 200, 1000),
         };
     }

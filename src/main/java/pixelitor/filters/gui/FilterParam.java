@@ -22,7 +22,7 @@ import pixelitor.utils.debug.Debuggable;
 
 /**
  * The model for a filter parameter, which (unlike a button) holds
- * some value.
+ * a value that can be changed by the user.
  *
  * For practical reasons, implementations of this interface are also
  * found outside filters as models of GUI elements. In such cases,

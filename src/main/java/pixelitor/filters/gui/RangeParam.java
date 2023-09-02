@@ -237,6 +237,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return (int) value;
     }
 
+    public String getValueStr() {
+        return getValue() + "";
+    }
+
     public boolean isZero() {
         return getValue() == 0;
     }

@@ -32,9 +32,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static java.awt.Color.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.*;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 
@@ -72,7 +77,7 @@ public class FilterParamTest {
             {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
             {new ImagePositionParam("Param Name")},
             {new GradientParam("Param Name", BLACK, WHITE)},
-            {new TextParam("Param Name", "default text")},
+            {new TextParam("Param Name", "default text", true)},
             {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
             {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
             {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},

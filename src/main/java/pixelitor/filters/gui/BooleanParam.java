@@ -124,6 +124,10 @@ public class BooleanParam extends AbstractFilterParam {
         return currentValue;
     }
 
+    public String isCheckedStr() {
+        return currentValue ? "1" : "0";
+    }
+
     public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
         if (currentValue != newValue) {
             currentValue = newValue;

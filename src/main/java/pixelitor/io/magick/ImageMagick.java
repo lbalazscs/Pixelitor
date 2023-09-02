@@ -24,6 +24,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -163,7 +164,7 @@ public class ImageMagick {
         try {
             Process p = pb.start();
             try (OutputStream magickInput = p.getOutputStream()) {
-                writeToOutStream(img, magickInput);
+                IO.writeToOutStream(img, magickInput);
                 magickInput.flush();
             }
             p.waitFor();
@@ -172,29 +173,6 @@ public class ImageMagick {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
-        // Write as png to ImageMagick and let it do
-        // the conversion to the final format.
-        // Explicitly setting a low compression level doesn't seem
-        // to make it faster (why?), so use the simple approach.
-        ImageIO.write(img, "png", magickInput);
-
-//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(magickInput)) {
-//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
-//            ImageWriter writer = writers.next();
-//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
-//            try {
-//                writer.setOutput(ios);
-//                writer.write(img);
-//            } finally {
-//                writer.dispose();
-//                ios.flush();
-//            }
-//        }
     }
 
     private static BufferedImage importImage(File file) {
@@ -223,14 +201,38 @@ public class ImageMagick {
         return img;
     }
 
+    public static void main(String[] args) throws IOException {
+        if (!installed) {
+            System.out.println("ImageMagick::main: NOT INSTALLED");
+            System.exit(1);
+        }
+
+        File inputFile = new File("C:\\Users\\Laci\\Desktop\\new_bosch.jpg");
+        System.out.println("ImageMagick::main: inputFile = " + inputFile.getAbsolutePath() + (inputFile.exists() ? " - exists" : " - does not exist!"));
+        BufferedImage img = ImageIO.read(inputFile);
+
+        File origFile = new File("origFile.png");
+        ImageIO.write(img, "PNG", origFile);
+        System.out.println("ImageMagick::main: origFile = " + origFile.getAbsolutePath() + (origFile.exists() ? " - exists" : " - does not exist!"));
+
+        BufferedImage out = IO.commandLineFilterImage(img,
+            List.of(
+                magickCommand.getAbsolutePath(),
+                "convert",
+                "png:-",
+                "-bilateral-blur",
+                "8",
+                "png:-"
+            )).get();
+        File outFile = new File("outFile.png");
+        ImageIO.write(out, "PNG", outFile);
+        System.out.println("ImageMagick::main: outFile = " + outFile.getAbsolutePath() + (outFile.exists() ? " - exists" : " - does not exist!"));
+    }
+
     private static boolean checkInstalled() {
-        if (!magickDirName.isEmpty()) {
-            String executable = JVM.isWindows ? "magick.exe" : "magick";
-            magickCommand = new File(magickDirName, executable);
-            if (magickCommand.exists()) {
-                // ImageMagick was found in the directory given in the preferences
-                return true;
-            }
+        magickCommand = Utils.checkExecutable(magickDirName, "magick");
+        if (magickCommand != null) {
+            return true;
         }
 
         // try to find it

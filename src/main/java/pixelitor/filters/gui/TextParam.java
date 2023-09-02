@@ -31,17 +31,23 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
 
-    private boolean trigger = true; // whether the running of the filter should be triggered
-    private final TextParamGUI gui;
+    // If true, the filter is not executed after every edit.
+    // Instead, there is a "Run" button in the GUI for that purpose.
+    private final boolean command;
 
-    public TextParam(String name, String defaultValue) {
+    private String value;
+    private TextParamGUI gui;
+
+    public TextParam(String name, String defaultValue, boolean command) {
         super(name, ALLOW_RANDOMIZE);
         this.defaultValue = defaultValue;
-        gui = new TextParamGUI(this, defaultValue, adjustmentListener);
+        this.value = defaultValue;
+        this.command = command;
     }
 
     @Override
     public JComponent createGUI() {
+        gui = new TextParamGUI(this, value, adjustmentListener);
         paramGUI = gui;
         guiCreated();
         return gui;
@@ -54,34 +60,22 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        if (trigger) {
-            setValue(defaultValue);
-        } else {
-            this.trigger = false;
-            setValue(defaultValue);
-            this.trigger = true;
-        }
+        setValue(defaultValue, trigger);
     }
 
     @Override
     protected void doRandomize() {
-        trigger = false;
-        setValue(Rnd.createRandomString(15));
-        trigger = true;
+        setValue(Rnd.createRandomString(15), false);
     }
 
     public String getValue() {
-        return gui.getText();
+        return value;
     }
 
-    public void setValue(String s) {
-        String old = gui.getText();
-        if (!old.equals(s)) {
-            boolean triggerWasTrue = trigger;
-            trigger = false;
-            gui.setText(s);
-            trigger = true;
-            if (triggerWasTrue) { // handle the case when this is called from randomize
+    public void setValue(String s, boolean trigger) {
+        if (!value.equals(s)) {
+            value = s;
+            if (trigger && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted();
             }
         }
@@ -94,12 +88,16 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public TextParamState copyState() {
-        return new TextParamState(gui.getText());
+        return new TextParamState(value);
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        gui.setText(((TextParamState) state).value());
+        String newValue = ((TextParamState) state).value();
+        value = newValue;
+        if (updateGUI) {
+            gui.setText(newValue);
+        }
     }
 
     @Override
@@ -107,13 +105,13 @@ public class TextParam extends AbstractFilterParam {
         gui.setText(savedValue);
     }
 
-    public boolean isTrigger() {
-        return trigger;
-    }
-
     @Override
     public String getParamValue() {
         return getValue();
+    }
+
+    public boolean isCommand() {
+        return command;
     }
 
     @Override
