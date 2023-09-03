@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.Composition;
 import pixelitor.gui.View;
@@ -495,7 +496,7 @@ public class Shapes {
         return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
-    public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius) {
+    public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius, double tuning) {
         double angleIncrement = Math.PI * 2 / n;
         double maxRadius = radius / Math.cos(angleIncrement / 2);
         double angle = 3 * Math.PI / 2;
@@ -503,18 +504,31 @@ public class Shapes {
             angle += angleIncrement / 2;
         }
         Path2D path = new Path2D.Double();
-        path.moveTo(cx + maxRadius * Math.cos(angle), cy + maxRadius * Math.sin(angle));
+        double prevX = cx + maxRadius * Math.cos(angle);
+        double prevY = cy + maxRadius * Math.sin(angle);
+        path.moveTo(prevX, prevY);
         for (int i = 0; i < n; i++) {
             angle += angleIncrement;
-            path.lineTo(cx + maxRadius * Math.cos(angle), cy + maxRadius * Math.sin(angle));
+            double nextX = cx + maxRadius * Math.cos(angle);
+            double nextY = cy + maxRadius * Math.sin(angle);
+            if (tuning == 0) {
+                path.lineTo(nextX, nextY);
+            } else {
+                double cpX = ImageMath.lerp(tuning + 1, cx, (prevX + nextX) / 2.0);
+                double cpY = ImageMath.lerp(tuning + 1, cy, (prevY + nextY) / 2.0);
+                path.curveTo(cpX, cpY, cpX, cpY, nextX, nextY);
+                prevX = nextX;
+                prevY = nextY;
+            }
         }
         path.closePath();
         return path;
     }
 
-    public static Shape createFlower(int n, double cx, double cy, double radius) {
+    public static Shape createFlower(int n, double cx, double cy, double radius, double width) {
         double angleIncrement = Math.PI * 2 / n;
-        double halfAngleIncrement = angleIncrement / 2;
+        // 0.45 instead of 0.5 so that the distant radius never goes to infinity
+        double halfAngleIncrement = angleIncrement * (0.5 + width * 0.45);
         double angle = -Math.PI / 2;
         double distantRadius = radius / Math.cos(halfAngleIncrement);
 

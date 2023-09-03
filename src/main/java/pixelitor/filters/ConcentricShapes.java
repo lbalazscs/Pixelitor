@@ -30,6 +30,7 @@ import pixelitor.utils.Shapes;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.ArrayList;
@@ -50,56 +51,63 @@ public class ConcentricShapes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    enum ConcentricShapeType {
-        CIRCLES("Circles", false, 1.0, 1.0) {
+    private enum ConcentricShapeType {
+        CIRCLES("Circles", false, false, 1.0, 1.0) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
                 return Shapes.createCircle(cx, cy, r);
             }
-        }, POLYGONS("Polygons", true, 1.0, 1.0) {
+        }, POLYGONS("Polygons", true, true, 1.0, 1.0) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
-                return Shapes.createCircumscribedPolygon(n, cx, cy, r);
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
+                return Shapes.createCircumscribedPolygon(n, cx, cy, r, tuning);
             }
             // the number of rings multiplier corresponds to the max/min radius ratio
-        }, STARS("Stars", true, 2.0, 2.0) {
+        }, STARS("Stars", true, true, 2.0, 2.0) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
-                return new Star2D(cx, cy, r / 2.0, r, n);
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
+                double innerRadius = (0.5 + tuning * 0.5) * r;
+                return new Star2D(cx, cy, innerRadius, r, n);
             }
-        }, BATS("Bats", false, 2.0, 2.0) {
+        }, BATS("Bats", false, false, 2.0, 2.0) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
                 return Shapes.createBat(cx - r, cy - r, 2 * r, 2 * r);
             }
-        }, HEARTS("Hearts", false, 1.0, 1.5) {
+        }, HEARTS("Hearts", false, false, 1.0, 1.5) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
                 return Shapes.createHeart(cx - r, cy - r, 2 * r, 2 * r);
             }
-        }, FLOWERS("Flowers", true, 1.0, 1.0) {
+        }, FLOWERS("Flowers", true, true, 1.0, 1.0) {
             @Override
-            Shape createShape(double cx, double cy, double r, int n) {
-                return Shapes.createFlower(n, cx, cy, r);
+            Shape createShape(double cx, double cy, double r, int n, double tuning) {
+                return Shapes.createFlower(n, cx, cy, r, tuning);
             }
         };
 
         private final String guiName;
         private final boolean hasSides;
+        private final boolean hasTuning;
         private final double distMultiplier;
         private final double ringsMultiplier;
 
-        ConcentricShapeType(String guiName, boolean hasSides, double distMultiplier, double ringsMultiplier) {
+        ConcentricShapeType(String guiName, boolean hasSides, boolean hasTuning, double distMultiplier, double ringsMultiplier) {
             this.guiName = guiName;
             this.hasSides = hasSides;
+            this.hasTuning = hasTuning;
             this.distMultiplier = distMultiplier;
             this.ringsMultiplier = ringsMultiplier;
         }
 
-        abstract Shape createShape(double cx, double cy, double r, int n);
+        abstract Shape createShape(double cx, double cy, double r, int n, double tuning);
 
         public boolean hasSides() {
             return hasSides;
+        }
+
+        public boolean hasTuning() {
+            return hasTuning;
         }
 
         public double getDistMultiplier() {
@@ -117,14 +125,17 @@ public class ConcentricShapes extends ParametrizedFilter {
     }
 
     private final EnumParam<ConcentricShapeType> type = new EnumParam<>("Type", ConcentricShapeType.class);
-    private final RangeParam sidesParam = new RangeParam("Sides", 3, 7, 25);
-    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final RangeParam sides = new RangeParam("Sides", 3, 7, 25);
+    private final RangeParam tuning = new RangeParam("Tuning", -100, 0, 100);
     private final RangeParam distanceParam = new RangeParam("Distance", 1, 20, 100);
     private final ColorListParam colorsParam = new ColorListParam("Colors",
         2, 2, WHITE, BLACK, Colors.CW_RED, Colors.CW_GREEN, Colors.CW_BLUE,
         Colors.CW_ORANGE, Colors.CW_TEAL, Colors.CW_VIOLET);
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 0, 100);
-    private final AngleParam rotateParam = new AngleParam("Rotate", 0);
+
+    private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
+    private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     private record ColoredShape(Color color, Shape shape) {
     }
@@ -133,16 +144,17 @@ public class ConcentricShapes extends ParametrizedFilter {
         super(false);
 
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
-        type.setupEnableOtherIf(sidesParam, ConcentricShapeType::hasSides);
-        type.setupEnableOtherIf(rotateParam, t -> t != ConcentricShapeType.CIRCLES);
+        type.setupEnableOtherIf(sides, ConcentricShapeType::hasSides);
+        type.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
+//        type.setupEnableOtherIf(rotate, t -> t != ConcentricShapeType.CIRCLES);
 
         setParams(
             type,
-            sidesParam,
-            center,
+            sides,
+            tuning,
             distanceParam,
             colorsParam,
-            rotateParam,
+            new DialogParam("Transform", center, scale, rotate),
             randomnessParam.withAction(reseedAction)
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
             null, "Export the current image to an SVG file",
@@ -158,7 +170,8 @@ public class ConcentricShapes extends ParametrizedFilter {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         Random random = paramSet.getLastSeedRandom();
-        List<ColoredShape> shapes = createShapes(dest.getWidth(), dest.getHeight(), random, rotateParam.getValueInRadians());
+        List<ColoredShape> shapes = createShapes(dest.getWidth(), dest.getHeight(),
+            random, rotate.getValueInRadians(), tuning.getPercentage());
         for (ColoredShape shape : shapes) {
             g.setColor(shape.color());
             g.fill(shape.shape());
@@ -168,7 +181,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         return dest;
     }
 
-    private List<ColoredShape> createShapes(int width, int height, Random rng, double angle) {
+    private List<ColoredShape> createShapes(int width, int height, Random rng, double angle, double tuning) {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
@@ -189,15 +202,32 @@ public class ConcentricShapes extends ParametrizedFilter {
         int numColors = colors.length;
         List<ColoredShape> retVal = new ArrayList<>(numRings);
 
+        int numSides = sides.getValue();
+
+        double scaleX = scale.getPercentage(0);
+        double scaleY = scale.getPercentage(1);
+
+        AffineTransform at = null;
+        if (angle != 0 || scaleX != 1.0 || scaleY != 1.0) {
+//            at = AffineTransform.getTranslateInstance
+//                (cx - scaleX * cx, cy - scaleY * cy);
+            at = new AffineTransform();
+            // this will first scale, and then rotate!
+            at.rotate(angle, cx, cy);
+            at.translate(cx, cy);
+            at.scale(scaleX, scaleY);
+            at.translate(-cx, -cy);
+        }
+
         for (int ring = numRings; ring > 0; ring--) {
             double r = ring * distance;
             Color color = colorsParam.getColor((ring - 1) % numColors);
-            Shape shape = shapeType.createShape(cx, cy, r, sidesParam.getValue());
+            Shape shape = shapeType.createShape(cx, cy, r, numSides, tuning);
             if (randomness > 0) {
                 shape = Shapes.randomize(shape, rng, rndMultiplier * r);
             }
-            if (angle != 0) {
-                shape = Shapes.rotate(shape, angle, cx, cy);
+            if (at != null) {
+                shape = at.createTransformedShape(shape);
             }
             retVal.add(new ColoredShape(color, shape));
         }
@@ -210,7 +240,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         content.append("\n");
 
         Canvas canvas = Views.getActiveComp().getCanvas();
-        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom(), rotateParam.getValueInRadians());
+        List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom(), rotate.getValueInRadians(), tuning.getPercentage());
         for (ColoredShape coloredShape : coloredShapes) {
             String svgPath = Shapes.toSVGPath(coloredShape.shape());
             String svgColor = Colors.toHTMLHex(coloredShape.color(), false);

@@ -772,8 +772,8 @@ public class SubPath implements Serializable, Transformable {
 
     public void randomize(Random rng, double amount) {
         for (AnchorPoint anchorPoint : anchorPoints) {
-            double dx = (rng.nextDouble() * 2 - 2) * amount;
-            double dy = (rng.nextDouble() * 2 - 2) * amount;
+            double dx = (rng.nextDouble() * 2 - 1) * amount;
+            double dy = (rng.nextDouble() * 2 - 1) * amount;
             anchorPoint.imTranslate(dx, dy);
         }
     }
