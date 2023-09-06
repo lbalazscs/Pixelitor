@@ -32,6 +32,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.Map;
 import java.util.Random;
 
@@ -48,6 +49,9 @@ import static pixelitor.utils.QuadrantAngle.*;
  * Render Truchet tiles filter
  */
 public class Truchet extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -3274808280051693533L;
+
     public static final String NAME = "Truchet Tiles";
 
     private static final int PATTERN_RANDOM = 0;
