@@ -32,6 +32,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Random;
 
 import static java.awt.Color.BLACK;
@@ -71,31 +72,54 @@ public class Truchet extends ParametrizedFilter {
     private static final int PATTERN_19 = 19;
     private static final int PATTERN_20 = 20;
     private static final int PATTERN_21 = 21;
+    public static final Map<String, String> migration_helper = Map.ofEntries(
+            Map.entry("Un", "Aquamarine" ),
+            Map.entry("Deux", "Baryte" ),
+            Map.entry("Trois", "Citrine" ),
+            Map.entry("Quatre", "Diamond" ),
+            Map.entry("Cinq", "Emerald" ),
+            Map.entry("Six", "Friedelite" ),
+            Map.entry("Sept", "Garnet" ),
+            Map.entry("Huit", "Hambergite" ),
+            Map.entry("Neuf", "Iolite" ),
+            Map.entry("Dix", "Jade" ),
+            Map.entry("Onze", "Kyanite" ),
+            Map.entry("Douze", "Lapis" ),
+            Map.entry("Treize", "Moonstone" ),
+            Map.entry("Quatorze", "Neptunite" ),
+            Map.entry("Quinze", "Opal" ),
+            Map.entry("Seize", "Pearl" ),
+            Map.entry("Dix-sept", "Quartz" ),
+            Map.entry("Dix-huit", "Ruby" ),
+            Map.entry("Dix-neuf", "Sapphire" ),
+            Map.entry("Vingt", "Turquoise" ),
+            Map.entry("Vingt et un", "Uvite" )
+    );
 
     private final EnumParam<TileType> typeParam = new EnumParam<>("Type", TileType.class);
     private final IntChoiceParam patternParam = new IntChoiceParam("Pattern", new Item[]{
-        new Item("Random", PATTERN_RANDOM),
-        new Item("Un", PATTERN_1),
-        new Item("Deux", PATTERN_2),
-        new Item("Trois", PATTERN_3),
-        new Item("Quatre", PATTERN_4),
-        new Item("Cinq", PATTERN_5),
-        new Item("Six", PATTERN_6),
-        new Item("Sept", PATTERN_7),
-        new Item("Huit", PATTERN_8),
-        new Item("Neuf", PATTERN_9),
-        new Item("Dix", PATTERN_10),
-        new Item("Onze", PATTERN_11),
-        new Item("Douze", PATTERN_12),
-        new Item("Treize", PATTERN_13),
-        new Item("Quatorze", PATTERN_14),
-        new Item("Quinze", PATTERN_15),
-        new Item("Seize", PATTERN_16),
-        new Item("Dix-sept", PATTERN_17),
-        new Item("Dix-huit", PATTERN_18),
-        new Item("Dix-neuf", PATTERN_19),
-        new Item("Vingt", PATTERN_20),
-        new Item("Vingt et un", PATTERN_21),
+            new Item("Random", PATTERN_RANDOM),
+            new Item("Aquamarine", PATTERN_1),
+            new Item("Baryte", PATTERN_2),
+            new Item("Citrine", PATTERN_3),
+            new Item("Diamond", PATTERN_4),
+            new Item("Emerald", PATTERN_5),
+            new Item("Friedelite", PATTERN_6),
+            new Item("Garnet", PATTERN_7),
+            new Item("Hambergite", PATTERN_8),
+            new Item("Iolite", PATTERN_9),
+            new Item("Jade", PATTERN_10),
+            new Item("Kyanite", PATTERN_11),
+            new Item("Lapis", PATTERN_12),
+            new Item("Moonstone", PATTERN_13),
+            new Item("Neptunite", PATTERN_14),
+            new Item("Opal", PATTERN_15),
+            new Item("Pearl", PATTERN_16),
+            new Item("Quartz", PATTERN_17),
+            new Item("Ruby", PATTERN_18),
+            new Item("Sapphire", PATTERN_19),
+            new Item("Turquoise", PATTERN_20),
+            new Item("Uvite", PATTERN_21),
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
