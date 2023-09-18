@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import com.bric.util.JVM;
 import pixelitor.GUIMode;
 import pixelitor.colors.Colors;
+import pixelitor.filters.Truchet;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
@@ -101,6 +102,13 @@ public class UserPreset implements Preset {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
         }
+
+        else {
+            // sept 2023: migration in Truchet Tiles
+            if (Truchet.migration_helper.containsKey(value))
+                value = Truchet.migration_helper.get(value);
+        }
+
         return value;
     }
 
