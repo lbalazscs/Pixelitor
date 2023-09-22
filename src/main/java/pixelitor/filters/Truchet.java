@@ -126,6 +126,7 @@ public class Truchet extends ParametrizedFilter {
             new Item("Sapphire", PATTERN_19),
             new Item("Turquoise", PATTERN_20),
             new Item("Uvite", PATTERN_21),
+            new Item("Wavellite", PATTERN_22),
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
@@ -341,7 +342,7 @@ public class Truchet extends ParametrizedFilter {
         for (int j = 0; j < numTilesVer; j++) {
             for (int i = 0; i < numTilesHor; i++) {
                 int tileIndex = switch (pattern) {
-                    case PATTERN_RANDOM -> rand.nextInt(4);
+                    case PATTERN_RANDOM -> rand.nextInt(6);
                     case PATTERN_1 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 1) : ((j % 2 == 0) ? 2 : 3);
                     case PATTERN_2 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 2) : ((j % 2 == 0) ? 1 : 3);
                     case PATTERN_3 -> indexFromArray(ARRAY_3, i, j);
