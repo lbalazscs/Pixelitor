@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;
@@ -388,6 +387,9 @@ public class Truchet extends ParametrizedFilter {
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
 
+        g.setColor(bgColor.getColor());
+        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+
         int numTilesHor = dest.getWidth() / size + 1;
         int numTilesVer = dest.getHeight() / size + 1;
         int pattern = patternParam.getValue();
@@ -440,7 +442,7 @@ public class Truchet extends ParametrizedFilter {
                     case PATTERN_30 -> indexFromArray(ARRAY_30, i, j);
                     default -> throw new IllegalStateException("Unexpected value: " + pattern);
                 };
-                g.drawImage(tiles[tileIndex], i * size, j * size, null);
+                g.drawImage(tiles[tileIndex], i * size - size / 2, j * size - size / 2, null);
             }
         }
 
@@ -468,12 +470,11 @@ public class Truchet extends ParametrizedFilter {
         int tileSize = sizeParam.getValue();
         TileType type = typeParam.getSelected();
 
-        BufferedImage tile = new BufferedImage(tileSize, tileSize, TYPE_INT_ARGB);
+        BufferedImage tile = new BufferedImage(2 * tileSize, 2 * tileSize, TYPE_INT_ARGB);
         Graphics2D tg = tile.createGraphics();
-        Colors.fillWith(bgColor.getColor(), tg, tileSize, tileSize);
 
         if (angle != null) {
-            tg.transform(angle.createTransform(tileSize, tileSize));
+            tg.transform(angle.createTransform(2 * tileSize, 2 * tileSize));
         }
 
         tg.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -489,9 +490,8 @@ public class Truchet extends ParametrizedFilter {
         int tileSize = sizeParam.getValue();
         TileType type = typeParam.getSelected();
 
-        BufferedImage tile = new BufferedImage(tileSize, tileSize, TYPE_INT_ARGB);
+        BufferedImage tile = new BufferedImage(2 * tileSize, 2 * tileSize, TYPE_INT_ARGB);
         Graphics2D tg = tile.createGraphics();
-        Colors.fillWith(bgColor.getColor(), tg, tileSize, tileSize);
 
         tg.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         tg.setColor(fgColor.getColor());
@@ -514,9 +514,9 @@ public class Truchet extends ParametrizedFilter {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
                 Path2D triangle = new Path2D.Double();
-                triangle.moveTo(tileSize, 0);
-                triangle.lineTo(tileSize, tileSize);
-                triangle.lineTo(0, tileSize);
+                triangle.moveTo(3 * tileSize / 2d, tileSize / 2d);
+                triangle.lineTo(3 * tileSize / 2d, 3 * tileSize / 2d);
+                triangle.lineTo(tileSize / 2d, 3 * tileSize / 2d);
                 triangle.closePath();
                 return triangle;
             }
@@ -526,7 +526,7 @@ public class Truchet extends ParametrizedFilter {
                 if (isBlank) {
                     return null;
                 }
-                return new Rectangle2D.Double(0, 0, tileSize, tileSize);
+                return new Rectangle2D.Double(tileSize / 2d, tileSize / 2d, tileSize, tileSize);
             }
 
         }, QUARTER_CIRCLES("Quarter Circles") {
@@ -536,12 +536,12 @@ public class Truchet extends ParametrizedFilter {
                 BasicStroke stroke = new BasicStroke(lineWidth);
 
                 Rectangle2D bounds1 = new Rectangle2D.Double(
-                    tileSize / 2.0, -tileSize / 2.0, tileSize, tileSize);
+                    tileSize, 0, tileSize, tileSize);
                 Arc2D arc1 = new Arc2D.Double(bounds1, 180, 90, Arc2D.OPEN);
                 path.append(stroke.createStrokedShape(arc1), false);
 
                 Rectangle2D bounds2 = new Rectangle2D.Double(
-                    -tileSize / 2.0, tileSize / 2.0, tileSize, tileSize);
+                    0, tileSize, tileSize, tileSize);
                 Arc2D arc2 = new Arc2D.Double(bounds2, 0, 90, Arc2D.OPEN);
                 path.append(stroke.createStrokedShape(arc2), false);
 
@@ -553,31 +553,31 @@ public class Truchet extends ParametrizedFilter {
                 Shape shape;
                 if (isBlank) {
                     Path2D lines = new Path2D.Double();
-                    lines.moveTo(tileSize / 2d, 0);
-                    lines.lineTo(tileSize / 2d, tileSize);
-                    lines.moveTo(0, tileSize / 2d);
-                    lines.lineTo(tileSize, tileSize / 2d);
+                    lines.moveTo(tileSize, tileSize / 2d);
+                    lines.lineTo(tileSize, 3 * tileSize / 2d);
+                    lines.moveTo(tileSize / 2d, tileSize);
+                    lines.lineTo(3 * tileSize / 2d, tileSize);
                     shape = lines;
                 } else {
                     Path2D path = new Path2D.Double();
 
                     Rectangle2D bounds1 = new Rectangle2D.Double(
-                        tileSize / 2.0, -tileSize / 2.0, tileSize, tileSize);
+                        tileSize, 0, tileSize, tileSize);
                     Arc2D arc1 = new Arc2D.Double(bounds1, 180, 90, Arc2D.OPEN);
                     path.append((arc1), false);
 
                     Rectangle2D bounds2 = new Rectangle2D.Double(
-                        -tileSize / 2.0, tileSize / 2.0, tileSize, tileSize);
+                        0, tileSize, tileSize, tileSize);
                     Arc2D arc2 = new Arc2D.Double(bounds2, 0, 90, Arc2D.OPEN);
                     path.append((arc2), false);
 
                     Rectangle2D bounds3 = new Rectangle2D.Double(
-                        -tileSize / 2.0, -tileSize / 2.0, tileSize, tileSize);
+                        0, 0, tileSize, tileSize);
                     Arc2D arc3 = new Arc2D.Double(bounds3, 270, 90, Arc2D.OPEN);
                     path.append((arc3), false);
 
                     Rectangle2D bounds4 = new Rectangle2D.Double(
-                        tileSize / 2.0, tileSize / 2.0, tileSize, tileSize);
+                        tileSize, tileSize, tileSize, tileSize);
                     Arc2D arc4 = new Arc2D.Double(bounds4, 90, 90, Arc2D.OPEN);
                     path.append((arc4), false);
 
@@ -589,21 +589,21 @@ public class Truchet extends ParametrizedFilter {
         }, DIAGONALS("Diagonals") {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
-                Line2D line = new Line2D.Double(0, 0, tileSize, tileSize);
-                BasicStroke stroke = new BasicStroke(lineWidth);
+                Line2D line = new Line2D.Double(tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d, 3 * tileSize / 2d);
+                BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 return stroke.createStrokedShape(line);
             }
 
             @Override
             public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
-                int offset = isBlank ? 0 : tileSize;
-                int onset = isBlank ? tileSize : 0;
+                double offset = isBlank ? tileSize / 2d : 3 * tileSize / 2d;
+                double onset = isBlank ? 3 * tileSize / 2d : tileSize / 2d;
                 Path2D lines = new Path2D.Double();
-                lines.moveTo(0, 0);
+                lines.moveTo(tileSize / 2d, tileSize / 2d);
                 lines.lineTo(offset, onset);
                 lines.moveTo(onset, offset);
-                lines.lineTo(tileSize, tileSize);
-                BasicStroke stroke = new BasicStroke(lineWidth);
+                lines.lineTo(3 * tileSize / 2d, 3 * tileSize / 2d);
+                BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 return stroke.createStrokedShape(lines);
             }
         };
