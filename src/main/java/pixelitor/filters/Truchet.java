@@ -33,6 +33,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -77,56 +78,73 @@ public class Truchet extends ParametrizedFilter {
     private static final int PATTERN_20 = 20;
     private static final int PATTERN_21 = 21;
     private static final int PATTERN_22 = 22;
+    private static final int PATTERN_RANDOM_EXTENDED = 23;
+    private static final int PATTERN_RANDOM_TILE = 24;
+    private static final int PATTERN_RANDOM_TILE_EXTENDED = 25;
+    private static final int PATTERN_26 = 26;
+    private static final int PATTERN_27 = 27;
+    private static final int PATTERN_28 = 28;
+    private static final int PATTERN_29 = 29;
+    private static final int PATTERN_30 = 30;
+
 
     public static final Map<String, String> migration_helper = Map.ofEntries(
-            Map.entry("Un", "Aquamarine" ),
-            Map.entry("Deux", "Baryte" ),
-            Map.entry("Trois", "Citrine" ),
-            Map.entry("Quatre", "Diamond" ),
-            Map.entry("Cinq", "Emerald" ),
-            Map.entry("Six", "Friedelite" ),
-            Map.entry("Sept", "Garnet" ),
-            Map.entry("Huit", "Hambergite" ),
-            Map.entry("Neuf", "Iolite" ),
-            Map.entry("Dix", "Jade" ),
-            Map.entry("Onze", "Kyanite" ),
-            Map.entry("Douze", "Lapis" ),
-            Map.entry("Treize", "Moonstone" ),
-            Map.entry("Quatorze", "Neptunite" ),
-            Map.entry("Quinze", "Opal" ),
-            Map.entry("Seize", "Pearl" ),
-            Map.entry("Dix-sept", "Quartz" ),
-            Map.entry("Dix-huit", "Ruby" ),
-            Map.entry("Dix-neuf", "Sapphire" ),
-            Map.entry("Vingt", "Turquoise" ),
-            Map.entry("Vingt et un", "Uvite" )
+        Map.entry("Un", "Aquamarine"),
+        Map.entry("Deux", "Baryte"),
+        Map.entry("Trois", "Citrine"),
+        Map.entry("Quatre", "Diamond"),
+        Map.entry("Cinq", "Emerald"),
+        Map.entry("Six", "Friedelite"),
+        Map.entry("Sept", "Garnet"),
+        Map.entry("Huit", "Hambergite"),
+        Map.entry("Neuf", "Iolite"),
+        Map.entry("Dix", "Jade"),
+        Map.entry("Onze", "Kyanite"),
+        Map.entry("Douze", "Lapis"),
+        Map.entry("Treize", "Moonstone"),
+        Map.entry("Quatorze", "Neptunite"),
+        Map.entry("Quinze", "Opal"),
+        Map.entry("Seize", "Pearl"),
+        Map.entry("Dix-sept", "Quartz"),
+        Map.entry("Dix-huit", "Ruby"),
+        Map.entry("Dix-neuf", "Sapphire"),
+        Map.entry("Vingt", "Turquoise"),
+        Map.entry("Vingt et un", "Uvite")
     );
 
     private final EnumParam<TileType> typeParam = new EnumParam<>("Type", TileType.class);
     private final IntChoiceParam patternParam = new IntChoiceParam("Pattern", new Item[]{
-            new Item("Random", PATTERN_RANDOM),
-            new Item("Aquamarine", PATTERN_1),
-            new Item("Baryte", PATTERN_2),
-            new Item("Citrine", PATTERN_3),
-            new Item("Diamond", PATTERN_4),
-            new Item("Emerald", PATTERN_5),
-            new Item("Friedelite", PATTERN_6),
-            new Item("Garnet", PATTERN_7),
-            new Item("Hambergite", PATTERN_8),
-            new Item("Iolite", PATTERN_9),
-            new Item("Jade", PATTERN_10),
-            new Item("Kyanite", PATTERN_11),
-            new Item("Lapis", PATTERN_12),
-            new Item("Moonstone", PATTERN_13),
-            new Item("Neptunite", PATTERN_14),
-            new Item("Opal", PATTERN_15),
-            new Item("Pearl", PATTERN_16),
-            new Item("Quartz", PATTERN_17),
-            new Item("Ruby", PATTERN_18),
-            new Item("Sapphire", PATTERN_19),
-            new Item("Turquoise", PATTERN_20),
-            new Item("Uvite", PATTERN_21),
-            new Item("Wavellite", PATTERN_22),
+        new Item("Random", PATTERN_RANDOM),
+        new Item("Random Tile", PATTERN_RANDOM_TILE),
+        new Item("Ex Random", PATTERN_RANDOM_EXTENDED),
+        new Item("Ex Random Tile", PATTERN_RANDOM_TILE_EXTENDED),
+        new Item("Aquamarine", PATTERN_1),
+        new Item("Baryte", PATTERN_2),
+        new Item("Citrine", PATTERN_3),
+        new Item("Diamond", PATTERN_4),
+        new Item("Emerald", PATTERN_5),
+        new Item("Friedelite", PATTERN_6),
+        new Item("Garnet", PATTERN_7),
+        new Item("Hambergite", PATTERN_8),
+        new Item("Iolite", PATTERN_9),
+        new Item("Jade", PATTERN_10),
+        new Item("Kyanite", PATTERN_11),
+        new Item("Lapis", PATTERN_12),
+        new Item("Moonstone", PATTERN_13),
+        new Item("Neptunite", PATTERN_14),
+        new Item("Opal", PATTERN_15),
+        new Item("Pearl", PATTERN_16),
+        new Item("Quartz", PATTERN_17),
+        new Item("Ruby", PATTERN_18),
+        new Item("Sapphire", PATTERN_19),
+        new Item("Turquoise", PATTERN_20),
+        new Item("Uvite", PATTERN_21),
+        new Item("Vivianite", PATTERN_22),
+        new Item("Wavellite", PATTERN_26),
+        new Item("Xonotlite", PATTERN_27),
+        new Item("Yugawaralite", PATTERN_28),
+        new Item("Zincite", PATTERN_29),
+        new Item("Amethyst", PATTERN_30),
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
@@ -296,6 +314,40 @@ public class Truchet extends ParametrizedFilter {
         {5, 5, 0, 2}
     };
 
+    private final int[][] ARRAY_26 = {
+        {4, 3},
+        {1, 5},
+    };
+
+    private final int[][] ARRAY_27 = {
+        {4, 0, 4, 5, 3, 5},
+        {3, 5, 1, 2, 4, 0},
+        {4, 2, 4, 5, 1, 5},
+        {5, 3, 5, 4, 0, 4},
+        {2, 4, 0, 3, 5, 1},
+        {5, 1, 5, 4, 2, 4},
+    };
+
+    private final int[][] ARRAY_28 = {
+        {5, 4, 3},
+        {3, 5, 4},
+        {4, 3, 5},
+    };
+
+    private final int[][] ARRAY_29 = {
+        {2, 4, 3},
+        {0, 1, 4},
+        {3, 2, 4},
+        {1, 4, 0},
+    };
+
+    private final int[][] ARRAY_30 = {
+        {5, 4},
+        {3, 1},
+        {4, 5},
+        {0, 2},
+    };
+
 
     public Truchet() {
         super(false);
@@ -304,7 +356,8 @@ public class Truchet extends ParametrizedFilter {
 
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
         FilterButtonModel reseedAction = paramSet.createReseedAction();
-        patternParam.setupDisableOtherIf(reseedAction, item -> item.getValue() != PATTERN_RANDOM);
+        List<Integer> randomPatterns = List.of(PATTERN_RANDOM, PATTERN_RANDOM_TILE, PATTERN_RANDOM_EXTENDED, PATTERN_RANDOM_TILE_EXTENDED);
+        patternParam.setupDisableOtherIf(reseedAction, item -> !randomPatterns.contains(item.getValue()));
 
         setParams(
             typeParam,
@@ -339,10 +392,23 @@ public class Truchet extends ParametrizedFilter {
         int numTilesVer = dest.getHeight() / size + 1;
         int pattern = patternParam.getValue();
 
+        int[][] profile = pattern == PATTERN_RANDOM_TILE || pattern == PATTERN_RANDOM_TILE_EXTENDED ?
+            new int[rand.nextInt(1, 7)][rand.nextInt(1, 7)] : new int[0][0];
+        int bound = pattern == PATTERN_RANDOM_TILE ? 4 :
+            pattern == PATTERN_RANDOM_TILE_EXTENDED ? 6 : 0;
+        for (int i = 0; i < profile.length; i++) {
+            for (int j = 0; j < profile[i].length; j++) {
+                profile[i][j] = rand.nextInt(bound);
+            }
+        }
+
         for (int j = 0; j < numTilesVer; j++) {
             for (int i = 0; i < numTilesHor; i++) {
                 int tileIndex = switch (pattern) {
-                    case PATTERN_RANDOM -> rand.nextInt(6);
+                    case PATTERN_RANDOM -> rand.nextInt(4);
+                    case PATTERN_RANDOM_TILE -> profile[j % profile.length][i % profile[0].length];
+                    case PATTERN_RANDOM_TILE_EXTENDED -> profile[j % profile.length][i % profile[0].length];
+                    case PATTERN_RANDOM_EXTENDED -> rand.nextInt(6);
                     case PATTERN_1 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 1) : ((j % 2 == 0) ? 2 : 3);
                     case PATTERN_2 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 2) : ((j % 2 == 0) ? 1 : 3);
                     case PATTERN_3 -> indexFromArray(ARRAY_3, i, j);
@@ -367,6 +433,11 @@ public class Truchet extends ParametrizedFilter {
                     case PATTERN_21 ->
                         (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 1 : 0) : ((j < numTilesVer / 2) ? 2 : 3);
                     case PATTERN_22 -> indexFromArray(ARRAY_22, i, j);
+                    case PATTERN_26 -> indexFromArray(ARRAY_26, i, j);
+                    case PATTERN_27 -> indexFromArray(ARRAY_27, i, j);
+                    case PATTERN_28 -> indexFromArray(ARRAY_28, i, j);
+                    case PATTERN_29 -> indexFromArray(ARRAY_29, i, j);
+                    case PATTERN_30 -> indexFromArray(ARRAY_30, i, j);
                     default -> throw new IllegalStateException("Unexpected value: " + pattern);
                 };
                 g.drawImage(tiles[tileIndex], i * size, j * size, null);
