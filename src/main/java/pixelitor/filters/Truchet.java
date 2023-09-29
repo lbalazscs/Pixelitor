@@ -514,9 +514,11 @@ public class Truchet extends ParametrizedFilter {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
                 Path2D triangle = new Path2D.Double();
-                triangle.moveTo(3 * tileSize / 2d, tileSize / 2d);
-                triangle.lineTo(3 * tileSize / 2d, 3 * tileSize / 2d);
-                triangle.lineTo(tileSize / 2d, 3 * tileSize / 2d);
+                double firsts = Math.floor(tileSize / 2d);
+                double thirds = Math.ceil(3 * tileSize / 2d);
+                triangle.moveTo(thirds, firsts);
+                triangle.lineTo(thirds, thirds);
+                triangle.lineTo(firsts, thirds);
                 triangle.closePath();
                 return triangle;
             }
@@ -526,7 +528,8 @@ public class Truchet extends ParametrizedFilter {
                 if (isBlank) {
                     return null;
                 }
-                return new Rectangle2D.Double(tileSize / 2d, tileSize / 2d, tileSize, tileSize);
+                return new Rectangle2D.Double(Math.floor(tileSize / 2d), Math.floor(tileSize / 2d),
+                    tileSize, tileSize);
             }
 
         }, QUARTER_CIRCLES("Quarter Circles") {
@@ -596,13 +599,15 @@ public class Truchet extends ParametrizedFilter {
 
             @Override
             public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
-                double offset = isBlank ? tileSize / 2d : 3 * tileSize / 2d;
-                double onset = isBlank ? 3 * tileSize / 2d : tileSize / 2d;
+                double firsts = Math.floor(tileSize / 2d);
+                double thirds = Math.ceil(3 * tileSize / 2d);
+                double offset = isBlank ? firsts : thirds;
+                double onset = isBlank ? thirds : firsts;
                 Path2D lines = new Path2D.Double();
-                lines.moveTo(tileSize / 2d, tileSize / 2d);
+                lines.moveTo(firsts, firsts);
                 lines.lineTo(offset, onset);
                 lines.moveTo(onset, offset);
-                lines.lineTo(3 * tileSize / 2d, 3 * tileSize / 2d);
+                lines.lineTo(thirds, thirds);
                 BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 return stroke.createStrokedShape(lines);
             }
