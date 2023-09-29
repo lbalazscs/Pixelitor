@@ -78,13 +78,11 @@ public class Truchet extends ParametrizedFilter {
     private static final int PATTERN_21 = 21;
     private static final int PATTERN_22 = 22;
     private static final int PATTERN_RANDOM_EXTENDED = 23;
-    private static final int PATTERN_RANDOM_TILE = 24;
-    private static final int PATTERN_RANDOM_TILE_EXTENDED = 25;
+    private static final int PATTERN_24 = 24;
+    private static final int PATTERN_25 = 25;
     private static final int PATTERN_26 = 26;
     private static final int PATTERN_27 = 27;
     private static final int PATTERN_28 = 28;
-    private static final int PATTERN_29 = 29;
-    private static final int PATTERN_30 = 30;
 
 
     public static final Map<String, String> migration_helper = Map.ofEntries(
@@ -114,9 +112,7 @@ public class Truchet extends ParametrizedFilter {
     private final EnumParam<TileType> typeParam = new EnumParam<>("Type", TileType.class);
     private final IntChoiceParam patternParam = new IntChoiceParam("Pattern", new Item[]{
         new Item("Random", PATTERN_RANDOM),
-        new Item("Random Tile", PATTERN_RANDOM_TILE),
         new Item("Ex Random", PATTERN_RANDOM_EXTENDED),
-        new Item("Ex Random Tile", PATTERN_RANDOM_TILE_EXTENDED),
         new Item("Aquamarine", PATTERN_1),
         new Item("Baryte", PATTERN_2),
         new Item("Citrine", PATTERN_3),
@@ -139,11 +135,11 @@ public class Truchet extends ParametrizedFilter {
         new Item("Turquoise", PATTERN_20),
         new Item("Uvite", PATTERN_21),
         new Item("Vivianite", PATTERN_22),
-        new Item("Wavellite", PATTERN_26),
-        new Item("Xonotlite", PATTERN_27),
-        new Item("Yugawaralite", PATTERN_28),
-        new Item("Zincite", PATTERN_29),
-        new Item("Amethyst", PATTERN_30),
+        new Item("Wavellite", PATTERN_24),
+        new Item("Xonotlite", PATTERN_25),
+        new Item("Yugawaralite", PATTERN_26),
+        new Item("Zincite", PATTERN_27),
+        new Item("Amethyst", PATTERN_28),
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
@@ -355,7 +351,7 @@ public class Truchet extends ParametrizedFilter {
 
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
         FilterButtonModel reseedAction = paramSet.createReseedAction();
-        List<Integer> randomPatterns = List.of(PATTERN_RANDOM, PATTERN_RANDOM_TILE, PATTERN_RANDOM_EXTENDED, PATTERN_RANDOM_TILE_EXTENDED);
+        List<Integer> randomPatterns = List.of(PATTERN_RANDOM, PATTERN_RANDOM_EXTENDED);
         patternParam.setupDisableOtherIf(reseedAction, item -> !randomPatterns.contains(item.getValue()));
 
         setParams(
@@ -394,22 +390,10 @@ public class Truchet extends ParametrizedFilter {
         int numTilesVer = dest.getHeight() / size + 1;
         int pattern = patternParam.getValue();
 
-        int[][] profile = pattern == PATTERN_RANDOM_TILE || pattern == PATTERN_RANDOM_TILE_EXTENDED ?
-            new int[rand.nextInt(1, 7)][rand.nextInt(1, 7)] : new int[0][0];
-        int bound = pattern == PATTERN_RANDOM_TILE ? 4 :
-            pattern == PATTERN_RANDOM_TILE_EXTENDED ? 6 : 0;
-        for (int i = 0; i < profile.length; i++) {
-            for (int j = 0; j < profile[i].length; j++) {
-                profile[i][j] = rand.nextInt(bound);
-            }
-        }
-
         for (int j = 0; j < numTilesVer; j++) {
             for (int i = 0; i < numTilesHor; i++) {
                 int tileIndex = switch (pattern) {
                     case PATTERN_RANDOM -> rand.nextInt(4);
-                    case PATTERN_RANDOM_TILE -> profile[j % profile.length][i % profile[0].length];
-                    case PATTERN_RANDOM_TILE_EXTENDED -> profile[j % profile.length][i % profile[0].length];
                     case PATTERN_RANDOM_EXTENDED -> rand.nextInt(6);
                     case PATTERN_1 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 1) : ((j % 2 == 0) ? 2 : 3);
                     case PATTERN_2 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 2) : ((j % 2 == 0) ? 1 : 3);
@@ -435,11 +419,11 @@ public class Truchet extends ParametrizedFilter {
                     case PATTERN_21 ->
                         (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 1 : 0) : ((j < numTilesVer / 2) ? 2 : 3);
                     case PATTERN_22 -> indexFromArray(ARRAY_22, i, j);
-                    case PATTERN_26 -> indexFromArray(ARRAY_26, i, j);
-                    case PATTERN_27 -> indexFromArray(ARRAY_27, i, j);
-                    case PATTERN_28 -> indexFromArray(ARRAY_28, i, j);
-                    case PATTERN_29 -> indexFromArray(ARRAY_29, i, j);
-                    case PATTERN_30 -> indexFromArray(ARRAY_30, i, j);
+                    case PATTERN_24 -> indexFromArray(ARRAY_26, i, j);
+                    case PATTERN_25 -> indexFromArray(ARRAY_27, i, j);
+                    case PATTERN_26 -> indexFromArray(ARRAY_28, i, j);
+                    case PATTERN_27 -> indexFromArray(ARRAY_29, i, j);
+                    case PATTERN_28 -> indexFromArray(ARRAY_30, i, j);
                     default -> throw new IllegalStateException("Unexpected value: " + pattern);
                 };
                 g.drawImage(tiles[tileIndex], i * size - size / 2, j * size - size / 2, null);
