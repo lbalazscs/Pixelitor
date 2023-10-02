@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;
@@ -33,6 +32,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -76,54 +76,70 @@ public class Truchet extends ParametrizedFilter {
     private static final int PATTERN_19 = 19;
     private static final int PATTERN_20 = 20;
     private static final int PATTERN_21 = 21;
+    private static final int PATTERN_22 = 22;
+    private static final int PATTERN_RANDOM_EXTENDED = 23;
+    private static final int PATTERN_24 = 24;
+    private static final int PATTERN_25 = 25;
+    private static final int PATTERN_26 = 26;
+    private static final int PATTERN_27 = 27;
+    private static final int PATTERN_28 = 28;
+
+
     public static final Map<String, String> migration_helper = Map.ofEntries(
-            Map.entry("Un", "Aquamarine" ),
-            Map.entry("Deux", "Baryte" ),
-            Map.entry("Trois", "Citrine" ),
-            Map.entry("Quatre", "Diamond" ),
-            Map.entry("Cinq", "Emerald" ),
-            Map.entry("Six", "Friedelite" ),
-            Map.entry("Sept", "Garnet" ),
-            Map.entry("Huit", "Hambergite" ),
-            Map.entry("Neuf", "Iolite" ),
-            Map.entry("Dix", "Jade" ),
-            Map.entry("Onze", "Kyanite" ),
-            Map.entry("Douze", "Lapis" ),
-            Map.entry("Treize", "Moonstone" ),
-            Map.entry("Quatorze", "Neptunite" ),
-            Map.entry("Quinze", "Opal" ),
-            Map.entry("Seize", "Pearl" ),
-            Map.entry("Dix-sept", "Quartz" ),
-            Map.entry("Dix-huit", "Ruby" ),
-            Map.entry("Dix-neuf", "Sapphire" ),
-            Map.entry("Vingt", "Turquoise" ),
-            Map.entry("Vingt et un", "Uvite" )
+        Map.entry("Un", "Aquamarine"),
+        Map.entry("Deux", "Baryte"),
+        Map.entry("Trois", "Citrine"),
+        Map.entry("Quatre", "Diamond"),
+        Map.entry("Cinq", "Emerald"),
+        Map.entry("Six", "Friedelite"),
+        Map.entry("Sept", "Garnet"),
+        Map.entry("Huit", "Hambergite"),
+        Map.entry("Neuf", "Iolite"),
+        Map.entry("Dix", "Jade"),
+        Map.entry("Onze", "Kyanite"),
+        Map.entry("Douze", "Lapis"),
+        Map.entry("Treize", "Moonstone"),
+        Map.entry("Quatorze", "Neptunite"),
+        Map.entry("Quinze", "Opal"),
+        Map.entry("Seize", "Pearl"),
+        Map.entry("Dix-sept", "Quartz"),
+        Map.entry("Dix-huit", "Ruby"),
+        Map.entry("Dix-neuf", "Sapphire"),
+        Map.entry("Vingt", "Turquoise"),
+        Map.entry("Vingt et un", "Uvite")
     );
 
     private final EnumParam<TileType> typeParam = new EnumParam<>("Type", TileType.class);
     private final IntChoiceParam patternParam = new IntChoiceParam("Pattern", new Item[]{
-            new Item("Random", PATTERN_RANDOM),
-            new Item("Aquamarine", PATTERN_1),
-            new Item("Baryte", PATTERN_2),
-            new Item("Citrine", PATTERN_3),
-            new Item("Diamond", PATTERN_4),
-            new Item("Emerald", PATTERN_5),
-            new Item("Friedelite", PATTERN_6),
-            new Item("Garnet", PATTERN_7),
-            new Item("Hambergite", PATTERN_8),
-            new Item("Iolite", PATTERN_9),
-            new Item("Jade", PATTERN_10),
-            new Item("Kyanite", PATTERN_11),
-            new Item("Lapis", PATTERN_12),
-            new Item("Moonstone", PATTERN_13),
-            new Item("Neptunite", PATTERN_14),
-            new Item("Opal", PATTERN_15),
-            new Item("Pearl", PATTERN_16),
-            new Item("Quartz", PATTERN_17),
-            new Item("Ruby", PATTERN_18),
-            new Item("Sapphire", PATTERN_19),
-            new Item("Turquoise", PATTERN_20),
-            new Item("Uvite", PATTERN_21),
+        new Item("Random", PATTERN_RANDOM),
+        new Item("Ex Random", PATTERN_RANDOM_EXTENDED),
+        new Item("Aquamarine", PATTERN_1),
+        new Item("Baryte", PATTERN_2),
+        new Item("Citrine", PATTERN_3),
+        new Item("Diamond", PATTERN_4),
+        new Item("Emerald", PATTERN_5),
+        new Item("Friedelite", PATTERN_6),
+        new Item("Garnet", PATTERN_7),
+        new Item("Hambergite", PATTERN_8),
+        new Item("Iolite", PATTERN_9),
+        new Item("Jade", PATTERN_10),
+        new Item("Kyanite", PATTERN_11),
+        new Item("Lapis", PATTERN_12),
+        new Item("Moonstone", PATTERN_13),
+        new Item("Neptunite", PATTERN_14),
+        new Item("Opal", PATTERN_15),
+        new Item("Pearl", PATTERN_16),
+        new Item("Quartz", PATTERN_17),
+        new Item("Ruby", PATTERN_18),
+        new Item("Sapphire", PATTERN_19),
+        new Item("Turquoise", PATTERN_20),
+        new Item("Uvite", PATTERN_21),
+        new Item("Vivianite", PATTERN_22),
+        new Item("Wavellite", PATTERN_24),
+        new Item("Xonotlite", PATTERN_25),
+        new Item("Yugawaralite", PATTERN_26),
+        new Item("Zincite", PATTERN_27),
+        new Item("Amethyst", PATTERN_28),
     });
     private final RangeParam sizeParam = new RangeParam("Tile Size", 2, 20, 100);
     private final RangeParam widthParam = new RangeParam("Line Width", 1, 3, 20);
@@ -286,6 +302,47 @@ public class Truchet extends ParametrizedFilter {
         {2, 0, 2, 0, 2, 3, 1, 3}
     };
 
+    private final int[][] ARRAY_22 = {
+        {0, 2, 4, 4},
+        {2, 0, 4, 4},
+        {5, 5, 2, 0},
+        {5, 5, 0, 2}
+    };
+
+    private final int[][] ARRAY_26 = {
+        {4, 3},
+        {1, 5},
+    };
+
+    private final int[][] ARRAY_27 = {
+        {4, 0, 4, 5, 3, 5},
+        {3, 5, 1, 2, 4, 0},
+        {4, 2, 4, 5, 1, 5},
+        {5, 3, 5, 4, 0, 4},
+        {2, 4, 0, 3, 5, 1},
+        {5, 1, 5, 4, 2, 4},
+    };
+
+    private final int[][] ARRAY_28 = {
+        {5, 4, 3},
+        {3, 5, 4},
+        {4, 3, 5},
+    };
+
+    private final int[][] ARRAY_29 = {
+        {2, 4, 3},
+        {0, 1, 4},
+        {3, 2, 4},
+        {1, 4, 0},
+    };
+
+    private final int[][] ARRAY_30 = {
+        {5, 4},
+        {3, 1},
+        {4, 5},
+        {0, 2},
+    };
+
 
     public Truchet() {
         super(false);
@@ -294,7 +351,8 @@ public class Truchet extends ParametrizedFilter {
 
         typeParam.setupEnableOtherIf(widthParam, type -> type != TileType.TRIANGLES);
         FilterButtonModel reseedAction = paramSet.createReseedAction();
-        patternParam.setupDisableOtherIf(reseedAction, item -> item.getValue() != PATTERN_RANDOM);
+        List<Integer> randomPatterns = List.of(PATTERN_RANDOM, PATTERN_RANDOM_EXTENDED);
+        patternParam.setupDisableOtherIf(reseedAction, item -> !randomPatterns.contains(item.getValue()));
 
         setParams(
             typeParam,
@@ -317,10 +375,16 @@ public class Truchet extends ParametrizedFilter {
             createTile(null),
             createTile(ANGLE_90),
             createTile(ANGLE_180),
-            createTile(ANGLE_270)};
+            createTile(ANGLE_270),
+            createPlainTile(true),
+            createPlainTile(false)
+        };
 
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
+
+        g.setColor(bgColor.getColor());
+        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
         int numTilesHor = dest.getWidth() / size + 1;
         int numTilesVer = dest.getHeight() / size + 1;
@@ -330,6 +394,7 @@ public class Truchet extends ParametrizedFilter {
             for (int i = 0; i < numTilesHor; i++) {
                 int tileIndex = switch (pattern) {
                     case PATTERN_RANDOM -> rand.nextInt(4);
+                    case PATTERN_RANDOM_EXTENDED -> rand.nextInt(6);
                     case PATTERN_1 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 1) : ((j % 2 == 0) ? 2 : 3);
                     case PATTERN_2 -> (i % 2 == 0) ? ((j % 2 == 0) ? 0 : 2) : ((j % 2 == 0) ? 1 : 3);
                     case PATTERN_3 -> indexFromArray(ARRAY_3, i, j);
@@ -353,9 +418,15 @@ public class Truchet extends ParametrizedFilter {
                         (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 0 : 1) : ((j < numTilesVer / 2) ? 3 : 2);
                     case PATTERN_21 ->
                         (i < numTilesHor / 2) ? ((j < numTilesVer / 2) ? 1 : 0) : ((j < numTilesVer / 2) ? 2 : 3);
+                    case PATTERN_22 -> indexFromArray(ARRAY_22, i, j);
+                    case PATTERN_24 -> indexFromArray(ARRAY_26, i, j);
+                    case PATTERN_25 -> indexFromArray(ARRAY_27, i, j);
+                    case PATTERN_26 -> indexFromArray(ARRAY_28, i, j);
+                    case PATTERN_27 -> indexFromArray(ARRAY_29, i, j);
+                    case PATTERN_28 -> indexFromArray(ARRAY_30, i, j);
                     default -> throw new IllegalStateException("Unexpected value: " + pattern);
                 };
-                g.drawImage(tiles[tileIndex], i * size, j * size, null);
+                g.drawImage(tiles[tileIndex], i * size - size / 2, j * size - size / 2, null);
             }
         }
 
@@ -383,12 +454,11 @@ public class Truchet extends ParametrizedFilter {
         int tileSize = sizeParam.getValue();
         TileType type = typeParam.getSelected();
 
-        BufferedImage tile = new BufferedImage(tileSize, tileSize, TYPE_INT_ARGB);
+        BufferedImage tile = new BufferedImage(2 * tileSize, 2 * tileSize, TYPE_INT_ARGB);
         Graphics2D tg = tile.createGraphics();
-        Colors.fillWith(bgColor.getColor(), tg, tileSize, tileSize);
 
         if (angle != null) {
-            tg.transform(angle.createTransform(tileSize, tileSize));
+            tg.transform(angle.createTransform(2 * tileSize, 2 * tileSize));
         }
 
         tg.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -396,6 +466,24 @@ public class Truchet extends ParametrizedFilter {
 
         Shape shape = type.createFilledArea(tileSize, widthParam.getValue());
         tg.fill(shape);
+        tg.dispose();
+        return tile;
+    }
+
+    private BufferedImage createPlainTile(boolean isBlank) {
+        int tileSize = sizeParam.getValue();
+        TileType type = typeParam.getSelected();
+
+        BufferedImage tile = new BufferedImage(2 * tileSize, 2 * tileSize, TYPE_INT_ARGB);
+        Graphics2D tg = tile.createGraphics();
+
+        tg.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        tg.setColor(fgColor.getColor());
+
+        Shape shape = type.createBlankArea(tileSize, widthParam.getValue(), isBlank);
+        if (shape != null) {
+            tg.fill(shape);
+        }
         tg.dispose();
         return tile;
     }
@@ -410,12 +498,24 @@ public class Truchet extends ParametrizedFilter {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
                 Path2D triangle = new Path2D.Double();
-                triangle.moveTo(tileSize, 0);
-                triangle.lineTo(tileSize, tileSize);
-                triangle.lineTo(0, tileSize);
+                double firsts = Math.floor(tileSize / 2d);
+                double thirds = Math.ceil(3 * tileSize / 2d);
+                triangle.moveTo(thirds, firsts);
+                triangle.lineTo(thirds, thirds);
+                triangle.lineTo(firsts, thirds);
                 triangle.closePath();
                 return triangle;
             }
+
+            @Override
+            public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
+                if (isBlank) {
+                    return null;
+                }
+                return new Rectangle2D.Double(Math.floor(tileSize / 2d), Math.floor(tileSize / 2d),
+                    tileSize, tileSize);
+            }
+
         }, QUARTER_CIRCLES("Quarter Circles") {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
@@ -423,23 +523,77 @@ public class Truchet extends ParametrizedFilter {
                 BasicStroke stroke = new BasicStroke(lineWidth);
 
                 Rectangle2D bounds1 = new Rectangle2D.Double(
-                    tileSize / 2.0, -tileSize / 2.0, tileSize, tileSize);
+                    tileSize, 0, tileSize, tileSize);
                 Arc2D arc1 = new Arc2D.Double(bounds1, 180, 90, Arc2D.OPEN);
                 path.append(stroke.createStrokedShape(arc1), false);
 
                 Rectangle2D bounds2 = new Rectangle2D.Double(
-                    -tileSize / 2.0, tileSize / 2.0, tileSize, tileSize);
+                    0, tileSize, tileSize, tileSize);
                 Arc2D arc2 = new Arc2D.Double(bounds2, 0, 90, Arc2D.OPEN);
                 path.append(stroke.createStrokedShape(arc2), false);
 
                 return path;
             }
+
+            @Override
+            public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
+                Shape shape;
+                if (isBlank) {
+                    Path2D lines = new Path2D.Double();
+                    lines.moveTo(tileSize, tileSize / 2d);
+                    lines.lineTo(tileSize, 3 * tileSize / 2d);
+                    lines.moveTo(tileSize / 2d, tileSize);
+                    lines.lineTo(3 * tileSize / 2d, tileSize);
+                    shape = lines;
+                } else {
+                    Path2D path = new Path2D.Double();
+
+                    Rectangle2D bounds1 = new Rectangle2D.Double(
+                        tileSize, 0, tileSize, tileSize);
+                    Arc2D arc1 = new Arc2D.Double(bounds1, 180, 90, Arc2D.OPEN);
+                    path.append((arc1), false);
+
+                    Rectangle2D bounds2 = new Rectangle2D.Double(
+                        0, tileSize, tileSize, tileSize);
+                    Arc2D arc2 = new Arc2D.Double(bounds2, 0, 90, Arc2D.OPEN);
+                    path.append((arc2), false);
+
+                    Rectangle2D bounds3 = new Rectangle2D.Double(
+                        0, 0, tileSize, tileSize);
+                    Arc2D arc3 = new Arc2D.Double(bounds3, 270, 90, Arc2D.OPEN);
+                    path.append((arc3), false);
+
+                    Rectangle2D bounds4 = new Rectangle2D.Double(
+                        tileSize, tileSize, tileSize, tileSize);
+                    Arc2D arc4 = new Arc2D.Double(bounds4, 90, 90, Arc2D.OPEN);
+                    path.append((arc4), false);
+
+                    shape = path;
+                }
+                BasicStroke stroke = new BasicStroke(lineWidth);
+                return stroke.createStrokedShape(shape);
+            }
         }, DIAGONALS("Diagonals") {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {
-                Line2D line = new Line2D.Double(0, 0, tileSize, tileSize);
-                BasicStroke stroke = new BasicStroke(lineWidth);
+                Line2D line = new Line2D.Double(tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d, 3 * tileSize / 2d);
+                BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
                 return stroke.createStrokedShape(line);
+            }
+
+            @Override
+            public Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank) {
+                double firsts = Math.floor(tileSize / 2d);
+                double thirds = Math.ceil(3 * tileSize / 2d);
+                double offset = isBlank ? firsts : thirds;
+                double onset = isBlank ? thirds : firsts;
+                Path2D lines = new Path2D.Double();
+                lines.moveTo(firsts, firsts);
+                lines.lineTo(offset, onset);
+                lines.moveTo(onset, offset);
+                lines.lineTo(thirds, thirds);
+                BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+                return stroke.createStrokedShape(lines);
             }
         };
 
@@ -450,6 +604,8 @@ public class Truchet extends ParametrizedFilter {
         }
 
         public abstract Shape createFilledArea(int tileSize, int lineWidth);
+
+        public abstract Shape createBlankArea(int tileSize, int lineWidth, boolean isBlank);
 
         @Override
         public String toString() {
