@@ -1019,6 +1019,7 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Shapes");
 
         sub.addFilter(FlowerOfLife.NAME, FlowerOfLife::new);
+        sub.addFilter(FractalCurves.NAME, FractalCurves::new);
         sub.addFilter(Grid.NAME, Grid::new);
         sub.addFilter(Lissajous.NAME, Lissajous::new);
         sub.addFilter(MysticRose.NAME, MysticRose::new);

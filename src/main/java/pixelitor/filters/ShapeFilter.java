@@ -29,7 +29,6 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -56,7 +55,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private static final int FG_GRADIENT = 8;
     private static final int FG_TRANSPARENT = 9;
 
-    private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
+    protected final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
     private final IntChoiceParam background = new IntChoiceParam("Background", new Item[]{
@@ -269,7 +268,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         return (float) Math.sqrt(cx * cx + cy * cy);
     }
 
-    protected abstract Path2D createShape(int width, int height);
+    protected abstract Shape createShape(int width, int height);
 
     @Override
     protected boolean createDefaultDestImg() {
