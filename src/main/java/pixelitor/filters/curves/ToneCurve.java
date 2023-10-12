@@ -47,8 +47,8 @@ public class ToneCurve {
     private int[] curvePlotData;
     private boolean curveChanged = true;
     private boolean active = false;
-    private final BasicStroke curveStroke = new BasicStroke(1);
-    private final BasicStroke pointStroke = new BasicStroke(2);
+    private static final BasicStroke curveStroke = new BasicStroke(1);
+    private static final BasicStroke pointStroke = new BasicStroke(2);
 
     public ToneCurve(Channel channel) {
         this.channel = channel;

@@ -31,12 +31,12 @@ import javax.swing.undo.CannotUndoException;
  * during the rearranging of the stack order.
  */
 public class ChangeHolderEdit extends PixelitorEdit {
-    private Layer layer;
+    private final Layer layer;
 
-    private LayerHolder oldHolder;
+    private final LayerHolder oldHolder;
     private final int oldIndex;
 
-    private LayerHolder newHolder;
+    private final LayerHolder newHolder;
     private final int newIndex;
 
     public ChangeHolderEdit(String editName, Layer layer, LayerHolder oldHolder, int oldIndex, LayerHolder newHolder, int newIndex) {
@@ -60,15 +60,6 @@ public class ChangeHolderEdit extends PixelitorEdit {
         super.redo();
 
         oldHolder.moveLayerInto(layer, newHolder, newIndex, null);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        oldHolder = null;
-        newHolder = null;
     }
 
     @Override

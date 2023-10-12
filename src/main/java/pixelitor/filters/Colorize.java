@@ -70,8 +70,8 @@ public class Colorize extends ParametrizedFilter {
         return colorize(src, dest, color, briShift, opacity);
     }
 
-    public static BufferedImage colorize(BufferedImage src, BufferedImage dest,
-                                         Color color, float briShift, float opacity) {
+    private static BufferedImage colorize(BufferedImage src, BufferedImage dest,
+                                          Color color, float briShift, float opacity) {
         int[] srcData = ImageUtils.getPixelArray(src);
         int[] destData = ImageUtils.getPixelArray(dest);
 

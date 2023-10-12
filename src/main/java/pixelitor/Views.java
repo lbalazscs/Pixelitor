@@ -195,12 +195,6 @@ public class Views {
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);
 
-//        // Invoke only later, when the view can correctly
-//        // translate between image and component spaces.
-//        // Important when loading serialized compositions with active shape layers.
-//        EventQueue.invokeLater(() -> Tools.activeLayerChanged(comp.getActiveLayer()));
-        // Invoking later can lead to situations where the comp has no view,
-        // and it's not necessary anymore?
         Tools.activeLayerChanged(comp.getActiveLayer());
     }
 
@@ -374,8 +368,7 @@ public class Views {
 
     public static void onActiveComp(Consumer<Composition> action) {
         if (activeView != null) {
-            var comp = activeView.getComp();
-            action.accept(comp);
+            action.accept(activeView.getComp());
         }
     }
 
@@ -437,9 +430,6 @@ public class Views {
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addView(view);
             setActiveView(view, false);
-
-// commented out, because ImageArea.addNewView(view); should always call this anyway
-//            Tools.activeLayerChanged(comp.getActiveLayer());
         } catch (Exception e) {
             Messages.showException(e);
         }

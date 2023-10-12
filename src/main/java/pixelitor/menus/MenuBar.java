@@ -884,9 +884,9 @@ public class MenuBar extends JMenuBar {
     private static JMenu createDistortSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("distort"));
 
-        sub.addFilter(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
         sub.addFilter(CircleToSquare.NAME, CircleToSquare::new);
         sub.addFilter(JHPerspective.NAME, JHPerspective::new);
+        sub.addFilter(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
 
         sub.addSeparator();
 
@@ -895,12 +895,12 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.addFilter(AngularWaves.NAME, AngularWaves::new);
+        sub.addFilter(RadialWaves.NAME, RadialWaves::new);
         sub.addFilter(JHTurbulentDistortion.NAME, JHTurbulentDistortion::new);
         sub.addFilter(JHUnderWater.NAME, JHUnderWater::new);
         sub.addFilter(JHWaterRipple.NAME, JHWaterRipple::new);
         sub.addFilter(JHWaves.NAME, JHWaves::new);
-        sub.addFilter(AngularWaves.NAME, AngularWaves::new);
-        sub.addFilter(RadialWaves.NAME, RadialWaves::new);
 
         sub.addSeparator();
 

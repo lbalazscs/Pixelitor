@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.bric.geom.RectangularTransform;
 import com.jhlabs.image.ImageMath;
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.Composition;
@@ -230,7 +231,6 @@ public class Shapes {
         return path;
     }
 
-
     // makes sure that the returned rectangle has positive width, height
     public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
         int topX, topY, width, height;
@@ -377,12 +377,15 @@ public class Shapes {
         }
     }
 
-    private static String arrayToString(double[] array, int firstN) {
-        if (firstN == array.length) {
+    /**
+     * Converts the first n elements of the given array to a String representation.
+     */
+    private static String arrayToString(double[] array, int n) {
+        if (n == array.length) {
             return Arrays.toString(array);
         }
-        double[] shortArray = new double[firstN];
-        System.arraycopy(array, 0, shortArray, 0, firstN);
+        double[] shortArray = new double[n];
+        System.arraycopy(array, 0, shortArray, 0, n);
         return Arrays.toString(shortArray);
     }
 
@@ -1955,5 +1958,37 @@ public class Shapes {
     public static Shape translate(Shape shape, double tx, double ty) {
         return AffineTransform.getTranslateInstance(tx, ty)
             .createTransformedShape(shape);
+    }
+
+    /**
+     * Resizes the given shape to fit centrally within a target rectangle
+     * without distortion, considering the given width, height, and margin.
+     *
+     * @param shape  The shape to be resized.
+     * @param width  The width of the target rectangle.
+     * @param height The height of the target rectangle.
+     * @param margin The margin around the shape inside the target rectangle.
+     * @return A new shape that fits within the target rectangle.
+     */
+    public static Shape resize(Shape shape, double width, double height, double margin) {
+        Rectangle2D bounds = shape.getBounds2D();
+        double shapeAspectRatio = bounds.getWidth() / bounds.getHeight();
+        double areaWidth = width - 2 * margin;
+        double areaHeight = height - 2 * margin;
+        double areaAspectRatio = areaWidth / areaHeight;
+
+        Rectangle2D targetArea;
+        if (shapeAspectRatio >= areaAspectRatio) {
+            double newAreaHeight = areaWidth / shapeAspectRatio;
+            double newAreaY = margin + (areaHeight - newAreaHeight) / 2.0;
+            targetArea = new Rectangle2D.Double(margin, newAreaY, areaWidth, newAreaHeight);
+        } else {
+            double newAreaWidth = areaHeight * shapeAspectRatio;
+            double newAreaX = margin + (areaWidth - newAreaWidth) / 2.0;
+            targetArea = new Rectangle2D.Double(newAreaX, margin, newAreaWidth, areaHeight);
+        }
+
+        AffineTransform at = RectangularTransform.create(bounds, targetArea);
+        return at.createTransformedShape(shape);
     }
 }

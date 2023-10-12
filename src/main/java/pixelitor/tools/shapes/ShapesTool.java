@@ -59,7 +59,6 @@ import java.awt.geom.Path2D;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.tools.DragToolState.*;
 import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -338,7 +337,7 @@ public class ShapesTool extends DragTool {
             // therefore the continuous drawing of the shape.
             // It repaints the whole image because
             // some shapes extend beyond their drag rectangle.
-            e.getComp().getActiveLayer().update(REPAINT);
+            e.getComp().getActiveLayer().update(false);
         }
     }
 
@@ -413,7 +412,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, true, false);
 
-            Views.getActiveLayer().update(REPAINT);
+            Views.getActiveLayer().update(false);
         }
         altDown = true;
     }
@@ -426,7 +425,7 @@ public class ShapesTool extends DragTool {
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, false, false);
 
-            Views.getActiveLayer().update(REPAINT);
+            Views.getActiveLayer().update(false);
         }
         altDown = false;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,12 @@
 
 package pixelitor.utils.debug;
 
+/**
+ * An object that can be inspected in the "Help/Internal State" window.
+ */
 public interface Debuggable {
+    /**
+     * Returns a {@link DebugNode} representing the internal state of this object.
+     */
     DebugNode createDebugNode(String key);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,8 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the deletion of a layer
  */
 public class DeleteLayerEdit extends PixelitorEdit {
-    private LayerHolder holder;
-    private Layer layer;
+    private final LayerHolder holder;
+    private final Layer layer;
     private final int layerIndex;
 
     public DeleteLayerEdit(LayerHolder holder, Layer layer, int layerIndex) {
@@ -54,14 +54,6 @@ public class DeleteLayerEdit extends PixelitorEdit {
         super.redo();
 
         holder.deleteLayer(layer, false);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        holder = null;
     }
 
     @Override

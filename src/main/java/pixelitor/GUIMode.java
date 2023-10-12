@@ -57,6 +57,10 @@ public enum GUIMode {
     // Lazy because it should be calculated after the CURRENT is set.
     private static final Lazy<String> fixTitle = Lazy.of(GUIMode::calcFixTitle);
 
+    /**
+     * Returns true if the app was started in development mode.
+     * In this mode, additional menus and correctness checks are enabled.
+     */
     public static boolean isDevelopment() {
         return CURRENT == DEVELOPMENT_GUI;
     }

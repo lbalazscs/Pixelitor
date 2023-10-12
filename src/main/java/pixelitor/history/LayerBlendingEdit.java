@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the changes made to the blending mode of a layer
  */
 public class LayerBlendingEdit extends PixelitorEdit {
-    private Layer layer;
+    private final Layer layer;
     private BlendingMode backupBlendingMode;
 
     public LayerBlendingEdit(Layer layer, BlendingMode backupBlendingMode) {
@@ -36,14 +36,6 @@ public class LayerBlendingEdit extends PixelitorEdit {
 
         this.layer = layer;
         this.backupBlendingMode = backupBlendingMode;
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        backupBlendingMode = null;
     }
 
     @Override

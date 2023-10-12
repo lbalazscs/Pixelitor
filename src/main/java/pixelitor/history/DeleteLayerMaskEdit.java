@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
@@ -30,20 +31,23 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the deletion of a layer mask
  */
 public class DeleteLayerMaskEdit extends PixelitorEdit {
-    private LayerMask oldMask;
-    private Layer layer;
+    private final LayerMask oldMask;
+    private final Layer layer;
     private final MaskViewMode oldMode;
 
     public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask oldMask, MaskViewMode oldMode) {
         super("Delete Layer Mask", comp);
         this.oldMode = oldMode;
 
+        assert layer.isActive() || GUIMode.isUnitTesting();
         this.layer = layer;
         this.oldMask = oldMask;
     }
 
     @Override
     public void undo() throws CannotUndoException {
+        assert layer.isActive() || GUIMode.isUnitTesting();
+
         super.undo();
 
         layer.addConfiguredMask(oldMask);
@@ -55,14 +59,6 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         layer.deleteMask(false);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        oldMask = null;
     }
 
     @Override

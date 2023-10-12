@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the changes made to the layer order.
  */
 public class LayerOrderChangeEdit extends PixelitorEdit {
-    private LayerHolder holder;
+    private final LayerHolder holder;
     private final int oldLayerIndex;
     private final int newLayerIndex;
 
@@ -51,13 +51,6 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
         super.redo();
 
         holder.changeLayerOrder(oldLayerIndex, newLayerIndex);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        holder = null;
     }
 
     @Override

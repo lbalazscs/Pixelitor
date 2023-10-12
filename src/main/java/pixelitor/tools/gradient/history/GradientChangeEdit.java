@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,8 @@ import javax.swing.undo.CannotUndoException;
 
 public class GradientChangeEdit extends PixelitorEdit {
     private final Drawable dr;
-    private Gradient before;
-    private Gradient after;
+    private final Gradient before;
+    private final Gradient after;
     private ImageEdit imageEdit;
     private final boolean imageEditNeeded;
 
@@ -72,8 +72,6 @@ public class GradientChangeEdit extends PixelitorEdit {
     public void die() {
         super.die();
 
-        before = null;
-        after = null;
         if (imageEditNeeded) {
             imageEdit.die();
         }

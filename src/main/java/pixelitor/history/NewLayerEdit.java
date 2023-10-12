@@ -29,9 +29,9 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the creation of a new layer
  */
 public class NewLayerEdit extends PixelitorEdit {
-    private LayerHolder holder;
-    private Layer previousActiveLayer;
-    private Layer layer;
+    private final LayerHolder holder;
+    private final Layer previousActiveLayer;
+    private final Layer layer;
     private final int layerIndex;
     private final MaskViewMode previousMaskViewMode;
 
@@ -65,15 +65,6 @@ public class NewLayerEdit extends PixelitorEdit {
         holder.adder()
             .atIndex(layerIndex)
             .add(layer);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        previousActiveLayer = null;
-        holder = null;
     }
 
     @Override

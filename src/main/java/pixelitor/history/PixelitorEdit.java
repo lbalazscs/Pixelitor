@@ -142,13 +142,6 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debu
     }
 
     @Override
-    public void die() {
-        super.die();
-
-        comp = null;
-    }
-
-    @Override
     public String getPresentationName() {
         return name;
     }

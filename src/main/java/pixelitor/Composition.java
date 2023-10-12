@@ -62,7 +62,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
@@ -734,7 +733,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public boolean allowZeroLayers() {
+    public boolean allowsZeroLayers() {
         return false;
     }
 
@@ -1467,19 +1466,19 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Override
     public void update() {
-        update(FULL);
+        update(true);
     }
 
     @Override
-    public void update(UpdateActions actions) {
-        update(actions, false);
+    public void update(boolean updateHistogram) {
+        update(updateHistogram, false);
     }
 
     /**
      * Signals that the contents of this composition have been changed:
      * the cache is invalidated, and additional actions might be necessary
      */
-    public void update(UpdateActions actions, boolean sizeChanged) {
+    public void update(boolean updateHistogram, boolean sizeChanged) {
         invalidateImageCache();
 
         if (isOpen()) {
@@ -1487,7 +1486,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             view.repaintNavigator(sizeChanged);
         }
 
-        if (actions.histogramChanged()) {
+        if (updateHistogram) {
             HistogramsPanel.updateFrom(this);
         }
     }
@@ -1915,22 +1914,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         return node;
-    }
-
-    public enum UpdateActions {
-        REPAINT(false) {
-        }, FULL(true) {
-        };
-
-        private final boolean updateHistogram;
-
-        UpdateActions(boolean updateHistogram) {
-            this.updateHistogram = updateHistogram;
-        }
-
-        private boolean histogramChanged() {
-            return updateHistogram;
-        }
     }
 
     public String toPathDebugString() {

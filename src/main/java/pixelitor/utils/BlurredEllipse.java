@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,15 +108,19 @@ public class BlurredEllipse implements BlurredShape {
         if (dy2 <= innerRadiusY2 - innerRadiusY2 * dx2 / innerRadiusX2) { // innermost region
             return 0.0;
         } else { // between the inner and outer radius
-            // we are on an ellipse with unknown a and b semi major/minor axes,
-            // but we know that a/b = outerRadiusX/outerRadiusY
-            double ellipseDistortion = outerRadiusX / outerRadiusY;
-            double b = Math.sqrt(ellipseDistortion * ellipseDistortion * dy2 + dx2) / ellipseDistortion;
-            // calculate how far away we are between the two ellipses
-            double ratio = (b - innerRadiusY) / yRadiusDifference; // a value between 0 and 1
-            double trigRatio = (FastMath.cos(ratio * Math.PI) + 1.0) / 2.0;
-
-            return 1.0 - trigRatio;
+            return calcEllipseRatio(dy2, dx2);
         }
+    }
+
+    private double calcEllipseRatio(double dy2, double dx2) {
+        // we are on an ellipse with unknown a and b semi major/minor axes,
+        // but we know that a/b = outerRadiusX/outerRadiusY
+        double ellipseDistortion = outerRadiusX / outerRadiusY;
+        double b = Math.sqrt(ellipseDistortion * ellipseDistortion * dy2 + dx2) / ellipseDistortion;
+        // calculate how far away we are between the two ellipses
+        double ratio = (b - innerRadiusY) / yRadiusDifference; // a value between 0 and 1
+        double trigRatio = (FastMath.cos(ratio * Math.PI) + 1.0) / 2.0;
+
+        return 1.0 - trigRatio;
     }
 }

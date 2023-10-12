@@ -49,7 +49,6 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.Views.thumbSize;
@@ -267,7 +266,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             setState(PREVIEW);
         }
         imageRefChanged();
-        holder.update(REPAINT);
+        holder.update(false);
     }
 
     @Override

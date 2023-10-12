@@ -273,85 +273,10 @@ public class FlowField extends ParametrizedFilter {
 
         ).withAction(paramSet.createReseedSimplexAction());
 
-        UserPreset confetti = new UserPreset("Confetti");
-        confetti.put("Force Mixer", "60.00,20.00,20.00,false");
-        confetti.put("Zoom (%)", "2450");
-        confetti.put("Variance", "100");
-        confetti.put("Turbulence", "5");
-        confetti.put("Wind", "0");
-        confetti.put("Particle Count", "500");
-        confetti.put("Stroke Width", "7");
-        confetti.put("Endpoint Cap", "Round");
-        confetti.put("Corner Join", "Round");
-        confetti.put("Line Type", "Zigzag");
-        confetti.put("Shape", "Kiwi");
-        confetti.put("Dashed", "no");
-        confetti.put("Stroke Width Randomness (%)", "100");
-        confetti.put("Use Antialiasing", "yes");
-        confetti.put("Background Color", "00000000");
-        confetti.put("Particle Color", "FFFFFFC9");
-        confetti.put("Initialize Colors", "HSB Cycle");
-        confetti.put("Start Flow from Source Image", "yes");
-        confetti.put("Color Randomness (%)", "0");
-        confetti.put("Force Mode", "Thicken");
-        confetti.put("Maximum Velocity", "843");
-        confetti.put("Path Length", "13");
-
-        UserPreset smoke = new UserPreset("Smoke");
-        smoke.put("Force Mixer", "70.00,15.00,15.00,false");
-        smoke.put("Zoom (%)", "6500");
-        smoke.put("Variance", "35");
-        smoke.put("Turbulence", "5");
-        smoke.put("Wind", "5");
-        smoke.put("Particle Count", "3272");
-        smoke.put("Stroke Width", "3");
-        smoke.put("Endpoint Cap", "Round");
-        smoke.put("Corner Join", "Round");
-        smoke.put("Line Type", "Reversed Tapering");
-        smoke.put("Shape", "Kiwi");
-        smoke.put("Dashed", "no");
-        smoke.put("Stroke Width Randomness (%)", "0");
-        smoke.put("Use Antialiasing", "yes");
-        smoke.put("Background Color", "000000FF");
-        smoke.put("Particle Color", "FFFFFF08");
-        smoke.put("Initialize Colors", "Default");
-        smoke.put("Start Flow from Source Image", "no");
-        smoke.put("Color Randomness (%)", "0");
-        smoke.put("Force Mode", "No Mass");
-        smoke.put("Maximum Velocity", "4000");
-        smoke.put("Path Length", "100");
-
-        UserPreset vanGogh = new UserPreset("Van Gogh");
-        vanGogh.put("Force Mixer", "100.00,0.00,0.00,false");
-        vanGogh.put("Zoom (%)", "3000");
-        vanGogh.put("Variance", "25");
-        vanGogh.put("Turbulence", "5");
-        vanGogh.put("Wind", "0");
-        vanGogh.put("Particle Count", "10000");
-        vanGogh.put("Stroke Width", "5");
-        vanGogh.put("Endpoint Cap", "Round");
-        vanGogh.put("Corner Join", "Round");
-        vanGogh.put("Line Type", "Basic");
-        vanGogh.put("Shape", "Kiwi");
-        vanGogh.put("Dashed", "no");
-        vanGogh.put("Stroke Width Randomness (%)", "0");
-        vanGogh.put("Use Antialiasing", "yes");
-        vanGogh.put("Background Color", "000000FF");
-        vanGogh.put("Particle Color", "FFFFFF1F");
-        vanGogh.put("Initialize Colors", "Source Image");
-        vanGogh.put("Start Flow from Source Image", "no");
-        vanGogh.put("Color Randomness (%)", "0");
-        vanGogh.put("Force Mode", "No Mass");
-        vanGogh.put("Maximum Velocity", "4000");
-        vanGogh.put("Path Length", "15");
-
-        FilterState vortex = new FilterState("Vortex")
-            .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
-            .with(strokeParam, StrokeSettings.defaultsWith(StrokeType.TAPERING_REV, 4))
-            .with(widthRandomnessParam, new RangeParamState(100))
-            .with(antiAliasParam, YES)
-            .withReset();
-
+        UserPreset confetti = createConfettiPreset();
+        UserPreset smoke = createSmokePreset();
+        UserPreset vanGogh = createVanGoghPreset();
+        FilterState vortex = createVortexPreset(forceMixerParam);
         paramSet.setBuiltinPresets(confetti, smoke, vanGogh, vortex);
 
         noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
@@ -381,6 +306,103 @@ public class FlowField extends ParametrizedFilter {
         startFlowFromSourceParam.setToolTip("Prevent particles from spawning at any transparent regions.");
         colorRandomnessParam.setToolTip("Increase to impart the particle color with some randomness.");
         widthRandomnessParam.setToolTip("Increase to draw particles with a randomised width.");
+    }
+
+    private static UserPreset createConfettiPreset() {
+        UserPreset confetti = new UserPreset("Confetti");
+
+        confetti.put("Force Mixer", "60.00,20.00,20.00,false");
+        confetti.put("Zoom (%)", "2450");
+        confetti.put("Variance", "100");
+        confetti.put("Turbulence", "5");
+        confetti.put("Wind", "0");
+        confetti.put("Particle Count", "500");
+        confetti.put("Stroke Width", "7");
+        confetti.put("Endpoint Cap", "Round");
+        confetti.put("Corner Join", "Round");
+        confetti.put("Line Type", "Zigzag");
+        confetti.put("Shape", "Kiwi");
+        confetti.put("Dashed", "no");
+        confetti.put("Stroke Width Randomness (%)", "100");
+        confetti.put("Use Antialiasing", "yes");
+        confetti.put("Background Color", "00000000");
+        confetti.put("Particle Color", "FFFFFFC9");
+        confetti.put("Initialize Colors", "HSB Cycle");
+        confetti.put("Start Flow from Source Image", "yes");
+        confetti.put("Color Randomness (%)", "0");
+        confetti.put("Force Mode", "Thicken");
+        confetti.put("Maximum Velocity", "843");
+        confetti.put("Path Length", "13");
+
+        return confetti;
+    }
+
+    private static UserPreset createSmokePreset() {
+        UserPreset smoke = new UserPreset("Smoke");
+
+        smoke.put("Force Mixer", "70.00,15.00,15.00,false");
+        smoke.put("Zoom (%)", "6500");
+        smoke.put("Variance", "35");
+        smoke.put("Turbulence", "5");
+        smoke.put("Wind", "5");
+        smoke.put("Particle Count", "3272");
+        smoke.put("Stroke Width", "3");
+        smoke.put("Endpoint Cap", "Round");
+        smoke.put("Corner Join", "Round");
+        smoke.put("Line Type", "Reversed Tapering");
+        smoke.put("Shape", "Kiwi");
+        smoke.put("Dashed", "no");
+        smoke.put("Stroke Width Randomness (%)", "0");
+        smoke.put("Use Antialiasing", "yes");
+        smoke.put("Background Color", "000000FF");
+        smoke.put("Particle Color", "FFFFFF08");
+        smoke.put("Initialize Colors", "Default");
+        smoke.put("Start Flow from Source Image", "no");
+        smoke.put("Color Randomness (%)", "0");
+        smoke.put("Force Mode", "No Mass");
+        smoke.put("Maximum Velocity", "4000");
+        smoke.put("Path Length", "100");
+
+        return smoke;
+    }
+
+    private static UserPreset createVanGoghPreset() {
+        UserPreset vanGogh = new UserPreset("Van Gogh");
+
+        vanGogh.put("Force Mixer", "100.00,0.00,0.00,false");
+        vanGogh.put("Zoom (%)", "3000");
+        vanGogh.put("Variance", "25");
+        vanGogh.put("Turbulence", "5");
+        vanGogh.put("Wind", "0");
+        vanGogh.put("Particle Count", "10000");
+        vanGogh.put("Stroke Width", "5");
+        vanGogh.put("Endpoint Cap", "Round");
+        vanGogh.put("Corner Join", "Round");
+        vanGogh.put("Line Type", "Basic");
+        vanGogh.put("Shape", "Kiwi");
+        vanGogh.put("Dashed", "no");
+        vanGogh.put("Stroke Width Randomness (%)", "0");
+        vanGogh.put("Use Antialiasing", "yes");
+        vanGogh.put("Background Color", "000000FF");
+        vanGogh.put("Particle Color", "FFFFFF1F");
+        vanGogh.put("Initialize Colors", "Source Image");
+        vanGogh.put("Start Flow from Source Image", "no");
+        vanGogh.put("Color Randomness (%)", "0");
+        vanGogh.put("Force Mode", "No Mass");
+        vanGogh.put("Maximum Velocity", "4000");
+        vanGogh.put("Path Length", "15");
+
+        return vanGogh;
+    }
+
+    private FilterState createVortexPreset(GroupedRangeParam forceMixerParam) {
+        FilterState vortex = new FilterState("Vortex")
+            .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
+            .with(strokeParam, StrokeSettings.defaultsWith(StrokeType.TAPERING_REV, 4))
+            .with(widthRandomnessParam, new RangeParamState(100))
+            .with(antiAliasParam, YES)
+            .withReset();
+        return vortex;
     }
 
     @Override
@@ -603,7 +625,7 @@ public class FlowField extends ParametrizedFilter {
     }
 
     private static double sigmoid(double v) {
-        return 1 / (1 + FastMath.exp(-v));
+        return 1 / (1 + exp(-v));
     }
 
     public interface Coord2DFunction<T> {
@@ -708,12 +730,12 @@ public class FlowField extends ParametrizedFilter {
                 vel.set(oldVel);
             }
 
-            if (positionChangeIsBigEnough()) {
+            if (positionChangedEnough()) {
                 addPoint(Geometry.newFrom(pos));
             }
         }
 
-        private boolean positionChangeIsBigEnough() {
+        private boolean positionChangedEnough() {
             double xChange = abs(lastPos.getX() - pos.getX());
             double yChange = abs(lastPos.getY() - pos.getY());
             return xChange > meta.tolerance || yChange > meta.tolerance;
@@ -728,11 +750,11 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
-                                 double tolerance,
-                                 float maximumVelocitySq, double zFactor, double zoom, int turbulence,
-                                 OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
-                                 ForceMode forceMode, GoldenRatio goldenRatio,
-                                 Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
+    public record FlowFieldMeta(int fieldWidth, int fieldHeight, float fieldDensity, Rectangle bounds,
+                                double tolerance,
+                                float maximumVelocitySq, double zFactor, double zoom, int turbulence,
+                                OpenSimplex2F noise, float multiplierNoise, float initTheta, float variantPI,
+                                ForceMode forceMode, GoldenRatio goldenRatio,
+                                Color[][] fieldColors, int imgWidth, int[] sourcePixels) {
     }
 }

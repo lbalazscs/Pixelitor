@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,9 +51,9 @@ public class ThreadPool {
     }
 
     /**
-     * Waits until all the given futures complete their
-     * computation, and updates the given
-     * {@link ProgressTracker} in the meantime.
+     * Blocks the current thread until all the given futures finish
+     * their tasks. During this time, it updates the progress using
+     * the given {@link ProgressTracker}.
      */
     public static void waitFor(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
@@ -62,9 +62,7 @@ public class ThreadPool {
             try {
                 future.get();
 
-                // not completely accurate because the submit order is not
-                // necessarily the same as the finish order, but
-                // good enough in practice
+                // not completely accurate to count here, but good enough in practice
                 pt.unitDone();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
@@ -72,7 +70,7 @@ public class ThreadPool {
         }
     }
 
-    // same as the above, but with array argument
+    // same as the above, but with an array argument
     public static void waitFor(Future<?>[] futures, ProgressTracker pt) {
         assert pt != null;
 
@@ -80,10 +78,8 @@ public class ThreadPool {
             try {
                 future.get();
                 pt.unitDone();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.getCause().printStackTrace();
             }
         }
     }

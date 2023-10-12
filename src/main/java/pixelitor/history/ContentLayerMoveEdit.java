@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     // can be null, if no image enlargement is taking place
     private ImageEdit imageEdit;
 
-    private ContentLayer layer;
+    private final ContentLayer layer;
     private final TranslationEdit translationEdit;
 
     public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTx, int oldTy) {
@@ -85,11 +85,10 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     @Override
     public void die() {
         super.die();
-        translationEdit.die();
+
         if (imageEdit != null) {
             imageEdit.die();
         }
-        layer = null;
     }
 
     @Override

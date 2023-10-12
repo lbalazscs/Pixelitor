@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,33 +58,36 @@ public abstract class OutlineBrush extends StrokeBrush {
                 return;
             }
 
-            // pixels/second
-            double speed = 1_000_000_000.0 * dist / timeDiff;
-
-            double scaledRadius;
-            if (speed < MIN_SPEED_THRESHOLD) {
-                scaledRadius = origRadius;
-            } else if (speed < MAX_SPEED_THRESHOLD) {
-                // between the two thresholds, the radius decreases linearly
-                double a = (1 - origRadius) / THRESHOLD_DIFF;
-                double b = (MAX_SPEED_THRESHOLD * origRadius - MIN_SPEED_THRESHOLD) / THRESHOLD_DIFF;
-                scaledRadius = a * speed + b;
-            } else {
-                scaledRadius = 1;
-            }
-
-            radius = scaledRadius;
+            radius = calcScaledRadius(dist, timeDiff);
 
             // don't set the diameter according to the scale
             // because the brush outline still has the full size,
             // and the repaint region is based on the diameter
 //            diameter = 2 * scaledRadius;
 
-            currentStroke = createStroke((float) (2 * scaledRadius));
+            currentStroke = createStroke((float) (2 * radius));
             prevTime = timeNow;
         }
 
         super.continueTo(p);
+    }
+
+    private double calcScaledRadius(double dist, long timeDiff) {
+        // pixels/second
+        double speed = 1_000_000_000.0 * dist / timeDiff;
+
+        double scaledRadius;
+        if (speed < MIN_SPEED_THRESHOLD) {
+            scaledRadius = origRadius;
+        } else if (speed < MAX_SPEED_THRESHOLD) {
+            // between the two thresholds, the radius decreases linearly
+            double a = (1 - origRadius) / THRESHOLD_DIFF;
+            double b = (MAX_SPEED_THRESHOLD * origRadius - MIN_SPEED_THRESHOLD) / THRESHOLD_DIFF;
+            scaledRadius = a * speed + b;
+        } else {
+            scaledRadius = 1;
+        }
+        return scaledRadius;
     }
 
     @Override

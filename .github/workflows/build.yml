@@ -3,6 +3,7 @@ name: GitHub Build
 on:
   push:
     branches: [ "master" ]
+    tags: [ "v*.*.*" ]
   pull_request:
     branches: [ "master" ]
 
@@ -31,7 +32,7 @@ jobs:
 
       - name: Build with Maven (Linux)
         run: |
-          xvfb-run -a mvn -B package --file pom.xml
+          xvfb-run -a mvn -B -V -ntp -Djansi.passthrough=true -Dstyle.color=always package
           rm target/original-*.jar
 
       - name: Put the current date in the environment file

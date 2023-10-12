@@ -50,7 +50,6 @@ import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -311,7 +310,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     @Override
     public void updateUI(View view) {
-        view.getComp().getActiveLayer().update(REPAINT);
+        view.getComp().getActiveLayer().update(false);
     }
 
     private void reloadType(ShapesTool tool) {

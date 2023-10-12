@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.StyledShape;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -66,10 +67,12 @@ public class RasterizeShapeEdit extends PixelitorEdit {
     }
 
     @Override
-    public void die() {
-        super.die();
-        if (imageEdit != null) {
-            imageEdit.die();
-        }
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(box.createDebugNode());
+        node.add(styledShape.createDebugNode());
+
+        return node;
     }
 }

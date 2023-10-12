@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.*;
 
 /**
  * The superclass of all filter configuration panels.
- * Instances must not be cached (since they store a Drawable reference).
+ * Instances must not be cached (since they store a {@link Filterable} reference).
  */
 public abstract class FilterGUI extends JPanel {
     protected Filter filter;

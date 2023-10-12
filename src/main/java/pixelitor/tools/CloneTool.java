@@ -60,7 +60,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private JCheckBox alignedCB;
     private JCheckBox sampleAllCB;
 
-    enum State {
+    public enum State {
         NO_SOURCE,
         SOURCE_DEFINED_FIRST_STROKE,
         CLONING

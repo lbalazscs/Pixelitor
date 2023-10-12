@@ -17,15 +17,13 @@
 
 package pixelitor.filters;
 
-import com.bric.geom.RectangularTransform;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.io.Serial;
 
 public class FractalCurves extends ShapeFilter {
@@ -97,7 +95,7 @@ public class FractalCurves extends ShapeFilter {
                 double moveDistance = (Math.min(width, height) - 2 * margin) / (Math.pow(2, n) - 1);
                 return new Turtle(startX, startY, moveDistance, 0, 90);
             }
-        }, // Peano: works, but show and not very interesting
+        }, // Peano: works, but slow and not very interesting
         /*PEANO("Peano", "A", false) {
             @Override
             RewriteRule rewriteRule() {
@@ -245,26 +243,7 @@ public class FractalCurves extends ShapeFilter {
 
         Path2D path = turtle.getPath();
         if (fractalType.resize) {
-            // rescale the shape so that if fits into the
-            // available area without distortion
-            Rectangle2D bounds = path.getBounds2D();
-            Rectangle2D targetArea;
-            double boundsAspectRatio = bounds.getWidth() / bounds.getHeight();
-            double areaWidth = width - 2 * margin;
-            double areaHeight = height - 2 * margin;
-            double areaAspectRatio = areaWidth / areaHeight;
-            if (boundsAspectRatio >= areaAspectRatio) {
-                double newAreaHeight = areaWidth / boundsAspectRatio;
-                double newAreaY = margin + (areaHeight - newAreaHeight) / 2.0;
-                targetArea = new Rectangle2D.Double(margin, newAreaY, areaWidth, newAreaHeight);
-            } else {
-                double newAreaWidth = areaHeight * boundsAspectRatio;
-                double newAreaX = margin + (areaWidth - newAreaWidth) / 2.0;
-                targetArea = new Rectangle2D.Double(newAreaX, margin, newAreaWidth, areaHeight);
-            }
-
-            AffineTransform at = RectangularTransform.create(bounds, targetArea);
-            return at.createTransformedShape(path);
+            return Shapes.resize(path, width, height, margin);
         }
 
         return path;

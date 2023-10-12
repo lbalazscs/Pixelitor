@@ -27,7 +27,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the changes made to the opacity of a layer
  */
 public class LayerOpacityEdit extends PixelitorEdit {
-    private Layer layer;
+    private final Layer layer;
     private float backupOpacity;
 
     public LayerOpacityEdit(Layer layer, float backupOpacity) {
@@ -59,13 +59,6 @@ public class LayerOpacityEdit extends PixelitorEdit {
             : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
 
         backupOpacity = tmp;
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
     }
 
     public Layer getLayer() {

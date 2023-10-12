@@ -171,11 +171,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return defaultValue;
     }
 
-    /**
-     * Resets to the default value.
-     *
-     * @param trigger should be true if called from a GUI component
-     */
     @Override
     public void reset(boolean trigger) {
         setValue(defaultValue, trigger);
@@ -189,7 +184,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * Int values measured in degrees are transformed to radians
+     * Returns the value in radians assuming that this {@link RangeParam} represents an angle in degrees.
      */
     public float getValueInRadians() {
         return (float) Math.toRadians(getValueAsDouble());

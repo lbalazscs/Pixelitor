@@ -105,8 +105,9 @@ public class UserPreset implements Preset {
 
         else {
             // sept 2023: migration in Truchet Tiles
-            if (Truchet.migration_helper.containsKey(value))
+            if (Truchet.migration_helper.containsKey(value)) {
                 value = Truchet.migration_helper.get(value);
+            }
         }
 
         return value;

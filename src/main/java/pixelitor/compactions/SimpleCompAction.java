@@ -34,8 +34,6 @@ import pixelitor.utils.Messages;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.Composition.UpdateActions.REPAINT;
-
 /**
  * A {@link CompAction} where the processing can be simplified
  * by using the template method pattern.
@@ -90,7 +88,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
         // they are based on the canvas-sized subimage
         newComp.updateAllIconImages();
 
-        newComp.update(REPAINT, true);
+        newComp.update(false, true);
         if (affectsCanvasSize) {
             view.revalidate(); // make sure the scrollbars are OK
         }

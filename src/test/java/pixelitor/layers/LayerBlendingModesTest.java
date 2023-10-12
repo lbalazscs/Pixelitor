@@ -41,8 +41,8 @@ class LayerBlendingModesTest {
     private ImageLayer lowerLayer;
     private Layer upperLayer;
 
-    private final Color lowerColor = new Color(211, 141, 86);
-    private final Color upperColor = new Color(119, 86, 132);
+    private static final Color lowerColor = new Color(211, 141, 86);
+    private static final Color upperColor = new Color(119, 86, 132);
 
     private AdjustmentLayer invertAdjustment;
     private AdjustmentLayer alwaysUpperColorAdjustment;

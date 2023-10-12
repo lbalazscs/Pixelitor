@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the adding of a layer mask.
  */
 public class AddLayerMaskEdit extends PixelitorEdit {
-    private Layer layer;
-    private LayerMask layerMask;
+    private final Layer layer;
+    private final LayerMask layerMask;
     private MaskViewMode newMode;
 
     public AddLayerMaskEdit(String name, Composition comp, Layer layer) {
@@ -60,14 +60,6 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         assert newMode != null;
         newMode.activate(comp, layer);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        layerMask = null;
     }
 
     @Override

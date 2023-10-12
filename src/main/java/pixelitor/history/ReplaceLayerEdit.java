@@ -28,9 +28,9 @@ import javax.swing.undo.CannotUndoException;
  * Represents the replacement of a layer with another
  */
 public class ReplaceLayerEdit extends PixelitorEdit {
-    private LayerHolder holder;
-    private Layer before;
-    private Layer after;
+    private final LayerHolder holder;
+    private final Layer before;
+    private final Layer after;
 
     public ReplaceLayerEdit(Layer before, Layer after, String editName) {
         super(editName, after.getComp(), true);
@@ -62,15 +62,6 @@ public class ReplaceLayerEdit extends PixelitorEdit {
 
         assert after.isActive();
         assert after.hasUI();
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        before = null;
-        after = null;
-        holder = null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,11 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A PixelitorEdit that uis created when a new layer is selected
+ * A PixelitorEdit that is created when a new layer is selected
  */
 public class LayerSelectionChangeEdit extends PixelitorEdit {
-    private Layer oldLayer;
-    private Layer newLayer;
+    private final Layer oldLayer;
+    private final Layer newLayer;
 
     public LayerSelectionChangeEdit(String editName, Composition comp, Layer oldLayer, Layer newLayer) {
         super(editName == null ? "Layer Selection Change" : editName, comp);
@@ -49,14 +49,6 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
         super.redo();
 
         comp.setActiveLayer(newLayer);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        oldLayer = null;
-        newLayer = null;
     }
 
     @Override

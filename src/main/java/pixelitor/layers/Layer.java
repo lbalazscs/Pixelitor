@@ -55,7 +55,6 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
-import static pixelitor.Composition.UpdateActions.FULL;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 
@@ -356,7 +355,8 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the holder for new layers if this is the currently active layer.
+     * Returns the holder for new layers.
+     * Must be called on the currently active layer.
      */
     public LayerHolder getHolderForNewLayers() {
         return holder;
@@ -566,6 +566,13 @@ public abstract class Layer implements Serializable, Debuggable {
         if (addToHistory) {
             History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
+
+        // DeleteLayerMaskEdit assumes that it is created with
+        // an active layer (when the undo activates the MaskViewMode)
+        // if this is not always true, then MaskViewMode activation
+        // must also be guarded in DeleteLayerMaskEdit.undo
+        assert isActive() || GUIMode.isUnitTesting();
+
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
         }
@@ -1013,22 +1020,21 @@ public abstract class Layer implements Serializable, Debuggable {
         return newImageLayer;
     }
 
-    public final String getTypeStringLC() {
-        return getTypeString().toLowerCase(Locale.ENGLISH);
-    }
-
-    public abstract String getTypeString();
-
     public Tool getPreferredTool() {
         return null;
     }
 
-    public boolean isSmartFilter() {
-        return this instanceof SmartFilter;
-    }
-
     public boolean isGroup() {
         return this instanceof LayerGroup;
+    }
+
+    public void unGroup() {
+        if (holder instanceof LayerGroup group) {
+            group.replaceWithUnGrouped(null, true);
+        } else {
+            Messages.showError("Can't ungroup",
+                "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));
+        }
     }
 
     public boolean contains(Layer layer) {
@@ -1046,12 +1052,12 @@ public abstract class Layer implements Serializable, Debuggable {
         }
     }
 
-    public void update(Composition.UpdateActions actions) {
-        holder.update(actions);
+    public void update(boolean updateHistogram) {
+        holder.update(updateHistogram);
     }
 
     public void update() {
-        update(FULL);
+        update(true);
     }
 
     public boolean checkInvariants() {
@@ -1097,17 +1103,17 @@ public abstract class Layer implements Serializable, Debuggable {
         return node;
     }
 
+    public final String getTypeStringLC() {
+        return getTypeString().toLowerCase(Locale.ENGLISH);
+    }
+
+    /**
+     * Returns a short string describing the type of this layer.
+     */
+    public abstract String getTypeString();
+
     @Override
     public String toString() {
         return "'" + name + "' (" + getClass().getSimpleName() + ")";
-    }
-
-    public void unGroup() {
-        if (holder instanceof LayerGroup group) {
-            group.replaceWithUnGrouped(null, true);
-        } else {
-            Messages.showError("Can't ungroup",
-                "<html>The layer \"<b>%s</b>\" isn't inside a layer group.".formatted(getName()));
-        }
     }
 }

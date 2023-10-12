@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import static java.lang.String.format;
 
 /**
- * Runtime assertions that run only in developer mode.
+ * Runtime assertions checked only in developer mode.
  */
 public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
@@ -243,7 +243,7 @@ public final class ConsistencyChecks {
         int numLayers = parent.getNumLayers();
         if (enabled) {
             int minValue = 2;
-            if (parent.allowZeroLayers()) {
+            if (parent.allowsZeroLayers()) {
                 minValue = 1;
             }
             if (numLayers < minValue) {
@@ -253,7 +253,7 @@ public final class ConsistencyChecks {
             }
         } else { // disabled
             int maxValue = 1;
-            if (parent.allowZeroLayers()) {
+            if (parent.allowsZeroLayers()) {
                 maxValue = 0;
             }
             if (numLayers > maxValue) {

@@ -39,7 +39,7 @@ import java.io.Serializable;
 import static pixelitor.Views.thumbSize;
 
 /**
- * The canvas represents the size of the composition.
+ * The canvas represents the size of a composition.
  * A layer can be bigger than the canvas, if it is partially hidden (for example
  * because it was moved with the Move Tool).
  * The saved images always have the size of the canvas.
@@ -66,7 +66,7 @@ public class Canvas implements Serializable, Debuggable {
         height = imHeight;
     }
 
-    public Canvas(Canvas orig) {
+    private Canvas(Canvas orig) {
         width = orig.width;
         height = orig.height;
         coWidth = orig.coWidth;
@@ -78,7 +78,7 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Changes the size with values given in image space
+     * Changes the size using values given in image space
      */
     public void resize(int newWidth, int newHeight, View view, boolean notify) {
         width = newWidth;

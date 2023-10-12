@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the enabling or disabling of a layer mask
  */
 public class EnableLayerMaskEdit extends PixelitorEdit {
-    private Layer layer;
+    private final Layer layer;
 
     public EnableLayerMaskEdit(Composition comp, Layer layer) {
         super(layer.isMaskEnabled() ?
@@ -54,13 +54,6 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
     private void changeEnabledState() {
         boolean newEnabled = !layer.isMaskEnabled();
         layer.setMaskEnabled(newEnabled, false);
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
     }
 
     @Override

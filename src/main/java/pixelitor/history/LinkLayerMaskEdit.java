@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.LayerMask;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -27,7 +28,7 @@ import javax.swing.undo.CannotUndoException;
  * A PixelitorEdit that represents the linking or unlinking of a layer mask
  */
 public class LinkLayerMaskEdit extends PixelitorEdit {
-    private LayerMask mask;
+    private final LayerMask mask;
 
     public LinkLayerMaskEdit(Composition comp, LayerMask mask) {
         super(mask.isLinked() ? "Link Layer Mask" : "Unlink Layer Mask", comp);
@@ -50,9 +51,9 @@ public class LinkLayerMaskEdit extends PixelitorEdit {
     }
 
     @Override
-    public void die() {
-        super.die();
-
-        mask = null;
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+        node.add(mask.createDebugNode());
+        return node;
     }
 }

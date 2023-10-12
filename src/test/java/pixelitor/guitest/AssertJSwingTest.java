@@ -1738,21 +1738,29 @@ public class AssertJSwingTest {
         testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
 
+        // Fractals
         testFilterWithDialog("Chaos Game", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Fractal Tree", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Julia Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Mandelbrot Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
+        // Geometry
+        testFilterWithDialog("Border Mask", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Concentric Shapes", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Checker Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Truchet Tiles", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
-        testFilterWithDialog("Mystic Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        // Shapes
+        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Mystic Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spiral", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
     private void testArtisticFilters() {

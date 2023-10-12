@@ -313,22 +313,6 @@ public class GradientSlider extends MultiThumbSlider {
         return true;
     }
 
-    /**
-     * TODO: If developers don't want to bundle the ColorPicker with their programs,
-     * they can use this method instead of <code>showColorPicker()</code>.
-     */
-    @SuppressWarnings("unused")
-    private void showJColorChooser() {
-        Color[] colors = getColors();
-        int i = getSelectedThumb();
-        if (i >= 0 && i < colors.length) {
-            colors[i] = JColorChooser.showDialog(this, "Choose a Color", colors[i]);
-            if (colors[i] != null) {
-                setValues(getThumbPositions(), colors);
-            }
-        }
-    }
-
     @Override
     public void updateUI() {
         setUI(new GradientSliderUI(this));

@@ -311,11 +311,11 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void update(Composition.UpdateActions actions) {
+    public void update(boolean updateHistogram) {
         if (imageNeedsRefresh) {
             recalculateImage();
         }
-        holder.update(actions);
+        holder.update(updateHistogram);
     }
 
     @Override
@@ -1078,7 +1078,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public boolean allowZeroLayers() {
+    public boolean allowsZeroLayers() {
         return true;
     }
 

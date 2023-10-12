@@ -127,7 +127,7 @@ public class LayerTest {
         layer.setVisible(false, true, true);
         checkHidden(layer);
 
-        String expectedEditName = layer.isSmartFilter() ? "Hide Smart Filter" : "Hide Layer";
+        String expectedEditName = "Hide " + layer.getTypeString();
         History.undo(expectedEditName);
         checkShown(layer);
 
@@ -138,7 +138,7 @@ public class LayerTest {
         layer.setVisible(true, true, true);
         checkShown(layer);
 
-        expectedEditName = layer.isSmartFilter() ? "Show Smart Filter" : "Show Layer";
+        expectedEditName = "Show " + layer.getTypeString();
         History.undo(expectedEditName);
         checkHidden(layer);
 

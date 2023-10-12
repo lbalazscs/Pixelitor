@@ -268,8 +268,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void update(Composition.UpdateActions actions) {
-        super.update(actions);
+    public void update(boolean updateHistogram) {
+        super.update(updateHistogram);
 
         // TODO currently updateIconImage() of ShapesLayer is
         //  called only when the icon really changes.

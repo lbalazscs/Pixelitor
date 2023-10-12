@@ -182,7 +182,7 @@ public class Clouds extends ParametrizedFilter {
      * Fill the permutation table is with all the values with
      * between 1 and 256, in random order, and duplicate it
      */
-    public void reseed(long newSeed) {
+    private void reseed(long newSeed) {
         Random random = new Random(newSeed);
         p = new int[512];
         for (int i = 0; i < 256; i++) {

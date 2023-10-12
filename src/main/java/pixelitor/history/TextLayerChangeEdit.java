@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import javax.swing.undo.CannotUndoException;
  */
 public class TextLayerChangeEdit extends PixelitorEdit {
     private TextSettings backupSettings;
-    private TextLayer layer;
+    private final TextLayer layer;
 
     public TextLayerChangeEdit(Composition comp, TextLayer layer,
                                TextSettings backupSettings) {
@@ -66,13 +66,6 @@ public class TextLayerChangeEdit extends PixelitorEdit {
         layer.updateLayerName();
 
         layer.update();
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
     }
 
     @Override

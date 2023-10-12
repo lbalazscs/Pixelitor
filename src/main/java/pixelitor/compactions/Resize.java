@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.UpdateActions.REPAINT;
 import static pixelitor.utils.Threads.*;
 
 /**
@@ -139,7 +138,7 @@ public class Resize implements CompAction {
         // changed or if it was resized to a very small size
         newComp.updateAllIconImages();
 
-        newComp.update(REPAINT, true);
+        newComp.update(false, true);
         view.revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();

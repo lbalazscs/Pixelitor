@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
- * Something that contains an ordered collection of layers, like a
+ * Something that contains a list of layers, like a
  * composition, layer group or smart object.
  */
 public interface LayerHolder extends Debuggable {
@@ -168,15 +168,7 @@ public interface LayerHolder extends Debuggable {
      */
     void deleteTemporarily(Layer layer);
 
-    boolean allowZeroLayers();
-
-    default boolean canDelete() {
-        if (allowZeroLayers()) {
-            return getNumLayers() >= 1;
-        } else {
-            return getNumLayers() >= 2;
-        }
-    }
+    boolean allowsZeroLayers();
 
     /**
      * Replaces a layer with another, while keeping its position, mask, ui
@@ -264,7 +256,7 @@ public interface LayerHolder extends Debuggable {
         return getComp().getActiveHolder() == this;
     }
 
-    void update(Composition.UpdateActions actions);
+    void update(boolean updateHistogram);
 
     void update();
 

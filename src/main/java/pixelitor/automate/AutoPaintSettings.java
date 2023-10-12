@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.util.SplittableRandom;
 /**
  * The settings of Auto Paint
  */
-class AutoPaintSettings {
+public class AutoPaintSettings {
     private final Tool tool;
     private final int numStrokes;
     private final double maxCurvature;

@@ -36,7 +36,7 @@ import java.lang.ref.SoftReference;
 public class CompositionReplacedEdit extends PixelitorEdit {
     private SoftReference<Composition> backupCompRef;
     private final MaskViewMode oldMaskViewMode;
-    private View view;
+    private final View view;
 
     private DeselectEdit oldDeselectEdit;
     private DeselectEdit newDeselectEdit;
@@ -158,14 +158,6 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public boolean makesDirty() {
         // reloading should not result in a dirty comp
         return !isReload;
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        backupCompRef = null;
-        view = null;
     }
 
     @Override

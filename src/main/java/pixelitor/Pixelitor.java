@@ -211,20 +211,9 @@ public class Pixelitor {
 
         var unsavedComps = Views.getUnsavedComps();
         if (!unsavedComps.isEmpty()) {
-            String msg;
-            if (unsavedComps.size() == 1) {
-                msg = format("<html>There are unsaved changes in <b>%s</b>." +
-                        "<br>Are you sure you want to exit?",
-                    unsavedComps.get(0).getName());
-            } else {
-                msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
-                    "<br>Unsaved images:<ul>";
-                for (Composition comp : unsavedComps) {
-                    msg += "<li>" + comp.getName();
-                }
-            }
+            String msg = createUnsavedChangesMsg(unsavedComps);
 
-            if (Dialogs.showYesNoWarningDialog(pw, "Unsaved changes", msg)) {
+            if (Dialogs.showYesNoWarningDialog(pw, "Unsaved Changes", msg)) {
                 pw.setVisible(false);
                 AppPreferences.savePrefsAndExit();
             }
@@ -232,6 +221,22 @@ public class Pixelitor {
             pw.setVisible(false);
             AppPreferences.savePrefsAndExit();
         }
+    }
+
+    private static String createUnsavedChangesMsg(List<Composition> unsavedComps) {
+        String msg;
+        if (unsavedComps.size() == 1) {
+            msg = format("<html>There are unsaved changes in <b>%s</b>." +
+                    "<br>Are you sure you want to exit?",
+                unsavedComps.get(0).getName());
+        } else {
+            msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
+                "<br>Unsaved images:<ul>";
+            for (Composition comp : unsavedComps) {
+                msg += "<li>" + comp.getName();
+            }
+        }
+        return msg;
     }
 
     /**

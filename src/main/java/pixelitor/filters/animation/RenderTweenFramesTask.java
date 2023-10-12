@@ -20,7 +20,6 @@ package pixelitor.filters.animation;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterState;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
@@ -99,18 +98,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
             int percentProgress = (int) ((100.0 * frameNr) / numTotalFrames);
             setProgress(percentProgress);
 
-            double time;
-            if (frameNr < numFrames) { // ping: normal animation forwards
-                time = ((double) frameNr) / numFrames;
-            } else { // pong: animating backwards
-                // Here the same frames are calculated again.
-                // They could be cached in an array of soft references
-                // or in the case of the file sequence output,
-                // the output files could be copied.
-                // However, "ping-pong" animations are probably uncommon.
-                int effectiveFrame = 2 * (numFrames - 1) - frameNr;
-                time = ((double) effectiveFrame) / numFrames;
-            }
+            double time = calcRenderTime(frameNr, numFrames);
 
             try {
                 // first render the frame...
@@ -132,6 +120,22 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         boolean finalCanceled = canceled;
         SwingUtilities.invokeLater(() -> finishOnEDT(animationWriter, finalCanceled));
+    }
+
+    private static double calcRenderTime(int frameNr, int numFrames) {
+        double time;
+        if (frameNr < numFrames) { // ping: normal animation forwards
+            time = ((double) frameNr) / numFrames;
+        } else { // pong: animating backwards
+            // Here the same frames are calculated again.
+            // They could be cached in an array of soft references
+            // or in the case of the file sequence output,
+            // the output files could be copied.
+            // However, "ping-pong" animations are probably uncommon.
+            int effectiveFrame = 2 * (numFrames - 1) - frameNr;
+            time = ((double) effectiveFrame) / numFrames;
+        }
+        return time;
     }
 
     private BufferedImage renderFrame(ParametrizedFilter filter, double time) {

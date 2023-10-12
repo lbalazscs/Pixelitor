@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,17 +23,17 @@ import javax.swing.*;
  * The available Swing Look and Feels.
  */
 public enum Theme {
-    NIMBUS("Nimbus", false, true) {
+    NIMBUS("Nimbus", false, false) {
         @Override
         String getLAFClassName() {
             return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
         }
-    }, FLAT_DARK("Flat Dark", true, false) {
+    }, FLAT_DARK("Flat Dark", true, true) {
         @Override
         String getLAFClassName() {
             return "com.formdev.flatlaf.FlatDarculaLaf";
         }
-    }, FLAT_LIGHT("Flat Light", false, false) {
+    }, FLAT_LIGHT("Flat Light", false, true) {
         @Override
         String getLAFClassName() {
             return "com.formdev.flatlaf.FlatIntelliJLaf";
@@ -47,12 +47,12 @@ public enum Theme {
 
     private final String guiName;
     private final boolean dark;
-    private final boolean nimbus;
+    private final boolean flat;
 
-    Theme(String guiName, boolean dark, boolean nimbus) {
+    Theme(String guiName, boolean dark, boolean flat) {
         this.guiName = guiName;
         this.dark = dark;
-        this.nimbus = nimbus;
+        this.flat = flat;
     }
 
     abstract String getLAFClassName();
@@ -62,7 +62,11 @@ public enum Theme {
     }
 
     public boolean isNimbus() {
-        return nimbus;
+        return this == NIMBUS;
+    }
+
+    public boolean isFlat() {
+        return flat;
     }
 
     public String getSaveCode() {
@@ -72,10 +76,5 @@ public enum Theme {
     @Override
     public String toString() {
         return guiName;
-    }
-
-    public boolean isFlat() {
-        // TODO
-        return guiName.startsWith("Flat");
     }
 }

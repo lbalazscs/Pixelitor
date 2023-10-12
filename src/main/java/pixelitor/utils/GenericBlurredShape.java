@@ -112,6 +112,13 @@ public class GenericBlurredShape implements BlurredShape {
         Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
         g2.dispose();
 
+        var blurFilter = createBlurFilter(shapeStartX, shapeStartY);
+        img = blurFilter.filter(img, null);
+
+        pixels = ImageUtils.getGrayPixelByteArray(img);
+    }
+
+    private static BoxBlurFilter createBlurFilter(double shapeStartX, double shapeStartY) {
         int numIterations = 3;
         // cast first to int in order to avoid fractional blurring
         float hRadius = (int) (shapeStartX / numIterations);
@@ -123,9 +130,7 @@ public class GenericBlurredShape implements BlurredShape {
         // it would be complicated to set up a better progress tracking
         // because we would have to know in advance whether we can cache
         blurFilter.setProgressTracker(ProgressTracker.NULL_TRACKER);
-        img = blurFilter.filter(img, null);
-
-        pixels = ImageUtils.getGrayPixelByteArray(img);
+        return blurFilter;
     }
 
     private void recenter(Point2D center) {

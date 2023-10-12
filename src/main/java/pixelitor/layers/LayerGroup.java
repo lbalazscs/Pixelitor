@@ -151,9 +151,9 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void update(Composition.UpdateActions actions) {
+    public void update(boolean updateHistogram) {
         recalculateCachedImage();
-        holder.update(actions);
+        holder.update(updateHistogram);
     }
 
     private void recalculateCachedImage() {
@@ -214,8 +214,7 @@ public class LayerGroup extends CompositeLayer {
         super.setBlendingMode(newMode, addToHistory, false);
 
         if (update) {
-            boolean typeChange = wasPassThrough != isPassThrough();
-            if (typeChange) {
+            if (wasPassThrough != isPassThrough()) {
                 recalculateCachedImage();
                 thumb = null;
                 updateIconImage();
@@ -294,7 +293,6 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public int getActiveLayerIndex() {
-        // TODO
         return layers.indexOf(comp.getActiveLayer());
     }
 
@@ -386,7 +384,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public boolean allowZeroLayers() {
+    public boolean allowsZeroLayers() {
         return true;
     }
 

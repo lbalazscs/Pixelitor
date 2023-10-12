@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -92,6 +92,17 @@ public class Canny extends ParametrizedFilter {
         }
 
         // do not cache this object because it holds a lot of memory!
+        var detector = createEdgeDetector(src);
+        dest = detector.getEdgesImage();
+
+        if (invert.isChecked()) {
+            Invert.quickInvert(dest);
+        }
+
+        return dest;
+    }
+
+    private CannyEdgeDetector createEdgeDetector(BufferedImage src) {
         var detector = new CannyEdgeDetector();
 
         detector.setLowThreshold((float) lowThreshold.getPercentage());
@@ -102,13 +113,7 @@ public class Canny extends ParametrizedFilter {
 
         detector.setSourceImage(src);
         detector.process();
-        dest = detector.getEdgesImage();
-
-        if (invert.isChecked()) {
-            Invert.quickInvert(dest);
-        }
-
-        return dest;
+        return detector;
     }
 
     private static void showNotEnoughMemoryDialog(long estimatedMemoryMB,

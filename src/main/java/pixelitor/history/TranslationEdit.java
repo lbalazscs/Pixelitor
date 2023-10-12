@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import javax.swing.undo.CannotUndoException;
  * this one is used only internally by other edits
  */
 public class TranslationEdit extends PixelitorEdit {
-    private ContentLayer layer;
+    private final ContentLayer layer;
     private int backupTx = 0;
     private int backupTy = 0;
 
@@ -96,16 +96,6 @@ public class TranslationEdit extends PixelitorEdit {
 
         if (!embedded) {
             layer.update();
-        }
-    }
-
-    @Override
-    public void die() {
-        super.die();
-
-        layer = null;
-        if (maskEdit != null) {
-            maskEdit.die();
         }
     }
 

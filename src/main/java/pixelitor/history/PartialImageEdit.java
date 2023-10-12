@@ -166,13 +166,6 @@ public class PartialImageEdit extends FadeableEdit {
     }
 
     @Override
-    public void die() {
-        super.die();
-
-        backupRasterRef = null;
-    }
-
-    @Override
     public BufferedImage getBackupImage() {
         if (backupRasterRef == null) { // died
             return null;

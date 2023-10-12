@@ -44,7 +44,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static pixelitor.Composition.UpdateActions.FULL;
 
 /**
  * A cropping action on all layers of a composition
@@ -144,7 +143,7 @@ public class Crop implements CompAction {
         newComp.updateAllIconImages();
         SelectionActions.update(newComp);
 
-        newComp.update(FULL, true);
+        newComp.update(true, true);
 
         Messages.showInStatusBar(format(
             "<b>%s</b> was cropped to %d x %d pixels.",
@@ -232,7 +231,7 @@ public class Crop implements CompAction {
                 break;
             case 2: // only hide
                 addHidingMask(comp, sel.getShape(), true);
-                comp.update(FULL);
+                comp.update();
                 break;
             case JOptionPane.CLOSED_OPTION:
             case 3: // canceled
