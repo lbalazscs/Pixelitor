@@ -169,7 +169,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         }
 
         // ...except if that single parameter is grouped...
-        FilterParam param = params.get(0);
+        FilterParam param = params.getFirst();
         if (param instanceof GroupedRangeParam) {
             return true;
         }

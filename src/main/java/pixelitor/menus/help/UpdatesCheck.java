@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,8 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
@@ -47,6 +49,9 @@ public class UpdatesCheck {
             versionInfo = downloadVersionInfo();
         } catch (IOException e) {
             showCouldNotCheckForUpdatesDialog();
+            return;
+        } catch (URISyntaxException e) {
+            Messages.showException(e);
             return;
         }
         if (versionInfo == null) {
@@ -104,9 +109,9 @@ public class UpdatesCheck {
         return parseInt(requiredJavaVersion) > currentMainJavaVersion;
     }
 
-    private static Properties downloadVersionInfo() throws IOException {
-        URL lastVersionURL = new URL(
-            HOME_PAGE + "/version_info.txt");
+    private static Properties downloadVersionInfo() throws IOException, URISyntaxException {
+        URL lastVersionURL = new URI(
+            HOME_PAGE + "/version_info.txt").toURL();
         URLConnection conn = lastVersionURL.openConnection();
         Properties properties = new Properties();
         properties.load(conn.getInputStream());

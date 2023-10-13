@@ -65,7 +65,7 @@ class GuidesRendererTest {
 
         verify(g2, times(1)).setColor(guideStyle.getColorA());
         verify(g2, times(1)).setStroke(guideStyle.getStrokeA());
-        verify(g2, times(1)).draw(lines.get(0));
+        verify(g2, times(1)).draw(lines.getFirst());
     }
 
     @Test
@@ -81,6 +81,6 @@ class GuidesRendererTest {
         verify(g2, times(1)).setStroke(guideStyle.getStrokeA());
         verify(g2, times(1)).setColor(guideStyle.getColorB());
         verify(g2, times(1)).setStroke(guideStyle.getStrokeB());
-        verify(g2, times(2)).draw(lines.get(0));
+        verify(g2, times(2)).draw(lines.getFirst());
     }
 }

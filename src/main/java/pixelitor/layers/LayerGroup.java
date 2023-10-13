@@ -355,7 +355,7 @@ public class LayerGroup extends CompositeLayer {
             } else if (layerIndex > 0) {
                 comp.setActiveLayer(layers.get(layerIndex - 1));
             } else {  // deleted the fist layer, set the new first layer as active
-                comp.setActiveLayer(layers.get(0));
+                comp.setActiveLayer(layers.getFirst());
             }
         }
 

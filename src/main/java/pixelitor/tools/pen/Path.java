@@ -302,7 +302,7 @@ public class Path implements Serializable {
         Path backup = deepCopy(comp);
         subPaths.removeIf(sp -> sp == subPath);
         assert !subPaths.isEmpty(); // should never be called for the last subpath
-        activeSubPath = subPaths.get(subPaths.size() - 1);
+        activeSubPath = subPaths.getLast();
         comp.repaint();
 
         PathEdit edit = new PathEdit("Delete Subpath", comp, backup, this);

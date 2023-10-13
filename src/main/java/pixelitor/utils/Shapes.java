@@ -455,7 +455,7 @@ public class Shapes {
             int type = points.get(i).type();
             if (closed && i == numPoints - 2) {
                 // make sure that at the end we arrive at the first point
-                PathPoint first = points.get(0);
+                PathPoint first = points.getFirst();
                 double[] firstCoords = first.coords();
                 switch (type) {
                     case SEG_LINETO -> {
@@ -1747,7 +1747,7 @@ public class Shapes {
     public static Path2D smoothConnect(List<Point2D> points) {
         Path2D.Double path = new Path2D.Double();
 
-        Point2D first = points.get(0);
+        Point2D first = points.getFirst();
         path.moveTo(first.getX(), first.getY());
 
         smoothConnect(points, path);
@@ -1840,7 +1840,7 @@ public class Shapes {
         // Given points must represent an open curve:1 or a closed curve:2
         // 1: first point != last point
         // 2: first point == last point
-        boolean isClosed = Geometry.areEqual(points.get(0), points.get(numPoints - 1));
+        boolean isClosed = Geometry.areEqual(points.getFirst(), points.get(numPoints - 1));
         int lastPointIndex = isClosed ? numPoints - 2 : numPoints - 1;
 
         // Every two alternate points represent a side. There are numPoints - 1 sides.
@@ -1874,7 +1874,7 @@ public class Shapes {
         }
 
         Path2D path = new Path2D.Float();
-        Point2D point = points.get(0);
+        Point2D point = points.getFirst();
         Point2D lastPoint = points.get(lastPointIndex);
 
         // for first point

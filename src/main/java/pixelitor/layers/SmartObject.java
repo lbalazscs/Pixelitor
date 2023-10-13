@@ -349,7 +349,7 @@ public class SmartObject extends CompositeLayer {
 
     private void invalidateAllFilterCaches() {
         if (!filters.isEmpty()) {
-            filters.get(0).invalidateChain();
+            filters.getFirst().invalidateChain();
         }
     }
 
@@ -663,7 +663,7 @@ public class SmartObject extends CompositeLayer {
         // if there are smart filters, the first one references the content
         if (filters != null) { // this check is required by the migration support
             if (!filters.isEmpty()) {
-                SmartFilter first = filters.get(0);
+                SmartFilter first = filters.getFirst();
                 first.setImageSource(baseSource);
                 first.invalidateChain();
             }
@@ -718,7 +718,7 @@ public class SmartObject extends CompositeLayer {
             Composition parent = so.getComp();
             if (parent.isSmartObjectContent()) {
                 // assumes that all owners are in the same comp
-                so = parent.getOwners().get(0);
+                so = parent.getOwners().getFirst();
             } else {
                 return parent;
             }
@@ -795,7 +795,7 @@ public class SmartObject extends CompositeLayer {
     private void setBaseSource(ImageSource baseSource) {
         this.baseSource = baseSource;
         if (!filters.isEmpty()) {
-            filters.get(0).setImageSource(baseSource);
+            filters.getFirst().setImageSource(baseSource);
         }
     }
 
@@ -893,7 +893,7 @@ public class SmartObject extends CompositeLayer {
             selected.edit();
         } else { // the smart object as a whole is selected
             // edit the last smart filter
-            filters.get(filters.size() - 1).edit();
+            filters.getLast().edit();
         }
     }
 
@@ -967,7 +967,7 @@ public class SmartObject extends CompositeLayer {
                 throw new AssertionError();
             }
             if (!filters.isEmpty()) {
-                if (filters.get(0).getImageSource() != imageTransformer) {
+                if (filters.getFirst().getImageSource() != imageTransformer) {
                     throw new AssertionError();
                 }
             }

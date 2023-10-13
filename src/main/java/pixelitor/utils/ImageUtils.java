@@ -1238,7 +1238,7 @@ public class ImageUtils {
 
     public static BufferedImage calculateCompositeImage(List<Layer> layers, Canvas canvas) {
         if (layers.size() == 1) { // shortcut
-            Layer layer = layers.get(0);
+            Layer layer = layers.getFirst();
             if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
                 BufferedImage layerImg = layer.asImage(true, true);
 

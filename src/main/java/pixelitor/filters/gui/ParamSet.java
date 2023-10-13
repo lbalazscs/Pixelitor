@@ -90,7 +90,7 @@ public class ParamSet implements Debuggable {
 
     public ParamSet withActionsAtFront(FilterButtonModel... actions) {
         for (FilterButtonModel action : actions) {
-            actionList.add(0, action);
+            actionList.addFirst(action);
         }
         return this;
     }

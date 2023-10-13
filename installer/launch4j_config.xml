@@ -4,7 +4,7 @@
     <headerType>gui</headerType>
     <jar>C:\dev_p\pixelitor\target\Pixelitor-4.3.1.jar</jar>
     <outfile>C:\dev_p\pixelitor\installer\pixelitor.exe</outfile>
-    <errTitle>Pixelitor - Java 17+ required</errTitle>
+    <errTitle>Pixelitor - Java 21+ required</errTitle>
     <cmdLine></cmdLine>
     <chdir></chdir>
     <priority>normal</priority>
@@ -18,7 +18,7 @@
         <path>runtime</path>
         <requiresJdk>false</requiresJdk>
         <requires64Bit>true</requires64Bit>
-        <minVersion>17</minVersion>
+        <minVersion>21</minVersion>
         <maxVersion></maxVersion>
         <initialHeapPercent>7</initialHeapPercent>
         <maxHeapPercent>95</maxHeapPercent>

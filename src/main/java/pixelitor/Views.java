@@ -123,7 +123,7 @@ public class Views {
                 .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
-                activate(views.get(0));
+                activate(views.getFirst());
             }
         }
     }

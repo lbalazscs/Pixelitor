@@ -106,6 +106,7 @@ public class SwingFilePicker implements FilePicker {
             }
         }
 
+        //noinspection IfCanBeSwitch
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
             Dirs.setLastSave(selectedFile.getParentFile());

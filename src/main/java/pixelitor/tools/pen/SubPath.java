@@ -150,11 +150,11 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public AnchorPoint getFirst() {
-        return anchorPoints.get(0);
+        return anchorPoints.getFirst();
     }
 
     public AnchorPoint getLast() {
-        return anchorPoints.get(anchorPoints.size() - 1);
+        return anchorPoints.getLast();
     }
 
     public int getNumAnchors() {
@@ -268,7 +268,7 @@ public class SubPath implements Serializable, Transformable {
                     AnchorPoint next = anchorPoints.get(i + 1);
                     next.paintHandles(g, true, false);
                 } else if (closed) {
-                    AnchorPoint next = anchorPoints.get(0);
+                    AnchorPoint next = anchorPoints.getFirst();
                     next.paintHandles(g, true, false);
                 }
             } else {
@@ -325,7 +325,7 @@ public class SubPath implements Serializable, Transformable {
             if (index < numPoints - 1) {
                 next = anchorPoints.get(index + 1);
             } else if (closed) {
-                next = anchorPoints.get(0);
+                next = anchorPoints.getFirst();
                 comparingWithFirst = true;
             } else {
                 // reached the last point, and it is not closed
@@ -345,7 +345,7 @@ public class SubPath implements Serializable, Transformable {
             // tests it is important that the first point remains first
             // even if the shape is closed.
             // Remove the last and set it as first
-            AnchorPoint removedLast = newPoints.remove(newPoints.size() - 1);
+            AnchorPoint removedLast = newPoints.removeLast();
             newPoints.set(0, removedLast);
         }
         anchorPoints = newPoints;

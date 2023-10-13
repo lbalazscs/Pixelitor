@@ -54,7 +54,7 @@ public class ColorHistory {
         }
         colors.add(newColor);
         if (colors.size() > MAX_HISTORY_SIZE) {
-            colors.remove(0);
+            colors.removeFirst();
         }
     }
 

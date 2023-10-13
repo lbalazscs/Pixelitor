@@ -81,7 +81,7 @@ public class SmoothConnectTest extends JPanel {
         List<Point2D> points = new ArrayList<>(pointList);
 
         if (isClosed.isSelected()) {
-            points.add(points.get(0));
+            points.add(points.getFirst());
         }
 
 //        Path2D path = Shapes.smoothConnect(points);

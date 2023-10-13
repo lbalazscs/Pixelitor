@@ -228,7 +228,7 @@ public class Pixelitor {
         if (unsavedComps.size() == 1) {
             msg = format("<html>There are unsaved changes in <b>%s</b>." +
                     "<br>Are you sure you want to exit?",
-                unsavedComps.get(0).getName());
+                unsavedComps.getFirst().getName());
         } else {
             msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
                 "<br>Unsaved images:<ul>";

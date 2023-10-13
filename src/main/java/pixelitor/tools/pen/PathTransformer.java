@@ -198,7 +198,7 @@ public class PathTransformer implements PenToolMode {
     private void initBoxes() {
         boxes = path.createTransformBoxes();
         if (!boxes.isEmpty()) {
-            lastActiveBox = boxes.get(0);
+            lastActiveBox = boxes.getFirst();
         } else {
             lastActiveBox = null;
         }

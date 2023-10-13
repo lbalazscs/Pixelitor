@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 
-# JAVA_HOME must point to a JDK 17+
+# JAVA_HOME must point to a JDK 21+
 if [ -z "$JAVA_HOME" ]; then
     echo "JAVA_HOME is not set"
     exit 1

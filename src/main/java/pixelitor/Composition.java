@@ -454,7 +454,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // Recursively search in the hierarchy of parents.
             // It checks only the first owner, because it assumes
             // that all owners are in the same composition.
-            return owners.get(0).getParentView();
+            return owners.getFirst().getParentView();
         }
 
         throw new IllegalStateException("no view for top-level comp " + getDebugName());
@@ -696,7 +696,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (layerIndex > 0) {
                 setActiveLayer(layerList.get(layerIndex - 1));
             } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.get(0));
+                setActiveLayer(layerList.getFirst());
             }
         }
 

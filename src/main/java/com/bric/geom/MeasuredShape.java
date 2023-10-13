@@ -413,7 +413,7 @@ public class MeasuredShape implements Serializable {
         }
         float t = closedDistance;
         if (!v.isEmpty()) {
-            Segment last = v.get(v.size() - 1);
+            Segment last = v.getLast();
             if (Math.abs(last.data[last.data.length - 2] - moveX) > 0.001 ||
                     Math.abs(last.data[last.data.length - 1] - moveY) > 0.001) {
                 coords[0] = moveX;

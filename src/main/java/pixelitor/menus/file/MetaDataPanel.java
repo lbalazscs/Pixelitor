@@ -136,7 +136,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
-                    File file = list.get(0);
+                    File file = list.getFirst();
                     if (file.isFile()) {
                         changeFile(file);
                     }

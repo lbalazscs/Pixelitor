@@ -164,7 +164,7 @@ public class TaperingStroke implements Stroke {
             taperedOutline.lineTo(Q4.getX(), Q4.getY());
         }
 
-        Point2D Ql = points.get(points.size() - 1);
+        Point2D Ql = points.getLast();
         taperedOutline.lineTo(Ql.getX(), Ql.getY());
 
         for (int i = returnPath.length - 1; i >= 0; i--) {

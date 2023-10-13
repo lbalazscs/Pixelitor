@@ -318,7 +318,7 @@ public final class GifDecoder {
          * @return 32 bit ARGB color in the form 0xAARRGGBB
          */
         public final int getBackgroundColor() {
-            GifFrame frame = frames.get(0);
+            GifFrame frame = frames.getFirst();
             if (frame.hasLocColTbl) {
                 return frame.localColTbl[bgColIndex];
             } else if (hasGlobColTbl) {

@@ -174,16 +174,13 @@ public final class GUIUtils {
 
         for (int i = 0; i < count; i++) {
             Component child = panel.getComponent(i);
-            //noinspection ChainOfInstanceofChecks
-            if (child instanceof JComboBox box) {
-                int itemCount = box.getItemCount();
-                box.setSelectedIndex(Rnd.nextInt(itemCount));
-            } else if (child instanceof JCheckBox box) {
-                box.setSelected(Rnd.nextBoolean());
-            } else if (child instanceof SliderSpinner spinner) {
-                spinner.getModel().randomize();
-            } else if (child instanceof BlendingModePanel bmp) {
-                bmp.randomize();
+            switch (child) {
+                case JComboBox cb -> cb.setSelectedIndex(Rnd.nextInt(cb.getItemCount()));
+                case JCheckBox cb -> cb.setSelected(Rnd.nextBoolean());
+                case SliderSpinner spinner -> spinner.getModel().randomize();
+                case BlendingModePanel bmp -> bmp.randomize();
+                case null, default -> {
+                }
             }
         }
     }

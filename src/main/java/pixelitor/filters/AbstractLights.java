@@ -186,7 +186,7 @@ public class AbstractLights extends ParametrizedFilter {
             }
         } else if (connect == TYPE_STAR) {
             // replace the first particle with a star particle
-            Color c = points.get(0).color;
+            Color c = points.getFirst().color;
             StarParticle starParticle = new StarParticle(0, 0, speed, c, starSizeParam, width, height, starCenterParam);
             points.set(0, starParticle);
 

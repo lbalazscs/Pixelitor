@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -118,7 +118,7 @@ public class Starburst extends ParametrizedFilter {
                 List<Point2D> points = calcSpiralPathPoints(cx, cy,
                     sliceAngle, radius, SPIRAL_RESOLUTION, spiral);
                 Collections.reverse(points);
-                Point2D first = points.get(0);
+                Point2D first = points.getFirst();
                 slice.lineTo(first.getX(), first.getY());
                 Shapes.smoothConnect(points, slice);
             }

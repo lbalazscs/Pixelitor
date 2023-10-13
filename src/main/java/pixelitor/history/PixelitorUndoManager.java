@@ -131,7 +131,7 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         if (selectionModel.isSelectionEmpty()) {
             // the first gets selected
             selectionModel.setSelectedIndex(0);
-            selectedEdit = (PixelitorEdit) edits.get(0);
+            selectedEdit = (PixelitorEdit) edits.getFirst();
         } else {
             int index = getSelectedIndex();
             int nextIndex = index + 1;
