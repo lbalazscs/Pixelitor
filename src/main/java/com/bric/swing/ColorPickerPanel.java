@@ -308,8 +308,7 @@ public class ColorPickerPanel extends JPanel {
         g2.drawImage(image, 0, 0, size, size, 0, 0, size, size, null);
 
         g2.setStroke(new BasicStroke(1));
-        if (shape instanceof Rectangle) {
-            Rectangle r = (Rectangle) shape;
+        if (shape instanceof Rectangle r) {
             PlafPaintUtils.drawBevel(g2, r);
         } else {
             g2.setColor(new Color(0, 0, 0, 120));

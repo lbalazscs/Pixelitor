@@ -31,6 +31,7 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.FileSystems;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -47,7 +48,7 @@ import static java.lang.String.format;
  * Utility class with static methods
  */
 public final class Utils {
-    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    public static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
     private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
     public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];

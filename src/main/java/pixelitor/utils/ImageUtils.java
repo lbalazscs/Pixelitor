@@ -1051,12 +1051,6 @@ public class ImageUtils {
         g.dispose();
     }
 
-    public static void fillWithTransparentRectangle(Graphics2D g, int size) {
-        g.setComposite(AlphaComposite.Clear);
-        g.fillRect(0, 0, size, size);
-        g.setComposite(AlphaComposite.SrcOver);
-    }
-
     public static boolean compareSmallImages(BufferedImage img1, BufferedImage img2) {
         assert img1.getWidth() == img2.getWidth();
         assert img1.getHeight() == img2.getHeight();

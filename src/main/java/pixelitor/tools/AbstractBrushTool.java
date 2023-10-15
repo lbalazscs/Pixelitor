@@ -271,7 +271,7 @@ public abstract class AbstractBrushTool extends Tool {
             return;
         }
 
-        // whether or not it is lazy mouse, set
+        // Whether or not it is a lazy mouse, set
         // the outline back to the mouse coordinates
         outlineCoX = (int) e.getCoX();
         outlineCoY = (int) e.getCoY();
@@ -334,14 +334,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     private void startOutlinePaintingAt(int x, int y, View view) {
-        if (typeCB == null) {
-            paintBrushOutline = true;
-        } else if (getBrushType() != BrushType.ONE_PIXEL) {
-            paintBrushOutline = true;
-        } else {
-            // it should be false already, but set it for safety
-            paintBrushOutline = false;
-        }
+        paintBrushOutline = typeCB == null || getBrushType() != BrushType.ONE_PIXEL;
         outlineCoX = x;
         outlineCoY = y;
         repaintOutline(view);

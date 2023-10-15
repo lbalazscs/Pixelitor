@@ -127,8 +127,8 @@ public class ColorFillLayer extends Layer {
             popup.addSeparator();
         }
 
-        Colors.setupCopyColorPopupMenu(popup, () -> color);
-        Colors.setupPasteColorPopupMenu(popup, PixelitorWindow.get(), c -> changeColor(c, true));
+        popup.add(Colors.createCopyColorAction(() -> color));
+        popup.add(Colors.createPasteColorAction(PixelitorWindow.get(), c -> changeColor(c, true)));
 
         return popup;
     }

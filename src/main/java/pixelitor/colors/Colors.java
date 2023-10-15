@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,8 +74,6 @@ public class Colors {
      * Full opacity is assumed.
      */
     public static Color rgbAverage(Color c1, Color c2) {
-        assert c1 != null && c2 != null;
-
         int rgb1 = c1.getRGB();
         int rgb2 = c2.getRGB();
 
@@ -99,8 +97,6 @@ public class Colors {
      * Full opacity is assumed.
      */
     public static Color hsbAverage(Color c1, Color c2) {
-        assert c1 != null && c2 != null;
-
         int rgb1 = c1.getRGB();
         int rgb2 = c2.getRGB();
 
@@ -358,43 +354,36 @@ public class Colors {
 
         popup.add(new PAction("Color Variations...", () ->
             PalettePanel.showFilterVariationsDialog(window, colorSource.get(), clickHandler)));
-
         popup.add(new PAction("Color History...", () ->
             ColorHistory.INSTANCE.showDialog(window, clickHandler, true)));
 
         popup.addSeparator();
-
-        setupCopyColorPopupMenu(popup, colorSource);
-
-        setupPasteColorPopupMenu(popup, window, colorSetter);
+        popup.add(createCopyColorAction(colorSource));
+        popup.add(createPasteColorAction(window, colorSetter));
 
         popup.addSeparator();
-        setupSetToFgBgColorMenus(popup, colorSetter);
+        popup.add(new PAction("Set to Foreground Color", () ->
+            colorSetter.accept(FgBgColors.getFGColor())));
+        popup.add(new PAction("Set to Background Color", () ->
+            colorSetter.accept(FgBgColors.getBGColor())));
 
         return popup;
     }
 
-    public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSource) {
-        popup.add(new PAction("Copy Color", () ->
-            copyColorToClipboard(colorSource.get())));
+    public static PAction createCopyColorAction(Supplier<Color> colorSource) {
+        return new PAction("Copy Color", () ->
+            copyColorToClipboard(colorSource.get()));
     }
 
-    public static void setupPasteColorPopupMenu(JPopupMenu popup, Window window, Consumer<Color> colorSetter) {
-        popup.add(new PAction("Paste Color", () -> {
+    public static PAction createPasteColorAction(Window window, Consumer<Color> colorSetter) {
+        return new PAction("Paste Color", () -> {
             Color color = getColorFromClipboard();
             if (color == null) {
                 Dialogs.showNotAColorOnClipboardDialog(window);
             } else {
                 colorSetter.accept(color);
             }
-        }));
-    }
-
-    private static void setupSetToFgBgColorMenus(JPopupMenu popup, Consumer<Color> colorSetter) {
-        popup.add(new PAction("Set to Foreground Color", () ->
-            colorSetter.accept(FgBgColors.getFGColor())));
-        popup.add(new PAction("Set to Background Color", () ->
-            colorSetter.accept(FgBgColors.getBGColor())));
+        });
     }
 
     public static void fillWith(Color color, Graphics2D g2, int width, int height) {
@@ -402,11 +391,16 @@ public class Colors {
         g2.fillRect(0, 0, width, height);
     }
 
+    public static void fillWithTransparent(Graphics2D g, int size) {
+        g.setComposite(AlphaComposite.Clear);
+        g.fillRect(0, 0, size, size);
+        g.setComposite(AlphaComposite.SrcOver);
+    }
+
     /**
      * Sets the alpha channel of the given ARGB packed int to the given 0..255 value.
      */
     public static int setAlpha(int rgb, int newAlpha) {
-//        assert newAlpha >= 0 && newAlpha <=0xFF : "newAlpha = " + newAlpha;
         // discard the original alpha and set it to the new value
         return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
     }

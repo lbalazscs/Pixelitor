@@ -46,12 +46,12 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     protected Kernel kernel = null;
 
     /**
-     * Whether to promultiply the alpha before convolving.
+     * Whether to premultiply the alpha before convolving.
      */
     protected boolean premultiplyAlpha = true;
 
     /**
-     * What do do at the image edges.
+     * What to do at the image edges.
      */
     private int edgeAction = CLAMP_EDGES;
 

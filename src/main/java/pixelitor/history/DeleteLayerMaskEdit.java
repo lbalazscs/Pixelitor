@@ -46,6 +46,8 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
 
     @Override
     public void undo() throws CannotUndoException {
+        // perhaps the MaskViewMode should be saved here,
+        // like in the AddLayerMaskEdit
         assert layer.isActive() || GUIMode.isUnitTesting();
 
         super.undo();

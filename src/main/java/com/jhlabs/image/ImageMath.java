@@ -208,17 +208,17 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
-     * @param a     the lower clamp threshold
-     * @param b     the upper clamp threshold
+     * @param min     the lower clamp threshold
+     * @param max     the upper clamp threshold
      * @param input the input parameter
      * @return the clamped value
      */
-    public static float clamp(float input, float a, float b) {
-        return (input < a) ? a : (input > b) ? b : input;
+    public static float clamp(float input, float min, float max) {
+        return (input < min) ? min : (input > max) ? max : input;
     }
 
-    public static double clamp(double input, double a, double b) {
-        return (input < a) ? a : (input > b) ? b : input;
+    public static double clamp(double input, double min, double max) {
+        return (input < min) ? min : (input > max) ? max : input;
     }
 
     public static float clamp01(float input) {
@@ -232,13 +232,13 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
-     * @param a     the lower clamp threshold
-     * @param b     the upper clamp threshold
+     * @param min     the lower clamp threshold
+     * @param max     the upper clamp threshold
      * @param input the input parameter
-     * @return the clamped value
+     * @return the clamped input
      */
-    public static int clamp(int input, int a, int b) {
-        return (input < a) ? a : (input > b) ? b : input;
+    public static int clamp(int input, int min, int max) {
+        return Math.min(max, Math.max(input, min));
     }
 
     /**

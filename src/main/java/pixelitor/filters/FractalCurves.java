@@ -239,9 +239,8 @@ public class FractalCurves extends ShapeFilter {
         Turtle turtle = fractalType.createTurtle(width, height, margin, n);
 
         String commands = rewrite(fractalType, n);
-        turtle.interpret(commands);
+        Path2D path = turtle.interpret(commands);
 
-        Path2D path = turtle.getPath();
         if (fractalType.resize) {
             return Shapes.resize(path, width, height, margin);
         }
@@ -286,8 +285,8 @@ public class FractalCurves extends ShapeFilter {
             path.moveTo(x, y);
         }
 
-        public void interpret(String s) {
-            for (int i = 0, n = s.length(); i < n; ++i) {
+        public Path2D interpret(String s) {
+            for (int i = 0, n = s.length(); i < n; i++) {
                 switch (s.charAt(i)) {
                     case 'F', 'G':
                         moveForward();
@@ -300,6 +299,7 @@ public class FractalCurves extends ShapeFilter {
                         break;
                 }
             }
+            return path;
         }
 
         private void turnLeft() {
@@ -315,10 +315,6 @@ public class FractalCurves extends ShapeFilter {
             x += moveDistance * FastMath.cos(angleRadians);
             y += moveDistance * FastMath.sin(angleRadians);
             path.lineTo(x, y);
-        }
-
-        public Path2D getPath() {
-            return path;
         }
     }
 

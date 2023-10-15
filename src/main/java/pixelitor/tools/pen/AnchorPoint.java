@@ -128,12 +128,10 @@ public class AnchorPoint extends DraggablePoint {
 
     @Override
     public void setLocation(double x, double y) {
-        double oldX = this.x;
-        double oldY = this.y;
-        super.setLocation(x, y);
+        double dx = x - this.x;
+        double dy = y - this.y;
 
-        double dx = x - oldX;
-        double dy = y - oldY;
+        super.setLocation(x, y);
 
         ctrlOut.translateOnlyThis(dx, dy);
         ctrlIn.translateOnlyThis(dx, dy);

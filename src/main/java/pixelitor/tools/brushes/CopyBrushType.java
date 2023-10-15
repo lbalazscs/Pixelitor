@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.colors.Colors;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.AlphaComposite;
@@ -40,7 +41,7 @@ public enum CopyBrushType {
         @Override
         public void beforeDrawImage(Graphics2D g) {
             // important in the areas where there is no source defined
-            ImageUtils.fillWithTransparentRectangle(g, (int) size);
+            Colors.fillWithTransparent(g, (int) size);
         }
 
         @Override
@@ -60,7 +61,7 @@ public enum CopyBrushType {
         @Override
         public void beforeDrawImage(Graphics2D g) {
             // important in the areas where there is no source defined
-            ImageUtils.fillWithTransparentRectangle(g, (int) size);
+            Colors.fillWithTransparent(g, (int) size);
 
             g.setClip(circleClip);
         }

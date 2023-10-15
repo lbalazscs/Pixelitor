@@ -68,8 +68,7 @@ public abstract class Transition2DInstruction {
             Transition2DInstruction i = transition2DInstruction;
 
             //check #1: if it's a shape instruction: are its elements visible?
-            if (i instanceof ShapeInstruction) {
-                ShapeInstruction i2 = (ShapeInstruction) i;
+            if (i instanceof ShapeInstruction i2) {
                 if ((i2.fillColor == null || i2.fillColor.getAlpha() < 5) &&
                         (i2.strokeColor == null || i2.strokeWidth == 0 || i2.strokeColor.getAlpha() < 5)) {
                     //this instruction is invisible:
@@ -78,8 +77,7 @@ public abstract class Transition2DInstruction {
             }
 
             //check #2: if it's a translucent image: is it visible?
-            if (i instanceof ImageInstruction) {
-                ImageInstruction i2 = (ImageInstruction) i;
+            if (i instanceof ImageInstruction i2) {
                 if (i2.opacity < 0.05f) {
                     //this instruction is invisible:
                     i = null;
@@ -92,8 +90,7 @@ public abstract class Transition2DInstruction {
             //However, to save time (against the infamously slow Area class), we'll
             //break this into a couple of different checks:
             Shape instructionShape = null;
-            if (i instanceof ImageInstruction) {
-                ImageInstruction i2 = (ImageInstruction) i;
+            if (i instanceof ImageInstruction i2) {
                 instructionShape = i2.clipping;
 
                 //this is a special case, indicating that there is no clipping,
@@ -102,8 +99,7 @@ public abstract class Transition2DInstruction {
                     v.add(i);
                     break;
                 }
-            } else if (i instanceof ShapeInstruction) {
-                ShapeInstruction i2 = (ShapeInstruction) i;
+            } else if (i instanceof ShapeInstruction i2) {
                 instructionShape = i2.shape;
             }
             if (instructionShape != null) {

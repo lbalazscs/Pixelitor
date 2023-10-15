@@ -30,7 +30,8 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 
 import static java.awt.Color.BLACK;
@@ -147,16 +148,15 @@ public class FgBgColorSelector extends JLayeredPane {
 
         popup.addSeparator();
 
-        Colors.setupCopyColorPopupMenu(popup,
-            () -> fg ? getFgColor() : getBgColor());
+        popup.add(Colors.createCopyColorAction(() -> fg ? getFgColor() : getBgColor()));
 
-        Colors.setupPasteColorPopupMenu(popup, pw, color -> {
+        popup.add(Colors.createPasteColorAction(pw, color -> {
             if (fg) {
                 setFgColor(color, true);
             } else {
                 setBgColor(color, true);
             }
-        });
+        }));
 
         return popup;
     }

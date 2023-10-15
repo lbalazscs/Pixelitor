@@ -115,7 +115,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
     /**
      * Replaces the matrix with its adjoint.
      */
-    private final void makeAdjoint() {
+    private void makeAdjoint() {
         double m00p = m11 * m22 - m12 * m21;
         double m01p = m12 * m20 - m10 * m22; // flipped sign
         double m02p = m10 * m21 - m11 * m20;
@@ -142,7 +142,7 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
      * Scales the matrix elements so m22 is equal to 1.0.
      * m22 must not be equal to 0.
      */
-    private final void normalize() {
+    private void normalize() {
         double invscale = 1.0 / m22;
         m00 *= invscale;
         m01 *= invscale;
@@ -155,11 +155,11 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
         m22 = 1.0;
     }
 
-    private static final void getSquareToQuad(double x0, double y0,
-                                              double x1, double y1,
-                                              double x2, double y2,
-                                              double x3, double y3,
-                                              PerspectiveTransform tx) {
+    private static void getSquareToQuad(double x0, double y0,
+                                        double x1, double y1,
+                                        double x2, double y2,
+                                        double x3, double y3,
+                                        PerspectiveTransform tx) {
         double dx3 = x0 - x1 + x2 - x3;
         double dy3 = y0 - y1 + y2 - y3;
 
