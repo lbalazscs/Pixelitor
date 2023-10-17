@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ import static pixelitor.utils.Texts.i18n;
 public final class SelectionActions {
     private static Shape copiedSelShape = null;
 
-    private static final Action crop = new PAction("Crop Selection",
+    private static final Action crop = new PAction(i18n("crop_selection"),
         Crop::selectionCropActiveComp);
 
     private static final Action deselect = new PAction(i18n("deselect"), () ->

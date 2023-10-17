@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 
@@ -33,7 +34,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARE
  * Crystallize filter based on the JHLabs CrystallizeFilter
  */
 public class JHCrystallize extends ParametrizedFilter {
-    public static final String NAME = "Crystallize";
+    public static final String NAME = Texts.i18n("crystallize");
 
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);
     private final RangeParam size = new RangeParam("Size", 1, 20, 200);

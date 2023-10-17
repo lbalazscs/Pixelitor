@@ -23,6 +23,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 
@@ -33,7 +34,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARE
  * Pointillize filter based on the JHLabs PointillizeFilter
  */
 public class JHPointillize extends ParametrizedFilter {
-    public static final String NAME = "Pointillize";
+    public static final String NAME = Texts.i18n("pointillize");
 
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,8 +116,8 @@ public class EnlargeCanvas extends SimpleCompAction {
             + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
     }
 
-    public static Action getAction() {
-        return new OpenViewEnabledAction("Enlarge Canvas...",
+    public static Action getAction(String name) {
+        return new OpenViewEnabledAction(name + "...",
             EnlargeCanvas::showInDialog);
     }
 

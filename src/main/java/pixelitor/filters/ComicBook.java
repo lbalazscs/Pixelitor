@@ -21,12 +21,13 @@ import com.jhlabs.image.BoxBlurFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Texts;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class ComicBook extends ParametrizedFilter {
-    public static final String NAME = "Comic Book";
+    public static final String NAME = Texts.i18n("comic_book");
 
     private final RangeParam stepsParam = new RangeParam("Color Steps", 1, 4, 20);
     private final RangeParam detailParam = new RangeParam("Detail", 1, 90, 100);

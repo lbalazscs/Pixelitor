@@ -159,13 +159,13 @@ public class OptimizedJpegSavePanel extends JPanel {
             progressiveCB.isSelected());
     }
 
-    public static void showInDialog(BufferedImage image) {
+    public static void showInDialog(BufferedImage image, String title) {
         var rgbImage = ImageUtils.convertToRGB(image, false);
         var savePanel = new OptimizedJpegSavePanel(rgbImage);
 
         new DialogBuilder()
             .content(savePanel)
-            .title("Save Optimized JPEG")
+            .title(title)
             .okText("Save")
             .okAction(() -> IO.saveJpegWithQuality(savePanel.getSettings()))
             .show();

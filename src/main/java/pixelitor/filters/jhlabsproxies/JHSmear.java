@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 
@@ -32,7 +33,7 @@ import static pixelitor.gui.GUIText.OPACITY;
  * Smear filter based on the JHLabs SmearFilter
  */
 public class JHSmear extends ParametrizedFilter {
-    public static final String NAME = "Smear";
+    public static final String NAME = Texts.i18n("smear");
 
     private final RangeParam distance = new RangeParam("Distance", 0, 15, 100);
     private final RangeParam density = new RangeParam("Density (%)", 0, 50, 100);

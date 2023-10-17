@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 
@@ -36,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Oil Painting filter based on the JHLabs OilFilter
  */
 public class JHOilPainting extends ParametrizedFilter {
-    public static final String NAME = "Oil Painting";
+    public static final String NAME = Texts.i18n("oil_painting");
 
     private static final int FASTER = 0;
     private static final int BETTER = 1;

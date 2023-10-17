@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
 
@@ -32,7 +33,7 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  * Emboss filter based on the JHLabs EmbossFilter
  */
 public class JHEmboss extends ParametrizedFilter {
-    public static final String NAME = "Emboss";
+    public static final String NAME = Texts.i18n("emboss");
 
     private final AngleParam lightDirection = new AngleParam(
         "Light Direction (Azimuth)", 0);

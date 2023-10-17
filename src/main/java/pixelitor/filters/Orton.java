@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.Texts;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -30,7 +31,7 @@ import java.awt.image.BufferedImage;
  * Orton effect - based on http://pcin.net/update/2006/11/01/the-orton-effect-digital-photography-tip-of-the-week/
  */
 public class Orton extends ParametrizedFilter {
-    public static final String NAME = "Orton Effect";
+    public static final String NAME = Texts.i18n("orton_effect");
 
     private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 3, 10);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 100, 100);

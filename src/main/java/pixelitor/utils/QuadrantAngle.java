@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
  * A rotation by a given number of quadrants.
  */
 public enum QuadrantAngle {
-    ANGLE_90(90, "90° CW") {
+    ANGLE_90(90, "rotate_90") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
             // switch width and height
@@ -52,7 +52,7 @@ public enum QuadrantAngle {
 
             return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
         }
-    }, ANGLE_180(180, "180°") {
+    }, ANGLE_180(180, "rotate_180") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
             // do nothing
@@ -74,7 +74,7 @@ public enum QuadrantAngle {
 
             return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
         }
-    }, ANGLE_270(270, "90° CCW") {
+    }, ANGLE_270(270, "rotate_270") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
             // same as for 90
@@ -101,12 +101,10 @@ public enum QuadrantAngle {
 
     private final int angleDegree;
     private final String guiName;
-    private final String asString;
 
-    QuadrantAngle(int angleDegree, String asString) {
+    QuadrantAngle(int angleDegree, String guiKey) {
         this.angleDegree = angleDegree;
-        this.guiName = "Rotate " + asString;
-        this.asString = asString;
+        this.guiName = Texts.i18n(guiKey);
     }
 
     public String getGUIName() {
@@ -138,7 +136,7 @@ public enum QuadrantAngle {
     }
 
     public String asString() {
-        return asString;
+        return angleDegree + "°";
     }
 
     /**

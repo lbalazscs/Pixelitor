@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
+import pixelitor.utils.Texts;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -32,7 +33,7 @@ public class Flip extends SimpleCompAction {
     private final Flip.Direction direction;
 
     public Flip(Direction dir) {
-        super(dir.getName(), false);
+        super(dir.getGUIName(), false);
         direction = dir;
     }
 
@@ -44,7 +45,7 @@ public class Flip extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return direction.getName();
+        return direction.getGUIName();
     }
 
     @Override
@@ -71,12 +72,7 @@ public class Flip extends SimpleCompAction {
      * The direction of the flip
      */
     public enum Direction {
-        HORIZONTAL {
-            @Override
-            public String getName() {
-                return "Flip Horizontal";
-            }
-
+        HORIZONTAL("flip_horizontal") {
             @Override
             public String getStatusBarMessage() {
                 return "The image was flipped horizontally";
@@ -97,12 +93,7 @@ public class Flip extends SimpleCompAction {
                 at.scale(-1, 1);
                 return at;
             }
-        }, VERTICAL {
-            @Override
-            public String getName() {
-                return "Flip Vertical";
-            }
-
+        }, VERTICAL("flip_vertical") {
             @Override
             public String getStatusBarMessage() {
                 return "The image was flipped vertically";
@@ -125,7 +116,17 @@ public class Flip extends SimpleCompAction {
             }
         };
 
-        public abstract String getName();
+        private final String guiName;
+
+        Direction(String guiKey) {
+            this.guiName = Texts.i18n(guiKey);
+        }
+
+        public String getGUIName() {
+            return guiName;
+        }
+
+        ;
 
         public abstract String getStatusBarMessage();
 

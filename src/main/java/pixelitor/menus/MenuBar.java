@@ -137,9 +137,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.add(new OpenViewEnabledAction(texts.getString("save_as") + "...",
             comp -> IO.save(comp, true)), CTRL_SHIFT_S);
 
+        String exportOptimizedName = texts.getString("export_optimized_jpeg");
         fileMenu.add(new OpenViewEnabledAction(
-            texts.getString("export_optimized_jpeg") + "...",
-            comp -> OptimizedJpegSavePanel.showInDialog(comp.getCompositeImage())));
+            exportOptimizedName + "...",
+            comp -> OptimizedJpegSavePanel.showInDialog(comp.getCompositeImage(), exportOptimizedName)));
 
         fileMenu.add(createImageMagickSubmenu());
 
@@ -163,8 +164,9 @@ public class MenuBar extends JMenuBar {
             texts.getString("reload"),
             comp -> comp.getView().reloadAsync()), F12);
 
+        String showMetaDataName = texts.getString("show_metadata");
         fileMenu.add(new OpenViewEnabledAction(
-            texts.getString("show_metadata") + "...",
+            showMetaDataName + "...",
             MetaDataPanel::showInDialog));
 
         fileMenu.addSeparator();
@@ -207,14 +209,16 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu automateMenu = new PMenu(texts.getString("automate"));
 
+        String batchResizeName = texts.getString("batch_resize");
         automateMenu.add(new PAction(
-            texts.getString("batch_resize") + "...",
-            BatchResize::showDialog));
+            batchResizeName + "...",
+            () -> BatchResize.showDialog(batchResizeName)));
 
-        automateMenu.add(new DrawableAction(texts.getString("batch_filter")) {
+        String batchFilterName = texts.getString("batch_filter");
+        automateMenu.add(new DrawableAction(batchFilterName) {
             @Override
             protected void process(Drawable dr) {
-                new BatchFilterWizard(dr).showDialog(pw);
+                new BatchFilterWizard(dr, batchFilterName).showDialog(pw);
             }
         });
 
@@ -264,8 +268,9 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // preferences
-        String prefsMenuName = texts.getString("preferences") + "...";
-        editMenu.add(new PAction(prefsMenuName, PreferencesPanel::showInDialog));
+        String prefsName = texts.getString("preferences");
+        editMenu.add(new PAction(prefsName + "...",
+            PreferencesPanel::showInDialog));
 
         return editMenu;
     }
@@ -643,15 +648,18 @@ public class MenuBar extends JMenuBar {
         // selection crop
         imageMenu.add(SelectionActions.getCrop());
 
-        imageMenu.add(new OpenViewEnabledAction("Crop to Content", Crop::contentCrop));
+        String cropToContentName = texts.getString("crop_to_content");
+        imageMenu.add(new OpenViewEnabledAction(cropToContentName, Crop::contentCrop));
 
         imageMenu.addSeparator();
 
         // resize
-        imageMenu.add(new OpenViewEnabledAction("Resize...",
-            ResizePanel::showInDialog), CTRL_ALT_I);
+        String resizeName = texts.getString("resize");
+        imageMenu.add(new OpenViewEnabledAction(resizeName + "...",
+            comp -> ResizePanel.showInDialog(comp, resizeName)), CTRL_ALT_I);
 
-        imageMenu.add(new OpenViewEnabledAction("Duplicate",
+        String duplicateName = texts.getString("duplicate");
+        imageMenu.add(new OpenViewEnabledAction(duplicateName,
             comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true))));
 
         if (GUIMode.enableImageMode) {
@@ -660,7 +668,7 @@ public class MenuBar extends JMenuBar {
 
         imageMenu.addSeparator();
 
-        imageMenu.add(EnlargeCanvas.getAction());
+        imageMenu.add(EnlargeCanvas.getAction(texts.getString("enlarge_canvas")));
 
         var fitCanvasToLayers = new OpenViewEnabledAction(
             texts.getString("fit_canvas_to_layers"),
@@ -669,7 +677,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.add(fitCanvasToLayers);
 
         imageMenu.add(new OpenViewEnabledAction(
-            "Layer to Canvas Size",
+            texts.getString("layer_to_canvas_size"),
             Composition::activeLayerToCanvasSize));
 
         imageMenu.addSeparator();
@@ -791,9 +799,10 @@ public class MenuBar extends JMenuBar {
     private static JMenu createFilterMenu(ResourceBundle texts) {
         PMenu filterMenu = new PMenu(texts.getString("filter"), 'T');
 
-        filterMenu.add(new OpenViewEnabledAction("Find Filter...",
+        String findFilterName = texts.getString("find_filter");
+        filterMenu.add(new OpenViewEnabledAction(findFilterName + "...",
             comp -> {
-                FilterAction action = FilterSearchPanel.showInDialog("Find Filter");
+                FilterAction action = FilterSearchPanel.showInDialog(findFilterName);
                 if (action != null) {
                     action.actionPerformed(null);
                 }
@@ -833,13 +842,13 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHStamp.NAME, JHStamp::new);
         sub.addFilter(JHWeave.NAME, JHWeave::new);
 
-        sub.add(createHalftoneSubmenu());
+        sub.add(createHalftoneSubmenu(texts));
 
         return sub;
     }
 
-    private static JMenu createHalftoneSubmenu() {
-        PMenu sub = new PMenu("Halftone");
+    private static JMenu createHalftoneSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("halftone"));
 
         sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
         sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);

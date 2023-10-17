@@ -342,11 +342,11 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return newHeight;
     }
 
-    public static void showInDialog(Composition comp) {
+    public static void showInDialog(Composition comp, String dialogTitle) {
         ResizePanel p = new ResizePanel(comp.getCanvas());
         new DialogBuilder()
             .validatedContent(p)
-            .title("Resize")
+            .title(dialogTitle)
             .menuBar(new DialogMenuBar(p))
             .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight()).process(comp))
             .show();

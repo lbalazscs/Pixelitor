@@ -19,7 +19,6 @@ package pixelitor.automate;
 
 import pixelitor.compactions.CompAction;
 import pixelitor.filters.Filter;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Drawable;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,8 +32,8 @@ import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 public class BatchFilterWizard extends Wizard {
     private Filter filter;
 
-    public BatchFilterWizard(Drawable dr) {
-        super(SELECT_FILTER_AND_DIRS, "Batch Filter",
+    public BatchFilterWizard(Drawable dr, String title) {
+        super(SELECT_FILTER_AND_DIRS, title,
             "Start Processing", 490, 500, dr);
     }
 

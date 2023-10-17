@@ -35,11 +35,11 @@ public class BatchResize {
     private BatchResize() { // do not instantiate
     }
 
-    public static void showDialog() {
+    public static void showDialog(String dialogTitle) {
         var batchResizePanel = new BatchResizePanel();
         new DialogBuilder()
             .validatedContent(batchResizePanel)
-            .title("Batch Resize")
+            .title(dialogTitle)
             .okAction(() -> dialogAccepted(batchResizePanel))
             .show();
     }
