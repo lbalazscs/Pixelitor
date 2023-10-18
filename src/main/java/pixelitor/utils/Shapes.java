@@ -19,8 +19,10 @@ package pixelitor.utils;
 
 import com.bric.geom.RectangularTransform;
 import com.jhlabs.image.ImageMath;
+import net.jafama.FastMath;
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.Composition;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
@@ -36,7 +38,11 @@ import java.util.Random;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.geom.PathIterator.*;
+import static java.lang.Math.PI;
 import static java.lang.String.format;
+import static net.jafama.FastMath.atan2;
+import static net.jafama.FastMath.cos;
+import static net.jafama.FastMath.sin;
 
 /**
  * Static shape-related utility methods
@@ -131,16 +137,16 @@ public class Shapes {
                                           double endX, double endY) {
         drawVisibly(g, new Line2D.Double(startX, startY, endX, endY));
 
-        double angle = Math.atan2(endY - startY, endX - startX);
+        double angle = atan2(endY - startY, endX - startX);
 
         double backAngle1 = 2.8797926 + angle;
         double backAngle2 = 3.4033926 + angle;
         int arrowRadius = 20;
 
-        double arrowEnd1X = endX + arrowRadius * Math.cos(backAngle1);
-        double arrowEnd1Y = endY + arrowRadius * Math.sin(backAngle1);
-        double arrowEnd2X = endX + arrowRadius * Math.cos(backAngle2);
-        double arrowEnd2Y = endY + arrowRadius * Math.sin(backAngle2);
+        double arrowEnd1X = endX + arrowRadius * cos(backAngle1);
+        double arrowEnd1Y = endY + arrowRadius * sin(backAngle1);
+        double arrowEnd2X = endX + arrowRadius * cos(backAngle2);
+        double arrowEnd2Y = endY + arrowRadius * sin(backAngle2);
 
         Path2D arrowHead = new Path2D.Double();
         arrowHead.moveTo(endX, endY);
@@ -500,20 +506,20 @@ public class Shapes {
     }
 
     public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius, double tuning) {
-        double angleIncrement = Math.PI * 2 / n;
-        double maxRadius = radius / Math.cos(angleIncrement / 2);
-        double angle = 3 * Math.PI / 2;
+        double angleIncrement = PI * 2 / n;
+        double maxRadius = radius / cos(angleIncrement / 2);
+        double angle = 3 * PI / 2;
         if (n % 2 == 0) {
             angle += angleIncrement / 2;
         }
         Path2D path = new Path2D.Double();
-        double prevX = cx + maxRadius * Math.cos(angle);
-        double prevY = cy + maxRadius * Math.sin(angle);
+        double prevX = cx + maxRadius * cos(angle);
+        double prevY = cy + maxRadius * sin(angle);
         path.moveTo(prevX, prevY);
         for (int i = 0; i < n; i++) {
             angle += angleIncrement;
-            double nextX = cx + maxRadius * Math.cos(angle);
-            double nextY = cy + maxRadius * Math.sin(angle);
+            double nextX = cx + maxRadius * cos(angle);
+            double nextY = cy + maxRadius * sin(angle);
             if (tuning == 0) {
                 path.lineTo(nextX, nextY);
             } else {
@@ -529,22 +535,22 @@ public class Shapes {
     }
 
     public static Shape createFlower(int n, double cx, double cy, double radius, double width) {
-        double angleIncrement = Math.PI * 2 / n;
+        double angleIncrement = PI * 2 / n;
         // 0.45 instead of 0.5 so that the distant radius never goes to infinity
         double halfAngleIncrement = angleIncrement * (0.5 + width * 0.45);
-        double angle = -Math.PI / 2;
-        double distantRadius = radius / Math.cos(halfAngleIncrement);
+        double angle = -PI / 2;
+        double distantRadius = radius / cos(halfAngleIncrement);
 
         Path2D path = new Path2D.Double();
         for (int i = 0; i < n; i++) {
             path.moveTo(cx, cy);
 
-            double p2X = cx + radius * Math.cos(angle);
-            double p2Y = cy + radius * Math.sin(angle);
+            double p2X = cx + radius * cos(angle);
+            double p2Y = cy + radius * sin(angle);
 
             double startAngle = angle - halfAngleIncrement;
-            double cp2X = cx + distantRadius * Math.cos(startAngle);
-            double cp2Y = cy + distantRadius * Math.sin(startAngle);
+            double cp2X = cx + distantRadius * cos(startAngle);
+            double cp2Y = cy + distantRadius * sin(startAngle);
 
             // p2 is exactly halfway between cp2 and cp3
             double cp3X = p2X + (p2X - cp2X);
@@ -589,6 +595,48 @@ public class Shapes {
     public static Shape createCircle(double cx, double cy, double radius) {
         double diameter = 2 * radius;
         return new Ellipse2D.Double(cx - radius, cy - radius, diameter, diameter);
+    }
+
+    /**
+     * Create a Bezier path approximating a circle with the given number of control points.
+     * Useful if the circle will be distorted in a nonlinear way.
+     */
+    public static Shape createCircle(double cx, double cy, double radius, int numPoints) {
+        // Math at https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
+        Path2D path = new Path2D.Double();
+        double angle = 0;
+        double angleIncrement = 2 * PI / numPoints;
+        double handleLength = 4 * radius * FastMath.tan(PI / (2 * numPoints)) / 3;
+        Point2D[] points = new Point2D[numPoints];
+        Point2D[] forwardControls = new Point2D[numPoints];
+        Point2D[] backwardControls = new Point2D[numPoints];
+
+        for (int i = 0; i < numPoints; i++) {
+            double cos = cos(angle);
+            double sin = sin(angle);
+            double x = cx + radius * cos;
+            double y = cy + radius * sin;
+            angle += angleIncrement;
+            points[i] = new Point2D.Double(x, y);
+            double handleX = handleLength * sin;
+            double handleY = handleLength * cos;
+            forwardControls[i] = new Point2D.Double(x - handleX, y + handleY);
+            backwardControls[i] = new Point2D.Double(x + handleX, y - handleY);
+        }
+
+        for (int i = 0; i < numPoints + 1; i++) {
+            Point2D p = i == numPoints ? points[0] : points[i];
+            if (i == 0) {
+                path.moveTo(p.getX(), p.getY());
+            } else {
+                Point2D cp1 = forwardControls[i - 1];
+                Point2D cp2 = i == numPoints ? backwardControls[0] : backwardControls[i];
+                path.curveTo(cp1.getX(), cp1.getY(), cp2.getX(), cp2.getY(), p.getX(), p.getY());
+            }
+        }
+
+        path.closePath();
+        return path;
     }
 
     /**
@@ -1990,5 +2038,210 @@ public class Shapes {
 
         AffineTransform at = RectangularTransform.create(bounds, targetArea);
         return at.createTransformedShape(shape);
+    }
+
+    public static List<Point2D> getAnchorPoints(Shape shape) {
+        List<Point2D> points = new ArrayList<>();
+        double[] coords = new double[6];
+
+        for (PathIterator it = shape.getPathIterator(null); !it.isDone(); it.next()) {
+            int type = it.currentSegment(coords);
+            switch (type) {
+                case SEG_MOVETO, SEG_LINETO:
+                    points.add(new Point2D.Double(coords[0], coords[1]));
+                    break;
+                case SEG_QUADTO:
+                    points.add(new Point2D.Double(coords[2], coords[3]));
+                    break;
+                case SEG_CUBICTO:
+                    points.add(new Point2D.Double(coords[4], coords[5]));
+                    break;
+                case SEG_CLOSE:
+                    break;
+            }
+        }
+        return points;
+    }
+
+    /**
+     * Transforms the given {@link Shape} into another
+     * {@link Shape} using the given {@link PointMapper}.
+     */
+    public static Shape transformShape(Shape shape, PointMapper mapper) {
+        Path2D transformedShape = new Path2D.Double();
+        double[] coords = new double[6];
+        Point2D target;
+        Point2D cp1;
+        Point2D cp2;
+        for (PathIterator it = shape.getPathIterator(null); !it.isDone(); it.next()) {
+            int type = it.currentSegment(coords);
+            switch (type) {
+                case SEG_MOVETO:
+                    target = mapper.map(coords[0], coords[1]);
+                    transformedShape.moveTo(target.getX(), target.getY());
+                    break;
+                case SEG_LINETO:
+                    target = mapper.map(coords[0], coords[1]);
+                    transformedShape.lineTo(target.getX(), target.getY());
+                    break;
+                case SEG_QUADTO:
+                    cp1 = mapper.map(coords[0], coords[1]);
+                    target = mapper.map(coords[2], coords[3]);
+                    transformedShape.quadTo(cp1.getX(), cp1.getY(),
+                        target.getX(), target.getY());
+                    break;
+                case SEG_CUBICTO:
+                    cp1 = mapper.map(coords[0], coords[1]);
+                    cp2 = mapper.map(coords[2], coords[3]);
+                    target = mapper.map(coords[4], coords[5]);
+                    transformedShape.curveTo(cp1.getX(), cp1.getY(),
+                        cp2.getX(), cp2.getY(),
+                        target.getX(), target.getY());
+                    break;
+                case SEG_CLOSE:
+                    transformedShape.closePath();
+                    break;
+            }
+        }
+        return transformedShape;
+    }
+
+    /**
+     * Maps the given point into another point.
+     */
+    public interface PointMapper {
+        Point2D map(double x, double y);
+    }
+
+    public enum NonlinTransform {
+        NONE("None", false) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+                throw new UnsupportedOperationException();
+            }
+        }, INVERT("Circle Inversion", true) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+                double circleRadius2 = (width * width + height * height) / 20.0;
+                double tuningEffect = tuning * width / 500.0;
+                return (x, y) -> {
+                    x -= tuningEffect;
+                    double r = center.distance(x, y);
+                    double cx = center.getX();
+                    double cy = center.getY();
+                    double theta = atan2(y - cy, x - cx);
+                    double invertedR;
+                    if (r > 1) { // the normal case
+                        invertedR = circleRadius2 / r;
+                    } else {
+                        // points that are too far away can cause problems with
+                        // some strokes, not not mention the infinitely distant points.
+                        invertedR = circleRadius2;
+                    }
+
+                    // inverted point: same angle, but r => circleRadius2/r distance
+                    double newX = cx + invertedR * cos(theta);
+                    double newY = cy + invertedR * sin(theta);
+                    return new Point2D.Double(newX, newY);
+                };
+            }
+        }, SWIRL("Swirl", true) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+                return (x, y) -> {
+                    double r = center.distance(x, y);
+                    double cx = center.getX();
+                    double cy = center.getY();
+                    double angle = atan2(y - cy, x - cx);
+
+                    double newAngle = angle + tuning * r / 20_000;
+
+                    double newX = cx + r * cos(newAngle);
+                    double newY = cy + r * sin(newAngle);
+                    return new Point2D.Double(newX, newY);
+                };
+            }
+        }, BULGE("Pinch-Bulge", true) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+                double maxR = Math.sqrt(width * width + height * height) / 2.0;
+                return (x, y) -> {
+                    double r = center.distance(x, y) / maxR;
+                    double cx = center.getX();
+                    double cy = center.getY();
+                    double theta = atan2(y - cy, x - cx);
+
+                    double newRadius = maxR * Math.pow(r, -tuning / 100 + 1);
+
+                    double newX = cx + newRadius * cos(theta);
+                    double newY = cy + newRadius * sin(theta);
+                    return new Point2D.Double(newX, newY);
+                };
+            }
+        }, RECT_TO_POLAR("Rectangular to Polar", false) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+//                double maxR = Math.sqrt(width * width + height * height) / 2.0;
+                double maxR = Math.min(width, height) / 2.0;
+                return (x, y) -> {
+                    double r = x * maxR / width;
+                    double theta = y * 2 * PI / height;
+
+                    double newX = center.getX() + r * cos(theta);
+                    double newY = center.getY() + r * sin(theta);
+                    return new Point2D.Double(newX, newY);
+                };
+            }
+        }, POLAR_TO_RECT("Polar to Rectangular", true) {
+            @Override
+            public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
+                double maxR = Math.sqrt(width * width + height * height) / 2.0;
+                return (x, y) -> {
+                    double r = center.distance(x, y) / maxR;
+                    double cx = center.getX();
+                    double cy = center.getY();
+
+                    // atan2 is in the range -pi..pi, theta will be 0..2*pi
+                    double theta = atan2(y - cy, x - cx) + PI;
+
+                    // in the range 0..1
+                    double normalizedTheta = theta / (2 * PI);
+                    normalizedTheta += tuning / 100.0;
+                    if (normalizedTheta > 1) {
+                        normalizedTheta -= 1;
+                    } else if (normalizedTheta < 0) {
+                        normalizedTheta += 1;
+                    }
+
+                    double newX = normalizedTheta * width;
+                    double newY = r * height;
+
+                    return new Point2D.Double(newX, newY);
+                };
+            }
+        };
+
+        private final String guiName;
+        private final boolean hasTuning;
+
+        NonlinTransform(String guiName, boolean hasTuning) {
+            this.guiName = guiName;
+            this.hasTuning = hasTuning;
+        }
+
+        public abstract PointMapper createMapper(Point2D center, double tuning, int width, int height);
+
+        public static EnumParam<NonlinTransform> asParam() {
+            return new EnumParam<>("Nonlinear Transform", NonlinTransform.class);
+        }
+
+        public boolean hasTuning() {
+            return hasTuning;
+        }
+
+        @Override
+        public String toString() {
+            return guiName;
+        }
     }
 }

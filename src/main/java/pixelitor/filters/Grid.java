@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.geom.Path2D;
 /**
  * The "Render/Shapes/Grid" filter
  */
-public class Grid extends ShapeFilter {
+public class Grid extends CurveFilter {
     public static final String NAME = "Grid";
 
     private static final int TYPE_RECTANGLE = 0;
@@ -45,26 +45,26 @@ public class Grid extends ShapeFilter {
         new Item("Dragon Scales", TYPE_DRAGON_SCALE)
     });
     private final GroupedRangeParam divisions = new GroupedRangeParam(
-        "Divisions", 1, 4, 49, false);
+        "Divisions", 1, 12, 49, false);
 
     public Grid() {
         addParamsToFront(type, divisions);
     }
 
     @Override
-    protected Path2D createShape(int width, int height) {
+    protected Path2D createCurve(int width, int height) {
         return switch (type.getValue()) {
-            case TYPE_RECTANGLE -> createRectangularGrid(width, height);
-            case TYPE_HEXAGON -> createHexagonalGrid(width, height);
-            case TYPE_TRIANGLE -> createTriangularGrid(width, height, false);
-            case TYPE_DIAMOND -> createTriangularGrid(width, height, true);
-            case TYPE_FISH_SCALE -> createScalesGrid(width, height, false);
-            case TYPE_DRAGON_SCALE -> createScalesGrid(width, height, true);
+            case TYPE_RECTANGLE -> createRectangles(width, height);
+            case TYPE_HEXAGON -> createHexagons(width, height);
+            case TYPE_TRIANGLE -> createTriangles(width, height, false);
+            case TYPE_DIAMOND -> createTriangles(width, height, true);
+            case TYPE_FISH_SCALE -> createScales(width, height, false);
+            case TYPE_DRAGON_SCALE -> createScales(width, height, true);
             default -> throw new IllegalStateException("Unexpected value: " + type.getValue());
         };
     }
 
-    private Path2D createTriangularGrid(int width, int height, boolean diamond) {
+    private Path2D createTriangles(int width, int height, boolean diamond) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);
@@ -90,24 +90,29 @@ public class Grid extends ShapeFilter {
         // ^ ^
         double cellInterval = cellW / 2;
 
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-
-        int horSeg = (int) (horShift / cellW);
-        int verSeg = (int) (verShift / (2 * cellH));
-
-        for (int i = -2 - horSeg; i < horDiv - horSeg + 1; i++) {
-            for (int j = -2 * (verSeg + 1); j < verDiv - 2 * (verSeg - 2); j += 2) {
+        for (int i = -1; i < horDiv + 1; i++) {
+            for (int j = 0; j < verDiv + 2; j += 2) {
                 baselessTriangle(shape, i * cellW, j * cellH, cellW, cellH);
                 baselessTriangle(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH);
             }
         }
 
-        // _ lines
+        // horizontal lines
         if (!diamond) {
-            verSeg *= 2;
-            for (int i = -verSeg - 1; i < verDiv - verSeg + 2; i++) {
-                line(shape, -horShift, i * cellH, width - horShift, i * cellH);
+            for (int i = 0; i <= verDiv; i++) {
+                double x = 0;
+                if (i % 2 != 0) {
+                    x -= cellInterval;
+                }
+
+                shape.moveTo(x, i * cellH);
+
+                // draw the line as multiple segments
+                double lineY = i * cellH;
+                for (int j = 0; j < horDiv + 1; j++) {
+                    x += cellW;
+                    shape.lineTo(x, lineY);
+                }
             }
         }
 
@@ -120,7 +125,7 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x + width, y);
     }
 
-    private Path2D createRectangularGrid(int width, int height) {
+    private Path2D createRectangles(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         // Here one cell is defined as the smallest
@@ -132,38 +137,36 @@ public class Grid extends ShapeFilter {
         double cellW = width / (double) horDiv;
         double cellH = height / (double) verDiv;
 
-        // Number of extra segments (lines) to be drawn
-        // in order to cope up with transform shifts.
-        // In extrema case, we draw just enough segments
-        // to fill up 50% of view [height/width] from one side
-        // while not drawing those from the other side as
-        // they'll be placed outside.
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-        int horSeg = (int) (horShift / cellW);
-        int verSeg = (int) (verShift / cellH);
-
-        // horizontal _ lines
-        for (int i = -verSeg; i < verDiv - verSeg + 1; i++) {
+        // horizontal lines
+        for (int i = 0; i < verDiv + 1; i++) {
             double lineY = i * cellH;
-            line(shape, -horShift, lineY, width - horShift, lineY);
+            double x = 0;
+            shape.moveTo(x, lineY);
+            // draw the line as multiple segments
+            for (int j = 0; j < horDiv; j++) {
+                x += cellW;
+                shape.lineTo(x, lineY);
+            }
         }
 
-        // vertical | lines
-        for (int i = -horSeg; i < horDiv - horSeg + 1; i++) {
+        // vertical lines
+        for (int i = 0; i < horDiv + 1; i++) {
             double lineX = i * cellW;
-            line(shape, lineX, -verShift, lineX, height - verShift);
+            double y = 0;
+            shape.moveTo(lineX, y);
+
+            // draw the line as multiple segments
+            for (int j = 0; j < verDiv; j++) {
+                y += cellH;
+                shape.lineTo(lineX, y);
+            }
+//            shape.lineTo(lineX, height - verShift);
         }
 
         return shape;
     }
 
-    private static void line(Path2D shape, double x, double y, double x2, double y2) {
-        shape.moveTo(x, y);
-        shape.lineTo(x2, y2);
-    }
-
-    private Path2D createHexagonalGrid(int width, int height) {
+    private Path2D createHexagons(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);
@@ -185,13 +188,8 @@ public class Grid extends ShapeFilter {
         // ^  ^
         double cellInterval = cellSpace / 2; // 3/4th of the cellW
 
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-        int horSeg = (int) (horShift / cellW);
-        int verSeg = (int) (verShift / (2 * cellH));
-
-        for (int i = -2 - horSeg; i < horDiv - horSeg + 1; i++) {
-            for (int j = -2 * (verSeg + 1); j < verDiv - 2 * (verSeg - 2); j += 2) {
+        for (int i = -1; i < horDiv; i++) {
+            for (int j = 0; j < verDiv + 2; j += 2) {
                 hexagonTopHalf(shape, i * cellSpace, j * cellH, cellW, cellH);
                 hexagonTopHalf(shape, i * cellSpace + cellInterval, (j + 1) * cellH, cellW, cellH);
             }
@@ -207,7 +205,7 @@ public class Grid extends ShapeFilter {
         shape.lineTo(x + width, y);
     }
 
-    private Path2D createScalesGrid(int width, int height, boolean dragon) {
+    private Path2D createScales(int width, int height, boolean dragon) {
         Path2D shape = new Path2D.Double();
 
         int horDiv = divisions.getValue(0);
@@ -218,16 +216,11 @@ public class Grid extends ShapeFilter {
 
         double cellInterval = cellW / 2;
 
-        double horShift = (center.getRelativeX() - 0.5) * width;
-        double verShift = (center.getRelativeY() - 0.5) * height;
-
-        int horSeg = (int) (horShift / cellW);
-        int verSeg = (int) (verShift / (2 * cellH));
-
-        for (int i = -2 - horSeg; i < horDiv - horSeg + 1; i++) {
-            for (int j = -2 * (verSeg + 1); j < verDiv - 2 * (verSeg - 2); j += 2) {
-                scale(shape, i * cellW, j * cellH, cellW, cellH, dragon);
-                scale(shape, i * cellW + cellInterval, (j + 1) * cellH, cellW, cellH, dragon);
+        for (int i = -1; i < horDiv; i++) {
+            for (int j = 1; j < verDiv; j += 2) {
+                double x = i * cellW;
+                scale(shape, x, j * cellH, cellW, cellH, dragon);
+                scale(shape, x + cellInterval, (j + 1) * cellH, cellW, cellH, dragon);
             }
         }
 

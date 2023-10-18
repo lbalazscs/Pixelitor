@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import static pixelitor.gui.GUIText.ZOOM;
 /**
  * "Spirograph" shape filter
  */
-public class Spirograph extends ShapeFilter {
+public class Spirograph extends CurveFilter {
     public static final String NAME = "Spirograph";
 
     private static final int TYPE_HYPOTROCHOID = 1;
@@ -68,9 +68,7 @@ public class Spirograph extends ShapeFilter {
     }
 
     @Override
-    protected Path2D createShape(int width, int height) {
-        Path2D shape = new Path2D.Double();
-
+    protected Path2D createCurve(int width, int height) {
         double r = radii.getValueAsDouble(0);
         double R = radii.getValueAsDouble(1);
         double d = radii.getValueAsDouble(2);
@@ -100,14 +98,18 @@ public class Spirograph extends ShapeFilter {
         double dt = 0.05;
         double startX = combinedR + d;
         double startY = 0;
-        shape.moveTo(cx + startX, cy + startY);
+
+        double x = cx + startX;
+        double y = cy + startY;
+
+        PathConnector connector = new PathConnector(5000, 20, 0.2);
+        connector.add(x, y);
+
         for (double t = dt; t < maxValue; t += dt) {
-            double x = combinedR * cos(t) + d * cos(combinedR * t / r);
-            double y = combinedR * sin(t) - d * sin(combinedR * t / r);
-
-            shape.lineTo(cx + x, cy + y);
+            x = cx + combinedR * cos(t) + d * cos(combinedR * t / r);
+            y = cy + combinedR * sin(t) - d * sin(combinedR * t / r);
+            connector.add(x, y);
         }
-
-        return shape;
+        return connector.getPath();
     }
 }

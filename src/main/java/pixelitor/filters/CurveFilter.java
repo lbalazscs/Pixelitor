@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import net.jafama.FastMath;
 import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
@@ -26,10 +27,17 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.io.IO;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Shapes.NonlinTransform;
+import pixelitor.utils.Shapes.PointMapper;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -39,11 +47,14 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.utils.Shapes.NonlinTransform.NONE;
 
 /**
- * Abstract superclass for the shape filters
+ * Abstract superclass for the curve filters
  */
-public abstract class ShapeFilter extends ParametrizedFilter {
+public abstract class CurveFilter extends ParametrizedFilter {
+    private static final boolean DEBUG_SHAPE_POINTS = false;
+
     private static final int BG_BLACK = 1;
     private static final int BG_ORIGINAL = 2;
     private static final int BG_TRANSPARENT = 3;
@@ -77,19 +88,23 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
     private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
     protected final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
+    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, true);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
+    private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
+    private final RangeParam nonlinTuning = new RangeParam("Nonlinear Tuning", -100, 0, 100);
 
     private transient Shape exportedShape;
 
-    protected ShapeFilter() {
+    protected CurveFilter() {
         super(false);
+
+        nonlinType.setupEnableOtherIf(nonlinTuning, NonlinTransform::hasTuning);
 
         setParams(
             background,
             foreground,
             waterMark,
-            new DialogParam("Transform", center, rotate, scale),
+            new DialogParam("Transform", nonlinType, nonlinTuning, center, rotate, scale),
             strokeParam,
             effectsParam
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
@@ -125,11 +140,19 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         Stroke stroke = strokeParam.createStroke();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        Shape shape = createShape(srcWidth, srcHeight);
+        Shape shape = createCurve(srcWidth, srcHeight);
         if (shape == null) {
             // can happen, for example with Spirograph at time=0
             g2.dispose();
             return dest;
+        }
+
+        NonlinTransform transform = nonlinType.getSelected();
+        if (transform != NONE) {
+            double amount = nonlinTuning.getValueAsDouble();
+            Point2D mapCenter = center.getAbsolutePoint(src);
+            PointMapper mapper = transform.createMapper(mapCenter, amount, srcWidth, srcHeight);
+            shape = Shapes.transformShape(shape, mapper);
         }
 
         double scaleX = scale.getPercentage(0);
@@ -185,6 +208,14 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
             } else { // the simple case
                 effects.drawOn(g2, shape);
+            }
+        }
+
+        if (DEBUG_SHAPE_POINTS) {
+            List<Point2D> points = Shapes.getAnchorPoints(shape);
+            g2.setColor(Color.RED);
+            for (Point2D point : points) {
+                g2.fill(Shapes.createCircle(point.getX(), point.getY(), 4));
             }
         }
 
@@ -268,7 +299,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         return (float) Math.sqrt(cx * cx + cy * cy);
     }
 
-    protected abstract Shape createShape(int width, int height);
+    protected abstract Shape createCurve(int width, int height);
 
     @Override
     protected boolean createDefaultDestImg() {
@@ -282,5 +313,47 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
     private void exportSVG() {
         IO.saveSVG(exportedShape, strokeParam, getName() + ".svg");
+    }
+
+    /**
+     * Manages and filters 2D points to create a smooth path.
+     */
+    protected static class PathConnector {
+        private final List<Point2D> points;
+
+        private final double angleThreshold;
+        private final double distThreshold;
+
+        double lastX = 0;
+        double lastY = 0;
+        double lastAngle = 0;
+
+        public PathConnector(int capacity, double distThreshold, double angleThreshold) {
+            this.points = new ArrayList<>(capacity);
+            this.angleThreshold = angleThreshold;
+            this.distThreshold = distThreshold;
+        }
+
+        public void add(double x, double y) {
+            double angle = FastMath.atan2(y - lastY, x - lastX);
+            if (Math.abs(lastAngle - angle) > angleThreshold || Math.abs(x - lastX) > distThreshold || Math.abs(y - lastY) > distThreshold) {
+                // this point adds some significant information to the curve
+                points.add(new Point2D.Double(x, y));
+                lastX = x;
+                lastY = y;
+                lastAngle = angle;
+            }
+        }
+
+        public Path2D getPath() {
+            if (points.size() < 3) {
+                return null;
+            }
+            return Shapes.smoothConnect(points);
+        }
+    }
+
+    protected boolean hasNonlinDistort() {
+        return nonlinType.getSelected() != NONE;
     }
 }

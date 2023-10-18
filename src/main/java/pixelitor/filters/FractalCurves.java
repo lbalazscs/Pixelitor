@@ -26,7 +26,7 @@ import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.io.Serial;
 
-public class FractalCurves extends ShapeFilter {
+public class FractalCurves extends CurveFilter {
     public static final String NAME = "Fractal Curves";
 
     @Serial
@@ -231,7 +231,7 @@ public class FractalCurves extends ShapeFilter {
     }
 
     @Override
-    protected Shape createShape(int width, int height) {
+    protected Shape createCurve(int width, int height) {
         double margin = Math.max(10.0, strokeParam.getStrokeWidth() * 2.0);
         int n = iterations.getValue();
 

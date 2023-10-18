@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.geom.Path2D;
 /**
  * A shape filter rendering a spider web.
  */
-public class SpiderWeb extends ShapeFilter {
+public class SpiderWeb extends CurveFilter {
     public static final String NAME = "Spider Web";
 
     private final RangeParam numBranchesParam =
@@ -45,12 +45,13 @@ public class SpiderWeb extends ShapeFilter {
     }
 
     @Override
-    protected Path2D createShape(int width, int height) {
+    protected Path2D createCurve(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
+        int numConnections = numConnectionsParam.getValue();
         int numBranches = numBranchesParam.getValue();
         double radius = Math.min(width / 2.0, height / 2.0);
         double angle = 2 * Math.PI / numBranches;
@@ -65,13 +66,17 @@ public class SpiderWeb extends ShapeFilter {
             double alpha = br * angle;
             cos[br] = FastMath.cos(alpha);
             sin[br] = FastMath.sin(alpha);
-            double x = radius * cos[br] + cx;
-            double y = radius * sin[br] + cy;
-            shape.lineTo(x, y);
+
+            // draw the line as multiple segments
+            for (int conn = 1; conn <= numConnections; conn++) {
+                double connDist = radius * conn / numConnections;
+                double x = connDist * cos[br] + cx;
+                double y = connDist * sin[br] + cy;
+                shape.lineTo(x, y);
+            }
         }
 
         // draw the connections
-        int numConnections = numConnectionsParam.getValue();
         for (int conn = 1; conn <= numConnections; conn++) {
             double connDist = radius * conn / numConnections;
             double startX = 0;

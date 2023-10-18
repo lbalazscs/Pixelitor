@@ -241,6 +241,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return getValue() == 0;
     }
 
+    public boolean isMaximum() {
+        return getValue() == maxValue;
+    }
+
     public float getValueAsFloat() {
         return (float) value;
     }

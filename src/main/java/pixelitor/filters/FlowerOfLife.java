@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * "Flower of Life" shape filter
  */
-public class FlowerOfLife extends ShapeFilter {
+public class FlowerOfLife extends CurveFilter {
     public static final String NAME = "Flower of Life";
 
     private static final int GRID_TYPE_TRIANGULAR = 1;
@@ -57,7 +57,7 @@ public class FlowerOfLife extends ShapeFilter {
     }
 
     @Override
-    protected Path2D createShape(int width, int height) {
+    protected Path2D createCurve(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         double r = radius.getValueAsDouble();
@@ -78,8 +78,9 @@ public class FlowerOfLife extends ShapeFilter {
             }
         }
 
+        boolean manyPoints = hasNonlinDistort();
         for (Circle circle : circlesSet) {
-            shape.append(circle.toShape(), false);
+            shape.append(circle.toShape(manyPoints), false);
         }
 
         return shape;
@@ -128,8 +129,12 @@ public class FlowerOfLife extends ShapeFilter {
             return n;
         }
 
-        Shape toShape() {
-            return Shapes.createCircle(cx, cy, r);
+        Shape toShape(boolean manyPoints) {
+            if (manyPoints) {
+                return Shapes.createCircle(cx, cy, r, 24);
+            } else {
+                return Shapes.createCircle(cx, cy, r);
+            }
         }
 
         @Override

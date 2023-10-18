@@ -1017,15 +1017,15 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
+        sub.add(createRenderCurvesSubmenu());
         sub.add(createRenderFractalsSubmenu(texts));
         sub.add(createRenderGeometrySubmenu());
-        sub.add(createRenderShapesSubmenu());
 
         return sub;
     }
 
-    private static JMenu createRenderShapesSubmenu() {
-        PMenu sub = new PMenu("Shapes");
+    private static JMenu createRenderCurvesSubmenu() {
+        PMenu sub = new PMenu("Curves");
 
         sub.addFilter(FlowerOfLife.NAME, FlowerOfLife::new);
         sub.addFilter(FractalCurves.NAME, FractalCurves::new);

@@ -28,7 +28,7 @@ import java.awt.geom.Path2D;
 /**
  * A shape filter rendering a spiral.
  */
-public class Spiral extends ShapeFilter {
+public class Spiral extends CurveFilter {
     public static final String NAME = "Spiral";
     private static final double LOG_PHI = 0.1;
 
@@ -64,7 +64,7 @@ public class Spiral extends ShapeFilter {
     }
 
     @Override
-    protected Path2D createShape(int width, int height) {
+    protected Path2D createCurve(int width, int height) {
         Path2D shape = new Path2D.Double();
 
         double cx = width * center.getRelativeX();
