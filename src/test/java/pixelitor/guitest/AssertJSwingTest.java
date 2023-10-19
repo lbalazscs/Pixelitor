@@ -1757,7 +1757,6 @@ public class AssertJSwingTest {
         testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Mystic Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spiral", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
