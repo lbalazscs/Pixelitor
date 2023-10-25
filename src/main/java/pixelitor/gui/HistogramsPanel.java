@@ -32,7 +32,9 @@ import java.util.Objects;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
-import static java.awt.Color.*;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.RED;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.utils.Texts.i18n;
@@ -43,49 +45,58 @@ import static pixelitor.utils.Texts.i18n;
 public class HistogramsPanel extends JPanel implements ViewActivationListener {
     private static final HistogramsPanel INSTANCE = new HistogramsPanel();
 
-    public static final int HISTOGRAM_RESOLUTION = 256;
+    public static final int NUM_BINS = 256;
 
     private static final String TYPE_LOGARITHMIC = "Logarithmic";
     private static final String TYPE_LINEAR = "Linear";
-    private final JComboBox<String> typeChooser;
+    private JComboBox<String> typeChooser;
 
-    private final HistogramPainter red;
-    private final HistogramPainter green;
-    private final HistogramPainter blue;
+    private final HistogramPainter redPainter;
+    private final HistogramPainter greenPainter;
+    private final HistogramPainter bluePainter;
 
     private boolean logarithmic;
 
     private HistogramsPanel() {
         super(new BorderLayout());
 
-        red = new HistogramPainter(RED);
-        green = new HistogramPainter(GREEN);
-        blue = new HistogramPainter(BLUE);
+        redPainter = new HistogramPainter(RED);
+        greenPainter = new HistogramPainter(GREEN);
+        bluePainter = new HistogramPainter(BLUE);
 
-        JPanel painters = new JPanel();
-        painters.setLayout(new GridLayout(3, 1, 0, 0));
+        JPanel northPanel = initNorthPanel();
+        add(northPanel, NORTH);
 
-        var size = new Dimension(
-            HISTOGRAM_RESOLUTION + 2,
-            3 * HistogramPainter.PREFERRED_HEIGHT);
-        painters.setPreferredSize(size);
-        painters.setMinimumSize(size);
+        JPanel painters = initPaintersPanel();
+        setBorder(createTitledBorder(i18n("histograms")));
+        add(new JScrollPane(painters), CENTER);
+    }
 
-        painters.add(red);
-        painters.add(green);
-        painters.add(blue);
-
+    private JPanel initNorthPanel() {
         typeChooser = new JComboBox<>(new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
         typeChooser.addActionListener(e -> typeChanged());
 
         JPanel northPanel = new JPanel(new FlowLayout(LEFT));
         northPanel.add(new JLabel(GUIText.TYPE + ":"));
         northPanel.add(typeChooser);
-        add(northPanel, NORTH);
+        return northPanel;
+    }
 
-        setBorder(createTitledBorder(i18n("histograms")));
-        var scrollPane = new JScrollPane(painters);
-        add(scrollPane, CENTER);
+    private JPanel initPaintersPanel() {
+        JPanel painters = new JPanel();
+        painters.setLayout(new GridLayout(3, 1, 0, 0));
+
+        var size = new Dimension(
+            NUM_BINS + 2,
+            3 * HistogramPainter.PREFERRED_HEIGHT);
+        painters.setPreferredSize(size);
+        painters.setMinimumSize(size);
+
+        painters.add(redPainter);
+        painters.add(greenPainter);
+        painters.add(bluePainter);
+
+        return painters;
     }
 
     private void typeChanged() {
@@ -99,9 +110,9 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
 
     @Override
     public void allViewsClosed() {
-        red.allViewsClosed();
-        green.allViewsClosed();
-        blue.allViewsClosed();
+        redPainter.allViewsClosed();
+        greenPainter.allViewsClosed();
+        bluePainter.allViewsClosed();
         repaint();
     }
 
@@ -125,9 +136,9 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         }
         BufferedImage image = comp.getCompositeImage();
 
-        int[] reds = new int[HISTOGRAM_RESOLUTION];
-        int[] blues = new int[HISTOGRAM_RESOLUTION];
-        int[] greens = new int[HISTOGRAM_RESOLUTION];
+        int[] reds = new int[NUM_BINS];
+        int[] blues = new int[NUM_BINS];
+        int[] greens = new int[NUM_BINS];
 
         int[] data = ImageUtils.getPixelArray(image);
         for (int rgb : data) {
@@ -144,7 +155,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         }
 
         if (logarithmic) {
-            for (int i = 0; i < HISTOGRAM_RESOLUTION; i++) {
+            for (int i = 0; i < NUM_BINS; i++) {
                 // Add one before taking the logarithm to avoid calculating log(0)
                 // Note that log(1) = 0, which is just perfect
                 // Also multiply with a big number to avoid rounding errors
@@ -154,9 +165,9 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
             }
         }
 
-        red.updateData(reds);
-        green.updateData(greens);
-        blue.updateData(blues);
+        redPainter.updateData(reds);
+        greenPainter.updateData(greens);
+        bluePainter.updateData(blues);
         repaint();
     }
 

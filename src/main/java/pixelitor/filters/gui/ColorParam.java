@@ -167,7 +167,7 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
-            return new ColorParamState(Colors.rgbInterpolate(
+            return new ColorParamState(Colors.interpolateRGB(
                 color, endState.color, progress));
         }
 

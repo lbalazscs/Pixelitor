@@ -166,8 +166,8 @@ public class ZoomLevel {
      * Calculate the optimal zoom level for a given canvas,
      * and possibly for a given auto zoom.
      */
-    public static ZoomLevel calcZoom(Canvas canvas, AutoZoom autoZoom,
-                                     boolean zoomInToFitSpace) {
+    public static ZoomLevel calcBestFor(Canvas canvas, AutoZoom autoZoom,
+                                        boolean zoomInToFitSpace) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
             return Z100;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class DebugNodes {
 
         node.add(createColorModelNode("color model", image.getColorModel()));
         node.add(createRasterNode(image.getRaster()));
-        node.addString("type", Debug.bufferedImageTypeAsString(image.getType()));
+        node.addString("type", Debug.bufferedImageTypeToString(image.getType()));
         node.addInt("width", image.getWidth());
         node.addInt("height", image.getHeight());
         node.addBoolean("alpha premultiplied", image.isAlphaPremultiplied());
@@ -97,10 +97,10 @@ public class DebugNodes {
         node.addInt("width", sampleModel.getWidth());
         node.addInt("height", sampleModel.getHeight());
         node.addString("data type",
-            Debug.dataBufferTypeAsString(sampleModel.getDataType()));
+            Debug.dataBufferTypeToString(sampleModel.getDataType()));
         node.addInt("num bands", sampleModel.getNumBands());
         node.addString("transfer type",
-            Debug.dataBufferTypeAsString(sampleModel.getTransferType()));
+            Debug.dataBufferTypeToString(sampleModel.getTransferType()));
         node.addInt("num data elements", sampleModel.getNumDataElements());
 
         return node;
@@ -111,7 +111,7 @@ public class DebugNodes {
 
         node.addClass();
         node.addInt("num banks", dataBuffer.getNumBanks());
-        node.addString("type", Debug.dataBufferTypeAsString(dataBuffer.getDataType()));
+        node.addString("type", Debug.dataBufferTypeToString(dataBuffer.getDataType()));
         node.addInt("size", dataBuffer.getSize());
 
         return node;
@@ -127,11 +127,11 @@ public class DebugNodes {
         node.addBoolean("has alpha", colorModel.hasAlpha());
         node.addInt("pixel size", colorModel.getPixelSize());
         node.addString("transfer type",
-            Debug.dataBufferTypeAsString(colorModel.getTransferType()));
+            Debug.dataBufferTypeToString(colorModel.getTransferType()));
         node.addString("transparency",
-            Debug.transparencyAsString(colorModel.getTransparency()));
-        node.addBoolean("is RGB", Debug.isRgbColorModel(colorModel));
-        node.addBoolean("is BGR", Debug.isBgrColorModel(colorModel));
+            Debug.transparencyToString(colorModel.getTransparency()));
+        node.addBoolean("is RGB", Debug.isRGB(colorModel));
+        node.addBoolean("is BGR", Debug.isBGR(colorModel));
 
         return node;
     }
@@ -141,7 +141,7 @@ public class DebugNodes {
 
         node.addClass();
         node.addInt("num components", colorSpace.getNumComponents());
-        node.addString("type", Debug.colorSpaceTypeAsString(colorSpace.getType()));
+        node.addString("type", Debug.colorSpaceTypeToString(colorSpace.getType()));
         node.addBoolean("sRGB", colorSpace.isCS_sRGB());
 
         return node;

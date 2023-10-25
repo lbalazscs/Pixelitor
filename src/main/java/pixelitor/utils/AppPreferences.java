@@ -50,7 +50,10 @@ import java.io.File;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
-import static javax.swing.SwingConstants.*;
+import static javax.swing.SwingConstants.BOTTOM;
+import static javax.swing.SwingConstants.LEFT;
+import static javax.swing.SwingConstants.RIGHT;
+import static javax.swing.SwingConstants.TOP;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.menus.file.RecentFilesMenu.MAX_RECENT_FILES;
@@ -257,7 +260,7 @@ public final class AppPreferences {
     private static void saveRecentFiles(BoundedUniqueList<RecentFile> recentFiles) {
         for (int i = 0; i < recentFiles.size(); i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
-            String value = recentFiles.get(i).getSavedName();
+            String value = recentFiles.get(i).getSavedPath();
             recentFilesNode.put(key, value);
         }
     }

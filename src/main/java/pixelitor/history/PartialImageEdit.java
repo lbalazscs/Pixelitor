@@ -152,7 +152,7 @@ public class PartialImageEdit extends FadeableEdit {
         String className = raster.getClass().getSimpleName();
         DataBuffer dataBuffer = raster.getDataBuffer();
         int dataType = dataBuffer.getDataType();
-        String typeAsString = Debug.dataBufferTypeAsString(dataType);
+        String typeAsString = Debug.dataBufferTypeToString(dataType);
         int numBanks = dataBuffer.getNumBanks();
         int numBands = raster.getNumBands();
         int numDataElements = raster.getNumDataElements();

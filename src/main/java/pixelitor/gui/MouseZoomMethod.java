@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,9 +32,9 @@ public enum MouseZoomMethod {
             removeExistingListeners(view);
             view.addMouseWheelListener(e -> {
                 if (e.getWheelRotation() < 0) { // up, away from the user
-                    view.increaseZoom(e.getPoint());
+                    view.zoomIn(e.getPoint());
                 } else {  // down, towards the user
-                    view.decreaseZoom(e.getPoint());
+                    view.zoomOut(e.getPoint());
                 }
             });
         }
@@ -45,11 +45,11 @@ public enum MouseZoomMethod {
                 if (e.getWheelRotation() < 0) { // up, away from the user
                     // this.view will be always the active image...
                     if (view != null) { // ...and it is null if all images are closed
-                        view.increaseZoom();
+                        view.zoomIn();
                     }
                 } else {  // down, towards the user
                     if (view != null) {
-                        view.decreaseZoom();
+                        view.zoomOut();
                     }
                 }
             });
@@ -62,9 +62,9 @@ public enum MouseZoomMethod {
             view.addMouseWheelListener(e -> {
                 if (e.isControlDown()) {
                     if (e.getWheelRotation() < 0) { // up, away from the user
-                        view.increaseZoom(e.getPoint());
+                        view.zoomIn(e.getPoint());
                     } else {  // down, towards the user
-                        view.decreaseZoom(e.getPoint());
+                        view.zoomOut(e.getPoint());
                     }
                 }
             });
@@ -77,11 +77,11 @@ public enum MouseZoomMethod {
                     if (e.getWheelRotation() < 0) { // up, away from the user
                         // this.view will be always the active image...
                         if (view != null) { // ...and it is null if all images are closed
-                            view.increaseZoom();
+                            view.zoomIn();
                         }
                     } else {  // down, towards the user
                         if (view != null) {
-                            view.decreaseZoom();
+                            view.zoomOut();
                         }
                     }
                 }

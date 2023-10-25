@@ -63,7 +63,7 @@ public class Colors {
     }
 
     // linear interpolation in the RGB space
-    public static Color rgbInterpolate(Color startColor, Color endColor, double progress) {
+    public static Color interpolateRGB(Color startColor, Color endColor, double progress) {
         int interpolatedRGB = ImageMath.mixColors((float) progress,
             startColor.getRGB(), endColor.getRGB());
         return new Color(interpolatedRGB, true);
@@ -73,7 +73,7 @@ public class Colors {
      * Calculates the average of two colors in the RGB space.
      * Full opacity is assumed.
      */
-    public static Color rgbAverage(Color c1, Color c2) {
+    public static Color averageRGB(Color c1, Color c2) {
         int rgb1 = c1.getRGB();
         int rgb2 = c2.getRGB();
 
@@ -93,46 +93,6 @@ public class Colors {
     }
 
     /**
-     * Calculates the average of two colors in the HSB space.
-     * Full opacity is assumed.
-     */
-    public static Color hsbAverage(Color c1, Color c2) {
-        int rgb1 = c1.getRGB();
-        int rgb2 = c2.getRGB();
-
-        int r1 = (rgb1 >>> 16) & 0xFF;
-        int g1 = (rgb1 >>> 8) & 0xFF;
-        int b1 = rgb1 & 0xFF;
-
-        int r2 = (rgb2 >>> 16) & 0xFF;
-        int g2 = (rgb2 >>> 8) & 0xFF;
-        int b2 = rgb2 & 0xFF;
-
-        float[] hsb1 = Color.RGBtoHSB(r1, g1, b1, null);
-        float[] hsb2 = Color.RGBtoHSB(r2, g2, b2, null);
-
-        float hue = hueAverage(hsb1[0], hsb2[0]);
-        float sat = (hsb1[1] + hsb2[1]) / 2.0f;
-        float bri = (hsb1[2] + hsb2[2]) / 2.0f;
-
-        return Color.getHSBColor(hue, sat, bri);
-    }
-
-    private static float hueAverage(float hue1, float hue2) {
-        float diff = hue1 - hue2;
-        if (diff < 0.5f && diff > -0.5f) {
-            return (hue1 + hue2) / 2.0f;
-        } else if (diff >= 0.5f) { // hue1 is bigger
-            return hue1 + (1.0f - hue1 + hue2) / 2.0f;
-        } else if (diff <= 0.5f) { // hue2 is bigger
-            return hue2 + (1.0f - hue2 + hue1) / 2.0f;
-        } else {
-            throw new IllegalStateException(
-                format("hue1 = %.2f, hue2 = %.2f", hue1, hue2));
-        }
-    }
-
-    /**
      * A linear interpolation for hue values,
      * taking their circular nature into account
      */
@@ -149,34 +109,6 @@ public class Colors {
             return mix;
         } else if (diff <= 0.5f) { // hue2 is big, hue1 is small
             hue1 += 1.0f;
-            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
-            if (mix > 1.0f) {
-                mix -= 1.0f;
-            }
-            return mix;
-        } else {
-            throw new IllegalStateException(
-                format("hue1 = %.2f, hue2 = %.2f, mixFactor = %.2f", hue1, hue2, mixFactor));
-        }
-    }
-
-    /**
-     * Just like the above lerpHue method, but taking the average
-     * that is on the opposite side of the circle. Not very useful.
-     */
-    public static float lerpHueLong(float mixFactor, float hue1, float hue2) {
-        float diff = hue1 - hue2;
-        if (diff > 0.5f || diff < -0.5f) {
-            return ImageMath.lerp(mixFactor, hue1, hue2);
-        } else if (hue2 > hue1) { // hue2 is slightly bigger
-            hue1 += 1.0f;
-            float mix = ImageMath.lerp(mixFactor, hue1, hue2);
-            if (mix > 1.0f) {
-                mix -= 1.0f;
-            }
-            return mix;
-        } else if (hue1 >= hue2) { // hue1 is slightly bigger
-            hue2 += 1.0f;
             float mix = ImageMath.lerp(mixFactor, hue1, hue2);
             if (mix > 1.0f) {
                 mix -= 1.0f;
@@ -392,9 +324,10 @@ public class Colors {
     }
 
     public static void fillWithTransparent(Graphics2D g, int size) {
+        Composite origComposite = g.getComposite();
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, size, size);
-        g.setComposite(AlphaComposite.SrcOver);
+        g.setComposite(origComposite);
     }
 
     /**

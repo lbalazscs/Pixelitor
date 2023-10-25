@@ -34,7 +34,10 @@ import pixelitor.layers.*;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.*;
+import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +51,6 @@ import java.awt.image.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.io.*;
-import java.lang.StackWalker.StackFrame;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -66,13 +68,11 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Debugging-related static utility methods
  */
 public class Debug {
-    public static volatile boolean flag = false;
-
     private Debug() {
         // shouldn't be instantiated
     }
 
-    public static String dataBufferTypeAsString(int type) {
+    public static String dataBufferTypeToString(int type) {
         return switch (type) {
             case DataBuffer.TYPE_BYTE -> "BYTE";
             case DataBuffer.TYPE_USHORT -> "USHORT";
@@ -85,7 +85,7 @@ public class Debug {
         };
     }
 
-    static String transparencyAsString(int transparency) {
+    static String transparencyToString(int transparency) {
         return switch (transparency) {
             case Transparency.OPAQUE -> "OPAQUE";
             case Transparency.BITMASK -> "BITMASK";
@@ -94,7 +94,7 @@ public class Debug {
         };
     }
 
-    public static String bufferedImageTypeAsString(int type) {
+    public static String bufferedImageTypeToString(int type) {
         return switch (type) {
             case BufferedImage.TYPE_3BYTE_BGR -> "3BYTE_BGR";
             case BufferedImage.TYPE_4BYTE_ABGR -> "4BYTE_ABGR";
@@ -114,7 +114,7 @@ public class Debug {
         };
     }
 
-    static String colorSpaceTypeAsString(int type) {
+    static String colorSpaceTypeToString(int type) {
         return switch (type) {
             case ColorSpace.TYPE_2CLR -> "2CLR";
             case ColorSpace.TYPE_3CLR -> "3CLR";
@@ -145,7 +145,7 @@ public class Debug {
         };
     }
 
-    public static boolean isRgbColorModel(ColorModel cm) {
+    public static boolean isRGB(ColorModel cm) {
         if (cm instanceof DirectColorModel dcm
             && cm.getTransferType() == DataBuffer.TYPE_INT) {
 
@@ -158,7 +158,7 @@ public class Debug {
         return false;
     }
 
-    public static boolean isBgrColorModel(ColorModel cm) {
+    public static boolean isBGR(ColorModel cm) {
         if (cm instanceof DirectColorModel dcm &&
             cm.getTransferType() == DataBuffer.TYPE_INT) {
 
@@ -171,12 +171,12 @@ public class Debug {
         return false;
     }
 
-    public static String modifiersAsString(MouseEvent e) {
-        return modifiersAsString(e.isControlDown(), e.isAltDown(), e.isShiftDown(),
+    public static String modifiersToString(MouseEvent e) {
+        return modifiersToString(e.isControlDown(), e.isAltDown(), e.isShiftDown(),
             SwingUtilities.isRightMouseButton(e), e.isPopupTrigger());
     }
 
-    public static String modifiersAsString(boolean control, boolean alt, boolean shift,
+    public static String modifiersToString(boolean control, boolean alt, boolean shift,
                                            boolean right, boolean popup) {
         StringBuilder msg = new StringBuilder(25);
         if (control) {
@@ -195,24 +195,6 @@ public class Debug {
             msg.append(Ansi.cyan("popup-"));
         }
         return msg.toString();
-    }
-
-    public static void debugCall(String msg, int depth) {
-        String threadName;
-        if (Threads.calledOnEDT()) {
-            threadName = "EDT";
-        } else {
-            threadName = Threads.threadName();
-        }
-
-        System.out.printf("%s on %s%n", Ansi.yellow(msg), threadName);
-        if (depth > 0) {
-            List<StackFrame> callStack = StackWalker.getInstance().walk(s ->
-                s.skip(1).limit(depth).toList());
-            for (StackFrame frame : callStack) {
-                System.out.println("\tat " + frame);
-            }
-        }
     }
 
     public static void debugImage(Image img) {
@@ -329,7 +311,7 @@ public class Debug {
         new Thread(backgroundTask).start();
     }
 
-    public static void dispatchKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
+    public static void sendKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
         int modifiers;
         if (ctrl) {
             modifiers = InputEvent.CTRL_DOWN_MASK;
@@ -559,7 +541,7 @@ public class Debug {
             case MouseEvent.MOUSE_EXITED -> "EXITED";
             default -> throw new IllegalStateException("Unexpected value: " + e.getID());
         };
-        return modifiersAsString(e) + action + String.format(" at (%d, %d), click count = %d, c = %s",
+        return modifiersToString(e) + action + String.format(" at (%d, %d), click count = %d, c = %s",
             e.getX(), e.getY(), e.getClickCount(),
             debugComponent(e.getComponent()));
     }

@@ -35,7 +35,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onPool;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Resizes all content layers of a composition
@@ -61,13 +64,31 @@ public class Resize implements CompAction {
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
         Canvas oldCanvas = oldComp.getCanvas();
-        int canvasCurrWidth = oldCanvas.getWidth();
-        int canvasCurrHeight = oldCanvas.getHeight();
-
-        if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
+        if (oldCanvas.hasImSize(targetWidth, targetHeight)) {
             // nothing to do
             return CompletableFuture.completedFuture(oldComp);
         }
+
+        var targetSize = calcTargetSize(oldCanvas);
+
+        // The resize runs outside the EDT so that the progress bar animation
+        // can update and multiple resizing operations can run in parallel
+        var progressHandler = Messages.startProgress("Resizing", -1);
+        return CompletableFuture
+            .supplyAsync(() -> oldComp.copy(CopyType.UNDO, true), onPool)
+            .thenCompose(newComp -> resizeLayers(newComp, targetSize))
+            .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler), onEDT)
+            .handle((newComp, ex) -> {
+                if (ex != null) {
+                    Messages.showExceptionOnEDT(ex);
+                }
+                return newComp;
+            });
+    }
+
+    private Dimension calcTargetSize(Canvas oldCanvas) {
+        int canvasCurrHeight = oldCanvas.getWidth();
+        int canvasCurrWidth = oldCanvas.getHeight();
 
         // it is important to use local copies of the final global
         // variables, otherwise batch resize in box gets different
@@ -83,21 +104,7 @@ public class Resize implements CompAction {
             canvasTargetWidth = (int) (scale * canvasCurrWidth);
             canvasTargetHeight = (int) (scale * canvasCurrHeight);
         }
-        var targetSize = new Dimension(canvasTargetWidth, canvasTargetHeight);
-
-        // The resize runs outside the EDT so that the progress bar animation
-        // can update and multiple resizing operations can run in parallel
-        var progressHandler = Messages.startProgress("Resizing", -1);
-        return CompletableFuture
-            .supplyAsync(() -> oldComp.copy(CopyType.UNDO, true), onPool)
-            .thenCompose(newComp -> resizeLayers(newComp, targetSize))
-            .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler), onEDT)
-            .handle((newComp, ex) -> {
-                if (ex != null) {
-                    Messages.showExceptionOnEDT(ex);
-                }
-                return newComp;
-            });
+        return new Dimension(canvasTargetWidth, canvasTargetHeight);
     }
 
     private static Composition afterResizeActions(Composition oldComp,

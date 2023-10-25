@@ -38,7 +38,10 @@ import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
 import static pixelitor.colors.FgBgColors.*;
-import static pixelitor.tools.Tools.*;
+import static pixelitor.tools.Tools.BRUSH;
+import static pixelitor.tools.Tools.CLONE;
+import static pixelitor.tools.Tools.ERASER;
+import static pixelitor.tools.Tools.SMUDGE;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -131,7 +134,7 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            setFGColor(Colors.rgbInterpolate(origFg, origBg, rand.nextDouble()));
+            setFGColor(Colors.interpolateRGB(origFg, origBg, rand.nextDouble()));
         }
     }
 

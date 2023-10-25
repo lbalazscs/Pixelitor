@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -119,7 +119,7 @@ public class SprayBrush extends AbstractBrush {
 
             if (!isEraser && colorRandomness > 0.0f) {
                 Color randomColor = Rnd.createRandomColor();
-                Color color = Colors.rgbInterpolate(baseColor, randomColor, colorRandomness);
+                Color color = Colors.interpolateRGB(baseColor, randomColor, colorRandomness);
                 targetG.setColor(color);
             }
 

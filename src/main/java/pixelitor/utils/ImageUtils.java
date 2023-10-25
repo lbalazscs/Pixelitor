@@ -350,7 +350,7 @@ public class ImageUtils {
             // a correct int array can still be retrieved with
             // src.getRGB(0, 0, width, height, null, 0, width);
             // but modifying that array won't have any effect on the image.
-            String msg = "type is " + Debug.bufferedImageTypeAsString(src.getType());
+            String msg = "type is " + Debug.bufferedImageTypeToString(src.getType());
             throw new UnsupportedOperationException(msg);
         }
 

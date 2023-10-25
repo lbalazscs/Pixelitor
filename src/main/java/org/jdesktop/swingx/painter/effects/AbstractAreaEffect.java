@@ -522,7 +522,7 @@ public class AbstractAreaEffect implements AreaEffect {
     }
 
     public Color interpolateBrushColor(Color endColor, double progress) {
-        return Colors.rgbInterpolate(brushColor, endColor, progress);
+        return Colors.interpolateRGB(brushColor, endColor, progress);
     }
 
     public float interpolateOpacity(float endOpacity, float progress) {

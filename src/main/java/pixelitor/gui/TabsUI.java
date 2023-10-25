@@ -27,15 +27,15 @@ import static pixelitor.utils.Keys.CTRL_SHIFT_TAB;
 import static pixelitor.utils.Keys.CTRL_TAB;
 
 /**
- * A user interface ({@link ImageAreaUI} implementation)
+ * An {@link ImageAreaUI} implementation
  * where the edited images are in tabs
  */
 public class TabsUI extends JTabbedPane implements ImageAreaUI {
-    private final Lazy<JMenu> tabPlacementMenu = Lazy.of(this::createTabPlacementMenu);
+    private final Lazy<JMenu> cachedPlacementMenu = Lazy.of(this::createTabPlacementMenu);
     private boolean userInitiated = true;
 
-    public TabsUI(int tabPlacement) {
-        setTabPlacement(tabPlacement);
+    public TabsUI() {
+        setTabPlacement(ImageArea.getTabPlacement());
         addChangeListener(e -> tabsChanged());
 
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
@@ -128,12 +128,12 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
         return new JRadioButtonMenuItem(new PAction(name, () -> {
-            setTabPlacement(pos);
-            ImageArea.setTabPlacement(pos);
+            setTabPlacement(pos); // update the GUI
+            ImageArea.setTabPlacement(pos); // store it for the saved preferences
         }));
     }
 
     public JMenu getTabPlacementMenu() {
-        return tabPlacementMenu.get();
+        return cachedPlacementMenu.get();
     }
 }

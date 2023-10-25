@@ -26,14 +26,14 @@ import java.beans.PropertyVetoException;
 import java.util.List;
 
 /**
- * A user interface ({@link ImageAreaUI} implementation)
+ * An {@link ImageAreaUI} implementation
  * where the edited images are in internal frames
  */
 public class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
     private static final int CASCADE_VERTICAL_SHIFT = 25;
 
-    private static int cascadeIndex = 0;
+    private static int cascadeCount = 0;
 
     public FramesUI() {
     }
@@ -47,8 +47,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
 
     @Override
     public void addView(View view) {
-        int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
-        int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
+        int locX = CASCADE_HORIZONTAL_SHIFT * cascadeCount;
+        int locY = CASCADE_VERTICAL_SHIFT * cascadeCount;
 
         int maxWidth = getWidth() - CASCADE_HORIZONTAL_SHIFT;
         locX %= maxWidth;
@@ -61,7 +61,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         add(frame);
         activateFrame(frame);
 
-        cascadeIndex++;
+        cascadeCount++;
     }
 
     private void activateFrame(ImageFrame frame) {
@@ -150,7 +150,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         }
     }
 
-    public static void resetCascadeIndex() {
-        cascadeIndex = 0;
+    public static void resetCascadeCount() {
+        cascadeCount = 0;
     }
 }

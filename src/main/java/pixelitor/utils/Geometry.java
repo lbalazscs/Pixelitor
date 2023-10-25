@@ -160,9 +160,9 @@ public class Geometry {
         deScale(r, (m + n));
     }
 
-    public static Point2D newFrom(Point2D a) {
+    public static Point2D newFrom(Point2D source) {
         Point2D.Double b = new Point2D.Double();
-        b.setLocation(a);
+        b.setLocation(source);
         return b;
     }
 
@@ -202,8 +202,8 @@ public class Geometry {
         return FastMath.abs(a.getX() - b.getX()) < EPSILON && FastMath.abs(a.getY() - b.getY()) < EPSILON;
     }
 
-    public static void copy(Point2D a, Point2D b) {
-        a.setLocation(b.getX(), b.getY());
+    public static void copy(Point2D from, Point2D to) {
+        to.setLocation(from.getX(), from.getY());
     }
 
     public static double distance(Point2D a, Point2D b) {
@@ -240,11 +240,6 @@ public class Geometry {
         return r;
     }
 
-    public static void midPoint(Point2D a, Point2D b, Point2D r) {
-        add(a, b, r);
-        deScale(r, 2);
-    }
-
     public static Point2D midPoint(Point2D p1, Point2D p2) {
         return new Point2D.Double(
             (p1.getX() + p2.getX()) / 2.0,
@@ -259,8 +254,8 @@ public class Geometry {
         );
     }
 
-    public static void subtract(Point2D a, Point2D b, Point2D r) {
-        r.setLocation(a.getX() - b.getX(), a.getY() - b.getY());
+    public static void subtract(Point2D a, Point2D b, Point2D result) {
+        result.setLocation(a.getX() - b.getX(), a.getY() - b.getY());
     }
 
     /**
@@ -268,7 +263,7 @@ public class Geometry {
      *
      * @return projected point p.
      */
-    public static Point2D.Double projectPointOnLine(Line2D line, Point2D.Double p) {
+    public static Point2D.Double projectPointToLine(Line2D line, Point2D.Double p) {
         Point2D.Double l1 = (Point2D.Double) line.getP1();
         Point2D.Double l2 = (Point2D.Double) line.getP2();
 
@@ -294,7 +289,7 @@ public class Geometry {
      * @return orthogonal line
      */
     public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
-        return new Line2D.Double(p, projectPointOnLine(line, p));
+        return new Line2D.Double(p, projectPointToLine(line, p));
     }
 
     public static void toRange(Point2D pos, double x1, double y1, double x2, double y2) {

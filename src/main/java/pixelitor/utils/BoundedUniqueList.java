@@ -18,12 +18,13 @@
 package pixelitor.utils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * A data structure for the recent files.
  */
-public class BoundedUniqueList<E> {
+public class BoundedUniqueList<E> implements Iterable<E> {
     private final int maxSize;
     private final List<E> list;
 
@@ -61,6 +62,11 @@ public class BoundedUniqueList<E> {
 
     public boolean isEmpty() {
         return list.isEmpty();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return list.iterator();
     }
 }
 

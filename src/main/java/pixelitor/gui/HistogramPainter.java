@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,33 +29,31 @@ import static java.awt.Color.BLACK;
  */
 public class HistogramPainter extends JComponent {
     private static final int MAX_LINE_HEIGHT = 100;
+    private static final int PREFERRED_WIDTH = HistogramsPanel.NUM_BINS + 1;
     public static final int PREFERRED_HEIGHT = MAX_LINE_HEIGHT + 2;
 
-    private int[] values = null;
-    private int maxValue = 0;
+    private int[] frequencies = null;
+    private int maxFrequency = 0;
     private final Color color;
 
     public HistogramPainter(Color color) {
         this.color = color;
 
-        setPreferredSize(new Dimension(257, PREFERRED_HEIGHT));
+        setPreferredSize(new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT));
     }
 
-    /**
-     * Sets the values array describing the statistical values in a channel
-     */
-    public void updateData(int[] values) {
-        this.values = values;
-        maxValue = 0;
-        for (int value : values) {
-            if (maxValue < value) {
-                maxValue = value;
+    public void updateData(int[] frequencies) {
+        this.frequencies = frequencies;
+        maxFrequency = 0;
+        for (int frequency : frequencies) {
+            if (maxFrequency < frequency) {
+                maxFrequency = frequency;
             }
         }
     }
 
     public void allViewsClosed() {
-        maxValue = 0;
+        maxFrequency = 0;
     }
 
     @Override
@@ -64,30 +62,26 @@ public class HistogramPainter extends JComponent {
 
         g.setColor(BLACK);
 
-        int rectWidth = HistogramsPanel.HISTOGRAM_RESOLUTION + 1;
-        int rectHeight = PREFERRED_HEIGHT;
-        int rectX = (getWidth() - rectWidth) / 2;
-        int rectY = (getHeight() - rectHeight) / 2;
-        g.drawRect(rectX, rectY, rectWidth, rectHeight);
+        int rectX = (getWidth() - PREFERRED_WIDTH) / 2;
+        int rectY = (getHeight() - PREFERRED_HEIGHT) / 2;
+        g.drawRect(rectX, rectY, PREFERRED_WIDTH, PREFERRED_HEIGHT);
 
-        if (maxValue == 0) { // no image
+        if (maxFrequency == 0) { // no image
             return;
         }
-        if (values == null) {
+        if (frequencies == null) {
             return;
         }
 
         int maxY = 1 + MAX_LINE_HEIGHT + rectY;
         int x = rectX;
         g.setColor(color);
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < HistogramsPanel.NUM_BINS; i++) {
             x++;
-            int value = values[i];
-            if (value > 0) {
-                int lineHeight = (int) (MAX_LINE_HEIGHT * ((double) value / maxValue));
-                int yTop = maxY - lineHeight;
-                int yBottom = maxY;
-                g.drawLine(x, yTop, x, yBottom);
+            int frequency = frequencies[i];
+            if (frequency > 0) {
+                int lineHeight = (int) (MAX_LINE_HEIGHT * ((double) frequency / maxFrequency));
+                g.drawLine(x, maxY - lineHeight, x, maxY);
             }
         }
     }

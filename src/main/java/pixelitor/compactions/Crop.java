@@ -158,13 +158,9 @@ public class Crop implements CompAction {
     public static void toolCropActiveImage(Rectangle2D cropRect,
                                            boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
-        try {
-            Views.onActiveComp(comp ->
-                new Crop(cropRect, false, allowGrowing,
-                    deleteCroppedPixels, false).process(comp));
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+        Views.onActiveComp(comp ->
+            new Crop(cropRect, false, allowGrowing,
+                deleteCroppedPixels, false).process(comp));
     }
 
     /**
@@ -188,11 +184,7 @@ public class Crop implements CompAction {
      * Crops the active composition based on the selection bounds
      */
     public static void selectionCropActiveComp() {
-        try {
-            Views.onActiveComp(Crop::selectionCrop);
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
+        Views.onActiveComp(Crop::selectionCrop);
     }
 
     private static void selectionCrop(Composition comp) {

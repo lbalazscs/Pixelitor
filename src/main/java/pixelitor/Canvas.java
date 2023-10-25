@@ -163,6 +163,10 @@ public class Canvas implements Serializable, Debuggable {
         return height;
     }
 
+    public boolean hasImSize(int width, int height) {
+        return this.width == width && this.height == height;
+    }
+
     /**
      * Returns the width in component space
      */

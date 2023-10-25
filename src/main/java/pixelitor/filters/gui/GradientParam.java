@@ -34,7 +34,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
+import static java.awt.Color.WHITE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -58,7 +60,7 @@ public class GradientParam extends AbstractFilterParam {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
                 firstColor,
-                Colors.rgbAverage(firstColor, secondColor),
+                Colors.averageRGB(firstColor, secondColor),
                 secondColor});
     }
 
@@ -280,7 +282,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                interpolatedColors[i] = Colors.rgbInterpolate(initial, end, progress);
+                interpolatedColors[i] = Colors.interpolateRGB(initial, end, progress);
             }
             return interpolatedColors;
         }

@@ -62,8 +62,12 @@ import java.util.function.Supplier;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.*;
-import static pixelitor.guitest.AJSUtils.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static pixelitor.guitest.AJSUtils.checkRandomly;
+import static pixelitor.guitest.AJSUtils.chooseRandomly;
+import static pixelitor.guitest.AJSUtils.slideRandomly;
 import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
@@ -509,7 +513,7 @@ public class RandomToolTest {
             boolean ctrlPressed = Rnd.withProbability(0.25, keyboard::pressCtrl);
             boolean altPressed = Rnd.withProbability(0.25, keyboard::pressAlt);
             boolean shiftPressed = Rnd.withProbability(0.25, keyboard::pressShift);
-            String msg = "random " + Debug.modifiersAsString(ctrlPressed, altPressed,
+            String msg = "random " + Debug.modifiersToString(ctrlPressed, altPressed,
                 shiftPressed, false, false) + "drag";
             log(msg);
 
@@ -547,7 +551,7 @@ public class RandomToolTest {
     }
 
     private String click(boolean ctrl, boolean alt, boolean shift) {
-        String modifierDescr = Debug.modifiersAsString(ctrl, alt, shift, false, false);
+        String modifierDescr = Debug.modifiersToString(ctrl, alt, shift, false, false);
         String name = "random " + modifierDescr + "click";
         log(name);
 

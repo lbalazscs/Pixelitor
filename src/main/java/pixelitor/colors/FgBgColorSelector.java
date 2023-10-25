@@ -48,6 +48,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public static final String BG_BUTTON_NAME = "bgButton";
     public static final String DEFAULTS_BUTTON_NAME = "resetColorsButton";
     public static final String SWAP_BUTTON_NAME = "swapColorsButton";
+
     private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
@@ -104,7 +105,7 @@ public class FgBgColorSelector extends JLayeredPane {
             fgButton = new JButton(fgColorIcon);
         }
         initButton(fgButton, "Set Foreground Color",
-            BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> fgButtonPressed());
+            BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> fgButtonClicked());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
 
         fgButton.setComponentPopupMenu(createPopupMenu(true));
@@ -117,7 +118,7 @@ public class FgBgColorSelector extends JLayeredPane {
             bgButton = new JButton(bgColorIcon);
         }
         initButton(bgButton, "Set Background Color",
-            BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> bgButtonPressed());
+            BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> bgButtonClicked());
         bgButton.setLocation(BIG_BUTTON_SIZE / 2,
             SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
 
@@ -226,14 +227,14 @@ public class FgBgColorSelector extends JLayeredPane {
         add(button, Integer.valueOf(layer));
     }
 
-    private void fgButtonPressed() {
+    private void fgButtonClicked() {
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
         selectColorWithDialog(pw, GUIText.FG_COLOR,
             selectedColor, false,
             color -> setFgColor(color, true));
     }
 
-    private void bgButtonPressed() {
+    private void bgButtonClicked() {
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
         selectColorWithDialog(pw, GUIText.BG_COLOR,
             selectedColor, false,

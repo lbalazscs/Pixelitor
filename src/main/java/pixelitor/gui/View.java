@@ -56,7 +56,9 @@ import java.util.concurrent.CompletableFuture;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.lang.String.format;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
@@ -96,8 +98,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         setComp(comp);
 
-        ZoomLevel fitZoom = ZoomLevel.calcZoom(canvas, null, false);
-        setZoom(fitZoom);
+        setZoom(ZoomLevel.calcBestFor(canvas, null, false));
 
         layersPanel = new LayersPanel();
 
@@ -570,8 +571,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     }
 
     public void setZoom(AutoZoom autoZoom) {
-        ZoomLevel fittingZoom = ZoomLevel.calcZoom(canvas, autoZoom, true);
-        setZoom(fittingZoom);
+        setZoom(ZoomLevel.calcBestFor(canvas, autoZoom, true));
     }
 
     public void setZoom(ZoomLevel newZoom) {
@@ -643,25 +643,25 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             return;
         }
 
-        Canvas c = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
+        Canvas tmpCanvas = new Canvas((int) zoomRect.getWidth(), (int) zoomRect.getHeight());
 
-        setZoom(ZoomLevel.calcZoom(c, AutoZoom.FIT_SPACE, true));
+        setZoom(ZoomLevel.calcBestFor(tmpCanvas, AutoZoom.FIT_SPACE, true));
         scrollRectToVisible(imageToComponentSpace(zoomRect));
     }
 
-    public void increaseZoom() {
-        increaseZoom(null);
+    public void zoomIn() {
+        zoomIn(null);
     }
 
-    public void increaseZoom(Point mousePos) {
+    public void zoomIn(Point mousePos) {
         setZoom(zoomLevel.zoomIn(), mousePos);
     }
 
-    public void decreaseZoom() {
-        decreaseZoom(null);
+    public void zoomOut() {
+        zoomOut(null);
     }
 
-    public void decreaseZoom(Point mousePos) {
+    public void zoomOut(Point mousePos) {
         setZoom(zoomLevel.zoomOut(), mousePos);
     }
 

@@ -12,6 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.0</junit.version>
+        <twelvemonkeys.version>3.10.0</twelvemonkeys.version>
     </properties>
 
     <build>
@@ -143,31 +144,31 @@
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
-            <version>3.10.0</version>
+            <version>${twelvemonkeys.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-tga</artifactId>
-            <version>3.9.4</version>
+            <version>${twelvemonkeys.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-pnm</artifactId>
-            <version>3.10.0</version>
+            <version>${twelvemonkeys.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-webp</artifactId>
-            <version>3.10.0</version>
+            <version>${twelvemonkeys.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.5</version>
         </dependency>
 
         <!--from here test dependencies-->

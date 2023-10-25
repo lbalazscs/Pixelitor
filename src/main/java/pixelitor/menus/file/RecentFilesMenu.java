@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,7 +77,7 @@ public final class RecentFilesMenu extends JMenu {
 
         for (int i = 0; i < recentFiles.size(); i++) {
             RecentFile recentFile = recentFiles.get(i);
-            recentFile.setNr(i + 1);
+            recentFile.setListPosition(i + 1);
             RecentFilesMenuItem item = new RecentFilesMenuItem(recentFile);
             add(item);
         }

@@ -114,7 +114,7 @@ public class Views {
         History.onAllViewsClosed();
         SelectionActions.update(null);
         PixelitorWindow.get().updateTitle(null);
-        FramesUI.resetCascadeIndex();
+        FramesUI.resetCascadeCount();
     }
 
     private static void makeSureAViewIsActive() {
@@ -368,7 +368,11 @@ public class Views {
 
     public static void onActiveComp(Consumer<Composition> action) {
         if (activeView != null) {
-            action.accept(activeView.getComp());
+            try {
+                action.accept(activeView.getComp());
+            } catch (Exception e) {
+                Messages.showException(e);
+            }
         }
     }
 

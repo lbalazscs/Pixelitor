@@ -162,12 +162,12 @@ public class EDT {
         run(() -> Events.postAssertJEvent(evt));
     }
 
-    public static void increaseZoom() {
-        run(() -> Views.getActive().increaseZoom());
+    public static void zoomIn() {
+        run(() -> Views.getActive().zoomIn());
     }
 
-    public static void decreaseZoom() {
-        run(() -> Views.getActive().decreaseZoom());
+    public static void zoomOut() {
+        run(() -> Views.getActive().zoomOut());
     }
 
     public static ZoomLevel getZoomLevelOfActive() {

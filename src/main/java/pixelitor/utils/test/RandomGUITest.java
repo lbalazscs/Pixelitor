@@ -75,7 +75,9 @@ import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.utils.QuadrantAngle.*;
+import static pixelitor.utils.QuadrantAngle.ANGLE_180;
+import static pixelitor.utils.QuadrantAngle.ANGLE_270;
+import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * An automatic test using java.awt.Robot, which performs
@@ -431,7 +433,7 @@ public class RandomGUITest {
             robot.delay(50);
         }
 
-        return Debug.modifiersAsString(ctrlDown, altDown, shiftDown, rightMouse, false);
+        return Debug.modifiersToString(ctrlDown, altDown, shiftDown, rightMouse, false);
     }
 
     private static void randomColors() {

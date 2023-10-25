@@ -24,7 +24,10 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 
 import static java.lang.String.format;
-import static pixelitor.gui.AutoZoom.*;
+import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_HEIGHT_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_WIDTH_ACTION;
 import static pixelitor.utils.Keys.*;
 import static pixelitor.utils.Texts.i18n;
 
@@ -47,11 +50,11 @@ public class ZoomMenu extends PMenu {
 
     private static final Action ZOOM_IN_ACTION = new OpenViewEnabledAction(
         i18n("zoom_in"),
-        comp -> comp.getView().increaseZoom());
+        comp -> comp.getView().zoomIn());
 
     private static final Action ZOOM_OUT_ACTION = new OpenViewEnabledAction(
         i18n("zoom_out"),
-        comp -> comp.getView().decreaseZoom());
+        comp -> comp.getView().zoomOut());
 
     // it is important to initialize this after other static fields
     public static final ZoomMenu INSTANCE = new ZoomMenu();

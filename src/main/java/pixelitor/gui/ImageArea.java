@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static javax.swing.SwingConstants.TOP;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.io.DropListener.Destination.NEW_IMAGES;
@@ -60,9 +59,7 @@ public class ImageArea {
     private static final List<Consumer<Mode>> uiChangeListeners = new ArrayList<>();
     private static ImageAreaUI ui;
 
-    // the tab placement used for creating new
-    // tabbed panes and for saving the preferences
-    private static int tabPlacement = TOP;
+    private static int tabPlacement;
 
     static {
         ImageAreaConfig config = AppPreferences.loadDesktopMode();
@@ -81,7 +78,7 @@ public class ImageArea {
         if (mode == FRAMES) {
             ui = new FramesUI();
         } else {
-            ui = new TabsUI(tabPlacement);
+            ui = new TabsUI();
         }
     }
 
@@ -129,7 +126,7 @@ public class ImageArea {
         if (mode == FRAMES) {
             // make sure that the internal frames start
             // in the top-left corner when they are re-added
-            FramesUI.resetCascadeIndex();
+            FramesUI.resetCascadeCount();
         }
         Views.forEachView(ImageArea::addView);
 

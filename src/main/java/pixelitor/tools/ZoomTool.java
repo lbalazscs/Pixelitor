@@ -38,7 +38,9 @@ import java.awt.geom.Path2D;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
-import static pixelitor.tools.DragToolState.*;
+import static pixelitor.tools.DragToolState.INITIAL_DRAG;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.TRANSFORM;
 
 public class ZoomTool extends DragTool {
     private DragToolState state = NO_INTERACTION;
@@ -64,9 +66,9 @@ public class ZoomTool extends DragTool {
         View view = e.getView();
 
         if (e.isRight() || (e.isLeft() && e.isAltDown())) {
-            view.decreaseZoom(mousePos);
+            view.zoomOut(mousePos);
         } else {
-            view.increaseZoom(mousePos);
+            view.zoomIn(mousePos);
         }
     }
 

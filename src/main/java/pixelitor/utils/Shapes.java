@@ -1914,8 +1914,8 @@ public class Shapes {
         }
 
         for (int i = 1; i < numPoints - 1; i++) {
-            Geometry.copy(controlPoints[i][0], centers[i - 1]);
-            Geometry.copy(controlPoints[i][1], centers[i]);
+            Geometry.copy(centers[i - 1], controlPoints[i][0]);
+            Geometry.copy(centers[i], controlPoints[i][1]);
             calculateControlPoint(points.get(i),
                 controlPoints[i][0], controlPoints[i][1],
                 lengths[i - 1], lengths[i], smoothness);
@@ -1928,16 +1928,16 @@ public class Shapes {
         // for first point
         if (isClosed) {
             // first and last point's center
-            Geometry.copy(controlPoints[0][0], centers[centers.length - 1]);
+            Geometry.copy(centers[centers.length - 1], controlPoints[0][0]);
             // first and second's center
-            Geometry.copy(controlPoints[0][1], centers[0]);
+            Geometry.copy(centers[0], controlPoints[0][1]);
             calculateControlPoint(point,
                 controlPoints[0][0], controlPoints[0][1],
                 lengths[lengths.length - 1], lengths[0], smoothness);
             path.moveTo(lastPoint.getX(), lastPoint.getY());
         } else {
-            Geometry.copy(controlPoints[0][1], point);
-            Geometry.copy(controlPoints[lastPointIndex][0], lastPoint);
+            Geometry.copy(point, controlPoints[0][1]);
+            Geometry.copy(lastPoint, controlPoints[lastPointIndex][0]);
 
             path.moveTo(point.getX(), point.getY());
         }

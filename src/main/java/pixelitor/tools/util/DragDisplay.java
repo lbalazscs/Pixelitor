@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,25 +57,11 @@ public class DragDisplay {
     }
 
     public static String getHeightDisplayString(double imHeight) {
-        String dyString;
-        int rounded = (int) imHeight;
-        if (imHeight >= 0) {
-            dyString = "\u2195 = " + rounded + " px";
-        } else {
-            dyString = "\u2195 = " + (-rounded) + " px";
-        }
-        return dyString;
+        return "\u2195 = " + Math.abs((int) imHeight) + " px";
     }
 
     public static String getWidthDisplayString(double imWidth) {
-        String dxString;
-        int rounded = (int) imWidth;
-        if (imWidth >= 0) {
-            dxString = "\u2194 = " + rounded + " px";
-        } else {
-            dxString = "\u2194 = " + (-rounded) + " px";
-        }
-        return dxString;
+        return "\u2194 = " + Math.abs((int) imWidth) + " px";
     }
 
     public static void displayRelativeMovement(Graphics2D g, int imDx, int imDy,

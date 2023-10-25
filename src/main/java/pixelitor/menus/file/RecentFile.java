@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,31 +18,36 @@ package pixelitor.menus.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Information about a recently opened file
  */
 public class RecentFile {
     private final File file;
-    private int nr;
+    private int listPosition;
 
     public RecentFile(File file) {
         this.file = file;
     }
 
-    public String getMenuName() {
-        return nr + ". " + file.getName();
+    public String getDisplayText() {
+        return listPosition + ". " + file.getName();
     }
 
     public File getFile() {
         return file;
     }
 
-    public void setNr(int nr) {
-        this.nr = nr;
+    public void setListPosition(int listPosition) {
+        this.listPosition = listPosition;
     }
 
-    public String getSavedName() {
+    public String getToolTipText() {
+        return file.getAbsolutePath();
+    }
+
+    public String getSavedPath() {
         String retVal;
         try {
             retVal = file.getCanonicalPath();
@@ -60,18 +65,12 @@ public class RecentFile {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        RecentFile recentFile = (RecentFile) o;
-
-        if (file != null) {
-            return file.equals(recentFile.file);
-        } else {
-            return recentFile.file == null;
-        }
+        RecentFile that = (RecentFile) o;
+        return Objects.equals(file, that.file);
     }
 
     @Override
     public int hashCode() {
-        return file != null ? file.hashCode() : 0;
+        return Objects.hashCode(file);
     }
 }

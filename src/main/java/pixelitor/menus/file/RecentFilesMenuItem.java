@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,11 +31,11 @@ public class RecentFilesMenuItem extends JMenuItem {
     private final RecentFile recentFile;
 
     public RecentFilesMenuItem(RecentFile recentFile) {
-        super(recentFile.getMenuName());
+        super(recentFile.getDisplayText());
 
         this.recentFile = recentFile;
 
-        setToolTipText(recentFile.getFile().getAbsolutePath());
+        setToolTipText(recentFile.getToolTipText());
 
         addActionListener(e -> openAsync());
     }

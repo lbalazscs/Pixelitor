@@ -209,7 +209,7 @@ public class AbstractLights extends ParametrizedFilter {
 
         Color color = Color.getHSBColor(hue / 360.0f, 1.0f, bri);
         if (whiteParam.getValue() > 0) {
-            color = Colors.rgbInterpolate(color, Color.WHITE, whiteParam.getPercentage());
+            color = Colors.interpolateRGB(color, Color.WHITE, whiteParam.getPercentage());
         }
         return color;
     }
