@@ -32,7 +32,9 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
-import static pixelitor.tools.shapes.StrokeType.*;
+import static pixelitor.tools.shapes.StrokeType.BASIC;
+import static pixelitor.tools.shapes.StrokeType.SHAPE;
+import static pixelitor.tools.shapes.StrokeType.ZIGZAG;
 
 /**
  * A {@link FilterParam} for stroke settings.
@@ -99,6 +101,11 @@ public class StrokeParam extends AbstractFilterParam {
 
     public ShapeType getShapeType() {
         return shapeTypeParam.getSelected();
+    }
+
+    public FilterParam withStrokeWidth(int newWidth) {
+        strokeWidthParam.changeDefaultValue(newWidth);
+        return this;
     }
 
     public float getStrokeWidth() {

@@ -105,7 +105,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
             foreground,
             waterMark,
             new DialogParam("Transform", nonlinType, nonlinTuning, center, rotate, scale),
-            strokeParam,
+            strokeParam.withStrokeWidth(2),
             effectsParam
         ).withAction(new FilterButtonModel("Export SVG...", this::exportSVG,
             null, "Export the current shape to an SVG file",

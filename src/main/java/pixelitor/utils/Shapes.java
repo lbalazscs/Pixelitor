@@ -2008,6 +2008,23 @@ public class Shapes {
             .createTransformedShape(shape);
     }
 
+    public static void elasticLine(Path2D path, Point2D from, Point2D to, boolean nonlin) {
+        if (nonlin) {
+            // create a line that can be distorted
+            // by nonlinear distortions
+            int numExtraPoints = 25;
+            double dt = 1.0 / (numExtraPoints + 1);
+            for (int i = 0; i <= numExtraPoints; i++) {
+                double t = i * dt;
+                Point2D cp = Geometry.interpolate(from, to, t + dt * 0.5);
+                Point2D p = Geometry.interpolate(from, to, t + dt);
+                path.curveTo(cp.getX(), cp.getY(), cp.getX(), cp.getY(), p.getX(), p.getY());
+            }
+        } else {
+            path.lineTo(to.getX(), to.getY());
+        }
+    }
+
     /**
      * Resizes the given shape to fit centrally within a target rectangle
      * without distortion, considering the given width, height, and margin.

@@ -83,16 +83,22 @@ import java.io.File;
 import java.util.ResourceBundle;
 
 import static pixelitor.Views.*;
-import static pixelitor.colors.FillType.*;
+import static pixelitor.colors.FillType.BACKGROUND;
+import static pixelitor.colors.FillType.FOREGROUND;
+import static pixelitor.colors.FillType.TRANSPARENT;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.*;
+import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
+import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
+import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.utils.Keys.*;
-import static pixelitor.utils.QuadrantAngle.*;
+import static pixelitor.utils.QuadrantAngle.ANGLE_180;
+import static pixelitor.utils.QuadrantAngle.ANGLE_270;
+import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * The main menu bar of the app window.
@@ -1027,6 +1033,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderCurvesSubmenu() {
         PMenu sub = new PMenu("Curves");
 
+        sub.addFilter(CircleWeave.NAME, CircleWeave::new);
         sub.addFilter(FlowerOfLife.NAME, FlowerOfLife::new);
         sub.addFilter(FractalCurves.NAME, FractalCurves::new);
         sub.addFilter(Grid.NAME, Grid::new);
