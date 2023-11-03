@@ -21,6 +21,8 @@ import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import pixelitor.TestHelper;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.gui.UserPreset;
+
 
 import static org.mockito.Mockito.*;
 
@@ -175,4 +177,5 @@ class LevelsTest {
         Assertions.assertEquals(expectedGreen, lookup.mapGreen(input));
         Assertions.assertEquals(expectedBlue, lookup.mapBlue(input));
     }
+
 }

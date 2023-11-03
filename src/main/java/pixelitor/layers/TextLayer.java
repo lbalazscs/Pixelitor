@@ -397,6 +397,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return true;
     }
 
+
     @Override
     public String getPresetDirName() {
         return TEXT_PRESETS_DIR_NAME;

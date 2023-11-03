@@ -30,6 +30,11 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
+import org.junit.jupiter.api.Assertions;
+import java.awt.Dimension;
+import pixelitor.layers.TextLayer;
+
+
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -123,16 +128,6 @@ public class TextLayerTest {
         }
     }
 
-//    @Test
-//    public void createSelectionFromText() {
-//        assertThat(comp).doesNotHaveSelection();
-//
-//        layer.createSelectionFromText();
-//
-//        assertThat(comp).hasSelection();
-//        iconUpdates.check(0, 0);
-//    }
-
     @Test
     public void enlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
@@ -176,5 +171,20 @@ public class TextLayerTest {
             .nameIs(newText);
 
         iconUpdates.check(0, 0);
+    }
+
+    /**
+     * Newly added testCase
+     */
+    @Test
+    public void testHasRasterThumbnail() {
+        TextLayer textLayer = new TextLayer(comp);
+        boolean hasRasterThumbnail = textLayer.hasRasterThumbnail();
+        Assertions.assertFalse(hasRasterThumbnail);
+    }
+    @Test
+    public void testResize() {
+        TextLayer textLayer = new TextLayer(comp);
+        textLayer.resize(new Dimension(100, 100));
     }
 }

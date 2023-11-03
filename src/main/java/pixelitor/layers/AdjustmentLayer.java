@@ -181,6 +181,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
         showOriginal = false;
     }
 
+
+
     @Override
     public void onFilterDialogCanceled() {
         if (!showOriginal) {
@@ -235,4 +237,5 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
         return node;
     }
+
 }

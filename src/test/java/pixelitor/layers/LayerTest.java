@@ -311,23 +311,17 @@ public class LayerTest {
             LayerMaskAddType[] addTypes = LayerMaskAddType.values();
             for (LayerMaskAddType addType : addTypes) {
                 assertThat(layer).hasNoMask();
-
                 layer.addMask(addType);
                 assertThat(layer).hasMask();
                 History.assertNumEditsIs(1);
-
                 String expectedEditName = addType.needsSelection() ?
                     "Layer Mask from Selection" : "Add Layer Mask";
                 History.undo(expectedEditName);
                 assertThat(layer).hasNoMask();
-
                 History.redo(expectedEditName);
                 assertThat(layer).hasMask();
-
-                // undo again so that it has no mask in the next round
                 History.undo(expectedEditName);
                 assertThat(layer).hasNoMask();
-
                 iconUpdates.check(0, 0);
             }
         }

@@ -163,4 +163,39 @@ class PixelitorUndoManagerTest {
 
         return edit;
     }
+
+//    /**
+//     * Newly added test case
+//     */
+//    @Test
+//    void testAddEditAndEventFiring() {
+//        PixelitorEdit edit = createMockEdit("new edit");
+//        int originalSize = undoManager.getSize();
+//
+//        boolean result = undoManager.addEdit(edit);
+//
+//        assertThat(result).isTrue();
+//        assertThat(undoManager.getSize()).isEqualTo(originalSize + 1);
+//        assertThat(undoManager.getSelectedIndex()).isEqualTo(originalSize);
+//        // Verify that the appropriate events were fired
+//    }
+//
+//    @Test
+//    void testUndoAndRedo() {
+//        // Assuming undoManager is in a state where undo and redo are possible
+//        int originalSize = undoManager.getSize();
+//        int originalIndex = undoManager.getSelectedIndex();
+//
+//        // Test undo
+//        undoManager.undo();
+//        assertThat(undoManager.getSelectedIndex()).isEqualTo(originalIndex - 1);
+//        // Verify that the last edit was undone and a status message was shown
+//
+//        // Test redo
+//        undoManager.redo();
+//        assertThat(undoManager.getSelectedIndex()).isEqualTo(originalIndex);
+//        // Verify that the last edit was redone and a status message was shown
+//    }
+
+
 }

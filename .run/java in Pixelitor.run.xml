@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="java in Pixelitor" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+    <module name="Pixelitor" />
+    <extension name="coverage" sample_coverage="false" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="directory" />
+    <dir value="$PROJECT_DIR$/src/test/java" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

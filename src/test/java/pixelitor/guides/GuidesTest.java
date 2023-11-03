@@ -20,6 +20,10 @@ package pixelitor.guides;
 import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.compactions.Flip;
+import java.awt.Rectangle;
+
+import pixelitor.utils.QuadrantAngle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,4 +79,38 @@ class GuidesTest {
         assertThat(guides.getHorizontals()).containsOnly(0.25, 0.5, 0.75);
         assertThat(guides.getVerticals()).containsOnly(0.25, 0.5, 0.75);
     }
+
+    /**
+     * Newly added test
+     */
+    @Test
+    @DisplayName("Copy guides for new composition")
+    void copyForNewComp() {
+        guides.addHorRelative(0.25);
+        guides.addVerRelative(0.5);
+        Guides copy = guides.copyForNewComp(comp.getView());
+        assertThat(copy.getHorizontals()).containsOnly(0.25);
+        assertThat(copy.getVerticals()).containsOnly(0.5);
+    }
+
+    @Test
+    @DisplayName("Copy guides for 90-degree rotation")
+    void copyFor90DegreeRotation() {
+        guides.addHorRelative(0.25);
+        guides.addVerRelative(0.5);
+        Guides copy = guides.copyForRotate(QuadrantAngle.ANGLE_90, comp.getView());
+        assertThat(copy.getHorizontals()).containsOnly(0.5);
+        assertThat(copy.getVerticals()).containsOnly(0.75);
+    }
+
+    @Test
+    @DisplayName("Copy guides for 180-degree rotation")
+    void copyFor180DegreeRotation() {
+        guides.addHorRelative(0.25);
+        guides.addVerRelative(0.5);
+        Guides copy = guides.copyForRotate(QuadrantAngle.ANGLE_180, comp.getView());
+        assertThat(copy.getHorizontals()).containsOnly(0.75);
+        assertThat(copy.getVerticals()).containsOnly(0.5);
+    }
+
 }

@@ -18,8 +18,10 @@
 package pixelitor.layers;
 
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.MockFilter;
 
 @DisplayName("Adjustment layer tests")
@@ -43,6 +45,7 @@ class AdjustmentLayerTest {
         assert filter.getNumTransformCalls() == 1;
     }
 
+
     @Test
     void hiddenLayerDoesNotRunFilter() {
         layer.setVisible(false, false, true);
@@ -63,4 +66,7 @@ class AdjustmentLayerTest {
             throw new AssertionError("Expected " + expected + ", found " + actual);
         }
     }
+
+
+
 }
