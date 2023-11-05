@@ -45,7 +45,7 @@ import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
 
 /**
- * Static shape-related utility methods
+ * Static shape-related utility methods.
  */
 public class Shapes {
     private static final Stroke BIG_STROKE = new BasicStroke(3);
@@ -58,7 +58,7 @@ public class Shapes {
 
     /**
      * Converts the given {@link Shape}, assumed to be
-     * in image coordinates, to a {@link Path}
+     * in image coordinates, to a {@link Path}.
      */
     public static Path shapeToPath(Shape shape, View view) {
         Composition comp = view == null ? null : view.getComp();
@@ -116,7 +116,7 @@ public class Shapes {
     }
 
     /**
-     * Fills the given Shape with the given color and also adds a black outline
+     * Fills the given Shape with the given color and also adds a black outline.
      */
     public static void fillVisibly(Graphics2D g, Shape shape, Color c) {
         assert shape != null;
@@ -237,7 +237,9 @@ public class Shapes {
         return path;
     }
 
-    // makes sure that the returned rectangle has positive width, height
+    /**
+     * Makes sure that the returned rectangle has positive width and height.
+     */
     public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
         int topX, topY, width, height;
 
@@ -260,7 +262,9 @@ public class Shapes {
         return new Rectangle(topX, topY, width, height);
     }
 
-    // makes sure that the returned rectangle has positive width, height
+    /**
+     * Makes sure that the returned rectangle has positive width and height.
+     */
     public static Rectangle2D toPositiveRect(Rectangle2D input) {
         double inX = input.getX();
         double inY = input.getY();
@@ -286,7 +290,9 @@ public class Shapes {
         }
     }
 
-    // makes sure that the returned rectangle has positive width, height
+    /**
+     * Makes sure that the returned rectangle has positive width and height.
+     */
     public static Rectangle toPositiveRect(Rectangle rect) {
         int width = rect.width;
         int height = rect.height;
@@ -396,7 +402,7 @@ public class Shapes {
     }
 
     /**
-     * Returns true if the two shapes have identical path iterators
+     * Returns true if the two given shapes have identical path iterators.
      */
     public static boolean pathIteratorIsEqual(Shape s1, Shape s2, double tolerance) {
         PathIterator it1 = s1.getPathIterator(null);
@@ -590,7 +596,7 @@ public class Shapes {
     }
 
     /**
-     * Create a circle shape with double precision around the given center
+     * Creates a circle shape with double precision around the given center.
      */
     public static Shape createCircle(double cx, double cy, double radius) {
         double diameter = 2 * radius;
@@ -598,7 +604,7 @@ public class Shapes {
     }
 
     /**
-     * Create a Bezier path approximating a circle with the given number of control points.
+     * Creates a Bezier path approximating a circle with the given number of control points.
      * Useful if the circle will be distorted in a nonlinear way.
      */
     public static Shape createCircle(double cx, double cy, double radius, int numPoints) {
@@ -640,7 +646,7 @@ public class Shapes {
     }
 
     /**
-     * Create a circle shape with float precision around the given center
+     * Creates a circle shape with float precision around the given center.
      */
     public static Shape createCircle(float cx, float cy, float radius) {
         float diameter = 2 * radius;
@@ -648,14 +654,14 @@ public class Shapes {
     }
 
     /**
-     * Create an ellipse shape with double precision around the given center
+     * Creates an ellipse shape with double precision around the given center.
      */
     public static Shape createEllipse(double cx, double cy, double radiusX, double radiusY) {
         return new Ellipse2D.Double(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
     }
 
     /**
-     * Create an ellipse shape with float precision around the given center
+     * Creates an ellipse shape with float precision around the given center.
      */
     public static Shape createEllipse(float cx, float cy, float radiusX, float radiusY) {
         return new Ellipse2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
@@ -1879,7 +1885,7 @@ public class Shapes {
 
     /**
      * Another version of the above method, which supports closed paths and
-     * has a smoothness parameter
+     * has a smoothness parameter.
      */
     public static Path2D smoothConnect(List<Point2D> points, double smoothness) {
         int numPoints = points.size();

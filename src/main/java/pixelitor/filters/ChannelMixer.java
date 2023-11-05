@@ -34,7 +34,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * The Channel Mixer filter
+ * The "Channel Mixer" filter.
  */
 public class ChannelMixer extends ParametrizedFilter {
     public static final String NAME = i18n("channel_mixer");
@@ -254,7 +254,7 @@ public class ChannelMixer extends ParametrizedFilter {
         return dest;
     }
 
-    // Replace the adjustment listeners with custom versions which
+    // Replace the adjustment listeners with custom versions that
     // change other values before triggering the filter.
     public void replaceAdjustmentListeners() {
         autoBWParam.setAdjustmentListener(this::updateAutoBW);
@@ -266,7 +266,7 @@ public class ChannelMixer extends ParametrizedFilter {
         enablePresets();
 
         if (autoBW) {
-            // since the channels will be synchronized, it is enough to have only
+            // since the channels will be synchronized, it's enough to have only
             // one auto-normalization constraint - this also prevents feedback loops
             greenPercentageGroup.setAutoNormalizationEnabled(false, true);
             bluePercentageGroup.setAutoNormalizationEnabled(false, true);

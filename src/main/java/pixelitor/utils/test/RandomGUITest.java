@@ -18,10 +18,7 @@
 package pixelitor.utils.test;
 
 import com.bric.util.JVM;
-import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
-import pixelitor.GUIMode;
-import pixelitor.Views;
+import pixelitor.*;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
@@ -80,11 +77,11 @@ import static pixelitor.utils.QuadrantAngle.ANGLE_270;
 import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
- * An automatic test using java.awt.Robot, which performs
+ * An automatic test using {@link Robot}, which performs
  * random mouse movements and actions.
  *
  * Can be dangerous because the random native mouse events
- * can control other apps as well if they escape.
+ * can affect other apps as well if they escape.
  */
 public class RandomGUITest {
     public static final char EXIT_KEY_CHAR = 'Q';
@@ -235,7 +232,7 @@ public class RandomGUITest {
             GUIUtils.invokeAndWait(() -> {
                 try {
                     weightedCaller.runRandomAction();
-                    ConsistencyChecks.checkAll(Views.getActiveComp(), true);
+                    ConsistencyChecks.checkAll(Views.getActiveComp());
                 } catch (Throwable e) {
                     Messages.showException(e);
                 }
@@ -558,8 +555,8 @@ public class RandomGUITest {
         long runCountAfter = Filter.runCount;
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
-                "runCountBefore = " + runCountBefore
-                    + ", runCountAfter = " + runCountAfter);
+                "filter = %s, runCountBefore = %d, runCountAfter = %d".formatted(
+                    filterName, runCountBefore, runCountAfter));
         }
     }
 
@@ -582,14 +579,14 @@ public class RandomGUITest {
 
     private static final int[] keyCodes = {VK_1,
         VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
-        // skip A, because it is the stop keystroke
+        // skip A, because it's the stop keystroke
         VK_B, VK_C,
         VK_D, VK_E, VK_F,
         VK_G, VK_H, VK_I,
         VK_J, VK_K, VK_L,
         VK_M, VK_N, VK_O,
         VK_P,
-        // skip Q, because it is the exit keystroke
+        // skip Q, because it's the exit keystroke
         VK_R, VK_S,
         // skip T, because it brings up the text layer dialog
         VK_U,
@@ -692,10 +689,10 @@ public class RandomGUITest {
 
             History.undo();
 
-            // for some reason, redo might not be available even if we are right
-            // after an undo which didn't throw a CannotUndoException
-            // This is not a problem normally, because the RedoMenuItem
-            // also checks History.canRedo() after an undo
+            // For some reason, redo might not be available even if we are right
+            // after an undo which didn't throw a CannotUndoException.
+            // This isn't a problem normally, because the RedoMenuItem
+            // also checks History.canRedo() after an undo.
             if (!History.canRedo()) {
                 return;
             }
@@ -1141,8 +1138,7 @@ public class RandomGUITest {
             assert preferredTweenFilter.getParamSet().isAnimatable();
             return preferredTweenFilter;
         }
-        FilterAction[] filterActions = Filters.getAnimationFilters();
-        FilterAction filterAction = Rnd.chooseFrom(filterActions);
+        FilterAction filterAction = Filters.getRandomAnimationFilter();
         return (ParametrizedFilter) filterAction.getFilter();
     }
 
@@ -1267,7 +1263,7 @@ public class RandomGUITest {
         weightedCaller.registerAction(4, RandomGUITest::randomGuides);
         weightedCaller.registerAction(4, RandomGUITest::setPathsToNull);
 
-        if (GUIMode.enableExperimentalFeatures) {
+        if (Features.enableExperimental) {
             weightedCaller.registerAction(2, RandomGUITest::randomNewAdjustmentLayer);
         }
 

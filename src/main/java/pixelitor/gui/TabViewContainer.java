@@ -113,9 +113,10 @@ public class TabViewContainer extends JComponent implements ViewContainer {
 
         popup.addSeparator();
 
-        // close the clicked one, even if it is not the active!
+        // close the clicked one, even if it isn't the active!
         popup.add(new PAction(i18n("close"), () ->
             Views.warnAndClose(view)));
+
         popup.add(new PAction("Close Others", () ->
             Views.warnAndCloseAllBut(view)));
         popup.add(Views.CLOSE_UNMODIFIED_ACTION);

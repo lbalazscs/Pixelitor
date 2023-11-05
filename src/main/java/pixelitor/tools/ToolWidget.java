@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,20 +31,20 @@ import java.awt.geom.AffineTransform;
 public interface ToolWidget {
     /**
      * If a {@link DraggablePoint}'s handle contains the given
-     * component space location, return the point, otherwise return null.
+     * component space location, return the point; otherwise return null.
      */
     DraggablePoint findHandleAt(double x, double y);
 
     /**
-     * Paint the widget on the given Graphics2D,
-     * which is expected to be in component space
+     * Paints the widget on the given Graphics2D,
+     * which is expected to be in component space.
      */
     void paint(Graphics2D g);
 
     /**
      * The component-space coordinates of this widget
      * have to be recalculated based on the image-space coordinates
-     * because the active view changed (zoom, canvas resize etc.)
+     * because the active view changed (zoom, canvas resize, etc.).
      */
     void coCoordsChanged(View view);
 

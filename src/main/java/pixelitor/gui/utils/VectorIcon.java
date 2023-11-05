@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,14 @@ package pixelitor.gui.utils;
 import javax.swing.*;
 import java.awt.*;
 
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
 /**
- * An abstract superclass for vector icons which look good
- * on HiDPI screens with any scaling
+ * An abstract superclass for vector icons, which look good
+ * on HiDPI screens with any scaling.
  */
 public abstract class VectorIcon implements Icon, Cloneable {
     protected Color color;

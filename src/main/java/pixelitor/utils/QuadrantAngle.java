@@ -24,13 +24,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
- * A rotation by a given number of quadrants.
+ * Represents rotation angles by a specific number of quadrants.
  */
 public enum QuadrantAngle {
     ANGLE_90(90, "rotate_90") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
-            // switch width and height
+            // swap the width and height
             int newWidth = canvas.getHeight();
             int newHeight = canvas.getWidth();
             canvas.resize(newWidth, newHeight, view, false);
@@ -38,7 +38,6 @@ public enum QuadrantAngle {
 
         @Override
         public AffineTransform createTransform(int width, int height) {
-            // rotate, then translate to compensate
             var at = AffineTransform.getTranslateInstance(height, 0);
             at.quadrantRotate(1);
             return at;
@@ -46,7 +45,7 @@ public enum QuadrantAngle {
 
         @Override
         public BufferedImage createDestImage(BufferedImage img) {
-            // switch width and height
+            // swap the width and height
             int newWidth = img.getHeight();
             int newHeight = img.getWidth();
 
@@ -60,7 +59,6 @@ public enum QuadrantAngle {
 
         @Override
         public AffineTransform createTransform(int width, int height) {
-            // rotate, then translate to compensate
             var at = AffineTransform.getTranslateInstance(width, height);
             at.quadrantRotate(2);
             return at;
@@ -77,13 +75,12 @@ public enum QuadrantAngle {
     }, ANGLE_270(270, "rotate_270") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
-            // same as for 90
+            // same as for 90 degrees
             ANGLE_90.resizeNewCanvas(canvas, view);
         }
 
         @Override
         public AffineTransform createTransform(int width, int height) {
-            // rotate, then translate to compensate
             var at = AffineTransform.getTranslateInstance(0, width);
             at.quadrantRotate(3);
             return at;
@@ -91,7 +88,7 @@ public enum QuadrantAngle {
 
         @Override
         public BufferedImage createDestImage(BufferedImage img) {
-            // switch width and height
+            // swap the width and height
             int newWidth = img.getHeight();
             int newHeight = img.getWidth();
 
@@ -114,8 +111,8 @@ public enum QuadrantAngle {
     public abstract void resizeNewCanvas(Canvas canvas, View view);
 
     /**
-     * Returns the rotation as a transform in
-     * image-space coordinates relative to the canvas
+     * Returns the rotation as a transformation in
+     * image-space coordinates relative to the canvas.
      */
     public AffineTransform createCanvasTransform(Canvas canvas) {
         return createTransform(canvas.getWidth(), canvas.getHeight());
@@ -123,7 +120,7 @@ public enum QuadrantAngle {
 
     /**
      * Returns the transformation of the image,
-     * ignoring the canvas and the translation
+     * ignoring the canvas and the translation.
      */
     public AffineTransform createImageTransform(BufferedImage image) {
         return createTransform(image.getWidth(), image.getHeight());
@@ -140,7 +137,7 @@ public enum QuadrantAngle {
     }
 
     /**
-     * Creates a new image with the appropriate size
+     * Creates a new image with the appropriate size.
      */
     public abstract BufferedImage createDestImage(BufferedImage img);
 }

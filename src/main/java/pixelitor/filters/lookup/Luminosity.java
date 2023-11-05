@@ -23,7 +23,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 /**
- * A filer which extracts the luminosity channel
+ * A filer that extracts the luminosity channel.
  */
 public class Luminosity extends Filter {
     public static final String NAME = "Luminosity";

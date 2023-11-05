@@ -48,4 +48,9 @@ public class RandomFilter extends FilterWithGUI {
     public boolean canHaveUserPresets() {
         return false;
     }
+
+    @Override
+    public boolean canBeSmart() {
+        return false;
+    }
 }

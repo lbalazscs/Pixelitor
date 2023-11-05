@@ -46,7 +46,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.lang.String.format;
 
 /**
- * A cropping action on all layers of a composition
+ * A cropping action on all layers of a {@link Composition}.
  */
 public class Crop implements CompAction {
     // the crop rectangle in image space (relative to the canvas)
@@ -82,7 +82,7 @@ public class Crop implements CompAction {
             roundedImCropRect = roundedImCropRect.intersection(canvasBounds);
         }
 
-        // from here it is effectively final, so it can be used in a lambda
+        // from here it's effectively final, so it can be used in a lambda
         Rectangle cropRect = roundedImCropRect;
 
         if (cropRect.isEmpty()) {
@@ -104,8 +104,8 @@ public class Crop implements CompAction {
         }
 
         if (!selectionCrop) {
-            // if this crop was started from the crop tool, there
-            // still could be a selection that needs to be cropped
+            // If the cropping was started from the crop tool, there
+            // could still be a selection that needs to be cropped.
             newComp.intersectSelection(cropRect);
         }
 
@@ -114,10 +114,11 @@ public class Crop implements CompAction {
 
         newCanvas.resize(cropRect.width, cropRect.height, view, false);
 
-        // The intersected selection, tool widgets etc. have to be moved
+        // Move the intersected selection, tool widgets, etc.,
         // into the coordinate system of the new, cropped image.
-        // It is important to call this only AFTER the actual canvas size was changed
-        // so that the component coords are calculated correctly from the new image coords.
+        // It's important to call this only AFTER the actual canvas size
+        // has been changed, ensuring that the new component coordinates
+        // are calculated correctly from the new image coordinates.
         newComp.imCoordsChanged(canvasTransform, false, view);
 
         if (addHidingMask) {
@@ -129,9 +130,9 @@ public class Crop implements CompAction {
             addHidingMask(newComp, hidingShape, false);
         }
 
-        // if before the crop the internal frame started
-        // at large negative coordinates, after the crop it
-        // could become unreachable, so move it
+        // If before the crop the internal frame started
+        // at large negative coordinates, it might become
+        // unreachable after the crop, so move it.
         view.ensurePositiveLocation();
 
         assert oldComp != newComp;
@@ -153,7 +154,7 @@ public class Crop implements CompAction {
     }
 
     /**
-     * Crops the active image based on the crop tool
+     * Crops the active composition based on the crop tool.
      */
     public static void toolCropActiveImage(Rectangle2D cropRect,
                                            boolean allowGrowing,
@@ -164,7 +165,7 @@ public class Crop implements CompAction {
     }
 
     /**
-     * Crops the active composition based on the non-transparent content.
+     * Crops the given composition based on the non-transparent content.
      */
     public static void contentCrop(Composition comp) {
         Rectangle2D bounds = comp.getNonTransparentContentBounds();
@@ -181,7 +182,7 @@ public class Crop implements CompAction {
     }
 
     /**
-     * Crops the active composition based on the selection bounds
+     * Crops the active composition based on the selection bounds.
      */
     public static void selectionCropActiveComp() {
         Views.onActiveComp(Crop::selectionCrop);
@@ -267,7 +268,7 @@ public class Crop implements CompAction {
 
     /**
      * The returned transform describes how the image space
-     * coordinates for a surviving pixel change after a crop
+     * coordinates for a surviving pixel change after a crop.
      */
     public static AffineTransform createCanvasTransform(Rectangle2D imCropRect) {
         double tx = -imCropRect.getX();

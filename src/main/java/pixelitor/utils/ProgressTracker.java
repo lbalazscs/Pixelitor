@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,27 +18,29 @@
 package pixelitor.utils;
 
 /**
- * Tracks the progress of some operation.
+ * Tracks the progress of an operation.
  */
 public interface ProgressTracker {
     /**
-     * One work unit - usually a line of pixels - was finished
+     * Signals the completion of a single work unit, often a line of pixels.
      */
     void unitDone();
 
     /**
-     * Multiple work units were finished
+     * Signals the completion of multiple work units.
+     *
+     * @param units The number of work units completed.
      */
     void unitsDone(int units);
 
     /**
-     * All the work is done
+     * Signals that all work has been completed.
      */
     void finished();
 
     /**
      * A "null object" tracker that does nothing and
-     * also can be shared because it has no state
+     * can be shared because it has no state
      */
     ProgressTracker NULL_TRACKER = new ProgressTracker() {
         @Override

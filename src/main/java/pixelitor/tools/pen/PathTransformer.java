@@ -48,7 +48,8 @@ public class PathTransformer implements PenToolMode {
     // Null if no box is being dragged.
     private TransformBox draggedBox;
 
-    // The receiver of keyboard nudges. Never null.
+    // The receiver of keyboard nudges.
+    // Never null (as long as this pen tool mode is active).
     private TransformBox lastActiveBox;
 
     private PathTransformer() {
@@ -79,9 +80,9 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public void imCoordsChanged(AffineTransform at, View view) {
-        // the path will be transformed by the box, which is unnecessary,
-        // since it was already transformed in Composition, but not a
-        // problem, because the box uses reference-point based transformations
+        // The path will be transformed by the box, which is unnecessary
+        // since it was already transformed in Composition. However, it's not a
+        // problem, because the box uses reference-point based transformations.
         for (TransformBox box : boxes) {
             box.imCoordsChanged(at, view);
         }
@@ -216,8 +217,9 @@ public class PathTransformer implements PenToolMode {
     @Override
     public DebugNode createDebugNode() {
         var node = PenToolMode.super.createDebugNode();
-        for (TransformBox box : boxes) {
-            node.add(box.createDebugNode());
+        for (int i = 0; i < boxes.size(); i++) {
+            TransformBox box = boxes.get(i);
+            node.add(box.createDebugNode("transform box " + i));
         }
         return node;
     }

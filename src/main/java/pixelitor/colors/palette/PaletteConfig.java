@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,11 @@ package pixelitor.colors.palette;
 
 import javax.swing.*;
 
+import static pixelitor.utils.Utils.toPercentage;
+
 /**
  * An interactive configuration for a {@link Palette}
- * with sliders
+ * with sliders.
  */
 public interface PaletteConfig {
     /**
@@ -30,8 +32,7 @@ public interface PaletteConfig {
     JPanel createConfigPanel(PalettePanel palettePanel);
 
     static JSlider createSlider(float value, String toolTip) {
-        int intValue = (int) (value * 100);
-        JSlider slider = new JSlider(0, 100, intValue);
+        JSlider slider = new JSlider(0, 100, toPercentage(value));
         slider.setToolTipText(toolTip);
         return slider;
     }

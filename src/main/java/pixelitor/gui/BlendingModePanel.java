@@ -32,8 +32,7 @@ import static java.awt.FlowLayout.LEFT;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * A GUI selector for opacity and blending mode.
- * Used by tools and layers.
+ * A GUI for setting the opacity and blending mode.
  */
 public class BlendingModePanel extends JPanel {
     private static final String OPACITY_LABEL_TEXT = i18n("opacity") + ":";

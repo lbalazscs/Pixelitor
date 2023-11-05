@@ -269,22 +269,18 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                         if (r > bloomThreshold) {
                             r *= bloom;
                         }
-//							r = bloomThreshold + (r-bloomThreshold) * bloom;
                         if (g > bloomThreshold) {
                             g *= bloom;
                         }
-//							g = bloomThreshold + (g-bloomThreshold) * bloom;
                         if (b > bloomThreshold) {
                             b *= bloom;
                         }
-//							b = bloomThreshold + (b-bloomThreshold) * bloom;
 
                         ar[1][i] = r;
                         gb[0][i] = g;
                         gb[1][i] = b;
 
                         i++;
-                        k++;
                     }
                 }
 

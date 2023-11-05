@@ -47,7 +47,10 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static java.awt.event.MouseEvent.*;
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_MOVED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
@@ -467,7 +470,7 @@ public class TestHelper {
         Utils.preloadUnitTestFontNames();
 
         Language.setCurrent(Language.ENGLISH);
-        Messages.setMsgHandler(new TestMessageHandler());
+        Messages.setHandler(new TestMessageHandler());
 
         // make sure that the current tool is not null
         Tools.setCurrentTool(Tools.BRUSH);

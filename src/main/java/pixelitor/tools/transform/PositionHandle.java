@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
 import java.io.Serial;
@@ -49,9 +48,8 @@ public abstract class PositionHandle extends DraggablePoint {
 
     protected PositionHandle(String name, TransformBox box,
                              PPoint p, View view,
-                             Color color, Color activeColor,
                              int cursorIndex, int cursorIndexIO) {
-        super(name, p, view, color, activeColor);
+        super(name, p, view);
         this.box = box;
         this.cursorIndex = cursorIndex;
         this.cursorIndexIO = cursorIndexIO;

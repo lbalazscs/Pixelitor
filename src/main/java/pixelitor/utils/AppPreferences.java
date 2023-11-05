@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import com.bric.util.JVM;
-import pixelitor.GUIMode;
+import pixelitor.Features;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
@@ -596,7 +596,7 @@ public final class AppPreferences {
     }
 
     private static void saveExperimentalFeatures() {
-        mainNode.putBoolean(EXPERIMENTAL_KEY, GUIMode.enableExperimentalFeatures);
+        mainNode.putBoolean(EXPERIMENTAL_KEY, Features.enableExperimental);
     }
 
     public static boolean loadNativeChoosers() {

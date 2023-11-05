@@ -25,7 +25,7 @@ import static java.lang.String.format;
 
 /**
  * A model for a button on a filter GUI that runs an action
- * when pushed, before triggering the filter preview.
+ * when clicked, and then triggers the filter preview.
  */
 public class FilterButtonModel implements FilterSetting {
     private final Runnable action;
@@ -78,8 +78,8 @@ public class FilterButtonModel implements FilterSetting {
     }
 
     /**
-     * The returned action only re-runs the filter
-     * (can be useful when using ThreadLocalRandom)
+     * Creates a filter button model that only re-runs the filter
+     * (can be useful when using ThreadLocalRandom).
      */
     public static FilterButtonModel createNoOpReseed() {
         return createReseed(() -> {});
@@ -90,13 +90,13 @@ public class FilterButtonModel implements FilterSetting {
         button = new JButton(text, icon);
         if (triggerFilter) {
             button.addActionListener(e -> {
-                // first run the given task...
+                // first perform the action...
                 action.run();
                 // ... and then trigger the filter preview
                 adjustmentListener.paramAdjusted();
             });
         } else {
-            // just the given task
+            // just perform the action
             button.addActionListener(e -> action.run());
         }
         if (toolTipText != null) {

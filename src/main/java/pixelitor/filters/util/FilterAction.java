@@ -35,7 +35,7 @@ import java.io.Serial;
 import java.util.function.Supplier;
 
 /**
- * An action that tries to run a filter on editing target.
+ * An action for running a lazily initialized filter.
  */
 public class FilterAction extends OpenViewEnabledAction.Checked {
     @Serial
@@ -44,7 +44,6 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
     private final Supplier<Filter> factory;
     private transient Filter filter;
     private final String name;
-    private String menuName;
     private boolean hasDialog;
 
     public FilterAction(String name, Supplier<Filter> factory) {
@@ -55,8 +54,7 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         super(name);
         this.name = name;
         this.hasDialog = hasDialog;
-        menuName = hasDialog ? name + "..." : name;
-        setText(menuName);
+        setText(hasDialog ? name + "..." : name);
 
         assert factory != null;
         this.factory = factory;
@@ -141,12 +139,11 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
         return filter;
     }
 
-    // overrides the constructor parameter
-    // a bit ugly, but it simplifies the builders
+    // Overrides the constructor parameter.
+    // A bit ugly, but it simplifies the builders.
     public FilterAction noGUI() {
         hasDialog = false;
-        menuName = name; // without the "..."
-        setText(menuName);
+        setText(name); // without the "..."
 
         return this;
     }

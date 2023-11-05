@@ -29,7 +29,7 @@ import static pixelitor.filters.util.Filters.getLastFilter;
 
 /**
  * The "Repeat" action, which repeats the last edit.
- * Currently, only the filters can be repeated.
+ * Currently, only filters can be repeated.
  */
 public class RepeatLast extends DrawableAction {
     public static final RepeatLast REPEAT_LAST_ACTION = new RepeatLast(false);
@@ -41,10 +41,10 @@ public class RepeatLast extends DrawableAction {
     private final boolean showDialog;
 
     private RepeatLast(boolean showDialog) {
-        // TODO This should be available for smart objects, however some technical
-        // problems prevent it at the moment: smart objects are handled in
+        // TODO This should be available for smart objects; however, some technical
+        // problems currently prevent it. Smart objects are handled in
         // FilterAction (because it might need to create a new filter instance),
-        // however here we have a Filter which is not guaranteed to have
+        // but here we have a Filter that isn't guaranteed to have
         // an action (deserialized smart filter). Perhaps an action could be searched
         // by the filter name.
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,

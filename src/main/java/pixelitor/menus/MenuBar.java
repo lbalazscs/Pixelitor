@@ -121,6 +121,8 @@ public class MenuBar extends JMenuBar {
         }
 
         add(createHelpMenu(pw, texts));
+
+        Filters.finishedAdding();
     }
 
     private static JMenu createFileMenu(PixelitorWindow pw, ResourceBundle texts) {
@@ -313,7 +315,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerStackSubmenu(texts));
         layersMenu.add(createLayerMaskSubmenu(texts));
 
-        if (GUIMode.enableExperimentalFeatures) {
+        if (Features.enableExperimental) {
             layersMenu.addSeparator();
 
             layersMenu.add(createAdjustmentLayersSubmenu());
@@ -668,7 +670,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.add(new OpenViewEnabledAction(duplicateName,
             comp -> addNew(comp.copy(CopyType.DUPLICATE_COMP, true))));
 
-        if (GUIMode.enableImageMode) {
+        if (Features.enableImageMode) {
             imageMenu.add(createModeSubmenu());
         }
 

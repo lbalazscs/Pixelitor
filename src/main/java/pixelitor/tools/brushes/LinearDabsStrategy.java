@@ -22,7 +22,7 @@ import pixelitor.utils.test.RandomGUITest;
 
 /**
  * The simplest dabs strategy: it places the dabs along the lines
- * connecting the mouse events with a uniform spacing between them
+ * connecting the mouse events with a uniform spacing between them.
  */
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
@@ -47,8 +47,8 @@ public class LinearDabsStrategy implements DabsStrategy {
         distFromLastDab = 0; // moved from reset()
 
         prev = p;
-        if (angleSettings.isAngleAware()) {
-            // No dab is drawn for the angle-aware brushes in this method,
+        if (angleSettings.isAngled()) {
+            // No dab is drawn for the angled brushes in this method,
             // because there is no angle information yet.
             // However, the distance from the last dab is set
             // artificially, so that a dab is drawn soon.
@@ -72,7 +72,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         double theta = 0;
         double dx = endX - prevX;
         double dy = endY - prevY;
-        if (angleSettings.isAngleAware()) {
+        if (angleSettings.isAngled()) {
             theta = Math.atan2(dy, dx);
         }
 
@@ -100,9 +100,9 @@ public class LinearDabsStrategy implements DabsStrategy {
                 theta = angleSettings.calcJitteredAngle(theta);
             }
 
-            // TODO perhaps this could be optimized if instead of putDab
-            // we called a special version that does not update the region
-            // and then we updated the region at the end
+            // TODO perhaps this could be optimized if, instead of putDab,
+            // we called a special version that doesn't update the region
+            // and then we updated the region at the end.
             brush.putDab(p, theta);
             drew = true;
         }

@@ -103,7 +103,7 @@ public interface Filterable {
                 .content(gui)
                 .align(FRAME_RIGHT)
                 .withScrollbars()
-                .enableCopyVisibleShortcut()
+                .enableCopyShortcuts()
                 .okAction(() -> onFilterDialogAccepted(filter.getName()))
                 .cancelAction(this::onFilterDialogCanceled)
                 .show()

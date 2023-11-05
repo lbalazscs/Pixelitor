@@ -117,41 +117,6 @@ public final class Utils {
             .setContents(new StringSelection(text), null);
     }
 
-    /**
-     * Converts an angle between -PI and PI, as returned form Math.atan2,
-     * to an angle between 0 and 2*PI in the counter-clockwise direction.
-     */
-    public static double atan2AngleToIntuitive(double angleInRadians) {
-        double angle;
-        if (angleInRadians <= 0) {
-            angle = -angleInRadians;
-        } else {
-            angle = Math.PI * 2 - angleInRadians;
-        }
-        return angle;
-    }
-
-    /**
-     * The inverse function of atan2AngleToIntuitive
-     */
-    public static double intuitiveToAtan2Angle(double radians) {
-        if (radians > Math.PI) {
-            return 2 * Math.PI - radians;
-        } else {
-            return -radians;
-        }
-    }
-
-    public static double toIntuitiveDegrees(double angle) {
-        double degrees = Math.toDegrees(angle);
-        if (degrees <= 0) {
-            degrees = -degrees;
-        } else {
-            degrees = 360.0 - degrees;
-        }
-        return degrees;
-    }
-
     public static double clampTo01(double d) {
         if (d < 0) {
             return 0;
@@ -412,6 +377,13 @@ public final class Utils {
             }
         }
         return bounds;
+    }
+
+    /**
+     * Converts a float value in the range 0..1 to an int value in the range 0..100.
+     */
+    public static int toPercentage(float float01) {
+        return (int) (float01 * 100);
     }
 }
 

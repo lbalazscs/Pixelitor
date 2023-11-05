@@ -64,8 +64,8 @@ public class DraggablePoint extends Point2D.Double {
     protected double origX;
     protected double origY;
 
-    private final Color color;
-    private final Color activeColor;
+    private final Color color = Color.WHITE;
+    private final Color activeColor = Color.RED;
 
     // since there can be only one active point at a
     // time, it can be stored in this static variable
@@ -88,15 +88,12 @@ public class DraggablePoint extends Point2D.Double {
     // a transform box is created to serve as reference points
     private Point2D imTransformRefPoint;
 
-    public DraggablePoint(String name, PPoint p,
-                          View view, Color color, Color activeColor) {
+    public DraggablePoint(String name, PPoint p, View view) {
         this.view = view;
 
         setLocationOnlyForThis(p);
 
         this.name = name;
-        this.color = color;
-        this.activeColor = activeColor;
     }
 
     @Override
@@ -105,7 +102,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     // setLocation is overridden in subclasses to also move related
-    // points, but we also need a pure version, which is final
+    // points. This (final) version only moves this point.
     public final void setLocationOnlyForThis(double coX, double coY) {
         assert !isNaN(coX) : this.x + " to NaN in " + this;
         assert !isNaN(coY) : this.y + " to NaN in " + this;
@@ -151,7 +148,7 @@ public class DraggablePoint extends Point2D.Double {
      */
     public final void imTransformOnlyThis(AffineTransform at, boolean useRefPoint) {
         // Can't simply use at.transform(refPoint, this) because that would
-        // call setLocation, which is in component space and also can be overridden
+        // call setLocation, which is in component space and also can be overridden.
         Point2D newImLoc;
         if (useRefPoint) {
             newImLoc = at.transform(imTransformRefPoint, null);

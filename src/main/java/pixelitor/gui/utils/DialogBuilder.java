@@ -58,7 +58,7 @@ public class DialogBuilder {
     private Screens.Align align = SCREEN_CENTER;
     private JComponent parent;
 
-    private boolean enableCopyVisibleShortcut;
+    private boolean enableCopyShortcuts;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -67,11 +67,11 @@ public class DialogBuilder {
     private JDialog dialog;
     private boolean cancelled;
 
-    // normally a dialog is validated only when OK is pressed,
-    // but sometimes (for example if the OK button text is "Close",
-    // and there is no Cancel button, but the dialog can still be
-    // canceled with X or Esc) we just don't want to allow
-    // closing it without validating.
+    // Normally, a dialog is validated only when the "OK" button is
+    // pressed. However, sometimes (e.g., if the "OK" button text is
+    // "Close" and there is no Cancel button, but the dialog can still
+    // be canceled with X or Esc), we want to prevent closing it
+    // without validation.
     private boolean validateWhenCanceled = false;
 
     private String name;
@@ -100,7 +100,7 @@ public class DialogBuilder {
     }
 
     /**
-     * Sets the name property of the dialog (for AssertJ-Swing tests)
+     * Sets the name property of the dialog (for AssertJ-Swing tests).
      */
     public DialogBuilder name(String name) {
         this.name = name;
@@ -108,7 +108,7 @@ public class DialogBuilder {
     }
 
     /**
-     * Sets an alternative text for the "OK" button
+     * Sets an alternative text for the "OK" button.
      */
     public DialogBuilder okText(String s) {
         okText = s;
@@ -116,7 +116,7 @@ public class DialogBuilder {
     }
 
     /**
-     * Sets an alternative text for the "Cancel" button
+     * Sets an alternative text for the "Cancel" button.
      */
     public DialogBuilder cancelText(String s) {
         cancelText = s;
@@ -124,7 +124,7 @@ public class DialogBuilder {
     }
 
     /**
-     * Uses the given component as the contents of the dialog.
+     * Uses the given component as the dialog's content.
      */
     public DialogBuilder content(JComponent form) {
         assert form != null;
@@ -133,8 +133,8 @@ public class DialogBuilder {
     }
 
     /**
-     * Uses the given component as the contents of the dialog, and also
-     * sets up validation based on it.
+     * Uses the given component as the dialog's content,
+     * and also sets up validation based on it.
      */
     public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
         content = validatedPanel;
@@ -174,8 +174,8 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder enableCopyVisibleShortcut() {
-        enableCopyVisibleShortcut = true;
+    public DialogBuilder enableCopyShortcuts() {
+        enableCopyShortcuts = true;
         return this;
     }
 
@@ -200,9 +200,9 @@ public class DialogBuilder {
     }
 
     /**
-     * When OK is pressed (and when canceled, if validateWhenCanceled is set),
+     * When "OK" is pressed (and when canceled, if validateWhenCanceled is set),
      * the dialog will close only if the given predicate evaluates to true.
-     * The predicate must show an error dialog if it is returning false.
+     * The predicate must show an error dialog if it returns false.
      * The predicate will be evaluated with the built dialog,
      * which should be used as the owner of the error dialog.
      */
@@ -230,7 +230,7 @@ public class DialogBuilder {
      */
     public DialogBuilder show() {
         if (RandomGUITest.isRunning()) {
-            return this; // avoid dialogs
+            return this; // avoid showing dialogs
         }
 
         JDialog d = build();
@@ -269,7 +269,7 @@ public class DialogBuilder {
         GUIUtils.setupCloseAction(dialog, cancelTask);
         GUIUtils.setupEscAction(dialog, cancelTask);
 
-        if (enableCopyVisibleShortcut) {
+        if (enableCopyShortcuts) {
             JComponent contentPane = (JComponent) dialog.getContentPane();
             InputMap inputMap = contentPane.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             ActionMap actionMap = contentPane.getActionMap();

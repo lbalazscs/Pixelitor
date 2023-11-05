@@ -69,8 +69,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private final List<LayerGUI> children = new ArrayList<>();
 
     // Most often false, but when opening serialized pxc files,
-    // the mask/smart filter label might be added before the drag handler
-    // and in unit tests the drag handler is not added at all.
+    // the mask/smart filter label might be added before the drag handler,
+    // and in unit tests the drag handler isn't added at all.
     private boolean hasLateDragHandler;
 
     // for debugging only: each layer GUI has a different id
@@ -143,7 +143,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
 
         // TODO it's not elegant to detach all layer GUIs and
-        //   then attach again those which weren't changed
+        //   then reattach those that weren't changed.
         for (LayerGUI child : children) {
             child.detach();
         }
@@ -231,7 +231,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     // Called when one of the icons is clicked
     private void activateLayerNow() {
-        // the layer would be activated anyway, but only in an invokeLayer,
+        // the layer would be activated anyway, but only in an invokeLater,
         // and the mask activation expects events to be coming from the active layer
         layer.activate();
     }
@@ -302,7 +302,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         cb.setIconTextGap(0);
         cb.setBorder(null);
         cb.setBorderPainted(false);
-//        cb.setMargin(new Insets(0, 0, 0, 0));
 
         return cb;
     }
@@ -324,9 +323,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     private void buttonActivationChanged() {
         if (isSelected()) {
-            // the layer was just activated
-//            layer.activate(userInteraction);
-
             // during comp actions, the active layer might already be inside the active layer
             boolean setActiveLayer = !layer.contains(layer.getComp().getActiveLayer());
             if (setActiveLayer) {
@@ -463,7 +459,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             }
         };
 
-//        CompletableFuture.runAsync(notEDT, Threads.onIOThread);
         new Thread(notEDT).start();
     }
 

@@ -27,7 +27,7 @@ import java.io.File;
 import static java.lang.String.format;
 
 /**
- * Static methods for status bar and dialog messages
+ * Static methods for displaying status bar and dialog messages.
  */
 public class Messages {
     private static MessageHandler msgHandler;
@@ -35,7 +35,7 @@ public class Messages {
     private Messages() { // should not be instantiated
     }
 
-    public static void setMsgHandler(MessageHandler msgHandler) {
+    public static void setHandler(MessageHandler msgHandler) {
         Messages.msgHandler = msgHandler;
     }
 
@@ -45,7 +45,7 @@ public class Messages {
 
     public static void showNotImplementedForSmartObjects(String what) {
         msgHandler.showInfo("Not Supported Yet",
-            what + " is not implemented yet if one of the layers is a smart object.", null);
+            what + " isn't yet supported if one of the layers is a smart object.", null);
     }
 
     public static void showInfo(String title, String message, Component parent) {
@@ -71,8 +71,8 @@ public class Messages {
     @SuppressWarnings("SameReturnValue")
     public static <T> T showExceptionOnEDT(Throwable e) {
         msgHandler.showExceptionOnEDT(e);
-        // returns a null of the desired type...:
-        // this way it fits into CompletableFuture.exceptionally
+        // Returns a null of the desired type...
+        // This way it fits into CompletableFuture.exceptionally.
         return null;
     }
 
@@ -130,12 +130,12 @@ public class Messages {
         return msgHandler.showYesNoQuestion(title, msg);
     }
 
-    public static void showPerformanceMessage(String filterName, long totalTime) {
+    public static void showPerformanceMessage(String filterName, long timeMillis) {
         String msg;
-        if (totalTime < 1000) {
-            msg = filterName + " took " + totalTime + " ms";
+        if (timeMillis < 1000) {
+            msg = filterName + " took " + timeMillis + " ms";
         } else {
-            float seconds = totalTime / 1000.0f;
+            float seconds = timeMillis / 1000.0f;
             msg = format("%s took %.1f s", filterName, seconds);
         }
         showPlainInStatusBar(msg);

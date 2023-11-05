@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
@@ -48,6 +49,8 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         // has to be saved here, because when the constructor is
         // called, we don't know yet the mode before the undo
         newMode = comp.getView().getMaskViewMode();
+
+        assert layer.isActive() || GUIMode.isUnitTesting();
 
         layer.deleteMask(false);
     }

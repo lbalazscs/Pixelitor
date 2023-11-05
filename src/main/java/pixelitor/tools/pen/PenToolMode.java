@@ -26,7 +26,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.DebugNodes;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -108,7 +107,7 @@ public interface PenToolMode {
         var node = new DebugNode("pen tool mode " + this, this);
 
         if (PenTool.hasPath()) {
-            node.add(DebugNodes.createPathNode(path));
+            node.add(path.createDebugNode("path " + path.getId()));
         } else {
             node.addBoolean("has path", false);
         }

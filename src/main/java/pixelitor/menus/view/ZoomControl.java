@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
 
         zoomSlider = new JSlider(0, zoomLevels.length - 1);
 
-        // Make sure that the status bar height does not increase because of this control.
+        // Make sure that the status bar height doesn't increase because of this control.
         // Normally the JSlider vertical size in Nimbus would be 21.
         zoomSlider.setPreferredSize(new Dimension(200, PREFERRED_HEIGHT));
 

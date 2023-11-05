@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
 
 /**
  * A {@link TextPainter} that can have an extra translation (so that text
@@ -111,9 +114,9 @@ public class TransformedTextPainter extends TextPainter {
 
         g.drawString(text, 0, (float) metrics.getAscent());
 
-        // paint the effects of an explicitly transformed shape
+        // Paint the effects of an explicitly transformed shape
         // instead of simply painting them on the transformed graphics
-        // so that the direction of the drop shadow effect does not rotate
+        // so that the direction of the drop shadow effect doesn't rotate.
         var tx = g.getTransform();
         g.setTransform(origTransform);
 

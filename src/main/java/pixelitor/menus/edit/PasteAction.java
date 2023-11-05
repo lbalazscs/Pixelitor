@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class PasteAction extends NamedAction.Checked implements ViewActivationLi
                 Messages.showException(ex);
             }
         } else {
-            Messages.showInfo("Paste", "The clipboard content is not an image.");
+            Messages.showInfo("Paste", "The clipboard content isn't an image.");
             return Optional.empty();
         }
         return Optional.ofNullable(pastedImage);

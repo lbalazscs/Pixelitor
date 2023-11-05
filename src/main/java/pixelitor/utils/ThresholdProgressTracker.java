@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.utils;
 import java.awt.EventQueue;
 
 /**
- * An abstract superclass for progress tracking classes which
+ * An abstract superclass for progress tracking classes that
  * show progress information after a time threshold has been exceeded.
  */
 public abstract class ThresholdProgressTracker implements ProgressTracker {
@@ -36,7 +36,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     private final boolean runningOnEDT;
 
     // In this class this field is used only for debugging.
-    // The status bar progress tracker uses it to label the progress bar.
+    // The status bar progress tracker subclass uses it to label the progress bar.
     protected final String name;
 
     protected ThresholdProgressTracker(int numComputationUnits, String name) {

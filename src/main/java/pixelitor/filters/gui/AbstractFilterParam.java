@@ -24,7 +24,7 @@ import java.util.Objects;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A base class for {@link FilterParam} implementations.
+ * A base class for implementations of {@link FilterParam}.
  */
 public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
@@ -36,9 +36,9 @@ public abstract class AbstractFilterParam implements FilterParam {
     private String toolTip;
     private String presetKey;
 
-    // If this is not null, then it's the model of an extra action button
-    // to the right of the normal GUI, typically some randomization, which
-    // will be enabled only for certain values of this filter parameter.
+    // If this is not null, it's the model of an additional action button
+    // to the right of the normal GUI. Typically used for randomization, it
+    // will be enabled only for specific values of this filter parameter.
     protected FilterButtonModel action;
 
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
@@ -47,7 +47,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     /**
-     * Called by the subclasses only, after the GUI is initialized
+     * Called only by subclasses, after initializing the GUI.
      */
     protected void guiCreated() {
         updateGUIEnabledState();
@@ -92,8 +92,8 @@ public abstract class AbstractFilterParam implements FilterParam {
             case APP_LOGIC -> enabledByAppLogic = b;
             case FINAL_ANIMATION_SETTING -> {
                 if (isAnimatable()) {
-                    // the whole point of the final animation setting mode
-                    // is to disable/enable the filter params that can't be animated
+                    // the purpose of the final animation setting mode is to
+                    // disable/enable the filter params that can't be animated
                     return;
                 }
                 enabledByAnimation = b;
@@ -130,8 +130,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     /**
-     * Randomizes the settings without checking the permission,
-     * and without triggering the filter
+     * Randomizes the settings without permission checking,
+     * and without triggering the filter.
      */
     protected abstract void doRandomize();
 
@@ -145,7 +145,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         if (paramGUI != null) {
             paramGUI.setToolTip(tip);
         } else {
-            // in the filters the GUI is not yet created, so store it for later
+            // in the filters the GUI is not created yet, so store it for later
             toolTip = tip;
         }
     }

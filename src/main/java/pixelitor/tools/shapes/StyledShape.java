@@ -68,7 +68,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     private transient State state;
 
-    private static final boolean DEBUG_PAINT = false;
+    private static final boolean DEBUG_PAINTING = false;
 
     private ShapeType shapeType;
     private List<ParamState<?>> typeSettings;
@@ -158,7 +158,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        if (DEBUG_PAINT) {
+        if (DEBUG_PAINTING) {
             // draw the original shape with a semitransparent black
             Composite oldComposite = g.getComposite();
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
@@ -179,7 +179,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             paintEffects(g);
         }
 
-        if (DEBUG_PAINT) {
+        if (DEBUG_PAINTING) {
             origDrag.drawImDirectionArrow(g);
             transformedDrag.drawImDirectionArrow(g);
         }
@@ -656,8 +656,8 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        var node = new DebugNode("styled shape", this);
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
 
         node.addAsString("state", state);
 

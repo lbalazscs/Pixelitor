@@ -20,11 +20,11 @@ package pixelitor;
 import pixelitor.utils.Utils;
 
 /**
- * Represents the reason for which a composition or a layer was copied.
+ * Represents the reason for copying a composition or layer.
  */
 public enum CopyType {
     /**
-     * A layer is duplicated
+     * A layer is being duplicated.
      */
     DUPLICATE_LAYER(true) {
         @Override
@@ -33,7 +33,7 @@ public enum CopyType {
         }
     },
     /**
-     * A composition or layer copy is needed for undo
+     * A composition or layer copy is needed for undo.
      */
     UNDO(false) {
         @Override
@@ -42,7 +42,7 @@ public enum CopyType {
         }
     },
     /**
-     * A composition is duplicated (Image/Duplicate)
+     * A composition is being duplicated (Image/Duplicate).
      */
     DUPLICATE_COMP(true) {
         @Override
@@ -70,5 +70,8 @@ public enum CopyType {
         return deepContentCopy;
     }
 
+    /**
+     * Generates a name for the copied layer based on the original name.
+     */
     public abstract String createLayerCopyName(String originalName);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import pixelitor.utils.Utils;
 import static java.lang.String.format;
 
 /**
- * An action that can run only when the active layer has a specific type
+ * An action that can run only when the active layer has a specific type.
  */
 public abstract class RestrictedLayerAction extends OpenViewEnabledAction.Checked {
     /**

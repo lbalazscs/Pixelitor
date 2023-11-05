@@ -27,7 +27,7 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 
 /**
- * An abstract superclass for tools which only care about the mouse drag
+ * An abstract superclass for tools that only care about the mouse drag
  * start and end positions, and not about the intermediate mouse positions.
  * The start and end points of the drag gesture are continuously
  * updated in the {@link Drag} object.
@@ -92,6 +92,9 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        if (drag == null) { // can happen in a synthetic mouse released event
+            return;
+        }
         if (drag.isCanceled()) {
             return;
         }

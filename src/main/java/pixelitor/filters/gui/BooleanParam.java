@@ -32,7 +32,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * A filter parameter for a boolean value.
+ * A filter parameter for selecting a boolean value.
  */
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
@@ -100,7 +100,7 @@ public class BooleanParam extends AbstractFilterParam {
         // an item listener because a change listener fires too much, even for
         // rollover, and an action listener ignores changes caused by randomize
         addItemListener(e -> {
-            // isChecked() is not returning the correct new value yet
+            // isChecked() isn't returning the correct new value yet
             boolean checked = e.getStateChange() == ItemEvent.SELECTED;
             other.setEnabled(enable ? checked : !checked, EnabledReason.APP_LOGIC);
         });
@@ -175,8 +175,8 @@ public class BooleanParam extends AbstractFilterParam {
             return;
         }
 
-        // if there is no GUI, store the listener so that
-        // it can be added to the GUI as soon as the GUI is created
+        // If there is no GUI, store the listener so that
+        // it can be added to the GUI as soon as the GUI is created.
         if (itemListeners == null) {
             itemListeners = new ArrayList<>(2);
         }

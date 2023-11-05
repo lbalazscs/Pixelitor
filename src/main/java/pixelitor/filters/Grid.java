@@ -77,12 +77,12 @@ public class Grid extends CurveFilter {
 
         // Adding the line below just to relate stuff with Hexagonal Grid.
         // Though I don't expect anyone to understand most of it...
-        //                          /\  /\  /\
-        // Cell space is Width of  /  \/  \/  \
-        //                        ^   ^
+        //                                  /\  /\  /\
+        // The cell space is the width of  /  \/  \/  \
+        //                                 ^   ^
         // double cellSpace = cellW;
 
-        // Cell interval is the horizontal length after which another cell starts above it.
+        // The cell interval is the horizontal length after which another cell starts above it.
         //     /\
         //    /  \
         //   /\
@@ -128,7 +128,7 @@ public class Grid extends CurveFilter {
     private Path2D createRectangles(int width, int height) {
         Path2D shape = new Path2D.Double();
 
-        // Here one cell is defined as the smallest
+        // Here, one cell is defined as the smallest
         // square/rectangle you can see
 
         int horDiv = divisions.getValue(0);
@@ -173,15 +173,15 @@ public class Grid extends CurveFilter {
         int verDiv = divisions.getValue(1);
 
         //                       ___
-        // Width and Height of  /   \
+        // width and height of  /   \
         double cellW = 2.0 * width / (3 * horDiv - 1);
         double cellH = height / (double) verDiv;
 
-        //                          ___     ___     ___
-        // Cell space is Width of  /   \___/   \___/   \___
-        //                        ^       ^
+        //                                  ___     ___     ___
+        // The cell space is the width of  /   \___/   \___/   \___
+        //                                 ^       ^
         double cellSpace = 3 * cellW / 2;
-        // Cell interval is the horizontal length after which another cell starts above it.
+        // The cell interval is the horizontal length after which another cell starts above it.
         //     ___
         //   _/_  \___
         //  /   \___

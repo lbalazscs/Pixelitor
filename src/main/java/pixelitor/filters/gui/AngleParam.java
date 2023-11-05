@@ -19,8 +19,8 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.utils.AngleUnit;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -77,8 +77,9 @@ public class AngleParam extends AbstractFilterParam {
             fireStateChanged();
         }
         if (trigger) {
-            // trigger even if this angle was already set,
-            // because we had drag events, and now we have mouse up
+            // Trigger even if the angle didn't change, because
+            // after the non-triggering drag events, we can have a
+            // triggering mouse up that didn't change the angle.
             if (adjustmentListener != null) { // can be null when used in tools
                 adjustmentListener.paramAdjusted();
             }
@@ -91,7 +92,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public double getValueInDegrees() {
-        return Utils.toIntuitiveDegrees(angle);
+        return Geometry.toIntuitiveDegrees(angle);
     }
 
     /**
@@ -105,7 +106,7 @@ public class AngleParam extends AbstractFilterParam {
      * Returns the value in the range of 0 and 2*PI, and in the intuitive direction
      */
     public double getValueInIntuitiveRadians() {
-        return Utils.atan2AngleToIntuitive(angle);
+        return Geometry.atan2ToIntuitive(angle);
     }
 
     @Override
@@ -153,10 +154,10 @@ public class AngleParam extends AbstractFilterParam {
         return 360;
     }
 
-    public RangeParam createRangeParam() {
-        // At this point the actual value can already be different from the
-        // default one => make sure the returned param has the same default.
-        double defaultInDegrees = Utils.toIntuitiveDegrees(defaultVal);
+    public RangeParam asRangeParam() {
+        // At this point, the actual value can already differ from the
+        // default one => ensure the returned param has the same default.
+        double defaultInDegrees = Geometry.toIntuitiveDegrees(defaultVal);
         RangeParam rangeParam = new RangeParam(getName(),
             0, defaultInDegrees, getMaxAngleInDegrees());
         rangeParam.setValueNoTrigger(getValueInDegrees());
@@ -170,8 +171,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public AngleParamState copyState() {
-        // save the degrees so that the interpolation
-        // does not confuse the user
+        // Save the value in degrees to make the interpolation more intuitive.
         return new AngleParamState(getValueInDegrees());
     }
 
@@ -182,8 +182,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        double d = Double.parseDouble(savedValue);
-        setValueInDegrees(d, false);
+        setValueInDegrees(Double.parseDouble(savedValue), false);
     }
 
     @Override
@@ -197,7 +196,7 @@ public class AngleParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), angle);
     }
 
-    private record AngleParamState(double angle) implements ParamState<AngleParamState> {
+    public record AngleParamState(double angle) implements ParamState<AngleParamState> {
         @Serial
         private static final long serialVersionUID = 1L;
 

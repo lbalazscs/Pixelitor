@@ -37,23 +37,23 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
- * The GUI which has the four sliders and a {@link PreviewPanel} in center.
+ * The GUI containing the four sliders and a {@link PreviewPanel} at the center.
  */
 class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
-    // Percentage Based
+    // Percentage based sliders
     private final RangeParam northPercent = new RangeParam("North", 0, 0, 100);
     private final RangeParam eastPercent = new RangeParam("East", 0, 0, 100);
     private final RangeParam southPercent = new RangeParam("South", 0, 0, 100);
     private final RangeParam westPercent = new RangeParam("West", 0, 0, 100);
 
-    // Actual Pixel Based
+    // Pixel based sliders
     private final RangeParam northPixels;
     private final RangeParam eastPixels;
     private final RangeParam southPixels;
     private final RangeParam westPixels;
 
-    private final JRadioButton btnUsePixels = new JRadioButton("Pixels");
-    private final JRadioButton btnUsePercentage = new JRadioButton("Percentage");
+    private final JRadioButton usePixelsRadio = new JRadioButton("Pixels");
+    private final JRadioButton usePercentsRadio = new JRadioButton("Percentage");
 
     private final PreviewPanel previewPanel = new PreviewPanel();
 
@@ -73,7 +73,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         addSliderSpinner(southPercent, southPixels, "south", 1, 2, SliderSpinner.HORIZONTAL);
         addSliderSpinner(westPercent, westPixels, "west", 0, 1, SliderSpinner.VERTICAL);
 
-        btnUsePixels.doClick();
+        usePixelsRadio.doClick();
 
         addCanvasEditor();
     }
@@ -83,17 +83,17 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         c.gridx = c.gridy = 2;
         c.anchor = GridBagConstraints.WEST;
 
-        btnUsePixels.addActionListener(e -> syncToPixels());
-        btnUsePercentage.addActionListener(e -> syncToPercentage());
+        usePixelsRadio.addActionListener(e -> syncToPixels());
+        usePercentsRadio.addActionListener(e -> syncToPercentage());
 
         new ButtonGroup() {{
-            add(btnUsePixels);
-            add(btnUsePercentage);
+            add(usePixelsRadio);
+            add(usePercentsRadio);
         }};
 
         add(new Box(BoxLayout.Y_AXIS) {{
-            add(btnUsePixels);
-            add(btnUsePercentage);
+            add(usePixelsRadio);
+            add(usePercentsRadio);
         }}, c);
     }
 
@@ -134,8 +134,8 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         card.add(percentGUI, "percent");
         cardLayout.show(card, "pixel");
 
-        btnUsePixels.addActionListener(e -> cardLayout.first(card));
-        btnUsePercentage.addActionListener(e -> cardLayout.last(card));
+        usePixelsRadio.addActionListener(e -> cardLayout.first(card));
+        usePercentsRadio.addActionListener(e -> cardLayout.last(card));
 
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = gridX;
@@ -185,7 +185,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     }
 
     private boolean usePixels() {
-        return btnUsePixels.isSelected();
+        return usePixelsRadio.isSelected();
     }
 
     private static int percentToPixels(RangeParam percentParam, int fullSize) {
@@ -224,14 +224,14 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
     public void loadUserPreset(UserPreset preset) {
         boolean usePixels = preset.getBoolean("Pixels");
         if (usePixels) {
-            btnUsePixels.doClick();
+            usePixelsRadio.doClick();
 
             northPixels.loadStateFrom(preset);
             eastPixels.loadStateFrom(preset);
             southPixels.loadStateFrom(preset);
             westPixels.loadStateFrom(preset);
         } else {
-            btnUsePercentage.doClick();
+            usePercentsRadio.doClick();
 
             northPercent.loadStateFrom(preset);
             eastPercent.loadStateFrom(preset);

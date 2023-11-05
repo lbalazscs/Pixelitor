@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
+import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLED;
 
 /**
  * The brush types in the brush and eraser tools.
@@ -39,7 +39,7 @@ public enum BrushType {
         @Override
         public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.SOFT, 0.25, NOT_ANGLE_AWARE);
+                ImageBrushType.SOFT, 0.25, NOT_ANGLED);
         }
     }, WOBBLE("Wobble", false) {
         @Override
@@ -61,13 +61,13 @@ public enum BrushType {
         @Override
         public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.REAL, 0.05, NOT_ANGLE_AWARE);
+                ImageBrushType.REAL, 0.05, NOT_ANGLED);
         }
     }, HAIR("Hair", false) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius,
-                ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
+                ImageBrushType.HAIR, 0.02, NOT_ANGLED);
         }
     }, SHAPE("Shapes", true) {
         @Override
@@ -165,7 +165,7 @@ public enum BrushType {
     }
 
     public JPanel getConfigPanel(Tool tool) {
-        assert hasSettings; // otherwise the button is not enabled
+        assert hasSettings; // otherwise the button isn't enabled
         assert settingsByTool != null; // already initialized
 
         var settings = settingsByTool.get(tool);

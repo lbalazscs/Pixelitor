@@ -59,7 +59,7 @@ public class DragReorderHandler extends MouseInputAdapter {
     public void mouseDragged(MouseEvent e) {
         LayerGUI layerGUI = layerGUIForEvent(e);
         if (!dragging && Math.abs(dragStartYInLayerGUI - e.getY()) < 5) {
-            // it seems that on Mac we get mouseDragged events even when the mouse is not moved
+            // it seems that on Mac we get mouseDragged events even when the mouse isn't moved
             return;
         }
         if (layerGUI.isNameEditing()) {

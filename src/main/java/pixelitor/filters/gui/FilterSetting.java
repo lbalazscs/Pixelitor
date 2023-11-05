@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,13 +22,13 @@ import javax.swing.*;
 /**
  * The model of something that appears in a filter GUI.
  * If that something is a button, then the {@link FilterButtonModel}
- * sub-interface is used, otherwise the {@link FilterParam}
+ * sub-interface is used, otherwise the {@link FilterParam}.
  */
 public interface FilterSetting {
     String getName();
 
     /**
-     * Creates the GUI component corresponding to this model.
+     * Creates the GUI component that corresponds to this model.
      *
      * If this is an instance of {@link FilterParam},
      * then the returned JComponent must also be
@@ -37,7 +37,7 @@ public interface FilterSetting {
     JComponent createGUI();
 
     /**
-     * Convenience method which also sets a name for the created GUI
+     * A convenience method that also sets a name of the created GUI.
      */
     default JComponent createGUI(String name) {
         JComponent gui = createGUI();
@@ -45,15 +45,21 @@ public interface FilterSetting {
         return gui;
     }
 
+    /**
+     * Sets the listener that will be notified when the filter setting is adjusted.
+     */
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
     /**
-     * This object can be disabled for two independent reasons:
-     * (1) because of the app logic and (2) because non-animatable
+     * Enables or disables this setting for one of two possible reasons:
+     * (1) because of the app logic or (2) because non-animatable
      * parameters should be disabled in the final animation dialogs.
      */
     void setEnabled(boolean b, EnabledReason reason);
 
+    /**
+     * The possible reasons for enabling or disabling a filter.
+     */
     enum EnabledReason {
         APP_LOGIC, FINAL_ANIMATION_SETTING
     }

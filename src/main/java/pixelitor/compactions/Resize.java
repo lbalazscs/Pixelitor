@@ -41,7 +41,7 @@ import static pixelitor.utils.Threads.onPool;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * Resizes all content layers of a composition
+ * A resizing action on all layers of a {@link Composition}.
  */
 public class Resize implements CompAction {
     private final int targetWidth;
@@ -71,8 +71,8 @@ public class Resize implements CompAction {
 
         var targetSize = calcTargetSize(oldCanvas);
 
-        // The resize runs outside the EDT so that the progress bar animation
-        // can update and multiple resizing operations can run in parallel
+        // The resizing runs outside the EDT to allow the progress bar animation
+        // to update, and to enable the parallel resizing of multiple layers.
         var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
             .supplyAsync(() -> oldComp.copy(CopyType.UNDO, true), onPool)
@@ -90,7 +90,7 @@ public class Resize implements CompAction {
         int canvasCurrHeight = oldCanvas.getWidth();
         int canvasCurrWidth = oldCanvas.getHeight();
 
-        // it is important to use local copies of the final global
+        // it's important to use local copies of the final global
         // variables, otherwise batch resize in box gets different
         // values for each input image, see issue #74
         int canvasTargetWidth = targetWidth;
@@ -126,8 +126,8 @@ public class Resize implements CompAction {
             view, oldComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
 
-        // the view was active when the resize started, but since the
-        // resize was asynchronous, this could have changed
+        // The view was active when the resizing started, but since the
+        // resizing was asynchronous, this could have changed.
         if (view.isActive()) {
             SelectionActions.update(newComp);
         }
@@ -156,8 +156,8 @@ public class Resize implements CompAction {
     }
 
     private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {
-        // this could be called on the EDT or on another thread, the layers
-        // themselves are resized in parallel using the thread pool's threads
+        // This could be called on the EDT or on another thread. The layers
+        // themselves are resized in parallel using the thread pool's threads.
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         comp.forEachNestedLayerAndMask(layer ->
             futures.add(layer.resize(newSize)));

@@ -45,7 +45,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The main class
@@ -112,7 +115,7 @@ public class Pixelitor {
     private static void createAndShowGUI(String[] args) {
         assert calledOnEDT() : threadInfo();
 
-        Messages.setMsgHandler(new GUIMessageHandler());
+        Messages.setHandler(new GUIMessageHandler());
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
@@ -144,8 +147,8 @@ public class Pixelitor {
         var pw = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
 
-        // Just to make 100% sure that at the end of GUI
-        // initialization the focus is not grabbed by
+        // Make sure that at the end of GUI
+        // initialization the focus isn't grabbed by
         // a textfield and the keyboard shortcuts work properly
         FgBgColors.getGUI().requestFocus();
 
@@ -176,7 +179,7 @@ public class Pixelitor {
                 openedFiles.add(IO.openFileAsync(f, false));
             } else {
                 Messages.showError("File not found",
-                    format("The file \"%s\" does not exist", f.getAbsolutePath()));
+                    format("The file \"%s\" doesn't exist.", f.getAbsolutePath()));
             }
         }
 

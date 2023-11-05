@@ -44,7 +44,6 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +64,10 @@ import static java.lang.String.format;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.threadInfo;
 import static pixelitor.utils.Utils.createCopyName;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
@@ -120,14 +122,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private transient Selection selection;
 
-    // a temporary, new selection which is currently created
-    // by dragging with a tool, but it's not finalized yet
+    // A temporary selection that is currently being created
+    // by dragging with a tool, but it's not finalized yet.
     private transient Selection inProgressSelection;
 
     /**
-     * The constructor is private: a {@link Composition}
-     * can be created either with one of the static factory
-     * methods or through deserialization of pxc files
+     * Private constructor: a {@link Composition}
+     * can be created either using one of the static factory
+     * methods or through deserialization of PXC files.
      */
     private Composition(Canvas canvas, ImageMode mode) {
         assert canvas != null;
@@ -136,15 +138,15 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Creates a single-layered composition from the given image
+     * Creates a single-layered composition from the given image.
      */
     public static Composition fromImage(BufferedImage img, File file, String name) {
         assert img != null;
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
 
         ImageMode mode;
-        if (GUIMode.enableImageMode && img.getColorModel() instanceof IndexColorModel) {
-            mode = ImageMode.Indexed;
+        if (Features.enableImageMode && img.getColorModel() instanceof IndexColorModel) {
+            mode = ImageMode.INDEXED;
         } else {
             mode = ImageMode.RGB;
             img = ImageUtils.toSysCompatibleImage(img);
@@ -167,7 +169,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Creates an empty composition (no layers, no name)
+     * Creates an empty composition (no layers, no name).
      */
     public static Composition createEmpty(int width, int height, ImageMode mode) {
         Canvas canvas = new Canvas(width, height);
@@ -184,14 +186,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // init transient variables
+        // Initialize transient variables
         compositeImage = null; // will be set when needed
         file = null; // will be set later
         fileTime = 0;
         debugName = null; // will be set later
         dirty = false;
         view = null; // will be set later
-        selection = null; // the selection is not saved
+        selection = null; // the selection isn't saved
         inProgressSelection = null;
         owners = null; // will be set from the owners when they are deserialized
 
@@ -199,7 +201,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         activeRoot = activeLayer.getTopLevelLayer();
 
-        // things that need a full canvas and also
+        // Perform actions that need a full canvas and also
         // (re)load the contents of linked smart objects
         forEachNestedLayer(CompositeLayer.class, CompositeLayer::afterDeserialization);
 
@@ -234,7 +236,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.paths = paths.deepCopy(compCopy);
         }
 
-        // In the case of undo the view will be transferred later.
+        // In the case of undo, the view will be transferred later.
         // At no time should two comps point to the same view.
         compCopy.view = null;
 
@@ -258,7 +260,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert checkInvariants();
         assert compCopy.checkInvariants();
 
-        // if it's an undo then the active layer names must match
+        // if it's an undo, then the active layer names must match
         assert copyType != CopyType.UNDO || compCopy.activeLayer.getName().equals(activeLayer.getName())
             : "copyType = " + copyType + ", compCopy.activeLayer.getName() = " + compCopy.activeLayer.getName() + ", activeLayer.getName() = " + activeLayer.getName();
 
@@ -286,7 +288,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Returns the holder where new layers should be added
+     * Returns the holder where new layers should be added.
      */
     public LayerHolder getHolderForNewLayers() {
         if (activeLayer == null) { // can happen during initialization
@@ -352,8 +354,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public boolean isSmartObjectContent() {
-        // if a content file is open independently of its parent,
-        // then this will  return false, even for pxc files!
+        // If a content file is open independently of its parent,
+        // then this will return false, even for PXC files!
         return owners != null;
     }
 
@@ -387,9 +389,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public boolean isUnsaved() {
         if (dirty) {
-            // if this is the contents of a smart object,
+            // If this is the contents of a smart object,
             // then the dirty flag matters only if it's linked,
-            // otherwise the parent composition saves it.
+            // otherwise, the parent composition saves it.
             if (isSmartObjectContent()) {
                 boolean savedByParent = false;
                 for (SmartObject owner : owners) {
@@ -752,11 +754,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             activeRoot = after;
         }
         if (containedActive) {
-            // don't call setActiveLayer, because it would set the mask view mode to NORMAL
+            // Avoids calling setActiveLayer, because it would set the mask view mode to NORMAL.
 
             // This means that after a rasterization undo, the active layer status
             // won't be restored correctly if a container of the active layer was
-            // rasterized. But normally rasterization is called on the active layer.
+            // rasterized. However, normally rasterization is called on the active layer.
             activeLayer = after;
         }
 
@@ -793,7 +795,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Layer oldActive = this.activeLayer;
         this.activeLayer = layer;
 
-        // after the ungrouping of a group with a single active layer,
+        // After ungrouping a group with a single active layer,
         // the active layer could change without a change in the target.
         setActiveRoot(layer.getTopLevelLayer());
 
@@ -1040,7 +1042,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Called when the contents of one of the smart objects
-     * belonging to this composition have changed
+     * belonging to this composition have changed.
      */
     @Override
     public void smartObjectChanged(boolean linked) {
@@ -1049,8 +1051,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             setDirty(true);
         }
 
-        // recursively invalidate the image caches in the smart
-        // objects and compositions until the top composition
+        // Recursively invalidate the image caches in the smart
+        // objects and compositions until the top composition.
         if (isSmartObjectContent()) {
             for (SmartObject owner : owners) {
                 owner.invalidateImageCache();
@@ -1094,7 +1096,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         PixelitorEdit layerEdit = null;
         if (mode.movesLayer()) {
             Layer layer = getActiveMaskOrLayer();
-            // the layer edit will be null if an adjustment
+            // The layer edit will be null if an adjustment
             // layer without a mask was moved.
             layerEdit = layer.endMovement();
         }
@@ -1126,8 +1128,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    // Called when the layer order is changed by drag-reordering in the GUI.
-    // The GUI doesn't have to be updated.
+    // Called when the layer order is changed by drag-reordering
+    // in the GUI. The GUI doesn't have to be updated.
     public void changeLayerIndex(Layer layer, int newIndex) {
         int oldIndex = layerList.indexOf(layer);
         assert oldIndex != -1;
@@ -1267,7 +1269,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Creates a selection from the given shape and also handles
-     * existing selections
+     * existing selections.
      */
     public PixelitorEdit changeSelection(Shape newShape) {
         newShape = clipToCanvasBounds(newShape);
@@ -1317,8 +1319,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Changing the selection reference should be done only by using this method
-     * (in order to make debugging easier)
+     * Changing the selection reference should be done only by using
+     * this method (in order to make debugging easier).
      */
     public void setSelectionRef(Selection selection) {
         this.selection = selection;
@@ -1348,8 +1350,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Sets the clip area on the given graphics according to the selection.
-     * It is assumed that the graphics is relative to the canvas:
-     * if it is coming from the image of an ImageLayer, then it must be
+     * It's assumed that the graphics is relative to the canvas:
+     * if it's coming from the image of an ImageLayer, then it must be
      * translated before calling this.
      */
     public void applySelectionClipping(Graphics2D g2) {
@@ -1402,18 +1404,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Called when the image-space coordinates have been changed by the
      * given transform (resize, crop, etc.).
-     * The View argument is because at this point it might not have a view
+     * The View argument is used because at this point it might not have a view.
      */
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo, View view) {
         // The selection is explicitly reset to a backup shape
-        // when something is undone/redone
+        // when something is undone/redone.
         if (selection != null && !isUndoRedo) {
             selection.transform(at);
         }
-        // The paths and the tool widgets are transformed even for undo redo.
+        // The paths and the tool widgets are transformed even for undo/redo.
         // The advantage is simpler code, the disadvantage is that
         // rounding errors could accumulate if the same operation is
-        // undone/redone many times
+        // undone/redone many times.
         if (paths != null) {
             paths.imCoordsChanged(at);
         }
@@ -1422,7 +1424,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     /**
      * Called when the component-space coordinates have changed,
-     * but the pixels remain the same  (zooming, view resizing etc.)
+     * but the pixels remain the same (zooming, view resizing, etc.).
      */
     public void coCoordsChanged() {
         if (guides != null) {
@@ -1457,7 +1459,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     @Override
     public void invalidateImageCache() {
-//        Debug.debugCall(getName() + " cache invalidated", 1);
         if (compositeImage != null) {
             compositeImage.flush();
         }
@@ -1475,8 +1476,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Signals that the contents of this composition have been changed:
-     * the cache is invalidated, and additional actions might be necessary
+     * Signals that the contents of this composition have been changed.
      */
     public void update(boolean updateHistogram, boolean sizeChanged) {
         invalidateImageCache();
@@ -1644,7 +1644,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         FileFormat.setLastSaved(format);
 
         // prevents starting a new save on the EDT while an asynchronous
-        // save is already scheduled or running on the IO thread
+        // save is already scheduled or running on the IO thread.
         File savedFile = saveSettings.getFile();
         String path = savedFile.getAbsolutePath();
         if (IOTasks.isProcessing(path)) {
@@ -1652,8 +1652,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         IOTasks.markWriteProcessing(path);
 
-        // set to not dirty already at the beginning of the saving process,
-        // so that subsequent closing does not trigger another, parallel save
+        // Set to not dirty already at the beginning of the saving process,
+        // so that subsequent closing doesn't trigger another, parallel save.
         boolean wasDirty = isDirty();
         clearAllDirtyFlagsAfterSave();
 
@@ -1682,8 +1682,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Messages.showFileSavedMessage(file);
 
         if (isSmartObjectContent()) {
-            // otherwise the changes might not be propagated when deactivating,
-            // because this is not dirty after saving even if it's changed
+            // Otherwise the changes might not be propagated when deactivating,
+            // because this isn't dirty after saving even if it's changed.
             for (SmartObject owner : owners) {
                 owner.propagateContentChanges(this, true);
 
@@ -1880,13 +1880,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (paths == null) {
             node.addBoolean("has paths", false);
         } else {
-            node.add(DebugNodes.createPathsNode(paths));
+            node.add(paths.createDebugNode("paths"));
         }
 
         if (guides == null) {
             node.addBoolean("has guides", false);
         } else {
-            node.add(DebugNodes.createGuidesNode("guides", guides));
+            node.add(guides.createDebugNode("guides"));
         }
 
         node.addInt("num layers", getNumLayers());

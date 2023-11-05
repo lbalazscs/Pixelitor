@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,8 @@ package pixelitor.tools.pen;
 
 import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.geom.AffineTransform;
 import java.io.Serial;
@@ -27,7 +29,7 @@ import java.io.Serializable;
 /**
  * All the {@link Path} objects that belong to a {@link Composition}
  */
-public class Paths implements Serializable {
+public class Paths implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -61,5 +63,18 @@ public class Paths implements Serializable {
             copy.activePath = activePath.deepCopy(newComp);
         }
         return copy;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
+
+        if (activePath != null) {
+            node.add(activePath.createDebugNode("path " + activePath.getId()));
+        } else {
+            node.addBoolean("has active path", false);
+        }
+
+        return node;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
@@ -44,9 +43,8 @@ public class ControlPoint extends DraggablePoint {
     // drifting for smooth anchors as rounding errors accumulate
     private double rememberedDistFromAnchor;
 
-    public ControlPoint(String name, PPoint p, View view,
-                        AnchorPoint anchor, Color color, Color activeColor) {
-        super(name, p, view, color, activeColor);
+    public ControlPoint(String name, PPoint p, View view, AnchorPoint anchor) {
+        super(name, p, view);
         this.anchor = anchor;
     }
 

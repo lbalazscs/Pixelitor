@@ -22,7 +22,9 @@ import pixelitor.GUIMode;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
 
-import static pixelitor.layers.LayerAdder.Position.*;
+import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.layers.LayerAdder.Position.TOP;
 
 /**
  * A helper class that encapsulates the logic of adding a
@@ -65,7 +67,7 @@ public class LayerAdder {
     }
 
     /**
-     * Used when the composite image does not change
+     * Used when the composite image doesn't change.
      */
     public LayerAdder noRefresh() {
         refresh = false;
@@ -97,7 +99,7 @@ public class LayerAdder {
     }
 
     /**
-     * The final operation which actually adds the layer.
+     * The final operation, which actually adds the layer.
      */
     public void add(Layer layer) {
         layer.setHolder(holder);

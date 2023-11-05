@@ -68,6 +68,10 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
             return getValue() == v;
         }
 
+        public boolean valueIsNot(int v) {
+            return getValue() != v;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {

@@ -26,6 +26,8 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -44,7 +46,10 @@ import java.util.Random;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.*;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * A path contains the same information as a {@link PathIterator},
@@ -53,7 +58,7 @@ import static pixelitor.tools.pen.BuildState.*;
  * Technically, it consists of a series of geometrically distinct
  * {@link SubPath} objects (typically only one).
  */
-public class Path implements Serializable {
+public class Path implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -184,12 +189,12 @@ public class Path implements Serializable {
         activeSubPath = subPath;
     }
 
-    public AnchorPoint getFirst() {
-        return activeSubPath.getFirst();
+    public AnchorPoint getFirstAnchor() {
+        return activeSubPath.getFirstAnchor();
     }
 
-    public AnchorPoint getLast() {
-        return activeSubPath.getLast();
+    public AnchorPoint getLastAnchor() {
+        return activeSubPath.getLastAnchor();
     }
 
     public AnchorPoint addMovingPointAsAnchor() {
@@ -423,6 +428,22 @@ public class Path implements Serializable {
         for (SubPath subPath : subPaths) {
             subPath.randomize(rng, amount);
         }
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
+
+        int numSubpaths = getNumSubpaths();
+        node.addInt("number of subpaths", numSubpaths);
+        node.addAsString("build state", getBuildState());
+
+        for (int i = 0; i < numSubpaths; i++) {
+            var subPath = getSubPath(i);
+            node.add(subPath.createDebugNode("subPath " + i));
+        }
+
+        return node;
     }
 
     @Override

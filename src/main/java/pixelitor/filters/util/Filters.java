@@ -17,14 +17,13 @@
 
 package pixelitor.filters.util;
 
-import pixelitor.filters.*;
+import pixelitor.filters.Fade;
+import pixelitor.filters.Filter;
+import pixelitor.filters.RepeatLast;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -42,42 +41,43 @@ public class Filters {
     private static final FilterAction[] EMPTY_FA_ARRAY = new FilterAction[0];
 
     private static Filter lastFilter = null;
+    private static boolean finishedAdding = false;
 
     private Filters() {
+        // there are only static utility functions in this class
     }
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
-    public static FilterAction[] getAllFiltersSorted() {
-        FilterAction[] filters = allFilters.toArray(EMPTY_FA_ARRAY);
-        Arrays.sort(filters, comparing(FilterAction::getName));
-        return filters;
+    public static FilterAction[] getAllFilters() {
+        assert finishedAdding;
+        return allFilters.toArray(EMPTY_FA_ARRAY);
     }
 
     public static void forEachSmartFilter(Consumer<? super Filter> action) {
+        assert finishedAdding;
         // all filters can be serialized, but only those
         // with a no-arg constructor can be deserialized
         allFilters.stream()
             .map(FilterAction::getFilter)
             .filter(Filter::canBeSmart)
-            .filter(filter -> !(filter instanceof RandomFilter))
-            .sorted(comparing(Filter::getName))
             .forEach(action);
     }
 
-    public static FilterAction[] getAnimationFilters() {
-        return allFilters.stream()
-            .filter(FilterAction::isAnimationFilter)
-            .toArray(FilterAction[]::new);
+    public static FilterAction getRandomAnimationFilter() {
+        assert finishedAdding;
+        return Rnd.chooseFrom(getAnimationFilters());
     }
 
-    public static FilterAction[] getAnimationFiltersSorted() {
+    public static FilterAction[] getAnimationFilters() {
+        assert finishedAdding;
         return allFilters.stream()
             .filter(FilterAction::isAnimationFilter)
-            .sorted(comparing(FilterAction::getName))
             .toArray(FilterAction[]::new);
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {
+        assert finishedAdding;
+
         // tries to avoid the instantiation of filters
         FilterAction filterAction;
         do {
@@ -108,31 +108,19 @@ public class Filters {
         return Optional.ofNullable(lastFilter);
     }
 
-    public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp,
-                                              BufferedImage src,
-                                              BufferedImage dest) {
-        int[] srcData = ImageUtils.getPixelArray(src);
-        int[] destData = ImageUtils.getPixelArray(dest);
-
-        for (int i = 0; i < srcData.length; i++) {
-            int rgb = srcData[i];
-
-            int a = (rgb >>> 24) & 0xFF;
-            int r = (rgb >>> 16) & 0xFF;
-            int g = (rgb >>> 8) & 0xFF;
-            int b = rgb & 0xFF;
-
-            destData[i] = pixelOp.changeRGB(a, r, g, b);
-        }
-
-        return dest;
-    }
-
     public static void addFilter(FilterAction filter) {
+        assert !finishedAdding;
         allFilters.add(filter);
     }
 
+    public static void finishedAdding() {
+        finishedAdding = true;
+        allFilters.sort(comparing(FilterAction::getName));
+    }
+
     public static void createAllFilters() {
+        assert finishedAdding;
+
         long startTime = System.nanoTime();
 
         allFilters.forEach(FilterAction::getFilter);
@@ -145,6 +133,8 @@ public class Filters {
      * Test whether all the filters have a no-argument constructor
      */
     public static void testFilterConstructors() {
+        assert finishedAdding;
+
         List<String> problems = new ArrayList<>();
         for (FilterAction action : allFilters) {
             Filter filter = action.getFilter();
@@ -160,6 +150,8 @@ public class Filters {
     }
 
     public static FilterAction getFilterActionByName(String filterName) {
+        assert finishedAdding;
+
         for (FilterAction filter : allFilters) {
             if (filter.getName().equals(filterName)) {
                 return filter;

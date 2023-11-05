@@ -19,7 +19,7 @@ package pixelitor.gui;
 
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.GUIMode;
+import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -235,7 +235,7 @@ public class PreferencesPanel extends JTabbedPane {
     private JPanel createMousePanel() {
         var mousePanel = new JPanel(new BorderLayout());
         // put the contents to the north of a border layout,
-        // so that it is not stretched vertically
+        // so that it isn't stretched vertically
         var contents = new JPanel(new GridBagLayout());
         mousePanel.add(contents, BorderLayout.NORTH);
 
@@ -347,7 +347,7 @@ public class PreferencesPanel extends JTabbedPane {
     }
 
     private void addExperimentalCB(GridBagHelper gbh) {
-        experimentalCB = new JCheckBox("", GUIMode.enableExperimentalFeatures);
+        experimentalCB = new JCheckBox("", Features.enableExperimental);
         gbh.addLabelAndControl("Enable Experimental Features:", experimentalCB);
     }
 
@@ -398,7 +398,7 @@ public class PreferencesPanel extends JTabbedPane {
         View.snappingSettingChanged(snapCB.isSelected());
         AppPreferences.magickDirName = magickDirName;
         FileChoosers.setUseNativeDialogs(nativeChoosersCB.isSelected());
-        GUIMode.enableExperimental(experimentalCB.isSelected());
+        Features.enableExperimental(experimentalCB.isSelected());
 
         return true;
     }

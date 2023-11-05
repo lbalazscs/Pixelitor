@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -83,8 +83,8 @@ public enum StrokeType {
             }
 
             if (width != lastWidth) {
-                // create new stroke objects only when necessary, the main benefit
-                // is that the seed is not changed when the mouse is released
+                // Create new stroke objects only when necessary; the main benefit
+                // is that the seed isn't changed when the mouse is released.
                 createStroke(width);
                 lastWidth = width;
             }

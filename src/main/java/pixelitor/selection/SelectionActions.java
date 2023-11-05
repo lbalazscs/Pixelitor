@@ -124,8 +124,8 @@ public final class SelectionActions {
             .validator(d -> {
                 modifySelection(type, amount);
 
-                // always return false so that
-                // the Change button does not close it
+                // Always return false so that
+                // the Change button doesn't close it.
                 return false;
             })
             .show();

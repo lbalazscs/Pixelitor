@@ -46,7 +46,7 @@ public class RecentFilesMenuItem extends JMenuItem {
             IO.openFileAsync(f, true);
         } else {
             // the file was deleted since Pixelitor started
-            String msg = format("The file %s does not exist.", f);
+            String msg = format("The file %s doesn't exist.", f);
             Messages.showError("Error", msg);
         }
     }

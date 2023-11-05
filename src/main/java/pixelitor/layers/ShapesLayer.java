@@ -305,17 +305,8 @@ public class ShapesLayer extends ContentLayer {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        if (styledShape == null) {
-            node.addString("styledShape", "null");
-        } else {
-            node.add(styledShape.createDebugNode());
-        }
-
-        if (transformBox == null) {
-            node.addString("transformBox", "null");
-        } else {
-            node.add(transformBox.createDebugNode());
-        }
+        node.addNullableDebuggable("styledShape", styledShape);
+        node.addNullableDebuggable("transformBox", transformBox);
 
         return node;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,7 +132,7 @@ public class ResizingFilterHelper {
     }
 
     private BufferedImage getDownscaledSource() {
-        // For the downscaling there is no quality improvement if it is done
+        // For the downscaling there is no quality improvement if it's done
         // in multiple steps, so this is always done the fast way.
         int smallWidth = (int) (srcWidth / resizeFactor);
         int smallHeight = (int) (srcHeight / resizeFactor);

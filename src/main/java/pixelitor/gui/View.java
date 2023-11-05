@@ -375,7 +375,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // make a copy of the transform object which represents "component space"
+        // make a copy of the transform object, which represents "component space"
         var componentTransform = g2.getTransform();
 
         g2.translate(canvasStartX, canvasStartY);
@@ -390,7 +390,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // after the translation and scaling, we are in "image space"
 
         if (showMask) {
-//            LayerMask mask = comp.getActiveLayer().getActiveMask();
             LayerMask mask = comp.getActiveLayer().getMask();
             assert mask != null : "no mask in " + maskViewMode;
             mask.paintLayerOnGraphics(g2, true);
@@ -398,7 +397,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             g2.drawImage(comp.getCompositeImage(), 0, 0, null);
 
             if (maskViewMode.showRuby()) {
-                //LayerMask mask = comp.getActiveLayer().getActiveMask();
                 LayerMask mask = comp.getActiveLayer().getMask();
                 assert mask != null : "no mask in " + maskViewMode;
                 mask.paintAsRubylith(g2);
@@ -665,8 +663,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         setZoom(zoomLevel.zoomOut(), mousePos);
     }
 
-    // it seems that all Swing resizing goes through this method, so we don't
-    // have to listen to componentResized events, which might come too late
+    // It seems that all Swing resizing goes through this method, so we don't
+    // have to listen to componentResized events, which might come too late.
     @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);

@@ -64,7 +64,7 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void mousePressed(PMouseEvent e) {
         if (path == null) {
-            //always called on the EDT, therefore thread safety is not a concern
+            //always called on the EDT, therefore thread safety isn't a concern
             //noinspection NonThreadSafeLazyInitialization
             path = new Path(e.getComp(), true);
             path.setPreferredPenToolMode(this);
@@ -193,7 +193,7 @@ public class PathBuilder implements PenToolMode {
             // alt-press on an anchor point should break the handle...
             cp.getAnchor().setType(CUSP);
         } else {
-            // ...except when it is retracted: then drag out symmetrically
+            // ...except when it's retracted: then drag out symmetrically
             cp.getAnchor().setType(SYMMETRIC);
         }
         // after breaking, move it as usual
@@ -238,7 +238,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         boolean breakHandle = e.isAltDown();
-        AnchorPoint last = path.getLast();
+        AnchorPoint last = path.getLastAnchor();
         if (breakHandle) {
             last.setType(CUSP);
         } else {
@@ -289,7 +289,7 @@ public class PathBuilder implements PenToolMode {
             return;
         } else if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             // finalize the dragged out control of the last anchor
-            AnchorPoint last = path.getLast();
+            AnchorPoint last = path.getLastAnchor();
             ControlPoint ctrlOut = last.ctrlOut;
             ctrlOut.mouseReleased(x, y, e.isShiftDown());
             if (!ctrlOut.isRetracted()) {
@@ -350,7 +350,7 @@ public class PathBuilder implements PenToolMode {
             // when the mouse is moved, the moving point is conceptually dragged
             path.getMovingPoint().mouseDragged(x, y, e.isShiftDown());
 
-            AnchorPoint first = path.getFirst();
+            AnchorPoint first = path.getFirstAnchor();
             if (first.handleContains(x, y)) {
                 first.setActive(true);
             } else {
@@ -423,7 +423,7 @@ public class PathBuilder implements PenToolMode {
         if (state == MOVING_TO_NEXT_ANCHOR || state == DRAGGING_THE_CONTROL_OF_LAST) {
             // If a new subpath is being created,
             // move the most recently placed anchor point
-            AnchorPoint last = path.getLast();
+            AnchorPoint last = path.getLastAnchor();
             if (last != null) {
                 last.arrowKeyPressed(key);
                 return true;
@@ -479,7 +479,7 @@ public class PathBuilder implements PenToolMode {
     }
 
     public MovingPoint createMovingPoint(SubPath sp) {
-        AnchorPoint last = sp.getLast();
+        AnchorPoint last = sp.getLastAnchor();
         return new MovingPoint(lastX, lastY, last, last.getView());
     }
 

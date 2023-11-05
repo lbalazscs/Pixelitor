@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,20 +71,20 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
         return this;
     }
 
-    public SubPathAssert firstIsActive() {
+    public SubPathAssert firstAnchorIsActive() {
         isNotNull();
 
-        if (!actual.getFirst().isActive()) {
+        if (!actual.getFirstAnchor().isActive()) {
             throw new AssertionError("first is not active");
         }
 
         return this;
     }
 
-    public SubPathAssert firstIsNotActive() {
+    public SubPathAssert firstAnchorIsNotActive() {
         isNotNull();
 
-        if (actual.getFirst().isActive()) {
+        if (actual.getFirstAnchor().isActive()) {
             throw new AssertionError("first is active");
         }
 

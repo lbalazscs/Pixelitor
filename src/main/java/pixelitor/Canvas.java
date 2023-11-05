@@ -25,6 +25,7 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
+import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -40,8 +41,8 @@ import static pixelitor.Views.thumbSize;
 
 /**
  * The canvas represents the size of a composition.
- * A layer can be bigger than the canvas, if it is partially hidden (for example
- * because it was moved with the Move Tool).
+ * A layer can be larger than the canvas if it's partially hidden,
+ * for example because it was moved with the Move Tool).
  * The saved images always have the size of the canvas.
  */
 public class Canvas implements Serializable, Debuggable {
@@ -78,7 +79,7 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Changes the size using values given in image space
+     * Changes the size using values given in image space.
      */
     public void resize(int newWidth, int newHeight, View view, boolean notify) {
         width = newWidth;
@@ -90,7 +91,7 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Recalculates the component-space size
+     * Recalculates the component-space size.
      */
     public void recalcCoSize(View view, boolean updateView) {
         double viewScale = view.getScaling();
@@ -107,24 +108,24 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Either a new composition (therefore a new canvas)
-     * was activated or the active canvas size changed
+     * Either a new composition (therefore, a new canvas)
+     * was activated or the active canvas size changed.
      */
     public static void activeCanvasSizeChanged(Canvas canvas) {
-        // as long as only Symmetry must be notified,
-        // a listener mechanism is not necessary
+        // As long as only Symmetry needs to be notified,
+        // a listener mechanism isn't necessary.
         Symmetry.activeCanvasSizeChanged(canvas);
     }
 
     /**
-     * Returns the bounds in image space
+     * Returns the bounds in image space.
      */
     public Rectangle getBounds() {
         return new Rectangle(0, 0, width, height);
     }
 
     /**
-     * Returns the component space bounds
+     * Returns the component space bounds.
      */
     public Rectangle getCoBounds(View view) {
         return new Rectangle(
@@ -132,7 +133,7 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the size in image space
+     * Returns the size in image space.
      */
     public Dimension getSize() {
         return new Dimension(width, height);
@@ -143,21 +144,21 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the size in component space
+     * Returns the size in component space.
      */
     public Dimension getCoSize() {
         return new Dimension(coWidth, coHeight);
     }
 
     /**
-     * Returns the width in image space
+     * Returns the width in image space.
      */
     public int getWidth() {
         return width;
     }
 
     /**
-     * Returns the height in image space
+     * Returns the height in image space.
      */
     public int getHeight() {
         return height;
@@ -168,14 +169,14 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
-     * Returns the width in component space
+     * Returns the width in component space.
      */
     public int getCoWidth() {
         return coWidth;
     }
 
     /**
-     * Returns the height in component space
+     * Returns the height in component space.
      */
     public int getCoHeight() {
         return coHeight;
@@ -225,10 +226,20 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     /**
+     * Returns the intersection of the given rectangle with the canvas bounds.
+     */
+    public Rectangle intersect(Rectangle rectangle) {
+        return SwingUtilities.computeIntersection(
+            0, 0, width, height,
+            rectangle
+        );
+    }
+
+    /**
      * Creates a temporary image with the size of this canvas.
      */
     public BufferedImage createTmpImage() {
-        // it is important that the tmp image has transparency
+        // it's important that the tmp image has transparency
         // even for layer masks, otherwise drawing is not possible
         return ImageUtils.createSysCompatibleImage(this);
     }

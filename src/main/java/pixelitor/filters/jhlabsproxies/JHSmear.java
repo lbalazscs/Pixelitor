@@ -40,14 +40,13 @@ public class JHSmear extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);
     private final RangeParam mix = new RangeParam(OPACITY, 0, 50, 100);
 
-    private static final Item[] shapeChoices = {
+    private final IntChoiceParam shape = new IntChoiceParam("Shape", new Item[]{
         new Item("Lines", SmearFilter.LINES),
         new Item("Crosses", SmearFilter.CROSSES),
         new Item("Circles", SmearFilter.CIRCLES),
         new Item("Squares", SmearFilter.SQUARES),
         new Item("Diamonds", SmearFilter.DIAMONDS),
-    };
-    private final IntChoiceParam shape = new IntChoiceParam("Shape", shapeChoices);
+    });
 
     private SmearFilter filter;
 
@@ -64,9 +63,9 @@ public class JHSmear extends ParametrizedFilter {
             mix
         );
 
-        // disable angle if the shape is not lines
+        // disable the angle if the shape isn't "lines"
         shape.setupDisableOtherIf(angle,
-            selected -> selected.getValue() != SmearFilter.LINES);
+            selected -> selected.valueIsNot(SmearFilter.LINES));
     }
 
     @Override

@@ -50,8 +50,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import static java.awt.AlphaComposite.SRC_OVER;
-import static java.awt.BasicStroke.CAP_ROUND;
-import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.*;
@@ -124,6 +122,10 @@ public class ImageUtils {
         return graphicsConfig.createCompatibleVolatileImage(width, height, TRANSLUCENT);
     }
 
+    /**
+     * Creates a new {@link BufferedImage} with the same
+     * {@link ColorModel} as the given source image.
+     */
     public static BufferedImage createImageWithSameCM(BufferedImage src) {
         ColorModel cm = src.getColorModel();
         return new BufferedImage(cm, cm.createCompatibleWritableRaster(
@@ -131,7 +133,11 @@ public class ImageUtils {
             cm.isAlphaPremultiplied(), null);
     }
 
-    // like the above but instead of src width and height, it uses the arguments
+    /**
+     * Creates a new {@link BufferedImage} with the same
+     * {@link ColorModel} as the given source image and
+     * with the given width and height.
+     */
     public static BufferedImage createImageWithSameCM(BufferedImage src,
                                                       int width, int height) {
         ColorModel cm = src.getColorModel();
@@ -311,7 +317,8 @@ public class ImageUtils {
     }
 
     /**
-     * Returns the number of steps necessary for progress tracking
+     * Returns the number of steps (progress tracking work units)
+     * required for smooth enlargement.
      */
     public static int calcNumStepsForEnlargeSmooth(double resizeFactor, double step) {
         double progress = 1.0;
@@ -346,12 +353,11 @@ public class ImageUtils {
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
         } else {
-            // if the image's pixels are not stored in an int array,
-            // a correct int array can still be retrieved with
+            // If the image's pixels are not stored in an int array,
+            // a correct int array could still be retrieved with
             // src.getRGB(0, 0, width, height, null, 0, width);
-            // but modifying that array won't have any effect on the image.
-            String msg = "type is " + Debug.bufferedImageTypeToString(src.getType());
-            throw new UnsupportedOperationException(msg);
+            // but modifying that array wouldn't have any effect on the image.
+            throw new UnsupportedOperationException("type is " + Debug.bufferedImageTypeToString(src.getType()));
         }
 
         return pixels;
@@ -394,10 +400,6 @@ public class ImageUtils {
     }
 
     public static BufferedImage loadJarImageFromImagesFolder(String fileName) {
-        // consider caching
-        // for image brushes this is not necessary because
-        // the template brush always has the max size
-
         assert fileName != null;
 
         URL imgURL = imagePathToURL(fileName);
@@ -662,7 +664,7 @@ public class ImageUtils {
             || raster.getSampleModelTranslateY() != 0;
     }
 
-    // Can copy an image which was created by BufferedImage.getSubimage
+    // Can copy an image that was created by BufferedImage.getSubimage
     public static BufferedImage copySubImage(BufferedImage src) {
         return copyTo(src.getType(), src);
     }
@@ -1101,17 +1103,6 @@ public class ImageUtils {
         BufferedImage img = createSysCompatibleImage(1, 1);
         img.setRGB(0, 0, toPackedARGB(a, r, g, b));
         return img;
-    }
-
-    public static void paintBlurredGlow(Shape shape, Graphics2D g, int numSteps, float effectWidth) {
-        float brushAlpha = 1.0f / numSteps;
-        g.setComposite(AlphaComposite.getInstance(SRC_OVER, brushAlpha));
-//        g.setComposite(new AddComposite(brushAlpha));
-        for (float i = 0; i < numSteps; i = i + 1.0f) {
-            float brushWidth = i * effectWidth / numSteps;
-            g.setStroke(new BasicStroke(brushWidth, CAP_ROUND, JOIN_ROUND));
-            g.draw(shape);
-        }
     }
 
     public static BufferedImage getSelectionSizedPartFrom(BufferedImage src,

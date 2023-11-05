@@ -21,10 +21,12 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DragDisplayType;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.*;
 
 /**
@@ -206,7 +208,7 @@ public enum ShapeType {
 
             // rotate the arrow into the direction of the drag
             double angleInRadians = drag.getDrawAngle();
-            double angle = Utils.atan2AngleToIntuitive(angleInRadians);
+            double angle = Geometry.atan2ToIntuitive(angleInRadians);
             angle += Math.PI / 2;
             transform.rotate(angle);
 

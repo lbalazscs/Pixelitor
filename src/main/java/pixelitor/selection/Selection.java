@@ -177,9 +177,10 @@ public class Selection implements Debuggable {
     private void repaint() {
 //        Rectangle selBounds = shape.getBounds();
 //        view.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
-//        the above optimization is not good, the previous positions should be also considered for the
+
+//        The above optimization isn't good; the previous positions should be also considered for the
 //        case when the selection is shrinking while dragging.
-//        But it does not seem to solve the pixel grid problem anyway
+//        But it doesn't seem to solve the pixel grid problem anyway.
 
         view.repaint();
     }

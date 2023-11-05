@@ -38,7 +38,7 @@ import static pixelitor.tools.shapes.StrokeType.ZIGZAG;
 
 /**
  * A {@link FilterParam} for stroke settings.
- * Its GUI is a button, which shows a dialog when pressed.
+ * Its GUI is a button that shows a dialog when pressed.
  */
 public class StrokeParam extends AbstractFilterParam {
     public static final ShapeType DEFAULT_SHAPE_TYPE = ShapeType.KIWI;

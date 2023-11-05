@@ -21,7 +21,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.lookup.FastLookupOp;
-import pixelitor.filters.util.Filters;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -109,7 +108,7 @@ public class ExtractChannel extends ParametrizedFilter {
             };
             default -> throw new IllegalStateException("should not het here");
         };
-        return Filters.runRGBPixelOp(rgbOp, src, dest);
+        return rgbOp.filter(src, dest);
     }
 
     private static BufferedImage colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {

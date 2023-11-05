@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class MirrorFilter extends CenteredTransformFilter {
             b = oneBySlope;
         }
 
-        // for a line `a*x + b*y + c = 0` which satisfies (cx, cy)
+        // for a line `a*x + b*y + c = 0` that satisfies (cx, cy)
         // c = -(a*cx + b*cy)
         c = -(a * cx + b * cy);
 

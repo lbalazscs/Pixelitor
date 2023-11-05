@@ -89,17 +89,14 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        int x = (int) e.getImX();
-        int y = (int) e.getImY();
-
         var comp = e.getComp();
         Drawable dr = comp.getActiveDrawableOrThrow();
 
         int tx = dr.getTx();
         int ty = dr.getTy();
 
-        x -= tx;
-        y -= ty;
+        int x = (int) e.getImX() - tx;
+        int y = (int) e.getImY() - ty;
 
         BufferedImage image = dr.getImage();
         int imgHeight = image.getHeight();
@@ -138,14 +135,13 @@ public class PaintBucketTool extends Tool {
             throw new IllegalStateException("fill = " + fill);
         }
 
-        String action = getSelectedAction();
         int tolerance = toleranceParam.getValue();
-        Rectangle replacedArea = switch (action) {
+        Rectangle replacedArea = switch (getSelectedAction()) {
             case ACTION_LOCAL -> scanlineFloodFill(workingImage,
                 x, y, tolerance, rgbAtMouse, fillRGB);
             case ACTION_GLOBAL -> globalReplaceColor(workingImage,
                 tolerance, rgbAtMouse, fillRGB);
-            default -> throw new IllegalStateException("action = " + action);
+            default -> throw new IllegalStateException("action = " + getSelectedAction());
         };
 
         if (replacedArea != null) { // something was replaced
@@ -194,8 +190,6 @@ public class PaintBucketTool extends Tool {
 
         int[] pixels = ImageUtils.getPixelArray(img);
 
-        // Needed because the tolerance: we cannot assume that
-        // if the pixel is within the target range, it has been processed
         boolean[] checkedPixels = new boolean[pixels.length];
 
         // the double-ended queue is used as a simple LIFO stack
@@ -305,7 +299,7 @@ public class PaintBucketTool extends Tool {
             }
         }
 
-        // return the replaced area, which is the whole image
+        // Return the replaced area, which is the entire image.
         return new Rectangle(0, 0, img.getWidth(), img.getHeight());
     }
 

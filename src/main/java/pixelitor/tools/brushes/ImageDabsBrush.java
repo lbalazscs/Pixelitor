@@ -59,7 +59,7 @@ public class ImageDabsBrush extends DabsBrush {
         // if the radius changes during the brush stroke
         // via hotkeys, the brush image has to be recreated
         if (targetG != null) {
-            // the point argument is not used by this class
+            // the point argument isn't used by this class
             setupBrushStamp(null);
         }
     }
@@ -137,7 +137,7 @@ public class ImageDabsBrush extends DabsBrush {
         int drawStartX = (int) (x - radius);
         int drawStartY = (int) (y - radius);
 
-        if (!settings.isAngleAware() || theta == 0) {
+        if (!settings.isAngled() || theta == 0) {
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
             // draw rotated image

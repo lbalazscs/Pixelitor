@@ -29,7 +29,7 @@ import org.assertj.swing.fixture.JSliderFixture;
 import org.fest.util.Files;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
+import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.AutoPaintPanel;
@@ -81,7 +81,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_CONTROL;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_F6;
+import static java.awt.event.KeyEvent.VK_F7;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.within;
@@ -348,7 +351,7 @@ public class AssertJSwingTest {
         testTextLayers();
         testMaskFromColorRange();
 
-        if (GUIMode.enableExperimentalFeatures) {
+        if (Features.enableExperimental) {
             testAdjLayers();
         }
 
@@ -455,13 +458,13 @@ public class AssertJSwingTest {
         layer1CopyButton.setOpenEye(false);
         layer1CopyButton.requireClosedEye();
 
-        keyboard.undo("Hide Layer");
+        keyboard.undo("Hide Image Layer");
         layer1CopyButton.requireOpenEye();
 
-        keyboard.redo("Hide Layer");
+        keyboard.redo("Hide Image Layer");
         layer1CopyButton.requireClosedEye();
 
-        keyboard.undo("Hide Layer");
+        keyboard.undo("Hide Image Layer");
         layer1CopyButton.requireOpenEye();
     }
 
@@ -1127,7 +1130,7 @@ public class AssertJSwingTest {
         // wait for the preview to be calculated
         Utils.sleep(2, SECONDS);
 
-        findDialogByTitle("Save Optimized JPEG").button("ok").click();
+        findDialogByTitle("Export Optimized JPEG").button("ok").click();
         app.saveWithOverwrite(baseDir, "saved.jpg");
 
         checkConsistency();
@@ -1752,7 +1755,8 @@ public class AssertJSwingTest {
         testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Truchet Tiles", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
-        // Shapes
+        // Curves
+        testFilterWithDialog("Circle Weave", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);

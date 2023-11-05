@@ -57,11 +57,11 @@ public class SelectionBuilder {
 
         if (combinator == ShapeCombinator.REPLACE) {
             replacedShape = existingSelection.getShape();
-            // At this point the mouse was pressed, and it is clear that the
+            // At this point the mouse was pressed, and it's clear that the
             // old selection should go away, but we don't know yet whether the
             // mouse will be released at the same point (Deselect) or another
-            // point (Replace Selection)
-            // Therefore we don't deselect yet (the selection information
+            // point (Replace Selection).
+            // Therefore, we don't deselect yet (the selection information
             // will be needed when the mouse will be released), only hide.
             existingSelection.setHidden(true, true);
         } else {

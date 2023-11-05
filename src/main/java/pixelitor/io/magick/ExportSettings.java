@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public interface ExportSettings {
     /**
-     * The settings for file types which don't have a customization dialog.
+     * The settings for file types that don't have a customization dialog.
      */
     static ExportSettings DEFAULTS = new ExportSettings() {
         @Override

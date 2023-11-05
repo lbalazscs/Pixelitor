@@ -28,7 +28,6 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
@@ -43,14 +42,10 @@ public class GradientHandles implements ToolWidget {
 
     public GradientHandles(PPoint startPos, PPoint endPos, View view) {
         this.view = view;
-        Color defaultColor = Color.WHITE;
-        Color activeColor = Color.RED;
 
-        start = new GradientDefiningPoint("start", startPos, view,
-            defaultColor, activeColor, this);
-        end = new GradientDefiningPoint("end", endPos, view,
-            defaultColor, activeColor, this);
-        middle = new GradientCenterPoint(start, end, view, defaultColor, activeColor);
+        start = new GradientDefiningPoint("start", startPos, view, this);
+        end = new GradientDefiningPoint("end", endPos, view, this);
+        middle = new GradientCenterPoint(start, end, view);
 
         end.setOther(start);
         end.setCenter(middle);

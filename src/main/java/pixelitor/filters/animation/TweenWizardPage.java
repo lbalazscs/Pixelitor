@@ -33,7 +33,7 @@ import java.awt.Component;
 import java.util.Optional;
 
 /**
- * A page in the tweening animation wizard
+ * A page in the tweening animation wizard.
  */
 public enum TweenWizardPage implements WizardPage {
     SELECT_FILTER {
@@ -51,7 +51,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            searchPanel = new FilterSearchPanel(Filters.getAnimationFiltersSorted());
+            searchPanel = new FilterSearchPanel(Filters.getAnimationFilters());
             return searchPanel;
         }
 
@@ -125,8 +125,9 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            // the following 3 lines are necessary because otherwise the image position
-            // selectors will show the result of the initial filter and not the original image
+            // The following lines are necessary because otherwise,
+            // the image position selectors will show the result of
+            // the initial filter and not the original image.
             dr.stopPreviewing(); // stop the initial one
             dr.startPreviewing(); // start the final one
 

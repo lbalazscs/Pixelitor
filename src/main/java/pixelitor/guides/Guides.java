@@ -25,6 +25,8 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -44,7 +46,7 @@ import static pixelitor.compactions.Flip.Direction.VERTICAL;
  * Objects of this class should be mutated only while building,
  * for any changes a new instance should be built.
  */
-public class Guides implements Serializable {
+public class Guides implements Serializable, Debuggable {
     @Serial
     private static final long serialVersionUID = -1168950961227421664L;
 
@@ -307,6 +309,20 @@ public class Guides implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
+
+        for (Double h : horizontals) {
+            node.addDouble("horizontal", h);
+        }
+        for (Double v : verticals) {
+            node.addDouble("vertical", v);
+        }
+
+        return node;
     }
 
     /**

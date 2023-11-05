@@ -146,11 +146,11 @@ public class GlobalEvents {
     }
 
     private static void spacePressed(KeyEvent e) {
-        // Alt-space is not treated as space-down because on Windows
+        // Alt-space isn't treated as space-down because on Windows,
         // this opens the system menu, and we get the space-pressed
         // event, but not the space released-event, and the app gets
-        // stuck in Hand mode, which looks like a freeze when there
-        // are no scrollbars. See issue #29
+        // stuck in Hand mode. This looks like a freeze when there
+        // are no scrollbars. See issue #29.
         if (numModalDialogs == 0 && !e.isAltDown()) {
             keyListener.spacePressed();
             spaceDown = true;

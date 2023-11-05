@@ -44,7 +44,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * OpenRaster file format support.
- * Only image layers are saved as the format does not cover
+ * Only image layers are saved as the format doesn't cover
  * other layer types or layer masks.
  */
 public class OpenRaster {

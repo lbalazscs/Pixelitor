@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -103,8 +103,8 @@ public abstract class DabsBrush extends AbstractBrush {
     public DebugNode createDebugNode(String key) {
         var node = super.createDebugNode(key);
 
-        node.addBoolean("angle aware", settings.isAngleAware());
-        node.addBoolean("jitter aware",
+        node.addBoolean("angled", settings.isAngled());
+        node.addBoolean("jittered",
             settings.getAngleSettings().shouldJitterAngle());
         node.addDouble("spacing", spacing.getSpacing(radius));
 

@@ -24,6 +24,7 @@ import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
 
+import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.io.File;
 
@@ -42,7 +43,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         = new BrowseFilesSupport(Dirs.getLastSavePath(),
         "Select Output Folder", DIRECTORY);
 
-    private final FileFormatSelector outputFormatSelector;
+    private final JComboBox<FileFormat> outputFormatSelector;
 
     OpenSaveDirsPanel() {
         super(new GridBagLayout());
@@ -51,7 +52,8 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
-        outputFormatSelector = new FileFormatSelector(FileFormat.getLastSaved());
+        outputFormatSelector = new JComboBox<>(FileFormat.values());
+        outputFormatSelector.setSelectedItem(FileFormat.getLastSaved());
         gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
@@ -64,7 +66,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     }
 
     private FileFormat getSelectedFormat() {
-        return outputFormatSelector.getSelectedFormat();
+        return (FileFormat) outputFormatSelector.getSelectedItem();
     }
 
     @Override
@@ -87,7 +89,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     private static ValidationResult addDirExistenceCheck(ValidationResult v,
                                                          File dir, String type) {
         if (!dir.exists()) {
-            String msg = format("The selected %s folder %s does not exist.",
+            String msg = format("The selected %s folder %s doesn't exist.",
                 type, dir.getAbsolutePath());
             v = v.and(ValidationResult.error(msg));
         }

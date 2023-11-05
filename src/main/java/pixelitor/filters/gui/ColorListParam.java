@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 /**
- * A filter parameter for selecting a list of colors
+ * A filter parameter for selecting a list of colors.
  */
 public class ColorListParam extends AbstractFilterParam {
     private Color[] colors;
@@ -88,10 +88,8 @@ public class ColorListParam extends AbstractFilterParam {
             paramGUI.updateGUI();
         }
 
-        if (trigger) {
-            if (adjustmentListener != null) {  // when called from randomize, this is null
-                adjustmentListener.paramAdjusted();
-            }
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
@@ -105,7 +103,7 @@ public class ColorListParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState<?> copyState() {
+    public ColorListParamState copyState() {
         return new ColorListParamState(colors);
     }
 
@@ -146,7 +144,7 @@ public class ColorListParam extends AbstractFilterParam {
         setColors(defCopy, trigger);
     }
 
-    private record ColorListParamState(Color[] colors) implements ParamState<ColorListParamState> {
+    public record ColorListParamState(Color[] colors) implements ParamState<ColorListParamState> {
         @Serial
         private static final long serialVersionUID = 1L;
 

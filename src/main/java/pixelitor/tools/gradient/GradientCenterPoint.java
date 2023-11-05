@@ -21,8 +21,6 @@ import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Color;
-
 /**
  * The draggable point at the half distance between the
  * start and end points, which moves the whole gradient.
@@ -33,9 +31,8 @@ public class GradientCenterPoint extends DraggablePoint {
 
     public GradientCenterPoint(GradientDefiningPoint start,
                                GradientDefiningPoint end,
-                               View view, Color color, Color activeColor) {
-        super("center", PPoint.halfPointBetween(start, end),
-            view, color, activeColor);
+                               View view) {
+        super("center", PPoint.halfPointBetween(start, end), view);
         this.start = start;
         this.end = end;
     }

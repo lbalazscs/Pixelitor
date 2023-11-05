@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.filters.util.Filters;
 import pixelitor.gui.GUIText;
 
 import java.awt.Color;
@@ -41,7 +40,7 @@ public class ExtractChannelFilter extends Filter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return Filters.runRGBPixelOp(rgbOp, src, dest);
+        return rgbOp.filter(src, dest);
     }
 
     @Override

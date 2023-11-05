@@ -17,6 +17,7 @@
 
 package pixelitor.filters.animation;
 
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.FileChoosers;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,7 +26,7 @@ import java.io.File;
 import static java.lang.String.format;
 
 /**
- * The output type of the tweening animation
+ * The output type of the tweening animation.
  */
 public enum TweenOutputType {
     PNG_FILE_SEQUENCE("PNG File Sequence") {
@@ -35,7 +36,7 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String validate(File output) {
+        public ValidationResult validate(File output) {
             return checkDir(output, this);
         }
 
@@ -55,7 +56,7 @@ public enum TweenOutputType {
         }
 
         @Override
-        public String validate(File output) {
+        public ValidationResult validate(File output) {
             return checkFile(output, this, "GIF");
         }
 
@@ -78,50 +79,50 @@ public enum TweenOutputType {
 
     abstract AnimationWriter createWriter(File file, int delayMillis);
 
-    /**
-     * Returns the error message or null if the argument is OK as output
-     */
-    public abstract String validate(File output);
+    public abstract ValidationResult validate(File output);
 
     public abstract boolean needsDirectory();
 
-    private static String checkFile(File output,
-                                    TweenOutputType type,
-                                    String fileType) {
+    private static ValidationResult checkFile(File output,
+                                              TweenOutputType type,
+                                              String fileType) {
         if (output.exists()) {
             if (output.isDirectory()) {
-                return format("%s is a folder." +
+                String msg = format("%s is a folder." +
                         "<br>For the \"%s\" output type, " +
                         "select a (new or existing) %s file in an existing folder.",
                     output.getAbsolutePath(), type, fileType);
+                return ValidationResult.error(msg);
             }
-        } else { // if it does not exist, we still expect the parent directory to exist
+        } else { // if it doesn't exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
             if (parentDir == null) {
-                return "Folder not found";
+                return ValidationResult.error("Folder not found");
             }
             if (!parentDir.exists()) {
-                return format("The folder %s of the %s file does not exist." +
+                String msg = format("The folder %s of the %s file does not exist." +
                         "<br>For the \"%s\" output type, " +
                         "select a (new or existing) %s file in an existing folder.",
                     parentDir.getName(), output.getAbsolutePath(),
                     type, fileType);
+                return ValidationResult.error(msg);
             }
         }
-        return null;
+        return ValidationResult.ok();
     }
 
-    private static String checkDir(File output, TweenOutputType type) {
+    private static ValidationResult checkDir(File output, TweenOutputType type) {
         // we expect it to be an existing directory
         if (!output.isDirectory()) {
-            return format("\"<b>%s</b>\" is not a folder." +
+            String msg = format("\"<b>%s</b>\" isn't a folder." +
                     "<br>For the \"%s\" output type, select an existing folder.",
                 output.getAbsolutePath(), type);
+            return ValidationResult.error(msg);
         }
         if (!output.exists()) {
-            return output.getAbsolutePath() + " does not exist.";
+            return ValidationResult.error(output.getAbsolutePath() + " doesn't exist.");
         }
-        return null;
+        return ValidationResult.ok();
     }
 
     public abstract FileNameExtensionFilter getFileFilter();

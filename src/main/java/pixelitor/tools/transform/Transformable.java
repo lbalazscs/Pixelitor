@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
-import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.geom.AffineTransform;
 
@@ -26,17 +26,15 @@ import java.awt.geom.AffineTransform;
  * A callback interface that is passed to a {@link TransformBox} so that something
  * can be automatically transformed with the {@link AffineTransform} created by the box.
  */
-public interface Transformable {
+public interface Transformable extends Debuggable {
     /**
      * Apply the given transform in image space.
      */
     void imTransform(AffineTransform transform);
 
     /**
-     * Update the UI. A simple repaint is not enough for the
+     * Update the UI. A simple repaint isn't enough for the
      * shapes tool, because the image has to be recalculated.
      */
     void updateUI(View view);
-
-    DebugNode createDebugNode();
 }

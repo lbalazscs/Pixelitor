@@ -26,10 +26,10 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 /**
- * A point which is at the mouse cursor when the mouse
+ * A point that is at the mouse cursor when the mouse
  * is moving (as opposed to dragging) as the path is built.
  * It has an inverse mouse cycle: it is dragged when the mouse is
- * actually up, its mousePressed is called when the mouse is released, etc.
+ * actually up; its mousePressed is called when the mouse is released, etc.
  * If Shift is pressed, it is constrained relative to the previous
  * anchor point.
  */
@@ -37,7 +37,7 @@ public class MovingPoint extends DraggablePoint {
     private final AnchorPoint prevAnchor;
 
     public MovingPoint(double coX, double coY, AnchorPoint prevAnchor, View view) {
-        super("moving", new PPoint(coX, coY, view), view, null, null);
+        super("moving", new PPoint(coX, coY, view), view);
         this.prevAnchor = prevAnchor;
     }
 
@@ -54,7 +54,7 @@ public class MovingPoint extends DraggablePoint {
     }
 
     /**
-     * Transform it into a regular anchor point when the mouse is pressed
+     * Transform it into a regular anchor point when the mouse is pressed.
      */
     public AnchorPoint toAnchor() {
         return new AnchorPoint(x, y, view, prevAnchor.getSubPath());

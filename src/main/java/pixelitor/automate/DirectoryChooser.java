@@ -26,16 +26,18 @@ import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.WEST;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
  * A panel that can be used to select a single directory
- * and optionally an output format
+ * and optionally an output format.
  */
 public class DirectoryChooser extends ValidatedPanel {
     private final BrowseFilesSupport chooserSupport;
-    private FileFormatSelector outputFormatSelector;
+    private JComboBox<FileFormat> outputFormatSelector;
 
     private DirectoryChooser(String label, String initialPath,
                              String chooserDialogTitle,
@@ -50,7 +52,8 @@ public class DirectoryChooser extends ValidatedPanel {
             var gbh = new GridBagHelper(this);
             gbh.addLabelAndTwoControls(label, dirTF, browseButton);
 
-            outputFormatSelector = new FileFormatSelector(defaultOutputFormat);
+            outputFormatSelector = new JComboBox<>(FileFormat.values());
+            outputFormatSelector.setSelectedItem(defaultOutputFormat);
 
             gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
         } else {
@@ -62,7 +65,7 @@ public class DirectoryChooser extends ValidatedPanel {
     }
 
     private FileFormat getSelectedFormat() {
-        return outputFormatSelector.getSelectedFormat();
+        return (FileFormat) outputFormatSelector.getSelectedItem();
     }
 
     private File getSelectedDir() {
@@ -81,12 +84,12 @@ public class DirectoryChooser extends ValidatedPanel {
                 return ValidationResult.error(
                     "The selected path "
                         + selectedDir.getAbsolutePath()
-                        + " is not a folder.");
+                        + " isn't a folder.");
             } else {
                 return ValidationResult.error(
                     "The selected folder "
                         + selectedDir.getAbsolutePath()
-                        + " does not exist.");
+                        + " doesn't exist.");
             }
         }
     }

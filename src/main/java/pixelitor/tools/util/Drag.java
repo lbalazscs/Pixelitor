@@ -20,6 +20,7 @@ package pixelitor.tools.util;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
+import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -143,9 +144,6 @@ public class Drag implements Serializable {
 
     public void setStart(PPoint e) {
         assert e.getView() != null;
-
-//        View view = e.getView();
-
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
@@ -465,7 +463,6 @@ public class Drag implements Serializable {
         return PRectangle.positiveFromCo(toCoRect(), view);
     }
 
-
     /**
      * Creates a Rectangle where the sign of with/height indicate the direction of drawing
      *
@@ -585,8 +582,7 @@ public class Drag implements Serializable {
     }
 
     public double calcIntuitiveAngle() {
-        double angle = calcAngle();
-        return Utils.atan2AngleToIntuitive(angle);
+        return Geometry.atan2ToIntuitive(calcAngle());
     }
 
     public double calcAngle() {

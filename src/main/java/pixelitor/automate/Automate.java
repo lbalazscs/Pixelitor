@@ -33,10 +33,13 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * Utility class with static methods for batch processing
+ * Utility class with static methods for batch processing.
  */
 public class Automate {
     private static final String OVERWRITE_YES = "Yes";
@@ -52,7 +55,7 @@ public class Automate {
 
     /**
      * Processes each file in the input directory
-     * with the given {@link CompAction}
+     * with the given {@link CompAction}.
      */
     public static void processFiles(CompAction action, String dialogTitle) {
         assert calledOnEDT() : threadInfo();
@@ -145,7 +148,7 @@ public class Automate {
                 default:
                     throw new IllegalStateException("Unexpected value: " + answer);
             }
-        } else { // the file does not exist or overwrite all was pressed previously
+        } else { // the file doesn't exist or "overwrite all" was selected previously
             view.paintImmediately();
             retVal = comp.saveAsync(saveSettings, false);
         }

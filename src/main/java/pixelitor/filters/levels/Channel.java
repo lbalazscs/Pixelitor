@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,7 @@ import static java.awt.Color.WHITE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Determines which channels are currently edited
- * (used by Levels and Curves filters)
+ * Determines which channels are currently edited.
  */
 public enum Channel {
     RGB("RGB", "rgb", BLACK) {

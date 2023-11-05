@@ -27,14 +27,14 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NORTH;
 
 /**
- * The GUI component for an {@link ImagePositionParam}
+ * The GUI component for an {@link ImagePositionParam}.
  */
 public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
 
-    private final ImagePositionSelector imgPosSelector;
+    private final ImagePositionSelector thumbSelector;
     private final JComponent xSlider;
     private final JComponent ySlider;
 
@@ -54,9 +54,9 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
             0, defaultY, 100, true, NORTH);
         ySliderModel.setDecimalPlaces(decimalPlaces);
 
-        // add the image position selector
-        imgPosSelector = new ImagePositionSelector(this, model, 100);
-        add(imgPosSelector, WEST);
+        // add the thumbnail selector
+        thumbSelector = new ImagePositionSelector(this, model, 100);
+        add(thumbSelector, WEST);
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
@@ -88,7 +88,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         if (slidersMovedByUser) {
             model.setRelativeX(xSliderModel.getPercentage(),
                 xSliderModel.getValueIsAdjusting());
-            imgPosSelector.repaint();
+            thumbSelector.repaint();
         }
     }
 
@@ -96,13 +96,13 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         if (slidersMovedByUser) {
             model.setRelativeY(ySliderModel.getPercentage(),
                 ySliderModel.getValueIsAdjusting());
-            imgPosSelector.repaint();
+            thumbSelector.repaint();
         }
     }
 
     /**
      * Updates the sliders based on the model changes.
-     * This does not trigger the running of the filter
+     * This doesn't trigger the running of the filter.
      */
     public void updateSlidersFromModel() {
         slidersMovedByUser = false;
@@ -125,12 +125,12 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     @Override
     public void updateGUI() {
         updateSlidersFromModel();
-        imgPosSelector.repaint();
+        thumbSelector.repaint();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        imgPosSelector.setEnabled(enabled);
+        thumbSelector.setEnabled(enabled);
         xSlider.setEnabled(enabled);
         ySlider.setEnabled(enabled);
         super.setEnabled(enabled);
@@ -138,7 +138,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-        imgPosSelector.setToolTipText(tip);
+        thumbSelector.setToolTipText(tip);
     }
 
     @Override

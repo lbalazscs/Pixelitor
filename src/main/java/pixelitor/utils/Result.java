@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,82 +17,57 @@
 
 package pixelitor.utils;
 
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
  * Represents either the result of a computation or an error.
  *
- * @param <V> the type of the successful result
+ * @param <S> the type of the successful result
  * @param <E> the type of the error details
  */
-public sealed interface Result<V, E> {
-    boolean isOK();
+public sealed interface Result<S, E> permits Success, Error {
+    boolean wasSuccess();
 
-    V get();
+    /**
+     * Returns the successful result.
+     */
+    S get();
 
+    /**
+     * Returns the error details.
+     */
     E errorDetail();
 
-    <W> Result<W, E> map(Function<? super V, ? extends W> mapper);
+    /**
+     * Maps the successful result using an S->T mapper function.
+     */
+    <T> Result<T, E> map(Function<? super S, ? extends T> mapper);
 
-    <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper);
+    /**
+     * Maps and flattens the successful result using an S->Result mapper function.
+     */
+    <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper);
 
-    static <V, E> Result<V, E> ok(V value) {
-        return new OK<>(value);
+    /**
+     * Creates a new Result representing a successful result.
+     */
+    static <V, E> Result<V, E> success(V value) {
+        return new Success<>(value);
     }
 
+    /**
+     * Creates a new Result representing an error.
+     */
     static <V, E> Result<V, E> error(E errorDetail) {
         return new Error<>(errorDetail);
     }
-}
 
-record OK<V, E>(V value) implements Result<V, E> {
-    @Override
-    public boolean isOK() {
-        return true;
-    }
-
-    @Override
-    public V get() {
-        return value;
-    }
-
-    @Override
-    public E errorDetail() {
-        throw new IllegalStateException("no error");
-    }
-
-    @Override
-    public <W> Result<W, E> map(Function<? super V, ? extends W> mapper) {
-        return new OK<>(mapper.apply(value));
-    }
-
-    @Override
-    public <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper) {
-        @SuppressWarnings("unchecked")
-        Result<W, E> returnValue = (Result<W, E>) mapper.apply(value);
-        return Objects.requireNonNull(returnValue);
+    static <V, E> Result<V, E> ofNullable(V value) {
+        if (value == null) {
+            return error(null);
+        } else {
+            return success(value);
+        }
     }
 }
 
-record Error<V, E>(E errorDetail) implements Result<V, E> {
-    @Override
-    public boolean isOK() {
-        return false;
-    }
-
-    @Override
-    public V get() {
-        throw new IllegalStateException("no value");
-    }
-
-    @Override
-    public <W> Result<W, E> map(Function<? super V, ? extends W> mapper) {
-        return new Error<>(errorDetail);
-    }
-
-    @Override
-    public <W> Result<W, E> flatMap(Function<? super V, ? extends Result<? extends W, E>> mapper) {
-        return new Error<>(errorDetail);
-    }
-}

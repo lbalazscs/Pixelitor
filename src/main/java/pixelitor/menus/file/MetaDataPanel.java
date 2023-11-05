@@ -40,7 +40,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.WEST;
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -199,7 +202,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
             return;
         }
         if (FileUtils.hasTGAExtension(file.getName())) {
-            String msg = "Metadata for TGA files is not supported yet.";
+            String msg = "Metadata for TGA files isn't supported yet.";
             Messages.showError("TGA File", msg, comp.getDialogParent());
             return;
         }

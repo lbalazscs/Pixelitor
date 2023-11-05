@@ -93,7 +93,7 @@ public class History {
         if (GUIMode.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
-            ConsistencyChecks.checkAll(comp, false);
+            ConsistencyChecks.checkAll(comp);
         }
     }
 

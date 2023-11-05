@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,16 +18,14 @@
 package pixelitor.utils;
 
 /**
- * A progress tracker which tracks the progress
- * of a subtask within a larger task
+ * A progress tracker that tracks the progress
+ * of a subtask within a larger task.
  */
 public class SubtaskProgressTracker implements ProgressTracker {
     private final ProgressTracker superTask;
 
-    /**
-     * Determines how many units in this task correspond
-     * to a unit in the larger task
-     */
+    // Determines how many units in this task correspond
+    // to a unit in the larger task.
     private final double ratio;
 
     // the progress in the super task

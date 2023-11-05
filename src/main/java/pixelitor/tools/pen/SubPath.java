@@ -50,7 +50,9 @@ import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.*;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * A subpath within a {@link Path}.
@@ -140,20 +142,21 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public AnchorPoint addMovingPointAsAnchor() {
-        AnchorPoint ap = moving.toAnchor();
-        anchorPoints.add(ap);
+        AnchorPoint newAnchor = moving.toAnchor();
+        anchorPoints.add(newAnchor);
         setMovingPoint(null);
 
-        AnchorPoint last = getLast();
-        History.add(new AddAnchorPointEdit(comp, this, last));
-        return last;
+        assert newAnchor == getLastAnchor();
+
+        History.add(new AddAnchorPointEdit(comp, this, newAnchor));
+        return newAnchor;
     }
 
-    public AnchorPoint getFirst() {
+    public AnchorPoint getFirstAnchor() {
         return anchorPoints.getFirst();
     }
 
-    public AnchorPoint getLast() {
+    public AnchorPoint getLastAnchor() {
         return anchorPoints.getLast();
     }
 
@@ -184,7 +187,7 @@ public class SubPath implements Serializable, Transformable {
         }
 
         // moveTo is the beginning of a new subpath
-        AnchorPoint first = getFirst();
+        AnchorPoint first = getFirstAnchor();
         gp.moveTo(toX.applyAsDouble(first), toY.applyAsDouble(first));
         AnchorPoint prev = first;
 
@@ -208,7 +211,7 @@ public class SubPath implements Serializable, Transformable {
             prev = curr;
         }
 
-        AnchorPoint last = getLast();
+        AnchorPoint last = getLastAnchor();
         if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showRubberBand()) {
             double movingX = toX.applyAsDouble(moving);
             double movingY = toY.applyAsDouble(moving);
@@ -282,7 +285,7 @@ public class SubPath implements Serializable, Transformable {
 
         // paint some extra handles if not finished
         if (state == DRAGGING_THE_CONTROL_OF_LAST || state == MOVING_TO_NEXT_ANCHOR) {
-            getLast().paintHandles(g, true, true);
+            getLastAnchor().paintHandles(g, true, true);
 
             if (numPoints >= 2) {
                 AnchorPoint lastButOne = anchorPoints.get(numPoints - 2);
@@ -479,10 +482,10 @@ public class SubPath implements Serializable, Transformable {
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
             out.print(Ansi.purple("Point " + i + " (" + point.getName() + "): "));
-            if (point == getFirst()) {
+            if (point == getFirstAnchor()) {
                 out.print("first ");
             }
-            if (point == getLast()) {
+            if (point == getLastAnchor()) {
                 out.print("last ");
             }
             point.dump();
@@ -576,13 +579,13 @@ public class SubPath implements Serializable, Transformable {
     }
 
     private boolean shouldBeClosed(double x, double y) {
-        return getFirst().handleContains(x, y) && getNumAnchors() >= 2;
+        return getFirstAnchor().handleContains(x, y) && getNumAnchors() >= 2;
     }
 
     // return true if it could be closed
     boolean tryClosing(double x, double y) {
         if (shouldBeClosed(x, y)) {
-            getFirst().setActive(false);
+            getFirstAnchor().setActive(false);
             close(true);
             return true;
         }
@@ -624,7 +627,7 @@ public class SubPath implements Serializable, Transformable {
     public void addCubicCurve(double c1x, double c1y,
                               double c2x, double c2y,
                               double nextX, double nextY, View view) {
-        ControlPoint lastOut = getLast().ctrlOut;
+        ControlPoint lastOut = getLastAnchor().ctrlOut;
         PPoint c1 = PPoint.lazyFromIm(c1x, c1y, view);
         lastOut.setLocationOnlyForThis(c1);
         lastOut.afterMovingActionsForThis();
@@ -642,7 +645,7 @@ public class SubPath implements Serializable, Transformable {
 
     public void addQuadCurve(double cx, double cy,
                              double nextX, double nextY, View view) {
-        AnchorPoint last = getLast();
+        AnchorPoint last = getLastAnchor();
 
         // convert the quadratic bezier (with one control point)
         // into a cubic one (with two control points), see
@@ -747,9 +750,10 @@ public class SubPath implements Serializable, Transformable {
     }
 
     @Override
-    public DebugNode createDebugNode() {
+    public DebugNode createDebugNode(String key) {
+        // the index of the subpath inside the parent path is already in the key
         String name = isActive() ? "active " : "";
-        name += "subpath " + getId();
+        name += key + " " + getId();
 
         var node = new DebugNode(name, this);
 

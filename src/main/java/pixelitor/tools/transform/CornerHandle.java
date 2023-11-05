@@ -21,7 +21,6 @@ import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Color;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.io.Serial;
@@ -34,6 +33,7 @@ public class CornerHandle extends PositionHandle {
     private static final long serialVersionUID = 1L;
 
     // the two neighbors in the horizontal and vertical directions
+    // and the edges that connect them to this corner handle
     private CornerHandle horNeighbor;
     private EdgeHandle horEdge;
     private CornerHandle verNeighbor;
@@ -50,8 +50,7 @@ public class CornerHandle extends PositionHandle {
 
     public CornerHandle(String name, TransformBox box, boolean nextToRot, PPoint pos,
                         View view, int cursorIndex, int cursorIndexIO) {
-        super(name, box, pos, view,
-            Color.WHITE, Color.RED, cursorIndex, cursorIndexIO);
+        super(name, box, pos, view, cursorIndex, cursorIndexIO);
         this.nextToRot = nextToRot;
     }
 
@@ -86,9 +85,9 @@ public class CornerHandle extends PositionHandle {
 
     @Override
     public void setLocation(double x, double y) {
-        // this method does not move the related points because when
+        // This method doesn't move the related points because when
         // the point is transformed with a rotation transform,
-        // AffineTransform.transform calls it, and expects the simple behavior
+        // AffineTransform.transform calls it, and expects the simple behavior.
         super.setLocation(x, y);
     }
 

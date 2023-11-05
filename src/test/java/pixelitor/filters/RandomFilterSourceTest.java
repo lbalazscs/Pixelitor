@@ -49,6 +49,7 @@ class RandomFilterSourceTest {
 
             Filters.addFilter(filterAction);
         }
+        Filters.finishedAdding();
     }
 
     @BeforeEach

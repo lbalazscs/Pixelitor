@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.Graphics2D;
 
 /**
  * A brush.
- * The received coordinates correspond to the mouse events,
+ * The received coordinates correspond to the mouse events;
  * they are not translated with the brush radius.
  */
 public interface Brush extends Debuggable {
@@ -80,32 +80,32 @@ public interface Brush extends Debuggable {
     PPoint getPrevious();
 
     /**
-     * Forces the given previous point on the brush
+     * Forces the given previous point on the brush.
      */
     void rememberPrevious(PPoint previous);
 
     /**
      * Returns true if the brush has a previous position,
-     * and false if it was not used yet.
+     * and false if it has not been used yet.
      */
     default boolean hasPrevious() {
         return getPrevious() != null;
     }
 
     /**
-     * Sets the Composition and the Graphics2D object
-     * on which this brush will draw
+     * Sets the {@link Drawable} and the Graphics2D object
+     * on which this brush will draw.
      */
     void setTarget(Drawable dr, Graphics2D g);
 
     /**
-     * Sets the radius of the brush
+     * Sets the radius of the brush.
      */
     void setRadius(double radius);
 
     /**
      * Used to determine the area saved for the undo.
-     * Note that this can be bigger than the radius, because
+     * Note that this can be bigger than the radius because
      * some brushes use randomness and paint outside their radius.
      * Since the radius can change during a brush stroke (vie keyboard),
      * the maximum value must be returned.

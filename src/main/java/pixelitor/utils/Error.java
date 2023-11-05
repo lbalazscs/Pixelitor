@@ -14,15 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.layers;
 
-/**
- * A listener for changes in layer mask state.
- * It doesn't observe a specific layer,
- * but rather the active layer of the active composition.
- */
-public interface ActiveMaskListener {
-    void maskAdded(Layer layer);
+package pixelitor.utils;
 
-    void maskDeleted(Layer layer);
+import java.util.function.Function;
+
+public record Error<S, E>(E errorDetail) implements Result<S, E> {
+    @Override
+    public boolean wasSuccess() {
+        return false;
+    }
+
+    @Override
+    public S get() {
+        throw new IllegalStateException("no success");
+    }
+
+    @Override
+    public <T> Result<T, E> map(Function<? super S, ? extends T> mapper) {
+        return new Error<>(errorDetail);
+    }
+
+    @Override
+    public <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper) {
+        return new Error<>(errorDetail);
+    }
 }

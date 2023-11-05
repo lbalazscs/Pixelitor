@@ -18,16 +18,12 @@
 package pixelitor.utils.debug;
 
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.guides.Guides;
-import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.Paths;
 import pixelitor.utils.Utils;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.util.List;
 
 /**
  * Static factory methods for creating {@link DebugNode}s
@@ -143,49 +139,6 @@ public class DebugNodes {
         node.addInt("num components", colorSpace.getNumComponents());
         node.addString("type", Debug.colorSpaceTypeToString(colorSpace.getType()));
         node.addBoolean("sRGB", colorSpace.isCS_sRGB());
-
-        return node;
-    }
-
-    public static DebugNode createGuidesNode(String name, Guides guides) {
-        var node = new DebugNode(name, guides);
-
-        List<Double> horizontals = guides.getHorizontals();
-        for (Double h : horizontals) {
-            node.addDouble("horizontal", h);
-        }
-        List<Double> verticals = guides.getVerticals();
-        for (Double v : verticals) {
-            node.addDouble("vertical", v);
-        }
-
-        return node;
-    }
-
-    public static DebugNode createPathsNode(Paths paths) {
-        var node = new DebugNode("paths", paths);
-
-        Path activePath = paths.getActivePath();
-        if (activePath != null) {
-            node.add(createPathNode(activePath));
-        } else {
-            node.addBoolean("has active path", false);
-        }
-
-        return node;
-    }
-
-    public static DebugNode createPathNode(Path path) {
-        var node = new DebugNode("path " + path.getId(), path);
-
-        int numSubpaths = path.getNumSubpaths();
-        node.addInt("number of subpaths", numSubpaths);
-        node.addAsString("build state", path.getBuildState());
-
-        for (int i = 0; i < numSubpaths; i++) {
-            var subPath = path.getSubPath(i);
-            node.add(subPath.createDebugNode());
-        }
 
         return node;
     }

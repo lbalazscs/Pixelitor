@@ -23,7 +23,6 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -46,7 +45,7 @@ public class RotationHandle extends DraggablePoint {
     private static final int MOUSE_DISPLAY_CENTER_DISTANCE = 12 + DragDisplay.ONE_LINER_BG_HEIGHT / 2;
 
     public RotationHandle(String name, TransformBox box, PPoint pos, View view) {
-        super(name, pos, view, Color.WHITE, Color.RED);
+        super(name, pos, view);
         this.box = box;
         cursor = Cursors.DEFAULT;
     }

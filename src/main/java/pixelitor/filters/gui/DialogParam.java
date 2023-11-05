@@ -31,8 +31,8 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
- * A composite {@link FilterParam} which
- * can show its children in a dialog
+ * A composite {@link FilterParam} that
+ * can show its children in a dialog.
  */
 public class DialogParam extends AbstractFilterParam {
     private final FilterParam[] children;
@@ -54,9 +54,8 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     private void configureDialog(DialogBuilder builder) {
-        JPanel p = GUIUtils.arrangeVertically(List.of(children));
         builder
-            .content(p)
+            .content(GUIUtils.arrangeVertically(List.of(children)))
             .title(getName())
             .withScrollbars()
             .okText(CLOSE_DIALOG)
@@ -156,9 +155,9 @@ public class DialogParam extends AbstractFilterParam {
         if (trigger) {
             adjustmentListener.paramAdjusted();
         } else {
-            // this class updates the default button state
-            // simply by putting a decorator on the adjustment
-            // listeners, no this needs to be called here manually
+            // This class updates the default button state
+            // by putting a decorator on the adjustment
+            // listeners, so this needs to be called here manually.
             updateResetButtonState();
         }
     }

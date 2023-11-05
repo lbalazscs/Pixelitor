@@ -43,7 +43,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
  * Represents a gradient.
- * Unlike other filter parameter implementations, this is not
+ * Unlike other filter parameter implementations, this isn't
  * a GUI-free model, the actual value is stored inside the GradientSlider.
  */
 public class GradientParam extends AbstractFilterParam {
@@ -253,7 +253,7 @@ public class GradientParam extends AbstractFilterParam {
         return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
-    private record GradientParamState(float[] thumbPositions,
+    public record GradientParamState(float[] thumbPositions,
                                       Color[] colors) implements ParamState<GradientParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

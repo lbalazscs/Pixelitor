@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.tools.pen.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -55,7 +55,8 @@ public class FinishSubPathEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         var node = super.createDebugNode(key);
 
-        node.add(DebugNodes.createPathNode(subPath.getPath()));
+        Path path = subPath.getPath();
+        node.add(path.createDebugNode("path " + path.getId()));
 
         return node;
     }

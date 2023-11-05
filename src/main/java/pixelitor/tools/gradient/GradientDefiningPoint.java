@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Utils;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
@@ -36,10 +35,9 @@ public class GradientDefiningPoint extends DraggablePoint {
     private GradientDefiningPoint other;
     private GradientCenterPoint center;
 
-    public GradientDefiningPoint(String name, PPoint pos,
-                                 View view, Color color, Color activeColor,
+    public GradientDefiningPoint(String name, PPoint pos, View view,
                                  GradientHandles gradientHandles) {
-        super(name, pos, view, color, activeColor);
+        super(name, pos, view);
         this.gradientHandles = gradientHandles;
     }
 

@@ -21,7 +21,10 @@ import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXTextField;
 import org.jdesktop.swingx.prompt.BuddySupport;
 import org.jdesktop.swingx.prompt.PromptSupport;
-import pixelitor.gui.utils.*;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
+import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.LayerGUI;
 
 import javax.swing.*;
@@ -39,9 +42,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.util.Locale;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_BACK_SPACE;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_UP;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
+import static pixelitor.gui.utils.TFValidationLayerUI.createCheckedTF;
 
 public class FilterSearchPanel extends JPanel {
     private static final int GAP = 4;
@@ -57,8 +63,7 @@ public class FilterSearchPanel extends JPanel {
         createSearchTextField();
         createFiltersList(filters);
 
-        var searchLayerUI = new TFValidationLayerUI(tf -> numMatchingFilters() > 0);
-        add(new JLayer<>(searchTF, searchLayerUI), BorderLayout.NORTH);
+        add(createCheckedTF(searchTF, tf -> numMatchingFilters() > 0), BorderLayout.NORTH);
         add(new JScrollPane(filtersList), BorderLayout.CENTER);
         setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
     }
@@ -219,7 +224,7 @@ public class FilterSearchPanel extends JPanel {
     }
 
     public static FilterAction showInDialog(String title) {
-        FilterSearchPanel panel = new FilterSearchPanel(Filters.getAllFiltersSorted());
+        FilterSearchPanel panel = new FilterSearchPanel(Filters.getAllFilters());
         DialogBuilder builder = new DialogBuilder()
             .content(panel)
             .title(title)

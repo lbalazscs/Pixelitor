@@ -17,15 +17,6 @@
 
 package pixelitor;
 
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Lazy;
-
-import java.awt.EventQueue;
-
-import static pixelitor.utils.Threads.calledOnEDT;
-import static pixelitor.utils.Threads.threadInfo;
-
 /**
  * The way in which the GUI is created.
  */
@@ -46,16 +37,7 @@ public enum GUIMode {
     UNIT_TESTS() {
     };
 
-    // feature flags to avoid diverging branches
-    public static boolean enableExperimentalFeatures = AppPreferences.loadExperimentalFeatures();
-    public static final boolean enableFreeTransform = false;
-    //    public static final boolean enableAdjLayers = false;
-    public static final boolean enableImageMode = false;
-
     public static GUIMode CURRENT = FINAL_GUI;
-
-    // Lazy because it should be calculated after the CURRENT is set.
-    private static final Lazy<String> fixTitle = Lazy.of(GUIMode::calcFixTitle);
 
     /**
      * Returns true if the app was started in development mode.
@@ -69,44 +51,11 @@ public enum GUIMode {
         return !isDevelopment();
     }
 
-    private static String calcFixTitle() {
-        String s = "Pixelitor " + Pixelitor.VERSION_NUMBER;
-        if (CURRENT != FINAL_GUI) {
-            s += " DEVELOPMENT " + System.getProperty("java.version");
-        }
-        return s;
-    }
-
-    public static String getMainWindowFixTitle() {
-        assert calledOnEDT() : threadInfo();
-
-        return fixTitle.get();
-    }
-
     public static boolean isUnitTesting() {
         return CURRENT == UNIT_TESTS;
     }
 
     public static void setUnitTestingMode() {
         CURRENT = UNIT_TESTS;
-    }
-
-    public static void enableExperimental(boolean newValue) {
-        if (enableExperimentalFeatures != newValue) {
-            enableExperimentalFeatures = newValue;
-            if (newValue) {
-                String msg = "<html>The following experimental features have been enabled:<ul>" +
-                    "<li>Smart objects</li>" +
-                    "<li>Layer groups</li>" +
-                    "<li>Gradient fill layers</li>" +
-                    "<li>Color fill layers</li>" +
-                    "<li>Shape layers</li>" +
-                    "</ul><br>Note that future versions of Pixelitor might not be able<br>to open pxc files with experimental features." +
-                    "<br><br>Some experimental features will be fully activated<br>only after restarting Pixelitor.";
-                // show the new dialog only after the main dialog is closed
-                EventQueue.invokeLater(() ->
-                    Dialogs.showWarningDialog("Experimental Features", msg));
-            }
-        }
     }
 }

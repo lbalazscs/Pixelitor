@@ -50,7 +50,7 @@ public class EraserTool extends AbstractBrushTool {
 
     @Override
     protected void initGraphics(Graphics2D g) {
-        // the color does not matter as long as AlphaComposite.DST_OUT is used
+        // the color doesn't matter as long as AlphaComposite.DST_OUT is used
         g.setComposite(AlphaComposite.getInstance(DST_OUT));
     }
 

@@ -66,13 +66,17 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.guitest.AJSUtils.*;
+import static pixelitor.guitest.AJSUtils.checkRandomly;
+import static pixelitor.guitest.AJSUtils.chooseRandomly;
+import static pixelitor.guitest.AJSUtils.pushRandomly;
+import static pixelitor.guitest.AJSUtils.slideRandomly;
 import static pixelitor.tools.BrushType.*;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.threadInfo;
+import static pixelitor.utils.Utils.toPercentage;
 
 /**
  * A utility class for running Pixelitor with assertj-swing based tests
@@ -222,7 +226,7 @@ public class AppRunner {
             chooseRandomly(dialog.comboBox("shape"));
             slideRandomly(dialog.slider("spacing"));
             slideRandomly(dialog.slider("angleJitter"));
-            checkRandomly(dialog.checkBox("angleAware"));
+            checkRandomly(dialog.checkBox("angled"));
         } else if (brushType == SPRAY) {
             chooseRandomly(dialog.comboBox("shape"));
             slideRandomly(dialog.slider("avgRadius"));
@@ -946,7 +950,7 @@ public class AppRunner {
     }
 
     public void changeLayerOpacity(float newValue) {
-        String newValueString = String.valueOf((int) (newValue * 100));
+        String newValueString = String.valueOf(toPercentage(newValue));
         JTextComponentFixture layerOpacity = findLayerOpacityTF();
         layerOpacity
             .requireText("100")

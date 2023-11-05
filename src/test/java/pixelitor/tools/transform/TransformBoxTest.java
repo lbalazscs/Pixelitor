@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
-import static java.awt.event.MouseEvent.*;
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
@@ -48,8 +50,8 @@ class TransformBoxTest {
         }
 
         @Override
-        public DebugNode createDebugNode() {
-            return new DebugNode("test", null);
+        public DebugNode createDebugNode(String key) {
+            return new DebugNode(key, null);
         }
     };
 

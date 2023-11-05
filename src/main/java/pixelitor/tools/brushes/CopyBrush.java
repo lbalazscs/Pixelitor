@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
+import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLED;
 
 /**
  * An abstract superclass for the clone and smudge brushes.
@@ -38,7 +38,7 @@ public abstract class CopyBrush extends DabsBrush {
     private static boolean debugBrushImage = false;
 
     protected CopyBrush(double radius, CopyBrushType type, Spacing spacing) {
-        super(radius, spacing, NOT_ANGLE_AWARE, true);
+        super(radius, spacing, NOT_ANGLED, true);
         this.type = type;
     }
 

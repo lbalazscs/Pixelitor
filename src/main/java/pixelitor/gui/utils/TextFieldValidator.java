@@ -38,7 +38,7 @@ public interface TextFieldValidator {
         try {
             value = Utils.parseDouble(text);
         } catch (ParseException ex) {
-            return ValidationResult.error(text + " is not a valid number for <b>" + label + "</b>");
+            return ValidationResult.error(text + " isn't a valid number for <b>" + label + "</b>");
         }
         if (value > 0) {
             return ValidationResult.ok();
@@ -71,8 +71,6 @@ public interface TextFieldValidator {
     static JLayer<JTextField> createPositiveIntLayer(String label,
                                                      JTextField tf,
                                                      boolean allowZero) {
-        TFValidationLayerUI layerUI = TFValidationLayerUI.fromValidator(
-            textField1 -> hasPositiveInt(textField1, label, allowZero));
-        return new JLayer<>(tf, layerUI);
+        return TFValidationLayerUI.createValidatedTF(tf, textField1 -> hasPositiveInt(textField1, label, allowZero));
     }
 }

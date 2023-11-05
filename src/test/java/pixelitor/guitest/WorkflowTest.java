@@ -23,7 +23,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
+import pixelitor.Features;
 import pixelitor.filters.Starburst;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
@@ -38,28 +38,40 @@ import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.Utils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_ENTER;
+import static java.awt.event.KeyEvent.VK_F3;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
-import static pixelitor.layers.MaskViewMode.*;
+import static pixelitor.layers.MaskViewMode.EDIT_MASK;
+import static pixelitor.layers.MaskViewMode.NORMAL;
+import static pixelitor.layers.MaskViewMode.RUBYLITH;
+import static pixelitor.layers.MaskViewMode.SHOW_MASK;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
-import static pixelitor.tools.gradient.GradientType.*;
+import static pixelitor.tools.gradient.GradientType.LINEAR;
+import static pixelitor.tools.gradient.GradientType.RADIAL;
+import static pixelitor.tools.gradient.GradientType.SPIRAL_CW;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
-import static pixelitor.tools.shapes.ShapeType.*;
-import static pixelitor.tools.shapes.TwoPointPaintType.*;
+import static pixelitor.tools.shapes.ShapeType.CAT;
+import static pixelitor.tools.shapes.ShapeType.HEART;
+import static pixelitor.tools.shapes.ShapeType.KIWI;
+import static pixelitor.tools.shapes.ShapeType.RECTANGLE;
+import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
+import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
+import static pixelitor.tools.shapes.TwoPointPaintType.TRANSPARENT;
 
 /**
  * A workflow test is an Assertj-Swing regression test, where an
@@ -170,9 +182,9 @@ public class WorkflowTest {
     }
 
     private WorkflowTest(String arg) {
-        boolean experimentalWasEnabled = EDT.call(() -> GUIMode.enableExperimentalFeatures);
+        boolean experimentalWasEnabled = EDT.call(() -> Features.enableExperimental);
         // enable it before building the menus so that shortcuts work
-        EDT.run(() -> GUIMode.enableExperimentalFeatures = true);
+        EDT.run(() -> Features.enableExperimental = true);
 
         app = new AppRunner(null);
         mouse = app.getMouse();
@@ -181,10 +193,13 @@ public class WorkflowTest {
 //        app.runSlowly();
 
         List<GroupSetting> groupSettings = List.of(
-            GroupSetting.values()
-//            WithinGroup.NO_GROUP,
-//            WithinGroup.PASS_THROUGH,
-//            WithinGroup.ISOLATED
+            GroupSetting.NO_GROUP
+//            GroupSetting.PASS_THROUGH,
+//            GroupSetting.ISOLATED,
+//            GroupSetting.DOUBLE_PP,
+//            GroupSetting.DOUBLE_II,
+//            GroupSetting.DOUBLE_PI,
+//            GroupSetting.DOUBLE_IP
         );
 
         List<Consumer<GroupSetting>> tests = switch (arg) {
@@ -202,7 +217,7 @@ public class WorkflowTest {
                 test.accept(groupSetting)));
 
         if (!experimentalWasEnabled) {
-            EDT.run(() -> GUIMode.enableExperimentalFeatures = false);
+            EDT.run(() -> Features.enableExperimental = false);
         }
 
         System.out.println("WorkflowTest: finished at " + AppRunner.getCurrentTimeHM());

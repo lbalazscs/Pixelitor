@@ -59,7 +59,10 @@ import java.awt.geom.Path2D;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static pixelitor.tools.DragToolState.*;
+import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
+import static pixelitor.tools.DragToolState.INITIAL_DRAG;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.TRANSFORM;
 import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
@@ -946,16 +949,8 @@ public class ShapesTool extends DragTool {
         var node = super.createDebugNode(key);
         node.addAsString("state", state);
 
-        if (transformBox == null) {
-            node.addString("transform box", "null");
-        } else {
-            node.add(transformBox.createDebugNode());
-        }
-        if (styledShape == null) {
-            node.addString("styledShape", "null");
-        } else {
-            node.add(styledShape.createDebugNode());
-        }
+        node.addNullableDebuggable("transform box", transformBox);
+        node.addNullableDebuggable("styled shape", styledShape);
 
         node.addAsString("type", getSelectedType());
         node.addAsString("fill", getSelectedFillPaint());

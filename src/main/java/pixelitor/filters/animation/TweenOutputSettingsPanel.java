@@ -23,7 +23,6 @@ import pixelitor.io.Dirs;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import javax.swing.plaf.LayerUI;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
@@ -36,14 +35,13 @@ import static java.lang.String.format;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
+import static pixelitor.gui.utils.TFValidationLayerUI.createValidatedTF;
 import static pixelitor.utils.Utils.parseDouble;
 
 /**
  * The settings for the tweening animation output
  */
-public class TweenOutputSettingsPanel extends ValidatedPanel
-    implements TextFieldValidator {
-
+public class TweenOutputSettingsPanel extends ValidatedPanel {
     private final JTextField numSecondsTF = new JTextField("2", 5);
     private final JTextField fpsTF = new JTextField("24", 5);
     private int nrFrames;
@@ -56,6 +54,13 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         Dirs.getLastSave().getAbsolutePath());
     private JTextField fileNameTF;
 
+    private final TextFieldValidator numSecondsValidator = textField ->
+        TextFieldValidator.hasPositiveDouble(textField, "Number of Seconds");
+    private final TextFieldValidator fpsValidator = textField ->
+        TextFieldValidator.hasPositiveDouble(textField, "Frames per Second");
+    private final TextFieldValidator fileNameValidator = textField ->
+        getOutputType().validate(new File(textField.getText().trim()));
+
     public TweenOutputSettingsPanel() {
         super(new GridBagLayout());
 
@@ -63,16 +68,12 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         fpsTF.setName("fpsTF");
         numFramesLabel.setName("numFramesLabel");
 
-        // A single TFValidationLayerUI for all the textfields.
-        LayerUI<JTextField> tfLayerUI = TFValidationLayerUI.fromValidator(this);
-
         var gbh = new GridBagHelper(this);
-
         addOutputTypeSelector(gbh);
-        addAnimationLengthSelectors(tfLayerUI, gbh);
+        addAnimationLengthSelectors(gbh);
         addInterpolationSelector(gbh);
         addPingPongSelector(gbh);
-        addFileSelector(tfLayerUI, gbh);
+        addFileSelector(gbh);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,10 +87,9 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         gbh.addLabelAndControlNoStretch("Output Type:", outputTypeCB);
     }
 
-    private void addAnimationLengthSelectors(LayerUI<JTextField> tfLayerUI,
-                                             GridBagHelper gbh) {
+    private void addAnimationLengthSelectors(GridBagHelper gbh) {
         gbh.addLabelAndControlNoStretch("Number of Seconds:",
-            new JLayer<>(numSecondsTF, tfLayerUI));
+            createValidatedTF(numSecondsTF, numSecondsValidator));
 
         KeyListener keyListener = new KeyAdapter() {
             @Override
@@ -100,7 +100,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         numSecondsTF.addKeyListener(keyListener);
 
         gbh.addLabelAndControlNoStretch("Frames per Second:",
-            new JLayer<>(fpsTF, tfLayerUI));
+            createValidatedTF(fpsTF, fpsValidator));
         fpsTF.addKeyListener(keyListener);
 
         updateCalculations();
@@ -122,11 +122,11 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         pingPongCB.addActionListener(e -> updateCalculations());
     }
 
-    private void addFileSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
+    private void addFileSelector(GridBagHelper gbh) {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
-        filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
+        filePanel.add(createValidatedTF(fileNameTF, fileNameValidator));
         filePanel.add(browseFilesSupport.getBrowseButton());
         gbh.addOnlyControl(filePanel);
     }
@@ -175,30 +175,9 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
     @Override
     public ValidationResult validateSettings() {
-        return check(numSecondsTF)
-            .and(check(fpsTF))
-            .and(check(fileNameTF));
-    }
-
-    @Override
-    public ValidationResult check(JTextField textField) {
-        if (textField == numSecondsTF) {
-            return TextFieldValidator.hasPositiveDouble(textField, "Number of Seconds");
-        } else if (textField == fpsTF) {
-            return TextFieldValidator.hasPositiveDouble(textField, "Frames per Second");
-        } else if (textField == fileNameTF) {
-            TweenOutputType outputType = getOutputType();
-
-            String fileName = textField.getText().trim();
-            String errorMessage = outputType.validate(new File(fileName));
-            if (errorMessage == null) {
-                return ValidationResult.ok();
-            } else {
-                return ValidationResult.error(errorMessage);
-            }
-        } else {
-            throw new IllegalStateException("unexpected JTextField");
-        }
+        return numSecondsValidator.check(numSecondsTF)
+            .and(fpsValidator.check(fpsTF))
+            .and(fileNameValidator.check(fileNameTF));
     }
 
     public void configure(TweenAnimation animation) {

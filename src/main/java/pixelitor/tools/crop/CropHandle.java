@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.tools.crop;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
 
-import java.awt.Color;
 import java.awt.Cursor;
 
 /**
@@ -29,7 +28,7 @@ import java.awt.Cursor;
  */
 public class CropHandle extends DraggablePoint {
     public CropHandle(String name, int cursorType, View view) {
-        super(name, null, view, Color.WHITE, Color.RED);
+        super(name, null, view);
         cursor = Cursor.getPredefinedCursor(cursorType);
     }
 }

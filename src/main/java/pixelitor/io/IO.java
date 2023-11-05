@@ -70,8 +70,8 @@ public class IO {
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
-        // if the file format is not recognized, this will still try to
-        // read it in a single-layered format, which doesn't have to be JPG
+        // If the file format isn't recognized, this will still try to
+        // read it in a single-layered format, which doesn't have to be JPG.
         FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
         return format.readAsync(file);
     }
@@ -227,9 +227,13 @@ public class IO {
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
             .thenAcceptAsync(numImg -> Messages.showInStatusBar(
-                    "Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
-                , onEDT)
+                getSavedImagesMessage(numImg, Dirs.getLastSave())), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    private static String getSavedImagesMessage(int numImg, File directory) {
+        String what = numImg == 1 ? "image" : "images";
+        return "Saved %d %s to <b>%s</b>".formatted(numImg, what, directory);
     }
 
     private static int exportLayersToPNG(Composition comp) {

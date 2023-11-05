@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import java.awt.Graphics2D;
 
 /**
  * A base class for brush decorators.
- * it implements all {@link Brush} methods by delegating them.
+ * It implements all {@link Brush} methods by delegating them.
  */
 public abstract class BrushDecorator implements Brush {
     protected final Brush delegate;

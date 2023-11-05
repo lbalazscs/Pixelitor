@@ -29,14 +29,16 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.Serial;
 
-import static pixelitor.tools.pen.AnchorPointType.*;
+import static pixelitor.tools.pen.AnchorPointType.CUSP;
+import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
+import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
+import static pixelitor.tools.pen.AnchorPointType.addTypePopupItems;
 
 /**
  * A point on a {@link SubPath}
@@ -54,13 +56,6 @@ public class AnchorPoint extends DraggablePoint {
 
     private AnchorPointType type = SYMMETRIC;
 
-    private static final Color ANCHOR_COLOR = Color.WHITE;
-    private static final Color ANCHOR_ACTIVE_COLOR = Color.RED;
-    private static final Color CTRL_IN_COLOR = Color.WHITE;
-    private static final Color CTRL_IN_ACTIVE_COLOR = Color.RED;
-    private static final Color CTRL_OUT_COLOR = Color.WHITE;
-    private static final Color CTRL_OUT_ACTIVE_COLOR = Color.RED;
-
     // not to be confused with DraggablePoint.lastActive!
     public static AnchorPoint recentlyEditedPoint = null;
 
@@ -69,14 +64,12 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public AnchorPoint(PPoint p, View view, SubPath subPath) {
-        super("AP" + debugCounter++, p, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
+        super("AP" + debugCounter++, p, view);
 
         this.subPath = subPath;
 
-        ctrlIn = new ControlPoint("ctrlIn", p, view, this,
-            CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
-        ctrlOut = new ControlPoint("ctrlOut", p, view, this,
-            CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
+        ctrlIn = new ControlPoint("ctrlIn", p, view, this);
+        ctrlOut = new ControlPoint("ctrlOut", p, view, this);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }

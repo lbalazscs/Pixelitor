@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ public class PorterDuff extends ParametrizedFilter {
         int height = src.getHeight();
 
         if (mode.getValue() == MODE_SHAPE) {
-            // if it is filled directly with a shape, then it will
+            // if it's filled directly with a shape, then it will
             // have any effect only within the shape
             fillWithRedEllipse(g, width, height);
         } else if (mode.getValue() == MODE_IMAGE) {

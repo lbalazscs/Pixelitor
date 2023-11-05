@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -143,7 +143,7 @@ public class Navigator extends JComponent
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (view != null) { // it is null if all images are closed
+                if (view != null) { // it's null if all images are closed
                     recalculateSize(view, false, false, true);
                 }
             }
@@ -170,7 +170,7 @@ public class Navigator extends JComponent
             .notModal()
             .noOKButton()
             .noCancelButton()
-            .cancelAction(navigatorPanel::dispose) // when it is closed with X
+            .cancelAction(navigatorPanel::dispose) // when it's closed with X
             .show()
             .getDialog();
     }
@@ -395,7 +395,7 @@ public class Navigator extends JComponent
 
                 updateTargetBox(x, y, w, h);
             } else {
-                // make sure that the view box does not leave the thumb
+                // make sure that the view box doesn't leave the thumb
                 if (newBoxX < 0) {
                     newBoxX = 0;
                 }

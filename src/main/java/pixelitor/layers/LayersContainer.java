@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.GUIMode;
+import pixelitor.Features;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
@@ -30,7 +30,9 @@ import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
@@ -75,7 +77,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         southPanel.add(new LayerActionButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
         southPanel.add(new LayerActionButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        if (GUIMode.enableExperimentalFeatures) {
+        if (Features.enableExperimental) {
             southPanel.add(new LayerActionButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 

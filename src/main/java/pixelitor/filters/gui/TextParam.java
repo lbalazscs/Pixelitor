@@ -26,7 +26,7 @@ import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for text input
+ * A filter parameter for text input.
  */
 public class TextParam extends AbstractFilterParam {
     private final String defaultValue;
@@ -93,7 +93,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState<?> copyState() {
+    public TextParamState copyState() {
         return new TextParamState(gui.getText());
     }
 
@@ -122,7 +122,7 @@ public class TextParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
     }
 
-    private record TextParamState(String value) implements ParamState<TextParamState> {
+    public record TextParamState(String value) implements ParamState<TextParamState> {
         @Serial
         private static final long serialVersionUID = 1L;
 

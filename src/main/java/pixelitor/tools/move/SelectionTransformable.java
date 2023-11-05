@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,8 @@ record SelectionTransformable(Selection selection) implements Transformable {
     }
 
     @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = new DebugNode("SelectionTransformable", this);
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
         node.add(selection.createDebugNode("selection"));
         return node;
     }

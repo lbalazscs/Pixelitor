@@ -199,7 +199,7 @@ public class TextSettingsPanel extends FilterGUI
         String[] availableFonts = Utils.getAvailableFontNames();
         fontFamilyChooserCB = new JComboBox<>(availableFonts);
 
-        // it is important to use Font.getName(), and not Font.getFontName(),
+        // it's important to use Font.getName(), and not Font.getFontName(),
         // otherwise it might not be in the combo box
         String fontName = font.getName();
         fontFamilyChooserCB.setSelectedItem(fontName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Result;
 import pixelitor.utils.Shapes;
 
-import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -33,24 +32,23 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * Represents the source of the image that will be copied to the clipboard
+ * Represents the source of the image to be copied to the clipboard.
  */
 public enum CopySource {
     LAYER_OR_MASK {
         @Override
         Result<BufferedImage, String> getImage(Composition comp) {
-            Layer layer = comp.getActiveLayer();
-            if (layer.isMaskEditing()) {
-                layer = layer.getMask();
+            Layer src = comp.getActiveLayer();
+            if (src.isMaskEditing()) {
+                src = src.getMask();
             }
 
-            // TODO Text layers are rasterized, but they should be probably copied
-            //   in other formats as well (as a string, as a serialized object)
-            //   and pasting into Pixelitor should choose the serialized object
-            //   There could be also an internal clipboard, to handle such cases
-            BufferedImage canvasSizedImage = layer.asImage(true, false);
+            // TODO Text layers are rasterized, but they should probably be copied
+            //   in other formats as well (as a string or a serialized object).
+            //   An internal clipboard could be implemented to handle such cases.
+            BufferedImage canvasSizedImage = src.asImage(true, false);
             if (canvasSizedImage == null) {
-                return Result.error("this layer cannot be copied");
+                return Result.error("this layer can't be copied");
             }
 
             return createImageWithSelectedPixels(canvasSizedImage, comp);
@@ -75,7 +73,7 @@ public enum CopySource {
     private static Result<BufferedImage, String> createImageWithSelectedPixels(
         BufferedImage canvasSizedImage, Composition comp) {
         if (!comp.hasSelection()) {
-            return Result.ok(canvasSizedImage);
+            return Result.success(canvasSizedImage);
         }
 
         Selection selection = comp.getSelection();
@@ -87,7 +85,7 @@ public enum CopySource {
             return cropToSelectionBounds(canvasSizedImage, comp.getCanvas(), selBounds);
         }
 
-        // in the case of a non-rectangular selection
+        // in the case of a non-rectangular selection,
         // set the unselected parts to transparent with an AA border
         Rectangle selBounds = selectionShape.getBounds();
 
@@ -98,21 +96,19 @@ public enum CopySource {
 
         g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
-        return Result.ok(tmpImg);
+        return Result.success(tmpImg);
     }
 
     private static Result<BufferedImage, String> cropToSelectionBounds(BufferedImage canvasSizedImage,
                                                                        Canvas canvas,
                                                                        Rectangle selBounds) {
-        // just to be sure that the bounds are inside the canvas
-        selBounds = SwingUtilities.computeIntersection(
-            0, 0, canvas.getWidth(), canvas.getHeight(),
-            selBounds
-        );
+        // make sure that the bounds are inside the canvas
+        selBounds = canvas.intersect(selBounds);
+
         if (selBounds.isEmpty()) {
             return Result.error("the selection is outside the image");
         }
-        return Result.ok(ImageUtils.crop(canvasSizedImage, selBounds));
+        return Result.success(ImageUtils.crop(canvasSizedImage, selBounds));
     }
 
     abstract Result<BufferedImage, String> getImage(Composition comp);

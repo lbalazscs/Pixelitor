@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static pixelitor.utils.Threads.threadInfo;
  * A {@link ProgressTracker} that tracks the progress by using an
  * arbitrary {@link JProgressBar}.
  * <p>
- * Not to be confused with the {@link StatusBarProgressTracker}
+ * Not to be confused with the {@link StatusBarProgressTracker},
  * which uses a specific progress bar in the status bar.
  */
 public class JProgressBarTracker extends ThresholdProgressTracker {
@@ -42,9 +42,9 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
 
-        // can be a window, but if progressPanel is not
+        // Can be a window, but if progressPanel is not
         // added yet to a window, the broadest available
-        // GUI area will do
+        // GUI area will do.
         topContainer = GUIUtils.getTopContainer(progressPanel);
     }
 
@@ -53,7 +53,6 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         assert calledOnEDT() : threadInfo();
 
         topContainer.setCursor(Cursors.BUSY);
-
         progressPanel.showProgressBar();
     }
 
@@ -69,7 +68,6 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     void finishProgressTracking() {
         progressPanel.setProgress(100);
         progressPanel.hideProgressBar();
-
         topContainer.setCursor(Cursors.DEFAULT);
     }
 }

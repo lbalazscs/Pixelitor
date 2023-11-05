@@ -163,7 +163,7 @@ public class ZoomLevel {
     }
 
     /**
-     * Calculate the optimal zoom level for a given canvas,
+     * Calculates the optimal zoom level for the given canvas,
      * and possibly for a given auto zoom.
      */
     public static ZoomLevel calcBestFor(Canvas canvas, AutoZoom autoZoom,
@@ -172,8 +172,8 @@ public class ZoomLevel {
             return Z100;
         }
         if (autoZoom == null) {
-            // if this is not an auto zoom, then the algorithm is the same
-            // as for "Fit Space"
+            // If this isn't an auto zoom, then the
+            // algorithm is the same as for "Fit Space".
             autoZoom = AutoZoom.FIT_SPACE;
         }
 
@@ -182,13 +182,13 @@ public class ZoomLevel {
         ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
         if (maximallyZoomedOut.asPercent() > idealZoomPercent) {
-            // the image is so big that it will need scroll bars
-            // even if it is maximally zoomed out
+            // The image is so big that it requires scroll
+            // bars even when it's maximally zoomed out.
             return maximallyZoomedOut;
         }
 
         ZoomLevel lastOK = maximallyZoomedOut;
-        // iterate all the zoom levels from zoomed out to zoomed in
+        // iterate through all zoom levels from zoomed-out to zoomed-in
         for (ZoomLevel level : zoomLevels) {
             if (level.asPercent() > idealZoomPercent) {
                 // found one that is too much zoomed in
@@ -201,8 +201,9 @@ public class ZoomLevel {
             }
             lastOK = level;
         }
-        // if we get here, the image is so small that even at maximal zoom
-        // it fits in the available space: set it then to the maximal zoom
+        // If we reach this point, it means that the image is small
+        // enough to fit within the available space even at maximum
+        // zoom. Therefore, set the zoom level to the maximum.
         return lastOK;
     }
 

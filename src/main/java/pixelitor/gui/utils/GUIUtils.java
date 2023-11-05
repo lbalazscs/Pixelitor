@@ -162,7 +162,7 @@ public final class GUIUtils {
             lastDialogLocationsByTitle.put(d.getTitle(), d.getLocationOnScreen());
             d.setVisible(false);
             // dispose should not be called if the dialog will be re-shown
-            // because then AssertJ-Swing doesn't find it even if it is there
+            // because then AssertJ-Swing doesn't find it even if it's there
             if (dispose) {
                 d.dispose();
             }
@@ -281,7 +281,7 @@ public final class GUIUtils {
         c.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                // on Linux/Mac the popup trigger check is not enough
+                // on Linux/Mac the popup trigger check isn't enough
                 // probably because the popups are started by mousePressed
                 boolean showDialog = c.isEnabled()
                     && !e.isPopupTrigger()

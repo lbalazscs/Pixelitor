@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,9 @@
 package pixelitor.filters;
 
 import pixelitor.filters.util.FilterAction;
+import pixelitor.utils.ImageUtils;
+
+import java.awt.image.BufferedImage;
 
 /**
  * Used when colors of all pixels have to be changed
@@ -26,11 +29,30 @@ import pixelitor.filters.util.FilterAction;
 public interface RGBPixelOp {
     /**
      * Computes a new color from the given channel values
-     * and returns the changed color in ARGB int format.
+     * and returns it as a packed ARGB integer.
      */
     int changeRGB(int a, int r, int g, int b);
 
     default FilterAction toFilterAction(String name) {
         return new FilterAction(name, () -> new ExtractChannelFilter(this)).noGUI();
+    }
+
+    default BufferedImage filter(BufferedImage src,
+                                 BufferedImage dest) {
+        int[] srcData = ImageUtils.getPixelArray(src);
+        int[] destData = ImageUtils.getPixelArray(dest);
+
+        for (int i = 0; i < srcData.length; i++) {
+            int rgb = srcData[i];
+
+            int a = (rgb >>> 24) & 0xFF;
+            int r = (rgb >>> 16) & 0xFF;
+            int g = (rgb >>> 8) & 0xFF;
+            int b = rgb & 0xFF;
+
+            destData[i] = changeRGB(a, r, g, b);
+        }
+
+        return dest;
     }
 }

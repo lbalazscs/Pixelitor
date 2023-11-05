@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class Screens {
     }
 
     /**
-     * Positions the given window in the screen in which Pixelitor is running.
+     * Positions the given window on the screen where Pixelitor is running.
      */
     public static void position(Window window, Align align, Point loc) {
         PixelitorWindow pw = PixelitorWindow.get();

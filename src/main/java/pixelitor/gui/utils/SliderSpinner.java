@@ -38,10 +38,10 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
- * A GUI Component that allows users to select a value from a range.
- * It consists of a JSlider and a JSpinner which are synchronized with each other,
- * so changing the value in one component will also change the value in the other one.
- * It also optionally includes a {@link ResetButton} for resetting the value to its default.
+ * A GUI Component that allows users to select a value within a range.
+ * It consists of a JSlider and a JSpinner synchronized with each other,
+ * so changing the value in one component will also update the other.
+ * It optionally includes a {@link ResetButton} for resetting the value to its default.
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;

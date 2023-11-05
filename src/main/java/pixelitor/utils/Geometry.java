@@ -314,4 +314,39 @@ public class Geometry {
 
         return new Point2D.Double(x, y);
     }
+
+    /**
+     * Converts an angle between -PI and PI, as returned form Math.atan2,
+     * to an angle between 0 and 2*PI in the counter-clockwise direction.
+     */
+    public static double atan2ToIntuitive(double angleInRadians) {
+        double angle;
+        if (angleInRadians <= 0) {
+            angle = -angleInRadians;
+        } else {
+            angle = Math.PI * 2 - angleInRadians;
+        }
+        return angle;
+    }
+
+    /**
+     * The inverse function of atan2ToIntuitive
+     */
+    public static double intuitiveToAtan2(double radians) {
+        if (radians > Math.PI) {
+            return 2 * Math.PI - radians;
+        } else {
+            return -radians;
+        }
+    }
+
+    public static double toIntuitiveDegrees(double angleRadians) {
+        double degrees = Math.toDegrees(angleRadians);
+        if (degrees <= 0) {
+            degrees = -degrees;
+        } else {
+            degrees = 360.0 - degrees;
+        }
+        return degrees;
+    }
 }

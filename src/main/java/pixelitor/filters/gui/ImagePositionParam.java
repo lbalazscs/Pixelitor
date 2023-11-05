@@ -28,7 +28,7 @@ import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for selecting an image coordinate (relative to the image size)
+ * A filter parameter for selecting an image coordinate (relative to the image size).
  */
 public class ImagePositionParam extends AbstractFilterParam {
     private double relativeX = 0.5;
@@ -167,7 +167,7 @@ public class ImagePositionParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 
-    private record ImagePositionParamState(double relativeX,
+    public record ImagePositionParamState(double relativeX,
                                            double relativeY) implements ParamState<ImagePositionParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

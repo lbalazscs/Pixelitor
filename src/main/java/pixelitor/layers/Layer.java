@@ -20,6 +20,7 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Composition;
 import pixelitor.CopyType;
+import pixelitor.Features;
 import pixelitor.GUIMode;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
@@ -55,7 +56,10 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
-import static pixelitor.layers.LayerMaskAddType.*;
+import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
+import static pixelitor.layers.LayerMaskAddType.HIDE_SELECTION;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
@@ -477,8 +481,8 @@ public abstract class Layer implements Serializable, Debuggable {
         maskEnabled = true;
 
         if (hasUI()) {
-            // in rare cases (like selection crop) this could be running
-            // on a comp which is not added yet to the GUI
+            // In rare cases (like selection crop), this could be
+            // running on a comp which isn't added yet to the GUI.
             ui.addMaskIcon();
         }
 
@@ -567,10 +571,10 @@ public abstract class Layer implements Serializable, Debuggable {
             History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
 
-        // DeleteLayerMaskEdit assumes that it is created with
-        // an active layer (when the undo activates the MaskViewMode)
-        // if this is not always true, then MaskViewMode activation
-        // must also be guarded in DeleteLayerMaskEdit.undo
+        // DeleteLayerMaskEdit assumes that it's created with
+        // an active layer (when the undo activates the MaskViewMode).
+        // If this isn't always true, then MaskViewMode activation
+        // must also be guarded in DeleteLayerMaskEdit.undo.
         assert isActive() || GUIMode.isUnitTesting();
 
         if (isActive()) {
@@ -932,7 +936,7 @@ public abstract class Layer implements Serializable, Debuggable {
             popup.add(new PAction("Rasterize", this::replaceWithRasterized));
         }
 
-        if (GUIMode.enableExperimentalFeatures) {
+        if (Features.enableExperimental) {
             if (popup == null) {
                 popup = new JPopupMenu();
             }

@@ -21,6 +21,7 @@ import pixelitor.Pixelitor;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
+import pixelitor.utils.Result;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,23 +45,15 @@ public class UpdatesCheck {
     }
 
     public static void checkForUpdates() {
-        Properties versionInfo;
-        try {
-            versionInfo = downloadVersionInfo();
-        } catch (IOException e) {
-            showCouldNotCheckForUpdatesDialog();
-            return;
-        } catch (URISyntaxException e) {
-            Messages.showException(e);
+        Result<Properties, String> result = getLastVersionInfo();
+        if (!result.wasSuccess()) {
+            showCouldNotCheckForUpdatesDialog(result.errorDetail());
             return;
         }
-        if (versionInfo == null) {
-            showCouldNotCheckForUpdatesDialog();
-            return;
-        }
+        Properties versionInfo = result.get();
         String lastVersion = versionInfo.getProperty("last_version");
         if (lastVersion == null) {
-            showCouldNotCheckForUpdatesDialog();
+            showCouldNotCheckForUpdatesDialog("missing last_version");
             return;
         }
         lastVersion = lastVersion.trim();
@@ -72,15 +65,9 @@ public class UpdatesCheck {
             Messages.showInfo("Pixelitor is up to date", msg);
         } else {
             String requiredJavaVersion = versionInfo.getProperty(
-                "required_java_version").trim(); // like "7"
+                "required_java_version").trim();
             newVersionAlert(lastVersion, requiredJavaVersion);
         }
-    }
-
-    private static void showCouldNotCheckForUpdatesDialog() {
-        String msg = "Could not check for updates on the Pixelitor website.";
-        String title = "Could not check for updates";
-        Dialogs.showErrorDialog(title, msg);
     }
 
     private static void newVersionAlert(String lastVersion, String requiredJavaVersion) {
@@ -101,12 +88,22 @@ public class UpdatesCheck {
     }
 
     private static boolean needsJavaUpdate(String requiredJavaVersion) {
-        if (requiredJavaVersion.equals("8")) {
-            // we always have at least Java 8, otherwise this code would not run
+        if (requiredJavaVersion.equals("21")) {
+            // we always have at least Java 21, otherwise this code would not run
             return false;
         }
         int currentMainJavaVersion = getJavaMainVersion();
         return parseInt(requiredJavaVersion) > currentMainJavaVersion;
+    }
+
+    private static Result<Properties, String> getLastVersionInfo() {
+        Properties versionInfo;
+        try {
+            versionInfo = downloadVersionInfo();
+        } catch (IOException | URISyntaxException e) {
+            return Result.error(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+        return Result.ofNullable(versionInfo);
     }
 
     private static Properties downloadVersionInfo() throws IOException, URISyntaxException {
@@ -116,5 +113,14 @@ public class UpdatesCheck {
         Properties properties = new Properties();
         properties.load(conn.getInputStream());
         return properties;
+    }
+
+    private static void showCouldNotCheckForUpdatesDialog(String errorDetails) {
+        String title = "Could not check for updates";
+        String msg = "Could not check for updates on the Pixelitor website.";
+        if (errorDetails != null) {
+            msg += ("\n" + errorDetails);
+        }
+        Dialogs.showErrorDialog(title, msg);
     }
 }

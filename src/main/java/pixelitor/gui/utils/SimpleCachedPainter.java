@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,7 @@ public abstract class SimpleCachedPainter implements Painter<Object> {
         }
         // at this point we have a cached image with the right size
 
-        int safetyCounter = 0; // to be 100% sure that this is not an infinite loop
+        int safetyCounter = 0; // to be 100% sure that this isn't an infinite loop
         do {
             int valCode = vi.validate(gc); // check before rendering
             if (valCode == VolatileImage.IMAGE_OK) {

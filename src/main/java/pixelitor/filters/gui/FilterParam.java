@@ -24,14 +24,14 @@ import pixelitor.utils.debug.Debuggable;
  * The model for a filter parameter, which (unlike a button) holds
  * some value.
  *
- * For practical reasons implementations of this are also found
- * outside filters as models of GUI elements, but then only
- * a subset of their functionality is used.
+ * For practical reasons, implementations of this interface are also
+ * found outside filters as models of GUI elements. In such cases,
+ * only a subset of their functionality is used.
  */
 public interface FilterParam extends FilterSetting, Resettable, Debuggable {
 
     /**
-     * Sets a random value without triggering the filter
+     * Sets a random value without triggering the filter.
      */
     void randomize();
 
@@ -64,7 +64,7 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     void loadStateFrom(String savedValue);
 
     /**
-     * Load the state from the given user preset.
+     * Loads the state from the given user preset.
      */
     default void loadStateFrom(UserPreset preset) {
         // overridden in the composite params
@@ -77,7 +77,7 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     }
 
     /**
-     * Save the state to the given user preset.
+     * Saves the state to the given user preset.
      */
     default void saveStateTo(UserPreset preset) {
         // overridden in the composite params
@@ -85,14 +85,15 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
     }
 
     /**
-     * True if the value can change gradually, and therefore it can be used for tweening animations.
+     * Returns true if the value can change gradually,
+     * allowing it to be used for tweening animations.
      * All implementing classes return either always true or always false.
      */
     boolean isAnimatable();
 
     /**
-     * Whether a filter parameter was configured to be
-     * affected when the user presses "Randomize"
+     * Indicates whether a filter parameter is configured to be
+     * affected when the user presses "Randomize."
      */
     boolean canRandomize();
 
@@ -102,8 +103,6 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
 
     /**
      * Returns the parameter value.
-     * The return type can't be more specific than Object,
-     * but this is still useful for testing.
      */
     Object getParamValue();
 }

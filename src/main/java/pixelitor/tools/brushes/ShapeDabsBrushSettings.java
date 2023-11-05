@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,24 +21,20 @@ import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 
-import static pixelitor.tools.brushes.AngleSettings.ANGLE_AWARE_NO_JITTER;
+import static pixelitor.tools.brushes.AngleSettings.ANGLED_NO_JITTER;
+import static pixelitor.tools.brushes.ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
+import static pixelitor.tools.brushes.ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
 
 /**
- * The settings of a {@link ShapeDabsBrush}
+ * The settings of a {@link ShapeDabsBrush}.
  */
 public class ShapeDabsBrushSettings extends DabsBrushSettings {
+    private static final Spacing SPACING = new RadiusRatioSpacing(DEFAULT_SPACING_RATIO);
     private ShapeType shapeType;
 
     public ShapeDabsBrushSettings() {
-        this(ANGLE_AWARE_NO_JITTER,
-            new RadiusRatioSpacing(ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO),
-            ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE);
-    }
-
-    private ShapeDabsBrushSettings(AngleSettings angleSettings,
-                                   Spacing spacing, ShapeType shapeType) {
-        super(angleSettings, spacing);
-        this.shapeType = shapeType;
+        super(ANGLED_NO_JITTER, SPACING);
+        this.shapeType = DEFAULT_SHAPE;
     }
 
     public ShapeType getShapeType() {

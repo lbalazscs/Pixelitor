@@ -39,9 +39,10 @@ import java.text.ParseException;
 
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
+import static pixelitor.gui.utils.TFValidationLayerUI.createValidatedTF;
 
 /**
- * The GUI for the resize dialog
+ * The GUI for the resize settings.
  */
 @SuppressWarnings("SuspiciousNameCombination")
 public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener, DialogMenuOwner {
@@ -55,7 +56,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private final JCheckBox constrainProportionsCB;
     private final JTextField heightTF;
     private final JTextField widthTF;
-    private final double origProportion;
+    private final double oldAspectRatio;
     private int newWidth;
     private int newHeight;
     private double newWidthInPercent;
@@ -66,13 +67,13 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     private final Validator widthFieldValidator = new Validator("Width");
     private final Validator heightFieldValidator = new Validator("Height");
-    private final TitledBorder titledBorder;
+    private final TitledBorder border;
 
     private ResizePanel(Canvas canvas) {
         oldWidth = canvas.getWidth();
         oldHeight = canvas.getHeight();
+        oldAspectRatio = ((double) oldWidth) / oldHeight;
 
-        origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;
         newHeight = oldHeight;
         newWidthInPercent = 100.0;
@@ -87,8 +88,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         widthTF.addKeyListener(this);
         updateWidthTextPixels();
         var pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
-        var widthLayer = new JLayer<>(widthTF,
-            TFValidationLayerUI.fromValidator(widthFieldValidator));
+        var widthLayer = createValidatedTF(widthTF, widthFieldValidator);
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
         heightTF = new JTextField(NUM_TF_COLUMNS);
@@ -96,13 +96,12 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         updateHeightTextPixels();
         heightTF.addKeyListener(this);
         var pixelPercentChooser2 = new JComboBox<>(sharedComboBoxModel);
-        var heightLayer = new JLayer<>(heightTF,
-            TFValidationLayerUI.fromValidator(heightFieldValidator));
+        var heightLayer = createValidatedTF(heightTF, heightFieldValidator);
         gbh.addLabelAndTwoControls("Height:", heightLayer, pixelPercentChooser2);
 
-        titledBorder = BorderFactory.createTitledBorder("");
+        border = BorderFactory.createTitledBorder("");
         updateStatusLine();
-        p.setBorder(titledBorder);
+        p.setBorder(border);
         Box verticalBox = Box.createVerticalBox();
         verticalBox.add(p);
 
@@ -147,7 +146,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private void constrainProportionsSettingChanged() {
         if (constrainProportions()) {
             // it just got selected, adjust the height to the width
-            newHeight = (int) (newWidth / origProportion);
+            newHeight = (int) (newWidth / oldAspectRatio);
             newHeightInPercent = newWidthInPercent;
             if (unitsArePixels()) {
                 updateHeightTextPixels();
@@ -196,12 +195,11 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 newWidth = parseInt(getWidthText());
                 newWidthInPercent = ((double) newWidth) * 100 / oldWidth;
                 if (constrainProportions()) {
-                    newHeight = (int) (newWidth / origProportion);
+                    newHeight = (int) (newWidth / oldAspectRatio);
                     if (newHeight == 0) {
                         newHeight = 1;
                     }
                     updateHeightTextPixels();
-//                    newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                     newHeightInPercent = newWidthInPercent;
                 }
             } catch (NumberFormatException ex) {
@@ -212,7 +210,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 newWidthInPercent = parseDouble(getWidthText());
                 newWidth = (int) (oldWidth * newWidthInPercent / 100);
                 if (constrainProportions()) {
-                    newHeight = (int) (newWidth / origProportion);
+                    newHeight = (int) (newWidth / oldAspectRatio);
                     newHeightInPercent = newWidthInPercent;
                     updateHeightTextPercent();
                 }
@@ -244,7 +242,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 newHeight = parseInt(getHeightText());
                 newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                 if (constrainProportions()) {
-                    newWidth = (int) (newHeight * origProportion);
+                    newWidth = (int) (newHeight * oldAspectRatio);
                     if (newWidth == 0) {
                         newWidth = 1;
                     }
@@ -259,7 +257,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 newHeightInPercent = parseDouble(getHeightText());
                 newHeight = (int) (oldHeight * newHeightInPercent / 100);
                 if (constrainProportions()) {
-                    newWidth = (int) (newHeight * origProportion);
+                    newWidth = (int) (newHeight * oldAspectRatio);
                     newWidthInPercent = newHeightInPercent;
                     updateWidthTextPercent();
                 }
@@ -304,9 +302,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private void updateStatusLine() {
         String oldSize = oldWidth + "x" + oldHeight + " to ";
         if (newWidth > 0 && newHeight > 0) {
-            titledBorder.setTitle(oldSize + newWidth + "x" + newHeight);
+            border.setTitle(oldSize + newWidth + "x" + newHeight);
         } else {
-            titledBorder.setTitle(oldSize + "??");
+            border.setTitle(oldSize + "??");
         }
 
         repaint();
@@ -391,7 +389,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     /**
      * A textfield validator that can validate
-     * either int or double textfields
+     * either int or double textfields.
      */
     static class Validator implements TextFieldValidator {
         private boolean pixels = true;

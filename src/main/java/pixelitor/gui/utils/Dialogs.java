@@ -226,14 +226,14 @@ public class Dialogs {
 
     public static void showNotImageLayerDialog(Layer layer) {
         if (!RandomGUITest.isRunning()) {
-            String msg = format("The active layer \"%s\" is not an image layer.",
+            String msg = format("The active layer \"%s\" isn't an image layer.",
                 layer.getName());
             showErrorDialog("Not an image layer", msg);
         }
     }
 
     public static void showNotDrawableDialog(Layer layer) {
-        String msg = format("The active layer \"%s\" is not an image layer or mask.",
+        String msg = format("The active layer \"%s\" isn't an image layer or mask.",
             layer.getName());
         showErrorDialog("Not an image layer or mask", msg);
     }

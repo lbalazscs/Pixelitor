@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.tools.transform;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Color;
 import java.awt.geom.Dimension2D;
 import java.io.Serial;
 
@@ -45,10 +44,9 @@ public class EdgeHandle extends PositionHandle {
 
     public EdgeHandle(String name, TransformBox box,
                       CornerHandle ch1, CornerHandle ch2,
-                      Color color, boolean horizontal,
-                      int cursorIndex, int cursorIndexIO) {
+                      boolean horizontal, int cursorIndex, int cursorIndexIO) {
         super(name, box, PPoint.halfPointBetween(ch1, ch2), ch1.getView(),
-            color, Color.RED, cursorIndex, cursorIndexIO);
+            cursorIndex, cursorIndexIO);
         this.ch1 = ch1;
         this.ch2 = ch2;
         this.horizontal = horizontal;

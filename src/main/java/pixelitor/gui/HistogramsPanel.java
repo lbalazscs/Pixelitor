@@ -157,8 +157,8 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         if (logarithmic) {
             for (int i = 0; i < NUM_BINS; i++) {
                 // Add one before taking the logarithm to avoid calculating log(0)
-                // Note that log(1) = 0, which is just perfect
-                // Also multiply with a big number to avoid rounding errors
+                // Note that log(1) = 0, which is just perfect.
+                // Also multiply by a large number to mitigate rounding errors.
                 reds[i] = (int) (1000.0 * Math.log(reds[i] + 1));
                 greens[i] = (int) (1000.0 * Math.log(greens[i] + 1));
                 blues[i] = (int) (1000.0 * Math.log(blues[i] + 1));

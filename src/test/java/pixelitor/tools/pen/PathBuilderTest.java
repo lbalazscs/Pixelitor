@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -626,7 +626,7 @@ class PathBuilderTest {
                 .isConsistent()
                 .isNotClosed()
                 .isFinished()
-                .firstIsNotActive()
+                .firstAnchorIsNotActive()
                 .numAnchorsIs(3);
             return sp;
         }
@@ -653,20 +653,20 @@ class PathBuilderTest {
         move(startX, startY + 20, MOVING_TO_NEXT_ANCHOR);
         assertThat(sp)
             .isNotClosed()
-            .firstIsNotActive();
+            .firstAnchorIsNotActive();
         move(startX, startY + 3, MOVING_TO_NEXT_ANCHOR);
         // we are close to the first point, it should become active
         assertThat(sp)
             .isNotClosed()
             .isNotFinished()
-            .firstIsActive();
+            .firstAnchorIsActive();
         // click to close
         press(startX, startY, NO_INTERACTION);
         assertThat(sp)
             .isConsistent()
             .isClosed()
             .isFinished()
-            .firstIsNotActive()
+            .firstAnchorIsNotActive()
             .numAnchorsIs(3);
         release(startX, startY, NO_INTERACTION);
 

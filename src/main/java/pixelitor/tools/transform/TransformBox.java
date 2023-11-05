@@ -30,11 +30,10 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
+import pixelitor.utils.debug.Debuggable;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
@@ -54,7 +53,7 @@ import static pixelitor.utils.Cursors.MOVE;
  * calculating an {@link AffineTransform}
  * based on the interactive movement of handles
  */
-public class TransformBox implements ToolWidget, Serializable {
+public class TransformBox implements ToolWidget, Debuggable, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -154,13 +153,13 @@ public class TransformBox implements ToolWidget, Serializable {
     private void initBox() {
         // initialize the edge handles
         EdgeHandle n = new EdgeHandle("N", this, nw, ne,
-            Color.WHITE, true, N_OFFSET, N_OFFSET_IO);
+            true, N_OFFSET, N_OFFSET_IO);
         EdgeHandle e = new EdgeHandle("E", this, ne, se,
-            Color.WHITE, false, E_OFFSET, E_OFFSET_IO);
+            false, E_OFFSET, E_OFFSET_IO);
         EdgeHandle w = new EdgeHandle("W", this, nw, sw,
-            Color.WHITE, false, W_OFFSET, W_OFFSET_IO);
+            false, W_OFFSET, W_OFFSET_IO);
         EdgeHandle s = new EdgeHandle("S", this, sw, se,
-            Color.WHITE, true, S_OFFSET, S_OFFSET_IO);
+            true, S_OFFSET, S_OFFSET_IO);
 
         // set up the neighboring relations between the corner handles
         nw.setVerNeighbor(sw, w, true);
@@ -631,7 +630,7 @@ public class TransformBox implements ToolWidget, Serializable {
         cos = Math.cos(angle);
         sin = Math.sin(angle);
 
-        angleDegrees = (int) Math.toDegrees(Utils.atan2AngleToIntuitive(angle));
+        angleDegrees = (int) Math.toDegrees(Geometry.atan2ToIntuitive(angle));
         cursorOffset = calcCursorOffset(angleDegrees);
     }
 
@@ -687,14 +686,12 @@ public class TransformBox implements ToolWidget, Serializable {
         return rot;
     }
 
-    public DebugNode createDebugNode() {
-        var node = new DebugNode("transform box", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
 
-        if (owner == null) {
-            node.addString("owner", "null");
-        } else {
-            node.add(owner.createDebugNode());
-        }
+        node.addNullableDebuggable("owner", owner);
+
         node.add(nw.createDebugNode());
         node.add(ne.createDebugNode());
         node.add(se.createDebugNode());

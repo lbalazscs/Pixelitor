@@ -24,17 +24,17 @@ import pixelitor.filters.gui.UserPreset;
  */
 public final class AngleSettings {
     // global shared immutable instances for the most common cases
-    public static final AngleSettings NOT_ANGLE_AWARE = new AngleSettings(false, 0);
-    public static final AngleSettings ANGLE_AWARE_NO_JITTER = new AngleSettings(true, 0);
+    public static final AngleSettings NOT_ANGLED = new AngleSettings(false, 0);
+    public static final AngleSettings ANGLED_NO_JITTER = new AngleSettings(true, 0);
 
-    private static final String ANGLE_AWARE_KEY = "Angle Aware";
+    private static final String ANGLED_KEY = "Angled";
     private static final String MAX_JITTER_KEY = "Max Angle Jitter";
 
-    private boolean angleAware;
+    private boolean angled;
     private double maxAngleJitter;
 
-    public AngleSettings(boolean angleAware, double maxAngleJitter) {
-        this.angleAware = angleAware;
+    public AngleSettings(boolean angled, double maxAngleJitter) {
+        this.angled = angled;
         this.maxAngleJitter = maxAngleJitter;
     }
 
@@ -51,24 +51,24 @@ public final class AngleSettings {
         return retVal;
     }
 
-    public boolean isAngleAware() {
-        return angleAware;
+    public boolean isAngled() {
+        return angled;
     }
 
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean(ANGLE_AWARE_KEY, angleAware);
+        preset.putBoolean(ANGLED_KEY, angled);
         preset.putDouble(MAX_JITTER_KEY, maxAngleJitter);
     }
 
     public void loadStateFrom(UserPreset preset) {
-        angleAware = preset.getBoolean(ANGLE_AWARE_KEY);
+        angled = preset.getBoolean(ANGLED_KEY);
         maxAngleJitter = preset.getDouble(MAX_JITTER_KEY);
     }
 
     @Override
     public String toString() {
         return "AngleSettings[" +
-            "angleAware=" + angleAware + ", " +
+            "angled=" + angled + ", " +
             "maxAngleJitter=" + maxAngleJitter + ']';
     }
 }

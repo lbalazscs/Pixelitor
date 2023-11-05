@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import javax.swing.*;
 import java.util.Optional;
 
 /**
- * A page in the batch filter wizard
+ * A page in the batch filter wizard.
  */
 public enum BatchFilterWizardPage implements WizardPage {
     SELECT_FILTER_AND_DIRS {
@@ -54,7 +54,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            searchPanel = new FilterSearchPanel(Filters.getAllFiltersSorted());
+            searchPanel = new FilterSearchPanel(Filters.getAllFilters());
             searchPanel.setBorder(BorderFactory.createTitledBorder("Select Filter"));
 
             var mainPanel = new JPanel(new VerticalLayout());
@@ -105,8 +105,8 @@ public enum BatchFilterWizardPage implements WizardPage {
         public JComponent createPanel(Wizard wizard, Drawable dr) {
             Filter filter = ((BatchFilterWizard) wizard).getFilter();
 
-            // this page will be invoked only if
-            // the selected filter is a filter with GUI
+            // This page will be shown only if
+            // the selected filter is a filter with GUI.
             FilterWithGUI guiFilter = (FilterWithGUI) filter;
 
             dr.startPreviewing();
@@ -116,7 +116,6 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void onWizardCanceled(Drawable dr) {
-            // we get here only if the chosen filter is a filter with GUI
             dr.onFilterDialogCanceled();
         }
 

@@ -38,13 +38,16 @@ import java.util.Random;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**
- * Photo Collage
+ * The "Photo Collage" filter.
  */
 public class PhotoCollage extends ParametrizedFilter {
     public static final String NAME = "Photo Collage";
@@ -119,8 +122,8 @@ public class PhotoCollage extends ParametrizedFilter {
             photoWOMarginShape = woMarginArea;
         }
 
-        // the shadow image must be larger than the image size
-        // so that there is room for soft shadows
+        // The shadow image must be larger than the image size
+        // so that there is room for soft shadows.
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
 
@@ -132,7 +135,7 @@ public class PhotoCollage extends ParametrizedFilter {
         double shadowOffsetX = offset.getX();
         double shadowOffsetY = offset.getY();
 
-        // multiply makes sense only if the shadow color is not black
+        // multiply makes sense only if the shadow color isn't black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
             (float) shadowOpacityParam.getPercentage());
 
@@ -148,8 +151,8 @@ public class PhotoCollage extends ParametrizedFilter {
                 tx = rand.nextInt(dest.getWidth()) - xSize / 2.0;
                 ty = rand.nextInt(dest.getHeight()) - ySize / 2.0;
             } else {
-                // a small part could be still outside because of the rotation,
-                // which is ignored here, but it's not a big deal
+                // A small part could be still outside because of the rotation,
+                // which is ignored here, but it's not a big deal.
                 int maxTranslateX = dest.getWidth() - xSize;
                 int maxTranslateY = dest.getHeight() - ySize;
                 if (maxTranslateX <= 0) {

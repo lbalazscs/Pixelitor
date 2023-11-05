@@ -120,8 +120,8 @@ public class AddNoise extends ParametrizedFilter {
             }
 
             if (!coverageAnim) {
-                // if coverage animation is not a requirement, then it is faster
-                // to generate the random values only here, for the covered pixels
+                // If coverage animation isn't a requirement, then it is faster
+                // to generate the random values only here, for the covered pixels.
                 randomInt = rand.nextInt();
             }
 

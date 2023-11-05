@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,11 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 import pixelitor.filters.LittlePlanet;
-import pixelitor.utils.Utils;
+import pixelitor.utils.Geometry;
 
 /**
  * The implementation of the {@link LittlePlanet} filter.
- * This is actually a rectangular -> polar filter with some extra features
+ * This is actually a rectangular -> polar filter with some extra features.
  */
 public class LittlePlanetFilter extends CenteredTransformFilter {
     private double rotateResult;
@@ -42,7 +42,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
 
         double radius = srcHeight * zoom / 2;
-        double angle = Utils.atan2AngleToIntuitive(FastMath.atan2(dy, dx)) + rotateResult;
+        double angle = Geometry.atan2ToIntuitive(FastMath.atan2(dy, dx)) + rotateResult;
 
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;

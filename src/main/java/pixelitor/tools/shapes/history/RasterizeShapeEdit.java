@@ -70,8 +70,8 @@ public class RasterizeShapeEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.add(box.createDebugNode());
-        node.add(styledShape.createDebugNode());
+        node.add(box.createDebugNode("box"));
+        node.add(styledShape.createDebugNode("styledShape"));
 
         return node;
     }

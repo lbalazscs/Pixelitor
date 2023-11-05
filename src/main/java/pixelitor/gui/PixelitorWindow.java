@@ -44,7 +44,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.awt.BorderLayout.*;
-import static java.awt.Desktop.Action.*;
+import static java.awt.Desktop.Action.APP_ABOUT;
+import static java.awt.Desktop.Action.APP_PREFERENCES;
+import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
 import static pixelitor.utils.Texts.i18n;
 
@@ -52,6 +54,8 @@ import static pixelitor.utils.Texts.i18n;
  * The main application window.
  */
 public class PixelitorWindow extends JFrame {
+    private static final String FIX_TITLE = calcFixTitle();
+
     private Box eastPanel;
     private ToolsPanel toolsPanel;
 
@@ -60,7 +64,7 @@ public class PixelitorWindow extends JFrame {
     private Rectangle savedNormalBounds; // the saved one
 
     private PixelitorWindow() {
-        super(GUIMode.getMainWindowFixTitle());
+        super(FIX_TITLE);
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
@@ -274,15 +278,23 @@ public class PixelitorWindow extends JFrame {
         return toolsPanel.getParent() != null;
     }
 
+    private static String calcFixTitle() {
+        String s = "Pixelitor " + Pixelitor.VERSION_NUMBER;
+        if (GUIMode.CURRENT != GUIMode.FINAL_GUI) {
+            s += " DEVELOPMENT " + System.getProperty("java.version");
+        }
+        return s;
+    }
+
     /**
      * Updates the app title with the name of the given {@link Composition}
      */
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.calcTitle() + " - " + GUIMode.getMainWindowFixTitle();
+            title = comp.calcTitle() + " - " + FIX_TITLE;
         } else {
-            title = GUIMode.getMainWindowFixTitle();
+            title = FIX_TITLE;
         }
         setTitle(title);
     }

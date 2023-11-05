@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResultTest {
     @Test
     void map_OK() {
-        Result<String, Integer> result = new OK<>("a");
+        Result<String, Integer> result = new Success<>("a");
         Result<String, Integer> mapped = result.map(String::toUpperCase);
 
         // expect successful mapping
-        assertThat(mapped.isOK()).isTrue();
+        assertThat(mapped.wasSuccess()).isTrue();
         assertThat(mapped.get()).isEqualTo("A");
     }
 
@@ -38,37 +38,37 @@ class ResultTest {
         Result<String, Integer> mapped = result.map(String::toUpperCase);
 
         // expect the original error
-        assertThat(mapped.isOK()).isFalse();
+        assertThat(mapped.wasSuccess()).isFalse();
         assertThat(mapped.errorDetail()).isEqualTo(2);
     }
 
     @Test
     void flatMap_OK_OK() {
-        Result<String, Integer> result = new OK<>("a");
-        Result<String, Integer> mapped = result.flatMap(s -> new OK<>(s.toUpperCase()));
+        Result<String, Integer> result = new Success<>("a");
+        Result<String, Integer> mapped = result.flatMap(s -> new Success<>(s.toUpperCase()));
 
         // expect successful mapping
-        assertThat(mapped.isOK()).isTrue();
+        assertThat(mapped.wasSuccess()).isTrue();
         assertThat(mapped.get()).isEqualTo("A");
     }
 
     @Test
     void flatMap_OK_Error() {
-        Result<String, Integer> result = new OK<>("a");
+        Result<String, Integer> result = new Success<>("a");
         Result<String, Integer> mapped = result.flatMap(s -> new Error<>(10));
 
         // expect error
-        assertThat(mapped.isOK()).isFalse();
+        assertThat(mapped.wasSuccess()).isFalse();
         assertThat(mapped.errorDetail()).isEqualTo(10);
     }
 
     @Test
     void flatMap_Error_OK() {
         Result<String, Integer> result = new Error<>(2);
-        Result<String, Integer> mapped = result.flatMap(s -> new OK<>(s.toUpperCase()));
+        Result<String, Integer> mapped = result.flatMap(s -> new Success<>(s.toUpperCase()));
 
         // expect error ignoring the mapping
-        assertThat(mapped.isOK()).isFalse();
+        assertThat(mapped.wasSuccess()).isFalse();
         assertThat(mapped.errorDetail()).isEqualTo(2);
     }
 
@@ -78,7 +78,7 @@ class ResultTest {
         Result<String, Integer> mapped = result.flatMap(s -> new Error<>(10));
 
         // expect error with the first error detail
-        assertThat(mapped.isOK()).isFalse();
+        assertThat(mapped.wasSuccess()).isFalse();
         assertThat(mapped.errorDetail()).isEqualTo(2);
     }
 }

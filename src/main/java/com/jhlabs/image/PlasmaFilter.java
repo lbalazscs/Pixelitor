@@ -318,7 +318,6 @@ public class PlasmaFilter extends WholeImageFilter {
         } else if (maxSize <= 8193) {
             estimatedDoPlasmaCalls = 29826156;
         } else {
-            // doesn't care about bigger thresholds
             // we don't expect images with a
             // max size of more than 16 000 pixels
             estimatedDoPlasmaCalls = 119304641;

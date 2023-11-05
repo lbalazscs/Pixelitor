@@ -23,7 +23,6 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -82,7 +81,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         var node = super.createDebugNode(key);
 
         node.addBoolean("was first subpath", wasFirstSP);
-        node.add(DebugNodes.createPathNode(path));
+        node.add(path.createDebugNode("path " + path.getId()));
 
         return node;
     }

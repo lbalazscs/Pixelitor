@@ -126,8 +126,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (!usesMask() && isNormalAndOpaque()) {
             return transformed;
         } else {
-            // unlike an adjustment layer, this makes sure that imgSoFar
-            // (which could be cached in the image source) is not modified
+            // Unlike an adjustment layer, this makes sure that imgSoFar
+            // (which could be cached in the image source) isn't modified.
             BufferedImage copy = ImageUtils.copyImage(imgSoFar);
 
             Graphics2D g = copy.createGraphics();
@@ -372,7 +372,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
         if (next != null) {
             if (next.getImageSource() != this) {
-                throw new AssertionError("image source of " + next.getName() + " is not " + getName());
+                throw new AssertionError("image source of " + next.getName() + " isn't " + getName());
             }
         }
 
@@ -390,7 +390,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
         node.addString("imageSource class", imageSource.getClass().getSimpleName());
         node.add(imageSource.createDebugNode("imageSource"));
-        node.addString("next", next == null ? "null" : next.toString());
+        node.addString("next", String.valueOf(next));
         node.addBoolean("cached", (cachedImage != null));
 
         return node;

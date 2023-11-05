@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,14 +33,14 @@ class UtilsTest {
     @Test
     void angleFunctions() {
         for (double a = -Math.PI; a < Math.PI; a += 0.1) {
-            double intuitive = Utils.atan2AngleToIntuitive(a);
-            double atan = Utils.intuitiveToAtan2Angle(intuitive);
+            double intuitive = Geometry.atan2ToIntuitive(a);
+            double atan = Geometry.intuitiveToAtan2(intuitive);
             Assertions.assertEquals(atan, a, 0.01);
         }
 
         for (double a = 0.0; a < 2 * Math.PI; a += 0.1) {
-            double atan = Utils.intuitiveToAtan2Angle(a);
-            double b = Utils.atan2AngleToIntuitive(atan);
+            double atan = Geometry.intuitiveToAtan2(a);
+            double b = Geometry.atan2ToIntuitive(atan);
             Assertions.assertEquals(a, b, 0.01);
         }
     }

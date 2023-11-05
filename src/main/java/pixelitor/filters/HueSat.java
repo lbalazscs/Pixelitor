@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,9 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.gui.GUIText.*;
+import static pixelitor.gui.GUIText.BRIGHTNESS;
+import static pixelitor.gui.GUIText.HUE;
+import static pixelitor.gui.GUIText.SATURATION;
 
 /**
  * Hue-Saturation filter
@@ -99,7 +101,7 @@ public class HueSat extends ParametrizedFilter {
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            // for the multithreaded performance it is better to
+            // for the multithreaded performance it's better to
             // create this array here instead of reusing it as a class field
             float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
 

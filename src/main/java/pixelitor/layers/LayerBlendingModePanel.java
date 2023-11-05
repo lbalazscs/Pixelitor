@@ -26,9 +26,10 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 
 import static pixelitor.Views.onActiveLayer;
+import static pixelitor.utils.Utils.toPercentage;
 
 /**
- * The GUI selector for the opacity and blending mode of the layers
+ * The GUI for the opacity and blending mode of the layers.
  */
 public class LayerBlendingModePanel extends BlendingModePanel
     implements ViewActivationListener, ActiveHolderListener {
@@ -101,13 +102,10 @@ public class LayerBlendingModePanel extends BlendingModePanel
 
     @Override
     public void layerActivated(Layer layer) {
-        float floatOpacity = layer.getOpacity();
-        int intOpacity = (int) (floatOpacity * 100);
-
         BlendingMode bm = layer.getBlendingMode();
         try {
             userInteractionChange = false;
-            opacityDDSlider.setValue(intOpacity);
+            opacityDDSlider.setValue(toPercentage(layer.getOpacity()));
             setBlendingMode(bm, layer);
         } finally {
             userInteractionChange = true;
@@ -148,8 +146,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
     public void opacityChangedForLayer(float newOpacity) {
         try {
             userInteractionChange = false;
-            int intValue = (int) (newOpacity * 100);
-            opacityDDSlider.setValue(intValue);
+            opacityDDSlider.setValue(toPercentage(newOpacity));
         } finally {
             userInteractionChange = true;
         }

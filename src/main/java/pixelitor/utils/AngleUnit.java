@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 /**
- * Angle units, similar in spirit to the JDK TimeUnit
+ * Units of angle, following a pattern similar to the JDK class TimeUnit.
  */
 public enum AngleUnit {
     /**
@@ -32,7 +32,7 @@ public enum AngleUnit {
 
         @Override
         public double toIntuitiveRadians(double a) {
-            return Utils.atan2AngleToIntuitive(a);
+            return Geometry.atan2ToIntuitive(a);
         }
 
         @Override
@@ -42,7 +42,7 @@ public enum AngleUnit {
 
         @Override
         public double toIntuitiveDegrees(double a) {
-            return Math.toDegrees(Utils.atan2AngleToIntuitive(a));
+            return Math.toDegrees(Geometry.atan2ToIntuitive(a));
         }
     },
     /**
@@ -51,7 +51,7 @@ public enum AngleUnit {
     CCW_RADIANS {
         @Override
         public double toRadians(double a) {
-            return Utils.intuitiveToAtan2Angle(a);
+            return Geometry.intuitiveToAtan2(a);
         }
 
         @Override
@@ -61,7 +61,7 @@ public enum AngleUnit {
 
         @Override
         public double toDegrees(double a) {
-            return Math.toDegrees(Utils.intuitiveToAtan2Angle(a));
+            return Math.toDegrees(Geometry.intuitiveToAtan2(a));
         }
 
         @Override
@@ -80,7 +80,7 @@ public enum AngleUnit {
 
         @Override
         public double toIntuitiveRadians(double a) {
-            return Math.toRadians(Utils.atan2AngleToIntuitive(a));
+            return Math.toRadians(Geometry.atan2ToIntuitive(a));
         }
 
         @Override

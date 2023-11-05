@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.utils.Error;
 import pixelitor.utils.*;
 
 import java.awt.Toolkit;
@@ -29,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Threads.onEDT;
 
 /**
  * Copies the image given by the {@link CopySource}
@@ -39,33 +41,33 @@ public class CopyAction extends OpenViewEnabledAction {
     public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
 
     private CopyAction(CopySource source) {
-        super(i18n(source.toResourceKey()), comp -> copyToClipboard(comp, source));
+        super(i18n(source.toResourceKey()), comp -> copy(comp, source));
     }
 
-    private static void copyToClipboard(Composition comp, CopySource source) {
-        Result<BufferedImage, String> result = source.getImage(comp);
-        if (!result.isOK()) {
-            String msg = "Could not copy because " + result.errorDetail();
-            Dialogs.showErrorDialog("Error", msg);
-            return;
+    private static void copy(Composition comp, CopySource source) {
+        switch (source.getImage(comp)) {
+            case Success<BufferedImage, ?>(var img) -> startImageCopy(img);
+            case Error<?, String>(var errorMsg) -> Dialogs.showErrorDialog(
+                "Error", "Could not copy because " + errorMsg);
         }
-        BufferedImage activeImage = result.get();
+    }
+
+    private static void startImageCopy(BufferedImage img) {
         // make a copy, because otherwise changing the image
         // will also change the clipboard contents
-        BufferedImage copy = ImageUtils.copySubImage(activeImage);
+        BufferedImage copy = ImageUtils.copySubImage(img);
 
         ProgressHandler progressHandler = Messages.startProgress("Copying to clipboard", -1);
-        CompletableFuture.runAsync(() -> doCopy(copy))
-            .thenRunAsync(() -> afterCopyActions(progressHandler), Threads.onEDT)
+        CompletableFuture.runAsync(() -> copyImage(copy))
+            .thenRunAsync(() -> afterCopyActions(progressHandler), onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private static void doCopy(BufferedImage copy) {
+    private static void copyImage(BufferedImage copy) {
         Transferable imageTransferable = new ImageTransferable(copy);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         try {
-            // TODO JDK bug? a stack trace is printed, but the image is copied.
             clipboard.setContents(imageTransferable, null);
         } catch (IllegalStateException e) {
             // ignore, see issue #181

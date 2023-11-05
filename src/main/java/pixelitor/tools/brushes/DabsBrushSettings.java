@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,18 +35,18 @@ public class DabsBrushSettings extends BrushSettings {
         this.spacing = spacing;
     }
 
-    public void changeSpacing(Spacing spacing) {
+    public void setSpacing(Spacing spacing) {
         this.spacing = spacing;
         notifyBrushes();
     }
 
-    public void changeAngleSettings(AngleSettings angleSettings) {
+    public void setAngleSettings(AngleSettings angleSettings) {
         this.angleSettings = angleSettings;
         notifyBrushes();
     }
 
-    public boolean isAngleAware() {
-        return angleSettings.isAngleAware();
+    public boolean isAngled() {
+        return angleSettings.isAngled();
     }
 
     public AngleSettings getAngleSettings() {
@@ -59,7 +59,7 @@ public class DabsBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        // shouldn't be called for brushes without settings.
+        // only subclasses use GUI configuration
         throw new UnsupportedOperationException();
     }
 

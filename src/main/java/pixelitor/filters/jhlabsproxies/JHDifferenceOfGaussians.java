@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
             // BoxBlurFilter throws ArrayIndexOutOfBoundsException for such images
 
             // Give up. A workaround would be to use a filter that can use another
-            // blurring algorithm, but it is not worth it, because this case is very
+            // blurring algorithm, but it isn't worth it, because this case is very
             // unlikely to occur.
             return src;
         }

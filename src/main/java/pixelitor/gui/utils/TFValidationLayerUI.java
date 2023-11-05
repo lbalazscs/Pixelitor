@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,12 +35,20 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class TFValidationLayerUI extends LayerUI<JTextField> {
     private final Predicate<JTextField> checker;
 
-    public TFValidationLayerUI(Predicate<JTextField> checker) {
+    private TFValidationLayerUI(Predicate<JTextField> checker) {
         this.checker = checker;
     }
 
-    public static TFValidationLayerUI fromValidator(TextFieldValidator validator) {
-        return new TFValidationLayerUI(tf -> validator.check(tf).isOK());
+    // used when only the red warning icon is needed,
+    // depending on the result of the given predicate
+    public static JLayer<JTextField> createCheckedTF(JTextField textField, Predicate<JTextField> checker) {
+        return new JLayer<>(textField, new TFValidationLayerUI(checker));
+    }
+
+    // used when in addition to the red warning icon,
+    // a specific error message is also needed
+    public static JLayer<JTextField> createValidatedTF(JTextField textField, TextFieldValidator validator) {
+        return new JLayer<>(textField, new TFValidationLayerUI(tf -> validator.check(tf).isOK()));
     }
 
     @Override
@@ -54,12 +62,11 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
         boolean isOK = checker.test(textField);
         if (!isOK) {
             Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
             // Paint the red X.
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
             int w = c.getWidth();
             int h = c.getHeight();
-
             int s = 8;
             int pad = 10;
             int x = w - pad - s;

@@ -37,7 +37,7 @@ public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
     }
 
-    public static void checkAll(Composition comp, boolean checkImageCoversCanvas) {
+    public static void checkAll(Composition comp) {
         assert comp != null;
 
         selectionActionsEnabledCheck(comp);
@@ -45,10 +45,7 @@ public final class ConsistencyChecks {
         assert selectionShapeIsNotEmpty(comp) : "empty selection shape in " + comp.getName();
         assert selectionIsInsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
-
-        if (checkImageCoversCanvas) {
-            assert imageCoversCanvas(comp);
-        }
+        assert imageCoversCanvas(comp);
         assert layerDeleteActionEnabled();
         assert addMaskActionEnabled();
         assert shapeLayersAreOK(comp);
@@ -161,7 +158,7 @@ public final class ConsistencyChecks {
         // but this is hard to check since
         // canvasSize.contains(selShapeBounds)
         // doesn't work (the bounds are not necessarily the smallest)
-        // so check that it is not fully outside
+        // so check that it's not fully outside
         boolean ok = !canvasSize.createIntersection(selShapeBounds).isEmpty();
         if (!ok) {
             System.out.println("\nConsistencyChecks::selectionIsInsideCanvas: no intersection: "
@@ -303,7 +300,7 @@ public final class ConsistencyChecks {
             }
         } else { // no mask
             if (!addMaskEnabled) {
-                return "The %s '%s' has no mask, but the add mask action is not enabled";
+                return "The %s '%s' has no mask, but the add mask action isn't enabled";
             }
             if (layer.hasUI() && layer.getUI().hasMaskIcon()) {
                 return "The %s '%s' has no mask, but it has mask icon";

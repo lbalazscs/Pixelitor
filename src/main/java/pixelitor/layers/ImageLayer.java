@@ -53,7 +53,9 @@ import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.Views.thumbSize;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
-import static pixelitor.layers.ImageLayer.State.*;
+import static pixelitor.layers.ImageLayer.State.NORMAL;
+import static pixelitor.layers.ImageLayer.State.PREVIEW;
+import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 import static pixelitor.utils.ImageUtils.copyImage;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
@@ -360,10 +362,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return visibleImage;
     }
 
-    // every image creation in this class should use this method
-    // which is overridden by the LayerMask subclass
+    // Every image creation in this class should use this method,
+    // which is overridden by the LayerMask subclass,
     // because normal image layers are enlarged with transparent pixels
-    // and layer masks are enlarged with white pixels
+    // and layer masks are enlarged with white pixels.
     protected BufferedImage createEmptyImageForLayer(int width, int height) {
         return ImageUtils.createSysCompatibleImage(width, height);
     }
@@ -722,67 +724,46 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void flip(Flip.Direction direction) {
-        var imageTransform = direction.createImageTransform(image);
-        int txAbs = -getTx();
-        int tyAbs = -getTy();
-        int newTxAbs;
-        int newTyAbs;
-
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
+        int newTx;
+        int newTy;
+        if (direction == HORIZONTAL) {
+            newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
+            newTy = getTy();
+        } else {
+            newTx = getTx();
+            newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
+        }
 
         BufferedImage dest = ImageUtils.createImageWithSameCM(image);
         Graphics2D g2 = dest.createGraphics();
 
-        if (direction == HORIZONTAL) {
-            newTxAbs = imageWidth - canvasWidth - txAbs;
-            newTyAbs = tyAbs;
-        } else {
-            newTxAbs = txAbs;
-            newTyAbs = imageHeight - canvasHeight - tyAbs;
-        }
-
-        g2.setTransform(imageTransform);
-        g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
+        g2.setTransform(direction.createImageTransform(image));
+        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         g2.dispose();
 
-        setTranslation(-newTxAbs, -newTyAbs);
+        setTranslation(newTx, newTy);
 
         setImage(dest);
     }
 
     @Override
     public void rotate(QuadrantAngle angle) {
-        int tx = getTx();
-        int ty = getTy();
-        int txAbs = -tx;
-        int tyAbs = -ty;
-        int newTxAbs = 0;
-        int newTyAbs = 0;
-
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-
-        int angleDegree = angle.getAngleDegree();
-        switch (angleDegree) {
+        int newTx;
+        int newTy;
+        switch (angle.getAngleDegree()) {
             case 90 -> {
-                newTxAbs = imageHeight - tyAbs - canvasHeight;
-                newTyAbs = txAbs;
+                newTx = comp.getCanvasHeight() - image.getHeight() - getTy();
+                newTy = getTx();
             }
             case 270 -> {
-                newTxAbs = tyAbs;
-                newTyAbs = imageWidth - txAbs - canvasWidth;
+                newTx = getTy();
+                newTy = comp.getCanvasWidth() - image.getWidth() - getTx();
             }
             case 180 -> {
-                newTxAbs = imageWidth - canvasWidth - txAbs;
-                newTyAbs = imageHeight - canvasHeight - tyAbs;
+                newTx = comp.getCanvasWidth() - image.getWidth() - getTx();
+                newTy = comp.getCanvasHeight() - image.getHeight() - getTy();
             }
-            default -> throw new IllegalStateException("angleDegree = " + angleDegree);
+            default -> throw new IllegalStateException("angleDegree = " + angle.getAngleDegree());
         }
 
         BufferedImage dest = angle.createDestImage(image);
@@ -791,10 +772,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g2.setTransform(angle.createImageTransform(image));
-        g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
+        g2.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         g2.dispose();
 
-        setTranslation(-newTxAbs, -newTyAbs);
+        setTranslation(newTx, newTy);
         setImage(dest);
     }
 
@@ -819,7 +800,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert !cropRect.isEmpty() : "empty crop rectangle";
 
         if (!deleteCropped && !allowGrowing) {
-            // the simple case: it is guaranteed that the image will
+            // the simple case: it's guaranteed that the image will
             // cover the new canvas, so just set the new translation
             super.crop(cropRect, false, allowGrowing);
             return;
@@ -831,7 +812,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert cropHeight > 0 : "cropRect = " + cropRect;
 
         // the cropRect is in image space, but relative to the canvas,
-        // so it is translated to get the correct image coordinates
+        // so it's translated to get the correct image coordinates
         int cropX = (int) (cropRect.getX() - getTx());
         int cropY = (int) (cropRect.getY() - getTy());
 
@@ -877,37 +858,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
         var translationEdit = new TranslationEdit(comp, this, true);
 
         boolean changed = toCanvasSize();
-        if (changed) {
-            addToCanvasSizeToHistory(backupImage, translationEdit);
+        if (!changed) {
+            Messages.showInStatusBar("The layer <b>\"%s\"</b> was already the same size (%dx%d) as the canvas."
+                .formatted(getName(), comp.getCanvasWidth(), comp.getCanvasHeight()));
+            return;
         }
-    }
 
-    /**
-     * Crops to the canvas size, without managing history.
-     * Returns true if something was changed.
-     */
-    public boolean toCanvasSize() {
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-        int canvasWidth = comp.getCanvasWidth();
-        int canvasHeight = comp.getCanvasHeight();
-
-        if (imageWidth > canvasWidth || imageHeight > canvasHeight) {
-            BufferedImage newImage = ImageUtils.crop(image,
-                -getTx(), -getTy(), canvasWidth, canvasHeight);
-
-            BufferedImage tmp = image;
-            setImage(newImage);
-            tmp.flush();
-
-            setTranslation(0, 0);
-            return true;
-        }
-        return false;
-    }
-
-    private void addToCanvasSizeToHistory(BufferedImage backupImage,
-                                          TranslationEdit translationEdit) {
         boolean maskChanged = false;
         BufferedImage maskBackupImage = null;
         if (hasMask()) {
@@ -925,6 +881,28 @@ public class ImageLayer extends ContentLayer implements Drawable {
             imageEdit.setFadeable(false);
         }
         History.add(new MultiEdit(editName, comp, translationEdit, imageEdit));
+
+        Messages.showInStatusBar("The layer <b>\"%s\"</b> was cropped to %dx%d from %dx%d."
+            .formatted(getName(), comp.getCanvasWidth(), comp.getCanvasHeight(), backupImage.getWidth(), backupImage.getHeight()));
+    }
+
+    /**
+     * Crops to the canvas size, without managing history.
+     * Returns true if something was changed.
+     */
+    public boolean toCanvasSize() {
+        if (isBigLayer()) {
+            BufferedImage newImage = ImageUtils.crop(image,
+                -getTx(), -getTy(), comp.getCanvasWidth(), comp.getCanvasHeight());
+
+            BufferedImage tmp = image;
+            setImage(newImage);
+            tmp.flush();
+
+            setTranslation(0, 0);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -1042,9 +1020,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Returns true if the layer image is bigger than the canvas
      */
     public boolean isBigLayer() {
-        Rectangle canvasBounds = comp.getCanvasBounds();
-        Rectangle layerBounds = getContentBounds();
-        return !canvasBounds.contains(layerBounds);
+//        Rectangle canvasBounds = comp.getCanvasBounds();
+//        Rectangle layerBounds = getContentBounds();
+//        return !canvasBounds.contains(layerBounds);
+        return image.getWidth() > comp.getCanvasWidth()
+            || image.getHeight() > comp.getCanvasHeight();
     }
 
     @Override
@@ -1057,7 +1037,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             if (isNormalAndOpaque()) {
                 g.drawImage(visibleImage, getTx(), getTy(), null);
                 tmpDrawingLayer.paintOn(g, 0, 0);
-            } else { // layer is not in normal mode
+            } else {
                 // the composite of the graphics is already set up, but
                 // the drawing layer still has to be considered
 
