@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,9 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -80,8 +83,18 @@ public class TipsOfTheDay {
     private static TipOfTheDayModel loadModel() throws IOException {
         var properties = new Properties();
         TipOfTheDayModel model;
-        try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream("/tips.properties")) {
-            properties.load(propertiesInputStream);
+
+//        ResourceBundle bundle = PropertyResourceBundle.getBundle("tips", Locale.getDefault());
+
+        String fileName = "/tips.properties";
+
+        // TODO do it in a generic way
+        if ("pt".equals(Locale.getDefault().getLanguage())) {
+            fileName = "/tips_pt_BR.properties";
+        }
+
+        try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream(fileName)) {
+            properties.load(new InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8));
             model = TipLoader.load(properties);
         }
         return model;
