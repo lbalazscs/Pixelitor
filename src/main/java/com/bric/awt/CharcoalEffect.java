@@ -103,7 +103,7 @@ public class CharcoalEffect {
         GeneralPath path = new GeneralPath();
         GeneralPathWriter writer = new GeneralPathWriter(path);
         CharcoalEffect effect = new CharcoalEffect(writer, size, angle, randomSeed, maxDepth);
-        effect.write(shape);
+        effect.applyCharcoalEffect(shape);
         return path;
     }
 
@@ -127,7 +127,12 @@ public class CharcoalEffect {
      *
      * @param s the shape to write.
      */
-    public void write(Shape s) {
+
+    /**
+     * Applied Rename Method Refactoring
+     * Write to applyCharcoalEffect
+     */
+    public void applyCharcoalEffect(Shape s) {
         Random random = new Random(seed);
 
         Point2D center = new Point2D.Float();

@@ -141,7 +141,7 @@ public class CharcoalStroke implements FilteredStroke {
 
         CharcoalEffect charcoal = new CharcoalEffect(writer, crackSize, angle, randomSeed, maxDepth);
 
-        charcoal.write(shape);
+        charcoal.applyCharcoalEffect(shape);
 
         return newShape;
     }
