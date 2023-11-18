@@ -47,7 +47,7 @@ public class ColorPickerSliderUI extends BasicSliderUI {
      */
     private static final int ARROW_HALF = 8;
 
-    private final int[] intArray = new int[Toolkit.getDefaultToolkit().getScreenSize().height];
+    private int[] intArray = new int[Toolkit.getDefaultToolkit().getScreenSize().height];
     private final BufferedImage bi = new BufferedImage(1, intArray.length, TYPE_INT_RGB);
     int lastMode = -1;
 
@@ -105,59 +105,87 @@ public class ColorPickerSliderUI extends BasicSliderUI {
         trackRect.height = size;
     }
 
+    /**
+     *
+     * Decompose Conditional Refactoring
+     */
+
     @Override
     public synchronized void paintTrack(Graphics g) {
         int mode = colorPicker.getMode();
-        if (mode == ColorPicker.HUE || mode == ColorPicker.BRI || mode == ColorPicker.SAT) {
-            float[] hsb = colorPicker.getHSB();
-            if (mode == ColorPicker.HUE) {
-                for (int y = 0; y < trackRect.height; y++) {
-                    float hue = ((float) y) / ((float) trackRect.height);
-                    intArray[y] = Color.HSBtoRGB(hue, 1, 1);
-                }
-            } else if (mode == ColorPicker.SAT) {
-                for (int y = 0; y < trackRect.height; y++) {
-                    float sat = 1 - ((float) y) / ((float) trackRect.height);
-                    intArray[y] = Color.HSBtoRGB(hsb[0], sat, hsb[2]);
-                }
-            } else {
-                for (int y = 0; y < trackRect.height; y++) {
-                    float bri = 1 - ((float) y) / ((float) trackRect.height);
-                    intArray[y] = Color.HSBtoRGB(hsb[0], hsb[1], bri);
-                }
-            }
+        if (isHueBriSatMode(mode)) {
+            paintHueBriSatTrack(g);
         } else {
-            int[] rgb = colorPicker.getRGB();
-            if (mode == ColorPicker.RED) {
-                for (int y = 0; y < trackRect.height; y++) {
-                    int red = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
-                    intArray[y] = (red << 16) + (rgb[1] << 8) + rgb[2];
-                }
-            } else if (mode == ColorPicker.GREEN) {
-                for (int y = 0; y < trackRect.height; y++) {
-                    int green = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
-                    intArray[y] = (rgb[0] << 16) + (green << 8) + rgb[2];
-                }
-            } else if (mode == ColorPicker.BLUE) {
-                for (int y = 0; y < trackRect.height; y++) {
-                    int blue = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
-                    intArray[y] = (rgb[0] << 16) + (rgb[1] << 8) + blue;
-                }
+            paintRgbTrack(g);
+        }
+    }
+
+    private boolean isHueBriSatMode(int mode) {
+        return mode == ColorPicker.HUE || mode == ColorPicker.BRI || mode == ColorPicker.SAT;
+    }
+
+    private void paintHueBriSatTrack(Graphics g) {
+        float[] hsb = colorPicker.getHSB();
+        intArray = calculateHueBriSatArray(hsb);
+        drawTrack(g);
+    }
+
+    private void paintRgbTrack(Graphics g) {
+        int[] rgb = colorPicker.getRGB();
+        intArray = calculateRgbArray(rgb);
+        drawTrack(g);
+    }
+
+    private int[] calculateHueBriSatArray(float[] hsb) {
+        int[] array = new int[trackRect.height];
+        int mode = colorPicker.getMode();
+        for (int y = 0; y < trackRect.height; y++) {
+            if (mode == ColorPicker.HUE) {
+                float hue = ((float) y) / ((float) trackRect.height);
+                array[y] = Color.HSBtoRGB(hue, 1, 1);
+            } else if (mode == ColorPicker.SAT) {
+                float sat = 1 - ((float) y) / ((float) trackRect.height);
+                array[y] = Color.HSBtoRGB(hsb[0], sat, hsb[2]);
+            } else {
+                float bri = 1 - ((float) y) / ((float) trackRect.height);
+                array[y] = Color.HSBtoRGB(hsb[0], hsb[1], bri);
             }
         }
+        return array;
+    }
+
+    private int[] calculateRgbArray(int[] rgb) {
+        int[] array = new int[trackRect.height];
+        int mode = colorPicker.getMode();
+        for (int y = 0; y < trackRect.height; y++) {
+            if (mode == ColorPicker.RED) {
+                int red = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
+                array[y] = (red << 16) + (rgb[1] << 8) + rgb[2];
+            } else if (mode == ColorPicker.GREEN) {
+                int green = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
+                array[y] = (rgb[0] << 16) + (green << 8) + rgb[2];
+            } else if (mode == ColorPicker.BLUE) {
+                int blue = 255 - (int) (y * 255.0 / trackRect.height + 0.49);
+                array[y] = (rgb[0] << 16) + (rgb[1] << 8) + blue;
+            }
+        }
+        return array;
+    }
+
+    private void drawTrack(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Rectangle r = new Rectangle(6, trackRect.y, 14, trackRect.height);
         if (slider.hasFocus()) {
             PlafPaintUtils.paintFocus(g2, r, 3);
         }
-
         bi.getRaster().setDataElements(0, 0, 1, trackRect.height, intArray);
         TexturePaint p = new TexturePaint(bi, new Rectangle(0, trackRect.y, 1, bi.getHeight()));
         g2.setPaint(p);
         g2.fillRect(r.x, r.y, r.width, r.height);
-
         PlafPaintUtils.drawBevel(g2, r);
     }
+
+
 
     @Override
     public void paintFocus(Graphics g) {
@@ -217,6 +245,5 @@ public class ColorPickerSliderUI extends BasicSliderUI {
         slider.removeMouseListener(myMouseListener);
         slider.removeMouseMotionListener(myMouseListener);
     }
-
 
 }
