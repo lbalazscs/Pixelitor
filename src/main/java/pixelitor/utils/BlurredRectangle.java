@@ -53,55 +53,57 @@ public class BlurredRectangle implements BlurredShape {
         maxYDist = outerRadiusY - innerRadiusY;
     }
 
+    /**
+     * Introducing Explaining variable and performing better encapsulation
+     */
     @Override
     public double isOutside(int x, int y) {
-        if (!outerRect.contains(x, y)) { // outside
+        if (!outerRect.contains(x, y)) {
             return 1.0;
-        } else if (innerRect.contains(x, y)) { // innermost region
-            return 0.0;
-        } else { // between the inner and outer radius
-            double xDist; // horizontal distance from the inner region
-            double yDist; // vertical distance from the inner region
-            double minInnerX = cx - innerRadiusX;
-            double maxInnerX = cx + innerRadiusX;
-            double minInnerY = cy - innerRadiusY;
-            double maxInnerY = cy + innerRadiusY;
-            if (x >= maxInnerX) {
-                xDist = x - cx - innerRadiusX;
-                double xRatio = xDist / maxXDist;
-                if (y <= minInnerY) { // top right corner
-                    yDist = cy - y - innerRadiusY;
-                    double yRatio = yDist / maxYDist;
-                    return Math.max(xRatio, yRatio);
-                } else if (y > maxInnerY) { // bottom right corner
-                    yDist = y - cy - innerRadiusY;
-                    double yRatio = yDist / maxYDist;
-                    return Math.max(xRatio, yRatio);
-                } else { // right part
-                    return xRatio;
-                }
-            } else if (x <= minInnerX) {
-                xDist = cx - x - innerRadiusX;
-                double xRatio = xDist / maxXDist;
-                if (y <= minInnerY) { // top left corner
-                    yDist = cy - y - innerRadiusY;
-                    double yRatio = yDist / maxYDist;
-                    return Math.max(xRatio, yRatio);
-                } else if (y > maxInnerY) { // bottom left corner
-                    yDist = y - cy - innerRadiusY;
-                    double yRatio = yDist / maxYDist;
-                    return Math.max(xRatio, yRatio);
-                } else { // left part
-                    return xRatio;
-                }
-            }
-
-            if (y > cy) { // bottom part
-                yDist = y - cy - innerRadiusY;
-            } else { // top part
-                yDist = cy - y - innerRadiusY;
-            }
-            return yDist / maxYDist;
         }
+        if (innerRect.contains(x, y)) {
+            return 0.0;
+        }
+
+        // Calculate distances from the inner rectangle
+        double horizontalDistanceFromInner = calculateHorizontalDistanceFromInner(x);
+        double verticalDistanceFromInner = calculateVerticalDistanceFromInner(y);
+
+        // Calculate ratios based on distances and maximum distances
+        double xRatio = horizontalDistanceFromInner / maxXDist;
+        double yRatio = verticalDistanceFromInner / maxYDist;
+
+        // Return the maximum ratio as the blending factor
+        return Math.max(xRatio, yRatio);
     }
+
+    private double calculateHorizontalDistanceFromInner(int x) {
+        double xDist;
+        double minInnerX = cx - innerRadiusX;
+        double maxInnerX = cx + innerRadiusX;
+
+        if (x >= maxInnerX) {
+            xDist = x - maxInnerX;
+        } else if (x <= minInnerX) {
+            xDist = minInnerX - x;
+        } else {
+            return 0.0;
+        }
+
+        return xDist;
+    }
+
+    private double calculateVerticalDistanceFromInner(int y) {
+        double yDist;
+        double minInnerY = cy - innerRadiusY;
+        double maxInnerY = cy + innerRadiusY;
+
+        if (y > maxInnerY) {
+            yDist = y - maxInnerY;
+        } else {
+            yDist = maxInnerY - y;
+        }
+        return yDist;
+    }
+
 }
