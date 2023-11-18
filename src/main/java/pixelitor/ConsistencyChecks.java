@@ -218,52 +218,58 @@ public final class ConsistencyChecks {
         throw new IllegalStateException(msg);
     }
 
-    @SuppressWarnings("SameReturnValue")
+    /**
+     * Extract method refactoring
+     */
     public static boolean layerDeleteActionEnabled() {
         var action = DeleteActiveLayerAction.INSTANCE;
-        if (action == null) {
-            // can be null at startup because this check is
-            // called while constructing the DeleteActiveLayerAction
+        if (action == null || isStartup()) {
             return true;
         }
 
         var comp = Views.getActiveComp();
-        if (comp == null) {
-            return true;
-        }
-
-        if (!comp.getActiveLayer().hasUI()) {
-            // an inconsistent state is OK while adding a layer
+        if (comp == null || !comp.getActiveLayer().hasUI()) {
             return true;
         }
 
         LayerHolder parent = comp.getActiveHolder();
-
         boolean enabled = action.isEnabled();
         int numLayers = parent.getNumLayers();
-        if (enabled) {
-            int minValue = 2;
-            if (parent.allowsZeroLayers()) {
-                minValue = 1;
-            }
-            if (numLayers < minValue) {
-                String msg = "delete layer enabled for %s '%s', but numLayers = %d (minValue=%d)";
-                throw new IllegalStateException(msg.formatted(
-                    parent.getClass().getSimpleName(), parent.getName(), numLayers, minValue));
-            }
-        } else { // disabled
-            int maxValue = 1;
-            if (parent.allowsZeroLayers()) {
-                maxValue = 0;
-            }
-            if (numLayers > maxValue) {
-                String msg = "delete layer disabled for %s '%s', but numLayers = %d (maxValue=%d)";
-                throw new IllegalStateException(msg.formatted(
-                    parent.getClass().getSimpleName(), parent.getName(), numLayers, maxValue));
-            }
+
+        if (isEnabledAndNumLayersInvalid(enabled, parent, numLayers)) {
+            throwExceptionForInvalidNumLayers(parent, numLayers, enabled);
         }
+
         return true;
     }
+
+    private static boolean isStartup() {
+        // can be null at startup because this check is
+        // called while constructing the DeleteActiveLayerAction
+        return false;
+    }
+
+    private static boolean isEnabledAndNumLayersInvalid(boolean enabled, LayerHolder parent, int numLayers) {
+        if (enabled) {
+            int minValue = parent.allowsZeroLayers() ? 1 : 2;
+            return numLayers < minValue;
+        } else { // disabled
+            int maxValue = parent.allowsZeroLayers() ? 0 : 1;
+            return numLayers > maxValue;
+        }
+    }
+
+    private static void throwExceptionForInvalidNumLayers(LayerHolder parent, int numLayers, boolean enabled) {
+        String msg = "delete layer %s for %s '%s', but numLayers = %d (value=%d)";
+        throw new IllegalStateException(msg.formatted(
+                enabled ? "enabled" : "disabled",
+                parent.getClass().getSimpleName(),
+                parent.getName(),
+                numLayers,
+                enabled ? (parent.allowsZeroLayers() ? 1 : 2) : (parent.allowsZeroLayers() ? 0 : 1)
+        ));
+    }
+
 
     @SuppressWarnings("SameReturnValue")
     public static boolean addMaskActionEnabled() {
