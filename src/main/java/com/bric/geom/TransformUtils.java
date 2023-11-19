@@ -146,29 +146,4 @@ public class TransformUtils {
         return new AffineTransform(m00, m10, m01, m11, m02, m12);
     }
 
-    /**
-     * Transitions from one AffineTransform to another.
-     *
-     * @param a               the initial AffineTransform
-     * @param b               the final AffineTransform
-     * @param progress        a float between zero and one, where zero
-     *                        represents <code>a</code> and one represents <code>b</code>.
-     *                        Values outside this range will not throw an exception, but they will
-     *                        make some funky results.
-     * @param createNewObject indicates whether a new AffineTransform
-     *                        should be constructed, or if one of the arguments can be
-     *                        used to store the results
-     * @return a transform that is somehow between <code>a</code> and <code>b</code>.
-     */
-    public static AffineTransform tween(AffineTransform a, AffineTransform b, float progress, boolean createNewObject) {
-        AffineTransform dest = createNewObject ? new AffineTransform() : a;
-        dest.setTransform(
-                a.getScaleX() * (1 - progress) + b.getScaleX() * progress,
-                a.getShearY() * (1 - progress) + b.getShearY() * progress,
-                a.getShearX() * (1 - progress) + b.getShearX() * progress,
-                a.getScaleY() * (1 - progress) + b.getScaleY() * progress,
-                a.getTranslateX() * (1 - progress) + b.getTranslateX() * progress,
-                a.getTranslateY() * (1 - progress) + b.getTranslateY() * progress);
-        return dest;
-    }
 }

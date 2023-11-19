@@ -78,6 +78,37 @@ public class TossTransition2D extends Transition2D {
         this.type = type;
     }
 
+    /**
+     * Transitions from one AffineTransform to another.
+     *
+     * @param a               the initial AffineTransform
+     * @param b               the final AffineTransform
+     * @param progress        a float between zero and one, where zero
+     *                        represents <code>a</code> and one represents <code>b</code>.
+     *                        Values outside this range will not throw an exception, but they will
+     *                        make some funky results.
+     * @param createNewObject indicates whether a new AffineTransform
+     *                        should be constructed, or if one of the arguments can be
+     *                        used to store the results
+     * @return a transform that is somehow between <code>a</code> and <code>b</code>.
+     */
+
+
+    /**
+     *Move method refactoring, tween(): from TransformUtils to TossTransition2D
+     */
+    public static AffineTransform tween(AffineTransform a, AffineTransform b, float progress, boolean createNewObject) {
+        AffineTransform dest = createNewObject ? new AffineTransform() : a;
+        dest.setTransform(
+                a.getScaleX() * (1 - progress) + b.getScaleX() * progress,
+                a.getShearY() * (1 - progress) + b.getShearY() * progress,
+                a.getShearX() * (1 - progress) + b.getShearX() * progress,
+                a.getScaleY() * (1 - progress) + b.getScaleY() * progress,
+                a.getTranslateX() * (1 - progress) + b.getTranslateX() * progress,
+                a.getTranslateY() * (1 - progress) + b.getTranslateY() * progress);
+        return dest;
+    }
+
     @Override
     public Transition2DInstruction[] getInstructions(float progress,
                                                      Dimension size) {
@@ -178,26 +209,26 @@ public class TossTransition2D extends Transition2D {
         float cut3 = 0.85f;
         if (progress < cut1) {
             progress = progress / cut1;
-            transform = TransformUtils.tween(untouched, transform1, progress, true);
+            transform = tween(untouched, transform1, progress, true);
         } else if (progress < cut2) {
             AffineTransform identity = new AffineTransform();
             progress = (progress - cut1) / (cut2 - cut1);
             progress = 3.125f * progress * progress - 2.125f * progress;
 
-            transform = TransformUtils.tween(transform1, identity, progress, true);
+            transform = tween(transform1, identity, progress, true);
         } else if (progress < cut3) {
             AffineTransform identity = new AffineTransform();
             progress = (progress - cut2) / (cut3 - cut2);
             progress = -4.8f * progress * progress + 4.8f * progress;
 
-            transform = TransformUtils.tween(identity, transform2, progress, true);
+            transform = tween(identity, transform2, progress, true);
         } else {
             AffineTransform identity = new AffineTransform();
             progress = (progress - cut3) / (1 - cut3);
 
             progress = -4.8f * progress * progress + 4.8f * progress;
 
-            transform = TransformUtils.tween(identity, transform3, progress, true);
+            transform = tween(identity, transform3, progress, true);
         }
 
         return new Transition2DInstruction[]{
