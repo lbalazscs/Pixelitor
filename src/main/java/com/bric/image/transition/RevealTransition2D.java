@@ -82,20 +82,23 @@ public class RevealTransition2D extends Transition2D {
         }
         this.direction = direction;
     }
-
     @Override
-    public Transition2DInstruction[] getInstructions(float progress,
-                                                     Dimension size) {
-        AffineTransform transform = switch (direction) {
-            case LEFT -> AffineTransform.getTranslateInstance(-progress * size.width, 0);
-            case RIGHT -> AffineTransform.getTranslateInstance(progress * size.width, 0);
-            case UP -> AffineTransform.getTranslateInstance(0, -progress * size.height);
-            default -> AffineTransform.getTranslateInstance(0, progress * size.height);
-        };
+    public Transition2DInstruction[] getInstructions(float progress, Dimension size) {
+        TransitionDirectionStrategy strategy = getStrategy();
+        AffineTransform transform = strategy.getTransform(progress, size);
 
-        return new ImageInstruction[]{
+        return new Transition2DInstruction[]{
                 new ImageInstruction(false),
                 new ImageInstruction(true, transform, null)
+        };
+    }
+
+    private TransitionDirectionStrategy getStrategy() {
+        return switch (direction) {
+            case LEFT -> new LeftTransitionDirection();
+            case RIGHT -> new RightTransitionDirection();
+            case UP -> new UpTransitionDirection();
+            default -> new DownTransitionDirection();
         };
     }
 
@@ -107,5 +110,37 @@ public class RevealTransition2D extends Transition2D {
             case RIGHT -> "Reveal Right";
             default -> "Reveal Down";
         };
+    }
+
+    private interface TransitionDirectionStrategy {
+        AffineTransform getTransform(float progress, Dimension size);
+    }
+
+    private static class LeftTransitionDirection implements TransitionDirectionStrategy {
+        @Override
+        public AffineTransform getTransform(float progress, Dimension size) {
+            return AffineTransform.getTranslateInstance(-progress * size.width, 0);
+        }
+    }
+
+    private static class RightTransitionDirection implements TransitionDirectionStrategy {
+        @Override
+        public AffineTransform getTransform(float progress, Dimension size) {
+            return AffineTransform.getTranslateInstance(progress * size.width, 0);
+        }
+    }
+
+    private static class UpTransitionDirection implements TransitionDirectionStrategy {
+        @Override
+        public AffineTransform getTransform(float progress, Dimension size) {
+            return AffineTransform.getTranslateInstance(0, -progress * size.height);
+        }
+    }
+
+    private static class DownTransitionDirection implements TransitionDirectionStrategy {
+        @Override
+        public AffineTransform getTransform(float progress, Dimension size) {
+            return AffineTransform.getTranslateInstance(0, progress * size.height);
+        }
     }
 }
