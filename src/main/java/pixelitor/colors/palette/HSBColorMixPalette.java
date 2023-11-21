@@ -22,6 +22,7 @@ import pixelitor.colors.Colors;
 import java.awt.Color;
 
 import static com.jhlabs.image.ImageMath.lerp;
+import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
@@ -78,6 +79,34 @@ public class HSBColorMixPalette extends Palette {
         // set the average saturation as the slider default
         averageSat = (satA + satB) / 2;
         config = new HueSatPaletteConfig(0.0f, averageSat);
+    }
+
+    /**
+     * A linear interpolation for hue values,
+     * taking their circular nature into account
+     */
+    public static float lerpHue(float mixFactor, float hue1, float hue2) {
+        float diff = hue1 - hue2;
+        if (diff < 0.5f && diff > -0.5f) {
+            return lerp(mixFactor, hue1, hue2);
+        } else if (diff >= 0.5f) { // hue1 is big, hue2 is small
+            hue2 += 1.0f;
+            float mix = lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
+        } else if (diff <= 0.5f) { // hue2 is big, hue1 is small
+            hue1 += 1.0f;
+            float mix = lerp(mixFactor, hue1, hue2);
+            if (mix > 1.0f) {
+                mix -= 1.0f;
+            }
+            return mix;
+        } else {
+            throw new IllegalStateException(
+                format("hue1 = %.2f, hue2 = %.2f, mixFactor = %.2f", hue1, hue2, mixFactor));
+        }
     }
 
     @Override
@@ -142,7 +171,7 @@ public class HSBColorMixPalette extends Palette {
 
     private float calcHue(float mixFactor) {
         float hueShift = ((HueSatPaletteConfig) config).getHueShift();
-        float h = hueShift + Colors.lerpHue(mixFactor, hueA, hueB);
+        float h = hueShift + lerpHue(mixFactor, hueA, hueB);
         if (h > 1.0f) {
             h = h - 1.0f;
         }

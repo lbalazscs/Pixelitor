@@ -22,6 +22,7 @@ import pixelitor.layers.Filterable;
 
 import javax.swing.*;
 import java.io.Serial;
+import java.util.Random;
 
 /**
  * A filter that has a GUI for customization.
@@ -57,6 +58,20 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
         }
 
         return new DialogMenuBar(this, addPresets);
+    }
+
+    /**
+     * Returns a randomized array that is on average close to being normalized
+     */
+    public static float[] createRandomKernelMatrix(int size) {
+        Random rand = new Random();
+        float[] retVal = new float[size * size];
+        for (int i = 0; i < retVal.length; i++) {
+            int randomInt = rand.nextInt(10000);
+            retVal[i] = (4 * randomInt / (10000.0f * retVal.length)) - (1.0f / retVal.length);
+        }
+
+        return retVal;
     }
 
     @Override

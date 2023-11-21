@@ -28,7 +28,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
 import java.awt.image.Kernel;
-import java.util.Random;
 
 /**
  * A customizable convolution
@@ -83,20 +82,6 @@ public class Convolve extends FilterWithGUI {
         filter.setEdgeAction(ConvolveFilter.CLAMP_EDGES);
         filter.setPremultiplyAlpha(false);
         return filter;
-    }
-
-    /**
-     * Returns a randomized array that is on average close to being normalized
-     */
-    public static float[] createRandomKernelMatrix(int size) {
-        Random rand = new Random();
-        float[] retVal = new float[size * size];
-        for (int i = 0; i < retVal.length; i++) {
-            int randomInt = rand.nextInt(10000);
-            retVal[i] = (4 * randomInt / (10000.0f * retVal.length)) - (1.0f / retVal.length);
-        }
-
-        return retVal;
     }
 
     public int getMatrixOrder() {

@@ -19,6 +19,7 @@ package pixelitor.filters.convolve;
 
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
@@ -131,7 +132,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
-            setMatrix(Convolve.createRandomKernelMatrix(matrixOrder));
+            setMatrix(FilterWithGUI.createRandomKernelMatrix(matrixOrder));
             collectValuesAndRun(e, false);
         });
         presetsBox.add(randomizeButton);
