@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,10 +46,10 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     @Override
     public void setupMaskEditing(boolean isMask) {
         maskEditing = isMask;
-        setupDrawDestination();
+        updateDrawDestination();
     }
 
-    private void setupDrawDestination() {
+    private void updateDrawDestination() {
         if (maskEditing) {
             drawDestination = DrawDestination.DIRECT;
             blendingModePanel.setEnabled(false);
@@ -91,7 +91,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
-        blendingModePanel.addActionListener(e -> setupDrawDestination());
+        blendingModePanel.addActionListener(e -> updateDrawDestination());
     }
 
     @Override

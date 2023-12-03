@@ -39,7 +39,7 @@ import static pixelitor.utils.Cursors.MOVE;
 /**
  * A pen tool interaction mode where a path can be transformed
  */
-public class PathTransformer implements PenToolMode {
+public final class PathTransformer implements PenToolMode {
     public static final PathTransformer INSTANCE = new PathTransformer();
     private static final String HELP_MESSAGE = "Pen Tool Transform Mode.";
 

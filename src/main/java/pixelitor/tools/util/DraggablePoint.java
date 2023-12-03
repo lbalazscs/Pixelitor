@@ -64,8 +64,8 @@ public class DraggablePoint extends Point2D.Double {
     protected double origX;
     protected double origY;
 
-    private final Color color = Color.WHITE;
-    private final Color activeColor = Color.RED;
+    private static final Color color = Color.WHITE;
+    private static final Color activeColor = Color.RED;
 
     // since there can be only one active point at a
     // time, it can be stored in this static variable

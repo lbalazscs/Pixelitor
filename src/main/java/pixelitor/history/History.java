@@ -205,7 +205,7 @@ public class History {
 
     /**
      * If the last edit in the history is a FadeableEdit for the given
-     * image layer, return it, otherwise return an empty Optional
+     * {@link Drawable}, return it, otherwise return null.
      */
     public static FadeableEdit getPreviousEditForFade(Drawable dr) {
         if (numUndoneEdits > 0 || dr == null) {
@@ -326,7 +326,7 @@ public class History {
 
         node.addInt("num edits", undoManager.getSize());
         if (undoManager.hasEdits()) {
-            node.add(undoManager.createDebugNode());
+            node.add(undoManager.createDebugNode("edits"));
         }
 
         node.addInt("num undone edits", numUndoneEdits);

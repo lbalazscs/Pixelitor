@@ -71,15 +71,15 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void initGraphics(Graphics2D g) {
+    protected void initBrushStroke() {
         // reinitialize the color for each stroke
-        g.setColor(drawingColor);
+        brushStroke.setColor(drawingColor);
     }
 
     @Override
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
-        graphics.setColor(getFGColor());
+        brushStroke.setColor(getFGColor());
     }
 
     private void setupDrawingColor(PMouseEvent e) {

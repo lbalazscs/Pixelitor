@@ -31,7 +31,6 @@ import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
-import pixelitor.layers.LayerMask;
 import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -46,9 +45,10 @@ import java.awt.geom.FlatteningPathIterator;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
@@ -62,16 +62,17 @@ public abstract class AbstractBrushTool extends Tool {
 
     private JComboBox<BrushType> typeCB;
 
-    protected Graphics2D graphics;
     private final RangeParam brushRadiusParam = new RangeParam(GUIText.RADIUS,
         MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
     private final boolean addSymmetry;
     private EnumComboBoxModel<Symmetry> symmetryModel;
 
+    protected BrushStroke brushStroke;
     protected Brush brush;
     private SymmetryBrush symmetryBrush;
     protected AffectedArea affectedArea;
+    protected LazyMouseBrush lazyMouseBrush;
 
     private JButton brushSettingsDialogButton;
     private Action brushSettingsAction;
@@ -85,7 +86,6 @@ public abstract class AbstractBrushTool extends Tool {
         "Lazy.Enabled", false);
     private final RangeParam lazyMouseDist = LazyMouseBrush.createDistParam();
     private JDialog lazyMouseDialog;
-    protected LazyMouseBrush lazyMouseBrush;
     private JButton showLazyMouseDialogButton;
 
     private int outlineCoX;
@@ -145,10 +145,10 @@ public abstract class AbstractBrushTool extends Tool {
     private void brushTypeChanged() {
         closeBrushSettingsDialog();
 
-        var brushType = getBrushType();
-        symmetryBrush.brushTypeChanged(brushType, getRadius());
-        brushRadiusParam.setEnabled(brushType.hasRadius(), APP_LOGIC);
-        brushSettingsAction.setEnabled(brushType.hasSettings());
+        var newBrushType = getBrushType();
+        symmetryBrush.brushTypeChanged(newBrushType, getRadius());
+        brushRadiusParam.setEnabled(newBrushType.hasRadius());
+        brushSettingsAction.setEnabled(newBrushType.hasSettings());
     }
 
     private boolean hasBrushType() {
@@ -241,6 +241,7 @@ public abstract class AbstractBrushTool extends Tool {
         // the tracking of the affected area
         if (!addSymmetry) {
             if (lineConnect) {
+                assert brush.hasPrevious();
                 affectedArea.updateWith(e);
             } else {
                 affectedArea.initAt(e);
@@ -253,9 +254,9 @@ public abstract class AbstractBrushTool extends Tool {
         newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
 
         if (lazyMouse) {
-            PPoint drawPoint = lazyMouseBrush.getDrawPoint();
-            outlineCoX = (int) drawPoint.getCoX();
-            outlineCoY = (int) drawPoint.getCoY();
+            PPoint drawLoc = lazyMouseBrush.getDrawLoc();
+            outlineCoX = (int) drawLoc.getCoX();
+            outlineCoY = (int) drawLoc.getCoY();
         } else {
             outlineCoX = (int) e.getCoX();
             outlineCoY = (int) e.getCoY();
@@ -264,7 +265,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        if (graphics == null) {
+        if (brushStroke == null) {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore
             // there is no need to save a backup, we can just return
@@ -353,16 +354,11 @@ public abstract class AbstractBrushTool extends Tool {
         brush.finishBrushStroke();
         addBrushStrokeToHistory(dr);
 
-        if (graphics != null) {
-            graphics.dispose();
+        assert brushStroke != null;
+        if (brushStroke != null) {
+            brushStroke.finish(dr);
         }
-        graphics = null;
-        drawDestination.finishBrushStroke(dr);
-
-//        dr.getComp().update(HISTOGRAM);
-        dr.update();
-
-        dr.updateIconImage();
+        brushStroke = null;
     }
 
     private void addBrushStrokeToHistory(Drawable dr) {
@@ -387,38 +383,19 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
-        drawDestination.prepareBrushStroke(dr);
-        graphics = createGraphicsForNewBrushStroke(dr);
+        createBrushStroke(dr);
     }
 
-    /**
-     * Creates the global Graphics2D object graphics.
-     */
-    private Graphics2D createGraphicsForNewBrushStroke(Drawable dr) {
-        var comp = dr.getComp();
-
-        // when editing masks, no tmp drawing layer should be used
-        assert !(dr instanceof LayerMask)
-            || drawDestination == DrawDestination.DIRECT :
-            "dr is " + dr.getClass().getSimpleName()
-                + ", comp = " + comp.getName()
-                + ", tool = " + getClass().getSimpleName()
-                + ", drawDestination = " + drawDestination;
-
-        var g = drawDestination.createGraphics(dr, getComposite());
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        initGraphics(g);
-        comp.applySelectionClipping(g);
-
-        brush.setTarget(dr, g);
-        return g;
+    private void createBrushStroke(Drawable dr) {
+        brushStroke = new BrushStroke(dr, drawDestination, brush, getComposite());
+        initBrushStroke();
     }
 
     /**
      * An opportunity to do extra tool-specific
      * initializations in the subclasses
      */
-    protected void initGraphics(Graphics2D g) {
+    protected void initBrushStroke() {
     }
 
     // overridden in brush tools with blending mode
@@ -430,10 +407,8 @@ public abstract class AbstractBrushTool extends Tool {
      * Called from mousePressed, mouseDragged
      */
     private void newMousePoint(Drawable dr, PPoint p, boolean lineConnect) {
-        if (graphics == null) { // a new brush stroke has to be initialized
-            drawDestination.prepareBrushStroke(dr);
-            graphics = createGraphicsForNewBrushStroke(dr);
-            graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        if (brushStroke == null) { // a new brush stroke has to be initialized
+            createBrushStroke(dr);
 
             if (lineConnect) {
                 brush.lineConnectTo(p);

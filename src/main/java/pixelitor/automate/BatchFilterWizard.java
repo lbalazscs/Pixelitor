@@ -50,7 +50,7 @@ public class BatchFilterWizard extends Wizard {
         var dialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
-            comp.getActiveDrawableOrThrow().startFilter(filter, BATCH_AUTOMATE);
+            comp.getActiveDrawable().startFilter(filter, BATCH_AUTOMATE);
             return CompletableFuture.completedFuture(comp);
         };
         Automate.processFiles(batchFilterAction, dialogTitle);

@@ -722,7 +722,7 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        Drawable dr = Views.getActiveDrawableOrThrow();
+        Drawable dr = Views.getActiveDrawable();
         dr.startFilter(fade, FILTER_WITHOUT_DIALOG);
     }
 

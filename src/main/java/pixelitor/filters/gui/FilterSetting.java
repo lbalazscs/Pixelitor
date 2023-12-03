@@ -57,6 +57,10 @@ public interface FilterSetting {
      */
     void setEnabled(boolean b, EnabledReason reason);
 
+    default void setEnabled(boolean b) {
+        setEnabled(b, EnabledReason.APP_LOGIC);
+    }
+
     /**
      * The possible reasons for enabling or disabling a filter.
      */

@@ -101,15 +101,15 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * is a "reseed randomness" button.
      */
     public void setupEnableOtherIfNotZero(FilterSetting other) {
-        other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC);
+        other.setEnabled(getValue() != 0);
         addChangeListener(e ->
-            other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC));
+            other.setEnabled(getValue() != 0));
     }
 
     public void setupDisableOtherIf(FilterSetting other, IntPredicate condition) {
-        other.setEnabled(true, EnabledReason.APP_LOGIC);
+        other.setEnabled(true);
         addChangeListener(e ->
-            other.setEnabled(!condition.test(getValue()), EnabledReason.APP_LOGIC));
+            other.setEnabled(!condition.test(getValue())));
     }
 
     /**

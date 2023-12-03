@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.utils.debug;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.history.History;
 import pixelitor.tools.Tools;
 
 /**
@@ -32,7 +33,7 @@ public class AppNode extends DebugNode {
         addQuotedString("version", Pixelitor.VERSION_NUMBER);
         add(DebugNodes.createSystemNode());
         add(Tools.getCurrent().createDebugNode("active tool"));
-//        add(History.createDebugNode());
+        add(History.createDebugNode());
 
         addImageNodes();
     }

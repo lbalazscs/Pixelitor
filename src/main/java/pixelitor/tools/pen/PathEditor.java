@@ -25,7 +25,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -39,7 +39,7 @@ import static pixelitor.tools.util.DraggablePoint.lastActive;
 /**
  * A pen tool interaction mode where a path can be edited
  */
-public class PathEditor implements PenToolMode {
+public final class PathEditor implements PenToolMode {
     public static final PathEditor INSTANCE = new PathEditor();
     private static final String EDIT_HELP_MESSAGE =
         "Pen Tool Edit Mode: " +

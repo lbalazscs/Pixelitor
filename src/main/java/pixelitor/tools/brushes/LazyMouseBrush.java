@@ -146,7 +146,7 @@ public class LazyMouseBrush extends BrushDecorator {
         return param;
     }
 
-    public PPoint getDrawPoint() {
+    public PPoint getDrawLoc() {
         return PPoint.fromIm(drawX, drawY, view);
     }
 }

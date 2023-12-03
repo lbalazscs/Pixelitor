@@ -75,8 +75,8 @@ public class Fade extends ParametrizedFilter {
         opacityParam.setValue(newOpacity);
     }
 
-    public static BufferedImage fadeRGB(BufferedImage before, BufferedImage after,
-                                        BufferedImage dest, RangeParam opacity) {
+    private static BufferedImage fadeRGB(BufferedImage before, BufferedImage after,
+                                         BufferedImage dest, RangeParam opacity) {
         if (opacity.getValue() == 100) {
             return after;
         }
@@ -111,8 +111,8 @@ public class Fade extends ParametrizedFilter {
         return dest;
     }
 
-    public static BufferedImage fadeGray(BufferedImage before, BufferedImage after,
-                                         BufferedImage dest, RangeParam opacity) {
+    private static BufferedImage fadeGray(BufferedImage before, BufferedImage after,
+                                          BufferedImage dest, RangeParam opacity) {
         if (opacity.getValue() == 100) {
             return after;
         }

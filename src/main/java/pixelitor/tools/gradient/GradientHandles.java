@@ -27,6 +27,7 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -34,7 +35,7 @@ import java.awt.geom.AffineTransform;
 /**
  * The three handles that can be used to manipulate a gradient.
  */
-public class GradientHandles implements ToolWidget {
+public class GradientHandles implements ToolWidget, Debuggable {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
     private final GradientCenterPoint middle;
@@ -147,8 +148,9 @@ public class GradientHandles implements ToolWidget {
         return middle;
     }
 
-    public DebugNode createDebugNode() {
-        DebugNode node = new DebugNode("handles", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
         node.add(start.createDebugNode());
         node.add(middle.createDebugNode());
         node.add(end.createDebugNode());

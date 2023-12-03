@@ -33,7 +33,7 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.PenTool.path;
 
-public interface PenToolMode {
+public sealed interface PenToolMode permits PathBuilder, PathEditor, PathTransformer {
     void mousePressed(PMouseEvent e);
 
     void mouseDragged(PMouseEvent e);

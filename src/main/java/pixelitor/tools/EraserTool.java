@@ -20,11 +20,8 @@ package pixelitor.tools;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.utils.Cursors;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
-
-import static java.awt.AlphaComposite.DST_OUT;
 
 /**
  * The eraser tool.
@@ -49,9 +46,8 @@ public class EraserTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void initGraphics(Graphics2D g) {
-        // the color doesn't matter as long as AlphaComposite.DST_OUT is used
-        g.setComposite(AlphaComposite.getInstance(DST_OUT));
+    protected void initBrushStroke() {
+        brushStroke.setTransparentDrawing();
     }
 
     @Override

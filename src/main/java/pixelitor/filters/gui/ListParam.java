@@ -206,7 +206,7 @@ public class ListParam<E>
     }
 
     private void setupOther(FilterSetting other, Predicate<E> condition, boolean enable) {
-        other.setEnabled(!enable, EnabledReason.APP_LOGIC);
+        other.setEnabled(!enable);
         addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -220,9 +220,9 @@ public class ListParam<E>
             @SuppressWarnings("unchecked")
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((E) getSelectedItem())) {
-                    other.setEnabled(enable, EnabledReason.APP_LOGIC);
+                    other.setEnabled(enable);
                 } else {
-                    other.setEnabled(!enable, EnabledReason.APP_LOGIC);
+                    other.setEnabled(!enable);
                 }
             }
         });

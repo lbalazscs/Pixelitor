@@ -63,8 +63,6 @@ public class BooleanParam extends AbstractFilterParam {
 
         if (itemListeners != null) {
             // The item listeners for the GUI were temporarily stored here.
-            // This is also necessary because currently createGUI() is called
-            // for each new filter invocation => the new GUI has to be set up.
             for (ItemListener listener : itemListeners) {
                 gui.addItemListener(listener);
             }
@@ -95,14 +93,14 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     private void setupOther(FilterSetting other, boolean enable) {
-        other.setEnabled(enable ? isChecked() : !isChecked(), EnabledReason.APP_LOGIC);
+        other.setEnabled(enable ? isChecked() : !isChecked());
 
         // an item listener because a change listener fires too much, even for
         // rollover, and an action listener ignores changes caused by randomize
         addItemListener(e -> {
             // isChecked() isn't returning the correct new value yet
             boolean checked = e.getStateChange() == ItemEvent.SELECTED;
-            other.setEnabled(enable ? checked : !checked, EnabledReason.APP_LOGIC);
+            other.setEnabled(enable ? checked : !checked);
         });
     }
 

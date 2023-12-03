@@ -107,7 +107,7 @@ public class TransformLayer extends ParametrizedFilter {
         // if this can run as a smart filter, then it shouldn't assume
         // that the active layer is the owner of the image
         if (!Features.enableExperimental) {
-            Drawable dr = Views.getActiveDrawableOrThrow();
+            Drawable dr = Views.getActiveDrawable();
             tx = -dr.getTx();
             ty = -dr.getTy();
         }

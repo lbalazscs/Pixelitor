@@ -42,7 +42,7 @@ import static pixelitor.tools.util.DraggablePoint.lastActive;
  * A pen tool interaction mode where a path can be built from scratch.
  * The path can also be edited, but only by using modifier keys
  */
-public class PathBuilder implements PenToolMode {
+public final class PathBuilder implements PenToolMode {
     // The last mouse positions. Important when the moving point
     // has to be restored after an undo
     private double lastX;

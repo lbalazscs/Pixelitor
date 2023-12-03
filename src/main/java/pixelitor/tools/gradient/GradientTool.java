@@ -53,7 +53,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.*;
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
@@ -641,11 +643,7 @@ public class GradientTool extends DragTool {
         node.addBoolean("revert", isReverted());
         node.addFloat("opacity", blendingModePanel.getOpacity());
         node.addAsQuotedString("blending mode", blendingModePanel.getBlendingMode());
-        if (handles != null) {
-            node.add(handles.createDebugNode());
-        } else {
-            node.addString("handles", "null");
-        }
+        node.addNullableDebuggable("handles", handles);
 
         return node;
     }

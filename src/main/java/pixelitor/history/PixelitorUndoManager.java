@@ -21,6 +21,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -36,7 +37,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * The undo manager, and also the list model for the history GUI.
  */
-public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListModel<PixelitorEdit> {
+public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListModel<PixelitorEdit>, Debuggable {
     private final HistoryListSelectionModel selectionModel;
     private final EventListenerList listenerList = new EventListenerList();
     private JDialog historyDialog;
@@ -276,11 +277,11 @@ public class PixelitorUndoManager extends TwoLimitsUndoManager implements ListMo
         userChangedSelection = true;
     }
 
-    public DebugNode createDebugNode() {
-        var node = new DebugNode("edits", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
 
-        int numEdits = getSize();
-        for (int i = 0; i < numEdits; i++) {
+        for (int i = 0, numEdits = getSize(); i < numEdits; i++) {
             PixelitorEdit edit = getElementAt(i);
             node.add(edit.createDebugNode());
         }

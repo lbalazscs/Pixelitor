@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,13 +19,14 @@ package pixelitor.tools.brushes;
 
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Rectangle;
 
 /**
  * Represents the area affected by a brush. Used for the undo.
  */
-public class AffectedArea {
+public class AffectedArea implements Debuggable {
     // affected area coordinates (in image space)
     private double minX = Double.POSITIVE_INFINITY;
     private double minY = Double.POSITIVE_INFINITY;
@@ -86,8 +87,9 @@ public class AffectedArea {
             (int) saveWidth, (int) saveHeight);
     }
 
-    public DebugNode createDebugNode() {
-        var node = new DebugNode("affected area", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        var node = new DebugNode(key, this);
 
         node.addDouble("min x", minX);
         node.addDouble("min y", minY);
