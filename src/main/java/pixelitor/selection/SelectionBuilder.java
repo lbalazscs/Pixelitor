@@ -22,6 +22,7 @@ import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Messages;
 
 import java.awt.Rectangle;
@@ -73,24 +74,39 @@ public class SelectionBuilder {
      * As the mouse is dragged or released, the current
      * in-progress-selection shape is continuously updated
      */
-    public void updateInProgressSelection(Object mouseInfo, Composition comp) {
+    public void updateInProgressSelection(Object mouseInfo, Composition comp, PMouseEvent pm) {
         Selection inProgressSelection = comp.getInProgressSelection();
         boolean noPreviousSelection = inProgressSelection == null;
+        Shape newShape;
 
         if (noPreviousSelection) {
-            Shape newShape = selectionType.createShape(mouseInfo, null);
+            if (selectionType == SelectionType.SELECTION_MAGIC_WAND) {
+                newShape = selectionType.createShape(pm, null);
+            } else {
+                newShape = selectionType.createShape(mouseInfo, null);
+            }
+            //Shape newShape = selectionType.createShape(mouseInfo, null);
             inProgressSelection = new Selection(newShape, comp.getView());
             comp.setInProgressSelection(inProgressSelection);
         } else {
             assert inProgressSelection.isAlive() : "dead selection";
 
             Shape shape = inProgressSelection.getShape();
-            Shape newShape = selectionType.createShape(mouseInfo, shape);
+            if (selectionType == SelectionType.SELECTION_MAGIC_WAND) {
+                newShape = selectionType.createShape(pm, shape);
+            } else {
+                newShape = selectionType.createShape(mouseInfo, shape);
+            }
+            //Shape newShape = selectionType.createShape(mouseInfo, shape);
             inProgressSelection.setShape(newShape);
             if (!inProgressSelection.isMarching()) {
                 inProgressSelection.startMarching();
             }
         }
+    }
+
+    public void updateInProgressSelection(PMouseEvent pm, Composition comp) {
+        updateInProgressSelection(pm, comp, pm);
     }
 
     /**

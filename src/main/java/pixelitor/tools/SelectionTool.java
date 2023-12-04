@@ -143,7 +143,7 @@ public class SelectionTool extends DragTool {
         }
 
         drag.setStartFromCenter(startFromCenter);
-        selectionBuilder.updateInProgressSelection(drag, e.getComp());
+        selectionBuilder.updateInProgressSelection(drag, e.getComp(), e);
     }
 
     @Override
@@ -197,7 +197,7 @@ public class SelectionTool extends DragTool {
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
         drag.setStartFromCenter(startFromCenter);
 
-        selectionBuilder.updateInProgressSelection(drag, comp);
+        selectionBuilder.updateInProgressSelection(drag, comp, e);
         selectionBuilder.combineShapes(comp);
         stopBuildingSelection();
 
@@ -248,7 +248,7 @@ public class SelectionTool extends DragTool {
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(true);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp());
+            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = true;
     }
@@ -257,7 +257,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(false);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp());
+            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = false;
     }

@@ -17,6 +17,7 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
@@ -33,9 +34,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
 
@@ -302,6 +305,27 @@ public class Drag implements Serializable {
             return new Drag(imStartX, centerY, imEndX, centerY);
         }
     }
+
+    /*public Color getColor() {
+        int x = (int) getStartX();
+        int y = (int) getStartY();
+
+        BufferedImage img;
+        PMouseEvent pm = (PMouseEvent) mouseInfo;
+        boolean isGray = false;
+
+        View view = pm.getView();
+        Composition comp = view.getComp();
+        img = comp.getCompositeImage();
+
+        isGray = img.getType() == TYPE_BYTE_GRAY;
+
+        if (x < img.getWidth() && y < img.getHeight() && x >= 0 && y >= 0) {
+            int rgb = img.getRGB(x, y);
+            return new Color(rgb);
+        }
+        return null;
+    }*/
 
     public boolean isClick() {
         assert hasCoCoords;
