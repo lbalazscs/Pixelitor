@@ -81,7 +81,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
 
-        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
+        GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
 
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             this::getColor, c -> setColor(c, true));

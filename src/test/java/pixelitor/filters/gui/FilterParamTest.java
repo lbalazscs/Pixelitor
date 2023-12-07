@@ -82,6 +82,7 @@ public class FilterParamTest {
             {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
             {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
             {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
+            {new GroupedColorsParam("Param Name", "Name 1", BLACK, "Name 2", BLUE)},
             {new BooleanParam("Param Name", true)},
             {new AngleParam("Param Name", 0)},
             {new ElevationAngleParam("Param Name", 0)},

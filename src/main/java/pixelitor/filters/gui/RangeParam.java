@@ -183,6 +183,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return getValueAsDouble() / 100.0;
     }
 
+    public String getPercentageStr() {
+        return getPercentage() + "";
+    }
+
     /**
      * Returns the value in radians assuming that this {@link RangeParam} represents an angle in degrees.
      */

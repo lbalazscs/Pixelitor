@@ -40,7 +40,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
         defaultInnerColor = innerColor;
         innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
-        GUIUtils.makeButton(innerColorSwatch, this::innerColorSwatchClicked);
+        GUIUtils.addClickAction(innerColorSwatch, this::innerColorSwatchClicked);
 
         Colors.setupFilterColorsPopupMenu(this, innerColorSwatch,
             this::getInnerColor, c -> setInnerColor(c, true));

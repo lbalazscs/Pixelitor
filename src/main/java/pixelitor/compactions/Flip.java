@@ -126,8 +126,6 @@ public class Flip extends SimpleCompAction {
             return guiName;
         }
 
-        ;
-
         public abstract String getStatusBarMessage();
 
         /**

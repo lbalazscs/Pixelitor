@@ -31,6 +31,7 @@ import java.util.List;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
+import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
@@ -41,7 +42,6 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     private final Color[] candidateColors;
     private final List<ColorSwatch> swatches;
 
-    private static final int BUTTON_SIZE = 30;
     private final SliderSpinner numColorsSlider;
     private final ResetButton resetButton;
     private final JPanel colorsPanel;
@@ -85,7 +85,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         swatches.add(swatch);
         colorsPanel.add(swatch);
 
-        GUIUtils.makeButton(swatch, () -> showColorDialog(index));
+        GUIUtils.addClickAction(swatch, () -> showColorDialog(index));
         Colors.setupFilterColorsPopupMenu(this, swatch,
             () -> model.getColor(index), c -> updateColor(c, index));
 

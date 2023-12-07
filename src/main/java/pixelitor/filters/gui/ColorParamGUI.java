@@ -31,7 +31,7 @@ import static java.awt.FlowLayout.LEFT;
  * The GUI for a {@link ColorParam}
  */
 public class ColorParamGUI extends JPanel implements ParamGUI {
-    private static final int BUTTON_SIZE = 30;
+    public static final int BUTTON_SIZE = 30;
     private final ColorParam model;
     private final ColorSwatch colorSwatch;
     private final ResetButton resetButton;
@@ -45,7 +45,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
         add(colorSwatch);
 
-        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
+        GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
 
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             model::getColor, this::updateColor);

@@ -93,7 +93,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public String getColorStr() {
-        return "%d,%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        return Colors.formatGMIC(color);
     }
 
     public void setColor(Color newColor, boolean trigger) {

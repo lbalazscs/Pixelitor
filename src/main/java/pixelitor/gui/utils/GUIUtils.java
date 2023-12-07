@@ -277,7 +277,7 @@ public final class GUIUtils {
      * attaching a mouse listener to it that will trigger
      * the given Runnable when the left mouse button is released.
      */
-    public static void makeButton(JComponent c, Runnable action) {
+    public static void addClickAction(JComponent c, Runnable action) {
         c.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {

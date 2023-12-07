@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class ToneCurves {
     private final EnumMap<Channel, ToneCurve> curvesByChannel
         = new EnumMap<>(Channel.class);
     private Channel activeChannel;
-    private final BasicStroke gridStroke = new BasicStroke(1);
+    private static final BasicStroke gridStroke = new BasicStroke(1);
     private int width = 295;
     private int height = 295;
     private int curveWidth = 255;

@@ -337,4 +337,11 @@ public class Colors {
         // discard the original alpha and set it to the new value
         return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
     }
+
+    /**
+     * Format a color's value in the format expected by G'MIC
+     */
+    public static String formatGMIC(Color color) {
+        return "%d,%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    }
 }

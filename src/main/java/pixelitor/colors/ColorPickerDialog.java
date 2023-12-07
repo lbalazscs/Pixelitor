@@ -34,7 +34,7 @@ public class ColorPickerDialog {
     public ColorPickerDialog(ColorSwatch colorSwatch, Consumer<Color> action) {
         this.colorSwatch = colorSwatch;
         this.action = action;
-        GUIUtils.makeButton(colorSwatch, this::showColorDialog);
+        GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
     }
 
     private void showColorDialog() {

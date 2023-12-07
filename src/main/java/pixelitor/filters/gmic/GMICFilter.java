@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gmic;
 
+import pixelitor.colors.Colors;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -47,6 +48,8 @@ public class GMICFilter extends ParametrizedFilter {
     public static final String NAME_LIGHT_GLOW = "Light Glow";
     public static final String NAME_LOCAL_NORMALIZATION = "Local Normalization";
     public static final String NAME_RODILIUS = "Rodilius";
+    public static final String NAME_STROKE = "Stroke";
+    public static final String NAME_VIBRANCE = "Vibrance";
 
     private final Supplier<List<String>> argsFactory;
 
@@ -181,47 +184,71 @@ public class GMICFilter extends ParametrizedFilter {
             new Item("Star", 7),
             new Item("Triangle", 0),
         });
-        RangeParam startDensity = new RangeParam("Starting Density", 1, 30, 256);
-        RangeParam startRadius = new RangeParam("Starting Radius", 0, 8, 50);
-        RangeParam startOutline = new RangeParam("Starting Outline", 0, 4, 100);
-        RangeParam startInnershade = new RangeParam("Starting Inner Shade", 0, 30, 100);
-        RangeParam startSmoothness = new RangeParam("Starting Smoothness", 0, 20, 800);
-        ColorParam startColor = new ColorParam("Starting Color", new Color(210, 210, 80, 160));
-        RangeParam startColorDispersion = new RangeParam("Starting Color Dispersion", 0, 70, 100);
 
-        RangeParam endDensity = new RangeParam("Ending Density", 1, 30, 256);
-        RangeParam endRadius = new RangeParam("Ending Radius", 0, 20, 50);
-        RangeParam endOutline = new RangeParam("Ending Outline", 0, 20, 100);
-        RangeParam endInnershade = new RangeParam("Ending Inner Shade", 0, 100, 100);
-        RangeParam endSmoothness = new RangeParam("Ending Smoothness", 0, 200, 800);
-        ColorParam endColor = new ColorParam("Ending Color", new Color(170, 130, 20, 110));
-        RangeParam endColorDispersion = new RangeParam("Ending Color Dispersion", 0, 15, 100);
+//        ColorParam startColor = new ColorParam("Starting Color", new Color(210, 210, 80, 160));
+//        ColorParam endColor = new ColorParam("Ending Color", new Color(170, 130, 20, 110));
+        GroupedColorsParam colors = new GroupedColorsParam("Color",
+            "Start", new Color(210, 210, 80, 160),
+            "End", new Color(170, 130, 20, 110));
+
+//        RangeParam startDensity = new RangeParam("Starting Density", 1, 30, 256);
+//        RangeParam endDensity = new RangeParam("Ending Density", 1, 30, 256);
+        GroupedRangeParam density = new GroupedRangeParam("Density",
+            "Start", "End", 1, 30, 256, false);
+
+        GroupedRangeParam radius = new GroupedRangeParam("Radius",
+            new RangeParam[]{
+                new RangeParam("Start", 0, 8, 50),
+                new RangeParam("End", 0, 20, 50)
+            }, false);
+
+        GroupedRangeParam outline = new GroupedRangeParam("Outline",
+            new RangeParam[]{
+                new RangeParam("Start", 0, 4, 100),
+                new RangeParam("End", 0, 20, 100)
+            }, false);
+
+        GroupedRangeParam innerShade = new GroupedRangeParam("Inner Shade",
+            new RangeParam[]{
+                new RangeParam("Start", 0, 30, 100),
+                new RangeParam("End", 0, 100, 100)
+            }, false);
+
+        GroupedRangeParam smoothness = new GroupedRangeParam("Smoothness",
+            new RangeParam[]{
+                new RangeParam("Star", 0, 20, 800),
+                new RangeParam("End", 0, 200, 800)
+            }, false);
+
+        GroupedRangeParam colorDispersion = new GroupedRangeParam("Color Dispersion",
+            new RangeParam[]{
+                new RangeParam("Start", 0, 70, 100),
+                new RangeParam("End", 0, 15, 100)
+            }, false);
 
         Supplier<List<String>> argsFactory = () -> List.of("fx_bokeh",
             scales.getValue() + ","
                 + shape.getValue() +
                 ",0," + // seed
-                startDensity.getValue() + "," +
-                startRadius.getValue() + "," +
-                startOutline.getValue() + "," +
-                startInnershade.getPercentage() + "," +
-                startSmoothness.getPercentage() + "," +
-                startColor.getColorStr() + "," +
-                startColorDispersion.getPercentage() + "," +
+                density.getValue(0) + "," +
+                radius.getValue(0) + "," +
+                outline.getValue(0) + "," +
+                innerShade.getPercentage(0) + "," +
+                smoothness.getPercentage(0) + "," +
+                colors.getColorStr(0) + "," +
+                colorDispersion.getPercentage(0) + "," +
 
-                endDensity.getValue() + "," +
-                endRadius.getValue() + "," +
-                endOutline.getValue() + "," +
-                endInnershade.getPercentage() + "," +
-                endSmoothness.getPercentage() + "," +
-                endColor.getColorStr() + "," +
-                endColorDispersion.getPercentage());
+                density.getValue(1) + "," +
+                radius.getValue(1) + "," +
+                outline.getValue(1) + "," +
+                innerShade.getPercentage(1) + "," +
+                smoothness.getPercentage(1) + "," +
+                colors.getColorStr(1) + "," +
+                colorDispersion.getPercentage(1));
 
-        return new GMICFilter(argsFactory, scales, shape,
-            startDensity, startRadius, startOutline, startInnershade,
-            startSmoothness, startColor, startColorDispersion,
-            endDensity, endRadius, endOutline, endInnershade,
-            endSmoothness, endColor, endColorDispersion);
+        return new GMICFilter(argsFactory, scales, shape, colors,
+            density, radius, outline, innerShade,
+            smoothness, colorDispersion);
     }
 
     public static GMICFilter createBoxFitting() {
@@ -437,5 +464,55 @@ public class GMICFilter extends ParametrizedFilter {
                 valueAction.getValue());
 
         return new GMICFilter(argsFactory, amplitude, thickness, sharpness, orientations, offset, smoothness, colormode, channel, valueAction);
+    }
+
+    public static GMICFilter createStroke() {
+        RangeParam thickness = new RangeParam("Thickness", 1, 3, 256);
+        RangeParam threshold = new RangeParam("Threshold", 0, 50, 100);
+        RangeParam smoothness = new RangeParam("Smoothness", 0, 0, 10);
+        IntChoiceParam shape = new IntChoiceParam("Shape", new Item[]{
+            new Item("Round", 2),
+            new Item("Square", 0),
+            new Item("Diamond", 1)
+        });
+        IntChoiceParam direction = new IntChoiceParam("Direction", new Item[]{
+            new Item("Outward", 1),
+            new Item("Inward", 0)
+        });
+        RangeParam zoom = new RangeParam("Zoom", 1, 100, 300);
+        GroupedRangeParam shift = new GroupedRangeParam("Shift",
+            -256, 0, 256);
+        GroupedColorsParam strokeColor = new GroupedColorsParam("Stroke Color",
+            "Start", Color.WHITE, "End", Color.WHITE);
+        GroupedColorsParam fillColor = new GroupedColorsParam("Fill Color",
+            "Inside", Colors.TRANSPARENT_BLACK, "Outside", Colors.TRANSPARENT_BLACK);
+
+        Supplier<List<String>> argsFactory = () -> List.of("fx_stroke",
+            thickness.getValue() + "," +
+                threshold.getValue() + "," +
+                smoothness.getValue() + "," +
+                shape.getValue() + "," +
+                direction.getValue() + "," +
+                zoom.getValue() + "," +
+                shift.getValue(0) + "," +
+                shift.getValue(1) + "," +
+                strokeColor.getColorStr(0) + "," +
+                strokeColor.getColorStr(1) + "," +
+                fillColor.getColorStr(0) + "," +
+                fillColor.getColorStr(1) + ",1,1", "blend", "alpha"
+        );
+
+        return new GMICFilter(argsFactory, thickness,
+            threshold, smoothness, shape, direction, zoom, shift,
+            strokeColor, fillColor);
+    }
+
+    public static GMICFilter createVibrance() {
+        RangeParam strength = new RangeParam("Strength", -100, 50, 300);
+
+        Supplier<List<String>> argsFactory = () -> List.of("fx_vibrance",
+            strength.getPercentageStr());
+
+        return new GMICFilter(argsFactory, strength);
     }
 }

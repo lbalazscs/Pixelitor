@@ -970,6 +970,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(GMICFilter.NAME_LIGHT_GLOW, GMICFilter::createLightGlow);
         sub.addFilter(GMICFilter.NAME_LOCAL_NORMALIZATION, GMICFilter::createLocalNormalization);
         sub.addFilter(GMICFilter.NAME_RODILIUS, GMICFilter::createRodilius);
+        sub.addFilter(GMICFilter.NAME_STROKE, GMICFilter::createStroke);
+        sub.addFilter(GMICFilter.NAME_VIBRANCE, GMICFilter::createVibrance);
 
         return sub;
     }

@@ -70,7 +70,6 @@ import static pixelitor.guitest.AJSUtils.checkRandomly;
 import static pixelitor.guitest.AJSUtils.chooseRandomly;
 import static pixelitor.guitest.AJSUtils.pushRandomly;
 import static pixelitor.guitest.AJSUtils.slideRandomly;
-import static pixelitor.tools.BrushType.*;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
@@ -220,38 +219,45 @@ public class AppRunner {
     public void testBrushSettings(BrushType brushType, Tool tool) {
         var dialog = findDialogByTitleStartingWith("Settings for the");
 
-        if (brushType == CALLIGRAPHY) {
-            slideRandomly(dialog.slider("angle"));
-        } else if (brushType == SHAPE) {
-            chooseRandomly(dialog.comboBox("shape"));
-            slideRandomly(dialog.slider("spacing"));
-            slideRandomly(dialog.slider("angleJitter"));
-            checkRandomly(dialog.checkBox("angled"));
-        } else if (brushType == SPRAY) {
-            chooseRandomly(dialog.comboBox("shape"));
-            slideRandomly(dialog.slider("avgRadius"));
-            slideRandomly(dialog.slider("radiusVar"));
-            slideRandomly(dialog.slider("flow"));
-            checkRandomly(dialog.checkBox("rndOpacity"));
-            slideRandomly(dialog.slider("flow"));
-            if (tool != ERASER) {
-                slideRandomly(dialog.slider("colorRand"));
-            }
-        } else if (brushType == CONNECT) {
-            chooseRandomly(dialog.comboBox("length"));
-            slideRandomly(dialog.slider("density"));
-            slideRandomly(dialog.slider("width"));
-            checkRandomly(dialog.checkBox("resetForEach"));
-            pushRandomly(0.1, dialog.button("resetHistNow"));
-        } else if (brushType == OUTLINE_CIRCLE || brushType == OUTLINE_SQUARE) {
-            checkRandomly(dialog.checkBox("dependsOnSpeed"));
-        } else if (brushType == ONE_PIXEL) {
-            checkRandomly(dialog.checkBox("aa"));
-        } else {
-            throw new IllegalStateException("brushType is " + brushType);
+        //noinspection EnumSwitchStatementWhichMissesCases
+        switch (brushType) {
+            case CALLIGRAPHY -> slideRandomly(dialog.slider("angle"));
+            case SHAPE -> testShapeBrushSettings(dialog);
+            case SPRAY -> testSprayBrushSettings(dialog, tool == ERASER);
+            case CONNECT -> testConnectBrushSettings(dialog);
+            case OUTLINE_CIRCLE, OUTLINE_SQUARE -> checkRandomly(dialog.checkBox("dependsOnSpeed"));
+            case ONE_PIXEL -> checkRandomly(dialog.checkBox("aa"));
+            case null, default -> throw new IllegalStateException("brushType is " + brushType);
         }
 
         dialog.button("ok").click();
+    }
+
+    private static void testShapeBrushSettings(DialogFixture dialog) {
+        chooseRandomly(dialog.comboBox("shape"));
+        slideRandomly(dialog.slider("spacing"));
+        slideRandomly(dialog.slider("angleJitter"));
+        checkRandomly(dialog.checkBox("angled"));
+    }
+
+    private static void testSprayBrushSettings(DialogFixture dialog, boolean isEraser) {
+        chooseRandomly(dialog.comboBox("shape"));
+        slideRandomly(dialog.slider("avgRadius"));
+        slideRandomly(dialog.slider("radiusVar"));
+        slideRandomly(dialog.slider("flow"));
+        checkRandomly(dialog.checkBox("rndOpacity"));
+        slideRandomly(dialog.slider("flow"));
+        if (!isEraser) {
+            slideRandomly(dialog.slider("colorRand"));
+        }
+    }
+
+    private static void testConnectBrushSettings(DialogFixture dialog) {
+        chooseRandomly(dialog.comboBox("length"));
+        slideRandomly(dialog.slider("density"));
+        slideRandomly(dialog.slider("width"));
+        checkRandomly(dialog.checkBox("resetForEach"));
+        pushRandomly(0.1, dialog.button("resetHistNow"));
     }
 
     void setIndexedMode() {
