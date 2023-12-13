@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,8 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Stamp filter based on the JHLabs StampFilter

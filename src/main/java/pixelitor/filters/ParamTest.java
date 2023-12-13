@@ -32,7 +32,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
  * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
@@ -67,10 +67,10 @@ public class ParamTest extends ParametrizedFilter {
         RangeParam c = new RangeParam("C", 0, 25, 100);
 
         return new FilterParam[]{
-            new GroupedRangeParam("Normalized Group", new RangeParam[]{
-                a, b, c}, false).autoNormalized(),
             new GradientParam("Colors", defaultThumbPositions, defaultValues),
             new RangeParam("RangeParam", 0, 50, 100),
+            new GroupedRangeParam("Normalized Group", new RangeParam[]{
+                a, b, c}, false).autoNormalized(),
             new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),
             new ImagePositionParam("ImagePositionParam"),
             new IntChoiceParam("IntChoiceParam", new Item[]{
@@ -78,6 +78,7 @@ public class ParamTest extends ParametrizedFilter {
                 new Item("value 2", 2),
             }),
             new ColorParam("ColorParam", WHITE, FREE_TRANSPARENCY),
+            new GroupedColorsParam("GroupedColorsParam", "A", WHITE, "B", Color.YELLOW, FREE_TRANSPARENCY, true, false),
             new AngleParam("AngleParam", 0),
             new ElevationAngleParam("ElevationAngleParam", 0),
             new BlendingModeParam(BlendingMode.values()),

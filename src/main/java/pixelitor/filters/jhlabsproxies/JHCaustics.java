@@ -25,8 +25,8 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 

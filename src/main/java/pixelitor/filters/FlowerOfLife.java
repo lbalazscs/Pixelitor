@@ -25,12 +25,16 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
+import java.io.Serial;
 import java.util.*;
 
 /**
  * "Flower of Life" shape filter
  */
 public class FlowerOfLife extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = 7213113245913645714L;
+
     public static final String NAME = "Flower of Life";
 
     private static final int GRID_TYPE_TRIANGULAR = 1;

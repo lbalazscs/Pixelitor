@@ -21,6 +21,7 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.io.Serial;
+import java.util.List;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -37,6 +38,9 @@ public class TextParam extends AbstractFilterParam {
 
     private String value;
     private TextParamGUI gui;
+
+    // in the case of commands the random values have to be listed explicitly
+    private List<String> randomCommands;
 
     public TextParam(String name, String defaultValue, boolean command) {
         super(name, ALLOW_RANDOMIZE);
@@ -65,7 +69,13 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        setValue(Rnd.createRandomString(15), false);
+        String randomValue;
+        if (command && randomCommands != null) {
+            randomValue = Rnd.chooseFrom(randomCommands);
+        } else {
+            randomValue = Rnd.createRandomString(15);
+        }
+        setValue(randomValue, false);
     }
 
     public String getValue() {
@@ -75,10 +85,18 @@ public class TextParam extends AbstractFilterParam {
     public void setValue(String s, boolean trigger) {
         if (!value.equals(s)) {
             value = s;
+            if (paramGUI != null) {
+                paramGUI.updateGUI();
+            }
             if (trigger && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted();
             }
         }
+    }
+
+    public void setRandomCommands(List<String> randomCommands) {
+        assert command;
+        this.randomCommands = randomCommands;
     }
 
     @Override
@@ -102,7 +120,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        gui.setText(savedValue);
+        setValue(savedValue, false);
     }
 
     @Override
@@ -115,9 +133,14 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
+    public boolean isComplex() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return format("%s[name = '%s', text = '%s']",
-            getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
+            getClass().getSimpleName(), getName(), value);
     }
 
     public record TextParamState(String value) implements ParamState<TextParamState> {

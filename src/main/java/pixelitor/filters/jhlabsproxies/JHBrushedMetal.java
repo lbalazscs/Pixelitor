@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
 import static java.awt.Color.GRAY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Brushed Metal filter based on the JHLabs BrushedMetalFilter

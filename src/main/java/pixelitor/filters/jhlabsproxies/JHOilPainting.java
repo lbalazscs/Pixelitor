@@ -29,6 +29,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -37,6 +38,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Oil Painting filter based on the JHLabs OilFilter
  */
 public class JHOilPainting extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -9168810692489222200L;
+
     public static final String NAME = Texts.i18n("oil_painting");
 
     private static final int FASTER = 0;

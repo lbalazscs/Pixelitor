@@ -26,14 +26,18 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
  * Pointillize filter based on the JHLabs PointillizeFilter
  */
 public class JHPointillize extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 7785086882567467357L;
+
     public static final String NAME = Texts.i18n("pointillize");
 
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);

@@ -26,9 +26,12 @@ import pixelitor.TestHelper;
 
 import java.util.stream.Stream;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 @DisplayName("ParamState tests")

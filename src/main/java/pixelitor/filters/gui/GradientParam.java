@@ -207,6 +207,11 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
+    public boolean isComplex() {
+        return true;
+    }
+
+    @Override
     public GradientParamState copyState() {
         return new GradientParamState(gradientSlider.getThumbPositions(),
             gradientSlider.getColors());

@@ -41,9 +41,11 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.utils.QuadrantAngle.*;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.utils.QuadrantAngle.ANGLE_180;
+import static pixelitor.utils.QuadrantAngle.ANGLE_270;
+import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 /**
  * Render Truchet tiles filter

@@ -26,7 +26,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.gui.GUIText.BRIGHTNESS;
 import static pixelitor.gui.GUIText.COLOR;
 import static pixelitor.utils.Texts.i18n;

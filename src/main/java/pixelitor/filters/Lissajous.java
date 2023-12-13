@@ -21,11 +21,15 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
+import java.io.Serial;
 
 /**
  * A shape filter rendering a Lissajous curve.
  */
 public class Lissajous extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = 3307105281671382731L;
+
     public static final String NAME = "Lissajous Curve";
 
     private final RangeParam a = new RangeParam("a", 1, 4, 41);

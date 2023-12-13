@@ -25,8 +25,12 @@ import pixelitor.utils.Texts;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 public class ComicBook extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 3811971020816294250L;
+
     public static final String NAME = Texts.i18n("comic_book");
 
     private final RangeParam stepsParam = new RangeParam("Color Steps", 1, 4, 20);

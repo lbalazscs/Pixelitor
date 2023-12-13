@@ -27,7 +27,7 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Sparkle filter based on the JHLabs SparkleFilter

@@ -26,14 +26,18 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
  * Crystallize filter based on the JHLabs CrystallizeFilter
  */
 public class JHCrystallize extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -79769649907735220L;
+
     public static final String NAME = Texts.i18n("crystallize");
 
     private final RangeParam edgeThickness = new RangeParam("Edge Thickness", 0, 40, 100);

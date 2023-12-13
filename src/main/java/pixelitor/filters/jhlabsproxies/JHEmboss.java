@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
@@ -33,6 +34,9 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  * Emboss filter based on the JHLabs EmbossFilter
  */
 public class JHEmboss extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 22766870452230593L;
+
     public static final String NAME = Texts.i18n("emboss");
 
     private final AngleParam lightDirection = new AngleParam(

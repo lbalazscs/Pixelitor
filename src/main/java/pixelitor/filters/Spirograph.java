@@ -24,6 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.geom.Path2D;
+import java.io.Serial;
 
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
@@ -34,6 +35,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  * "Spirograph" shape filter
  */
 public class Spirograph extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = 8713881692729675904L;
+
     public static final String NAME = "Spirograph";
 
     private static final int TYPE_HYPOTROCHOID = 1;

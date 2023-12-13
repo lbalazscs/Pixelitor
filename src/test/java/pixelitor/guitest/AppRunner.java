@@ -219,15 +219,20 @@ public class AppRunner {
     public void testBrushSettings(BrushType brushType, Tool tool) {
         var dialog = findDialogByTitleStartingWith("Settings for the");
 
-        //noinspection EnumSwitchStatementWhichMissesCases
-        switch (brushType) {
-            case CALLIGRAPHY -> slideRandomly(dialog.slider("angle"));
-            case SHAPE -> testShapeBrushSettings(dialog);
-            case SPRAY -> testSprayBrushSettings(dialog, tool == ERASER);
-            case CONNECT -> testConnectBrushSettings(dialog);
-            case OUTLINE_CIRCLE, OUTLINE_SQUARE -> checkRandomly(dialog.checkBox("dependsOnSpeed"));
-            case ONE_PIXEL -> checkRandomly(dialog.checkBox("aa"));
-            case null, default -> throw new IllegalStateException("brushType is " + brushType);
+        if (brushType == BrushType.CALLIGRAPHY) {
+            slideRandomly(dialog.slider("angle"));
+        } else if (brushType == BrushType.SHAPE) {
+            testShapeBrushSettings(dialog);
+        } else if (brushType == BrushType.SPRAY) {
+            testSprayBrushSettings(dialog, tool == ERASER);
+        } else if (brushType == BrushType.CONNECT) {
+            testConnectBrushSettings(dialog);
+        } else if (brushType == BrushType.OUTLINE_CIRCLE || brushType == BrushType.OUTLINE_SQUARE) {
+            checkRandomly(dialog.checkBox("dependsOnSpeed"));
+        } else if (brushType == BrushType.ONE_PIXEL) {
+            checkRandomly(dialog.checkBox("aa"));
+        } else {
+            throw new IllegalStateException("brushType is " + brushType);
         }
 
         dialog.button("ok").click();

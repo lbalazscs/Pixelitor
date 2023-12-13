@@ -26,14 +26,21 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
-import static com.jhlabs.image.WeaveFilter.*;
+import static com.jhlabs.image.WeaveFilter.BASKET_PATTERN;
+import static com.jhlabs.image.WeaveFilter.CROWFOOT_PATTERN;
+import static com.jhlabs.image.WeaveFilter.PLAIN_PATTERN;
+import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Weave filter based on the JHLabs WeaveFilter
  */
 public class JHWeave extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 6730512545695784681L;
+
     public static final String NAME = Texts.i18n("weave");
 
     private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new Item[]{

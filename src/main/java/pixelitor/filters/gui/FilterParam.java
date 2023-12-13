@@ -105,4 +105,9 @@ public interface FilterParam extends FilterSetting, Resettable, Debuggable {
      * Returns the parameter value.
      */
     Object getParamValue();
+
+    /**
+     * Returns true if the filter should have presets even if it has just one {@link FilterParam}.
+     */
+    boolean isComplex();
 }

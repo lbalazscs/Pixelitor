@@ -163,19 +163,11 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     public boolean isNonTrivial() {
         List<FilterParam> params = paramSet.getParams();
         if (params.size() > 1) {
-            // no need for "randomize"/"reset all"
-            // if the filter has only one parameter...
             return true;
         }
 
-        // ...except if that single parameter is grouped...
-        FilterParam param = params.getFirst();
-        if (param instanceof GroupedRangeParam) {
-            return true;
-        }
-
-        // ...or it is a gradient param
-        if (param instanceof GradientParam) {
+        FilterParam singleParam = params.getFirst();
+        if (singleParam.isComplex()) {
             return true;
         }
 

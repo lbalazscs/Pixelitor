@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**

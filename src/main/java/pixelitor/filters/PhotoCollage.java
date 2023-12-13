@@ -42,8 +42,8 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
 /**

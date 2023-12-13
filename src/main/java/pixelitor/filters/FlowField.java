@@ -43,8 +43,8 @@ import java.util.function.Supplier;
 
 import static net.jafama.FastMath.*;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {

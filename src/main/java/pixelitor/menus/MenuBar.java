@@ -34,7 +34,7 @@ import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
 import pixelitor.filters.convolve.Convolve;
 import pixelitor.filters.curves.ToneCurvesFilter;
-import pixelitor.filters.gmic.GMICFilter;
+import pixelitor.filters.gmic.*;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
@@ -959,19 +959,19 @@ public class MenuBar extends JMenuBar {
     private static JMenu createGMICSubmenu() {
         PMenu sub = new PMenu("G'MIC");
 
-        sub.addFilter(GMICFilter.NAME_ANISOTHROPIC, GMICFilter::createAnisothropic);
-        sub.addFilter(GMICFilter.NAME_BILATERAL, GMICFilter::createBilateral);
-        sub.addFilter(GMICFilter.NAME_BOKEH, GMICFilter::createBokeh);
-        sub.addFilter(GMICFilter.NAME_BOXFITTING, GMICFilter::createBoxFitting);
-        sub.addFilter(GMICFilter.NAME_BRUSHIFY, GMICFilter::createBrushify);
-        sub.addFilter(GMICFilter.NAME_CUBISM, GMICFilter::createCubism);
-        sub.addFilter(GMICFilter.NAME_GENERIC, GMICFilter::createGeneric);
-//        sub.addFilter(GMICFilter.NAME_KUWAHARA, GMICFilter::createKuwahara);
-        sub.addFilter(GMICFilter.NAME_LIGHT_GLOW, GMICFilter::createLightGlow);
-        sub.addFilter(GMICFilter.NAME_LOCAL_NORMALIZATION, GMICFilter::createLocalNormalization);
-        sub.addFilter(GMICFilter.NAME_RODILIUS, GMICFilter::createRodilius);
-        sub.addFilter(GMICFilter.NAME_STROKE, GMICFilter::createStroke);
-        sub.addFilter(GMICFilter.NAME_VIBRANCE, GMICFilter::createVibrance);
+        sub.addFilter(AnisothropicSmoothing.NAME, AnisothropicSmoothing::new);
+        sub.addFilter(BilateralSmoothing.NAME, BilateralSmoothing::new);
+        sub.addFilter(Bokeh.NAME, Bokeh::new);
+        sub.addFilter(BoxFitting.NAME, BoxFitting::new);
+        sub.addFilter(Brushify.NAME, Brushify::new);
+        sub.addFilter(Cubism.NAME, Cubism::new);
+        sub.addFilter(GMICCommand.NAME, GMICCommand::new);
+//        sub.addFilter(GMICFilter.NAME_KUWAHARA, GMICFilter::new);
+        sub.addFilter(LightGlow.NAME, LightGlow::new);
+        sub.addFilter(LocalNormalization.NAME, LocalNormalization::new);
+        sub.addFilter(Rodilius.NAME, Rodilius::new);
+        sub.addFilter(Stroke.NAME, Stroke::new);
+        sub.addFilter(Vibrance.NAME, Vibrance::new);
 
         return sub;
     }

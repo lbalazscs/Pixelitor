@@ -156,6 +156,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     @Override
+    public boolean isComplex() {
+        return false;
+    }
+
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 

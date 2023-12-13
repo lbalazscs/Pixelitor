@@ -26,11 +26,15 @@ import pixelitor.utils.Texts;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Orton effect - based on http://pcin.net/update/2006/11/01/the-orton-effect-digital-photography-tip-of-the-week/
  */
 public class Orton extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -3777096018326312847L;
+
     public static final String NAME = Texts.i18n("orton_effect");
 
     private final RangeParam blurRadius = new RangeParam("Blur Radius", 0, 3, 10);

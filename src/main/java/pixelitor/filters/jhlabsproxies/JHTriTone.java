@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,8 +23,10 @@ import pixelitor.filters.gui.ColorParam;
 
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.*;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
+import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Tritone filter based on the JHLabs TritoneFilter

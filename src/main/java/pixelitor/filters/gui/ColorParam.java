@@ -85,7 +85,7 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         setColor(Rnd.createRandomColor(
-            transparencyPolicy.randomizeTransparency), false);
+            transparencyPolicy.randomizeTransparency()), false);
     }
 
     public Color getColor() {
@@ -125,7 +125,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public boolean allowTransparency() {
-        return transparencyPolicy.allowTransparency;
+        return transparencyPolicy.allowTransparency();
     }
 
     @Override
@@ -182,33 +182,6 @@ public class ColorParam extends AbstractFilterParam {
         @Override
         public String toSaveString() {
             return Colors.toHTMLHex(color, true);
-        }
-    }
-
-    public enum TransparencyPolicy {
-        /**
-         * Transparent colors can't be selected
-         */
-        NO_TRANSPARENCY(false, false),
-
-        /**
-         * The user can select an alpha value, but randomizing will
-         * always create opaque colors
-         */
-        USER_ONLY_TRANSPARENCY(true, false),
-
-        /**
-         * The user can select an alpha value, and randomizing will
-         * with randomize the alpha
-         */
-        FREE_TRANSPARENCY(true, true);
-
-        private final boolean allowTransparency;
-        private final boolean randomizeTransparency;
-
-        TransparencyPolicy(boolean allowTransparency, boolean randomizeTransparency) {
-            this.allowTransparency = allowTransparency;
-            this.randomizeTransparency = randomizeTransparency;
         }
     }
 }

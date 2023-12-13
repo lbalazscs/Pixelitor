@@ -24,11 +24,15 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
+import java.io.Serial;
 
 /**
  * A shape filter rendering a spiral.
  */
 public class Spiral extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = -6438706867376861332L;
+
     public static final String NAME = "Spiral";
     private static final double LOG_PHI = 0.1;
 

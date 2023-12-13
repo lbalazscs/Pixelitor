@@ -22,11 +22,15 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
+import java.io.Serial;
 
 /**
  * A shape filter rendering a spider web.
  */
 public class SpiderWeb extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = 3170284746386621728L;
+
     public static final String NAME = "Spider Web";
 
     private final RangeParam numBranchesParam =

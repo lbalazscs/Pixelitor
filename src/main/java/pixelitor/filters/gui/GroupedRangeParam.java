@@ -24,9 +24,9 @@ import javax.swing.*;
 import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  * Two or more {@link RangeParam} objects that are grouped
  * visually in the GUI and can be linked to move together.
  */
-public class GroupedRangeParam extends AbstractFilterParam {
+public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     private final RangeParam[] children;
     private final ButtonModel linkedModel;
     private final boolean linkedByDefault;
@@ -228,10 +228,12 @@ public class GroupedRangeParam extends AbstractFilterParam {
         this.autoNormalizationEnabled = enable;
     }
 
+    @Override
     public ButtonModel getLinkedModel() {
         return linkedModel;
     }
 
+    @Override
     public String createLinkedToolTip() {
         if (children.length == 2) {
             return "<html>Whether the <b>%s</b> and <b>%s</b> sliders move together"
@@ -266,10 +268,12 @@ public class GroupedRangeParam extends AbstractFilterParam {
         // if linked, the others will be set automatically
     }
 
+    @Override
     public boolean isLinked() {
         return linkedModel.isSelected();
     }
 
+    @Override
     public void setLinked(boolean linked) {
         linkedModel.setSelected(linked);
     }
@@ -348,6 +352,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return this;
     }
 
+    @Override
     public boolean isLinkable() {
         return linkable;
     }
@@ -410,8 +415,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         if (linkable) {
             boolean linked = linkedByDefault;
             if (st.hasMoreTokens()) {
-                String s = st.nextToken();
-                linked = Boolean.parseBoolean(s);
+                linked = Boolean.parseBoolean(st.nextToken());
             }
             setLinked(linked);
         }
@@ -440,6 +444,11 @@ public class GroupedRangeParam extends AbstractFilterParam {
             .collect(toList());
     }
 
+    @Override
+    public boolean isComplex() {
+        return true;
+    }
+
     public record GroupedRangeParamState(double[] values,
                                          boolean linked) implements ParamState<GroupedRangeParamState> {
         @Serial
@@ -458,9 +467,12 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            return DoubleStream.of(values)
-                .mapToObj("%.2f"::formatted)
-                .collect(joining(",")) + "," + linked;
+            StringBuilder sb = new StringBuilder();
+            for (double value : values) {
+                sb.append(String.format(Locale.ENGLISH, "%.2f,", value));
+            }
+            sb.append(linked);
+            return sb.toString();
         }
     }
 }

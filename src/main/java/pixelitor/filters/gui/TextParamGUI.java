@@ -28,19 +28,21 @@ import static java.awt.FlowLayout.LEFT;
  * The GUI for a {@link TextParam}
  */
 public class TextParamGUI extends JPanel implements ParamGUI {
+    private final TextParam model;
     private final JTextField tf;
 
-    public TextParamGUI(TextParam param, String defaultValue, ParamAdjustmentListener adjustmentListener) {
+    public TextParamGUI(TextParam model, String defaultValue, ParamAdjustmentListener adjustmentListener) {
+        this.model = model;
         tf = new JTextField(defaultValue, 25);
 
         setLayout(new FlowLayout(LEFT));
-        add(new JLabel(param.getName() + ": "));
+        add(new JLabel(model.getName() + ": "));
         add(tf);
 
-        if (param.isCommand()) {
+        if (model.isCommand()) {
             JButton runButton = new JButton("Run");
             runButton.addActionListener(e ->
-                param.setValue(getText(), true));
+                model.setValue(getText(), true));
             add(runButton);
         } else if (adjustmentListener != null) {
             addDocumentListener(adjustmentListener);
@@ -68,7 +70,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void updateGUI() {
-        // ok if empty
+        setText(model.getValue());
     }
 
     @Override

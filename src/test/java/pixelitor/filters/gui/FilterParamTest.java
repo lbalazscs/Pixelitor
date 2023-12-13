@@ -37,11 +37,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
+import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Checks whether different FilterParam implementations implement
@@ -82,7 +82,7 @@ public class FilterParamTest {
             {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
             {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
             {new ColorListParam("Param Name", 1, 1, BLACK, BLUE)},
-            {new GroupedColorsParam("Param Name", "Name 1", BLACK, "Name 2", BLUE)},
+            {new GroupedColorsParam("Param Name", "Name 1", BLUE, "Name 2", BLUE, FREE_TRANSPARENCY, true, true)},
             {new BooleanParam("Param Name", true)},
             {new AngleParam("Param Name", 0)},
             {new ElevationAngleParam("Param Name", 0)},

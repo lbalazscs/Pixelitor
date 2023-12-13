@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 
@@ -67,11 +68,8 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     }
 
     private void addLinkCheckBox() {
-        JCheckBox linkedCB = new JCheckBox();
-        linkedCB.setModel(model.getLinkedModel());
-        linkedCB.setToolTipText(model.createLinkedToolTip());
+        JCheckBox linkedCB = GUIUtils.createLinkCheckBox(model);
         gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numParams);
-        linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
     }
 
     @Override

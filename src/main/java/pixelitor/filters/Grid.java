@@ -22,11 +22,15 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import java.awt.geom.Path2D;
+import java.io.Serial;
 
 /**
  * The "Render/Shapes/Grid" filter
  */
 public class Grid extends CurveFilter {
+    @Serial
+    private static final long serialVersionUID = 3571274477909108139L;
+
     public static final String NAME = "Grid";
 
     private static final int TYPE_RECTANGLE = 0;
