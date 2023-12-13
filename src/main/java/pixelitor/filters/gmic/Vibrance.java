@@ -36,6 +36,7 @@ public class Vibrance extends GMICFilter {
 
     @Override
     public List<String> getArgs() {
-        return List.of("fx_vibrance", strength.getPercentageStr());
+        return List.of("fx_vibrance", strength.getPercentageStr(),
+            "cut", "0,255"); // workaround
     }
 }

@@ -966,7 +966,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Brushify.NAME, Brushify::new);
         sub.addFilter(Cubism.NAME, Cubism::new);
         sub.addFilter(GMICCommand.NAME, GMICCommand::new);
-//        sub.addFilter(GMICFilter.NAME_KUWAHARA, GMICFilter::new);
+//        sub.addFilter(KuwaharaSmoothing.NAME, KuwaharaSmoothing::new);
         sub.addFilter(LightGlow.NAME, LightGlow::new);
         sub.addFilter(LocalNormalization.NAME, LocalNormalization::new);
         sub.addFilter(Rodilius.NAME, Rodilius::new);

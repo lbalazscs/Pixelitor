@@ -44,6 +44,7 @@ public class KuwaharaSmoothing extends GMICFilter {
             iterations.getValue() + "," +
                 radius.getValue() + "," +
                 channel.getValue() + "," +
-                valueAction.getValue());
+                valueAction.getValue(),
+            "cut", "0,255"); // doesn't help
     }
 }
