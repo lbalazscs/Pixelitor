@@ -1630,7 +1630,6 @@ public class AssertJSwingTest {
         testOtherFilters();
         testRenderFilters();
         testTransitionsFilters();
-        testText();
 
         checkConsistency();
     }
@@ -1732,14 +1731,25 @@ public class AssertJSwingTest {
         testFilterWithDialog("Clouds", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+
         testFilterWithDialog("Abstract Lights", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Flow Field", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+
+        // Curves
+        testFilterWithDialog("Circle Weave", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Spiral", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
         // Fractals
         testFilterWithDialog("Chaos Game", Randomize.YES, Reseed.NO, ShowOriginal.NO);
@@ -1754,16 +1764,6 @@ public class AssertJSwingTest {
         testFilterWithDialog("Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Truchet Tiles", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-
-        // Curves
-        testFilterWithDialog("Circle Weave", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spiral", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
     private void testArtisticFilters() {
@@ -1795,6 +1795,7 @@ public class AssertJSwingTest {
         testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 //        testRandomFilter();
+        testText();
         testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         testFilterWithDialog("Custom 3x3 Convolution", Randomize.NO,

@@ -75,7 +75,7 @@ public class Bokeh extends GMICFilter {
 
     private final GroupedRangeParam smoothness = new GroupedRangeParam("Smoothness",
         new RangeParam[]{
-            new RangeParam("Star", 0, 20, 800),
+            new RangeParam("Start", 0, 20, 800),
             new RangeParam("End", 0, 200, 800)
         }, false);
 
@@ -88,15 +88,15 @@ public class Bokeh extends GMICFilter {
     public Bokeh() {
         setParams(scales, shape, colors,
             density, radius, outline, innerShade,
-            smoothness, colorDispersion);
+            smoothness, colorDispersion).withReseedGmicAction(this);
     }
 
     @Override
     public List<String> getArgs() {
         return List.of("fx_bokeh",
-            scales.getValue() + ","
-                + shape.getValue() +
-                ",0," + // seed
+            scales.getValue() + "," +
+                shape.getValue() + "," +
+                seed + "," +
                 density.getValue(0) + "," +
                 radius.getValue(0) + "," +
                 outline.getValue(0) + "," +

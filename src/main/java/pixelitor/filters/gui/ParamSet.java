@@ -21,6 +21,7 @@ import com.jhlabs.math.Noise;
 import pd.OpenSimplex2F;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gmic.GMICFilter;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Icons;
@@ -318,13 +319,20 @@ public class ParamSet implements Debuggable {
         return withAction(createReseedNoiseAction());
     }
 
-    private void initReseedSupport() {
-        if (random != null) {
-            throw new IllegalStateException(); // call only once
-        }
+    public ParamSet withReseedGmicAction(GMICFilter filter) {
+        return withAction(createReseedGmicAction(filter));
+    }
+
+    private void initReseedSupport(boolean createRandom) {
         seed = System.nanoTime();
-        random = new Random(seed);
         savesSeed = true;
+
+        if (createRandom) {
+            if (random != null) {
+                throw new IllegalStateException(); // call only once
+            }
+            random = new Random(seed);
+        }
     }
 
     /**
@@ -364,12 +372,22 @@ public class ParamSet implements Debuggable {
         simplex = new OpenSimplex2F(seed);
     }
 
+    private FilterButtonModel createReseedGmicAction(GMICFilter filter) {
+        initReseedSupport(false);
+        seedChangedAction = filter::setSeed;
+
+        return FilterButtonModel.createReseed(() -> {
+            reseed();
+            filter.setSeed(seed);
+        }, "Reseed", "Reinitialize the randomness");
+    }
+
     public FilterButtonModel createReseedNoiseAction() {
         return createReseedNoiseAction("Reseed", "Reinitialize the randomness");
     }
 
     public FilterButtonModel createReseedNoiseAction(String text, String toolTip) {
-        initReseedSupport();
+        initReseedSupport(false);
         seedChangedAction = Noise::reseed;
 
         return FilterButtonModel.createReseed(() -> {
@@ -379,7 +397,7 @@ public class ParamSet implements Debuggable {
     }
 
     public FilterButtonModel createReseedCachedAndNoiseAction() {
-        initReseedSupport();
+        initReseedSupport(true);
 
         seedChangedAction = newSeed -> {
             Noise.reseed(newSeed);
@@ -394,22 +412,22 @@ public class ParamSet implements Debuggable {
     }
 
     public FilterButtonModel createReseedAction() {
-        initReseedSupport();
+        initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseed);
     }
 
     public FilterButtonModel createReseedAction(String name, String toolTipText) {
-        initReseedSupport();
+        initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseed, name, toolTipText);
     }
 
     public FilterButtonModel createReseedSimplexAction() {
-        initReseedSupport();
+        initReseedSupport(true);
         return FilterButtonModel.createReseed(this::reseedSimplex);
     }
 
     public FilterButtonModel createReseedAction(LongConsumer seedChangedAction) {
-        initReseedSupport();
+        initReseedSupport(false);
 
         this.seedChangedAction = seedChangedAction;
         return FilterButtonModel.createReseed(() -> {

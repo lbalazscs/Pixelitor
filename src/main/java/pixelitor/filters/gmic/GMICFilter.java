@@ -31,6 +31,7 @@ import java.util.List;
 
 public abstract class GMICFilter extends ParametrizedFilter {
     public static File GMIC_PATH;
+    protected long seed;
 
     protected GMICFilter() {
         super(true);
@@ -81,5 +82,13 @@ public abstract class GMICFilter extends ParametrizedFilter {
             "YIQ [Luma]", "YIQ [Chromas]",
             "RYB [All]", "RYB [Red]", "RYB [Yellow]", "RYB [Blue]",
         });
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
+    public long getSeed() {
+        return seed;
     }
 }

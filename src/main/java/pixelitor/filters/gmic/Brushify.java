@@ -72,12 +72,12 @@ public class Brushify extends GMICFilter {
             lightType, lightStrength, opacity,
             density, contourCoherence, orientationCoherence,
             gradientSmoothness, structureSmoothness,
-            primaryAngle, angleDispersion);
+            primaryAngle, angleDispersion).withReseedGmicAction(this);
     }
 
     @Override
     public List<String> getArgs() {
-        return List.of("fx_brushify",
+        return List.of("srand", String.valueOf(seed), "fx_brushify",
             shape.getValue() + "," +
                 ratio.getPercentage() + "," +
                 numberOfSizes.getValue() + "," +

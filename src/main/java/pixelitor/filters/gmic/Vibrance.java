@@ -19,6 +19,7 @@ package pixelitor.filters.gmic;
 
 import pixelitor.filters.gui.RangeParam;
 
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class Vibrance extends GMICFilter {
 
     public static final String NAME = "Vibrance";
 
-    private final RangeParam strength = new RangeParam("Strength", -100, 50, 300);
+    private final RangeParam strength = new RangeParam("Strength", -100, 0, 300);
 
     public Vibrance() {
         setParams(strength);
@@ -38,5 +39,13 @@ public class Vibrance extends GMICFilter {
     public List<String> getArgs() {
         return List.of("fx_vibrance", strength.getPercentageStr(),
             "cut", "0,255"); // workaround
+    }
+
+    @Override
+    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        if (strength.isZero()) {
+            return src;
+        }
+        return super.doTransform(src, dest);
     }
 }

@@ -827,7 +827,6 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createDisplaceSubmenu(texts));
         filterMenu.add(createDistortSubmenu(texts));
         filterMenu.add(createFindEdgesSubmenu(texts));
-        filterMenu.add(createLightSubmenu(texts));
 
         File gmicExe = Utils.checkExecutable(AppPreferences.gmicDirName, "gmic");
         if (gmicExe != null) {
@@ -835,6 +834,7 @@ public class MenuBar extends JMenuBar {
             filterMenu.add(createGMICSubmenu());
         }
 
+        filterMenu.add(createLightSubmenu(texts));
         filterMenu.add(createNoiseSubmenu(texts));
         filterMenu.add(createOtherSubmenu());
         filterMenu.add(createRenderSubmenu(texts));

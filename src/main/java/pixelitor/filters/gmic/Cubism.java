@@ -37,12 +37,12 @@ public class Cubism extends GMICFilter {
 
     public Cubism() {
         setParams(iterations, density,
-            thickness, angle, opacity, smoothness);
+            thickness, angle, opacity, smoothness).withReseedGmicAction(this);
     }
 
     @Override
     public List<String> getArgs() {
-        return List.of("fx_cubism",
+        return List.of("srand", String.valueOf(seed), "fx_cubism",
             iterations.getValue() + "," +
                 density.getValue() + "," +
                 thickness.getValue() + "," +

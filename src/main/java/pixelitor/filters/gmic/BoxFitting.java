@@ -38,12 +38,14 @@ public class BoxFitting extends GMICFilter {
     public BoxFitting() {
         maxSize.ensureHigherValueThan(minSize);
 
-        setParams(minSize, maxSize, density, minSpacing, transparency);
+        setParams(minSize, maxSize,
+            density, minSpacing,
+            transparency).withReseedGmicAction(this);
     }
 
     @Override
     public List<String> getArgs() {
-        return List.of("fx_boxfitting",
+        return List.of("srand", String.valueOf(seed), "fx_boxfitting",
             minSize.getValue() + "," +
                 maxSize.getValue() + "," +
                 density.getPercentage() + "," +
