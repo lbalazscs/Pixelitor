@@ -193,10 +193,9 @@ public class ConcentricShapes extends ParametrizedFilter {
         maxDist += rndMultiplier * maxDist;
 
         double distance = distanceParam.getValueAsDouble();
-        int numRings = 1 + (int) (maxDist / distance);
+        int numRings = (int) (shapeType.getRingsMultiplier() * (1 + (maxDist / distance)));
 
         distance *= shapeType.getDistMultiplier();
-        numRings *= shapeType.getRingsMultiplier();
 
         Color[] colors = colorsParam.getColors();
         int numColors = colors.length;
@@ -209,8 +208,6 @@ public class ConcentricShapes extends ParametrizedFilter {
 
         AffineTransform at = null;
         if (angle != 0 || scaleX != 1.0 || scaleY != 1.0) {
-//            at = AffineTransform.getTranslateInstance
-//                (cx - scaleX * cx, cy - scaleY * cy);
             at = new AffineTransform();
             // this will first scale, and then rotate!
             at.rotate(angle, cx, cy);

@@ -1237,12 +1237,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             selection.die();
             setSelectionRef(null);
 
-            if (isActive()) {
-                if (wasHidden) {
-                    SelectionActions.getShowHide().setHideText();
-                }
-            } else {
-                // we can get here from a DeselectEdit.redo on a non-active composition
+            if (wasHidden && isActive()) {
+                SelectionActions.getShowHide().setHideText();
             }
         }
         return edit;

@@ -67,11 +67,11 @@ public class Noise implements Function1D, Function2D, Function3D {
      * @param octaves number of octaves of turbulence
      * @return turbulence value at (x,y)
      */
-    public static float turbulence2(float x, float y, float octaves) {
-        float t = 0.0f;
+    public static double turbulence2(double x, double y, double octaves) {
+        double t = 0.0;
 
-        for (float f = 1.0f; f <= octaves; f *= 2) {
-            t += Math.abs(noise2(f * x, f * y)) / f;
+        for (double f = 1.0; f <= octaves; f *= 2) {
+            t += Math.abs(noise2((float) (f * x), (float) (f * y))) / f;
         }
         return t;
     }
@@ -79,11 +79,11 @@ public class Noise implements Function1D, Function2D, Function3D {
     /**
      * Same as above but without abs, results in a smoother look
      */
-    public static float turbulence2B(float x, float y, float octaves) {
-        float t = 0.0f;
+    public static double turbulence2Smooth(double x, double y, double octaves) {
+        double t = 0.0;
 
-        for (float f = 1.0f; f <= octaves; f *= 2) {
-            t += noise2(f * x, f * y) / f;
+        for (double f = 1.0; f <= octaves; f *= 2) {
+            t += noise2((float) (f * x), (float) (f * y)) / f;
         }
         return t;
     }

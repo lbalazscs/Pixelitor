@@ -20,9 +20,6 @@ package pixelitor.filters.gmic;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.io.IO;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Result;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -39,6 +36,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+//        Threads.dumpStack();
         List<String> args = getArgs();
         System.out.println(String.join(" ", args));
 
@@ -50,13 +48,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
         command.add("-output");
         command.add("-.png");
 
-        Result<BufferedImage, String> result = IO.commandLineFilterImage(src, command);
-        if (result.wasSuccess()) {
-            return ImageUtils.toSysCompatibleImage(result.get());
-        } else {
-            Messages.showError("G'MIC Error", result.errorDetail());
-            return src;
-        }
+        return IO.commandLineFilter(src, getName(), command);
     }
 
     public abstract List<String> getArgs();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,10 @@ import static java.awt.Color.GRAY;
  * The panel corresponding to one channel in the Levels GUI
  */
 public class ChannelLevelsPanel extends JPanel {
-    private final String cardName;
+    private final String channelName;
 
     public ChannelLevelsPanel(ChannelLevelsModel model) {
-        cardName = model.getChannelName();
+        channelName = model.getChannelName();
         Box box = Box.createVerticalBox();
         add(box);
 
@@ -46,7 +46,7 @@ public class ChannelLevelsPanel extends JPanel {
         box.add(outputLightSlider);
     }
 
-    public String getCardName() {
-        return cardName;
+    public String getChannelName() {
+        return channelName;
     }
 }

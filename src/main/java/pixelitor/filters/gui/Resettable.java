@@ -21,7 +21,7 @@ package pixelitor.filters.gui;
  * and can be reset to it (typically by pressing a {@link ResetButton}).
  */
 public interface Resettable {
-    public static final String RESET_ALL_TOOLTIP = "Reset all settings to their default values.";
+    String RESET_ALL_TOOLTIP = "Reset all settings to their default values.";
 
     /**
      * Whether this {@link Resettable} is currently set to its default value.

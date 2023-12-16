@@ -215,7 +215,7 @@ public class ImageMagick {
         ImageIO.write(img, "PNG", origFile);
         System.out.println("ImageMagick::main: origFile = " + origFile.getAbsolutePath() + (origFile.exists() ? " - exists" : " - does not exist!"));
 
-        BufferedImage out = IO.commandLineFilterImage(img,
+        BufferedImage out = IO.runCommandLineFilter(img,
             List.of(
                 magickCommand.getAbsolutePath(),
                 "convert",

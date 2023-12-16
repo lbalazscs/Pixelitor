@@ -26,6 +26,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Result;
 import pixelitor.utils.Shapes;
@@ -34,7 +35,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.SecondaryLoop;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -55,6 +58,8 @@ import static pixelitor.utils.Threads.*;
  * Utility class with static methods related to opening and saving files.
  */
 public class IO {
+    private static final boolean USE_SECOND_LOOP = false;
+
     private IO() {
     }
 
@@ -362,7 +367,57 @@ public class IO {
             .formatted(canvas.getWidth(), canvas.getHeight());
     }
 
-    public static Result<BufferedImage, String> commandLineFilterImage(BufferedImage src, List<String> command) {
+    public static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
+        // Write as png to ImageMagick and let it do
+        // the conversion to the final format.
+        // Explicitly setting a low compression level doesn't seem
+        // to make it faster (why?), so use the simple approach.
+        ImageIO.write(img, "png", magickInput);
+
+//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(magickInput)) {
+//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+//            ImageWriter writer = writers.next();
+//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
+//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
+//            try {
+//                writer.setOutput(ios);
+//                writer.write(img);
+//            } finally {
+//                writer.dispose();
+//                ios.flush();
+//            }
+//        }
+    }
+
+    public static BufferedImage commandLineFilter(BufferedImage src, String filterName, List<String> command) {
+        Result<BufferedImage, String> result;
+        if (USE_SECOND_LOOP) {
+            var progressHandler = Messages.startProgress(filterName, -1);
+
+            SecondaryLoop secondaryLoop = Toolkit.getDefaultToolkit().getSystemEventQueue().createSecondaryLoop();
+            CompletableFuture<Result<BufferedImage, String>> cf = CompletableFuture
+                .supplyAsync(() ->
+                    runCommandLineFilter(src, command))
+                .thenApplyAsync(r -> {
+                    EventQueue.invokeLater(progressHandler::stopProgress);
+                    secondaryLoop.exit();
+                    return r;
+                });
+            secondaryLoop.enter();
+            result = cf.join();
+        } else {
+            result = runCommandLineFilter(src, command);
+        }
+        if (result.wasSuccess()) {
+            return ImageUtils.toSysCompatibleImage(result.get());
+        } else {
+            Messages.showError("Command Line Error", result.errorDetail());
+            return src;
+        }
+    }
+
+    public static Result<BufferedImage, String> runCommandLineFilter(BufferedImage src, List<String> command) {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectInput(ProcessBuilder.Redirect.PIPE);
         pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -401,28 +456,5 @@ public class IO {
             throw new RuntimeException(e);
         }
         return Result.success(out);
-    }
-
-    public static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
-        // Write as png to ImageMagick and let it do
-        // the conversion to the final format.
-        // Explicitly setting a low compression level doesn't seem
-        // to make it faster (why?), so use the simple approach.
-        ImageIO.write(img, "png", magickInput);
-
-//        try (ImageOutputStream ios = ImageIO.createImageOutputStream(magickInput)) {
-//            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
-//            ImageWriter writer = writers.next();
-//            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-//            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-//            writeParam.setCompressionQuality(1.0f); // 1 is no compression
-//            try {
-//                writer.setOutput(ios);
-//                writer.write(img);
-//            } finally {
-//                writer.dispose();
-//                ios.flush();
-//            }
-//        }
     }
 }

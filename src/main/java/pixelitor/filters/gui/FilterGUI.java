@@ -18,9 +18,11 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
 
 import javax.swing.*;
+import java.awt.Component;
 
 /**
  * The superclass of all filter configuration panels.
@@ -35,8 +37,10 @@ public abstract class FilterGUI extends JPanel {
         this.layer = layer;
     }
 
-    public void settingsChanged(boolean first) {
-        layer.previewingFilterSettingsChanged(filter, first, this);
-//        layer.startFilter(filter, PREVIEWING, this);
+    public void startPreview(boolean first) {
+        Component busyCursorParent = first ? GUIUtils.getTopContainer(this) : this;
+//        Component busyCursorParent = SwingUtilities.getRoot(this);
+
+        layer.startPreview(filter, first, busyCursorParent);
     }
 }

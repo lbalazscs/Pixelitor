@@ -1798,19 +1798,23 @@ public class AssertJSwingTest {
         testText();
         testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
+        testConvolution();
+
+        testFilterWithDialog("Channel to Transparency", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testNoDialogFilter("Invert Transparency");
+    }
+
+    private void testConvolution() {
         testFilterWithDialog("Custom 3x3 Convolution", Randomize.NO,
             Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
             "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
             "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
-            "Do Nothing", "Randomize");
+            "Reset", "Randomize");
         testFilterWithDialog("Custom 5x5 Convolution", Randomize.NO,
             Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur",
             "Find Horizontal Edges", "Find Vertical Edges",
             "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
-            "Do Nothing", "Randomize");
-
-        testFilterWithDialog("Channel to Transparency", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testNoDialogFilter("Invert Transparency");
+            "Reset", "Randomize");
     }
 
     private void testTransitionsFilters() {

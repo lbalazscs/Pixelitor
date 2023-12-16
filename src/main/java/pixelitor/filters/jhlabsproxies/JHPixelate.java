@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,6 @@ public class JHPixelate extends ParametrizedFilter {
     private static final int STYLE_FLAT = 0;
     private static final int STYLE_3D = 1;
     private static final int STYLE_EMBEDDED = 2;
-//    private static final int STYLE_GRID_ONLY = 3;
 
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
@@ -57,7 +56,6 @@ public class JHPixelate extends ParametrizedFilter {
         new Item("Flat", STYLE_FLAT),
         new Item("3D", STYLE_3D),
         new Item("Embedded", STYLE_EMBEDDED),
-//            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
     });
 
     private final RangeParam cellSizeParam = new RangeParam("Cell Size", 3, 20, 200);
@@ -101,7 +99,6 @@ public class JHPixelate extends ParametrizedFilter {
             }
         }
 
-//        if ((style == STYLE_3D) || (style == STYLE_GRID_ONLY || (style == STYLE_EMBEDDED))) {
         if (style == STYLE_3D || style == STYLE_EMBEDDED) {
             int width = dest.getWidth();
             int height = dest.getHeight();
@@ -115,8 +112,6 @@ public class JHPixelate extends ParametrizedFilter {
 
             if (style == STYLE_3D || style == STYLE_EMBEDDED) {
                 dest = ImageUtils.bumpMap(dest, bumpSource, NAME);
-//            } else if (style == STYLE_GRID_ONLY) {
-//                dest = ImageUtils.bumpMap(src, bumpSource);
             } else {
                 throw new IllegalStateException("style = " + style);
             }

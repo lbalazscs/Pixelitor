@@ -83,9 +83,8 @@ public interface Drawable extends Filterable {
     void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context);
 
     @Override
-    default void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
+    default void startPreview(Filter filter, boolean first, Component busyCursorParent) {
         startFilter(filter, FilterContext.PREVIEWING, busyCursorParent);
-//        runFilter(filter, FilterContext.PREVIEWING);
     }
 
     @Override

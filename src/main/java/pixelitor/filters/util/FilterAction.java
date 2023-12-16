@@ -29,6 +29,7 @@ import pixelitor.history.History;
 import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
@@ -73,11 +74,17 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
 
     @Override
     protected void onClick(Composition comp) {
-        Layer layer = comp.getActiveLayer();
+        // invoke later to prevent "frozen" menus
+        EventQueue.invokeLater(() ->
+            process(comp.getActiveLayer()));
+    }
+
+    private void process(Layer layer) {
         if (layer.isMaskEditing()) {
             processFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
             // Smart filters are Filterable, but the filter should be started on their smart object
+            // invokeLater: for unfreezing the menu when adding the second smart filter
             processSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be

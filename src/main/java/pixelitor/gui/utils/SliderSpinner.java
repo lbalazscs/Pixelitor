@@ -266,9 +266,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         }
 
         slider.setLabelTable(labels);
-
         slider.setMajorTickSpacing(100);
-
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
     }

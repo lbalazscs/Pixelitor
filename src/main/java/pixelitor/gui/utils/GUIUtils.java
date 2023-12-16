@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import com.bric.util.JVM;
 import pixelitor.Composition;
+import pixelitor.GUIMode;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.Linkable;
 import pixelitor.filters.gui.ParamSet;
@@ -66,7 +67,8 @@ public final class GUIUtils {
     public static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
         && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
-    private static final int BUSY_CURSOR_DELAY = 300; // in milliseconds
+    private static final int BUSY_CURSOR_DELAY_MILLIS = 300;
+    private static Component lastParent;
 
     private static final Map<String, Point> lastDialogLocationsByTitle = new HashMap<>();
 
@@ -176,7 +178,7 @@ public final class GUIUtils {
         for (int i = 0; i < count; i++) {
             Component child = panel.getComponent(i);
             switch (child) {
-                case JComboBox cb -> cb.setSelectedIndex(Rnd.nextInt(cb.getItemCount()));
+                case JComboBox<?> cb -> cb.setSelectedIndex(Rnd.nextInt(cb.getItemCount()));
                 case JCheckBox cb -> cb.setSelected(Rnd.nextBoolean());
                 case SliderSpinner spinner -> spinner.getModel().randomize();
                 case BlendingModePanel bmp -> bmp.randomize();
@@ -245,6 +247,8 @@ public final class GUIUtils {
     }
 
     public static void runWithBusyCursor(Runnable task, Component parent) {
+        assert parent.isShowing() || GUIMode.isUnitTesting();
+        
         java.util.Timer timer = new Timer();
         var startBusyCursorTask = new TimerTask() {
             @Override
@@ -253,10 +257,17 @@ public final class GUIUtils {
             }
         };
 
+        int delay = BUSY_CURSOR_DELAY_MILLIS;
+        if (parent != lastParent) {
+            // wait longer when a dialog is shown for the first time
+            delay *= 2;
+        }
+        lastParent = parent;
+
         try {
             // if after BUSY_CURSOR_DELAY the original task is still running,
             // set the cursor to the delay cursor
-            timer.schedule(startBusyCursorTask, BUSY_CURSOR_DELAY);
+            timer.schedule(startBusyCursorTask, delay);
             task.run(); // on the current thread!
         } finally {
             // when the original task has stopped running, the cursor is reset

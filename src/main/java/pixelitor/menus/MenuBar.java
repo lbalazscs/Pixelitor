@@ -959,19 +959,36 @@ public class MenuBar extends JMenuBar {
     private static JMenu createGMICSubmenu() {
         PMenu sub = new PMenu("G'MIC");
 
-        sub.addFilter(AnisothropicSmoothing.NAME, AnisothropicSmoothing::new);
-        sub.addFilter(BilateralSmoothing.NAME, BilateralSmoothing::new);
+        sub.add(createGMICArtistictSubmenu());
+        sub.add(createGMICBlurSharpenSubmenu());
+        
+        sub.addFilter(GMICCommand.NAME, GMICCommand::new);
+        sub.addFilter(LightGlow.NAME, LightGlow::new);
+        sub.addFilter(LocalNormalization.NAME, LocalNormalization::new);
+        sub.addFilter(Stroke.NAME, Stroke::new);
+        sub.addFilter(Vibrance.NAME, Vibrance::new);
+
+        return sub;
+    }
+
+    private static JMenu createGMICArtistictSubmenu() {
+        PMenu sub = new PMenu("Artistic");
+
         sub.addFilter(Bokeh.NAME, Bokeh::new);
         sub.addFilter(BoxFitting.NAME, BoxFitting::new);
         sub.addFilter(Brushify.NAME, Brushify::new);
         sub.addFilter(Cubism.NAME, Cubism::new);
-        sub.addFilter(GMICCommand.NAME, GMICCommand::new);
-//        sub.addFilter(KuwaharaSmoothing.NAME, KuwaharaSmoothing::new);
-        sub.addFilter(LightGlow.NAME, LightGlow::new);
-        sub.addFilter(LocalNormalization.NAME, LocalNormalization::new);
         sub.addFilter(Rodilius.NAME, Rodilius::new);
-        sub.addFilter(Stroke.NAME, Stroke::new);
-        sub.addFilter(Vibrance.NAME, Vibrance::new);
+
+        return sub;
+    }
+
+    private static JMenu createGMICBlurSharpenSubmenu() {
+        PMenu sub = new PMenu("Blur/Sharpen");
+
+        sub.addFilter(AnisothropicSmoothing.NAME, AnisothropicSmoothing::new);
+        sub.addFilter(BilateralSmoothing.NAME, BilateralSmoothing::new);
+//        sub.addFilter(KuwaharaSmoothing.NAME, KuwaharaSmoothing::new);
 
         return sub;
     }
@@ -1011,6 +1028,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createOtherSubmenu() {
         PMenu sub = new PMenu("Other");
 
+        sub.addFilter(CommandLineFilter.NAME, CommandLineFilter::new);
         sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
         sub.addFilter(Morphology.NAME, Morphology::new);
         sub.addFilter(RandomFilter.NAME, RandomFilter::new);

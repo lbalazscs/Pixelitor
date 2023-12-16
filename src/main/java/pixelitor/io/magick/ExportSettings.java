@@ -26,7 +26,7 @@ public interface ExportSettings {
     /**
      * The settings for file types that don't have a customization dialog.
      */
-    static ExportSettings DEFAULTS = new ExportSettings() {
+    ExportSettings DEFAULTS = new ExportSettings() {
         @Override
         public void addMagickOptions(List<String> command) {
             // do nothing

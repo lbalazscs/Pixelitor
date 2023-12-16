@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 
 /**
  * The GUI for the levels filter
@@ -84,15 +86,15 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
         southPanel.add(showOriginalCB);
 
         JButton resetAllButton = GUIUtils.createResetAllButton(
-            e -> model.resetAllToDefault());
+            e -> model.resetAllAndRun());
         southPanel.add(resetAllButton);
 
         add(southPanel, SOUTH);
+        model.collectLookup();
     }
 
     private void addNewCard(ChannelLevelsPanel chPanel) {
-        String channelName = chPanel.getCardName();
-        cardPanel.add(chPanel, channelName);
+        cardPanel.add(chPanel, chPanel.getChannelName());
     }
 
     @Override

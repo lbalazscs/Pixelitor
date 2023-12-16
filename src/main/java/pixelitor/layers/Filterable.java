@@ -19,19 +19,25 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.FilterContext;
+import pixelitor.Views;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.Filters;
 import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Threads;
 
+import javax.swing.*;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
@@ -53,8 +59,8 @@ public interface Filterable {
     void setShowOriginal(boolean b);
 
     // if "first" is true, then the settings haven't really changed,
-    // this is called only to trigger the first running of the filter
-    void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent);
+    // this is called only to trigger the first preview run of the filter
+    void startPreview(Filter filter, boolean first, Component busyCursorParent);
 
     void onFilterDialogAccepted(String filterName);
 
@@ -86,7 +92,14 @@ public interface Filterable {
      * @return true if the filter was not cancelled
      */
     default boolean startFilter(Filter filter, boolean reset) {
+        assert Threads.calledOnEDT();
+
         if (filter instanceof FilterWithGUI fwg) {
+            PixelitorWindow.get().setCursor(Cursors.BUSY);
+            View view = Views.getActive();
+            Cursor prevViewCursor = view.getCursor();
+            view.setCursor(Cursors.BUSY);
+
             startPreviewing();
 
             Tools.forceFinish();
@@ -96,18 +109,23 @@ public interface Filterable {
             MouseZoomMethod.CURRENT.installOnJComponent(gui, getComp().getView());
             ZoomMenu.setupZoomKeys(gui);
 
-            return new DialogBuilder()
+            DialogBuilder dialogBuilder = new DialogBuilder()
                 .title(filter.getName())
                 .menuBar(fwg.getMenuBar())
                 .name("filterDialog")
                 .content(gui)
-                .align(FRAME_RIGHT)
                 .withScrollbars()
                 .enableCopyShortcuts()
+                .onVisibleAction(() -> gui.startPreview(true))
                 .okAction(() -> onFilterDialogAccepted(filter.getName()))
-                .cancelAction(this::onFilterDialogCanceled)
-                .show()
-                .wasAccepted();
+                .cancelAction(this::onFilterDialogCanceled);
+            JDialog dialog = dialogBuilder.build();
+
+            PixelitorWindow.get().setCursor(Cursors.DEFAULT);
+            view.setCursor(prevViewCursor);
+
+            GUIUtils.showDialog(dialog, FRAME_RIGHT);
+            return dialogBuilder.wasAccepted();
         }
         startFilter(filter, FILTER_WITHOUT_DIALOG);
         return true;

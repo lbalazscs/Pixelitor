@@ -84,7 +84,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     }
 
     public String getText() {
-        return tf.getText();
+        return tf.getText().trim();
     }
 
     public void setText(String s) {

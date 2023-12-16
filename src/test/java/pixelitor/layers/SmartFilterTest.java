@@ -259,7 +259,7 @@ class SmartFilterTest {
     void editFirst() {
         // doesn't simply call edit() on the smart filter,
         // because that would try to use a dialog.
-        first.filterSettingsChanged();
+        first.invalidateAll();
         forceRecalculatingImage();
 
         checkNumFilterRuns(1, 1, 1);
@@ -269,7 +269,7 @@ class SmartFilterTest {
 
     @Test
     void editMiddle() {
-        middle.filterSettingsChanged();
+        middle.invalidateAll();
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 1, 1);
@@ -279,7 +279,7 @@ class SmartFilterTest {
 
     @Test
     void editLast() {
-        last.filterSettingsChanged();
+        last.invalidateAll();
         forceRecalculatingImage();
 
         checkNumFilterRuns(0, 0, 1);

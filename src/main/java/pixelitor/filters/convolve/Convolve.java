@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public FilterGUI createGUI(Filterable layer, boolean reset) {
-        return new CustomConvolveGUI(this, layer, reset);
+        return new ConvolveGUI(this, layer, reset);
     }
 
     @Override

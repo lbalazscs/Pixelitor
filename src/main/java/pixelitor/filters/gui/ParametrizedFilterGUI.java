@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,8 +62,6 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         paramSet.setAdjustmentListener(this);
 
         setupGUI(paramSet, addShowOriginal, presets);
-
-        settingsChanged(true); // force running the first filter preview
     }
 
     protected void setupGUI(ParamSet paramSet,
@@ -120,7 +118,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             // mode should be automatically stopped
             showOriginalCB.deselectWithoutTriggering();
         }
-        settingsChanged(false);
+        startPreview(false);
     }
 
     private boolean hasShowOriginal() {

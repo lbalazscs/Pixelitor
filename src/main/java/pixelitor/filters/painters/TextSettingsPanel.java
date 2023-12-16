@@ -74,13 +74,7 @@ public class TextSettingsPanel extends FilterGUI
      */
     public TextSettingsPanel(TextFilter textFilter, Filterable layer) {
         super(textFilter, layer);
-        TextSettings settings = textFilter.getSettings();
-        init(settings);
-
-        if (!textTF.getText().isEmpty()) {
-            // a "last text" was set
-            paramAdjusted();
-        }
+        init(textFilter.getSettings());
     }
 
     /**
@@ -312,9 +306,9 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void updateApp(TextSettings settings) {
-        if (isInFilterMode()) {
+        if (isFilter()) {
             ((TextFilter) filter).setSettings(settings);
-            settingsChanged(false); // TODO currently always false
+            startPreview(false); // TODO currently always false
         } else {
             assert textLayer != null;
             textLayer.applySettings(settings);
@@ -361,7 +355,7 @@ public class TextSettingsPanel extends FilterGUI
         watermarkCB.setSelected(settings.hasWatermark());
     }
 
-    private boolean isInFilterMode() {
+    private boolean isFilter() {
         return filter != null;
     }
 }

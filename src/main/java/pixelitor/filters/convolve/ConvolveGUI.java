@@ -35,7 +35,7 @@ import static javax.swing.BoxLayout.X_AXIS;
 /**
  * An adjustment panel for customizable convolutions
  */
-public class CustomConvolveGUI extends FilterGUI {
+public class ConvolveGUI extends FilterGUI {
     private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
 
     private JTextField[] textFields;
@@ -44,7 +44,9 @@ public class CustomConvolveGUI extends FilterGUI {
     private Box presetsBox;
     private final int matrixOrder;
 
-    public CustomConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
+    private Object eventSource;
+
+    public ConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
         super(filter, layer);
         setLayout(new BoxLayout(this, X_AXIS));
 
@@ -62,7 +64,6 @@ public class CustomConvolveGUI extends FilterGUI {
                 reset(matrixOrder);
             } else {
                 setMatrix(kernelMatrix);
-                collectValuesAndRun(null, true);
             }
         }
     }
@@ -103,7 +104,7 @@ public class CustomConvolveGUI extends FilterGUI {
 
     private void addNormalizeButton(Box leftVerticalBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(e -> collectValuesAndRun(e, false));
+        normalizeButton.addActionListener(this::guiChanged);
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(normalizeButton);
     }
@@ -111,7 +112,7 @@ public class CustomConvolveGUI extends FilterGUI {
     private void addRunButton(Box leftVerticalBox) {
         JButton runButton = new JButton("Run");
         runButton.setToolTipText("Run the filter with the current values.");
-        runButton.addActionListener(e -> collectValuesAndRun(e, false));
+        runButton.addActionListener(this::guiChanged);
         leftVerticalBox.add(runButton);
     }
 
@@ -132,14 +133,14 @@ public class CustomConvolveGUI extends FilterGUI {
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
             setMatrix(Convolve.createRandomKernelMatrix(matrixOrder));
-            collectValuesAndRun(e, false);
+            guiChanged(e);
         });
         presetsBox.add(randomizeButton);
 
-        JButton doNothingButton = new JButton("Do Nothing");
+        JButton doNothingButton = new JButton("Reset");
         doNothingButton.addActionListener(e -> {
             reset(matrixOrder);
-            collectValuesAndRun(e, false);
+            guiChanged(e);
         });
         presetsBox.add(doNothingButton);
 
@@ -152,7 +153,7 @@ public class CustomConvolveGUI extends FilterGUI {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             setMatrix(kernel);
-            collectValuesAndRun(e, false);
+            guiChanged(e);
         });
         presetsBox.add(button);
     }
@@ -286,10 +287,10 @@ public class CustomConvolveGUI extends FilterGUI {
 
     private void setupTextField(JTextField textField) {
         matrixPanel.add(textField);
-        textField.addActionListener(e -> collectValuesAndRun(e, false));
+        textField.addActionListener(this::guiChanged);
     }
 
-    private void collectValuesAndRun(ActionEvent e, boolean first) {
+    private void collectValues() {
         float sum = 0;
         float[] values = new float[matrixOrder * matrixOrder];
         for (int i = 0; i < values.length; i++) {
@@ -304,7 +305,7 @@ public class CustomConvolveGUI extends FilterGUI {
         }
         enableNormalizeButton(sum);
 
-        if (e != null && e.getSource() == normalizeButton && sum != 0.0f) {
+        if (eventSource == normalizeButton && sum != 0.0f) {
             for (int i = 0; i < values.length; i++) {
                 values[i] /= sum;
             }
@@ -314,7 +315,17 @@ public class CustomConvolveGUI extends FilterGUI {
 
         Convolve convolve = (Convolve) this.filter;
         convolve.setKernelMatrix(values);
-        settingsChanged(first);
+    }
+
+    private void guiChanged(ActionEvent e) {
+        eventSource = e.getSource();
+        startPreview(false);
+    }
+
+    @Override
+    public void startPreview(boolean first) {
+        collectValues();
+        super.startPreview(first);
     }
 
     private void setMatrix(float[] values) {

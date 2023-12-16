@@ -28,7 +28,9 @@ import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.WaveType.wave;
 import static com.jhlabs.image.WaveType.wave01;
-import static com.jhlabs.math.Noise.*;
+import static com.jhlabs.math.Noise.noise2;
+import static com.jhlabs.math.Noise.turbulence2;
+import static com.jhlabs.math.Noise.turbulence2Smooth;
 import static net.jafama.FastMath.*;
 
 /**
@@ -101,15 +103,15 @@ public class Marble extends ParametrizedFilter {
         if (type.getValue() == Impl.TYPE_GRID) {
             angleShift = Math.PI / 4;
         }
-        filter.setAngle((float) (angle.getValueInRadians() + angleShift));
+        filter.setAngle(angle.getValueInRadians() + angleShift);
 
-        filter.setZoom(zoom.getValueAsFloat());
-        filter.setStrength(distortion.getValueAsFloat() / 5.0f);
-        filter.setDetails(detailsLevel.getValueAsFloat());
-        filter.setDetailsStrength(detailsStrength.getValueAsFloat() / 4.0f);
+        filter.setZoom(zoom.getValueAsDouble());
+        filter.setStrength(distortion.getValueAsDouble() / 5.0);
+        filter.setDetails(detailsLevel.getValueAsDouble());
+        filter.setDetailsStrength(detailsStrength.getValueAsDouble() / 4.0);
         filter.setColormap(gradient.getValue());
         filter.setSmoothDetails(smoothDetails.isChecked());
-        filter.setTime(time.getValueAsFloat() / 5.0f);
+        filter.setTime(time.getValueAsDouble() / 5.0);
 
         return filter.filter(src, dest);
     }
@@ -121,34 +123,34 @@ public class Marble extends ParametrizedFilter {
         private static final int TYPE_SPIRAL = 4;
         private static final int TYPE_STAR = 5;
 
-        private float m00, m01, m10, m11;
+        private double m00, m01, m10, m11;
         private double rotAngle;
 
-        private float zoom = 200;
-        private float detailsStrength;
-        private float strength;
-        private float octaves;
+        private double zoom = 200;
+        private double detailsStrength;
+        private double strength;
+        private double octaves;
         private int type;
         private Colormap colormap;
-        private float cx, cy;
+        private double cx, cy;
         private int waveType;
         private boolean smoothDetails;
-        private float time;
+        private double time;
 
         protected Impl() {
             super(NAME);
         }
 
-        public void setDetailsStrength(float f) {
+        public void setDetailsStrength(double f) {
             detailsStrength = f;
         }
 
-        public void setStrength(float f) {
+        public void setStrength(double f) {
             strength = f;
         }
 
-        public void setDetails(float f) {
-            octaves = (float) pow(2.0, f - 1.0);
+        public void setDetails(double f) {
+            octaves = pow(2.0, f - 1.0);
         }
 
         public void setSmoothDetails(boolean smoothDetails) {
@@ -165,22 +167,22 @@ public class Marble extends ParametrizedFilter {
 
         public void setAngle(double angle) {
             rotAngle = angle;
-            float cos = (float) cos(angle);
-            float sin = (float) sin(angle);
+            double cos = cos(angle);
+            double sin = sin(angle);
             m00 = cos;
             m01 = sin;
             m10 = -sin;
             m11 = cos;
         }
 
-        public void setZoom(float zoom) {
+        public void setZoom(double zoom) {
             this.zoom = zoom;
         }
 
         @Override
         public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            cx = src.getWidth() / 2.0f;
-            cy = src.getHeight() / 2.0f;
+            cx = src.getWidth() / 2.0;
+            cy = src.getHeight() / 2.0;
             return super.filter(src, dst);
         }
 
@@ -188,16 +190,16 @@ public class Marble extends ParametrizedFilter {
         public int filterRGB(int x, int y, int rgb) {
             double dy = y - cy;
             double dx = x - cx;
-            float nx = (float) (m00 * dx + m01 * dy);
-            float ny = (float) (m10 * dx + m11 * dy);
+            double nx = m00 * dx + m01 * dy;
+            double ny = m10 * dx + m11 * dy;
             nx /= zoom;
             ny /= zoom;
 
-            float f = strength * noise2(nx * 0.1f, ny * 0.1f);
+            double f = strength * noise2((float) (nx * 0.1), (float) (ny * 0.1));
             if (smoothDetails) {
-                f += detailsStrength * turbulence2B(nx * 0.2f, ny * 0.2f, octaves);
+                f += detailsStrength * turbulence2Smooth(nx * 0.2, ny * 0.2, octaves);
             } else {
-                f += detailsStrength * turbulence2(nx * 0.2f, ny * 0.2f, octaves);
+                f += detailsStrength * turbulence2(nx * 0.2, ny * 0.2, octaves);
             }
             f += time;
 
@@ -213,37 +215,37 @@ public class Marble extends ParametrizedFilter {
             return colormap.getColor(c);
         }
 
-        private float calcLinesColor(float nx, float f) {
+        private float calcLinesColor(double nx, double f) {
             return (float) wave01(nx + f, waveType);
         }
 
-        private float calcGridColor(float nx, float ny, float f) {
-            float f2 = strength * noise2(ny * -0.1f, nx * -0.1f);
+        private float calcGridColor(double nx, double ny, double f) {
+            double f2 = strength * noise2((float) (ny * -0.1), (float) (nx * -0.1));
             if (smoothDetails) {
-                f2 += detailsStrength * turbulence2B(ny * -0.2f, nx * -0.2f, octaves);
+                f2 += detailsStrength * turbulence2Smooth(ny * -0.2, nx * -0.2, octaves);
             } else {
-                f2 += detailsStrength * turbulence2(ny * -0.2f, nx * -0.2f, octaves);
+                f2 += detailsStrength * turbulence2(ny * -0.2, nx * -0.2, octaves);
             }
 
             return (float) (wave01(nx + f, waveType) + wave01(ny + f2, waveType)) / 2.0f;
         }
 
-        private float calcRingsColor(double dy, double dx, float f) {
-            float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
+        private float calcRingsColor(double dy, double dx, double f) {
+            double dist = sqrt(dx * dx + dy * dy) / zoom;
             f += dist;
 
             return (float) wave01(f, waveType);
         }
 
-        private float calcSpiralColor(double dy, double dx, float f) {
-            float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
+        private float calcSpiralColor(double dy, double dx, double f) {
+            double dist = sqrt(dx * dx + dy * dy) / zoom;
             double pixelAngle = atan2(dy, dx);
             f += (dist + pixelAngle - rotAngle);
 
             return (float) wave01(f, waveType);
         }
 
-        private float calcStarColor(double dy, double dx, float f) {
+        private float calcStarColor(double dy, double dx, double f) {
             double pixelAngle = atan2(dy, dx);
             f += ((pixelAngle - rotAngle) * 10.0);
             return (float) ((1 + wave(f, waveType)) / 2);
@@ -253,7 +255,7 @@ public class Marble extends ParametrizedFilter {
             this.colormap = colormap;
         }
 
-        public void setTime(float time) {
+        public void setTime(double time) {
             this.time = time;
         }
     }

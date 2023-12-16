@@ -123,6 +123,10 @@ public class TextParam extends AbstractFilterParam {
         setValue(savedValue, false);
     }
 
+    public boolean isEmpty() {
+        return value.trim().isEmpty();
+    }
+
     @Override
     public String getParamValue() {
         return getValue();

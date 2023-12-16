@@ -25,7 +25,10 @@ import pixelitor.filters.gui.UserPreset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pixelitor.filters.levels.Channel.*;
+import static pixelitor.filters.levels.Channel.BLUE;
+import static pixelitor.filters.levels.Channel.GREEN;
+import static pixelitor.filters.levels.Channel.RED;
+import static pixelitor.filters.levels.Channel.RGB;
 
 public class LevelsModel {
     private final ChannelLevelsModel rgbModel;
@@ -57,6 +60,15 @@ public class LevelsModel {
     }
 
     public void settingsChanged(boolean first) {
+        collectLookup();
+
+        if (lastGUI == null) {
+            return; // it's null when loading a smart filter
+        }
+        lastGUI.startPreview(first);
+    }
+
+    public void collectLookup() {
         GrayScaleLookup rgb = rgbModel.getLookup();
 
         GrayScaleLookup r = rModel.getLookup();
@@ -65,19 +77,18 @@ public class LevelsModel {
 
         RGBLookup unifiedLookup = new RGBLookup(rgb, r, g, b);
         filter.setRGBLookup(unifiedLookup);
-
-        if (lastGUI == null) {
-            return; // it's null when loading a smart filter
-        }
-        lastGUI.settingsChanged(first);
     }
 
-    public void resetAllToDefault() {
+    public void resetAllAndRun() {
+        resetAll();
+
+        settingsChanged(false);
+    }
+
+    public void resetAll() {
         for (ChannelLevelsModel model : subModels) {
             model.resetToDefaults();
         }
-
-        settingsChanged(false);
     }
 
     public void resetChannelToDefault(Channel channel) {

@@ -52,12 +52,17 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static java.awt.font.TextAttribute.*;
+import static java.awt.font.TextAttribute.KERNING;
+import static java.awt.font.TextAttribute.KERNING_ON;
+import static java.awt.font.TextAttribute.LIGATURES;
+import static java.awt.font.TextAttribute.LIGATURES_ON;
 import static java.lang.String.format;
 import static pixelitor.layers.BlendingMode.NORMAL;
 import static pixelitor.layers.LayerAdder.Position.TOP;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Static methods for creating the splash images
@@ -128,6 +133,7 @@ public class SplashImageCreator {
 
         SmartFilter lightsSF = new SmartFilter(lights, so.getContent(), so);
         so.addSmartFilter(lightsSF, true, true);
+        lightsSF.evaluateNow();
 
         addTextLayers(comp);
 

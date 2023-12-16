@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2023 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,9 @@ import org.mockito.ArgumentCaptor;
 import pixelitor.TestHelper;
 import pixelitor.filters.gui.FilterGUI;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("Levels tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -52,7 +54,7 @@ class LevelsTest {
 
     @Test
     void defaultSettingsProduceIdentity() {
-        model.resetAllToDefault();
+        model.resetAllAndRun();
 
         var lookup = getCalculatedLookup();
 
@@ -152,7 +154,7 @@ class LevelsTest {
     }
 
     private RGBLookup getCalculatedLookup() {
-        verify(filterGUI, times(1)).settingsChanged(false);
+        verify(filterGUI, times(1)).startPreview(false);
         verify(levels, times(1)).setRGBLookup(captor.capture());
         return captor.getValue();
     }

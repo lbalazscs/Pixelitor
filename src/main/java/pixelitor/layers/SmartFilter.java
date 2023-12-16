@@ -23,6 +23,7 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.FilterChangedEdit;
 import pixelitor.history.History;
@@ -144,14 +145,22 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             return cachedImage;
         }
         assert src != null;
-        cachedImage = filter.transformImage(src);
+        createCachedImage(src);
 
-        // TODO this check should not be necessary
+        return cachedImage;
+    }
+
+    public void evaluateNow() {
+        if (cachedImage == null) {
+            createCachedImage(imageSource.getImage());
+        }
+    }
+
+    private void createCachedImage(BufferedImage src) {
+        cachedImage = filter.transformImage(src);
         if (cachedImage == src) {
             cachedImage = ImageUtils.copyImage(cachedImage);
         }
-
-        return cachedImage;
     }
 
     public ImageSource getImageSource() {
@@ -193,17 +202,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         this.next = next;
     }
 
-    /**
-     * Recursively invalidates all smart filters after the edited one.
-     */
-    public void invalidateChain() {
-        invalidateCache();
-        if (next != null) {
-            //noinspection TailRecursion
-            next.invalidateChain();
-        }
-    }
-
     private Stream<SmartFilter> getChainStream() {
         return Stream.iterate(this, Objects::nonNull, SmartFilter::getNext);
     }
@@ -213,13 +211,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             .limit(5) // prevent infinite recursion
             .map(SmartFilter::toString)
             .collect(Collectors.joining(", ", "[", "]"));
-    }
-
-    private void invalidateCache() {
-        if (cachedImage != null) {
-            cachedImage.flush();
-            cachedImage = null;
-        }
     }
 
     public boolean hasCachedImage() {
@@ -261,18 +252,40 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
-    public void filterSettingsChanged() {
+    /**
+     * Recursively invalidates all smart filters after the edited one.
+     */
+    public void invalidateChain() {
+        invalidateCache();
+        if (next != null) {
+            //noinspection TailRecursion
+            next.invalidateChain();
+        }
+    }
+
+    private void invalidateCache() {
+        if (cachedImage != null) {
+            cachedImage.flush();
+            cachedImage = null;
+        }
+    }
+
+    public void invalidateAll() {
         invalidateChain();
         smartObject.invalidateImageCache();
     }
 
-    // "layer level" = not related to the filter settings
-    public void layerLevelSettingsChanged(boolean update) {
+    private void invalidateAllButTheCache() {
         // invalidate only starting from the next one
         if (next != null) {
             next.invalidateChain();
         }
         smartObject.invalidateImageCache();
+    }
+
+    // "layer level" = not related to the filter settings
+    public void layerLevelSettingsChanged(boolean update) {
+        invalidateAllButTheCache();
         if (update) {
             holder.update();
             smartObject.updateIconImage();
@@ -288,23 +301,32 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     @Override
     public void onFilterDialogCanceled() {
         super.onFilterDialogCanceled();
-        filterSettingsChanged();
+        invalidateAll();
     }
 
     @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
 
-        filterSettingsChanged();
+        invalidateAll();
         holder.update();
     }
 
     @Override
-    public void previewingFilterSettingsChanged(Filter filter, boolean first, Component busyCursorParent) {
+    public void startPreview(Filter filter, boolean first, Component busyCursorParent) {
         if (!first) {
-            filterSettingsChanged();
-            holder.update();
+            invalidateAll();
         }
+        if (cachedImage != null) {
+            // the painting thread already calculated it
+            return;
+        }
+//        if (!first) { // prevent the filter from running twice
+            GUIUtils.runWithBusyCursor(() ->
+                    createCachedImage(imageSource.getImage()),
+                busyCursorParent);
+            holder.update();
+//        }
     }
 
     @Override
@@ -349,7 +371,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
             History.add(new FilterChangedEdit(this, oldFilter, oldName));
 
-            filterSettingsChanged();
+            invalidateAll();
             holder.update();
             edit();
         }

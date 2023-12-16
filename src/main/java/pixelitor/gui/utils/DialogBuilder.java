@@ -28,6 +28,8 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.function.Predicate;
 
 import static java.awt.BorderLayout.CENTER;
@@ -77,6 +79,7 @@ public class DialogBuilder {
     private String name;
     private JButton okButton;
     private JMenuBar menuBar;
+    private Runnable onVisibleAction;
 
     public DialogBuilder() {
     }
@@ -282,6 +285,16 @@ public class DialogBuilder {
         }
 
         dialog.pack();
+
+        if (onVisibleAction != null) {
+            dialog.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(ComponentEvent e) {
+                    onVisibleAction.run();
+                }
+            });
+        }
+
         return dialog;
     }
 
@@ -389,6 +402,11 @@ public class DialogBuilder {
         if (cancelText == null) {
             cancelText = DEFAULT_CANCEL_TEXT;
         }
+    }
+
+    public DialogBuilder onVisibleAction(Runnable onVisibleAction) {
+        this.onVisibleAction = onVisibleAction;
+        return this;
     }
 
     private static class BuiltDialog extends JDialog {
