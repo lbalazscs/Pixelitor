@@ -30,7 +30,7 @@ public class GMICCommand extends GMICFilter {
     public static final String NAME = "G'MIC Command";
 
     private final TextParam textParam = new TextParam("Command",
-        "edges 9% normalize 0,255", true);
+        "edges 9%\nnormalize 0,255", true);
 
     public GMICCommand() {
         textParam.setRandomCommands(List.of(

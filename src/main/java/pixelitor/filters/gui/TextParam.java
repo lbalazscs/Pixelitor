@@ -111,7 +111,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        String newValue = ((TextParamState) state).value();
+        String newValue = decodeSavedString(((TextParamState) state).value());
         value = newValue;
         if (updateGUI) {
             gui.setText(newValue);
@@ -120,7 +120,11 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        setValue(savedValue, false);
+        setValue(decodeSavedString(savedValue), false);
+    }
+
+    private static String decodeSavedString(String s) {
+        return s.replaceAll("#", "\n");
     }
 
     public boolean isEmpty() {
@@ -158,7 +162,7 @@ public class TextParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            return value;
+            return value.replaceAll("\\R", "#");
         }
     }
 }

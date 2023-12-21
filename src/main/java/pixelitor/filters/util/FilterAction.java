@@ -84,7 +84,6 @@ public class FilterAction extends OpenViewEnabledAction.Checked {
             processFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
             // Smart filters are Filterable, but the filter should be started on their smart object
-            // invokeLater: for unfreezing the menu when adding the second smart filter
             processSmartObject(smartFilter.getSmartObject());
         } else if (layer instanceof AdjustmentLayer) {
             // adjustment layers are Filterable, so this must be

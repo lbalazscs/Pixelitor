@@ -430,6 +430,8 @@ public class IO {
             // Write the source image to the standard input
             // of the external process
             try (OutputStream processInput = p.getOutputStream()) {
+                assert processInput instanceof BufferedOutputStream;
+
                 writeToOutStream(src, processInput);
                 processInput.flush();
             }
@@ -437,6 +439,8 @@ public class IO {
             // Read the filtered image the from the standard output
             // of the external process
             try (InputStream processOutput = p.getInputStream()) {
+                assert processOutput instanceof BufferedInputStream;
+
                 out = ImageIO.read(processOutput);
             }
             String errorMsg = null;

@@ -62,7 +62,9 @@ public class CommandLineFilter extends ParametrizedFilter {
         Pattern surroundingQuotes = Pattern.compile("^\"|\"$");
         for (String part : parts) {
             String cleanedPart = surroundingQuotes.matcher(part).replaceAll("");
-            result.add(cleanedPart);
+            if (!cleanedPart.isBlank()) {
+                result.add(cleanedPart);
+            }
         }
 
         return result;

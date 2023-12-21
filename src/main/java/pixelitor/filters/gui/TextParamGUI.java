@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
@@ -29,28 +30,35 @@ import static java.awt.FlowLayout.LEFT;
  */
 public class TextParamGUI extends JPanel implements ParamGUI {
     private final TextParam model;
-    private final JTextField tf;
+    private final JTextComponent textComponent;
 
     public TextParamGUI(TextParam model, String defaultValue, ParamAdjustmentListener adjustmentListener) {
         this.model = model;
-        tf = new JTextField(defaultValue, 25);
 
         setLayout(new FlowLayout(LEFT));
         add(new JLabel(model.getName() + ": "));
-        add(tf);
 
         if (model.isCommand()) {
+            textComponent = new JTextArea(defaultValue, 10, 25);
+            JScrollPane scrollPane = new JScrollPane(textComponent);
+            add(scrollPane);
+
             JButton runButton = new JButton("Run");
             runButton.addActionListener(e ->
                 model.setValue(getText(), true));
             add(runButton);
-        } else if (adjustmentListener != null) {
-            addDocumentListener(adjustmentListener);
+        } else {
+            textComponent = new JTextField(defaultValue, 25);
+            add(textComponent);
+
+            if (adjustmentListener != null) {
+                addDocumentListener(adjustmentListener);
+            }
         }
     }
 
     private void addDocumentListener(ParamAdjustmentListener adjustmentListener) {
-        tf.getDocument().addDocumentListener(new DocumentListener() {
+        textComponent.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 adjustmentListener.paramAdjusted();
@@ -75,25 +83,25 @@ public class TextParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public boolean isEnabled() {
-        return tf.isEnabled();
+        return textComponent.isEnabled();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        tf.setEnabled(enabled);
+        textComponent.setEnabled(enabled);
     }
 
     public String getText() {
-        return tf.getText().trim();
+        return textComponent.getText().trim();
     }
 
     public void setText(String s) {
-        tf.setText(s);
+        textComponent.setText(s);
     }
 
     @Override
     public void setToolTip(String tip) {
-        tf.setToolTipText(tip);
+        textComponent.setToolTipText(tip);
     }
 
     @Override
