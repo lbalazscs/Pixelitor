@@ -21,6 +21,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
@@ -35,19 +36,29 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     public TextParamGUI(TextParam model, String defaultValue, ParamAdjustmentListener adjustmentListener) {
         this.model = model;
 
-        setLayout(new FlowLayout(LEFT));
-        add(new JLabel(model.getName() + ": "));
+        JLabel nameLabel = new JLabel(model.getName() + ": ");
 
         if (model.isCommand()) {
+            setLayout(new BorderLayout());
+            add(nameLabel, BorderLayout.WEST);
+
             textComponent = new JTextArea(defaultValue, 10, 25);
             JScrollPane scrollPane = new JScrollPane(textComponent);
-            add(scrollPane);
+            add(scrollPane, BorderLayout.CENTER);
 
             JButton runButton = new JButton("Run");
             runButton.addActionListener(e ->
                 model.setValue(getText(), true));
-            add(runButton);
+
+            Box verticalBox = Box.createVerticalBox();
+            verticalBox.add(Box.createVerticalGlue());
+            verticalBox.add(runButton);
+            verticalBox.add(Box.createVerticalGlue());
+            add(verticalBox, BorderLayout.EAST);
         } else {
+            setLayout(new FlowLayout(LEFT));
+            add(nameLabel);
+
             textComponent = new JTextField(defaultValue, 25);
             add(textComponent);
 

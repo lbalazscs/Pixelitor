@@ -17,7 +17,10 @@
 
 package pixelitor.filters.gmic;
 
+import pixelitor.filters.gui.CommandLineGUI;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.TextParam;
+import pixelitor.layers.Filterable;
 
 import java.io.Serial;
 import java.util.List;
@@ -75,5 +78,10 @@ public class GMICCommand extends GMICFilter {
         return Stream.of(textParam.getValue().split(" "))
             .map(String::trim)
             .toList();
+    }
+
+    @Override
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new CommandLineGUI(this, layer, true, reset);
     }
 }

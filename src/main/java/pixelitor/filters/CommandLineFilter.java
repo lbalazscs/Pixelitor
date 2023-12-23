@@ -17,8 +17,11 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.gui.CommandLineGUI;
+import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.TextParam;
 import pixelitor.io.IO;
+import pixelitor.layers.Filterable;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -68,5 +71,10 @@ public class CommandLineFilter extends ParametrizedFilter {
         }
 
         return result;
+    }
+
+    @Override
+    public FilterGUI createGUI(Filterable layer, boolean reset) {
+        return new CommandLineGUI(this, layer, true, reset);
     }
 }
