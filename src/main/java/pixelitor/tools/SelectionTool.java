@@ -22,9 +22,11 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.GUIMode;
 import pixelitor.Views;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.*;
 import pixelitor.tools.util.ArrowKey;
@@ -37,6 +39,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Graphics2D;
 
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.selection.ShapeCombinator.*;
 
 /**
@@ -63,12 +66,15 @@ public class SelectionTool extends DragTool {
 
     private SelectionBuilder selectionBuilder;
     private boolean polygonal = false;
+    private boolean magicWand = false;
     private boolean displayWidthHeight = true;
 
     private final EnumComboBoxModel<SelectionType> typeModel
         = new EnumComboBoxModel<>(SelectionType.class);
     private final EnumComboBoxModel<ShapeCombinator> combinatorModel
         = new EnumComboBoxModel<>(ShapeCombinator.class);
+
+    private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
@@ -103,12 +109,16 @@ public class SelectionTool extends DragTool {
 
         SelectionType type = getSelectionType();
         polygonal = type == SelectionType.POLYGONAL_LASSO;
+        magicWand = type == SelectionType.SELECTION_MAGIC_WAND;
         displayWidthHeight = type.displayWidthHeight();
 
         if (polygonal) {
             Messages.showInStatusBar(POLY_HELP_TEXT);
         } else if (type == SelectionType.LASSO) {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
+        } else if (magicWand) {
+            settingsPanel.addSeparator();
+            settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
         } else {
             Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
         }
@@ -202,6 +212,10 @@ public class SelectionTool extends DragTool {
         stopBuildingSelection();
 
         assert !comp.hasInProgressSelection();
+    }
+
+    public static int getTolerance() {
+        return toleranceParam.getValue();
     }
 
     @Override

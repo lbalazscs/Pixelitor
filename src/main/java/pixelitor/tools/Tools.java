@@ -47,7 +47,6 @@ public class Tools {
     public static final MoveTool MOVE = new MoveTool();
     public static final CropTool CROP = new CropTool();
     public static final SelectionTool SELECTION = new SelectionTool();
-    public static final SelectionMagicWandTool SELECTION_MAGIC_WAND = new SelectionMagicWandTool();
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
     public static final EraserTool ERASER = new EraserTool();
@@ -61,7 +60,7 @@ public class Tools {
     public static final ZoomTool ZOOM = new ZoomTool();
 
     private static final Tool[] allTools = {
-        MOVE, CROP, SELECTION, SELECTION_MAGIC_WAND, BRUSH, CLONE, ERASER,
+        MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
         SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
         PEN, SHAPES, HAND, ZOOM};
 

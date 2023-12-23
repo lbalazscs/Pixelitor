@@ -85,7 +85,6 @@ public class SelectionBuilder {
             } else {
                 newShape = selectionType.createShape(mouseInfo, null);
             }
-            //Shape newShape = selectionType.createShape(mouseInfo, null);
             inProgressSelection = new Selection(newShape, comp.getView());
             comp.setInProgressSelection(inProgressSelection);
         } else {
@@ -97,7 +96,6 @@ public class SelectionBuilder {
             } else {
                 newShape = selectionType.createShape(mouseInfo, shape);
             }
-            //Shape newShape = selectionType.createShape(mouseInfo, shape);
             inProgressSelection.setShape(newShape);
             if (!inProgressSelection.isMarching()) {
                 inProgressSelection.startMarching();
