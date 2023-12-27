@@ -42,6 +42,8 @@ public class TextParam extends AbstractFilterParam {
     // in the case of commands the random values have to be listed explicitly
     private List<String> randomCommands;
 
+    private static final String ENCODED_NEWLINE = "#NL#";
+
     public TextParam(String name, String defaultValue, boolean command) {
         super(name, ALLOW_RANDOMIZE);
         this.defaultValue = defaultValue;
@@ -124,7 +126,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     private static String decodeSavedString(String s) {
-        return s.replaceAll("#", "\n");
+        return s.replaceAll(ENCODED_NEWLINE, "\n");
     }
 
     public boolean isEmpty() {
@@ -162,7 +164,7 @@ public class TextParam extends AbstractFilterParam {
 
         @Override
         public String toSaveString() {
-            return value.replaceAll("\\R", "#");
+            return value.replaceAll("\\R", ENCODED_NEWLINE);
         }
     }
 }
