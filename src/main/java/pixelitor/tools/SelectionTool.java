@@ -80,6 +80,7 @@ public class SelectionTool extends DragTool {
         = new EnumComboBoxModel<>(ShapeCombinator.class);
 
     private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
+    private static SliderSpinner sliderSpinner;
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
@@ -123,10 +124,16 @@ public class SelectionTool extends DragTool {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
         } else if (magicWand) {
             Messages.showInStatusBar(MAGIC_WAND_HELP_TEXT);
-            settingsPanel.addSeparator();
-            settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
+            if (sliderSpinner == null) {
+                sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);
+                settingsPanel.add(sliderSpinner);
+            }
         } else {
             Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
+            if (sliderSpinner != null) {
+                settingsPanel.remove(sliderSpinner);
+                sliderSpinner = null;
+            }
         }
     }
 
