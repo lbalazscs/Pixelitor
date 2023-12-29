@@ -126,7 +126,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (polygonal) {
+        if (polygonal || magicWand) {
             return; // ignore mouse pressed
         }
 
@@ -138,7 +138,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        if (polygonal) {
+        if (polygonal || magicWand) {
             return; // ignore dragging
         }
         if (selectionBuilder == null) {
@@ -158,7 +158,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (drag.isClick() && !polygonal) { // will be handled by mouseClicked
+        if (drag.isClick() && !polygonal && !magicWand) { // will be handled by mouseClicked
             restoreCombinator();
             return;
         }
@@ -231,11 +231,23 @@ public class SelectionTool extends DragTool {
                 // ignore otherwise: will be handled in mouse released
             }
             return;
+        } else if (magicWand) {
+            setupCombinatorWithKeyModifiers(e);
+            selectionBuilder = new SelectionBuilder(
+                    getSelectionType(), getCombinator(), e.getComp());
+
+            if (e.isRight()) {
+                cancelSelection(comp);
+            } else if (selectionBuilder != null && e.getClickCount() == 1) {
+                selectionBuilder.updateInProgressSelection(e, comp);
+                selectionBuilder.combineShapes(comp);
+                stopBuildingSelection();
+            }
         }
 
         super.mouseClicked(e);
 
-        cancelSelection(comp);
+        if (!magicWand) { cancelSelection(comp); }
     }
 
     private void cancelSelection(Composition comp) {

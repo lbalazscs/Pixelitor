@@ -20,11 +20,9 @@ package pixelitor.selection;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.PaintBucketTool;
 import pixelitor.tools.SelectionTool;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
@@ -33,11 +31,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.text.ParsePosition;
-
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
 
 import java.util.*;
 
@@ -95,20 +88,16 @@ public enum SelectionType {
     }, SELECTION_MAGIC_WAND("MagicWand", true){
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
+            PMouseEvent pm = (PMouseEvent) mouseInfo;
+            Area newShape = selectPixelsInColorRange(pm);
 
-            if (mouseInfo instanceof PMouseEvent pm) {
-                Area newShape = selectPixelsInColorRange(pm);
-
-                if(createNewShape(oldShape)){
-                    return newShape;
-                } else {
-                    Area unitedArea = new Area(oldShape);
-                    unitedArea.add(newShape);
-                    return unitedArea;
-                }
+            if(createNewShape(oldShape)){
+                return newShape;
+            } else {
+                Area unitedArea = new Area(oldShape);
+                unitedArea.add(newShape);
+                return unitedArea;
             }
-
-            return oldShape;
         }
 
         private Area selectPixelsInColorRange(PMouseEvent pm) {
@@ -135,9 +124,7 @@ public enum SelectionType {
                 return null;
             }
 
-            //BufferedImage backupForUndo = ImageUtils.copyImage(image);
             boolean thereIsSelection = comp.hasSelection();
-
             boolean grayScale = image.getType() == BufferedImage.TYPE_BYTE_GRAY;
 
             BufferedImage workingImage;
@@ -149,14 +136,10 @@ public enum SelectionType {
                 workingImage = image;
             }
 
-            int rgbAtMouse = workingImage.getRGB(x, y);
-
             boolean [][] visited = new boolean[workingImage.getWidth()][workingImage.getHeight()];
             int targetColor = getColorAtEvent(x, y, pm);
-            System.out.println(x + " " + y + " " + targetColor);
 
             selectedArea(workingImage, x, y, colorTolerance, targetColor, selectedArea, pm, visited);
-
             return selectedArea;
         }
 
@@ -167,18 +150,15 @@ public enum SelectionType {
             int imgHeight = img.getHeight();
             int imgWidth = img.getWidth();
 
-            LinkedList<Area> areasToProcess = new LinkedList<>();
-            areasToProcess.add(new Area(new Rectangle2D.Double(x, y, 1, 1)));
+            Stack<Area> areasToProcess = new Stack<>();
+            areasToProcess.push(new Area(new Rectangle2D.Double(x, y, 1, 1)));
 
             while (!areasToProcess.isEmpty()) {
 
-                    Area currentArea = areasToProcess.get(0);
-                    areasToProcess.remove(0);
+                    Area currentArea = areasToProcess.pop();
                     Rectangle2D bounds = currentArea.getBounds2D();
                     int currentX = (int) bounds.getX();
                     int currentY = (int) bounds.getY();
-
-                    System.out.println(currentX + " " + currentY);
 
                     int targetColor = getColorAtEvent(currentX, currentY, pm);
 
@@ -186,15 +166,13 @@ public enum SelectionType {
                             colorWithinTolerance(new Color(rgbAtMouse), new Color(targetColor), tolerance) &&
                             !visited[currentX][currentY]) {
 
-                        System.out.println(imgHeight);
-
                         selectedArea.add(currentArea);
                         visited[currentX][currentY] = true;
 
-                        areasToProcess.add(new Area(new Rectangle2D.Double(currentX + 1, currentY, 1, 1)));
-                        areasToProcess.add(new Area(new Rectangle2D.Double(currentX - 1, currentY, 1, 1)));
-                        areasToProcess.add(new Area(new Rectangle2D.Double(currentX, currentY + 1, 1, 1)));
-                        areasToProcess.add(new Area(new Rectangle2D.Double(currentX, currentY - 1, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX + 1, currentY, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX - 1, currentY, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY + 1, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY - 1, 1, 1)));
                     }
 
             }
@@ -214,7 +192,6 @@ public enum SelectionType {
         }
 
         private boolean colorWithinTolerance(Color c1, Color c2, int tolerance) {
-            // Comprueba si el color c1 está dentro de la tolerancia de color de c2
             return Math.abs(c1.getRed() - c2.getRed()) <= tolerance &&
                     Math.abs(c1.getGreen() - c2.getGreen()) <= tolerance &&
                     Math.abs(c1.getBlue() - c2.getBlue()) <= tolerance;
