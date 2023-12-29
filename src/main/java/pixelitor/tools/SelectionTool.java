@@ -59,6 +59,11 @@ public class SelectionTool extends DragTool {
         "simply drag around the area that you want to select. " +
         "<b>Shift-drag</b> adds to an existing selection, " +
         "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+    private static final String MAGIC_WAND_HELP_TEXT = "MagicWand selection: " +
+        "<b>click</b> on the area that you want to select. " +
+        "<b>right-click</b> to close the selection." +
+        "<b>Shift</b> adds to an existing selection, " +
+        "<b>Alt</b> removes from it, <b>Shift-Alt</b> intersects.";
     private static final String NEW_SELECTION_TEXT = "New Selection";
 
     private boolean altMeansSubtract = false;
@@ -117,6 +122,7 @@ public class SelectionTool extends DragTool {
         } else if (type == SelectionType.LASSO) {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
         } else if (magicWand) {
+            Messages.showInStatusBar(MAGIC_WAND_HELP_TEXT);
             settingsPanel.addSeparator();
             settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
         } else {
