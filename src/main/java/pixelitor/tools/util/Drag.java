@@ -305,28 +305,7 @@ public class Drag implements Serializable {
             return new Drag(imStartX, centerY, imEndX, centerY);
         }
     }
-
-    /*public Color getColor() {
-        int x = (int) getStartX();
-        int y = (int) getStartY();
-
-        BufferedImage img;
-        PMouseEvent pm = (PMouseEvent) mouseInfo;
-        boolean isGray = false;
-
-        View view = pm.getView();
-        Composition comp = view.getComp();
-        img = comp.getCompositeImage();
-
-        isGray = img.getType() == TYPE_BYTE_GRAY;
-
-        if (x < img.getWidth() && y < img.getHeight() && x >= 0 && y >= 0) {
-            int rgb = img.getRGB(x, y);
-            return new Color(rgb);
-        }
-        return null;
-    }*/
-
+    
     public boolean isClick() {
         assert hasCoCoords;
         return coStartX == coEndX && coStartY == coEndY;
