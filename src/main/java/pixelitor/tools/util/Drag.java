@@ -17,7 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
@@ -34,11 +33,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
 
