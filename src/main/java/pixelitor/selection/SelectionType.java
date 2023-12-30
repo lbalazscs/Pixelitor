@@ -17,13 +17,22 @@
 
 package pixelitor.selection;
 
+import pixelitor.Composition;
+import pixelitor.gui.View;
+import pixelitor.layers.Drawable;
+import pixelitor.tools.SelectionTool;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.ImageUtils;
 
-import java.awt.Shape;
+import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+
+import java.util.*;
 
 /**
  * The type of a new selection created interactively by the user.
@@ -75,6 +84,117 @@ public enum SelectionType {
 
                 return gp;
             }
+        }
+    }, SELECTION_MAGIC_WAND("MagicWand", true){
+        @Override
+        public Shape createShape(Object mouseInfo, Shape oldShape) {
+            PMouseEvent pm = (PMouseEvent) mouseInfo;
+            Area newShape = selectPixelsInColorRange(pm);
+
+            if(createNewShape(oldShape)){
+                return newShape;
+            } else {
+                Area unitedArea = new Area(oldShape);
+                unitedArea.add(newShape);
+                return unitedArea;
+            }
+        }
+
+        private Area selectPixelsInColorRange(PMouseEvent pm) {
+            Area selectedArea = new Area();
+
+            int x = (int) pm.getImX();
+            int y = (int) pm.getImY();
+
+            var comp = pm.getComp();
+            Drawable dr = comp.getActiveDrawableOrThrow();
+
+            int tx = dr.getTx();
+            int ty = dr.getTy();
+
+            x -= tx;
+            y -= ty;
+
+            int colorTolerance = SelectionTool.getTolerance();
+
+            BufferedImage image = dr.getImage();
+            int imgHeight = image.getHeight();
+            int imgWidth = image.getWidth();
+            if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
+                return null;
+            }
+
+            boolean thereIsSelection = comp.hasSelection();
+            boolean grayScale = image.getType() == BufferedImage.TYPE_BYTE_GRAY;
+
+            BufferedImage workingImage;
+            if (grayScale) {
+                workingImage = ImageUtils.toSysCompatibleImage(image);
+            } else if (thereIsSelection) {
+                workingImage = ImageUtils.copyImage(image);
+            } else {
+                workingImage = image;
+            }
+
+            boolean [][] visited = new boolean[workingImage.getWidth()][workingImage.getHeight()];
+            int targetColor = getColorAtEvent(x, y, pm);
+
+            selectedArea(workingImage, x, y, colorTolerance, targetColor, selectedArea, pm, visited);
+            return selectedArea;
+        }
+
+        private void selectedArea(BufferedImage img, int x, int y, int tolerance,
+                                  int rgbAtMouse, Area selectedArea,
+                                  PMouseEvent pm, boolean[][] visited) {
+
+            int imgHeight = img.getHeight();
+            int imgWidth = img.getWidth();
+
+            Stack<Area> areasToProcess = new Stack<>();
+            areasToProcess.push(new Area(new Rectangle2D.Double(x, y, 1, 1)));
+
+            while (!areasToProcess.isEmpty()) {
+
+                    Area currentArea = areasToProcess.pop();
+                    Rectangle2D bounds = currentArea.getBounds2D();
+                    int currentX = (int) bounds.getX();
+                    int currentY = (int) bounds.getY();
+
+                    int targetColor = getColorAtEvent(currentX, currentY, pm);
+
+                    if (currentX > 0 && currentX < imgWidth && currentY > 0 && currentY < imgHeight &&
+                            colorWithinTolerance(new Color(rgbAtMouse), new Color(targetColor), tolerance) &&
+                            !visited[currentX][currentY]) {
+
+                        selectedArea.add(currentArea);
+                        visited[currentX][currentY] = true;
+
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX + 1, currentY, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX - 1, currentY, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY + 1, 1, 1)));
+                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY - 1, 1, 1)));
+                    }
+
+            }
+        }
+
+        private int getColorAtEvent(int x, int y, PMouseEvent pm) {
+            View view = pm.getView();
+            BufferedImage img;
+            Composition comp = view.getComp();
+            img = comp.getCompositeImage();
+
+            if (x >= 0 && x < img.getWidth() && y >= 0 && y < img.getHeight()) {
+                return img.getRGB(x, y);
+            } else {
+                return Color.BLACK.getRGB();
+            }
+        }
+
+        private boolean colorWithinTolerance(Color c1, Color c2, int tolerance) {
+            return Math.abs(c1.getRed() - c2.getRed()) <= tolerance &&
+                    Math.abs(c1.getGreen() - c2.getGreen()) <= tolerance &&
+                    Math.abs(c1.getBlue() - c2.getBlue()) <= tolerance;
         }
     };
 

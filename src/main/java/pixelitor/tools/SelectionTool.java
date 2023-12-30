@@ -22,9 +22,11 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.GUIMode;
 import pixelitor.Views;
+import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.selection.*;
 import pixelitor.tools.util.ArrowKey;
@@ -37,6 +39,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Graphics2D;
 
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.selection.ShapeCombinator.*;
 
 /**
@@ -56,6 +59,11 @@ public class SelectionTool extends DragTool {
         "simply drag around the area that you want to select. " +
         "<b>Shift-drag</b> adds to an existing selection, " +
         "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+    private static final String MAGIC_WAND_HELP_TEXT = "MagicWand selection: " +
+        "<b>click</b> on the area that you want to select. " +
+        "<b>right-click</b> to close the selection." +
+        "<b>Shift</b> adds to an existing selection, " +
+        "<b>Alt</b> removes from it, <b>Shift-Alt</b> intersects.";
     private static final String NEW_SELECTION_TEXT = "New Selection";
 
     private boolean altMeansSubtract = false;
@@ -63,12 +71,16 @@ public class SelectionTool extends DragTool {
 
     private SelectionBuilder selectionBuilder;
     private boolean polygonal = false;
+    private boolean magicWand = false;
     private boolean displayWidthHeight = true;
 
     private final EnumComboBoxModel<SelectionType> typeModel
         = new EnumComboBoxModel<>(SelectionType.class);
     private final EnumComboBoxModel<ShapeCombinator> combinatorModel
         = new EnumComboBoxModel<>(ShapeCombinator.class);
+
+    private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
+    private static SliderSpinner sliderSpinner;
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
@@ -103,20 +115,31 @@ public class SelectionTool extends DragTool {
 
         SelectionType type = getSelectionType();
         polygonal = type == SelectionType.POLYGONAL_LASSO;
+        magicWand = type == SelectionType.SELECTION_MAGIC_WAND;
         displayWidthHeight = type.displayWidthHeight();
 
         if (polygonal) {
             Messages.showInStatusBar(POLY_HELP_TEXT);
         } else if (type == SelectionType.LASSO) {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
+        } else if (magicWand) {
+            Messages.showInStatusBar(MAGIC_WAND_HELP_TEXT);
+            if (sliderSpinner == null) {
+                sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);
+                settingsPanel.add(sliderSpinner);
+            }
         } else {
             Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
+            if (sliderSpinner != null) {
+                settingsPanel.remove(sliderSpinner);
+                sliderSpinner = null;
+            }
         }
     }
 
     @Override
     protected void dragStarted(PMouseEvent e) {
-        if (polygonal) {
+        if (polygonal || magicWand) {
             return; // ignore mouse pressed
         }
 
@@ -128,7 +151,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     protected void ongoingDrag(PMouseEvent e) {
-        if (polygonal) {
+        if (polygonal || magicWand) {
             return; // ignore dragging
         }
         if (selectionBuilder == null) {
@@ -143,12 +166,12 @@ public class SelectionTool extends DragTool {
         }
 
         drag.setStartFromCenter(startFromCenter);
-        selectionBuilder.updateInProgressSelection(drag, e.getComp());
+        selectionBuilder.updateInProgressSelection(drag, e.getComp(), e);
     }
 
     @Override
     protected void dragFinished(PMouseEvent e) {
-        if (drag.isClick() && !polygonal) { // will be handled by mouseClicked
+        if (drag.isClick() && !polygonal && !magicWand) { // will be handled by mouseClicked
             restoreCombinator();
             return;
         }
@@ -197,11 +220,15 @@ public class SelectionTool extends DragTool {
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
         drag.setStartFromCenter(startFromCenter);
 
-        selectionBuilder.updateInProgressSelection(drag, comp);
+        selectionBuilder.updateInProgressSelection(drag, comp, e);
         selectionBuilder.combineShapes(comp);
         stopBuildingSelection();
 
         assert !comp.hasInProgressSelection();
+    }
+
+    public static int getTolerance() {
+        return toleranceParam.getValue();
     }
 
     @Override
@@ -217,11 +244,23 @@ public class SelectionTool extends DragTool {
                 // ignore otherwise: will be handled in mouse released
             }
             return;
+        } else if (magicWand) {
+            setupCombinatorWithKeyModifiers(e);
+            selectionBuilder = new SelectionBuilder(
+                    getSelectionType(), getCombinator(), e.getComp());
+
+            if (e.isRight()) {
+                cancelSelection(comp);
+            } else if (selectionBuilder != null && e.getClickCount() == 1) {
+                selectionBuilder.updateInProgressSelection(e, comp);
+                selectionBuilder.combineShapes(comp);
+                stopBuildingSelection();
+            }
         }
 
         super.mouseClicked(e);
 
-        cancelSelection(comp);
+        if (!magicWand) { cancelSelection(comp); }
     }
 
     private void cancelSelection(Composition comp) {
@@ -248,7 +287,7 @@ public class SelectionTool extends DragTool {
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(true);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp());
+            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = true;
     }
@@ -257,7 +296,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setStartFromCenter(false);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp());
+            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = false;
     }

@@ -302,7 +302,7 @@ public class Drag implements Serializable {
             return new Drag(imStartX, centerY, imEndX, centerY);
         }
     }
-
+    
     public boolean isClick() {
         assert hasCoCoords;
         return coStartX == coEndX && coStartY == coEndY;
