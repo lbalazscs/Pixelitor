@@ -40,7 +40,7 @@ jobs:
 
       - name: Archive artifacts
         if: matrix.java-version == 21
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PixelitorJAR-${{ env.DATE }}
           path: target/*.jar
