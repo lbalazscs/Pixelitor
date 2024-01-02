@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,28 +121,7 @@ public class Pixelitor {
 
         Theme theme = AppPreferences.loadTheme();
         Themes.install(theme, false, true);
-
-        int uiFontSize = AppPreferences.loadUIFontSize();
-        String uiFontType = AppPreferences.loadUIFontType();
-
-        Font defaultFont = UIManager.getFont("defaultFont");
-        if (defaultFont != null) { // if null, we don't know how to set the font
-            if (uiFontSize != 0 || !uiFontType.isEmpty()) {
-                Font newFont;
-                if (!uiFontType.isEmpty()) {
-                    newFont = new Font(uiFontType, Font.PLAIN, uiFontSize);
-                } else {
-                    newFont = defaultFont.deriveFont((float) uiFontSize);
-                }
-
-                FontUIResource fontUIResource = new FontUIResource(newFont);
-                UIManager.put("defaultFont", fontUIResource);
-
-                if (theme.isNimbus()) {
-                    UIManager.getLookAndFeel().getDefaults().put("defaultFont", fontUIResource);
-                }
-            }
-        }
+        loadUIFonts(theme);
 
         var pw = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
@@ -167,6 +146,35 @@ public class Pixelitor {
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
+    private static void loadUIFonts(Theme theme) {
+        int uiFontSize = AppPreferences.loadUIFontSize();
+        String uiFontType = AppPreferences.loadUIFontType();
+        if (uiFontSize == 0 || uiFontType.isEmpty()) {
+            // no saved settings found
+            return;
+        }
+
+        Font defaultFont = UIManager.getFont("defaultFont");
+        if (defaultFont == null) {
+            // if null, we don't know how to set the font
+            return;
+        }
+
+        Font newFont;
+        if (!uiFontType.isEmpty()) {
+            newFont = new Font(uiFontType, Font.PLAIN, uiFontSize);
+        } else {
+            newFont = defaultFont.deriveFont((float) uiFontSize);
+        }
+
+        FontUIResource fontUIResource = new FontUIResource(newFont);
+        UIManager.put("defaultFont", fontUIResource);
+
+        if (theme.isNimbus()) {
+            UIManager.getLookAndFeel().getDefaults().put("defaultFont", fontUIResource);
+        }
+    }
+
     /**
      * Schedules the opening of the files given as command-line arguments
      */
@@ -174,19 +182,19 @@ public class Pixelitor {
         List<CompletableFuture<Composition>> openedFiles = new ArrayList<>();
 
         for (String fileName : args) {
-            File f = new File(fileName);
-            if (f.exists()) {
-                openedFiles.add(IO.openFileAsync(f, false));
+            File file = new File(fileName);
+            if (file.exists()) {
+                openedFiles.add(IO.openFileAsync(file, false));
             } else {
                 Messages.showError("File not found",
-                    format("The file \"%s\" doesn't exist.", f.getAbsolutePath()));
+                    format("The file \"%s\" doesn't exist.", file.getAbsolutePath()));
             }
         }
 
         return Utils.allOf(openedFiles);
     }
 
-    public static void exitApp(PixelitorWindow pw) {
+    public static void warnAndExit(PixelitorWindow pw) {
         assert calledOnEDT() : threadInfo();
 
         var paths = IOTasks.getCurrentWritePaths();
@@ -205,25 +213,29 @@ public class Pixelitor {
                 // can be updated while waiting
                 new Thread(() -> {
                     Utils.sleep(10, TimeUnit.SECONDS);
-                    EventQueue.invokeLater(() -> exitApp(pw));
+                    EventQueue.invokeLater(() -> warnAndExit(pw));
                 }).start();
 
                 return;
             }
         }
 
-        var unsavedComps = Views.getUnsavedComps();
-        if (!unsavedComps.isEmpty()) {
-            String msg = createUnsavedChangesMsg(unsavedComps);
-
-            if (Dialogs.showYesNoWarningDialog(pw, "Unsaved Changes", msg)) {
-                pw.setVisible(false);
-                AppPreferences.savePrefsAndExit();
+        List<Composition> unsaved = Views.getUnsavedComps();
+        if (!unsaved.isEmpty()) {
+            boolean yesClicked = Dialogs.showYesNoWarningDialog(pw,
+                "Unsaved Changes", createUnsavedChangesMsg(unsaved));
+            if (yesClicked) {
+                exit(pw);
             }
         } else {
-            pw.setVisible(false);
-            AppPreferences.savePrefsAndExit();
+            exit(pw);
         }
+    }
+
+    private static void exit(PixelitorWindow pw) {
+        pw.setVisible(false);
+        AppPreferences.savePreferences();
+        System.exit(0);
     }
 
     private static String createUnsavedChangesMsg(List<Composition> unsavedComps) {

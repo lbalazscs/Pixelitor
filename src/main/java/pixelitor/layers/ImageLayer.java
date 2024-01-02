@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -413,7 +413,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                                                 boolean isUndoRedo) {
         assert src != null;
         assert newImg != null;
-        assert Assertions.checkRasterMinimum(newImg);
+        assert Assertions.rasterStartsAtZero(newImg);
 
         var selection = comp.getSelection();
         if (selection == null) {
@@ -464,7 +464,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         image = requireNonNull(newImage);
         imageRefChanged();
 
-        assert Assertions.checkRasterMinimum(newImage);
+        assert Assertions.rasterStartsAtZero(newImage);
 
         comp.invalidateImageCache();
 

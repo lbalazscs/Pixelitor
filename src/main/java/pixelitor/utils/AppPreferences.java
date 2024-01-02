@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -393,12 +393,7 @@ public final class AppPreferences {
         mainNode.putInt(CROP_GUIDE_STROKE_KEY, style.getStrokeType().ordinal());
     }
 
-    public static void savePrefsAndExit() {
-        savePreferences();
-        System.exit(0);
-    }
-
-    private static void savePreferences() {
+    public static void savePreferences() {
         saveDesktopMode();
         saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFileInfosForSaving());
         saveFramePosition(PixelitorWindow.get());
@@ -508,8 +503,7 @@ public final class AppPreferences {
 
     public static Theme loadTheme() {
         String code = mainNode.get(THEME_KEY, Themes.DEFAULT.getSaveCode());
-        Theme[] themes = Theme.values();
-        for (Theme theme : themes) {
+        for (Theme theme : Theme.values()) {
             if (code.equals(theme.getSaveCode())) {
                 return theme;
             }

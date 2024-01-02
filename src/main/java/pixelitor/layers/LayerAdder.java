@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class LayerAdder {
     private final Composition comp;
     private String editName; // null if the add should not be added to history
     private int targetLayerIndex = -1;
-    private boolean refresh = true;
+    private boolean update = true;
 
     public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
 
@@ -69,8 +69,8 @@ public class LayerAdder {
     /**
      * Used when the composite image doesn't change.
      */
-    public LayerAdder noRefresh() {
-        refresh = false;
+    public LayerAdder noUpdate() {
+        update = false;
         return this;
     }
 
@@ -132,7 +132,7 @@ public class LayerAdder {
             assert GUIMode.isUnitTesting() || layer.hasUI();
 
             comp.setDirty(true);
-            if (refresh) {
+            if (update) {
                 holder.update();
             }
         }

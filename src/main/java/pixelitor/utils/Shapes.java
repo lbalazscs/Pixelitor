@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -574,7 +574,7 @@ public class Shapes {
 
     public static Shape createHexagon(double cx, double cy, double radius) {
         double cos60 = 0.5;
-        double sin60 = 0.86602540378443864676372317075294;
+        double sin60 = 0.8660254037844386;
         double rCos60 = radius * cos60;
         double rSin60 = radius * sin60;
 

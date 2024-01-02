@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -167,13 +167,7 @@ public class SplashImageCreator {
         return font;
     }
 
-    private static ImageLayer addNewLayer(Composition comp, String name) {
-        ImageLayer imageLayer = comp.addNewEmptyImageLayer(name, false);
-        imageLayer.setName(name, true);
-        return imageLayer;
-    }
-
-    private static TextLayer addNewTextLayer(Composition comp, String name, TextSettings settings, int translationY) {
+    private static void addNewTextLayer(Composition comp, String name, TextSettings settings, int translationY) {
         var layer = new TextLayer(comp, name, settings);
 
         layer.setTranslation(0, translationY);
@@ -182,7 +176,6 @@ public class SplashImageCreator {
             .withHistory("add " + name)
             .atPosition(TOP)
             .add(layer);
-        return layer;
     }
 
     private static void addTextLayer(Composition comp, String text,

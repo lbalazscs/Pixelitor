@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -558,7 +558,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         getHolderForNewLayers().adder()
             .withHistory("New Empty Layer")
             .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
-            .noRefresh()
+            .noUpdate()
             .add(newLayer);
 
         return newLayer;
@@ -575,7 +575,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         new LayerAdder(this)
             .withHistory("New Layer from Visible")
-            .noRefresh()
+            .noUpdate()
             .atIndex(layerList.size())
             .add(newLayer);
     }
@@ -612,7 +612,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         Layer flattened = new ImageLayer(this, bi, "flattened");
         adder()
             .atIndex(numLayers) // add to the top
-            .noRefresh()
+            .noUpdate()
             .add(flattened);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest

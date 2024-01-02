@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,10 @@ public class Assertions {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean checkRasterMinimum(BufferedImage newImage) {
+    public static boolean rasterStartsAtZero(BufferedImage newImage) {
         var raster = newImage.getRaster();
         if (raster.getMinX() != 0 || raster.getMinY() != 0) {
-            throw new IllegalArgumentException("Raster " + raster +
+            throw new IllegalStateException("Raster " + raster +
                 " has minX or minY not equal to zero: "
                 + raster.getMinX() + ' ' + raster.getMinY());
         }

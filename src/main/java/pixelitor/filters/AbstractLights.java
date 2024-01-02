@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -174,7 +174,7 @@ public class AbstractLights extends ParametrizedFilter {
         return points;
     }
 
-    private void connectParticles(int width, int height, int numPoints, double speed, ArrayList<Particle> points) {
+    private void connectParticles(int width, int height, int numPoints, double speed, List<Particle> points) {
         int connect = typeParam.getValue();
         if (connect == TYPE_CHAOS || connect == TYPE_FRAME) {
             for (int i = 0; i < numPoints; i++) {

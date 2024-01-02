@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.tools.brushes.*;
 
 import javax.swing.*;
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLED;
@@ -142,7 +141,7 @@ public enum BrushType {
 
     // The settings are shared between the symmetry-brushes of a
     // tool, but they are different between the different tools
-    private Map<Tool, BrushSettings> settingsByTool;
+    private IdentityHashMap<Tool, BrushSettings> settingsByTool;
 
     BrushType(String guiName, boolean hasSettings) {
         this.guiName = guiName;

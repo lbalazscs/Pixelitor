@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -129,6 +129,8 @@ public class GlobalEvents {
         backwardKeys = new HashSet<>(backwardKeys); // make modifiable
         backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
+
+        addBrushSizeActions();
     }
 
     private static void keyPressed(KeyEvent e) {
@@ -239,7 +241,7 @@ public class GlobalEvents {
         return numModalDialogs;
     }
 
-    public static void addBrushSizeActions() {
+    private static void addBrushSizeActions() {
         addHotKey(']', INCREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
         addHotKey('[', DECREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
     }
@@ -247,7 +249,7 @@ public class GlobalEvents {
     public static void registerDebugMouseWatching(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
-            String msg = Tools.getCurrent().getName() + ": " + Debug.debugMouseEvent(e);
+            String msg = Tools.getCurrent().getName() + ": " + Debug.mouseEventAsString(e);
             if (postEvents) {
                 Events.postMouseEvent(msg);
             } else {

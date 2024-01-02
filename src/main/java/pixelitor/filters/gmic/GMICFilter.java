@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,6 +52,11 @@ public abstract class GMICFilter extends ParametrizedFilter {
     }
 
     public abstract List<String> getArgs();
+
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
 
     public static IntChoiceParam createValueAction() {
         return new IntChoiceParam("Value Action", new String[]{

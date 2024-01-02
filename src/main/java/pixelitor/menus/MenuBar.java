@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -201,7 +201,7 @@ public class MenuBar extends JMenuBar {
         // exit
         String exitName = JVM.isMac ?
             texts.getString("exit_mac") : texts.getString("exit");
-        fileMenu.add(new PAction(exitName, () -> Pixelitor.exitApp(pw)));
+        fileMenu.add(new PAction(exitName, () -> Pixelitor.warnAndExit(pw)));
 
         return fileMenu;
     }
@@ -1439,7 +1439,8 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter(ParamTest.NAME, ParamTest::new);
 
-        sub.add(new PAction("Random GUI Test", RandomGUITest::start), CTRL_R);
+        sub.add(new PAction("Random GUI Test", () ->
+            RandomGUITest.get().start()), CTRL_R);
 
         sub.add(new OpenViewEnabledAction(
             "Save in All Formats...",

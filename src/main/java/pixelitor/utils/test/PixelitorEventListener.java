@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,8 @@ public class PixelitorEventListener implements ActiveHolderListener,
 
     public PixelitorEventListener() {
         if (GUIMode.isFinal()) {
-            throw new IllegalStateException("should be used only for debugging");
+            // should be used only for debugging
+            throw new IllegalStateException();
         }
     }
 
@@ -52,7 +53,7 @@ public class PixelitorEventListener implements ActiveHolderListener,
 
     @Override
     public void layerActivated(Layer layer) {
-        String type = "layer targeted: " + layer.getName();
+        String type = "layer activated: " + layer.getName();
         Events.postListenerEvent(type, layer.getComp(), layer);
     }
 
@@ -78,8 +79,8 @@ public class PixelitorEventListener implements ActiveHolderListener,
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        String oldCVName = oldView == null ? "null" : oldView.getName();
-        String type = format("view activated %s => %s", oldCVName, newView.getName());
+        String oldViewName = oldView == null ? "null" : oldView.getName();
+        String type = format("view activated %s => %s", oldViewName, newView.getName());
         Events.postListenerEvent(type, newView.getComp(), null);
     }
 }

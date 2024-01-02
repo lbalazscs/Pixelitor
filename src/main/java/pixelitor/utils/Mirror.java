@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,51 +20,31 @@ package pixelitor.utils;
 import pixelitor.tools.Symmetry;
 
 /**
- * A mirroring effect achieved with negative scaling
- * Not to be confused with {@link Symmetry}
+ * A mirroring effect achieved with negative scaling.
+ * Not to be confused with {@link Symmetry}.
  */
 public enum Mirror {
-    NONE("None") {
-        @Override
-        public double getScaleX(double scaleAbs) {
-            return scaleAbs;
-        }
-
-        @Override
-        public double getScaleY(double scaleAbs) {
-            return scaleAbs;
-        }
-    }, VERTICAL("Vertical") {
-        @Override
-        public double getScaleX(double scaleAbs) {
-            return -1 * scaleAbs;
-        }
-
-        @Override
-        public double getScaleY(double scaleAbs) {
-            return scaleAbs;
-        }
-    }, HORIZONTAL("Horizontal") {
-        @Override
-        public double getScaleX(double scaleAbs) {
-            return scaleAbs;
-        }
-
-        @Override
-        public double getScaleY(double scaleAbs) {
-            return -1 * scaleAbs;
-        }
-    };
+    NONE("None", 1.0, 1.0),
+    VERTICAL("Vertical", -1.0, 1.0),
+    HORIZONTAL("Horizontal", 1.0, -1.0);
 
     private final String guiName;
+    private final double multX;
+    private final double multY;
 
-    Mirror(String guiName) {
+    Mirror(String guiName, double multX, double multY) {
         this.guiName = guiName;
+        this.multX = multX;
+        this.multY = multY;
     }
 
-    public abstract double getScaleX(double scaleAbs);
+    public double getScaleX(double scaleAbs) {
+        return scaleAbs * multX;
+    }
 
-    public abstract double getScaleY(double scaleAbs);
+    public double getScaleY(double scaleAbs) {
+        return scaleAbs * multY;
+    }
 
     @Override
     public String toString() {

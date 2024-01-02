@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -174,7 +174,7 @@ public class ValueNoise extends ParametrizedFilter {
         int n = x + y * 57;
         n = (n << 13) ^ n;
 
-        return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7F_FF_FF_FF) / 1.07374182E+9f);
+        return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7F_FF_FF_FF) / 1.0737418E+9f);
     }
 
     private static float interpolate(float x, float y, float a, NoiseInterpolation interp) {

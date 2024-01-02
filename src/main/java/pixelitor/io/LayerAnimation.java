@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,8 @@ import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Layer;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -33,11 +35,17 @@ import java.util.List;
 public class LayerAnimation {
     private final int delayMillis;
     private final List<BufferedImage> images = new ArrayList<>();
+    private int numFrames;
 
     public LayerAnimation(Composition comp, int delayMillis, boolean pingPong) {
         this.delayMillis = delayMillis;
 
         int numLayers = comp.getNumLayers();
+        numFrames = numLayers;
+        if (pingPong && numLayers > 2) {
+            numFrames += (numLayers - 1);
+        }
+
         for (int i = 0; i < numLayers; i++) {
             addLayer(comp, i);
         }
@@ -58,11 +66,17 @@ public class LayerAnimation {
     }
 
     private void export(File f) {
+        ProgressTracker pt = new StatusBarProgressTracker("Writing " + f.getName(), numFrames);
+
         AnimatedGifEncoder e = new AnimatedGifEncoder();
         e.start(f);
         e.setDelay(delayMillis);
         e.setRepeat(0);
-        images.forEach(e::addFrame);
+        for (BufferedImage image : images) {
+            e.addFrame(image);
+            pt.unitDone();
+        }
+        pt.finished();
         e.finish();
     }
 

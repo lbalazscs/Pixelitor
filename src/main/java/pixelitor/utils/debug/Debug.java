@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -209,7 +209,6 @@ public class Debug {
         }
 
         BufferedImage copy = ImageUtils.copyToBufferedImage(img);
-
         View previousView = Views.getActive();
 
         findCompByName(name).ifPresentOrElse(
@@ -227,12 +226,12 @@ public class Debug {
             c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
     }
 
-    private static void replaceImageInDebugComp(Composition comp, BufferedImage copy) {
+    private static void replaceImageInDebugComp(Composition comp, BufferedImage newImg) {
         Canvas canvas = comp.getCanvas();
-        comp.getActiveDrawableOrThrow().setImage(copy);
+        comp.getActiveDrawableOrThrow().setImage(newImg);
 
-        if (canvas.hasDifferentSizeThan(copy)) {
-            canvas.resize(copy.getWidth(), copy.getHeight(), comp.getView(), true);
+        if (canvas.hasDifferentSizeThan(newImg)) {
+            canvas.resize(newImg.getWidth(), newImg.getHeight(), comp.getView(), true);
         }
 
         comp.repaint();
@@ -260,23 +259,19 @@ public class Debug {
     }
 
     public static void debugRaster(Raster raster, String name) {
-        ColorModel colorModel;
-        int numBands = raster.getNumBands();
-
-        if (numBands == 4) { // normal color image
-            colorModel = new DirectColorModel(
+        ColorModel colorModel = switch (raster.getNumBands()) {
+            // normal color image
+            case 4 -> new DirectColorModel(
                 ColorSpace.getInstance(ColorSpace.CS_sRGB), 32,
                 0x00_FF_00_00, 0x00_00_FF_00, 0x00_00_00_FF, 0xFF_00_00_00,
                 true, DataBuffer.TYPE_INT);
-        } else if (numBands == 1) { // grayscale image
-            int[] nBits = {8};
-            colorModel = new ComponentColorModel(
-                ColorSpace.getInstance(ColorSpace.CS_GRAY), nBits,
+            // grayscale image
+            case 1 -> new ComponentColorModel(
+                ColorSpace.getInstance(ColorSpace.CS_GRAY), new int[]{8},
                 false, true,
                 Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
-        } else {
-            throw new IllegalStateException("numBands = " + numBands);
-        }
+            default -> throw new IllegalStateException("numBands = " + raster.getNumBands());
+        };
 
         Raster correctlyTranslated = raster.createChild(
             raster.getMinX(), raster.getMinY(),
@@ -289,6 +284,7 @@ public class Debug {
     }
 
     public static void debugRasterWithEmptySpace(Raster raster) {
+        // This image will include the minX/minY part of the Raster
         BufferedImage debugImage = new BufferedImage(
             raster.getMinX() + raster.getWidth(),
             raster.getMinY() + raster.getHeight(),
@@ -303,9 +299,8 @@ public class Debug {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Utils.sleep(1, TimeUnit.SECONDS);
-
-                Runnable changeToolOnEDTTask = () -> Tools.getRandomTool().activate();
-                GUIUtils.invokeAndWait(changeToolOnEDTTask);
+                GUIUtils.invokeAndWait(() ->
+                    Tools.getRandomTool().activate());
             }
         };
         new Thread(backgroundTask).start();
@@ -336,16 +331,16 @@ public class Debug {
         AddTextLayerAction.INSTANCE.actionPerformed(null);
     }
 
+    public static void startFilter(String filterName) {
+        FilterAction action = Filters.getFilterActionByName(filterName);
+        EventQueue.invokeLater(() -> action.actionPerformed(null));
+    }
+
     public static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
         View view = Views.getActive();
         Layer layer = view.getComp().getActiveLayer();
         MaskViewMode.SHOW_MASK.activate(view, layer);
-    }
-
-    public static void startFilter(String filterName) {
-        FilterAction action = Filters.getFilterActionByName(filterName);
-        EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 
     public static void addNewImageWithMask() {
@@ -430,10 +425,6 @@ public class Debug {
         }
     }
 
-    private static String debugDimension(Dimension d) {
-        return d.width + "x" + d.height;
-    }
-
     public static String debugJComponent(JComponent c) {
         return String.format("""
                 size = %s
@@ -445,14 +436,18 @@ public class Debug {
                 border insets = %s
                 doubleBuffered = %s
                 """,
-            debugDimension(c.getSize()),
-            debugDimension(c.getPreferredSize()),
-            debugDimension(c.getMinimumSize()),
-            debugDimension(c.getMaximumSize()),
+            dimensionAsString(c.getSize()),
+            dimensionAsString(c.getPreferredSize()),
+            dimensionAsString(c.getMinimumSize()),
+            dimensionAsString(c.getMaximumSize()),
             c.getInsets().toString(),
             c.getBorder().toString(),
             c.getBorder().getBorderInsets(c).toString(),
             c.isDoubleBuffered());
+    }
+
+    private static String dimensionAsString(Dimension d) {
+        return d.width + "x" + d.height;
     }
 
     public static void serializeAllFilters() {
@@ -529,7 +524,7 @@ public class Debug {
         smartObject.updateIconImage();
     }
 
-    public static String debugMouseEvent(MouseEvent e) {
+    public static String mouseEventAsString(MouseEvent e) {
         String action = switch (e.getID()) {
             case MouseEvent.MOUSE_CLICKED -> "CLICKED";
             case MouseEvent.MOUSE_PRESSED -> "PRESSED";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,9 @@ package pixelitor.utils;
 
 import com.jhlabs.image.ImageMath;
 
+/**
+ * Utility methods related to color spaces.
+ */
 public class ColorSpaces {
     /**
      * A lookup table for transforming sRGB (ints in the 0..255 range)
@@ -46,7 +49,7 @@ public class ColorSpaces {
     }
 
     private ColorSpaces() {
-        // private constructor to prevent initialization
+        // prevent initialization
     }
 
     private static double toLinear(double sRGB) {

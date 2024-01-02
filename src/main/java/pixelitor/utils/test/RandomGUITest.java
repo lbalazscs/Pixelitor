@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,10 +46,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenTool;
-import pixelitor.utils.MemoryInfo;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
@@ -86,41 +83,49 @@ import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 public class RandomGUITest {
     public static final char EXIT_KEY_CHAR = 'Q';
     public static final char PAUSE_KEY_CHAR = 'A';
-    private static final Random rand = new Random();
+
+    private static final boolean PRINT_MEMORY = false;
+    private static final boolean NO_HIDE_SHOW = true; // no view operations if set to true
+
+    private final Random rand = new Random();
 
     // set to null to select random tools
-    private static final Tool preferredTool = null;
+    private final Tool preferredTool = null;
 
     // set to null to select random filters
-    private static final Filter preferredFilter = null;
-    private static final ParametrizedFilter preferredTweenFilter = null;
+    private final Filter preferredFilter = null;
+    private final ParametrizedFilter preferredTweenFilter = null;
 
-    private static final boolean singleImageTest = false;
-    private static final boolean noHideShow = true; // no view operations if set to true
-    private static final DateTimeFormatter DATE_FORMAT
+    private final DateTimeFormatter DATE_FORMAT
         = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
-    private static volatile boolean stopRunning = false;
+    private boolean running = false;
+    private volatile boolean stopRunning = false;
 
-    private static final WeightedCaller weightedCaller = new WeightedCaller();
-    private static final boolean PRINT_MEMORY = false;
+    private final WeightedCaller weightedCaller = new WeightedCaller();
 
-    private static boolean running = false;
+    private final boolean verbose = "true".equals(System.getProperty("verbose"));
 
-    private static final boolean verbose = "true".equals(System.getProperty("verbose"));
-
-    private static Rectangle startBounds;
+    private Rectangle startBounds;
 
     private static final boolean enableCopyPaste = false;
-    private static int numPastedImages = 0;
+    private int numPastedImages = 0;
 
-    /**
-     * Utility class with static methods
-     */
+    private static RandomGUITest INSTANCE = null;
+
     private RandomGUITest() {
     }
 
-    public static void start() {
+    public static RandomGUITest get() {
+        assert Threads.calledOnEDT();
+        if (INSTANCE == null) {
+            //noinspection NonThreadSafeLazyInitialization
+            INSTANCE = new RandomGUITest();
+        }
+        return INSTANCE;
+    }
+
+    public void start() {
         if (GUIMode.isFinal()) {
             Messages.showError("Error", "Build is FINAL");
             return;
@@ -130,7 +135,7 @@ public class RandomGUITest {
             return;
         }
         running = true;
-        startBounds = getWindowBounds();
+        startBounds = PixelitorWindow.get().getBounds();
 
         PixelitorWindow.get().setAlwaysOnTop(true);
 
@@ -162,7 +167,7 @@ public class RandomGUITest {
         try {
             robot = new Robot();
         } catch (AWTException e) {
-            e.printStackTrace();
+            Messages.showException(e);
         }
         setupActions(robot);
 
@@ -179,11 +184,18 @@ public class RandomGUITest {
     }
 
     public static boolean isRunning() {
-        return running;
+        if (INSTANCE == null) {
+            return false;
+        }
+        return INSTANCE.running;
     }
 
     public static void stop() {
-        stopRunning = true;
+        if (INSTANCE == null) {
+            return;
+        }
+        INSTANCE.stopRunning = true;
+
         var pw = PixelitorWindow.get();
         // the window can be null if an exception is thrown at startup,
         // and we get here from the uncaught exception handler
@@ -192,7 +204,7 @@ public class RandomGUITest {
         }
     }
 
-    private static SwingWorker<Void, Void> createSwingWorker(Robot robot) {
+    private SwingWorker<Void, Void> createSwingWorker(Robot robot) {
         return new SwingWorker<>() {
             @Override
             public Void doInBackground() {
@@ -201,7 +213,7 @@ public class RandomGUITest {
         };
     }
 
-    private static Void backgroundRunner(Robot robot) {
+    private Void backgroundRunner(Robot robot) {
         int numTests = 8000;  // must be > 100
         int onePercent = numTests / 100;
 
@@ -261,7 +273,7 @@ public class RandomGUITest {
 
     private static void tryToRegainWindowFocus(int attempts) {
         if (attempts <= 0) {
-            return;
+            return; // give up
         }
 
         System.out.println("RandomGUITest: trying to regain window focus");
@@ -273,17 +285,14 @@ public class RandomGUITest {
 
         if (!GUIUtils.appHasFocus()) {
             Utils.sleep(1, TimeUnit.SECONDS);
+            //noinspection TailRecursion
             tryToRegainWindowFocus(attempts - 1);
         }
     }
 
-    private static Rectangle getWindowBounds() {
-        return PixelitorWindow.get().getBounds();
-    }
-
     // generates a random point within the main window relative to the screen
-    private static Point generateRandomPoint() {
-        Rectangle windowBounds = getWindowBounds();
+    private Point generateRandomPoint() {
+        Rectangle windowBounds = PixelitorWindow.get().getBounds();
         if (!windowBounds.equals(startBounds)) {
             // Window moved. Shouldn't happen, but as a workaround
             // restore it to the starting state
@@ -316,25 +325,27 @@ public class RandomGUITest {
             Rnd.intInRange(minY, maxY));
     }
 
-    private static void finishRunning() {
+    private void finishRunning() {
         resetGUI();
         running = false;
     }
 
     private static void resetGUI() {
         WorkSpace.resetDefaults(PixelitorWindow.get());
-        resetTabsUI();
+        if (ImageArea.currentModeIs(FRAMES)) {
+            ImageArea.changeUI();
+        }
         PixelitorWindow.get().setAlwaysOnTop(false);
     }
 
-    private static void log(String msg) {
+    private void log(String msg) {
         if (verbose) {
             System.out.println(msg);
         }
         Events.postRandomTestEvent(msg);
     }
 
-    private static void randomMove(Robot robot) {
+    private void randomMove(Robot robot) {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
@@ -349,7 +360,7 @@ public class RandomGUITest {
         return true;
     }
 
-    private static void randomDrag(Robot robot) {
+    private void randomDrag(Robot robot) {
         Tool tool = Tools.getCurrent();
         if (!canUseTool(tool)) {
             return;
@@ -369,7 +380,7 @@ public class RandomGUITest {
             + "drag to (" + x + ", " + y + ')');
     }
 
-    private static void randomClick(Robot robot) {
+    private void randomClick(Robot robot) {
         Tool tool = Tools.getCurrent();
         if (!canUseTool(tool)) {
             return;
@@ -380,7 +391,7 @@ public class RandomGUITest {
         log(msg);
     }
 
-    private static String runWithModifiers(Robot robot, Runnable task) {
+    private String runWithModifiers(Robot robot, Runnable task) {
         boolean shiftDown = rand.nextBoolean();
         if (shiftDown) {
             robot.keyPress(VK_SHIFT);
@@ -433,12 +444,12 @@ public class RandomGUITest {
         return Debug.modifiersToString(ctrlDown, altDown, shiftDown, rightMouse, false);
     }
 
-    private static void randomColors() {
+    private void randomColors() {
         log("randomize colors");
         randomizeColors();
     }
 
-    private static void randomFilter() {
+    private void randomFilter() {
         Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
             return;
@@ -506,7 +517,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomTween() {
+    private void randomTween() {
         Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
             return;
@@ -560,7 +571,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomFitTo() {
+    private void randomFitTo() {
         double r = Math.random();
         if (r > 0.75) {
             log("fit active to space");
@@ -577,7 +588,7 @@ public class RandomGUITest {
         }
     }
 
-    private static final int[] keyCodes = {VK_1,
+    private final int[] keyCodes = {VK_1,
         VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
         // skip A, because it's the stop keystroke
         VK_B, VK_C,
@@ -600,7 +611,7 @@ public class RandomGUITest {
         VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN
     };
 
-    private static void randomKey(Robot robot) {
+    private void randomKey(Robot robot) {
         int randomIndex = rand.nextInt(keyCodes.length);
         int keyCode = keyCodes[randomIndex];
 
@@ -624,11 +635,11 @@ public class RandomGUITest {
         robot.keyRelease(VK_CONTROL);
     }
 
-    private static void randomZoom() {
-        Views.onActiveView(RandomGUITest::setRandomZoom);
+    private void randomZoom() {
+        Views.onActiveView(this::setRandomZoom);
     }
 
-    private static void setRandomZoom(View view) {
+    private void setRandomZoom(View view) {
         ZoomLevel randomZoomLevel = calcRandomZoomLevel();
         log("zoom " + view.getName() + ", zoom level = " + randomZoomLevel);
 
@@ -663,7 +674,7 @@ public class RandomGUITest {
         return new Point(randX, randY);
     }
 
-    private static void randomZoomOut() {
+    private void randomZoomOut() {
         View view = Views.getActive();
         if (view != null) {
             log("zoom out " + view.getName());
@@ -677,13 +688,13 @@ public class RandomGUITest {
         }
     }
 
-    private static void repeat() {
+    private void repeat() {
         log("repeat (dispatch Ctrl-F)");
 
         dispatchKey(VK_F, 'F', CTRL_DOWN_MASK);
     }
 
-    private static void randomUndoRedo() {
+    private void randomUndoRedo() {
         if (History.canUndo()) {
             log("undo " + History.getEditToBeUndoneName());
 
@@ -704,14 +715,14 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomCrop() {
+    private void randomCrop() {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
             runAction(SelectionActions.getCrop());
         }
     }
 
-    private static void randomFade() {
+    private void randomFade() {
         if (!History.canFade()) {
             return;
         }
@@ -726,12 +737,12 @@ public class RandomGUITest {
         dr.startFilter(fade, FILTER_WITHOUT_DIALOG);
     }
 
-    private static void randomizeToolSettings() {
+    private void randomizeToolSettings() {
         log("randomize tool settings for " + Tools.getCurrent());
         ToolSettingsPanelContainer.get().randomizeToolSettings();
     }
 
-    private static void arrangeWindows() {
+    private void arrangeWindows() {
         if (ImageArea.currentModeIs(TABS)) {
             return;
         }
@@ -745,51 +756,51 @@ public class RandomGUITest {
         }
     }
 
-    private static void changeImageArea() {
+    private void changeImageArea() {
         log("change image area from " + ImageArea.getMode());
         ImageArea.changeUI();
     }
 
-    private static void deselect() {
+    private void deselect() {
         if (SelectionActions.areEnabled()) {
             runAction(SelectionActions.getDeselect());
         }
     }
 
-    private static void showHideSelection(Robot robot) {
+    private void showHideSelection(Robot robot) {
         log("showHideSelection");
         pressCtrlKey(robot, VK_H);
     }
 
-    private static void layerToCanvasSize() {
+    private void layerToCanvasSize() {
         log("layer to canvas size");
         Views.onActiveComp(Composition::activeLayerToCanvasSize);
     }
 
-    private static void fitCanvasToLayers() {
+    private void fitCanvasToLayers() {
         log("fit canvas to layers");
         Views.onActiveComp(Composition::fitCanvasToLayers);
     }
 
-    private static void invertSelection() {
+    private void invertSelection() {
         if (SelectionActions.areEnabled()) {
             runAction(SelectionActions.getInvert());
         }
     }
 
-    private static void traceWithCurrentBrush() {
+    private void traceWithCurrentBrush() {
         if (canTrace()) {
             runAction(PenTool.getTraceWithBrushAction());
         }
     }
 
-    private static void traceWithCurrentEraser() {
+    private void traceWithCurrentEraser() {
         if (canTrace()) {
             runAction(PenTool.getTraceWithEraserAction());
         }
     }
 
-    private static void traceWithCurrentSmudge() {
+    private void traceWithCurrentSmudge() {
         if (canTrace()) {
             runAction(PenTool.getTraceWithSmudgeAction());
         }
@@ -803,7 +814,7 @@ public class RandomGUITest {
         return comp.hasActivePath() && comp.activeLayerAcceptsToolDrawing();
     }
 
-    private static void randomRotateFlip() {
+    private void randomRotateFlip() {
         int r = rand.nextInt(5);
         switch (r) {
             case 0 -> runAction(new Rotate(ANGLE_90));
@@ -815,14 +826,14 @@ public class RandomGUITest {
         }
     }
 
-    private static void activateRandomView() {
+    private void activateRandomView() {
         View view = Views.activateRandomView();
         if (view != null) {
             log("activated random view " + view.getName());
         }
     }
 
-    private static void layerOrderChange() {
+    private void layerOrderChange() {
         var comp = Views.getActiveComp();
         int r = rand.nextInt(6);
         switch (r) {
@@ -836,37 +847,37 @@ public class RandomGUITest {
         }
     }
 
-    private static void moveActiveLayerToTop(Composition comp) {
+    private void moveActiveLayerToTop(Composition comp) {
         log("layer order change: active to top");
         comp.getActiveHolder().moveActiveLayerToTop();
     }
 
-    private static void moveActiveLayerToBottom(Composition comp) {
+    private void moveActiveLayerToBottom(Composition comp) {
         log("layer order change: active to bottom");
         comp.getActiveHolder().moveActiveLayerToBottom();
     }
 
-    private static void raiseLayerSelection(Composition comp) {
+    private void raiseLayerSelection(Composition comp) {
         log("layer selection change: raise selection");
         comp.getActiveHolder().raiseLayerSelection();
     }
 
-    private static void lowerLayerSelection(Composition comp) {
+    private void lowerLayerSelection(Composition comp) {
         log("layer selection change: lower selection");
         comp.getActiveHolder().lowerLayerSelection();
     }
 
-    private static void moveActiveLayerUp(Composition comp) {
+    private void moveActiveLayerUp(Composition comp) {
         log("layer order change: active up");
         comp.getActiveHolder().moveActiveLayer(true);
     }
 
-    private static void moveActiveLayerDown(Composition comp) {
+    private void moveActiveLayerDown(Composition comp) {
         log("layer order change: active down");
         comp.getActiveHolder().moveActiveLayer(false);
     }
 
-    private static void layerMerge() {
+    private void layerMerge() {
         var comp = Views.getActiveComp();
 
         if (rand.nextBoolean()) {
@@ -881,7 +892,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void layerAddDelete() {
+    private void layerAddDelete() {
         if (rand.nextBoolean()) {
             if (AddNewLayerAction.INSTANCE.isEnabled()) {
                 runAction(AddNewLayerAction.INSTANCE);
@@ -893,8 +904,8 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomHideShow() {
-        if (noHideShow) {
+    private void randomHideShow() {
+        if (NO_HIDE_SHOW) {
             return;
         }
 
@@ -909,7 +920,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomCopy() {
+    private void randomCopy() {
         if (rand.nextBoolean()) {
             runAction(CopyAction.COPY_LAYER);
         } else {
@@ -917,7 +928,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void runAction(Action action) {
+    private void runAction(Action action) {
         String msg = format("action \"%s\" (class: \"%s\")",
             action.getValue(Action.NAME),
             action.getClass().getSimpleName());
@@ -926,15 +937,12 @@ public class RandomGUITest {
         action.actionPerformed(new ActionEvent("", 0, ""));
     }
 
-    private static void randomPaste() {
+    private void randomPaste() {
         if (numPastedImages > 3) {
             return;
         }
         int r = rand.nextInt(10);
         if (r == 0) {
-            if (singleImageTest) {
-                return;
-            }
             runAction(new PasteAction(PasteDestination.NEW_IMAGE));
             numPastedImages++;
         } else if (r == 1) {
@@ -944,7 +952,7 @@ public class RandomGUITest {
         // paste as mask?
     }
 
-    private static void randomChangeLayerOpacityOrBlending() {
+    private void randomChangeLayerOpacityOrBlending() {
         Layer layer = Views.getActiveLayer();
         if (rand.nextBoolean()) {
             float opacity = layer.getOpacity();
@@ -967,7 +975,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomChangeLayerVisibility() {
+    private void randomChangeLayerVisibility() {
         Layer layer = Views.getActiveLayer();
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
@@ -985,7 +993,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomTool() {
+    private void randomTool() {
         Tool tool;
         if (preferredTool != null) {
             if (rand.nextBoolean()) {
@@ -1008,7 +1016,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void newRandomTextLayer() {
+    private void newRandomTextLayer() {
         Composition comp = Views.getActiveComp();
         MaskViewMode oldMaskViewMode = comp.getView().getMaskViewMode();
         Layer activeLayerBefore = comp.getActiveLayer();
@@ -1023,32 +1031,32 @@ public class RandomGUITest {
         log("new text layer: " + textLayer.getName());
     }
 
-    private static void newColorFillLayer() {
+    private void newColorFillLayer() {
         log("new color fill layer");
         ColorFillLayer.createNew(Views.getActiveComp());
     }
 
-    private static void newGradientFillLayer() {
+    private void newGradientFillLayer() {
         log("new gradient fill layer");
         GradientFillLayer.createNew(Views.getActiveComp());
     }
 
-    private static void newShapesLayer() {
+    private void newShapesLayer() {
         log("new shapes layer");
         ShapesLayer.createNew(Views.getActiveComp());
     }
 
-    private static void newEmptyLayerGroup() {
+    private void newEmptyLayerGroup() {
         log("new empty layer group");
         Views.getActiveComp().getHolderForNewLayers().addEmptyGroup();
     }
 
-    private static void convertVisibleToGroup() {
+    private void convertVisibleToGroup() {
         log("convert visible to group");
         Views.getActiveComp().getHolderForGrouping().convertVisibleLayersToGroup();
     }
 
-    private static void convertToSmartObject() {
+    private void convertToSmartObject() {
         Layer layer = Views.getActiveLayer();
         if (!(layer instanceof SmartObject)) {
             log("Convert Layer to Smart Object");
@@ -1056,7 +1064,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomRasterizeLayer() {
+    private void randomRasterizeLayer() {
         Layer layer = Views.getActiveLayer();
         if (layer.isRasterizable()) {
             log("rasterize " + layer.getTypeStringLC() + " " + layer.getName());
@@ -1064,7 +1072,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomNewAdjustmentLayer() {
+    private void randomNewAdjustmentLayer() {
         log("new adj layer");
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
@@ -1074,7 +1082,7 @@ public class RandomGUITest {
             .add(adjustmentLayer);
     }
 
-    private static void randomSetLayerMaskEditMode() {
+    private void randomSetLayerMaskEditMode() {
         Layer layer = Views.getActiveLayer();
         if (!layer.hasMask()) {
             return;
@@ -1100,7 +1108,7 @@ public class RandomGUITest {
     }
 
     // (add, delete, apply, link)
-    private static void randomLayerMaskAction() {
+    private void randomLayerMaskAction() {
         Layer layer = Views.getActiveLayer();
         if (!layer.hasMask()) {
             assert AddLayerMaskAction.INSTANCE.isEnabled();
@@ -1132,7 +1140,7 @@ public class RandomGUITest {
         }
     }
 
-    private static ParametrizedFilter getRandomTweenFilter() {
+    private ParametrizedFilter getRandomTweenFilter() {
         if (preferredTweenFilter != null) {
             assert !preferredTweenFilter.excludedFromAnimation();
             assert preferredTweenFilter.getParamSet().isAnimatable();
@@ -1142,7 +1150,7 @@ public class RandomGUITest {
         return (ParametrizedFilter) filterAction.getFilter();
     }
 
-    private static void randomEnlargeCanvas() {
+    private void randomEnlargeCanvas() {
         int north = rand.nextInt(3);
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
@@ -1153,7 +1161,7 @@ public class RandomGUITest {
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
 
-    private static void randomGuides() {
+    private void randomGuides() {
         var comp = Views.getActiveComp();
         float v = rand.nextFloat();
         if (v < 0.2) {
@@ -1162,10 +1170,10 @@ public class RandomGUITest {
             return;
         }
         new Guides.Builder(comp.getView(), false)
-            .build(false, RandomGUITest::randomGuidesSetup);
+            .build(false, this::randomGuidesSetup);
     }
 
-    private static void randomGuidesSetup(Guides guides) {
+    private void randomGuidesSetup(Guides guides) {
         if (rand.nextBoolean()) {
             log("add relative horizontal guide");
             guides.addHorRelative(rand.nextFloat());
@@ -1175,7 +1183,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void reload(Robot robot) {
+    private void reload(Robot robot) {
         if (rand.nextFloat() < 0.1) {
             var comp = Views.getActiveComp();
             if (comp.getFile() != null) {
@@ -1186,7 +1194,7 @@ public class RandomGUITest {
     }
 
     // prevents paths from growing too large
-    private static void setPathsToNull() {
+    private void setPathsToNull() {
         log("set paths to null");
         Views.forEachView(view -> {
             // don't touch the active, as its path might be edited just now
@@ -1204,71 +1212,65 @@ public class RandomGUITest {
             System.currentTimeMillis(), modifiers, keyCode, keyChar));
     }
 
-    private static void resetTabsUI() {
-        if (ImageArea.currentModeIs(FRAMES)) {
-            ImageArea.changeUI();
-        }
-    }
-
-    private static void setupActions(Robot robot) {
+    private void setupActions(Robot robot) {
         // random move
         weightedCaller.registerAction(10, () -> randomMove(robot));
         weightedCaller.registerAction(20, () -> randomDrag(robot));
         weightedCaller.registerAction(5, () -> randomClick(robot));
-        weightedCaller.registerAction(2, RandomGUITest::repeat);
-        weightedCaller.registerAction(5, RandomGUITest::randomUndoRedo);
-        weightedCaller.registerAction(1, RandomGUITest::randomCrop);
-        weightedCaller.registerAction(1, RandomGUITest::randomFade);
-        weightedCaller.registerAction(2, RandomGUITest::randomizeToolSettings);
-        weightedCaller.registerAction(1, RandomGUITest::arrangeWindows);
-        weightedCaller.registerAction(3, RandomGUITest::changeImageArea);
-        weightedCaller.registerAction(1, RandomGUITest::randomColors);
-        weightedCaller.registerAction(3, RandomGUITest::randomFilter);
-        weightedCaller.registerAction(1, RandomGUITest::randomTween);
-        weightedCaller.registerAction(1, RandomGUITest::randomFitTo);
+        weightedCaller.registerAction(2, this::repeat);
+        weightedCaller.registerAction(5, this::randomUndoRedo);
+        weightedCaller.registerAction(1, this::randomCrop);
+        weightedCaller.registerAction(1, this::randomFade);
+        weightedCaller.registerAction(2, this::randomizeToolSettings);
+        weightedCaller.registerAction(1, this::arrangeWindows);
+        weightedCaller.registerAction(3, this::changeImageArea);
+        weightedCaller.registerAction(1, this::randomColors);
+        weightedCaller.registerAction(3, this::randomFilter);
+        weightedCaller.registerAction(1, this::randomTween);
+        weightedCaller.registerAction(1, this::randomFitTo);
         weightedCaller.registerAction(3, () -> randomKey(robot));
         weightedCaller.registerAction(1, () -> reload(robot));
-        weightedCaller.registerAction(1, RandomGUITest::randomZoom);
-        weightedCaller.registerAction(1, RandomGUITest::randomZoomOut);
-        weightedCaller.registerAction(10, RandomGUITest::deselect);
+        weightedCaller.registerAction(1, this::randomZoom);
+        weightedCaller.registerAction(1, this::randomZoomOut);
+        weightedCaller.registerAction(10, this::deselect);
         weightedCaller.registerAction(1, () -> showHideSelection(robot));
-        weightedCaller.registerAction(1, RandomGUITest::layerToCanvasSize);
-        weightedCaller.registerAction(1, RandomGUITest::fitCanvasToLayers);
-        weightedCaller.registerAction(1, RandomGUITest::invertSelection);
-        weightedCaller.registerAction(1, RandomGUITest::traceWithCurrentBrush);
-        weightedCaller.registerAction(1, RandomGUITest::traceWithCurrentEraser);
-        weightedCaller.registerAction(1, RandomGUITest::traceWithCurrentSmudge);
-        weightedCaller.registerAction(1, RandomGUITest::randomRotateFlip);
-        weightedCaller.registerAction(5, RandomGUITest::activateRandomView);
-        weightedCaller.registerAction(1, RandomGUITest::layerOrderChange);
-        weightedCaller.registerAction(5, RandomGUITest::layerMerge);
-        weightedCaller.registerAction(3, RandomGUITest::layerAddDelete);
-        weightedCaller.registerAction(1, RandomGUITest::randomHideShow);
+        weightedCaller.registerAction(1, this::layerToCanvasSize);
+        weightedCaller.registerAction(1, this::fitCanvasToLayers);
+        weightedCaller.registerAction(1, this::invertSelection);
+        weightedCaller.registerAction(1, this::traceWithCurrentBrush);
+        weightedCaller.registerAction(1, this::traceWithCurrentEraser);
+        weightedCaller.registerAction(1, this::traceWithCurrentSmudge);
+        weightedCaller.registerAction(1, this::randomRotateFlip);
+        weightedCaller.registerAction(5, this::activateRandomView);
+        weightedCaller.registerAction(1, this::layerOrderChange);
+        weightedCaller.registerAction(5, this::layerMerge);
+        weightedCaller.registerAction(3, this::layerAddDelete);
+        weightedCaller.registerAction(1, this::randomHideShow);
         if (enableCopyPaste) {
-            weightedCaller.registerAction(1, RandomGUITest::randomCopy);
-            weightedCaller.registerAction(1, RandomGUITest::randomPaste);
+            weightedCaller.registerAction(1, this::randomCopy);
+            weightedCaller.registerAction(1, this::randomPaste);
         }
-        weightedCaller.registerAction(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
-        weightedCaller.registerAction(1, RandomGUITest::randomChangeLayerVisibility);
-        weightedCaller.registerAction(5, RandomGUITest::randomTool);
-        weightedCaller.registerAction(1, RandomGUITest::randomEnlargeCanvas);
-        weightedCaller.registerAction(2, RandomGUITest::newRandomTextLayer);
-        weightedCaller.registerAction(1, RandomGUITest::newColorFillLayer);
-        weightedCaller.registerAction(1, RandomGUITest::newGradientFillLayer);
-        weightedCaller.registerAction(1, RandomGUITest::newShapesLayer);
-        weightedCaller.registerAction(1, RandomGUITest::newEmptyLayerGroup);
-        weightedCaller.registerAction(1, RandomGUITest::convertVisibleToGroup);
-        weightedCaller.registerAction(1, RandomGUITest::convertToSmartObject);
-        weightedCaller.registerAction(5, RandomGUITest::randomRasterizeLayer);
-        weightedCaller.registerAction(4, RandomGUITest::randomGuides);
-        weightedCaller.registerAction(4, RandomGUITest::setPathsToNull);
+        weightedCaller.registerAction(1, this::randomChangeLayerOpacityOrBlending);
+        weightedCaller.registerAction(1, this::randomChangeLayerVisibility);
+        weightedCaller.registerAction(5, this::randomTool);
+        weightedCaller.registerAction(1, this::randomEnlargeCanvas);
+        weightedCaller.registerAction(2, this::newRandomTextLayer);
+        weightedCaller.registerAction(1, this::newColorFillLayer);
+        weightedCaller.registerAction(1, this::newGradientFillLayer);
+        weightedCaller.registerAction(1, this::newShapesLayer);
+        weightedCaller.registerAction(1, this::newEmptyLayerGroup);
+        weightedCaller.registerAction(1, this::convertVisibleToGroup);
+        weightedCaller.registerAction(1, this::convertToSmartObject);
+        weightedCaller.registerAction(5, this::randomRasterizeLayer);
+        weightedCaller.registerAction(4, this::randomGuides);
+        weightedCaller.registerAction(4, this::setPathsToNull);
 
         if (Features.enableExperimental) {
-            weightedCaller.registerAction(2, RandomGUITest::randomNewAdjustmentLayer);
+            weightedCaller.registerAction(2, this::randomNewAdjustmentLayer);
         }
 
-        weightedCaller.registerAction(7, RandomGUITest::randomSetLayerMaskEditMode);
-        weightedCaller.registerAction(10, RandomGUITest::randomLayerMaskAction);
+        weightedCaller.registerAction(7, this::randomSetLayerMaskEditMode);
+        weightedCaller.registerAction(10, this::randomLayerMaskAction);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,7 +80,6 @@ public class PixelitorWindow extends JFrame {
         setupIcons();
 
         GlobalEvents.init();
-        GlobalEvents.addBrushSizeActions();
 
         AppPreferences.loadFramePosition(this, screenSize);
 
@@ -99,7 +98,7 @@ public class PixelitorWindow extends JFrame {
             new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent we) {
-                    Pixelitor.exitApp(PixelitorWindow.this);
+                    Pixelitor.warnAndExit(PixelitorWindow.this);
                 }
 
                 @Override
@@ -129,7 +128,7 @@ public class PixelitorWindow extends JFrame {
                 desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());
             }
             if (desktop.isSupported(APP_QUIT_HANDLER)) {
-                desktop.setQuitHandler((e, r) -> Pixelitor.exitApp(this));
+                desktop.setQuitHandler((e, r) -> Pixelitor.warnAndExit(this));
             }
         }
     }
@@ -173,17 +172,16 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void setupIcons() {
-        URL imgURL32 = getClass().getResource("/images/pixelitor_icon32.png");
-        URL imgURL48 = getClass().getResource("/images/pixelitor_icon48.png");
-        URL imgURL256 = getClass().getResource("/images/pixelitor_icon256.png");
+        var clazz = getClass();
+        URL imgURL32 = clazz.getResource("/images/pixelitor_icon32.png");
+        URL imgURL48 = clazz.getResource("/images/pixelitor_icon48.png");
+        URL imgURL256 = clazz.getResource("/images/pixelitor_icon256.png");
 
         if (imgURL32 != null && imgURL48 != null && imgURL256 != null) {
             List<Image> icons = new ArrayList<>(2);
-            Image img32 = new ImageIcon(imgURL32).getImage();
-            Image img48 = new ImageIcon(imgURL48).getImage();
+            icons.add(new ImageIcon(imgURL32).getImage());
+            icons.add(new ImageIcon(imgURL48).getImage());
             Image img256 = new ImageIcon(imgURL256).getImage();
-            icons.add(img32);
-            icons.add(img48);
             icons.add(img256);
             setIconImages(icons);
 
@@ -194,8 +192,8 @@ public class PixelitorWindow extends JFrame {
                 }
             }
         } else {
-            String msg = "icon imgURL is null";
-            Dialogs.showErrorDialog(this, "Error", msg);
+            Dialogs.showErrorDialog(this, "Error",
+                "icon imgURL is null");
         }
     }
 

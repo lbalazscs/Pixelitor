@@ -927,21 +927,15 @@ class NeuQuant {
             a = radpower[m++];
             if (j < hi) {
                 p = network[j++];
-                try {
-                    p[0] -= (a * (p[0] - b)) / alpharadbias;
-                    p[1] -= (a * (p[1] - g)) / alpharadbias;
-                    p[2] -= (a * (p[2] - r)) / alpharadbias;
-                } catch (Exception e) {
-                } // prevents 1.3 miscompilation
+                p[0] -= (a * (p[0] - b)) / alpharadbias;
+                p[1] -= (a * (p[1] - g)) / alpharadbias;
+                p[2] -= (a * (p[2] - r)) / alpharadbias;
             }
             if (k > lo) {
                 p = network[k--];
-                try {
-                    p[0] -= (a * (p[0] - b)) / alpharadbias;
-                    p[1] -= (a * (p[1] - g)) / alpharadbias;
-                    p[2] -= (a * (p[2] - r)) / alpharadbias;
-                } catch (Exception e) {
-                }
+                p[0] -= (a * (p[0] - b)) / alpharadbias;
+                p[1] -= (a * (p[1] - g)) / alpharadbias;
+                p[2] -= (a * (p[2] - r)) / alpharadbias;
             }
         }
     }

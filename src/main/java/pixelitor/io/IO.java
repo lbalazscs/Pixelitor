@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -447,7 +447,7 @@ public class IO {
             if (out == null) {
                 // There was an error. Try to get an error message.
                 try (InputStream processError = p.getErrorStream()) {
-                    errorMsg = new String(processError.readAllBytes());
+                    errorMsg = new String(processError.readAllBytes(), UTF_8);
                 }
             }
             p.waitFor();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.utils.debug;
 
 /**
- * Helper class with ANSI colors for debugging
+ * Utility class for creating ANSI-colored strings.
+ * Used only for debugging.
  */
 public class Ansi {
     private static final String RESET = "\u001B[0m";
@@ -32,6 +33,7 @@ public class Ansi {
     private static final String WHITE = "\u001B[37m";
 
     private Ansi() {
+        // prevent instantiation
     }
 
     public static String red(Object o) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,5 +76,10 @@ public class CommandLineFilter extends ParametrizedFilter {
     @Override
     public FilterGUI createGUI(Filterable layer, boolean reset) {
         return new CommandLineGUI(this, layer, true, reset);
+    }
+
+    @Override
+    public boolean supportsGray() {
+        return false;
     }
 }

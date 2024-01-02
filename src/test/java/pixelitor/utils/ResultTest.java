@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.utils;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +47,8 @@ class ResultTest {
     @Test
     void flatMap_OK_OK() {
         Result<String, Integer> result = new Success<>("a");
-        Result<String, Integer> mapped = result.flatMap(s -> new Success<>(s.toUpperCase()));
+        Result<String, Integer> mapped = result.flatMap(s ->
+            new Success<>(s.toUpperCase(Locale.ENGLISH)));
 
         // expect successful mapping
         assertThat(mapped.wasSuccess()).isTrue();
@@ -65,7 +68,8 @@ class ResultTest {
     @Test
     void flatMap_Error_OK() {
         Result<String, Integer> result = new Error<>(2);
-        Result<String, Integer> mapped = result.flatMap(s -> new Success<>(s.toUpperCase()));
+        Result<String, Integer> mapped = result.flatMap(s ->
+            new Success<>(s.toUpperCase(Locale.ENGLISH)));
 
         // expect error ignoring the mapping
         assertThat(mapped.wasSuccess()).isFalse();

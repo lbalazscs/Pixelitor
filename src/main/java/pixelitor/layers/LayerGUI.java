@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -284,7 +284,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 if (smartFilter) {
                     super.processMouseEvent(e);
                 } else if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                    //String s = Debug.debugMouseEvent(e);
+                    //String s = Debug.mouseEventAsString(e);
                     boolean altDown = (e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK;
                     if (altDown) {
                         layer.isolate();
@@ -708,7 +708,8 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
         if (!layer.isTopLevel()) {
             if (parentUI == null) {
-                throw new AssertionError("null parentUI in " + getLayerName() + " UI");
+                throw new AssertionError("null parentUI in " + getLayerName()
+                    + " UI, holder class = " + layer.getHolder().getClass().getSimpleName());
             }
 
             LayerUI holderUI = ((CompositeLayer) layer.getHolder()).getUI();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,10 @@ public class CachedFloatRandom {
     private final Random instanceRandom = new Random();
 
     static {
-        reseedCache(new Random());
+        reBuildCache(new Random());
     }
 
-    public static void reseedCache(Random staticRandom) {
+    public static void reBuildCache(Random staticRandom) {
         for (int i = 0; i < CACHE_SIZE; i++) {
             cache[i] = staticRandom.nextFloat();
         }

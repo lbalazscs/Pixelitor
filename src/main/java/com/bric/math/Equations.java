@@ -377,7 +377,7 @@ public class Equations {
         int row = 0;
         int a, i;
         BigDecimal t;
-        BigDecimal tolerance = new BigDecimal(0.0000000001);
+        BigDecimal tolerance = new BigDecimal("0.0000000001");
         int errorCounter = 0;
         //println(coefficients);
         while (ctr < b.length) {

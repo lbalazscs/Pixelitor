@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,16 +17,16 @@
 
 package pixelitor.utils.test;
 
+import pixelitor.utils.Rnd;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Calls the registered functions with a probability
  * proportional to their weights.
  */
 public class WeightedCaller {
-    private final Random random = new Random();
     private final List<Runnable> tasks = new ArrayList<>();
 
     public void registerAction(int weight, Runnable r) {
@@ -36,7 +36,6 @@ public class WeightedCaller {
     }
 
     public void runRandomAction() {
-        int index = random.nextInt(tasks.size());
-        tasks.get(index).run();
+        Rnd.chooseFrom(tasks).run();
     }
 }

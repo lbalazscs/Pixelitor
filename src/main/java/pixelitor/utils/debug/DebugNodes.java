@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Utils;
 
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
@@ -152,6 +153,17 @@ public class DebugNodes {
         node.addDouble("shearY (m10)", at.getShearY());
         node.addDouble("translateX (m02)", at.getTranslateX());
         node.addDouble("translateY (m12)", at.getTranslateY());
+
+        return node;
+    }
+
+    public static DebugNode createRectangleNode(Rectangle rect, String name) {
+        DebugNode node = new DebugNode(name, rect);
+
+        node.addInt("x", rect.x);
+        node.addInt("y", rect.y);
+        node.addInt("width", rect.width);
+        node.addInt("height", rect.height);
 
         return node;
     }

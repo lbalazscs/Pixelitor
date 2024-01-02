@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,10 +46,15 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 
-import static java.awt.BasicStroke.*;
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_MITER;
+import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.tools.pen.PenToolMode.*;
+import static pixelitor.tools.pen.PenToolMode.BUILD;
+import static pixelitor.tools.pen.PenToolMode.EDIT;
+import static pixelitor.tools.pen.PenToolMode.TRANSFORM;
 
 /**
  * The pen tool.
@@ -396,11 +401,11 @@ public class PenTool extends Tool {
 
     private void setPathFromComp(Composition comp) {
         if (comp == null) {
-            setNullPath();
+            setNoPath();
         } else {
             Path compPath = comp.getActivePath();
             if (compPath == null) {
-                setNullPath();
+                setNoPath();
             } else {
                 path = compPath;
                 PenToolMode preferredMode = compPath.getPreferredPenToolMode();
@@ -413,7 +418,7 @@ public class PenTool extends Tool {
         enableActions(path != null);
     }
 
-    private void setNullPath() {
+    private void setNoPath() {
         path = null;
         if (mode.requiresExistingPath()) {
             startBuilding(false);
@@ -436,7 +441,7 @@ public class PenTool extends Tool {
 
     public void removePath() {
         Views.setActivePath(null);
-        setNullPath();
+        setNoPath();
         enableActions(false);
     }
 

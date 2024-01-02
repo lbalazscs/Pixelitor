@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             if (child instanceof DebugNode dn) {
                 text = dn.toJSON();
             } else if (child instanceof DefaultMutableTreeNode defaultNode) {
-                text = ((StringUserObject) defaultNode.getUserObject()).toJSON();
+                text = ((StringKeyValue) defaultNode.getUserObject()).toJSON();
             } else {
                 throw new IllegalStateException();
             }
@@ -151,7 +151,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     private void addNode(String key, String value) {
-        add(new DefaultMutableTreeNode(new StringUserObject(key, value)));
+        add(new DefaultMutableTreeNode(new StringKeyValue(key, value)));
     }
 
     private static void indent(StringBuilder sb, int indentLevel) {
@@ -162,7 +162,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     /**
      * Allow a leaf node to have two string representations: a GUI text and a JSON.
      */
-    private record StringUserObject(String key, String value) {
+    private record StringKeyValue(String key, String value) {
         public String toJSON() {
             return "\"" + key + "\": " + value + ",";
         }

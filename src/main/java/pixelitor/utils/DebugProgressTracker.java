@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,8 @@ package pixelitor.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * A progress tracker that is used only for development
@@ -84,7 +86,6 @@ public class DebugProgressTracker implements ProgressTracker {
         }
 
         printCallInfoStatistics();
-        System.out.println();
     }
 
     private void printCallInfoStatistics() {
@@ -97,6 +98,7 @@ public class DebugProgressTracker implements ProgressTracker {
             .map(s -> s.replace("jhlabsproxies.", ""))
             .map(s -> s.replace("utils.", ""))
             .forEach(System.out::println);
+        System.out.println();
     }
 
     private void log(String method) {
@@ -123,25 +125,22 @@ public class DebugProgressTracker implements ProgressTracker {
             this.method = method;
             this.time = time;
             this.totalUnits = totalUnits;
-            duration = time - lastTime;
+            this.duration = time - lastTime;
             this.ste = ste;
         }
 
         public String asString(long totalDuration) {
             double timeSeconds = time / 1000.0;
             double durationSeconds = duration / 1000.0;
-
             double durationPercentage = (duration * 100.0) / totalDuration;
 
-            String whatWithPercent = String
-                .format("%s (%.1f%%=>%.2fu)", method, durationPercentage,
-                    (durationPercentage / 100.0) * totalUnits);
+            String whatWithPercent = format("%s (%.1f%%=>%.2fu)",
+                method, durationPercentage, (durationPercentage / 100.0) * totalUnits);
 
-            return String
-                .format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
-                    timeSeconds, durationSeconds, whatWithPercent,
-                    ste.getClassName(), ste.getMethodName(),
-                    ste.getFileName(), ste.getLineNumber());
+            return format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
+                timeSeconds, durationSeconds, whatWithPercent,
+                ste.getClassName(), ste.getMethodName(),
+                ste.getFileName(), ste.getLineNumber());
         }
     }
 }

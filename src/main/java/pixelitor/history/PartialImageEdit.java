@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
@@ -206,6 +207,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         node.addInt("backup image width", width);
         node.addInt("backup image height", height);
+        node.add(DebugNodes.createRectangleNode(saveRect, "saveRect"));
 
         return node;
     }

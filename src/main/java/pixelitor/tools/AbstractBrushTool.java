@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -558,7 +558,8 @@ public abstract class AbstractBrushTool extends Tool {
                         prepareProgrammaticBrushStroke(dr, pathPoint);
                         brushStrokePrepared = true;
                     }
-                    if (subPathIndex != 0) {
+                    if (subPathIndex > 0) {
+                        // finish the previous brush stroke
                         brush.finishBrushStroke();
                     }
                     brush.startAt(pathPoint);

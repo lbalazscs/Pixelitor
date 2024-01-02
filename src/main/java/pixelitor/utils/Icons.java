@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ public final class Icons {
     private static final Icon dice2Icon = load("dice2.png");
     private static final Icon northArrowIcon = loadThemed("north_arrow.gif", ThemedImageIcon.BLUE);
     private static final Icon southArrowIcon = loadThemed("south_arrow.gif", ThemedImageIcon.BLUE);
-    //    private static final Icon textLayerIcon = load("text_layer.png", "text_layer_icon_dark.png");
 
     private static final Icon textLayerIcon = VectorIcon.createNonTransparentThemed(TEXT_LAYER_ICON_SHAPE);
     private static final Icon adjLayerIcon = VectorIcon.createNonTransparentThemed(ADJ_LAYER_ICON_SHAPE);

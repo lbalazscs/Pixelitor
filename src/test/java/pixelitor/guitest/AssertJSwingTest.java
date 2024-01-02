@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,6 +78,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -238,12 +239,13 @@ public class AssertJSwingTest {
         if (targetProp == null || targetProp.equalsIgnoreCase("all")) {
             return TestTarget.ALL; // default target
         }
+        targetProp = targetProp.toUpperCase(Locale.ENGLISH);
 
         TestTarget target = null;
         try {
-            target = TestTarget.valueOf(targetProp.toUpperCase());
+            target = TestTarget.valueOf(targetProp);
         } catch (IllegalArgumentException e) {
-            String msg = "Target " + targetProp.toUpperCase() + " not found.\n" +
+            String msg = "Target " + targetProp + " not found.\n" +
                 "Available targets: " + Arrays.toString(TestTarget.values());
             System.err.println(msg);
             System.exit(1);
@@ -252,24 +254,25 @@ public class AssertJSwingTest {
     }
 
     private static MaskMode[] decideMaskModes() {
-        MaskMode[] usedMaskModes;
         String maskMode = System.getProperty("mask.mode");
         if (maskMode == null || maskMode.equalsIgnoreCase("all")) {
-            usedMaskModes = MaskMode.values();
 //            Collections.shuffle(Arrays.asList(usedMaskModes));
-        } else {
-            // if a specific test mode was configured, test only that
-            MaskMode mode = null;
-            try {
-                mode = MaskMode.valueOf(maskMode.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                String msg = "Mask mode " + maskMode.toUpperCase() + " not found.\n" +
-                    "Available mask modes: " + Arrays.toString(MaskMode.values());
-                System.err.println(msg);
-                System.exit(1);
-            }
-            usedMaskModes = new MaskMode[]{mode};
+            return MaskMode.values();
         }
+
+        maskMode = maskMode.toUpperCase(Locale.ENGLISH);
+        MaskMode[] usedMaskModes;
+        // if a specific test mode was configured, test only that
+        MaskMode mode = null;
+        try {
+            mode = MaskMode.valueOf(maskMode);
+        } catch (IllegalArgumentException e) {
+            String msg = "Mask mode " + maskMode + " not found.\n" +
+                "Available mask modes: " + Arrays.toString(MaskMode.values());
+            System.err.println(msg);
+            System.exit(1);
+        }
+        usedMaskModes = new MaskMode[]{mode};
         return usedMaskModes;
     }
 
