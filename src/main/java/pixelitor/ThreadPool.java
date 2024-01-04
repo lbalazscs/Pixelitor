@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
@@ -65,7 +66,7 @@ public class ThreadPool {
                 // not completely accurate to count here, but good enough in practice
                 pt.unitDone();
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                Messages.showException(e);
             }
         }
     }
@@ -79,7 +80,7 @@ public class ThreadPool {
                 future.get();
                 pt.unitDone();
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                Messages.showException(e);
             }
         }
     }
@@ -101,7 +102,7 @@ public class ThreadPool {
                 pt.unitDone();
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            Messages.showException(e);
         }
     }
 

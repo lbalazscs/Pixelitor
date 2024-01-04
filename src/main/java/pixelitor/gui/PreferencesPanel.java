@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,10 +32,7 @@ import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.layers.LayerGUILayout;
-import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Cursors;
-import pixelitor.utils.Language;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -196,7 +193,7 @@ public class PreferencesPanel extends JTabbedPane {
                 UIManager.setLookAndFeel(laf);
                 laf.getDefaults().put("defaultFont", new FontUIResource(newFont));
             } catch (UnsupportedLookAndFeelException e) {
-                e.printStackTrace();
+                Messages.showException(e);
             }
         }
 

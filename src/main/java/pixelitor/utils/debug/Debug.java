@@ -23,7 +23,6 @@ import pixelitor.colors.Colors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.Filters;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -329,11 +328,6 @@ public class Debug {
 
     public static void showAddTextLayerDialog() {
         AddTextLayerAction.INSTANCE.actionPerformed(null);
-    }
-
-    public static void startFilter(String filterName) {
-        FilterAction action = Filters.getFilterActionByName(filterName);
-        EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 
     public static void addMaskAndShowIt() {

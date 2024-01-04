@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -255,6 +256,7 @@ public class Dialogs {
 
         System.err.printf("%nDialogs.showExceptionDialog: Exception in the thread '%s'%n",
             srcThread.getName());
+        //noinspection CallToPrintStackTrace
         e.printStackTrace();
 
         RandomGUITest.stop();
@@ -339,15 +341,16 @@ public class Dialogs {
                 channel.noteOff(sound + i);
             }
         } catch (MidiUnavailableException e) {
-            e.printStackTrace();
+            Messages.showException(e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
+            Messages.showException(e);
         }
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
         if (GUIMode.isDevelopment()) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +

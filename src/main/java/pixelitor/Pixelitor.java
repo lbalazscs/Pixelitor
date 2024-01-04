@@ -20,6 +20,7 @@ package pixelitor;
 import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Theme;
@@ -265,10 +266,15 @@ public class Pixelitor {
 
         if (Views.getNumViews() > 0) {
             AutoZoom.FIT_SPACE_ACTION.actionPerformed(null);
+
+            // automatically start a filter specified with -DautoFilter
+            String autoFilterName = System.getProperty("autoFilter");
+            if (autoFilterName != null) {
+                Filters.startFilter(autoFilterName);
+            }
         }
 
 //        NewImage.addNewImage(FillType.WHITE, 700, 500, "Test");
-//        Debug.startFilter(ConcentricShapes.NAME);
 
 //        GradientFillLayer.createNew();
 

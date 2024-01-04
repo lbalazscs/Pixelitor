@@ -55,7 +55,6 @@ public class GMICFilterCreator {
 
     private GMICFilterCreator(String orig, String commandName, String filterName, String reseed) {
         this.paramInfos = orig.lines()
-            .map(s -> s.split(" : ")[1])
             .map(GMICFilterCreator::transformLine)
             .toList();
         this.commandName = commandName;
@@ -238,6 +237,13 @@ public class GMICFilterCreator {
     }
 
     private static ParamInfo transformLine(String input) {
+        // keep only the part after the colon
+        String[] parts = input.split(" : ");
+        if (parts.length != 2) {
+            throw new RuntimeException(COULD_NOT_PARSE_MSG + input);
+        }
+        input = parts[1];
+
         // remove " (%)" from the string
         input = PERCENT_PATTERN.get().matcher(input).replaceAll("");
 
@@ -286,6 +292,20 @@ public class GMICFilterCreator {
         return new ParamInfo(paramName, declaration, "int");
     }
 
+    private static ParamInfo createFloatDeclaration(String defaultString, String minString, String maxString, String paramName, String paramTitle) {
+        double defaultValue = Double.parseDouble(defaultString);
+        double minValue = Double.parseDouble(minString);
+        double maxValue = Double.parseDouble(maxString);
+
+        String declaration = String.format("RangeParam %s = new RangeParam(\"%s\", %.0f, %.0f, %.0f);",
+            paramName,
+            paramTitle,
+            minValue * 100,
+            defaultValue * 100,
+            maxValue * 100);
+        return new ParamInfo(paramName, declaration, "float");
+    }
+
     private static ParamInfo transformFloatRange(String input) {
         Matcher matcher = FLOAT_PATTERN.get().matcher(input);
 
@@ -303,19 +323,14 @@ public class GMICFilterCreator {
                 int minValue = Integer.parseInt(minString);
                 int maxValue = Integer.parseInt(maxString);
 
-                return createIntDeclaration(paramName, paramTitle, minValue, defaultValue, maxValue);
-            } else {
-                double defaultValue = Double.parseDouble(defaultString);
-                double minValue = Double.parseDouble(minString);
-                double maxValue = Double.parseDouble(maxString);
-
-                String declaration = String.format("RangeParam %s = new RangeParam(\"%s\", %.0f, %.0f, %.0f);",
-                    paramName,
-                    paramTitle,
-                    minValue * 100,
-                    defaultValue * 100,
-                    maxValue * 100);
-                return new ParamInfo(paramName, declaration, "float");
+                if (maxValue - minValue < 2) {
+                    // handle cases like "Opacity = float(1,0,1)"
+                    return createFloatDeclaration(defaultString, minString, maxString, paramName, paramTitle);
+                } else {
+                    return createIntDeclaration(paramName, paramTitle, minValue, defaultValue, maxValue);
+                }
+            } else { // not all ints
+                return createFloatDeclaration(defaultString, minString, maxString, paramName, paramTitle);
             }
         } else {
             throw new RuntimeException(COULD_NOT_PARSE_MSG + input);

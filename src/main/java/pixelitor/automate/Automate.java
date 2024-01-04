@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -94,7 +94,7 @@ public class Automate {
                 break;
             }
 
-            monitor.setProgress((int) ((float) i * 100 / numFiles));
+            monitor.setProgress((int) (i * 100.0 / numFiles));
             monitor.setNote("Processing " + (i + 1) + " of " + numFiles);
 
             processFile(inputFiles.get(i), action, saveDir);

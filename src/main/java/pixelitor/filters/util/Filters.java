@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.RepeatLast;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.Rnd;
 
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -158,5 +159,10 @@ public class Filters {
             }
         }
         return null;
+    }
+
+    public static void startFilter(String filterName) {
+        FilterAction action = getFilterActionByName(filterName);
+        EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 }
