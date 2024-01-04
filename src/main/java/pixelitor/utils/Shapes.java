@@ -2050,7 +2050,7 @@ public class Shapes {
      * @param margin The margin around the shape inside the target rectangle.
      * @return A new shape that fits within the target rectangle.
      */
-    public static Shape resize(Shape shape, double width, double height, double margin) {
+    public static Shape resizeToFit(Shape shape, double width, double height, double margin) {
         Rectangle2D bounds = shape.getBounds2D();
         double shapeAspectRatio = bounds.getWidth() / bounds.getHeight();
         double areaWidth = width - 2 * margin;

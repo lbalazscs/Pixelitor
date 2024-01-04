@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -205,8 +205,27 @@ public class ListParam<E>
         setupOther(other, condition, false);
     }
 
+    @SuppressWarnings("unchecked")
     private void setupOther(FilterSetting other, Predicate<E> condition, boolean enable) {
         other.setEnabled(!enable);
+        addOnChangeTask(() -> {
+            if (condition.test((E) getSelectedItem())) {
+                other.setEnabled(enable);
+            } else {
+                other.setEnabled(!enable);
+            }
+        });
+    }
+
+    public void setupMaximizeOtherOnChange(RangeParam other, int maxValue) {
+        addOnChangeTask(() -> {
+            if (other.getValue() > maxValue) {
+                other.setValueNoTrigger(maxValue);
+            }
+        });
+    }
+
+    private void addOnChangeTask(Runnable task) {
         addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -217,13 +236,8 @@ public class ListParam<E>
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public void contentsChanged(ListDataEvent e) {
-                if (condition.test((E) getSelectedItem())) {
-                    other.setEnabled(enable);
-                } else {
-                    other.setEnabled(!enable);
-                }
+                task.run();
             }
         });
     }
