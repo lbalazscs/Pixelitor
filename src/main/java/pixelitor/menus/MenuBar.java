@@ -979,6 +979,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Brushify.NAME, Brushify::new);
         sub.addFilter(Cubism.NAME, Cubism::new);
         sub.addFilter(Rodilius.NAME, Rodilius::new);
+        sub.addFilter(HuffmanGlitches.NAME, HuffmanGlitches::new);
+        
 
         return sub;
     }
