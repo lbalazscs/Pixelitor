@@ -368,9 +368,8 @@ public class Debug {
         form.add(explainLabel, NORTH);
         form.add(new JScrollPane(tree), CENTER);
 
-        String text = node.toJSON();
-        String title = "Internal State";
-        GUIUtils.showCopyTextToClipboardDialog(form, text, title);
+        GUIUtils.showCopyTextToClipboardDialog(form,
+            node::toJSON, "Internal State");
     }
 
     public static void showTree(Debuggable debuggable, String name) {

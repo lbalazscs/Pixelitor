@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Supplier;
 
 import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
@@ -86,13 +87,13 @@ public final class GUIUtils {
     }
 
     public static void showCopyTextToClipboardDialog(JComponent content,
-                                                     String text,
+                                                     Supplier<String> text,
                                                      String title) {
         new DialogBuilder()
             .okText("Copy as Text to the Clipboard")
             .cancelText(CLOSE_DIALOG)
             .validator(d -> {
-                Utils.copyStringToClipboard(text);
+                Utils.copyStringToClipboard(text.get());
                 return false; // prevents the dialog from closing
             })
             .title(title)

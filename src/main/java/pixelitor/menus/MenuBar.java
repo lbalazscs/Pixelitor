@@ -978,9 +978,8 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(BoxFitting.NAME, BoxFitting::new);
         sub.addFilter(Brushify.NAME, Brushify::new);
         sub.addFilter(Cubism.NAME, Cubism::new);
-        sub.addFilter(Rodilius.NAME, Rodilius::new);
         sub.addFilter(HuffmanGlitches.NAME, HuffmanGlitches::new);
-        
+        sub.addFilter(Rodilius.NAME, Rodilius::new);
 
         return sub;
     }
@@ -1472,6 +1471,9 @@ public class MenuBar extends JMenuBar {
             TipsOfTheDay.showTips(pw, true)));
 
         helpMenu.addSeparator();
+
+        helpMenu.add(new PAction(GMICFilterCreator.TITLE + "...",
+            GMICFilterCreator::showInDialog));
 
         helpMenu.add(new OpenInBrowserAction("Report an Issue...",
             "https://github.com/lbalazscs/Pixelitor/issues"));

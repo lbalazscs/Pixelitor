@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -98,6 +98,22 @@ public class GridBagHelper {
 
     public void addLabelAndControl(String labelText, Component c) {
         addLabelAndControl(labelText, c, autoIncrementedGridY);
+        autoIncrementedGridY++;
+    }
+
+    public void addLabelAndControlVerticalStretch(String labelText, Component c, double weightY) {
+        JLabel label = new JLabel(labelText, RIGHT);
+        labelConstraint.gridx = 0;
+        labelConstraint.gridy = autoIncrementedGridY;
+        container.add(label, labelConstraint);
+
+        nextControlConstraint.gridx = 1;
+        nextControlConstraint.gridy = autoIncrementedGridY;
+        GridBagConstraints controlConstraints = (GridBagConstraints) nextControlConstraint.clone();
+        controlConstraints.fill = BOTH;
+        controlConstraints.weighty = weightY;
+        container.add(c, controlConstraints);
+
         autoIncrementedGridY++;
     }
 
