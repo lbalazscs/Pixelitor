@@ -980,6 +980,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Cubism.NAME, Cubism::new);
         sub.addFilter(HuffmanGlitches.NAME, HuffmanGlitches::new);
         sub.addFilter(Rodilius.NAME, Rodilius::new);
+        sub.addFilter(GMICVoronoi.NAME, GMICVoronoi::new);
 
         return sub;
     }
