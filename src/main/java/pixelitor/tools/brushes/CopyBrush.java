@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public abstract class CopyBrush extends DabsBrush {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
         node.addAsString("type", type);
         return node;
     }

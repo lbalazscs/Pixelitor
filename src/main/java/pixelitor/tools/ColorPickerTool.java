@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -156,10 +156,8 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
-
+        DebugNode node = super.createDebugNode(key);
         node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
-
         return node;
     }
 

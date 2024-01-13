@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,9 @@ import java.awt.geom.Rectangle2D;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
-import static pixelitor.tools.DragToolState.*;
+import static pixelitor.tools.DragToolState.INITIAL_DRAG;
+import static pixelitor.tools.DragToolState.NO_INTERACTION;
+import static pixelitor.tools.DragToolState.TRANSFORM;
 
 /**
  * The crop tool
@@ -538,7 +540,7 @@ public class CropTool extends DragTool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
 
         node.addDouble("mask opacity", maskOpacity.getPercentage());
         node.addBoolean("allow growing", allowGrowingCB.isSelected());

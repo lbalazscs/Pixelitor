@@ -515,10 +515,8 @@ public class PenTool extends Tool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
-
+        DebugNode node = super.createDebugNode(key);
         node.add(mode.createDebugNode());
-
         return node;
     }
 

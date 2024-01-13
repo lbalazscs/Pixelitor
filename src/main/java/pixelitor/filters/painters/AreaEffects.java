@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -299,19 +299,11 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
-        addToNode(node, glowEffect, "glow");
-        addToNode(node, innerGlowEffect, "inner glow");
-        addToNode(node, neonBorderEffect, "glow");
-        addToNode(node, dropShadowEffect, "glow");
+        node.addNullableProperty("glow", glowEffect);
+        node.addNullableProperty("inner glow", innerGlowEffect);
+        node.addNullableProperty("neon border", neonBorderEffect);
+        node.addNullableProperty("drop shadow", dropShadowEffect);
         return node;
-    }
-
-    private static void addToNode(DebugNode node, AreaEffect effect, String name) {
-        if (effect == null) {
-            node.addString(name, "null");
-        } else {
-            node.addString(name, "not null");
-        }
     }
 
     @Override

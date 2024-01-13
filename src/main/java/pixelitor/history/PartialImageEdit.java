@@ -195,18 +195,10 @@ public class PartialImageEdit extends FadeableEdit {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
 
-        int width = -1;
-        int height = -1;
-        Raster backupRaster = backupRasterRef.get();
-        if (backupRaster != null) {
-            width = backupRaster.getWidth();
-            height = backupRaster.getHeight();
-        }
-
-        node.addInt("backup image width", width);
-        node.addInt("backup image height", height);
+        node.addNullableDebuggable("backup raster",
+            backupRasterRef.get(), DebugNodes::createRasterNode);
         node.add(DebugNodes.createRectangleNode(saveRect, "saveRect"));
 
         return node;

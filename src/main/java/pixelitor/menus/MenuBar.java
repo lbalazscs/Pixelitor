@@ -188,7 +188,7 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        fileMenu.add(new PrintAction(), CTRL_P);
+        fileMenu.add(new PrintAction(texts), CTRL_P);
 
         fileMenu.add(createAutomateSubmenu(pw, texts));
 
@@ -474,7 +474,7 @@ public class MenuBar extends JMenuBar {
         sub.add(new RestrictedLayerAction("Selection from Text", isTextLayer) {
             @Override
             public void onActiveLayer(Layer layer) {
-                layer.getComp().createSelectionFromText();
+                ((TextLayer) layer).createSelectionFromText();
             }
         });
 

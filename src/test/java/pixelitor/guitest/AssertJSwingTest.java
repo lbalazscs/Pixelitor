@@ -1257,9 +1257,6 @@ public class AssertJSwingTest {
         dialog.button("expandButton").click();
         dialog.button("collapseButton").click();
 
-        findButtonByText(dialog, "Help").click();
-        app.findJOptionPane().okButton().click();
-
         dialog.button("ok").click();
         dialog.requireNotVisible();
     }

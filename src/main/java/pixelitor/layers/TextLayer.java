@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -420,13 +420,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
-
-        if (settings == null) {
-            node.addString("text settings", "NO TEXT SETTINGS!");
-        } else {
-            node.add(settings.createDebugNode("text settings"));
-        }
-
+        node.addNullableDebuggable("text settings", settings);
         return node;
     }
 }

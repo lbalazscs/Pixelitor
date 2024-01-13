@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -946,16 +946,15 @@ public class ShapesTool extends DragTool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
-        node.addAsString("state", state);
+        DebugNode node = super.createDebugNode(key);
 
+        node.addAsString("state", state);
         node.addNullableDebuggable("transform box", transformBox);
         node.addNullableDebuggable("styled shape", styledShape);
-
         node.addAsString("type", getSelectedType());
         node.addAsString("fill", getSelectedFillPaint());
         node.addAsString("stroke", getSelectedStrokePaint());
-        strokeParam.addDebugNodeInfo(node);
+        node.add(strokeParam.createDebugNode("strokeParam"));
 
         return node;
     }

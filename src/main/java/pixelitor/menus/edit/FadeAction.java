@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,11 +40,10 @@ public class FadeAction extends FilterAction implements UndoableEditListener {
 
     @Override
     public void undoableEditHappened(UndoableEditEvent e) {
-        boolean b = History.canFade();
-        refresh(b);
+        updateGUI(History.canFade());
     }
 
-    public void refresh(boolean canFade) {
+    public void updateGUI(boolean canFade) {
         setEnabled(canFade);
         String menuName;
         if (canFade) {
@@ -59,8 +58,5 @@ public class FadeAction extends FilterAction implements UndoableEditListener {
     @Override
     public void viewActivated(View oldView, View newView) {
         setEnabled(false);
-
-// the following should be very slightly better, but goes into a complex territory:
-//        setEnabled(History.canFade());
     }
 }

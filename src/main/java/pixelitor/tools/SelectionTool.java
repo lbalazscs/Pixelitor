@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,9 @@ import javax.swing.*;
 import java.awt.Graphics2D;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
-import static pixelitor.selection.ShapeCombinator.*;
+import static pixelitor.selection.ShapeCombinator.ADD;
+import static pixelitor.selection.ShapeCombinator.INTERSECT;
+import static pixelitor.selection.ShapeCombinator.SUBTRACT;
 
 /**
  * The selection tool
@@ -411,7 +413,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
 
         node.addAsString("type", getSelectionType());
         node.addAsString("combinator", getCombinator());

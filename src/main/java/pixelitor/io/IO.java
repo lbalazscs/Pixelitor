@@ -286,7 +286,7 @@ public class IO {
     public static void saveJpegWithQuality(JpegInfo jpegInfo) {
         var comp = Views.getActiveComp();
         FileChoosers.saveWithSingleAllowedExtension(comp,
-            comp.getFileNameWithExt("jpg"), jpegInfo, FileChoosers.jpegFilter);
+            comp.createFileNameWithExt("jpg"), jpegInfo, FileChoosers.jpegFilter);
     }
 
     static void saveToChosenFile(Composition comp, File file,
@@ -311,7 +311,7 @@ public class IO {
     }
 
     public static void saveSVG(String content, String suggestedFileName) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(suggestedFileName, svgFilter);
+        File file = FileChoosers.selectSaveFileForFormat(suggestedFileName, svgFilter);
         if (file == null) { // save file dialog cancelled
             return;
         }

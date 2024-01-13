@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -138,7 +138,7 @@ public class StrokeParam extends AbstractFilterParam {
         return dashFloats;
     }
 
-    public boolean hasDashes() {
+    private boolean hasDashes() {
         return dashedParam.isChecked();
     }
 
@@ -160,7 +160,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeCapParam.doRandomize();
         strokeJoinParam.doRandomize();
 
-        // make sure that the slow settings can't be set by "randomize settings"
+        // ensure that "randomize settings" doesn't create slow strokes
         do {
             strokeTypeParam.doRandomize();
         } while (strokeTypeParam.getSelected().isSlow());
@@ -295,17 +295,18 @@ public class StrokeParam extends AbstractFilterParam {
         this.previewer = previewer;
     }
 
-    public void addDebugNodeInfo(DebugNode node) {
-        DebugNode strokeNode = new DebugNode("stroke settings", this);
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
 
-        strokeNode.addInt("width", strokeWidthParam.getValue());
-        strokeNode.addAsString("cap", strokeCapParam.getSelected());
-        strokeNode.addAsString("join", strokeJoinParam.getSelected());
-        strokeNode.addAsString("type", strokeTypeParam.getSelected());
-        strokeNode.addAsString("shape type", shapeTypeParam.getSelected());
-        strokeNode.addBoolean("dashed", hasDashes());
+        node.addInt("width", strokeWidthParam.getValue());
+        node.addAsString("cap", strokeCapParam.getSelected());
+        node.addAsString("join", strokeJoinParam.getSelected());
+        node.addAsString("type", strokeTypeParam.getSelected());
+        node.addAsString("shape type", shapeTypeParam.getSelected());
+        node.addBoolean("dashed", hasDashes());
 
-        node.add(strokeNode);
+        return node;
     }
 
     @Override

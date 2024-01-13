@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.utils.Threads.onEDT;
@@ -40,13 +41,15 @@ import static pixelitor.utils.Threads.onIOThread;
 
 public class PrintAction extends OpenViewEnabledAction.Checked implements Printable {
     private static final float DPI = 72.0f;
+    private final ResourceBundle texts;
 
     private BufferedImage img;
     private String compName;
     private PageFormat page;
 
-    public PrintAction() {
-        super("Print...");
+    public PrintAction(ResourceBundle texts) {
+        super(texts.getString("print") + "...");
+        this.texts = texts;
     }
 
     @Override
@@ -73,9 +76,9 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         p.add(previewPanel, BorderLayout.CENTER);
 
         new DialogBuilder()
-            .title("Print Preview")
+            .title(texts.getString("print_preview"))
             .content(p)
-            .okText("Print...")
+            .okText(texts.getString("print") + "...")
             .okAction(() -> previewAccepted(job))
             .show();
     }

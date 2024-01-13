@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.tools.util;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -38,7 +40,7 @@ import static java.lang.String.format;
  * take the position of the {@link Canvas} within the
  * {@link View} and the image zooming into account.
  */
-public class PPoint {
+public class PPoint implements Debuggable {
     protected final View view;
 
     // All the coordinates are initialized in subclasses.
@@ -219,6 +221,14 @@ public class PPoint {
 
     public Composition getComp() {
         return view.getComp();
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+        node.addDouble("imX", getImX());
+        node.addDouble("imY", getImY());
+        return node;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
+import java.util.Objects;
 
 /**
  * An abstract base class for the brushes that are
@@ -61,8 +62,8 @@ public abstract class AbstractBrush implements Brush {
 
     @Override
     public void setTarget(Drawable dr, Graphics2D g) {
-        this.dr = dr;
-        targetG = g;
+        this.dr = Objects.requireNonNull(dr);
+        targetG = Objects.requireNonNull(g);
     }
 
     // always call it before rememberPrevious!
@@ -142,10 +143,7 @@ public abstract class AbstractBrush implements Brush {
         var node = new DebugNode(key, this);
         node.addClass();
         node.addDouble("radius", radius);
-        if (previous != null) {
-            node.addDouble("previous x", previous.getImX());
-            node.addDouble("previous y", previous.getImY());
-        }
+        node.addNullableDebuggable("previous", previous);
 
         return node;
     }

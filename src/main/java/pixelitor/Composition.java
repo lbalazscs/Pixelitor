@@ -44,6 +44,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.*;
 import java.awt.*;
@@ -467,7 +468,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return name;
     }
 
-    public String getFileNameWithExt(String ext) {
+    public String createFileNameWithExt(String ext) {
         if (file == null) {
             return name + "." + ext;
         } else {
@@ -1389,14 +1390,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    public void createSelectionFromText() {
-        if (activeLayer instanceof TextLayer textLayer) {
-            textLayer.createSelectionFromText();
-        } else {
-            throw new IllegalStateException("active layer is not text layer");
-        }
-    }
-
     /**
      * Called when the image-space coordinates have been changed by the
      * given transform (resize, crop, etc.).
@@ -1873,41 +1866,20 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         node.add(createBufferedImageNode("composite image", getCompositeImage()));
 
-        if (paths == null) {
-            node.addBoolean("has paths", false);
-        } else {
-            node.add(paths.createDebugNode("paths"));
-        }
-
-        if (guides == null) {
-            node.addBoolean("has guides", false);
-        } else {
-            node.add(guides.createDebugNode("guides"));
-        }
+        node.addNullableDebuggable("paths", paths);
+        node.addNullableDebuggable("guides", guides);
 
         node.addInt("num layers", getNumLayers());
         node.addQuotedString("name", getName());
         node.addQuotedString("debug name", getDebugName());
 
-        String filePath = "";
-        if (file != null) {
-            filePath = file.getAbsolutePath();
-        }
-        node.addQuotedString("file", filePath);
+        node.addNullableDebuggable("file", file, DebugNodes::createFileNode);
+
         node.addBoolean("is smart object content", isSmartObjectContent());
         node.addBoolean("dirty", isDirty());
 
-        if (hasInProgressSelection()) {
-            node.add(getInProgressSelection().createDebugNode("in-progress selection"));
-        } else {
-            node.addBoolean("has in-progress selection", false);
-        }
-
-        if (hasSelection()) {
-            node.add(getSelection().createDebugNode("selection"));
-        } else {
-            node.addBoolean("has selection", false);
-        }
+        node.addNullableDebuggable("in-progress selection", inProgressSelection);
+        node.addNullableDebuggable("selection", selection);
 
         return node;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -126,7 +126,7 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    protected BufferedImage createEmptyImageForLayer(int width, int height) {
+    protected BufferedImage createEmptyLayerImage(int width, int height) {
         var empty = new BufferedImage(width, height, TYPE_BYTE_GRAY);
 
         // when enlarging a layer mask, the new areas need to be white

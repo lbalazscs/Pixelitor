@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,9 @@ import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
-import static pixelitor.tools.CloneTool.State.*;
+import static pixelitor.tools.CloneTool.State.CLONING;
+import static pixelitor.tools.CloneTool.State.NO_SOURCE;
+import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
 
 /**
  * The clone stamp tool.
@@ -296,7 +298,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
 
         node.addAsString("brush", cloneBrush.getType());
         node.addAsString("state", state);

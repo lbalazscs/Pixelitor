@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,8 +61,8 @@ public class FileChoosers {
     public static final FileNameExtensionFilter webpFilter = new FileNameExtensionFilter(
         "WebP files", "webp");
 
-    // the difference is that all NetPBM files can be opened,
-    // but only PAM and PPM can be saved
+    // All NetPBM files can be opened, but only PAM and PPM can be saved.
+    // Also, webp can only be opened, but not saved.
     public static final FileNameExtensionFilter[] OPEN_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, netPBMFilters, oraFilter,
         pngFilter, pxcFilter, tiffFilter, tgaFilter, webpFilter};
@@ -108,12 +108,12 @@ public class FileChoosers {
                                                          String suggestedFileName,
                                                          Object extraInfo,
                                                          FileNameExtensionFilter extensionFilter) {
-        File selectedFile = selectSaveFileForSpecificFormat(
+        File selectedFile = selectSaveFileForFormat(
             suggestedFileName, extensionFilter);
         return saveSelectedFile(comp, selectedFile, extraInfo);
     }
 
-    public static File selectSaveFileForSpecificFormat(String suggestedFileName, FileFilter fileFilter) {
+    public static File selectSaveFileForFormat(String suggestedFileName, FileFilter fileFilter) {
         FileChooserInfo chooserInfo = FileChooserInfo.forSingleFormat(suggestedFileName, fileFilter);
         return picker.showSaveDialog(chooserInfo);
     }

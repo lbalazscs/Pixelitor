@@ -135,7 +135,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public static ImageLayer createEmpty(Composition comp, String name) {
         ImageLayer imageLayer = new ImageLayer(comp, name);
 
-        BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
+        BufferedImage emptyImage = imageLayer.createEmptyLayerImage(
             comp.getCanvasWidth(), comp.getCanvasHeight());
         imageLayer.setImage(emptyImage);
         imageLayer.checkConstructorPostConditions();
@@ -180,7 +180,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // and the pasted image is centered within it
         int newWidth = Math.max(canvasWidth, pastedWidth);
         int newHeight = Math.max(canvasHeight, pastedHeight);
-        BufferedImage newImage = createEmptyImageForLayer(newWidth, newHeight);
+        BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
         Graphics2D g = newImage.createGraphics();
 
         // center the pasted image within the new image
@@ -366,7 +366,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     // which is overridden by the LayerMask subclass,
     // because normal image layers are enlarged with transparent pixels
     // and layer masks are enlarged with white pixels.
-    protected BufferedImage createEmptyImageForLayer(int width, int height) {
+    protected BufferedImage createEmptyLayerImage(int width, int height) {
         return ImageUtils.createSysCompatibleImage(width, height);
     }
 
@@ -707,7 +707,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             Rectangle current = getContentBounds();
             Rectangle target = current.union(canvasBounds);
 
-            BufferedImage bi = createEmptyImageForLayer(target.width, target.height);
+            BufferedImage bi = createEmptyLayerImage(target.width, target.height);
             Graphics2D g = bi.createGraphics();
             int drawX = current.x - target.x;
             int drawY = current.y - target.y;

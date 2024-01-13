@@ -684,7 +684,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public DebugNode createDebugNode(String key) {
-        var node = super.createDebugNode(key);
+        DebugNode node = super.createDebugNode(key);
 
         if (hasBrushType()) {
             node.addAsString("brush type", getBrushType());

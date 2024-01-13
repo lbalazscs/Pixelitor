@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -41,7 +40,7 @@ public class CopyAction extends OpenViewEnabledAction {
     public static final CopyAction COPY_COMPOSITE = new CopyAction(CopySource.COMPOSITE);
 
     private CopyAction(CopySource source) {
-        super(i18n(source.toResourceKey()), comp -> copy(comp, source));
+        super(source.getName(), comp -> copy(comp, source));
     }
 
     private static void copy(Composition comp, CopySource source) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Represents the source of the image to be copied to the clipboard.
  */
@@ -55,8 +57,8 @@ public enum CopySource {
         }
 
         @Override
-        public String toResourceKey() {
-            return "copy_layer_mask";
+        public String getName() {
+            return i18n("copy_layer_mask");
         }
     }, COMPOSITE {
         @Override
@@ -65,8 +67,8 @@ public enum CopySource {
         }
 
         @Override
-        public String toResourceKey() {
-            return "copy_composite";
+        public String getName() {
+            return i18n("copy_composite");
         }
     };
 
@@ -113,5 +115,5 @@ public enum CopySource {
 
     abstract Result<BufferedImage, String> getImage(Composition comp);
 
-    abstract String toResourceKey();
+    abstract String getName();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -216,7 +216,7 @@ public final class PathTransformer implements PenToolMode {
 
     @Override
     public DebugNode createDebugNode() {
-        var node = PenToolMode.super.createDebugNode();
+        DebugNode node = PenToolMode.super.createDebugNode();
         for (int i = 0; i < boxes.size(); i++) {
             TransformBox box = boxes.get(i);
             node.add(box.createDebugNode("transform box " + i));

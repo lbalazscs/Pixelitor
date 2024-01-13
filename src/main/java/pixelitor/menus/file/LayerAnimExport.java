@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,8 +55,8 @@ public class LayerAnimExport {
     }
 
     private static void export(Composition comp, int delayMillis, boolean pingPong) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(
-            comp.getFileNameWithExt("gif"), gifFilter);
+        File file = FileChoosers.selectSaveFileForFormat(
+            comp.createFileNameWithExt("gif"), gifFilter);
         if (file != null) {
             new LayerAnimation(comp, delayMillis, pingPong)
                 .saveToFile(file);

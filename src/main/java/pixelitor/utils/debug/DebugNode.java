@@ -23,6 +23,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.Color;
 import java.util.Enumeration;
+import java.util.function.BiFunction;
 
 import static java.lang.String.format;
 
@@ -100,13 +101,25 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * A null-safe version of adding the DebugNode created by an object
+     * A null-safe version of adding the {@link DebugNode} created by an object
      */
     public void addNullableDebuggable(String name, Debuggable debuggable) {
         if (debuggable == null) {
             addString(name, "null");
         } else {
             add(debuggable.createDebugNode(name));
+        }
+    }
+
+    /**
+     * This overload can be used if the debugged object can't implement {@link Debuggable}
+     */
+    public <T> void addNullableDebuggable(String name, T debugged,
+                                          BiFunction<String, T, DebugNode> transformer) {
+        if (debugged == null) {
+            addString(name, "null");
+        } else {
+            add(transformer.apply(name, debugged));
         }
     }
 

@@ -25,6 +25,7 @@ import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.io.File;
 
 /**
  * Static factory methods for creating {@link DebugNode}s
@@ -66,7 +67,7 @@ public class DebugNodes {
         var node = new DebugNode(name, image);
 
         node.add(createColorModelNode("color model", image.getColorModel()));
-        node.add(createRasterNode(image.getRaster()));
+        node.add(createRasterNode("raster", image.getRaster()));
         node.addString("type", Debug.bufferedImageTypeToString(image.getType()));
         node.addInt("width", image.getWidth());
         node.addInt("height", image.getHeight());
@@ -75,10 +76,12 @@ public class DebugNodes {
         return node;
     }
 
-    private static DebugNode createRasterNode(WritableRaster raster) {
-        var node = new DebugNode("writable raster", raster);
+    public static DebugNode createRasterNode(String key, Raster raster) {
+        var node = new DebugNode(key, raster);
 
         node.addClass();
+        node.addInt("width", raster.getWidth());
+        node.addInt("height", raster.getHeight());
         node.addInt("sample model tx", raster.getSampleModelTranslateX());
         node.addInt("sample model ty", raster.getSampleModelTranslateY());
         node.add(createSampleModelNode(raster.getSampleModel()));
@@ -164,6 +167,15 @@ public class DebugNodes {
         node.addInt("y", rect.y);
         node.addInt("width", rect.width);
         node.addInt("height", rect.height);
+
+        return node;
+    }
+
+    public static DebugNode createFileNode(String name, File file) {
+        DebugNode node = new DebugNode(name, file);
+
+        node.addQuotedString("path", file.getAbsolutePath());
+        node.addBoolean("exists", file.exists());
 
         return node;
     }
