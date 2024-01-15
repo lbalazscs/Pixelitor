@@ -17,38 +17,38 @@
 
 package pixelitor.menus.file;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import pixelitor.Composition;
-import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.PAction;
-import pixelitor.io.FileUtils;
+import pixelitor.menus.file.MetaDataTreeTableModel.NameValue;
 import pixelitor.utils.Messages;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.io.UncheckedIOException;
+import java.util.Iterator;
 
 import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
 import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.WEST;
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
-public class MetaDataPanel extends JPanel implements DropTargetListener {
+public class MetaDataPanel extends JPanel {
     private final JXTreeTable treeTable;
 
     private MetaDataPanel(MetaDataTreeTableModel model) {
@@ -62,8 +62,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         JScrollPane sp = new JScrollPane(treeTable);
         add(sp, CENTER);
 
-        JPanel northPanel = new JPanel(new BorderLayout());
-        JPanel northLeftPanel = new JPanel(new FlowLayout(LEFT));
+        JPanel northPanel = new JPanel(new FlowLayout(LEFT));
 
         JButton expandButton = new JButton(new PAction(
             "Expand All", treeTable::expandAll));
@@ -73,33 +72,12 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
             "Collapse All", treeTable::collapseAll));
         collapseButton.setName("collapseButton");
 
-        northLeftPanel.add(expandButton);
-        northLeftPanel.add(collapseButton);
-        northPanel.add(northLeftPanel, WEST);
+        northPanel.add(expandButton);
+        northPanel.add(collapseButton);
 
-        JButton helpButton = new JButton(new PAction(
-            GUIText.HELP, this::showHelp));
-
-        JPanel northRightPanel = new JPanel();
-        northRightPanel.add(helpButton);
-        northPanel.add(northRightPanel, EAST);
         add(northPanel, NORTH);
 
         setupColumnsWidths();
-
-        new DropTarget(this, this);
-    }
-
-    private void showHelp() {
-        String txt = "<html>You can drag external multimedia files on the Metadata window " +
-            "to see their Exif, IPTC, etc. information." +
-            "<br>It can read a different set of files than the rest of Pixelitor." +
-            "<p><br>Supported file types: <b>JPEG, TIFF, WebP, PNG, BMP, GIF, HEIC, PSD, " +
-            "ICO, PCX, MP3, WAV, QuickTime, MP4, AVI</b>." +
-            "<br>Supported Camera Raw file types: <b>NEF</b> (Nikon), <b>CR2</b> (Canon), " +
-            "<b>ORF</b> (Olympus), <b>ARW</b> (Sony), <br><b>RW2</b> (Panasonic), " +
-            "<b>RWL</b> (Leica), <b>SRW</b> (Samsung).";
-        Dialogs.showInfoDialog(this, "Show Metadata Help", txt);
     }
 
     private void setupColumnsWidths() {
@@ -107,81 +85,56 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         treeTable.getColumnModel().getColumn(1).setMinWidth(200);
     }
 
-    @Override
-    public void dragEnter(DropTargetDragEvent dtde) {
-        handleOngoingDrag(dtde);
+    private static TreeNode extractMetadata(File file) throws IOException {
+        IIOMetadata metadata = null;
+        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (readers.hasNext()) {
+                // pick the first available ImageReader
+                ImageReader reader = readers.next();
+                // attach source to the reader
+                reader.setInput(iis, true);
+                // read metadata of first image
+                metadata = reader.getImageMetadata(0);
+            }
+        }
+        String[] formatNames = metadata.getMetadataFormatNames();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        for (String formatName : formatNames) {
+            Node node = metadata.getAsTree(formatName);
+            root.add(toSwingNode(node));
+        }
+        return root;
     }
 
-    @Override
-    public void dragOver(DropTargetDragEvent dtde) {
-        handleOngoingDrag(dtde);
-    }
+    private static DefaultMutableTreeNode toSwingNode(Node node) {
+        DefaultMutableTreeNode swingNode;
 
-    @Override
-    public void dropActionChanged(DropTargetDragEvent dtde) {
+        swingNode = new DefaultMutableTreeNode(node.getNodeName());
 
-    }
-
-    @Override
-    public void dragExit(DropTargetEvent dte) {
-
-    }
-
-    @Override
-    public void drop(DropTargetDropEvent e) {
-        Transferable transferable = e.getTransferable();
-        DataFlavor[] flavors = transferable.getTransferDataFlavors();
-        for (DataFlavor flavor : flavors) {
-            if (flavor.isFlavorJavaFileListType()) {
-                // this is where we get after dropping a file or directory
-                e.acceptDrop(DnDConstants.ACTION_COPY);
-
-                try {
-                    @SuppressWarnings("unchecked")
-                    List<File> list = (List<File>) transferable.getTransferData(flavor);
-                    File file = list.getFirst();
-                    if (file.isFile()) {
-                        changeFile(file);
-                    }
-                } catch (UnsupportedFlavorException | IOException ex) {
-                    e.rejectDrop();
+        NamedNodeMap map = node.getAttributes();
+        if (map != null) {
+            int length = map.getLength();
+            if (length == 1) {
+                NameValue nameValue = new NameValue(node.getNodeName(), map.item(0).getNodeValue());
+                return new DefaultMutableTreeNode(nameValue);
+            } else {
+                for (int i = 0; i < length; i++) {
+                    Node attr = map.item(i);
+                    String nodeName = attr.getNodeName();
+                    String nodeValue = attr.getNodeValue();
+                    NameValue nameValue = new NameValue(nodeName, nodeValue);
+                    swingNode.add(new DefaultMutableTreeNode(nameValue));
                 }
-                e.dropComplete(true);
-                return;
             }
         }
 
-        // DataFlavor not recognized
-        e.rejectDrop();
-    }
-
-    private static void handleOngoingDrag(DropTargetDragEvent dtde) {
-        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-            dtde.acceptDrag(DnDConstants.ACTION_COPY);
-        } else {
-            dtde.rejectDrag();
+        NodeList nodeList = node.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node childNode = nodeList.item(i);
+            swingNode.add(toSwingNode(childNode));
         }
-    }
-
-    private void changeFile(File file) {
-        Metadata metadata = extractMetadata(file);
-        if (metadata != null) {
-            treeTable.setTreeTableModel(new MetaDataTreeTableModel(metadata));
-            setupColumnsWidths();
-            JDialog d = (JDialog) SwingUtilities.getWindowAncestor(this);
-            d.setTitle("Metadata for " + file.getName());
-        }
-    }
-
-    private static Metadata extractMetadata(File file) {
-        Metadata metadata;
-        try {
-            metadata = ImageMetadataReader.readMetadata(file);
-        } catch (ImageProcessingException | IOException e) {
-            Messages.showException(e);
-            return null;
-        }
-        return metadata;
+        return swingNode;
     }
 
     public static void showInDialog(Composition comp) {
@@ -200,13 +153,13 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
             Messages.showError("File not found", msg, comp.getDialogParent());
             return;
         }
-        if (FileUtils.hasTGAExtension(file.getName())) {
-            String msg = "Metadata for TGA files isn't supported yet.";
-            Messages.showError("TGA File", msg, comp.getDialogParent());
-            return;
+        TreeNode metadataRoot;
+        try {
+            metadataRoot = extractMetadata(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        Metadata metadata = extractMetadata(file);
-        MetaDataPanel panel = new MetaDataPanel(new MetaDataTreeTableModel(metadata));
+        MetaDataPanel panel = new MetaDataPanel(new MetaDataTreeTableModel(metadataRoot));
         new DialogBuilder()
             .title("Metadata for " + file.getName())
             .content(panel)

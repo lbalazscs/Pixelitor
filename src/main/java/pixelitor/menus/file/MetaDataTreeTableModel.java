@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,66 +17,55 @@
 
 package pixelitor.menus.file;
 
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 /**
  * The model for the metadata tree-table
  */
 public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     private static final String[] COLUMN_NAMES = {"Name", "Value"};
-    private final List<DirNode> dirNodes = new ArrayList<>();
 
-    public MetaDataTreeTableModel(Metadata metadata) {
-        super(new Object());
-        for (Directory directory : metadata.getDirectories()) {
-            dirNodes.add(new DirNode(directory));
-        }
+    public MetaDataTreeTableModel(TreeNode root) {
+        super(root);
     }
 
     @Override
     public Object getValueAt(Object node, int column) {
-        if (node instanceof DirNode dir) {
-            return switch (column) {
-                case 0 -> dir.name();
+        DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
+        Object userObject = treeNode.getUserObject();
+        return switch (userObject) {
+            case String s -> switch (column) {
+                // a String means a "directory node" with no value
+                case 0 -> s;
                 case 1 -> null;
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
-        } else if (node instanceof TagNode tag) {
-            return switch (column) {
-                case 0 -> tag.name();
-                case 1 -> tag.value();
+            case NameValue nameValue -> switch (column) {
+                // a leaf node was found
+                case 0 -> nameValue.name();
+                case 1 -> nameValue.value();
                 default -> throw new IllegalStateException("Unexpected column: " + column);
             };
-        }
-        return null;
+            default -> throw new IllegalStateException("Unexpected type: " + userObject.getClass().getName());
+        };
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof DirNode dir) {
-            return dir.nodes.get(index);
-        }
-        return dirNodes.get(index);
+        return ((TreeNode) parent).getChildAt(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof DirNode dir) {
-            return dir.nodes.size();
-        }
-        return dirNodes.size();
+        return ((TreeNode) parent).getChildCount();
     }
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return ((TagNode) child).index();
+        return ((TreeNode) parent).getIndex((TreeNode) child);
     }
 
     @Override
@@ -89,38 +78,6 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
         return COLUMN_NAMES[column];
     }
 
-    @Override
-    public boolean isLeaf(Object node) {
-        return node instanceof TagNode;
-    }
-
-    static class DirNode {
-        private final Directory dir;
-        private final List<TagNode> nodes = new ArrayList<>();
-
-        DirNode(Directory dir) {
-            this.dir = dir;
-            Collection<Tag> tags = dir.getTags();
-            int tagIndex = 0;
-            for (Tag tag : tags) {
-                String tagName = tag.getTagName();
-                if (tagName.startsWith("Unknown")) {
-                    continue;
-                }
-                String description = tag.getDescription();
-                if (description != null && description.startsWith("Unknown")) {
-                    continue;
-                }
-                nodes.add(new TagNode(tagName, description, tagIndex));
-                tagIndex++;
-            }
-        }
-
-        public String name() {
-            return dir.getName();
-        }
-    }
-
-    private record TagNode(String name, String value, int index) {
+    public record NameValue(String name, String value) {
     }
 }
