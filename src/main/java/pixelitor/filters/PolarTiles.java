@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Polar Glass Tiles filter
  */
 public class PolarTiles extends ParametrizedFilter {
     public static final String NAME = "Polar Glass Tiles";
+
+    @Serial
+    private static final long serialVersionUID = -2428230904945914960L;
 
     private final IntChoiceParam modeParam = new IntChoiceParam("Type", new Item[]{
         new Item("Concentric", PolarTilesFilter.MODE_CONCENTRIC),
@@ -69,7 +73,7 @@ public class PolarTiles extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new PolarTilesFilter();
         }

@@ -80,7 +80,7 @@ public class ValueNoise extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] lookupTable = new int[256];
         Color c1 = color1.getColor();
         Color c2 = color2.getColor();

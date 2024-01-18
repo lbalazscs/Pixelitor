@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,16 @@ import pixelitor.utils.BlurredShape;
 
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Development filter for testing blurred shapes
  */
 public class BlurredShapeTester extends ParametrizedFilter {
     public static final String NAME = "Blurred Shape Tester";
+
+    @Serial
+    private static final long serialVersionUID = 6561913257737828209L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 1, 200, 1000, false);
@@ -54,7 +58,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new Impl();
         }

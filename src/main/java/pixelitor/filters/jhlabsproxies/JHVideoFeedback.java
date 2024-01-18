@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Video Feedback filter based on the JHLabs FeedbackFilter
  */
 public class JHVideoFeedback extends ParametrizedFilter {
     public static final String NAME = "Video Feedback";
+
+    @Serial
+    private static final long serialVersionUID = 6619788137062818386L;
 
     private final RangeParam iterations = new RangeParam("Iterations", 2, 3, 30);
     private final ImagePositionParam center = new ImagePositionParam("Center");
@@ -53,7 +57,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (rotation.isZero() && zoom.isZero()) {
             return src;
         }

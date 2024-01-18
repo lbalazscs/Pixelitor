@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.lookup.FastLookupOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
+import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -32,6 +33,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Posterize extends ParametrizedFilter {
     public static final String NAME = i18n("posterize");
+
+    @Serial
+    private static final long serialVersionUID = 4448706459360371642L;
 
     private final RangeParam redLevels = new RangeParam(i18n("red"), 2, 2, 50);
     private final RangeParam greenLevels = new RangeParam(i18n("green"), 2, 2, 50);
@@ -51,7 +55,7 @@ public class Posterize extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int numRedLevels = redLevels.getValue();
         int numGreenLevels = greenLevels.getValue();
         int numBlueLevels = blueLevels.getValue();

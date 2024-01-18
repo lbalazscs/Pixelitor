@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.gui.GUIText;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -36,6 +37,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  * Common superclass for the Julia and Mandelbrot sets
  */
 public abstract class ComplexFractal extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 9185505916174567657L;
+
     private static final int COLORS_CONTRASTING = 1;
     private static final int COLORS_CONTINUOUS = 2;
     private static final int COLORS_BLUES = 3;
@@ -77,15 +81,15 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int aa = aaParam.getValue();
         if (aa == AA_NONE) {
-            return doTransformAA(src, dest);
+            return transformAA(src, dest);
         } else if (aa == AA_2x2) {
             // transform an image with double size, then scale it down
             BufferedImage bigSrc = new BufferedImage(
                 src.getWidth() * 2, src.getHeight() * 2, src.getType());
-            BufferedImage bigDest = doTransformAA(bigSrc, null);
+            BufferedImage bigDest = transformAA(bigSrc, null);
             bigSrc.flush();
             Graphics2D g2 = dest.createGraphics();
             g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
@@ -99,7 +103,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
         }
     }
 
-    protected abstract BufferedImage doTransformAA(BufferedImage src, BufferedImage dest);
+    protected abstract BufferedImage transformAA(BufferedImage src, BufferedImage dest);
 
     protected int[] createColors(int maxIterations) {
         int[] colors = new int[maxIterations + 1];

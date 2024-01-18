@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Magnify filter
  */
 public class Magnify extends ParametrizedFilter {
     public static final String NAME = "Magnify";
+
+    @Serial
+    private static final long serialVersionUID = -7415549925214553939L;
 
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 501);
     private final GroupedRangeParam outerRadius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
@@ -43,8 +47,6 @@ public class Magnify extends ParametrizedFilter {
     public Magnify() {
         super(true);
 
-        showAffectedArea();
-
         setParams(
             magnification,
             outerRadius.withAdjustedRange(1.0),
@@ -58,7 +60,7 @@ public class Magnify extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new MagnifyFilter(NAME);
         }

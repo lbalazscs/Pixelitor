@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.impl.VoronoiFilter;
 import pixelitor.utils.Metric;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -32,6 +33,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class Voronoi extends ParametrizedFilter {
     public static final String NAME = "Voronoi Diagram";
+
+    @Serial
+    private static final long serialVersionUID = -104154369877253021L;
 
     private final RangeParam distance = new RangeParam("Distance between Points", 10, 20, 400);
     private final EnumParam<Metric> metric = new EnumParam<>("Distance", Metric.class);
@@ -65,7 +69,7 @@ public class Voronoi extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new VoronoiFilter(NAME);
         }

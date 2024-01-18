@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.BRIGHTNESS;
 import static pixelitor.gui.GUIText.HUE;
@@ -32,6 +33,9 @@ import static pixelitor.gui.GUIText.SATURATION;
  */
 public class HueSat extends ParametrizedFilter {
     public static final String NAME = HUE + "/" + SATURATION;
+
+    @Serial
+    private static final long serialVersionUID = -5215830710090103691L;
 
     private static final int MIN_HUE = -180;
     private static final int MAX_HUE = 180;
@@ -64,7 +68,7 @@ public class HueSat extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int hueP = hue.getValue();
         int satP = saturation.getValue();
         int briP = brightness.getValue();

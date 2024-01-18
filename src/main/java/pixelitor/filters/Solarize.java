@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,16 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Solarize
  */
 public class Solarize extends ParametrizedFilter {
     public static final String NAME = "Solarize";
+
+    @Serial
+    private static final long serialVersionUID = -5483360370529563790L;
 
     private static final int TYPE_CLASSIC = 1; // pixels above the threshold level are inverted + contrast is maximized
     private static final int TYPE_INVERTED = 2; // upside down: corresponds to a V-shaped curves adjustment
@@ -57,7 +61,7 @@ public class Solarize extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] srcData = ImageUtils.getPixelArray(src);
         int[] destData = ImageUtils.getPixelArray(dest);
 

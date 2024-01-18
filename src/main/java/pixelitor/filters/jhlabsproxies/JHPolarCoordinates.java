@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.utils.Texts.i18n;
@@ -35,6 +36,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class JHPolarCoordinates extends ParametrizedFilter {
     public static final String NAME = i18n("polar_coordinates");
+
+    @Serial
+    private static final long serialVersionUID = -5671953836564191141L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
@@ -61,7 +65,7 @@ public class JHPolarCoordinates extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new PolarFilter(NAME);
         }

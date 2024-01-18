@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Water Ripple filter based on the JHLabs WaterFilter
  */
 public class JHWaterRipple extends ParametrizedFilter {
     public static final String NAME = "Water Ripple";
+
+    @Serial
+    private static final long serialVersionUID = -1049818778564803544L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
@@ -46,8 +50,6 @@ public class JHWaterRipple extends ParametrizedFilter {
     public JHWaterRipple() {
         super(true);
 
-        showAffectedArea();
-
         setParams(
             center,
             radius.withAdjustedRange(1.0),
@@ -60,7 +62,7 @@ public class JHWaterRipple extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amplitude.isZero()) {
             return src;
         }

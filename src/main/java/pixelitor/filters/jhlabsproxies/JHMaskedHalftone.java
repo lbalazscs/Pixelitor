@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Abstract base class for filters that use {@link HalftoneFilter}
@@ -33,6 +34,9 @@ import java.awt.image.BufferedImage;
 public abstract class JHMaskedHalftone extends ParametrizedFilter {
     private static final int REPETITION_REFLECT = 1;
     private static final int REPETITION_REPEAT = 2;
+
+    @Serial
+    private static final long serialVersionUID = -8785201913136925217L;
 
     protected final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     protected final BooleanParam invert = new BooleanParam("Invert Pattern", false);
@@ -51,7 +55,7 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         setupHelperVariables();
 
         BufferedImage stripes = createMaskImage(src);

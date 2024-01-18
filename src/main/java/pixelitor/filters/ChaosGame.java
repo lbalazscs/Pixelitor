@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +49,10 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
  */
 public class ChaosGame extends ParametrizedFilter {
     public static final String NAME = "Chaos Game";
+
+    @Serial
+    private static final long serialVersionUID = 6399413203597332126L;
+
     private static final int MARGIN = 5;
     private static final Vertex[] EMPTY_ARRAY = new Vertex[0];
 
@@ -125,7 +130,7 @@ public class ChaosGame extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int numIterations = iterations.getValue() * 1_000_000;
         int workUnit = numIterations / 20;
         int numWorkUnits = 20;

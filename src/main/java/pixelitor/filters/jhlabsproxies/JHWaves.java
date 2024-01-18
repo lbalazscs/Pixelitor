@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,16 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Waves filter based on the JHLabs RippleFilter
  */
 public class JHWaves extends ParametrizedFilter {
     public static final String NAME = "Waves";
+
+    @Serial
+    private static final long serialVersionUID = -3414927980090919384L;
 
     private final GroupedRangeParam wavelengthParam = new GroupedRangeParam("Wavelength", 1, 20, 200);
     private final GroupedRangeParam amplitudeParam = new GroupedRangeParam("Amplitude", 0, 10, 200);
@@ -56,7 +60,7 @@ public class JHWaves extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int xAmplitude = amplitudeParam.getValue(0);
         int yAmplitude = amplitudeParam.getValue(1);
 

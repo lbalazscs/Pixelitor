@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
 
@@ -31,6 +32,9 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  */
 public class JHColorHalftone extends ParametrizedFilter {
     public static final String NAME = "Color Halftone";
+
+    @Serial
+    private static final long serialVersionUID = 3114442166040830236L;
 
     private final RangeParam dotRadius = new RangeParam(
         "Dot Radius (pixel %)", 10, 100, 1000);
@@ -54,7 +58,7 @@ public class JHColorHalftone extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new ColorHalftoneFilter(NAME);
         }

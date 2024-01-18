@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Offset filter based on the JHLabs OffsetFilter
  */
 public class JHOffset extends ParametrizedFilter {
     public static final String NAME = "Offset";
+
+    @Serial
+    private static final long serialVersionUID = -4148462098219318362L;
 
     private final ImagePositionParam center =
         new ImagePositionParam("Translate Top Left Point To");
@@ -41,7 +45,7 @@ public class JHOffset extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new OffsetFilter(NAME);
         }

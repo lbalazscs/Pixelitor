@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
@@ -34,6 +35,9 @@ import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
  */
 public class JHCheckerFilter extends ParametrizedFilter {
     public static final String NAME = "Checker Pattern";
+
+    @Serial
+    private static final long serialVersionUID = -2525401637282008155L;
 
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
     private final AngleParam angle = new AngleParam("Angle", 0);
@@ -65,7 +69,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new CheckFilter(NAME);
         }

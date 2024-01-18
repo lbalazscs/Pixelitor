@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import pixelitor.utils.BlurredShape;
 
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -36,6 +37,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class Flashlight extends ParametrizedFilter {
     public static final String NAME = "Flashlight";
+
+    @Serial
+    private static final long serialVersionUID = 8815249851114990821L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 1, 200, 1000, false);
@@ -65,7 +69,7 @@ public class Flashlight extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new Impl();
         }

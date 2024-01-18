@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.WHITE;
 
@@ -32,6 +33,9 @@ import static java.awt.Color.WHITE;
  */
 public class JHGlint extends ParametrizedFilter {
     public static final String NAME = "Glint";
+
+    @Serial
+    private static final long serialVersionUID = 4149860982005369922L;
 
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 70, 100);
     private final RangeParam coverage = new RangeParam("Coverage (%)", 0, 50, 100);
@@ -62,7 +66,7 @@ public class JHGlint extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int length = lengthParam.getValue();
         if (length == 0) {
             // mot just for performance, a 0 length would cause division by 0

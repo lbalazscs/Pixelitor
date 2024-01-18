@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Difference of Gaussians filter based on the JHLabs DoGFilter
  */
 public class JHDifferenceOfGaussians extends ParametrizedFilter {
     public static final String NAME = "Difference of Gaussians";
+
+    @Serial
+    private static final long serialVersionUID = 366119416232468912L;
 
     private final RangeParam radius1 = new RangeParam(GUIText.RADIUS + " 1", 0, 0, 10);
     private final RangeParam radius2 = new RangeParam(GUIText.RADIUS + " 2", 0, 4, 10);
@@ -53,7 +57,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new DoGFilter(NAME);
         }

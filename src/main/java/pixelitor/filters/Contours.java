@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.impl.MorphologyFilter;
 import pixelitor.filters.lookup.Luminosity;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Contours filter
  */
 public class Contours extends ParametrizedFilter {
     public static final String NAME = "Contours";
+
+    @Serial
+    private static final long serialVersionUID = 5491727897640647525L;
 
     private final RangeParam lineThickness = new RangeParam("Extra Line Thickness", 0, 0, 20);
 
@@ -39,7 +43,7 @@ public class Contours extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         var edgeFilter = new EdgeFilter(NAME);
         edgeFilter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
         edgeFilter.setVEdgeMatrix(EdgeFilter.SOBEL_V);

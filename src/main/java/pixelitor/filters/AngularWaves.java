@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.AngularWavesFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 
@@ -31,6 +32,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class AngularWaves extends ParametrizedFilter {
     public static final String NAME = "Angular Waves";
+
+    @Serial
+    private static final long serialVersionUID = 912678274938942074L;
 
     private final RangeParam radialWL = new RangeParam("Radial Wavelength", 1, 20, 100);
     private final RangeParam amount = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
@@ -62,7 +66,7 @@ public class AngularWaves extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new AngularWavesFilter();
         }

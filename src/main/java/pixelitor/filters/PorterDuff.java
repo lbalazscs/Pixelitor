@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.AlphaComposite.*;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -37,6 +38,10 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  */
 public class PorterDuff extends ParametrizedFilter {
     public static final String NAME = "Porter-Duff";
+
+    @Serial
+    private static final long serialVersionUID = -198539287852827047L;
+
     private static final int MODE_SHAPE = 1;
     private static final int MODE_IMAGE = 2;
 
@@ -69,7 +74,7 @@ public class PorterDuff extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
 

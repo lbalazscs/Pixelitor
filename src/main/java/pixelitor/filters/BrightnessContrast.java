@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.BRIGHTNESS;
 import static pixelitor.utils.Texts.i18n;
@@ -32,6 +33,9 @@ import static pixelitor.utils.Texts.i18n;
 public class BrightnessContrast extends ParametrizedFilter {
     private static final String CONTRAST = i18n("contrast");
     public static final String NAME = BRIGHTNESS + "/" + CONTRAST;
+
+    @Serial
+    private static final long serialVersionUID = 6499135543709555493L;
 
     private final RangeParam brightnessParam = new RangeParam(BRIGHTNESS, -100, 0, 100);
     private final RangeParam contrastParam = new RangeParam(CONTRAST, -100, 0, 100);
@@ -49,7 +53,7 @@ public class BrightnessContrast extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (brightnessParam.isZero() && contrastParam.isZero()) {
             return src;
         }

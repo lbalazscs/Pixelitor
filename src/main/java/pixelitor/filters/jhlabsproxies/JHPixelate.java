@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
@@ -39,6 +40,9 @@ import static java.awt.Color.WHITE;
  */
 public class JHPixelate extends ParametrizedFilter {
     public static final String NAME = "Pixelate";
+
+    @Serial
+    private static final long serialVersionUID = 152174018715974359L;
 
     private static final int STYLE_FLAT = 0;
     private static final int STYLE_3D = 1;
@@ -76,7 +80,7 @@ public class JHPixelate extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int style = styleParam.getValue();
         int type = typeParam.getValue();
 

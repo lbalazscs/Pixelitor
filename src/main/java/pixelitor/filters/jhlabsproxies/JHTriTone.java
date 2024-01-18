@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.RED;
@@ -33,6 +34,9 @@ import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
  */
 public class JHTriTone extends ParametrizedFilter {
     public static final String NAME = "Tritone";
+
+    @Serial
+    private static final long serialVersionUID = 7244953260858845197L;
 
     private final ColorParam shadowColor = new ColorParam("Shadow Color", BLACK, NO_TRANSPARENCY);
     private final ColorParam midtonesColor = new ColorParam("Midtones Color", RED, NO_TRANSPARENCY);
@@ -47,7 +51,7 @@ public class JHTriTone extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new TritoneFilter(NAME);
         }

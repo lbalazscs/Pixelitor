@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.SplittableRandom;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
@@ -36,6 +37,9 @@ import static pixelitor.gui.GUIText.OPACITY;
  */
 public class AddNoise extends ParametrizedFilter {
     public static final String NAME = "Add Noise";
+
+    @Serial
+    private static final long serialVersionUID = 3647024991920186929L;
 
     private static final int METHOD_FASTER = 1;
     private static final int METHOD_COVERAGE_ANIM = 2;
@@ -64,7 +68,7 @@ public class AddNoise extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         if (src.getType() == TYPE_BYTE_GRAY) {

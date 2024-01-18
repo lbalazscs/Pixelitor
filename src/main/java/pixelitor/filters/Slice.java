@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.SliceFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Slice filter
  */
 public class Slice extends ParametrizedFilter {
     public static final String NAME = "Slice";
+
+    @Serial
+    private static final long serialVersionUID = -6725097851795366223L;
 
     private final RangeParam size = new RangeParam("Size", 1, 75, 300);
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
@@ -53,7 +57,7 @@ public class Slice extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new SliceFilter(NAME);
         }

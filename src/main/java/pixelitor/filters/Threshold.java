@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.levels.Channel;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static com.jhlabs.image.ImageMath.clamp;
 import static pixelitor.utils.Texts.i18n;
@@ -33,6 +34,9 @@ import static pixelitor.utils.Texts.i18n;
 public class Threshold extends ParametrizedFilter {
     private static final String THRESHOLD = i18n("threshold");
     public static final String NAME = THRESHOLD;
+
+    @Serial
+    private static final long serialVersionUID = 3739055511694844941L;
 
     private final EnumParam<Channel> channelParam = Channel.asParam();
     private final RangeParam thresholdParam = new RangeParam(THRESHOLD, 0, 128, 255);
@@ -47,7 +51,7 @@ public class Threshold extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         boolean dither = dithering.getValue() != 0;
         double ditherStrength = dithering.getPercentage();
         BufferedImage input;

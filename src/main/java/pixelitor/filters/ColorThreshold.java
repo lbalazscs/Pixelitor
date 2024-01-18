@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -30,6 +31,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ColorThreshold extends ParametrizedFilter {
     public static final String NAME = "Color Threshold";
+
+    @Serial
+    private static final long serialVersionUID = -4064195363482725916L;
 
     private final RangeParam redThreshold = new RangeParam(i18n("red"), 0, 128, 256);
     private final RangeParam greenThreshold = new RangeParam(i18n("green"), 0, 128, 256);
@@ -50,7 +54,7 @@ public class ColorThreshold extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] srcData = ImageUtils.getPixelArray(src);
         int[] destData = ImageUtils.getPixelArray(dest);
 

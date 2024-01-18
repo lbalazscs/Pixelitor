@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -39,6 +40,9 @@ import static pixelitor.gui.GUIText.OPACITY;
  */
 public class JHRays extends ParametrizedFilter {
     public static final String NAME = "Rays";
+
+    @Serial
+    private static final long serialVersionUID = -6212129082965328281L;
 
     private final ImagePositionParam center = new ImagePositionParam("Light Source");
     private final RangeParam rotation = new RangeParam("Twirl", -90, 0, 90);
@@ -67,7 +71,7 @@ public class JHRays extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new RaysFilter(NAME);
         }

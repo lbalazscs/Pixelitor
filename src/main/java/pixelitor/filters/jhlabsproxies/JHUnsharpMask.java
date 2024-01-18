@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Unsharp Mask filter based on the JHLabs UnsharpFilter
  */
 public class JHUnsharpMask extends ParametrizedFilter {
     public static final String NAME = "Unsharp Mask";
+
+    @Serial
+    private static final long serialVersionUID = -5932789050150214528L;
 
     private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 0, 2, 100);
@@ -49,7 +53,7 @@ public class JHUnsharpMask extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero() || radius.isZero()) {
             return src;
         }

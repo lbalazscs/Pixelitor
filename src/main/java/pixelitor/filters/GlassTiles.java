@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.impl.TilesFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Glass Tiles filter
  */
 public class GlassTiles extends ParametrizedFilter {
     public static final String NAME = "Glass Tiles";
+
+    @Serial
+    private static final long serialVersionUID = 1062493790771795674L;
 
     private final GroupedRangeParam size = new GroupedRangeParam("Tile Size", 5, 100, 500);
     private final GroupedRangeParam curvature = new GroupedRangeParam("Curvature", 0, 10, 20);
@@ -52,7 +56,7 @@ public class GlassTiles extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new TilesFilter(NAME);
         }

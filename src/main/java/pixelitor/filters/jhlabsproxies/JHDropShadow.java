@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
@@ -42,6 +43,9 @@ import static pixelitor.utils.AngleUnit.CCW_DEGREES;
  */
 public class JHDropShadow extends ParametrizedFilter {
     public static final String NAME = "Drop Shadow";
+
+    @Serial
+    private static final long serialVersionUID = -3914785189683755908L;
 
     private final AngleParam angle = new AngleParam("Angle", 315, CCW_DEGREES);
     private final RangeParam distance = new RangeParam("Distance", 0, 10, 100);
@@ -68,7 +72,7 @@ public class JHDropShadow extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new ShadowFilter(NAME);
         }

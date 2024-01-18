@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.levels.RGBLookup;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ShortLookupTable;
+import java.io.Serial;
 
 import static java.awt.Color.*;
 import static pixelitor.utils.Texts.i18n;
@@ -36,6 +37,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class ColorBalance extends ParametrizedFilter {
     public static final String NAME = i18n("color_balance");
+
+    @Serial
+    private static final long serialVersionUID = 8496579363272349016L;
 
     private static final int EVERYTHING = 0;
     private static final int SHADOWS = 1;
@@ -77,7 +81,7 @@ public class ColorBalance extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         assert dest == null;
 
         float cr = cyanRed.getValueAsFloat();

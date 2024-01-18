@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,17 @@ package pixelitor.filters;
 import pixelitor.filters.impl.ComplexFractalImpl;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Renders a Mandelbrot Set, see https://en.wikipedia.org/wiki/Mandelbrot_set
  */
 public class MandelbrotSet extends ComplexFractal {
     public static final String NAME = "Mandelbrot Set";
+
+    @Serial
+    private static final long serialVersionUID = 6726131928523590000L;
+
     private MandelbrotSetImpl filter;
 
     public MandelbrotSet() {
@@ -35,7 +40,7 @@ public class MandelbrotSet extends ComplexFractal {
     }
 
     @Override
-    public BufferedImage doTransformAA(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transformAA(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new MandelbrotSetImpl();
         }

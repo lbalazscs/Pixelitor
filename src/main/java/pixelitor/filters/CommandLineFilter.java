@@ -48,7 +48,7 @@ public class CommandLineFilter extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (textParam.isEmpty()) {
             return src;
         }

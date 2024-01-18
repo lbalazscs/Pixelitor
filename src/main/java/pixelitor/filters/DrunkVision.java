@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -38,6 +39,9 @@ import static java.lang.Math.PI;
  */
 public class DrunkVision extends ParametrizedFilter {
     public static final String NAME = "Drunk Vision";
+
+    @Serial
+    private static final long serialVersionUID = 6466819957540455396L;
 
     private final RangeParam drunkenness = new RangeParam("Drunkenness", 0, 20, 100);
     private final RangeParam numEyes = new RangeParam("Number of Eyes", 2, 5, 42);
@@ -52,7 +56,7 @@ public class DrunkVision extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (drunkenness.isZero()) {
             return src;
         }

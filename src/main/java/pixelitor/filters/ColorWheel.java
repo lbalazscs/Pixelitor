@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.concurrent.Future;
 
 /**
@@ -36,6 +37,9 @@ import java.util.concurrent.Future;
  */
 public class ColorWheel extends ParametrizedFilter {
     public static final String NAME = "Color Wheel";
+
+    @Serial
+    private static final long serialVersionUID = -8398979151631397821L;
 
     public enum ColorSpaceType {
         HSB {
@@ -69,7 +73,7 @@ public class ColorWheel extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int[] destData = ImageUtils.getPixelArray(dest);
 
         int width = dest.getWidth();

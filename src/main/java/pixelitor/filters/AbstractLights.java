@@ -102,7 +102,7 @@ public class AbstractLights extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Random random = paramSet.getLastSeedRandom();
         int iterations = iterationsParam.getValue();
 

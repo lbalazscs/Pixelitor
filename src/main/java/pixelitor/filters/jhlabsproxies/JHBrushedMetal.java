@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.SplittableRandom;
 
 import static java.awt.Color.GRAY;
@@ -33,6 +34,9 @@ import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
  */
 public class JHBrushedMetal extends ParametrizedFilter {
     public static final String NAME = "Brushed Metal";
+
+    @Serial
+    private static final long serialVersionUID = 5028460952633659329L;
 
     private final ColorParam color = new ColorParam("Color", GRAY, NO_TRANSPARENCY);
     private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
@@ -51,7 +55,7 @@ public class JHBrushedMetal extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         var filter = new BrushedMetalFilter(color.getColor().getRGB(),

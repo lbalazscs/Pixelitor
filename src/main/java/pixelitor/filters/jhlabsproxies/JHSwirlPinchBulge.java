@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 
@@ -34,6 +35,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class JHSwirlPinchBulge extends ParametrizedFilter {
     public static final String NAME = "Swirl, Pinch, Bulge";
+
+    @Serial
+    private static final long serialVersionUID = 920532852611723223L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 500, 999);
@@ -50,8 +54,6 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
     public JHSwirlPinchBulge() {
         super(true);
 
-        showAffectedArea();
-
         zoom.setPresetKey("Zoom (%)");
         setParams(
             swirlAmount,
@@ -66,7 +68,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new PinchFilter();
         }

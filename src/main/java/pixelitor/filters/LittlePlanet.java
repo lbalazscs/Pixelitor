@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.LittlePlanetFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.utils.AngleUnit.CCW_DEGREES;
@@ -31,6 +32,9 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class LittlePlanet extends ParametrizedFilter {
     public static final String NAME = i18n("little_planet");
+
+    @Serial
+    private static final long serialVersionUID = 3658391628537896082L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 90, CCW_DEGREES);
@@ -59,7 +63,7 @@ public class LittlePlanet extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new LittlePlanetFilter();
         }

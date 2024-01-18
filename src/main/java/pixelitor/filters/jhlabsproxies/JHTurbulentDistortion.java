@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
 
@@ -30,6 +31,9 @@ import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
  */
 public class JHTurbulentDistortion extends ParametrizedFilter {
     public static final String NAME = "Turbulent Distortion";
+
+    @Serial
+    private static final long serialVersionUID = 5724875114911087098L;
 
     private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
     private final RangeParam amount = new RangeParam("Amount", 0, 10, 100);
@@ -55,7 +59,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero() || turbulence.isZero()) {
             return src;
         }

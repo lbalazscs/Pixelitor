@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * The "Gradient Map" filter.
  */
 public class GradientMap extends ParametrizedFilter {
     public static final String NAME = "Gradient Map";
+
+    @Serial
+    private static final long serialVersionUID = 1258924395449510227L;
 
     private final GradientParam gradient =
         GradientParam.createBlackToWhite("Colors");
@@ -39,7 +43,7 @@ public class GradientMap extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Colormap colormap = gradient.getValue();
 
         int[] gradientLookup = new int[256];

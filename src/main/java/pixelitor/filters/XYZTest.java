@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,16 @@ import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * XYZTest filter
  */
 public class XYZTest extends ParametrizedFilter {
     public static final String NAME = "XYZ Test";
+
+    @Serial
+    private static final long serialVersionUID = -7871330761287217919L;
 
     private final RangeParam x = new RangeParam("X", -20, 0, 20);
     private final RangeParam y = new RangeParam("Y", -20, 0, 20);
@@ -52,7 +56,7 @@ public class XYZTest extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = ImageUtils.copyImage(src);
         int[] pixels = ImageUtils.getPixelArray(dest);
 

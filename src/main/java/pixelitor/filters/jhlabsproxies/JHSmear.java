@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.OPACITY;
 
@@ -34,6 +35,9 @@ import static pixelitor.gui.GUIText.OPACITY;
  */
 public class JHSmear extends ParametrizedFilter {
     public static final String NAME = Texts.i18n("smear");
+
+    @Serial
+    private static final long serialVersionUID = -1276539723041828316L;
 
     private final RangeParam distance = new RangeParam("Distance", 0, 15, 100);
     private final RangeParam density = new RangeParam("Density (%)", 0, 50, 100);
@@ -69,7 +73,7 @@ public class JHSmear extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int distanceValue = distance.getValue();
         if (distanceValue == 0) {
             return src;

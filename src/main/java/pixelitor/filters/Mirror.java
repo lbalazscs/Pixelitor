@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.impl.MirrorFilter;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Mirror filter
  */
 public class Mirror extends ParametrizedFilter {
     public static final String NAME = GUIText.MIRROR;
+
+    @Serial
+    private static final long serialVersionUID = 3763029376424830243L;
 
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
@@ -49,7 +53,7 @@ public class Mirror extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new MirrorFilter();
         }

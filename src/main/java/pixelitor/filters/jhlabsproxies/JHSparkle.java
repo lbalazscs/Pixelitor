@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
@@ -34,6 +35,9 @@ import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
  */
 public class JHSparkle extends ParametrizedFilter {
     public static final String NAME = "Sparkle";
+
+    @Serial
+    private static final long serialVersionUID = -2547285385455761188L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
@@ -62,7 +66,7 @@ public class JHSparkle extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new SparkleFilter(NAME);
         }

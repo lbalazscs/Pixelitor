@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.SplittableRandom;
 
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -44,6 +45,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class FractalTree extends ParametrizedFilter {
     public static final String NAME = "Fractal Tree";
+
+    @Serial
+    private static final long serialVersionUID = 341738912127760736L;
 
     private static final Color BROWN = new Color(140, 100, 73);
     private static final Color GREEN = new Color(31, 125, 42);
@@ -105,7 +109,7 @@ public class FractalTree extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         SplittableRandom rand = paramSet.getLastSeedSRandom();
 
         leftFirst = true;

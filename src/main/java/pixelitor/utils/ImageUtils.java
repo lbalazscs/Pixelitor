@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -1031,26 +1031,6 @@ public class ImageUtils {
 
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
         return copyTo(TYPE_BYTE_GRAY, src);
-    }
-
-    public static void paintAffectedAreaShapes(BufferedImage image, Shape[] shapes) {
-        Graphics2D g = image.createGraphics();
-        g.setColor(BLACK);
-
-//        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        g.setStroke(zoomLevel.getOuterStroke());
-
-        for (Shape shape : shapes) {
-            g.draw(shape);
-        }
-        g.setColor(WHITE);
-//        g.setStroke(zoomLevel.getInnerStroke());
-
-        for (Shape shape : shapes) {
-            g.draw(shape);
-        }
-
-        g.dispose();
     }
 
     public static boolean compareSmallImages(BufferedImage img1, BufferedImage img2) {

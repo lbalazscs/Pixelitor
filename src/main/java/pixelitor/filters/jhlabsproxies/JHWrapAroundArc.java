@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Wrap Around Arc filter based on the JHLabs CircleFilter
  */
 public class JHWrapAroundArc extends ParametrizedFilter {
     public static final String NAME = "Wrap Around Arc";
+
+    @Serial
+    private static final long serialVersionUID = 3136221427173608186L;
 
     private CircleFilter filter;
 
@@ -58,7 +62,7 @@ public class JHWrapAroundArc extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new CircleFilter(NAME);
         }

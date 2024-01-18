@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.gui.GUIText;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.impl.MorphologyFilter.OP_DILATE;
 import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
@@ -34,6 +35,9 @@ import static pixelitor.filters.impl.MorphologyFilter.OP_ERODE;
  */
 public class Morphology extends ParametrizedFilter {
     public static final String NAME = "Morphology";
+
+    @Serial
+    private static final long serialVersionUID = -8455037018593373562L;
 
     private static final int OP_OPEN = 10;
     private static final int OP_CLOSE = 11;
@@ -57,7 +61,7 @@ public class Morphology extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         var filter = new MorphologyFilter(NAME);
 
         int iterations = radius.getValue();

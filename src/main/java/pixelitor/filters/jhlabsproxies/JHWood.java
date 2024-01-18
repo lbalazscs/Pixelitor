@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.filters.gui.RangeParam;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 
@@ -33,6 +34,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class JHWood extends ParametrizedFilter {
     public static final String NAME = "Wood";
+
+    @Serial
+    private static final long serialVersionUID = 7410284607530067748L;
 
     private final RangeParam rings = new RangeParam("Rings", 1, 50, 100);
     private final RangeParam scale = new RangeParam(ZOOM, 1, 100, 500);
@@ -70,7 +74,7 @@ public class JHWood extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new WoodFilter(NAME);
         }

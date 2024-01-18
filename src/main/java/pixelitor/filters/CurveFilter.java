@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,9 @@ import static pixelitor.utils.Shapes.NonlinTransform.NONE;
  */
 public abstract class CurveFilter extends ParametrizedFilter {
     private static final boolean DEBUG_SHAPE_POINTS = false;
+
+    @Serial
+    private static final long serialVersionUID = 5917893980467661843L;
 
     private static final int BG_BLACK = 1;
     private static final int BG_ORIGINAL = 2;
@@ -117,7 +121,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Inverts only some RGB or HSB channels
  */
 public class ChannelInvert extends ParametrizedFilter {
     public static final String NAME = "Channel Invert";
+
+    @Serial
+    private static final long serialVersionUID = -4337108326020558329L;
 
     private static final int NOTHING = 0;
     private static final int RED_ONLY = 1;
@@ -87,7 +91,7 @@ public class ChannelInvert extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int invertType = invertTypeSelector.getValue();
         if (invertType == NOTHING) {
             return src;

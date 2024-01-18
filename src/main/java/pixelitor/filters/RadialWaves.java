@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.RadialWavesFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 
@@ -31,6 +32,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class RadialWaves extends ParametrizedFilter {
     public static final String NAME = "Radial Waves";
+
+    @Serial
+    private static final long serialVersionUID = -4227411946278244176L;
 
     private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 101);
     private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude (Amount)", 0, 20, 100);
@@ -61,7 +65,7 @@ public class RadialWaves extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new RadialWavesFilter();
         }

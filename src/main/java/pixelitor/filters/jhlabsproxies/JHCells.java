@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
 
@@ -35,6 +36,9 @@ import static pixelitor.gui.GUIText.ZOOM;
  */
 public class JHCells extends ParametrizedFilter {
     public static final String NAME = "Cells";
+
+    @Serial
+    private static final long serialVersionUID = -1933935916260552075L;
 
     private static final int TYPE_CELLS = 1;
     private static final int TYPE_GRID = 2;
@@ -81,7 +85,7 @@ public class JHCells extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new CellularFilter(NAME);
         }

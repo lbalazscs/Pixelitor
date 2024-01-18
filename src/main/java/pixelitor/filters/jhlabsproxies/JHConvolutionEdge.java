@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -33,6 +34,9 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
  */
 public class JHConvolutionEdge extends ParametrizedFilter {
     public static final String NAME = "Convolution Edge Detection";
+
+    @Serial
+    private static final long serialVersionUID = 6728675248520735379L;
 
     private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new Item[]{
         new Item("Sobel", METHOD_SOBEL),
@@ -74,7 +78,7 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new EdgeFilter(NAME);
         }

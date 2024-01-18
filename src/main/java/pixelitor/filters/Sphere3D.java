@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,12 +23,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.Sphere3DFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Sphere3D based on Sphere3DFilter
  */
 public class Sphere3D extends ParametrizedFilter {
     public static final String NAME = "Sphere3D";
+
+    @Serial
+    private static final long serialVersionUID = 4440956028052013650L;
 
     private final RangeParam alpha = new RangeParam("alpha", 0, 50, 100);
     private final RangeParam beta = new RangeParam("beta", 0, 50, 100);
@@ -51,7 +55,7 @@ public class Sphere3D extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new Sphere3DFilter();
         }

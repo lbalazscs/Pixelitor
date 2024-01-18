@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.impl.SepiaFilter;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Sepia filter based on Daniel Wreczycki's sepia filter
  */
 public class Sepia extends ParametrizedFilter {
     public static final String NAME = "Sepia";
+
+    @Serial
+    private static final long serialVersionUID = 7124387979100909841L;
 
     private final RangeParam intensity = new RangeParam("Intensity", 0, 20, 100);
 
@@ -39,7 +43,7 @@ public class Sepia extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new SepiaFilter(NAME);
         }

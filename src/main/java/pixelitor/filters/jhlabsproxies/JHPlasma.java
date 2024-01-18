@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,10 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.ORANGE;
+import static java.awt.Color.RED;
+import static java.awt.Color.YELLOW;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -72,7 +75,7 @@ public class JHPlasma extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         filter.setLessColors(type.getValue() != MORE_COLORS);
         filter.setTurbulence((float) turbulence.getPercentage());
         filter.setUseColormap(type.getValue() == GRADIENT_COLORS);

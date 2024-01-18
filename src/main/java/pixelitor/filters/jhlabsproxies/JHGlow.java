@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,16 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Glow filter based on the JHLabs GlowFilter
  */
 public class JHGlow extends ParametrizedFilter {
     public static final String NAME = "Glow";
+
+    @Serial
+    private static final long serialVersionUID = 742109802474933848L;
 
     private final RangeParam amount = new RangeParam("Amount", 0, 15, 100);
     private final RangeParam softness = new RangeParam("Softness Radius", 0, 20, 100);
@@ -44,7 +48,7 @@ public class JHGlow extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         float amountValue = (float) amount.getPercentage();
         if (amountValue == 0.0f) {
             return src;

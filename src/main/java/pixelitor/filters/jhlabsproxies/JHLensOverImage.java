@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,16 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * "Lens over image" filter based on the JHLabs SphereFilter
  */
 public class JHLensOverImage extends ParametrizedFilter {
     public static final String NAME = "Lens Over Image";
+
+    @Serial
+    private static final long serialVersionUID = -2964686509316632105L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
@@ -46,8 +50,6 @@ public class JHLensOverImage extends ParametrizedFilter {
     public JHLensOverImage() {
         super(true);
 
-        showAffectedArea();
-
         setParams(
             center,
             radius.withAdjustedRange(1.0),
@@ -58,7 +60,7 @@ public class JHLensOverImage extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         float refraction = (float) refractionIndex.getPercentage();
         int hRadius = radius.getValue(0);
         int vRadius = radius.getValue(1);

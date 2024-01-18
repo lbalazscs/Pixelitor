@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,12 +24,16 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * Underwater filter based on JHLabs SwimFilter
  */
 public class JHUnderWater extends ParametrizedFilter {
     public static final String NAME = "Underwater";
+
+    @Serial
+    private static final long serialVersionUID = 6340723334751347028L;
 
     private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
     private final RangeParam scale = new RangeParam("Scale", 1, 150, 300);
@@ -60,7 +64,7 @@ public class JHUnderWater extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero()) {
             return src;
         }

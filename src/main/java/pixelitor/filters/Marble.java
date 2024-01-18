@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static com.jhlabs.image.WaveType.wave;
 import static com.jhlabs.image.WaveType.wave01;
@@ -38,6 +39,9 @@ import static net.jafama.FastMath.*;
  */
 public class Marble extends ParametrizedFilter {
     public static final String NAME = "Marble";
+
+    @Serial
+    private static final long serialVersionUID = -4289737664285529580L;
 
     private final RangeParam zoom = new RangeParam(GUIText.ZOOM, 1, 10, 200);
     private final AngleParam angle = new AngleParam("Angle", 0);
@@ -91,7 +95,7 @@ public class Marble extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new Impl();
         }

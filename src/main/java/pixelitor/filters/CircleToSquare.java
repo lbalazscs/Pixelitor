@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,12 +25,16 @@ import pixelitor.filters.impl.CircleToSquareFilter;
 import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 /**
  * "Circle to Square" filter
  */
 public class CircleToSquare extends ParametrizedFilter {
     public static final String NAME = "Circle to Square";
+
+    @Serial
+    private static final long serialVersionUID = 1611532516529648926L;
 
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 500);
     private final RangeParam amount = new RangeParam("Amount (%)", -200, 100, 200);
@@ -43,7 +47,6 @@ public class CircleToSquare extends ParametrizedFilter {
 
     public CircleToSquare() {
         super(true);
-        showAffectedArea();
 
         setParams(
             center,
@@ -55,7 +58,7 @@ public class CircleToSquare extends ParametrizedFilter {
     }
 
     @Override
-    public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
             filter = new CircleToSquareFilter();
         }

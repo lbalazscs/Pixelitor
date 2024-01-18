@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,10 @@ public interface Filterable {
         if (filter instanceof FilterWithGUI fwg) {
             PixelitorWindow.get().setCursor(Cursors.BUSY);
             View view = Views.getActive();
-            Cursor prevViewCursor = view.getCursor();
+
+            // Save the view cursor set by the current tool
+            // so that it can be restored later.
+            Cursor toolViewCursor = view.getCursor();
             view.setCursor(Cursors.BUSY);
 
             startPreviewing();
@@ -122,7 +125,7 @@ public interface Filterable {
             JDialog dialog = dialogBuilder.build();
 
             PixelitorWindow.get().setCursor(Cursors.DEFAULT);
-            view.setCursor(prevViewCursor);
+            view.setCursor(toolViewCursor);
 
             GUIUtils.showDialog(dialog, FRAME_RIGHT);
             return dialogBuilder.wasAccepted();

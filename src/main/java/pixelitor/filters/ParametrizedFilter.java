@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,9 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.layers.Filterable;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Shape;
-import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
 
@@ -38,9 +36,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     protected final transient ParamSet paramSet;
 
-    private transient BooleanParam showAffectedAreaParam = null;
     private final transient boolean addShowOriginal;
-    private transient boolean hasAffectedAreaShapeParam;
 
     // not fully implemented - the idea is to show interactively
     // the area affected by a filter
@@ -49,11 +45,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     protected ParametrizedFilter(boolean addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
         paramSet = new ParamSet();
-    }
-
-    protected void showAffectedArea() {
-        hasAffectedAreaShapeParam = true;
-        showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
     }
 
     @Override
@@ -65,19 +56,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     public FilterGUI createGUI(Filterable layer, boolean reset) {
         return new ParametrizedFilterGUI(this, layer, addShowOriginal, reset);
     }
-
-    @Override
-    protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        dest = doTransform(src, dest);
-
-        if (hasAffectedAreaShapeParam && showAffectedAreaParam.isChecked()) {
-            ImageUtils.paintAffectedAreaShapes(dest, affectedAreaShapes);
-        }
-
-        return dest;
-    }
-
-    public abstract BufferedImage doTransform(BufferedImage src, BufferedImage dest);
 
     public ParamSet setParams(FilterParam param) {
         paramSet.addParam(param);
