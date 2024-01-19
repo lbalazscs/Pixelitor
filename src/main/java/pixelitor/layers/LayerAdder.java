@@ -83,10 +83,10 @@ public class LayerAdder {
                 targetLayerIndex = holder.getNumLayers();
             }
         } else {
-            if (position == BELLOW_ACTIVE) {
-                targetLayerIndex = activeLayerIndex;
-            } else if (position == ABOVE_ACTIVE) {
+            if (position == ABOVE_ACTIVE) {
                 targetLayerIndex = activeLayerIndex + 1;
+            } else if (position == BELLOW_ACTIVE) {
+                targetLayerIndex = activeLayerIndex;
             } else {
                 throw new IllegalStateException("position = " + position);
             }

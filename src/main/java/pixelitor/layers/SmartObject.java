@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -1056,8 +1056,16 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void addLayerToList(int index, Layer newLayer) {
-        // TODO is this ever called?
-        filters.add(index, (SmartFilter) newLayer);
+        SmartFilter newSmartFilter = (SmartFilter) newLayer;
+
+        // This code is called when duplicating a smart filter.
+        newSmartFilter.invalidateCache();
+
+        insertSmartFilter(newSmartFilter, index, false, false);
+
+        // Update and setActiveLayer will be called later, but this is necessary.
+        invalidateImageCache();
+        iconImageNeedsRefresh = true;
     }
 
     @Override

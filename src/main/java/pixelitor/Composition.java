@@ -85,10 +85,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     private String name;
 
     private final List<Layer> layerList = new ArrayList<>();
-    private transient Layer activeRoot;
 
-    // Can be a layer or a smart filter inside a smart object
+    // The active layer of any type, not necessarily at the top level
+    // (it could be inside a group or a smart filter in a smart object).
     private Layer activeLayer;
+
+    // If the active layer is top-level, then this is the same as the
+    // active layer. Otherwise, it's the active layer's top level ancestor.
+    private transient Layer activeRoot;
 
     // a counter for the names of new layers
     private int newLayerCount = 1;
@@ -582,12 +586,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void duplicateActiveLayer() {
-        // TODO it should be possible to duplicate
-        //   a smart filter within a smart object
-        if (activeLayer instanceof SmartFilter sf) {
-            activeLayer = sf.getSmartObject();
-        }
-
         Layer duplicate = activeLayer.copy(CopyType.DUPLICATE_LAYER, true, this);
         if (duplicate == null) {
             // there was an out of memory error

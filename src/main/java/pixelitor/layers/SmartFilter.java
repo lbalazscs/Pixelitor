@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -182,8 +182,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public void setHolder(LayerHolder holder) {
-        // setSmartObject should be used to set the holder
-        throw new IllegalStateException();
+        setSmartObject((SmartObject) holder);
     }
 
     @Override
@@ -263,7 +262,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
-    private void invalidateCache() {
+    public void invalidateCache() {
         if (cachedImage != null) {
             cachedImage.flush();
             cachedImage = null;
