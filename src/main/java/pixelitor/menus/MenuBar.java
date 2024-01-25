@@ -93,7 +93,6 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK;
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.utils.Keys.*;
@@ -555,8 +554,7 @@ public class MenuBar extends JMenuBar {
 
             IO.loadCompAsync(file)
                 .thenAcceptAsync(content -> {
-                    SmartObject so = new SmartObject(file, comp, content);
-                    comp.adder().atPosition(ABOVE_ACTIVE).add(so);
+                    comp.add(new SmartObject(file, comp, content));
                 }, Threads.onEDT)
                 .exceptionally(Messages::showExceptionOnEDT);
         }));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,16 @@
 package pixelitor.filters.gui;
 
 import org.junit.jupiter.api.*;
+import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
+import pixelitor.layers.ImageLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("ParamSet tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -49,7 +54,10 @@ class ParamSetTest {
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParam(extraParam, 3);
-        params.updateOptions(TestHelper.createEmptyImageLayer(TestHelper.createEmptyComp(), "layer"), true);
+
+        Composition comp = TestHelper.createRealComp(ImageLayer.class);
+        ImageLayer layer = (ImageLayer) comp.getLayer(0);
+        params.updateOptions(layer, true);
     }
 
     @Test

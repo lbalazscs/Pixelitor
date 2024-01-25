@@ -31,9 +31,9 @@ public class Noise implements Function1D, Function2D, Function3D {
         init();
     }
 
-    private static final int B = 0x100;
-    private static final int BM = 0xff;
-    private static final int N = 0x1000;
+    private static final int B = 0x100; // 256
+    private static final int BM = 0xff; // 255
+    private static final int N = 0x1000; // 4096
 
     static final int[] p = new int[B + B + 2];
     static final float[][] g3 = new float[B + B + 2][3];

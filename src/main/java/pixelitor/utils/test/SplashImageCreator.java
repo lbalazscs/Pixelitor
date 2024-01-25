@@ -58,7 +58,6 @@ import static java.awt.font.TextAttribute.LIGATURES;
 import static java.awt.font.TextAttribute.LIGATURES_ON;
 import static java.lang.String.format;
 import static pixelitor.layers.BlendingMode.NORMAL;
-import static pixelitor.layers.LayerAdder.Position.TOP;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
@@ -172,10 +171,7 @@ public class SplashImageCreator {
 
         layer.setTranslation(0, translationY);
 
-        comp.adder()
-            .withHistory("add " + name)
-            .atPosition(TOP)
-            .add(layer);
+        comp.addWithHistory(layer, "add " + name);
     }
 
     private static void addTextLayer(Composition comp, String text,
@@ -215,7 +211,7 @@ public class SplashImageCreator {
 
         Gradient gradient = new Gradient(new Drag(startX, startY, endX, endY),
             GradientType.RADIAL, REFLECT, BLACK_TO_WHITE, false, NORMAL, 1.0f);
-        gradient.drawOn(dr);
+        gradient.paintOn(dr);
     }
 
     private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp, FileFormat format) {

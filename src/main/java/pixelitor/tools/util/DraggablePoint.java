@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -120,12 +120,10 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public final void setLocationOnlyForThis(PPoint p) {
-        if (p != null) { // TODO CropHandle objects are initialized after the constructor
-            this.x = p.getCoX();
-            this.y = p.getCoY();
-            this.imX = p.getImX();
-            this.imY = p.getImY();
-        }
+        this.x = p.getCoX();
+        this.y = p.getCoY();
+        this.imX = p.getImX();
+        this.imY = p.getImY();
 
         updateShapes();
     }

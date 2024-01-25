@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-
 /**
  * A gradient fill layer that fills the entire canvas with a given gradient.
  */
@@ -57,10 +55,8 @@ public class GradientFillLayer extends ContentLayer {
 
     public static void createNew(Composition comp) {
         var layer = new GradientFillLayer(comp, createName());
-        comp.getHolderForNewLayers().adder()
-            .atPosition(ABOVE_ACTIVE)
-            .withHistory("Add Gradient Fill Layer")
-            .add(layer);
+        comp.getHolderForNewLayers()
+            .addWithHistory(layer, "Add Gradient Fill Layer");
         Tools.GRADIENT.activate();
     }
 
@@ -99,12 +95,12 @@ public class GradientFillLayer extends ContentLayer {
                 if (cachedImage == null) {
                     cachedImage = ImageUtils.createSysCompatibleImage(width, height);
                     Graphics2D imgG = cachedImage.createGraphics();
-                    gradient.drawOnGraphics(imgG, width, height);
+                    gradient.paintOnGraphics(imgG, width, height);
                     imgG.dispose();
                 }
                 g.drawImage(cachedImage, 0, 0, null);
             } else {
-                gradient.drawOnGraphics(g, width, height);
+                gradient.paintOnGraphics(g, width, height);
             }
         }
     }

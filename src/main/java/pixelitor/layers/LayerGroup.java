@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ public class LayerGroup extends CompositeLayer {
     private transient BufferedImage thumb;
     private transient boolean needsIconUpdate = false;
 
-    // used only for isolated images
+    // used only for isolated (non-passthrough) groups
     private transient BufferedImage cachedImage;
 
     private static int groupCounter = 0;
@@ -129,6 +129,9 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
         if (isPassThrough()) {
+            // Apply the layers as if they were directly in the parent holder.
+            // The algorithm is similar to ImageUtils.calcComposite(),
+            // but here we have to consider the existing state of the composition.
             for (Layer layer : layers) {
                 if (layer.isVisible()) {
                     BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
@@ -143,7 +146,8 @@ public class LayerGroup extends CompositeLayer {
                 }
             }
         } else {
-            // TODO apply mask
+            // TODO Currently the layer mask of isolated
+            //   (non-passthrough) groups is ignored.
             g.setComposite(blendingMode.getComposite(getOpacity()));
             g.drawImage(getCachedImage(), 0, 0, null);
         }
@@ -160,7 +164,7 @@ public class LayerGroup extends CompositeLayer {
         if (isPassThrough()) {
             cachedImage = null;
         } else {
-            cachedImage = ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
+            cachedImage = ImageUtils.calcComposite(layers, comp.getCanvas());
             if (needsIconUpdate) {
                 updateIconImage();
                 needsIconUpdate = false;
@@ -176,13 +180,11 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public BufferedImage asImage(boolean applyMask, boolean applyOpacity) {
-        // TODO this totally ignores the arguments
-        //   (it was only implemented to support the
-        //   shortcut in Composition.getCompositeImage)
-        // TODO If this group is the single layer or the first layer
-        //   then even a pass-trough group behaves like an isolated one
+        // TODO This method currently ignores its arguments.
+        //   (It was only implemented to support the
+        //   shortcut in Composition.getCompositeImage.)
         if (isPassThrough()) {
-            return ImageUtils.calculateCompositeImage(layers, comp.getCanvas());
+            return ImageUtils.calcComposite(layers, comp.getCanvas());
         } else {
             return getCachedImage();
         }
@@ -197,12 +199,12 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        throw new IllegalStateException("TODO");
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected BufferedImage applyOnImage(BufferedImage src) {
-        throw new IllegalStateException("TODO");
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -232,18 +234,22 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCropped, boolean allowGrowing) {
+        // Do nothing for the group itself.
     }
 
     @Override
     public void flip(Flip.Direction direction) {
+        // Do nothing for the group itself.
     }
 
     @Override
     public void rotate(QuadrantAngle angle) {
+        // Do nothing for the group itself.
     }
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
+        // Do nothing for the group itself.
     }
 
     @Override
@@ -390,7 +396,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void replaceLayer(Layer before, Layer after) {
-        boolean containedTarget = before.contains(comp.getActiveLayer());
+        boolean containedActive = before.contains(comp.getActiveLayer());
 
         before.transferMaskAndUITo(after);
 
@@ -398,7 +404,7 @@ public class LayerGroup extends CompositeLayer {
         assert layerIndex != -1;
         layers.set(layerIndex, after);
 
-        if (containedTarget) {
+        if (containedActive) {
             // TODO see comments in Composition.replaceLayer
             comp.setActiveLayer(after);
         }
@@ -481,7 +487,7 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {
-        return Utils.calcUnionOfContentBounds(layers, includeTransparent);
+        return Utils.calcContentBoundsUnion(layers, includeTransparent);
     }
 
     @Override

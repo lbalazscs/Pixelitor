@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,10 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -284,9 +284,9 @@ public class TextSettings implements Serializable, Debuggable {
                 // TODO for some reason the "all smart filters" test file has this
                 return;
             }
-            EventQueue.invokeLater(() -> Messages.showError("Font Not Found",
+            Messages.showError("Error loading " + textLayer.getComp().getName(),
                 "<html>The font <b>" + fontName + "</b> was not found on this computer." +
-                    "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>."));
+                    "<br>It's used in the text layer <b>" + textLayer.getName() + "</b>.");
         }
     }
 
@@ -294,8 +294,12 @@ public class TextSettings implements Serializable, Debuggable {
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
-        node.addQuotedString("Text", getText());
-        node.addBoolean("Watermark", watermark);
+        node.addQuotedString("text", getText());
+        node.add(DebugNodes.createFontNode("font", font));
+        node.addColor("color", color);
+        node.add(areaEffects.createDebugNode("effects"));
+        node.addDouble("rotation", rotation);
+        node.addBoolean("watermark", watermark);
 
         return node;
     }

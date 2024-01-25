@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
+import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
@@ -51,7 +52,15 @@ public class ValueNoise extends ParametrizedFilter {
     private int r2;
     private int r3;
 
+    private float cx;
+    private float cy;
+    private boolean rotate;
+    private double cos;
+    private double sin;
+
     private final RangeParam scale = new RangeParam(ZOOM, 5, 100, 300);
+    private final AngleParam angleParam = new AngleParam("Rotate", 0);
+
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
     private final RangeParam persistenceParam =
         new RangeParam("Roughness (%)", 0, 60, 100);
@@ -67,6 +76,7 @@ public class ValueNoise extends ParametrizedFilter {
         scale.setPresetKey("Zoom");
         setParams(
             scale.withAdjustedRange(0.3),
+            angleParam,
             details,
             persistenceParam,
             interpolation.withDefault(NoiseInterpolation.CUBIC),
@@ -95,8 +105,17 @@ public class ValueNoise extends ParametrizedFilter {
         int[] destData = ImageUtils.getPixelArray(dest);
         int width = dest.getWidth();
         int height = dest.getHeight();
-        float frequency = 1.0f / scale.getValueAsFloat();
+        cx = width / 2.0f;
+        cy = height / 2.0f;
 
+        double angle = angleParam.getValueInRadians();
+        rotate = angle != 0;
+        if (rotate) {
+            cos = Math.cos(angle);
+            sin = Math.sin(angle);
+        }
+
+        float frequency = 1.0f / scale.getValueAsFloat();
         float persistence = (float) persistenceParam.getPercentage();
 
         var pt = new StatusBarProgressTracker(NAME, height);
@@ -119,10 +138,20 @@ public class ValueNoise extends ParametrizedFilter {
     private void calculateLine(int[] lookupTable, int[] destData,
                                int width, float frequency, float persistence,
                                int y, NoiseInterpolation interp) {
+        float outerY = y - cy;
         for (int x = 0; x < width; x++) {
             int octaves = details.getValue();
+            float sampleX = x - cx;
+            float sampleY = outerY; // must be reset, because rotation modifies it
 
-            int noise = (int) (255 * generateValueNoise(x, y,
+            if (rotate) {
+                double newX = cos * sampleX + sin * sampleY;
+                double newY = -sin * sampleX + cos * sampleY;
+                sampleX = (float) newX;
+                sampleY = (float) newY;
+            }
+
+            int noise = (int) (255 * generateValueNoise(sampleX, sampleY,
                 octaves, frequency, persistence, interp));
 
             int value = lookupTable[noise];
@@ -134,7 +163,7 @@ public class ValueNoise extends ParametrizedFilter {
      * Returns a float between 0 and 1
      */
     @SuppressWarnings("WeakerAccess")
-    public float generateValueNoise(int x, int y,
+    public float generateValueNoise(float x, float y,
                                     int octaves,
                                     float frequency,
                                     float persistence,
@@ -142,7 +171,7 @@ public class ValueNoise extends ParametrizedFilter {
         float total = 0.0f;
 
         float amplitude = 1.0f;
-        for (int lcv = 0; lcv < octaves; lcv++) {
+        for (int i = 0; i < octaves; i++) {
             total += smooth(x * frequency, y * frequency, interp) * amplitude;
             frequency *= 2;
             amplitude *= persistence;
@@ -152,15 +181,23 @@ public class ValueNoise extends ParametrizedFilter {
     }
 
     private float smooth(float x, float y, NoiseInterpolation interp) {
-        float n1 = noise((int) x, (int) y);
-        float n2 = noise((int) x + 1, (int) y);
-        float n3 = noise((int) x, (int) y + 1);
-        float n4 = noise((int) x + 1, (int) y + 1);
+        int xx = fastFloor(x);
+        int yy = fastFloor(y);
+        int xxp = xx + 1;
+        int yyp = yy + 1;
 
-        float i1 = interpolate(n1, n2, x - (int) x, interp);
-        float i2 = interpolate(n3, n4, x - (int) x, interp);
+        float n1 = noise(xx, yy);
+        float n2 = noise(xxp, yy);
+        float n3 = noise(xx, yyp);
+        float n4 = noise(xxp, yyp);
 
-        return interpolate(i1, i2, y - (int) y, interp);
+        float i1 = interpolate(n1, n2, x - xx, interp);
+        float i2 = interpolate(n3, n4, x - xx, interp);
+        return interpolate(i1, i2, y - yy, interp);
+    }
+
+    private static int fastFloor(float f) {
+        return f >= 0 ? (int) f : (int) f - 1;
     }
 
     private void reseed(long newSeed) {
@@ -170,10 +207,14 @@ public class ValueNoise extends ParametrizedFilter {
         r3 = 100000 + rand.nextInt(1000000000);
     }
 
+    // Creates a random number between 0 and 1, and guarantees that
+    // it always generates the same number for a given (x, y) pair.
     private float noise(int x, int y) {
         int n = x + y * 57;
         n = (n << 13) ^ n;
 
+        // 0x7F_FF_FF_FF is Integer.MAX_VALUE: ensures that the value is positive.
+        // The final division ensures that the result is scaled to the range 0..1.
         return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7F_FF_FF_FF) / 1.0737418E+9f);
     }
 

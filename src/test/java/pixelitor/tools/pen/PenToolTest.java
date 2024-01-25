@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.layers.ColorFillLayer;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 
@@ -49,8 +50,10 @@ class PenToolTest {
     void beforeEachTest() {
         Tools.setCurrentTool(Tools.PEN);
 
-        // a real composition that can store paths
-        comp = TestHelper.createEmptyComp(300, 300, true);
+        // A real composition that can store paths.
+        // The layer type doesn't matter.
+        comp = TestHelper.createRealComp(ColorFillLayer.class, 300, 300);
+
         view = comp.getView(); // a mock view
         PenTool.path = null;
         Tools.PEN.startBuilding(false);

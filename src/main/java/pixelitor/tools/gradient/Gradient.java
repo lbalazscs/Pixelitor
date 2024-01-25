@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class Gradient implements Serializable, Debuggable {
     private final BlendingMode blendingMode;
     private final float opacity;
 
-    // the actual drawing colors
+    // the actual painting colors
     private final Color[] colors;
 
     // saved so that they can be restored
@@ -109,25 +109,25 @@ public class Gradient implements Serializable, Debuggable {
         return new Color[]{startColor, endColor};
     }
 
-    public void drawOn(Drawable dr) {
+    public void paintOn(Drawable dr) {
         Graphics2D g;
         var comp = dr.getComp();
         Canvas canvas = comp.getCanvas();
         int width, height;
         if (dr instanceof LayerMask) {
+            // paint directly, without a temporary layer
             BufferedImage subImage = dr.getCanvasSizedSubImage();
             g = subImage.createGraphics();
             width = canvas.getWidth();
             height = canvas.getHeight();
         } else {
+            // use a temporary layer when painting on an image
+            // layer, in order to have soft selection
             var composite = blendingMode.getComposite(opacity);
-            var tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
+            var tmpDrawingLayer = dr.createTmpLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
 
-            // the temporary image might be smaller than the canvas, if there is selection
-
-            boolean smallImage = tmpDrawingLayer.hasSmallImage();
-            if (smallImage) {
+            if (tmpDrawingLayer.hasSmallImage()) {
                 Rectangle bounds = comp.getSelection().getShapeBounds();
                 width = bounds.width;
                 height = bounds.height;
@@ -139,14 +139,14 @@ public class Gradient implements Serializable, Debuggable {
             drag = tmpDrawingLayer.translateDrag(drag);
         }
 
-        drawOnGraphics(g, width, height);
+        paintOnGraphics(g, width, height);
 
         g.dispose();
         dr.mergeTmpDrawingLayerDown();
         dr.updateIconImage();
     }
 
-    public void drawOnGraphics(Graphics2D g, int width, int height) {
+    public void paintOnGraphics(Graphics2D g, int width, int height) {
         // No composite is set in this method, because
         // it's not needed for gradient fill layers.
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

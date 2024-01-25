@@ -190,7 +190,7 @@ public class ShapesTool extends DragTool {
         return strokeParam.copyState();
     }
 
-    private void updateStroke() {
+    private void recreateStroke() {
         stroke = strokeParam.createStroke();
     }
 
@@ -202,7 +202,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void strokeUIChanged() {
-        updateStroke();
+        recreateStroke();
         uiChanged(CHANGE_SHAPE_STROKE_SETTINGS);
     }
 
@@ -371,7 +371,6 @@ public class ShapesTool extends DragTool {
         }
 
         updateStyledShapeFromDrag(e);
-//        styledShape.createBackupState(this);
 
         transformBox = styledShape.createBox(e.getView());
         if (transformBox == null) {
@@ -385,8 +384,6 @@ public class ShapesTool extends DragTool {
         e.getView().repaint();
         setState(TRANSFORM);
         History.add(new CreateBoxedShapeEdit(e.getComp(), styledShape, transformBox));
-
-        updateStroke(); // TODO is this still necessary?
 
         if (isEditingShapesLayer()) {
             shapesLayer.setTransformBox(transformBox);
@@ -832,46 +829,46 @@ public class ShapesTool extends DragTool {
     }
 
     private void layerActivated(Layer layer) {
-        boolean wasShapesLayer = isEditingShapesLayer();
         if (layer.isMaskEditing()) {
-            setupMaskEditing(true);
-            startEditingRasterLayer(layer, wasShapesLayer);
+            startEditingRasterLayer(layer);
         } else {
-            if (layer instanceof ShapesLayer sl) {
-                if (sl == shapesLayer) {
+            if (layer instanceof ShapesLayer newShapesLayer) {
+                if (newShapesLayer == shapesLayer) {
                     return; // not a new layer
                 }
-                shapesLayer = sl;
-                styledShape = sl.getStyledShape();
-                if (styledShape != null && styledShape.isInitialized()) {
-                    View view = layer.getComp().getView();
-                    transformBox = sl.getTransformBox();
-//                    transformBox = styledShape.createBox(view);
-
-                    if (transformBox != null) {
-                        if (transformBox.needsInitialization(view)) {
-                            transformBox.reInitialize(view, styledShape);
-                        }
-                        // the zoom could have changed since the box was active
-                        transformBox.coCoordsChanged(view);
-
-                        loadShapeAndBox(styledShape, transformBox);
-                    } else {
-                        throw new IllegalStateException("state = " + state);
-                    }
-
-                    // make the loaded box visible - TODO necessary?
-                    layer.getComp().repaint();
-                } else {
-                    setNoInteractionState();
-                }
+                shapesLayer = newShapesLayer;
+                startEditingShapesLayer();
             } else {
-                startEditingRasterLayer(layer, wasShapesLayer);
+                startEditingRasterLayer(layer);
             }
         }
     }
 
-    private void startEditingRasterLayer(Layer layer, boolean wasShapesLayer) {
+    private void startEditingShapesLayer() {
+        styledShape = shapesLayer.getStyledShape();
+        if (styledShape == null || !styledShape.isInitialized()) {
+            setNoInteractionState();
+        } else {
+            View view = shapesLayer.getComp().getView();
+            transformBox = shapesLayer.getTransformBox();
+
+            if (transformBox != null) {
+                transformBox.reInitialize(view, styledShape);
+                // the zoom could have changed since the box was active
+                transformBox.coCoordsChanged(view);
+
+                loadShapeAndBox(styledShape, transformBox);
+            } else {
+                throw new IllegalStateException("state = " + state);
+            }
+
+            // make the loaded box visible
+            shapesLayer.getComp().repaint();
+        }
+    }
+
+    private void startEditingRasterLayer(Layer layer) {
+        boolean wasShapesLayer = isEditingShapesLayer();
         shapesLayer = null;
         if (wasShapesLayer) {
             // hide the shape and box
@@ -919,7 +916,7 @@ public class ShapesTool extends DragTool {
             preset.getEnum("Stroke", TwoPointPaintType.class));
 
         strokeParam.loadStateFrom(preset);
-        updateStroke();
+        recreateStroke();
 
         effectsParam.loadStateFrom(preset);
         updateEffects();

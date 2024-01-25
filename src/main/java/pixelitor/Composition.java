@@ -82,7 +82,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private static long debugCounter = 0;
 
-    private String name;
+    private volatile String name;
 
     private final List<Layer> layerList = new ArrayList<>();
 
@@ -472,6 +472,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+        if (isOpen()) {
+            view.updateViewContainerTitle();
+            PixelitorWindow.get().updateTitle(this);
+        }
+    }
+
     public String createFileNameWithExt(String ext) {
         if (file == null) {
             return name + "." + ext;
@@ -497,14 +505,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
         setName(newName);
         History.add(new CompositionRenamedEdit(this, oldName, newName));
-    }
-
-    public void setName(String name) {
-        this.name = name;
-        if (isOpen()) {
-            view.updateViewContainerTitle();
-            PixelitorWindow.get().updateTitle(this);
-        }
     }
 
     public String getDebugName() {
@@ -571,7 +571,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String editName) {
         Layer newLayer = ImageLayer.fromExternalImage(image, this, layerName);
-        adder().withHistory(editName).atPosition(ABOVE_ACTIVE).add(newLayer);
+        addWithHistory(newLayer, editName);
     }
 
     public void addNewLayerFromComposite() {
@@ -591,10 +591,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // there was an out of memory error
             return;
         }
-        getActiveHolder().adder()
-            .withHistory("Duplicate Layer")
-            .atPosition(ABOVE_ACTIVE)
-            .add(duplicate);
+        getActiveHolder().addWithHistory(duplicate, "Duplicate Layer");
         assert checkInvariants();
     }
 
@@ -982,8 +979,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return null;
     }
 
-    public Rectangle2D getNonTransparentContentBounds() {
-        return Utils.calcUnionOfContentBounds(layerList, false);
+    public Rectangle2D calcContentBounds(boolean includeTransparent) {
+        return Utils.calcContentBoundsUnion(layerList, includeTransparent);
     }
 
     public void updateAllIconImages() {
@@ -1083,10 +1080,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             layer.moveWhileDragging(relImX, relImY);
             layer.getHolder().invalidateImageCache();
         }
-        if (mode.movesSelection()) {
-            if (selection != null) {
-                selection.moveWhileDragging(relImX, relImY);
-            }
+        if (mode.movesSelection() && selection != null) {
+            selection.moveWhileDragging(relImX, relImY);
         }
         update();
     }
@@ -1424,7 +1419,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public BufferedImage getCompositeImage() {
         if (compositeImage == null) {
-            compositeImage = ImageUtils.calculateCompositeImage(layerList, canvas);
+            compositeImage = ImageUtils.calcComposite(layerList, canvas);
             assert compositeImage != null;
         }
         return compositeImage;
@@ -1508,7 +1503,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer contentLayer) {
-                enlargeCanvas.setupToFitContentOf(contentLayer);
+                enlargeCanvas.ensureFitsContentOf(contentLayer);
             }
         }
 
@@ -1544,11 +1539,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariants() {
         if (layerList.isEmpty()) {
-            if (GUIMode.isUnitTesting()) {
-                // TODO this skips all checks for empty compositions.
-                //   Empty compositions should not be used in tests.
-                return true;
-            }
             throw new AssertionError("no layer in " + getName());
         }
         if (activeRoot == null) {
@@ -1846,11 +1836,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             setActiveLayer(so);
         }
 
-        SmartObject duplicate = so.shallowDuplicate();
-        new LayerAdder(this)
-            .withHistory("Clone")
-            .atPosition(ABOVE_ACTIVE)
-            .add(duplicate);
+        addWithHistory(so.shallowDuplicate(), "Clone");
+    }
+
+    public void checkFontsAreInstalled() {
+        assert calledOnEDT();
+        forEachNestedLayer(TextLayer.class, TextLayer::checkFontIsInstalled);
     }
 
     @Override

@@ -363,6 +363,10 @@ public class ParamSet implements Debuggable {
         return seed;
     }
 
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
     public void reseed() {
         seed = System.nanoTime();
     }

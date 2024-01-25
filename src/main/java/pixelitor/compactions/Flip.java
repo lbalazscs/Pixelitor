@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,17 +79,9 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasTransform(Canvas canvas) {
+            public AffineTransform createTransform(int width, int height) {
                 var at = new AffineTransform();
-                at.translate(canvas.getWidth(), 0);
-                at.scale(-1, 1);
-                return at;
-            }
-
-            @Override
-            public AffineTransform createImageTransform(BufferedImage image) {
-                var at = new AffineTransform();
-                at.translate(image.getWidth(), 0);
+                at.translate(width, 0);
                 at.scale(-1, 1);
                 return at;
             }
@@ -100,17 +92,9 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasTransform(Canvas canvas) {
+            public AffineTransform createTransform(int width, int height) {
                 var at = new AffineTransform();
-                at.translate(0, canvas.getHeight());
-                at.scale(1, -1);
-                return at;
-            }
-
-            @Override
-            public AffineTransform createImageTransform(BufferedImage image) {
-                var at = new AffineTransform();
-                at.translate(0, image.getHeight());
+                at.translate(0, height);
                 at.scale(1, -1);
                 return at;
             }
@@ -128,15 +112,21 @@ public class Flip extends SimpleCompAction {
 
         public abstract String getStatusBarMessage();
 
+        public abstract AffineTransform createTransform(int width, int height);
+
         /**
          * Returns the transformation in image space, relative to the canvas.
          * Needed for transforming the selection.
          */
-        public abstract AffineTransform createCanvasTransform(Canvas canvas);
+        public AffineTransform createCanvasTransform(Canvas canvas) {
+            return createTransform(canvas.getWidth(), canvas.getHeight());
+        }
 
         /**
          * Returns the transformation for the image (image space, relative to the image).
          */
-        public abstract AffineTransform createImageTransform(BufferedImage image);
+        public AffineTransform createImageTransform(BufferedImage image) {
+            return createTransform(image.getWidth(), image.getHeight());
+        }
     }
 }

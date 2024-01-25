@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -363,7 +363,7 @@ public final class Utils {
         return outStart + slope * (x - inStart);
     }
 
-    public static Rectangle calcUnionOfContentBounds(List<Layer> layers, boolean includeTransparent) {
+    public static Rectangle calcContentBoundsUnion(List<Layer> layers, boolean includeTransparent) {
         Rectangle bounds = null;
         for (Layer layer : layers) {
             if (layer instanceof ContentLayer contentLayer) {

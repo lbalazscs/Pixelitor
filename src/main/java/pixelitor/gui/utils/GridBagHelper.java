@@ -38,10 +38,10 @@ public class GridBagHelper {
     private static final GridBagConstraints labelConstraint = new GridBagConstraints(
         0, 0, 1, 1,
         0.0, 1.0, EAST, NONE, insets, 0, 0);
-    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(
+    private static final GridBagConstraints controlConstraint = new GridBagConstraints(
         0, 0, 1, 1,
         1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
-    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(
+    private static final GridBagConstraints lastControlConstraint = new GridBagConstraints(
         0, 0, REMAINDER, 1,
         1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
 
@@ -50,6 +50,10 @@ public class GridBagHelper {
 
     public GridBagHelper(Container container) {
         this.container = container;
+
+        labelConstraint.gridy = 0;
+        controlConstraint.gridy = 0;
+        lastControlConstraint.gridy = 0;
     }
 
     public void addLabel(String labelText, int gridX, int gridY) {
@@ -67,9 +71,9 @@ public class GridBagHelper {
      * Adds the specified control to the right of the last label
      */
     public void addControl(Component c) {
-        nextControlConstraint.gridx = labelConstraint.gridx + 1;
-        nextControlConstraint.gridy = labelConstraint.gridy;
-        container.add(c, nextControlConstraint);
+        controlConstraint.gridx = labelConstraint.gridx + 1;
+        controlConstraint.gridy = labelConstraint.gridy;
+        container.add(c, controlConstraint);
     }
 
     public void addLabelAndTwoControls(String labelText, Component c1, Component c2) {
@@ -107,9 +111,9 @@ public class GridBagHelper {
         labelConstraint.gridy = autoIncrementedGridY;
         container.add(label, labelConstraint);
 
-        nextControlConstraint.gridx = 1;
-        nextControlConstraint.gridy = autoIncrementedGridY;
-        GridBagConstraints controlConstraints = (GridBagConstraints) nextControlConstraint.clone();
+        controlConstraint.gridx = 1;
+        controlConstraint.gridy = autoIncrementedGridY;
+        GridBagConstraints controlConstraints = (GridBagConstraints) controlConstraint.clone();
         controlConstraints.fill = BOTH;
         controlConstraints.weighty = weightY;
         container.add(c, controlConstraints);
@@ -136,7 +140,7 @@ public class GridBagHelper {
     }
 
     public void addTwoControlsNoStretch(Component c1, Component c2) {
-        nextControlConstraint.fill = NONE;
+        controlConstraint.fill = NONE;
         addTwoControls(c1, c2, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
@@ -146,10 +150,10 @@ public class GridBagHelper {
         labelConstraint.gridy = gridY;
         container.add(c1, labelConstraint);
 
-        nextControlConstraint.gridx = 1;
-        nextControlConstraint.gridy = gridY;
+        controlConstraint.gridx = 1;
+        controlConstraint.gridy = gridY;
 
-        container.add(c2, nextControlConstraint);
+        container.add(c2, controlConstraint);
     }
 
     /**
@@ -157,20 +161,20 @@ public class GridBagHelper {
      * last label without stretching
      */
     public void addControlNoStretch(Component c) {
-        nextControlConstraint.gridx = labelConstraint.gridx + 1;
-        nextControlConstraint.gridy = labelConstraint.gridy;
-        nextControlConstraint.fill = NONE;
-        container.add(c, nextControlConstraint);
+        controlConstraint.gridx = labelConstraint.gridx + 1;
+        controlConstraint.gridy = labelConstraint.gridy;
+        controlConstraint.fill = NONE;
+        container.add(c, controlConstraint);
 
-        nextControlConstraint.fill = HORIZONTAL; // reset
+        controlConstraint.fill = HORIZONTAL; // reset
     }
 
     /**
      * Adds the specified control to the right of the last control
      */
     public void addNextControl(Component c) {
-        nextControlConstraint.gridx++;
-        container.add(c, nextControlConstraint);
+        controlConstraint.gridx++;
+        container.add(c, controlConstraint);
     }
 
     public void addLabelAndLastControl(FilterSetting setting) {
@@ -184,17 +188,17 @@ public class GridBagHelper {
     }
 
     public void addLastControl(Component c) {
-        nextLastControlConstraint.gridx = labelConstraint.gridx + 1;
-        nextLastControlConstraint.gridy = labelConstraint.gridy;
-        container.add(c, nextLastControlConstraint);
+        lastControlConstraint.gridx = labelConstraint.gridx + 1;
+        lastControlConstraint.gridy = labelConstraint.gridy;
+        container.add(c, lastControlConstraint);
     }
 
     public void addOnlyControl(Component c) {
-        nextLastControlConstraint.gridx = 0;
-        nextLastControlConstraint.gridy = autoIncrementedGridY;
+        lastControlConstraint.gridx = 0;
+        lastControlConstraint.gridy = autoIncrementedGridY;
         autoIncrementedGridY++;
 
-        container.add(c, nextLastControlConstraint);
+        container.add(c, lastControlConstraint);
     }
 
     public void arrangeVertically(Iterable<? extends FilterSetting> settings) {

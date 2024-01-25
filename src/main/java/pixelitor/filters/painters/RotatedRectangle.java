@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,9 @@
 
 package pixelitor.filters.painters;
 
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.Debuggable;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -29,7 +32,7 @@ import static java.lang.Math.min;
 /**
  * A rectangle rotated around its center
  */
-public class RotatedRectangle {
+public class RotatedRectangle implements Debuggable {
     private final double origTopLeftX;
     private final double origTopLeftY;
     private final double origTopRightX;
@@ -68,6 +71,30 @@ public class RotatedRectangle {
         double cx = x + width / 2.0;
         double cy = y + height / 2.0;
 
+/*        // start of new, potentially more generic implementation
+        AffineTransform transform = AffineTransform.getRotateInstance(theta, cx, cy);
+
+        Point2D topLeft = new Point2D.Double(origTopLeftX, origTopLeftY);
+        Point2D bottomLeft = new Point2D.Double(origBottomLeftX, origBottomLeftY);
+        Point2D topRight = new Point2D.Double(origTopRightX, origTopRightY);
+        Point2D bottomRight = new Point2D.Double(origBottomRightX, origBottomRightY);
+
+        transform.transform(topLeft, topLeft);
+        transform.transform(bottomLeft, bottomLeft);
+        transform.transform(topRight, topRight);
+        transform.transform(bottomRight, bottomRight);
+
+        topLeftX = topLeft.getX();
+        topLeftY = topLeft.getY();
+        bottomLeftX = bottomLeft.getX();
+        bottomLeftY = bottomLeft.getY();
+        topRightX = topRight.getX();
+        topRightY = topRight.getY();
+        bottomRightX = bottomRight.getX();
+        bottomRightY = bottomRight.getY();
+        // end of new implementation
+*/
+        // old implmementation
         double xDist = origTopLeftX - cx;
         double yDist = origTopLeftY - cy;
 
@@ -129,10 +156,13 @@ public class RotatedRectangle {
     public void translate(double dx, double dy) {
         topLeftX += dx;
         topLeftY += dy;
+
         topRightX += dx;
         topRightY += dy;
+
         bottomRightX += dx;
         bottomRightY += dy;
+
         bottomLeftX += dx;
         bottomLeftY += dy;
     }
@@ -154,5 +184,17 @@ public class RotatedRectangle {
         g.setColor(new Color(0, 100, 0));
         g.fillOval((int) bottomLeftX - 5, (int) bottomLeftY - 5, 10, 10);
         g.fillOval((int) origBottomLeftX - 5, (int) origBottomLeftY - 5, 10, 10);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addDouble("origTopLeftX", origTopLeftX);
+        node.addDouble("origTopLeftY", origTopLeftY);
+        node.addDouble("topLeftX", topLeftX);
+        node.addDouble("topLeftY", topLeftY);
+
+        return node;
     }
 }

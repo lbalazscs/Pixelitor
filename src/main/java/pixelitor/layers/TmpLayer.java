@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,18 +30,21 @@ import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 /**
- * A temporary drawing layer for the tools that use blending modes.
+ * A temporary image buffer on the top of an image layer for the tools
+ * that use blending modes.
  */
-public class TmpDrawingLayer {
+public class TmpLayer {
     private BufferedImage image;
     private final Graphics2D g;
     private final Composite composite;
 
+    // the temporary image might be smaller than the canvas, if there is selection
     private final boolean smallImage;
+
     private int selStartX = 0;
     private int selStartY = 0;
 
-    public TmpDrawingLayer(ImageLayer imageLayer, Composite composite, boolean softSelection) {
+    public TmpLayer(ImageLayer imageLayer, Composite composite, boolean softSelection) {
         this.composite = Objects.requireNonNull(composite);
 
         Composition comp = imageLayer.getComp();
@@ -57,13 +60,11 @@ public class TmpDrawingLayer {
             } else {
                 // Sets up the image of this temporary layer to act as
                 // the intermediate image of a soft selection clipping.
-                //
                 Rectangle bounds = selShape.getBounds();
                 selStartX = bounds.x;
                 selStartY = bounds.y;
                 image = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
                 g = ImageUtils.setupForSoftSelection(image, selShape, selStartX, selStartY);
-//                g.translate(selStartX, selStartY);
                 smallImage = true;
             }
         } else {
@@ -90,23 +91,26 @@ public class TmpDrawingLayer {
         return image.getHeight();
     }
 
+    /**
+     * Paints the contents of this temporary layer on the given Graphics2D.
+     */
+    public void paintOn(Graphics2D targetG, int tx, int ty) {
+        targetG.setComposite(composite);
+
+        assert smallImage || (selStartX == 0 && selStartY == 0);
+        targetG.drawImage(image, tx + selStartX, ty + selStartY, null);
+    }
+
     public void dispose() {
         g.dispose();
         image.flush();
         image = null;
     }
 
-    public void paintOn(Graphics2D g, int tx, int ty) {
-        g.setComposite(composite);
-
-        assert smallImage || (selStartX == 0 && selStartY == 0);
-        g.drawImage(image, tx + selStartX, ty + selStartY, null);
-    }
-
     public Drag translateDrag(Drag drag) {
         if (smallImage) {
             // the drag was relative to the canvas, but if small images are used,
-            // then it must be transformed to be relative to the selection
+            // then it must be translated to be relative to the selection
             return drag.translatedCopy(-selStartX, -selStartY);
         } else {
             return drag;

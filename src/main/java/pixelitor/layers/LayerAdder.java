@@ -24,7 +24,6 @@ import pixelitor.history.NewLayerEdit;
 
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
-import static pixelitor.layers.LayerAdder.Position.TOP;
 
 /**
  * A helper class that encapsulates the logic of adding a
@@ -34,12 +33,12 @@ public class LayerAdder {
     private final LayerHolder holder;
     private final Composition comp;
     private String editName; // null if the add should not be added to history
-    private int targetLayerIndex = -1;
+    private int targetIndex = -1;
     private boolean update = true;
 
-    public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
+    public enum Position {ABOVE_ACTIVE, BELLOW_ACTIVE}
 
-    private Position position = TOP;
+    private Position position = ABOVE_ACTIVE;
     private boolean addToUI = true;
 
     public LayerAdder(LayerHolder holder) {
@@ -75,26 +74,26 @@ public class LayerAdder {
     }
 
     private void calcIndexBasedOnRelPosition() {
-        int activeLayerIndex = holder.getActiveLayerIndex();
-        if (activeLayerIndex == -1) { // no active layer
+        int activeIndex = holder.getActiveLayerIndex();
+        if (activeIndex == -1) { // no active layer
             if (position == BELLOW_ACTIVE) {
-                targetLayerIndex = 0;
+                targetIndex = 0;
             } else {
-                targetLayerIndex = holder.getNumLayers();
+                targetIndex = holder.getNumLayers(); // add to the top
             }
         } else {
             if (position == ABOVE_ACTIVE) {
-                targetLayerIndex = activeLayerIndex + 1;
+                targetIndex = activeIndex + 1;
             } else if (position == BELLOW_ACTIVE) {
-                targetLayerIndex = activeLayerIndex;
+                targetIndex = activeIndex;
             } else {
                 throw new IllegalStateException("position = " + position);
             }
         }
     }
 
-    public LayerAdder atIndex(int targetLayerIndex) {
-        this.targetLayerIndex = targetLayerIndex;
+    public LayerAdder atIndex(int targetIndex) {
+        this.targetIndex = targetIndex;
         return this;
     }
 
@@ -111,19 +110,15 @@ public class LayerAdder {
             previousMaskViewMode = comp.getView().getMaskViewMode();
         }
 
-        if (targetLayerIndex == -1) { // no index was explicitly set
-            if (position == TOP) {
-                targetLayerIndex = holder.getNumLayers();
-            } else {
-                calcIndexBasedOnRelPosition();
-            }
+        if (targetIndex == -1) { // no index was explicitly set
+            calcIndexBasedOnRelPosition();
         }
-        holder.addLayerToList(targetLayerIndex, layer);
+        holder.addLayerToList(targetIndex, layer);
         comp.setActiveLayer(layer);
 
         if (addToUI) {
             if (holder == comp) {
-                comp.getView().addLayerToGUI(layer, targetLayerIndex);
+                comp.getView().addLayerToGUI(layer, targetIndex);
             } else {
                 ((CompositeLayer) holder).updateChildrenUI();
             }

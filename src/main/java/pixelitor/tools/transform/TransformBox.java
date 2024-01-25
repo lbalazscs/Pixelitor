@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,7 @@ import java.io.Serializable;
 import static java.lang.String.format;
 import static pixelitor.tools.transform.Direction.*;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
+import static pixelitor.utils.AngleUnit.RADIANS;
 import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Cursors.MOVE;
 
@@ -231,16 +232,15 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         this.owner = owner;
     }
 
-    public boolean needsInitialization(View currentView) {
-        // A box needs reinitialization if the view is null after deserialization
-        // or if it's the old view after the duplication of a composition.
-        return view != currentView;
-    }
-
     /**
      * Initialize transient variables after deserialization.
      */
     public void reInitialize(View view, Transformable owner) {
+        // A box needs reinitialization if the view is null after deserialization
+        // or if it's the old view after the duplication of a composition.
+        if (this.view == view) {
+            return;
+        }
         setView(view);
         setOwner(owner);
     }
@@ -630,7 +630,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         cos = Math.cos(angle);
         sin = Math.sin(angle);
 
-        angleDegrees = (int) Math.toDegrees(Geometry.atan2ToIntuitive(angle));
+        angleDegrees = (int) RADIANS.toIntuitiveDegrees(angle);
         cursorOffset = calcCursorOffset(angleDegrees);
     }
 
@@ -705,7 +705,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         node.addDouble("scale Y", calcScaleY());
 
         AffineTransform at = calcImTransform();
-        node.add(DebugNodes.createTransformNode(at, "transform"));
+        node.add(DebugNodes.createTransformNode("transform", at));
 
         return node;
     }
@@ -753,9 +753,11 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         startWholeBoxDrag(0, 0);
     }
 
-    public void moveWhileDragging(double x, double y) {
-        // TODO transform into co space
-        dragBox(x, y);
+    public void moveWhileDragging(double relImX, double relImY) {
+        // Since these are deltas, they can't use the normal
+        // image space => component space methods.
+        double scaling = view.getScaling();
+        dragBox(scaling * relImX, scaling * relImY);
     }
 
     public void endMovement() {

@@ -251,8 +251,8 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
      * @param height the height of the area that the content will be positioned in
      * @return the rectangle for the content to be painted in
      */
-    protected Rectangle calculateLayout(final int contentWidth, final int contentHeight,
-                                              final int width, final int height) {
+    protected Rectangle calculateLayout(int contentWidth, int contentHeight,
+                                        int width, int height) {
 
         Rectangle rect = new Rectangle();
         rect.width = contentWidth;
@@ -270,37 +270,19 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         return rect;
     }
 
-    private int calculateY(final int imgHeight, final int height) {
-        int y = 0;
-        if (getVerticalAlignment() == VerticalAlignment.TOP) {
-            y = 0;
-            y += insets.top;
-        }
-        if (getVerticalAlignment() == VerticalAlignment.CENTER) {
-            y = (height - imgHeight) / 2;
-            y += insets.top;
-        }
-        if (getVerticalAlignment() == VerticalAlignment.BOTTOM) {
-            y = height - imgHeight;
-            y -= insets.bottom;
-        }
-        return y;
+    private int calculateY(int imgHeight, int height) {
+        return switch (verticalAlignment) {
+            case TOP -> insets.top;
+            case CENTER -> (height - imgHeight) / 2 + insets.top;
+            case BOTTOM -> height - imgHeight - insets.bottom;
+        };
     }
 
-    private int calculateX(final int imgWidth, final int width) {
-        int x = 0;
-        if (getHorizontalAlignment() == HorizontalAlignment.LEFT) {
-            x = 0;
-            x += insets.left;
-        }
-        if (getHorizontalAlignment() == HorizontalAlignment.CENTER) {
-            x = (width - imgWidth) / 2;
-            x += insets.left;
-        }
-        if (getHorizontalAlignment() == HorizontalAlignment.RIGHT) {
-            x = width - imgWidth;
-            x -= insets.right;
-        }
-        return x;
+    private int calculateX(int imgWidth, int width) {
+        return switch (horizontalAlignment) {
+            case LEFT -> insets.left;
+            case CENTER -> (width - imgWidth) / 2 + insets.left;
+            case RIGHT -> width - imgWidth - insets.right;
+        };
     }
 }

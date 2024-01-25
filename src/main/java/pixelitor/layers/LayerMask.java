@@ -167,7 +167,7 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean softSelection) {
+    public TmpLayer createTmpLayer(Composite c, boolean softSelection) {
         throw new IllegalStateException("tmp layer with masks");
     }
 

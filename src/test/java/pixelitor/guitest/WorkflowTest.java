@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,9 @@ import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
 import pixelitor.Features;
 import pixelitor.filters.Starburst;
+import pixelitor.filters.jhlabsproxies.JHPlasma;
 import pixelitor.filters.lookup.ColorBalance;
+import pixelitor.filters.util.Filters;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
 import pixelitor.guitest.AppRunner.Randomize;
@@ -36,9 +38,11 @@ import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.StrokeType;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -414,6 +418,14 @@ public class WorkflowTest {
         app.runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
 
+        try {
+            EventQueue.invokeAndWait(() -> {
+                JHPlasma plasma = (JHPlasma) Filters.getFilterActionByName("Plasma").getFilter();
+                plasma.getParamSet().setSeed(0);
+            });
+        } catch (Exception e) {
+            Messages.showException(e);
+        }
         runFilterWithDialog("Plasma");
 
         // select the text layer

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,14 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Canvas;
+import pixelitor.compactions.Flip;
+import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugNodes;
+import pixelitor.utils.debug.Debuggable;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
@@ -35,7 +41,7 @@ import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
  * layers can be moved with the move tool).
  * It also supports the rotation of the text.
  */
-public class TransformedTextPainter extends TextPainter {
+public class TransformedTextPainter extends TextPainter implements Debuggable {
     @Serial
     private static final long serialVersionUID = -2064757977654857961L;
 
@@ -47,9 +53,11 @@ public class TransformedTextPainter extends TextPainter {
     private transient Rectangle boundingBox;
     private transient Shape transformedShape;
 
+    private AffineTransform extraTransform;
+
     /**
      * Return the last painted bounding box for the rendered text.
-     * Note that this is not a pixel perfect rectangle.
+     * Note that this is an approximation.
      */
     public Rectangle getBoundingBox() {
         return rotatedRect != null ? rotatedRect.getBoundingBox() : boundingBox;
@@ -168,6 +176,9 @@ public class TransformedTextPainter extends TextPainter {
             g.translate(topLeftX, topLeftY);
             g.rotate(rotation, 0, 0);
         }
+        if (extraTransform != null) {
+            g.transform(extraTransform);
+        }
     }
 
     private void updateLayout(int width, int height, String text, FontMetrics metrics) {
@@ -210,5 +221,58 @@ public class TransformedTextPainter extends TextPainter {
 
     public void setRotation(double rotation) {
         this.rotation = rotation;
+    }
+
+    public void flip(Flip.Direction direction, Canvas canvas) {
+        // TODO
+//        AffineTransform flipTransform = direction.createTransform(boundingBox.width, boundingBox.height);
+//        if (extraTransform == null) {
+//            extraTransform = flipTransform;
+//        } else {
+//            extraTransform.preConcatenate(flipTransform);
+//        }
+    }
+
+    public void rotate(QuadrantAngle angle, Canvas canvas) {
+        // TODO
+//        AffineTransform rotateTransform = angle.createTransform(boundingBox.width, boundingBox.height);
+//        if (extraTransform == null) {
+//            extraTransform = rotateTransform;
+//        } else {
+//            extraTransform.preConcatenate(rotateTransform);
+//        }
+    }
+
+    public TransformedTextPainter copy(TextSettings settings) {
+        var copy = new TransformedTextPainter();
+        settings.configurePainter(copy);
+
+        // also copy internal data
+        copy.translationX = translationX;
+        copy.translationY = translationY;
+        copy.rotation = rotation;
+
+        copy.rotatedRect = rotatedRect;
+        copy.boundingBox = boundingBox;
+        copy.transformedShape = transformedShape;
+        copy.extraTransform = extraTransform;
+
+        return copy;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = new DebugNode(key, this);
+
+        node.addInt("translationX", translationX);
+        node.addInt("translationY", translationY);
+        node.addDouble("rotation", rotation);
+
+        node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
+        node.addNullableDebuggable("rotatedRect", rotatedRect);
+        node.addNullableDebuggable("extraTransform", extraTransform, DebugNodes::createTransformNode);
+        node.addNullableProperty("transformedShape", transformedShape);
+
+        return node;
     }
 }

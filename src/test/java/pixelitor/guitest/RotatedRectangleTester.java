@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -57,7 +57,7 @@ class RotatedRectangleTester extends JPanel {
         p.add(testPanel, CENTER);
 
         var angleParam = new AngleParam("", 0);
-        angleParam.setAdjustmentListener(() -> testPanel.setRotation(angleParam.getValueInRadians()));
+        angleParam.setAdjustmentListener(() -> testPanel.updateRotation(angleParam.getValueInRadians()));
         p.add(angleParam.createGUI(), SOUTH);
         f.add(p);
 
@@ -92,7 +92,7 @@ class RotatedRectangleTester extends JPanel {
         rotatedRect.paintCorners(g2);
     }
 
-    public void setRotation(double rotation) {
+    private void updateRotation(double rotation) {
         this.rotation = rotation;
         repaint();
     }

@@ -41,6 +41,8 @@ import static java.lang.String.format;
  * {@link View} and the image zooming into account.
  */
 public class PPoint implements Debuggable {
+    public static final PPoint ZERO = new PPoint(0, 0, 0, 0, null);
+
     protected final View view;
 
     // All the coordinates are initialized in subclasses.

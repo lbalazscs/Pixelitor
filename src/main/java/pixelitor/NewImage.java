@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
@@ -55,16 +54,11 @@ public final class NewImage {
 
     public static Composition createNewComposition(FillType bg, int width, int height, String title) {
         BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
-        fillImage(newImage, bg);
-        return Composition.fromImage(newImage, null, title);
-    }
-
-    private static void fillImage(BufferedImage img, FillType bg) {
-        if (bg == TRANSPARENT) {
-            return;
+        if (bg != TRANSPARENT) {
+            Fill.fillImage(newImage, bg.getColor());
         }
-        Color c = bg.getColor();
-        Fill.fillImage(img, c);
+
+        return Composition.fromImage(newImage, null, title);
     }
 
     private static void showInDialog() {

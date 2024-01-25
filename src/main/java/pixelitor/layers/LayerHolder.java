@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-
 /**
  * Something that contains a list of layers, like a
  * composition, layer group or smart object.
@@ -52,6 +50,14 @@ public interface LayerHolder extends Debuggable {
 
     default void addLayerNoUI(Layer newLayer) {
         adder().noUI().add(newLayer);
+    }
+
+    default void addWithHistory(Layer newLayer, String editName) {
+        adder().withHistory(editName).add(newLayer);
+    }
+
+    default void add(Layer newLayer) {
+        adder().add(newLayer);
     }
 
     default void moveActiveLayer(boolean up) {
@@ -320,10 +326,7 @@ public interface LayerHolder extends Debuggable {
 
     default void addEmptyGroup() {
         LayerGroup group = new LayerGroup(getComp(), LayerGroup.createName());
-        new LayerAdder(this)
-            .atPosition(ABOVE_ACTIVE)
-            .withHistory("New Layer Group")
-            .add(group);
+        addWithHistory(group, "New Layer Group");
     }
 
     default LayerAdder adder() {

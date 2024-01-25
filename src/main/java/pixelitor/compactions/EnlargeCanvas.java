@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class EnlargeCanvas extends SimpleCompAction {
         this.west = west;
     }
 
-    public void setupToFitContentOf(ContentLayer contentLayer) {
+    public void ensureFitsContentOf(ContentLayer contentLayer) {
         Rectangle contentBounds = contentLayer.getContentBounds();
         if (contentBounds == null) {
             // can happen for gradient layers and for uninitialized shape layers

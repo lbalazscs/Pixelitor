@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,6 +74,9 @@ public class GradientParam extends AbstractFilterParam {
         super(name, randomizePolicy);
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
+
+        // TODO the gui shouldn't be created here so that
+        //   the filters can be created outside the EDT
 
         // has to be created in the constructor because getValue() can be called early
         createGradientSlider(defaultThumbPositions, defaultColors);

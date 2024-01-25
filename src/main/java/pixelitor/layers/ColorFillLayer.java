@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
-
 /**
  * A color fill layer that fills the entire canvas with a given color.
  */
@@ -63,9 +61,7 @@ public class ColorFillLayer extends Layer {
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
-        holder.adder()
-            .atPosition(ABOVE_ACTIVE)
-            .add(layer);
+        holder.add(layer);
 
         String title = "Add Color Fill Layer";
         Color defaultColor = FgBgColors.getFGColor();

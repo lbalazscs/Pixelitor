@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.BoundingBox;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
 
@@ -27,11 +28,7 @@ import java.awt.Rectangle;
  * Represents the area affected by a brush. Used for the undo.
  */
 public class AffectedArea implements Debuggable {
-    // affected area coordinates (in image space)
-    private double minX = Double.POSITIVE_INFINITY;
-    private double minY = Double.POSITIVE_INFINITY;
-    private double maxX = Double.NEGATIVE_INFINITY;
-    private double maxY = Double.NEGATIVE_INFINITY;
+    private final BoundingBox boundingBox = new BoundingBox();
 
     public AffectedArea() {
     }
@@ -43,68 +40,33 @@ public class AffectedArea implements Debuggable {
      * and it gets reinitialized for each independent brush stroke.
      */
     public void initAt(PPoint p) {
-        double x = p.getImX();
-        double y = p.getImY();
-        minX = x;
-        minY = y;
-        maxX = x;
-        maxY = y;
+        boundingBox.reset();
+        boundingBox.add(p.getImX(), p.getImY());
     }
 
     /**
      * Update the area with a brush position
      */
     public void updateWith(PPoint p) {
-        double x = p.getImX();
-        double y = p.getImY();
-        if (x > maxX) {
-            maxX = x;
-        }
-        if (x < minX) {
-            minX = x;
-        }
-
-        if (y > maxY) {
-            maxY = y;
-        }
-        if (y < minY) {
-            minY = y;
-        }
+        boundingBox.add(p.getImX(), p.getImY());
     }
 
     /**
      * Returns the rectangle affected by a brush stroke for the undo
      */
     public Rectangle asRectangle(double radius) {
-        double saveX = minX - radius;
-        double saveY = minY - radius;
-
-        double extraSize = 2 * radius + 2.0;
-        double saveWidth = maxX - minX + extraSize;
-        double saveHeight = maxY - minY + extraSize;
-
-        return new Rectangle((int) saveX, (int) saveY,
-            (int) saveWidth, (int) saveHeight);
+        return boundingBox.asRectangle(radius + 1.0);
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         var node = new DebugNode(key, this);
 
-        node.addDouble("min x", minX);
-        node.addDouble("min y", minY);
-        node.addDouble("max x", maxX);
-        node.addDouble("max y", maxY);
+        node.addDouble("min x", boundingBox.getMinX());
+        node.addDouble("min y", boundingBox.getMinY());
+        node.addDouble("max x", boundingBox.getMaxX());
+        node.addDouble("max y", boundingBox.getMaxY());
 
         return node;
-    }
-
-    @Override
-    public String toString() {
-        return "{minX=" + minX +
-            ", minY=" + minY +
-            ", maxX=" + maxX +
-            ", maxY=" + maxY +
-            '}';
     }
 }

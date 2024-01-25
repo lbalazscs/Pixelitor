@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onPool;
 
@@ -166,7 +167,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         new DialogBuilder()
             .content(savePanel)
             .title(title)
-            .okText("Save")
+            .okText(i18n("save"))
             .okAction(() -> IO.saveJpegWithQuality(savePanel.getSettings()))
             .show();
     }

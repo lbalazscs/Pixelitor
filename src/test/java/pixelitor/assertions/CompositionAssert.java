@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -100,15 +100,19 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-
     public CompositionAssert numLayersIs(int numLayers) {
         isNotNull();
 
-        String msg = "\nExpecting number of layers of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
         int actualNumLayers = actual.getNumLayers();
         if (actualNumLayers != numLayers) {
-            failWithMessage(msg, actual, numLayers, actualNumLayers);
+            failWithMessage("""
+                    
+                Expecting number of layers of:
+                  <%s>
+                to be:
+                  <%s>
+                but was:
+                  <%s>""", actual, numLayers, actualNumLayers);
         }
 
         return this;
@@ -156,11 +160,16 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert activeLayerIndexIs(int expected) {
         isNotNull();
 
-        String msg = "\nExpecting expected of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
         int actualIndex = actual.getActiveLayerIndex();
         if (actualIndex != expected) {
-            failWithMessage(msg, actual, expected, actualIndex);
+            failWithMessage("""
+                    
+                Expecting active layer index of:
+                  <%s>
+                to be:
+                  <%s>
+                but was:
+                  <%s>""", actual, expected, actualIndex);
         }
 
         return this;
@@ -178,35 +187,22 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return activeLayerIndexIs(2);
     }
 
-    public CompositionAssert hasCanvasWidth(int canvasWidth) {
-        isNotNull();
-
-        int actualCanvasWidth = actual.getCanvasWidth();
-        if (actualCanvasWidth != canvasWidth) {
-            String msg = "\nExpecting canvasWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-            failWithMessage(msg, actual, canvasWidth, actualCanvasWidth);
-        }
-
-        return this;
-    }
-
-    public CompositionAssert hasCanvasHeight(int canvasHeight) {
-        isNotNull();
-
-        int actualCanvasHeight = actual.getCanvasHeight();
-        if (actualCanvasHeight != canvasHeight) {
-            String msg = "\nExpecting canvasHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-            failWithMessage(msg, actual, canvasHeight, actualCanvasHeight);
-        }
-
-        return this;
-    }
-
     public CompositionAssert canvasSizeIs(int w, int h) {
         isNotNull();
 
-        hasCanvasWidth(w);
-        hasCanvasHeight(h);
+        int actualCanvasWidth = actual.getCanvasWidth();
+        int actualCanvasHeight = actual.getCanvasHeight();
+        if (actualCanvasWidth != w || actualCanvasHeight != h) {
+            String msg = """
+
+                Expecting canvas size of:
+                  <%s>
+                to be:
+                  <%dx%d>
+                but was:
+                  <%dx%d>""";
+            failWithMessage(msg, actual, w, h, actualCanvasWidth, actualCanvasHeight);
+        }
 
         return this;
     }
@@ -214,11 +210,16 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert hasName(String name) {
         isNotNull();
 
-        String msg = "\nExpecting name of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
         String actualName = actual.getName();
         if (!Objects.equals(actualName, name)) {
-            failWithMessage(msg, actual, name, actualName);
+            failWithMessage("""
+                    
+                Expecting name of:
+                  <%s>
+                to be:
+                  <%s>
+                but was:
+                  <%s>""", actual, name, actualName);
         }
 
         return this;
@@ -228,7 +229,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         if (!actual.hasSelection()) {
-            failWithMessage("\nExpecting that actual Composition has selection but does not have.");
+            failWithMessage("No selection");
         }
 
         return this;
@@ -238,7 +239,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         if (actual.hasSelection()) {
-            failWithMessage("\nExpecting that actual Composition does not have selection but has.");
+            failWithMessage("Has selection");
         }
 
         return this;

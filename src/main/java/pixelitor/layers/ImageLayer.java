@@ -78,7 +78,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     //
     private transient State state = NORMAL;
 
-    private transient TmpDrawingLayer tmpDrawingLayer;
+    private transient TmpLayer tmpLayer;
 
     /**
      * The regular image content of this image layer.
@@ -232,7 +232,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // init transient fields
         state = NORMAL;
-        tmpDrawingLayer = null;
+        tmpLayer = null;
         previewImage = null;
         filterSourceImage = null;
         image = null;
@@ -927,23 +927,23 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean softSelection) {
-        tmpDrawingLayer = new TmpDrawingLayer(this, c, softSelection);
-        return tmpDrawingLayer;
+    public TmpLayer createTmpLayer(Composite c, boolean softSelection) {
+        tmpLayer = new TmpLayer(this, c, softSelection);
+        return tmpLayer;
     }
 
     @Override
     public void mergeTmpDrawingLayerDown() {
-        if (tmpDrawingLayer == null) {
+        if (tmpLayer == null) {
             return;
         }
 
         Graphics2D g = image.createGraphics();
-        tmpDrawingLayer.paintOn(g, -getTx(), -getTy());
+        tmpLayer.paintOn(g, -getTx(), -getTy());
         g.dispose();
 
-        tmpDrawingLayer.dispose();
-        tmpDrawingLayer = null;
+        tmpLayer.dispose();
+        tmpLayer = null;
     }
 
     @Override
@@ -1031,12 +1031,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         BufferedImage visibleImage = getVisibleImage();
 
-        if (tmpDrawingLayer == null) {
+        if (tmpLayer == null) {
             paintLayerOnGraphicsWOTmpLayer(g, visibleImage, firstVisibleLayer);
         } else { // we are in the middle of a brush draw
             if (isNormalAndOpaque()) {
                 g.drawImage(visibleImage, getTx(), getTy(), null);
-                tmpDrawingLayer.paintOn(g, 0, 0);
+                tmpLayer.paintOn(g, 0, 0);
             } else {
                 // the composite of the graphics is already set up, but
                 // the drawing layer still has to be considered
@@ -1047,7 +1047,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
 
                 // draw the drawing layer on the layer
-                tmpDrawingLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
+                tmpLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
                 mergedLayerBrushG.dispose();
 
                 // now draw the merged layer-brush on the target Graphics

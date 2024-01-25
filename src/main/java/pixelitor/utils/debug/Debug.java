@@ -510,7 +510,7 @@ public class Debug {
 
         SmartObject smartObject = new SmartObject(textLayer);
         smartObject.setOpacity(0.2f, false, true);
-        comp.adder().add(smartObject);
+        comp.add(smartObject);
         SmartFilter sf = new SmartFilter(filter, smartObject.getContent(), smartObject);
         smartObject.addSmartFilter(sf, false, true);
 

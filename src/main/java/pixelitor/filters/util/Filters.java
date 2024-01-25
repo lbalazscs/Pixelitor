@@ -21,6 +21,7 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.RepeatLast;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 
 import java.awt.EventQueue;
@@ -163,6 +164,10 @@ public class Filters {
 
     public static void startFilter(String filterName) {
         FilterAction action = getFilterActionByName(filterName);
+        if (action == null) {
+            Messages.showError("Error", "<html>The filter <b>\"%s\"</b> was not found.".formatted(filterName));
+            return;
+        }
         EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 }

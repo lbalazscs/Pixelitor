@@ -193,15 +193,20 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     protected void doRandomize() {
-        // TODO this is implemented only for 2 colors
+        int numColors = colors.length;
         boolean randomAlpha = transparencyPolicy.randomizeTransparency();
-        Color newColor1 = Rnd.createRandomColor(randomAlpha);
+        Color firstNewColor = Rnd.createRandomColor(randomAlpha);
+
+        Color[] newColors = new Color[numColors];
         if (isLinked()) {
-            setColors(new Color[]{newColor1, newColor1}, false);
+            Arrays.fill(newColors, firstNewColor);
         } else {
-            Color newColor2 = Rnd.createRandomColor(randomAlpha);
-            setColors(new Color[]{newColor1, newColor2}, false);
+            newColors[0] = firstNewColor;
+            for (int i = 1; i < numColors; i++) {
+                newColors[i] = Rnd.createRandomColor(randomAlpha);
+            }
         }
+        setColors(newColors, false);
     }
 
     @Override

@@ -17,8 +17,6 @@
 
 package pixelitor.layers;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
@@ -46,11 +44,7 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
-import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
-import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
-import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.utils.Keys.CTRL_T;
 
 /**
@@ -75,6 +69,19 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         applySettings(settings);
     }
 
+    public TextLayer(TextLayer other, String name) {
+        super(other.comp, name);
+
+        this.settings = other.settings.copy();
+
+        // This copy constructor makes a copy of the painter instead of
+        // just calling applySettings so that flip/rotate see fully
+        // initialized internal data structures when they are applied.
+        this.painter = other.painter.copy(settings);
+
+        this.isAdjustment = other.isAdjustment;
+    }
+
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -84,8 +91,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter = new TransformedTextPainter();
         settings.configurePainter(painter);
         painter.setTranslation(getTx(), getTy());
-
-        settings.checkFontIsInstalled(this);
     }
 
     public static TextLayer createNew(Composition comp) {
@@ -106,9 +111,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
-        holder.adder()
-            .atPosition(ABOVE_ACTIVE)
-            .add(textLayer);
+        holder.add(textLayer);
 
         var settingsPanel = new TextSettingsPanel(textLayer);
         new DialogBuilder()
@@ -171,15 +174,20 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     protected TextLayer createTypeSpecificCopy(CopyType copyType, Composition newComp) {
         String duplicateName = copyType.createLayerCopyName(name);
-        TextLayer d = new TextLayer(comp, duplicateName, settings.copy());
+        TextLayer d = new TextLayer(this, duplicateName);
         d.setTranslation(getTx(), getTy());
         return d;
+    }
+
+    public void checkFontIsInstalled() {
+        settings.checkFontIsInstalled(this);
     }
 
     @Override
     public Rectangle getContentBounds(boolean includeTransparent) {
         if (includeTransparent) {
-            // still doesn't include the transparent area, but it should be quick
+            // a quick and rough estimate of the text content,
+            // it can include some transparency at the edges
             return painter.getBoundingBox();
         } else {
             // make an image-based calculation for an exact "content crop"
@@ -222,7 +230,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
         if (settings == null) {
             // the layer was just created, nothing to paint yet
-            return imageSoFar;
+            return null;
         }
 
         // the text will be painted normally
@@ -294,38 +302,29 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        VerticalAlignment verticalAlignment = painter.getVerticalAlignment();
-        HorizontalAlignment horizontalAlignment = painter.getHorizontalAlignment();
-        int newTx = getTx();
-        int newTy = getTy();
+        int newTx = getTx() + switch (painter.getHorizontalAlignment()) {
+            case LEFT -> west;
+            case CENTER -> (west - east) / 2;
+            case RIGHT -> -east;
+        };
 
-        if (horizontalAlignment == LEFT) {
-            newTx += west;
-        } else if (horizontalAlignment == CENTER) {
-            newTx += (west - east) / 2;
-        } else { // RIGHT
-            newTx -= east;
-        }
-
-        if (verticalAlignment == TOP) {
-            newTy += north;
-        } else if (verticalAlignment == VerticalAlignment.CENTER) {
-            newTy += (north - south) / 2;
-        } else { // BOTTOM
-            newTy -= south;
-        }
+        int newTy = getTy() + switch (painter.getVerticalAlignment()) {
+            case TOP -> north;
+            case CENTER -> (north - south) / 2;
+            case BOTTOM -> -south;
+        };
 
         setTranslation(newTx, newTy);
     }
 
     @Override
     public void flip(Flip.Direction direction) {
-        // TODO
+        painter.flip(direction, comp.getCanvas());
     }
 
     @Override
     public void rotate(QuadrantAngle angle) {
-        // TODO
+        painter.rotate(angle, comp.getCanvas());
     }
 
     @Override
@@ -421,6 +420,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
         node.addNullableDebuggable("text settings", settings);
+        node.addNullableDebuggable("painter", painter);
         return node;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (actual.getLastFilter() != null) {
-            failWithMessage("\nExpecting that the last filter is null, but it is not.");
+            failWithMessage("The last filter is not null");
         }
 
         return this;
@@ -52,7 +52,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (actual.getLastFilter() == null) {
-            failWithMessage("\nExpecting that the last filter is not null, but it is.");
+            failWithMessage("The last filter is null");
         }
 
         return this;
@@ -101,7 +101,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (!actual.hasNext()) {
-            failWithMessage("\nExpecting that actual RandomFilterSource has next but does not have.");
+            failWithMessage("Doesn't have next");
         }
 
         return this;
@@ -111,7 +111,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (actual.hasNext()) {
-            failWithMessage("\nExpecting that actual RandomFilterSource does not have next but has.");
+            failWithMessage("Has next");
         }
 
         return this;
@@ -121,7 +121,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (!actual.hasPrevious()) {
-            failWithMessage("\nExpecting that actual RandomFilterSource has previous but does not have.");
+            failWithMessage("Doesn't have previous");
         }
 
         return this;
@@ -131,7 +131,7 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
         isNotNull();
 
         if (actual.hasPrevious()) {
-            failWithMessage("\nExpecting that actual RandomFilterSource does not have previous but has.");
+            failWithMessage("Has previous");
         }
 
         return this;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,9 +32,9 @@ public class PMenu extends JMenu {
         super(s);
     }
 
-    public PMenu(String s, char c) {
+    public PMenu(String s, char mnemonic) {
         super(s);
-        setMnemonic(c);
+        setMnemonic(mnemonic);
     }
 
     public void add(Action action, KeyStroke keyStroke) {

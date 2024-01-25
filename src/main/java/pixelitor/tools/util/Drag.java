@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -587,11 +587,6 @@ public class Drag implements Serializable {
 
     public double calcAngle() {
         return Math.atan2(imEndY - imStartY, imEndX - imStartX);
-    }
-
-    public double calcAngleBetween(Drag other) {
-        // TODO there should be a faster formula
-        return other.calcAngle() - calcAngle();
     }
 
     protected double calcReversedAngle() {

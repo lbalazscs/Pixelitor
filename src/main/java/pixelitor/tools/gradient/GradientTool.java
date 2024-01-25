@@ -443,7 +443,7 @@ public class GradientTool extends DragTool {
             }
         }
 
-        gradient.drawOn(dr);
+        gradient.paintOn(dr);
         dr.update();
         lastGradient = gradient;
     }

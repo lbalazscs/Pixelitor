@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -154,7 +154,6 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
         // can be shared if there are no settings
         // TODO a few filters do have settings, but no preset support.
-        //  Currently, this isn't a problem, because this is used for smart filters only
         return this;
     }
 
@@ -177,7 +176,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         private final Class<? extends Filter> filterClass;
         private final String filterName;
 
-        // The serialized state of the filter in preset form
+        // The serialized state of the filter in preset format
         private String filterState;
 
         public SerializationProxy(Filter filter) {

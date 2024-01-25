@@ -20,12 +20,15 @@ package pixelitor.utils.debug;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Utils;
 
+import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
+import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.File;
+import java.util.Map;
 
 /**
  * Static factory methods for creating {@link DebugNode}s
@@ -147,7 +150,7 @@ public class DebugNodes {
         return node;
     }
 
-    public static DebugNode createTransformNode(AffineTransform at, String name) {
+    public static DebugNode createTransformNode(String name, AffineTransform at) {
         DebugNode node = new DebugNode(name, at);
 
         node.addDouble("scaleX (m00)", at.getScaleX());
@@ -160,7 +163,7 @@ public class DebugNodes {
         return node;
     }
 
-    public static DebugNode createRectangleNode(Rectangle rect, String name) {
+    public static DebugNode createRectangleNode(String name, Rectangle rect) {
         DebugNode node = new DebugNode(name, rect);
 
         node.addInt("x", rect.x);
@@ -176,6 +179,24 @@ public class DebugNodes {
 
         node.addQuotedString("path", file.getAbsolutePath());
         node.addBoolean("exists", file.exists());
+
+        return node;
+    }
+
+    public static DebugNode createFontNode(String name, Font font) {
+        DebugNode node = new DebugNode(name, font);
+
+        node.addQuotedString("family name", font.getName());
+        node.addQuotedString("face name", font.getFontName());
+        node.addInt("size", font.getSize());
+        node.addBoolean("bold", font.isBold());
+        node.addBoolean("italic", font.isItalic());
+
+        Map<TextAttribute, ?> attributes = font.getAttributes();
+        DebugNode attrNode = new DebugNode("attributes", attributes);
+        attributes.forEach((key, value) ->
+            attrNode.addAsQuotedString(key.toString(), value));
+        node.add(attrNode);
 
         return node;
     }

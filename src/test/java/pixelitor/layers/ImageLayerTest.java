@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -276,8 +276,7 @@ public class ImageLayerTest {
             assertThat(image)
                 .isNotNull()
                 .isNotSameAs(layer.getImage())
-                .widthIs(selShape.width)
-                .heightIs(selShape.height);
+                .hasSameSizeAs(selShape);
         } else {
             // no selection, we expect it to return the image
             assertThat(image)
@@ -290,12 +289,12 @@ public class ImageLayerTest {
 
     @Test
     public void tmpDrawingLayer() {
-        TmpDrawingLayer tmpDrawingLayer
-            = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
-        assertThat(tmpDrawingLayer).isNotNull();
+        TmpLayer tmpLayer
+            = layer.createTmpLayer(AlphaComposite.SrcOver, false);
+        assertThat(tmpLayer).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
-        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(canvas.getWidth());
-        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(canvas.getHeight());
+        assertThat(tmpLayer.getWidth()).isEqualTo(canvas.getWidth());
+        assertThat(tmpLayer.getHeight()).isEqualTo(canvas.getHeight());
 
         layer.mergeTmpDrawingLayerDown();
         iconUpdates.check(0, 0);
@@ -308,8 +307,7 @@ public class ImageLayerTest {
 
         assertThat(image)
             .isNotNull()
-            .widthIs(canvas.getWidth())
-            .heightIs(canvas.getHeight());
+            .hasSameSizeAs(canvas);
         iconUpdates.check(0, 0);
     }
 
@@ -320,8 +318,7 @@ public class ImageLayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         assertThat(image)
             .isNotNull()
-            .widthIs(canvas.getWidth())
-            .heightIs(canvas.getHeight());
+            .hasSameSizeAs(canvas);
         iconUpdates.check(0, 0);
     }
 
@@ -335,8 +332,7 @@ public class ImageLayerTest {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(filterSourceImage)
                 .isNotSameAs(layer.getImage())
-                .widthIs(selShape.width)
-                .heightIs(selShape.height);
+                .hasSameSizeAs(selShape);
         } else {
             assertThat(filterSourceImage).isSameAs(layer.getImage());
         }
@@ -351,13 +347,11 @@ public class ImageLayerTest {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageT)
                 .isNotSameAs(layerImage)
-                .widthIs(selShape.width)
-                .heightIs(selShape.height);
+                .hasSameSizeAs(selShape);
         } else {
             assertThat(imageT)
                 .isNotSameAs(layerImage) // copy even if there is no selection
-                .widthIs(layerImage.getWidth())
-                .heightIs(layerImage.getHeight());
+                .hasSameSizeAs(layerImage);
         }
 
         BufferedImage imageF = layer.getSelectedSubImage(false);
@@ -367,13 +361,11 @@ public class ImageLayerTest {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageF)
                 .isNotSameAs(layerImage)
-                .widthIs(selShape.width)
-                .heightIs(selShape.height);
+                .hasSameSizeAs(selShape);
         } else {
             assertThat(imageF)
                 .isSameAs(layerImage) // don't copy if there is no selection
-                .widthIs(layerImage.getWidth())
-                .heightIs(layerImage.getHeight());
+                .hasSameSizeAs(layerImage);
         }
 
         iconUpdates.check(0, 0);
@@ -505,8 +497,7 @@ public class ImageLayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();
         assertThat(image)
-            .widthIs(canvas.getWidth())
-            .heightIs(canvas.getHeight());
+            .hasSameSizeAs(canvas);
         iconUpdates.check(0, 0);
     }
 
@@ -538,8 +529,8 @@ public class ImageLayerTest {
         BufferedImage duplicateImage = duplicate.getImage();
         assertNotSame(duplicateImage, image);
         assertThat(image)
-            .widthIs(duplicateImage.getWidth())
-            .heightIs(duplicateImage.getHeight());
+            .isNotSameAs(duplicateImage)
+            .hasSameSizeAs(duplicateImage);
 
         iconUpdates.check(0, 0);
     }

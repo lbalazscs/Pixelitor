@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Views.thumbSize;
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 
 public class ShapesLayer extends ContentLayer {
     @Serial
@@ -63,10 +62,8 @@ public class ShapesLayer extends ContentLayer {
 
     public static void createNew(Composition comp) {
         var layer = new ShapesLayer(comp, "shape layer " + (++count));
-        comp.getHolderForNewLayers().adder()
-            .atPosition(ABOVE_ACTIVE)
-            .withHistory("Add Shape Layer")
-            .add(layer);
+        comp.getHolderForNewLayers()
+            .addWithHistory(layer, "Add Shape Layer");
         Tools.SHAPES.activate();
     }
 
@@ -84,7 +81,7 @@ public class ShapesLayer extends ContentLayer {
             duplicate.setStyledShape(styledShape.clone());
             if (transformBox != null) {
                 View view = comp.getView();
-                if (view != null && transformBox.needsInitialization(view)) {
+                if (view != null) {
                     // can't be copied without a view
                     transformBox.reInitialize(view, styledShape);
                 }
@@ -234,9 +231,7 @@ public class ShapesLayer extends ContentLayer {
         super.startMovement();
         if (hasShape() && transformBox != null) {
             View view = Views.getActive();
-            if (transformBox.needsInitialization(view)) {
-                transformBox.reInitialize(view, styledShape);
-            }
+            transformBox.reInitialize(view, styledShape);
             transformBox.startMovement();
         }
     }

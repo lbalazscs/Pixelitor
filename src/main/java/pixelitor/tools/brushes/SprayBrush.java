@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,11 +23,13 @@ import pixelitor.layers.Drawable;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
+import pixelitor.utils.BoundingBox;
 import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import static pixelitor.utils.Rnd.nextGaussian;
 
@@ -96,10 +98,7 @@ public class SprayBrush extends AbstractBrush {
             return;
         }
 
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE;
-        double maxY = Double.MIN_VALUE;
+        BoundingBox boundingBox = new BoundingBox();
 
         ShapeType shapeType = settings.getShapeType();
         boolean useRandomOpacity = settings.randomOpacity();
@@ -128,26 +127,11 @@ public class SprayBrush extends AbstractBrush {
                 x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
             targetG.fill(shape);
 
-            if (x > maxX) {
-                maxX = x;
-            }
-            if (y > maxY) {
-                maxY = y;
-            }
-            if (x < minX) {
-                minX = x;
-            }
-            if (y < minY) {
-                minY = y;
-            }
+            boundingBox.add(x, y);
         }
-        PRectangle area = PRectangle.fromIm(
-            minX - maxShapeRadius,
-            minY - maxShapeRadius,
-            maxX - minX + 2 * maxShapeRadius + 2,
-            maxY - minY + 2 * maxShapeRadius + 2, view);
 
-        dr.repaintRegion(area);
+        Rectangle2D imArea = boundingBox.asRectangle2D(maxShapeRadius + 1);
+        dr.repaintRegion(PRectangle.fromIm(imArea, view));
     }
 
     private void setOpacityRandomly() {

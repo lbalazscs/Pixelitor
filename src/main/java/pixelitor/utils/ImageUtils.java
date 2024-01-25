@@ -1201,7 +1201,10 @@ public class ImageUtils {
         return newImage;
     }
 
-    public static BufferedImage calculateCompositeImage(List<Layer> layers, Canvas canvas) {
+    /**
+     * Calculates the composite image of the given layers.
+     */
+    public static BufferedImage calcComposite(List<Layer> layers, Canvas canvas) {
         if (layers.size() == 1) { // shortcut
             Layer layer = layers.getFirst();
             if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
@@ -1218,6 +1221,7 @@ public class ImageUtils {
             canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = compositeImg.createGraphics();
 
+        // the first visible layer is always applied with normal blending mode
         boolean firstVisibleLayer = true;
         for (Layer layer : layers) {
             if (layer.isVisible()) {
@@ -1248,53 +1252,65 @@ public class ImageUtils {
         return img;
     }
 
+    /**
+     * Returns the minimum enclosing rectangle around the non-transparent region in the given image.
+     */
     public static Rectangle getNonTransparentBounds(BufferedImage image) {
         WritableRaster alphaRaster = image.getAlphaRaster();
         int width = alphaRaster.getWidth();
         int height = alphaRaster.getHeight();
+
+        // initial bounds
         int left = 0;
         int top = 0;
         int right = width - 1;
         int bottom = height - 1;
+
+        // optimization helper variables
         int minRight = width - 1;
         int minBottom = height - 1;
 
-        top:
+        // iterates through the rows from the top and stops
+        // when it finds the first non-transparent pixel
+        topLabel:
         for (; top < bottom; top++) {
             for (int x = 0; x < width; x++) {
                 if (alphaRaster.getSample(x, top, 0) != 0) {
                     minRight = x;
                     minBottom = top;
-                    break top;
+                    break topLabel;
                 }
             }
         }
 
-        left:
+        // iterates through the columns from the left
+        leftLabel:
         for (; left < minRight; left++) {
             for (int y = height - 1; y > top; y--) {
                 if (alphaRaster.getSample(left, y, 0) != 0) {
                     minBottom = y;
-                    break left;
+                    break leftLabel;
                 }
             }
         }
 
-        bottom:
+        // iterates through the rows from the bottom
+        bottomLabel:
         for (; bottom > minBottom; bottom--) {
             for (int x = width - 1; x >= left; x--) {
                 if (alphaRaster.getSample(x, bottom, 0) != 0) {
                     minRight = x;
-                    break bottom;
+                    break bottomLabel;
                 }
             }
         }
 
-        right:
+        // iterates through the columns from the right
+        rightLabel:
         for (; right > minRight; right--) {
             for (int y = bottom; y >= top; y--) {
                 if (alphaRaster.getSample(right, y, 0) != 0) {
-                    break right;
+                    break rightLabel;
                 }
             }
         }

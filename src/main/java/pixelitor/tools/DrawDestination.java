@@ -34,7 +34,7 @@ public enum DrawDestination {
     TMP_LAYER {
         @Override
         public Graphics2D createGraphics(Drawable dr, Composite composite) {
-            return dr.createTmpDrawingLayer(composite, false).getGraphics();
+            return dr.createTmpLayer(composite, false).getGraphics();
         }
 
         @Override

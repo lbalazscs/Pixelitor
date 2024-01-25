@@ -199,7 +199,7 @@ public class PartialImageEdit extends FadeableEdit {
 
         node.addNullableDebuggable("backup raster",
             backupRasterRef.get(), DebugNodes::createRasterNode);
-        node.add(DebugNodes.createRectangleNode(saveRect, "saveRect"));
+        node.add(DebugNodes.createRectangleNode("saveRect", saveRect));
 
         return node;
     }

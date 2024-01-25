@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -67,11 +67,25 @@ public class TestHelper {
     private TestHelper() {
     }
 
+    /**
+     * Creates a real (non-mocked) composition with a layer of the given class
+     */
+    public static Composition createRealComp(Class<? extends Layer> layerClass) {
+        return createRealComp(layerClass, TEST_WIDTH, TEST_HEIGHT);
+    }
+
+    public static Composition createRealComp(Class<? extends Layer> layerClass, int width, int height) {
+        Composition comp = createEmptyComp(width, height, true);
+        Layer layer = createLayerOfClass(layerClass, comp);
+        comp.addLayerNoUI(layer);
+        return comp;
+    }
+
     public static Composition createEmptyComp() {
         return createEmptyComp(TEST_WIDTH, TEST_HEIGHT, true);
     }
 
-    public static Composition createEmptyComp(int width, int height, boolean addMockView) {
+    private static Composition createEmptyComp(int width, int height, boolean addMockView) {
         var comp = Composition.createEmpty(width, height, ImageMode.RGB);
         comp.setName("Test");
         comp.createDebugName();
@@ -145,7 +159,7 @@ public class TestHelper {
         return comp;
     }
 
-    public static Layer createLayerOfClass(Class<?> layerClass, Composition comp) {
+    public static Layer createLayerOfClass(Class<? extends Layer> layerClass, Composition comp) {
         Layer layer;
         if (layerClass == ImageLayer.class) {
             layer = createEmptyImageLayer(comp, "layer 1");
@@ -209,7 +223,7 @@ public class TestHelper {
     }
 
     public static SmartObject createSmartObject(Composition comp, String name) {
-        Composition content = createComp(0, false, false);
+        Composition content = createComp(1, false, true);
         SmartObject layer = new SmartObject(comp, content);
         layer.setName(name, false);
         layer.createUI();

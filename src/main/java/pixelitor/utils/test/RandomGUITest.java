@@ -68,7 +68,6 @@ import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
-import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.utils.QuadrantAngle.ANGLE_180;
 import static pixelitor.utils.QuadrantAngle.ANGLE_270;
 import static pixelitor.utils.QuadrantAngle.ANGLE_90;
@@ -1076,10 +1075,7 @@ public class RandomGUITest {
         log("new adj layer");
         var comp = Views.getActiveComp();
         var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.adder()
-            .withHistory("New Random Adj Layer")
-            .atPosition(ABOVE_ACTIVE)
-            .add(adjustmentLayer);
+        comp.addWithHistory(adjustmentLayer, "New Random Adj Layer");
     }
 
     private void randomSetLayerMaskEditMode() {

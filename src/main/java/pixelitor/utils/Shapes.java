@@ -689,28 +689,11 @@ public class Shapes {
     }
 
     public static Rectangle2D calcBounds(List<? extends Point2D> points) {
-        double minX = Integer.MAX_VALUE;
-        double minY = Integer.MAX_VALUE;
-        double maxX = Integer.MIN_VALUE;
-        double maxY = Integer.MIN_VALUE;
-
+        BoundingBox boundingBox = new BoundingBox();
         for (Point2D point : points) {
-            double x = point.getX();
-            double y = point.getY();
-            if (x < minX) {
-                minX = x;
-            }
-            if (y < minY) {
-                minY = y;
-            }
-            if (x > maxX) {
-                maxX = x;
-            }
-            if (y > maxY) {
-                maxY = y;
-            }
+            boundingBox.add(point);
         }
-        return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
+        return boundingBox.asRectangle2D();
     }
 
     public static Shape createDiamond(double x, double y, double width, double height) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.layers.ColorFillLayer;
 import pixelitor.tools.KeyModifiers;
 import pixelitor.tools.Tools;
 
@@ -51,8 +52,10 @@ class PathBuilderTest {
 
     @BeforeEach
     void beforeEachTest() {
-        // a real comp that can store paths
-        var comp = TestHelper.createEmptyComp();
+        // A real composition that can store paths.
+        // The layer type doesn't matter.
+        var comp = TestHelper.createRealComp(ColorFillLayer.class);
+
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
         pb = BUILD;
