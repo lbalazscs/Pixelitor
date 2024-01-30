@@ -60,8 +60,6 @@ import static pixelitor.tools.DragToolState.TRANSFORM;
  * The crop tool
  */
 public class CropTool extends DragTool {
-    private DragToolState state = NO_INTERACTION;
-
     private CropBox cropBox;
 
     private final RangeParam maskOpacity = new RangeParam(

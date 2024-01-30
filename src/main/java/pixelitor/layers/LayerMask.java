@@ -176,14 +176,14 @@ public class LayerMask extends ImageLayer {
                                                   BufferedImage visibleImage,
                                                   boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing()) {
-            paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
+            paintDraggedShapesOverActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
         }
     }
 
     @Override
-    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g,
+    protected void paintDraggedShapesOverActiveLayer(Graphics2D g,
                                                      BufferedImage visibleImage,
                                                      boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTx(), getTy(), null);

@@ -174,10 +174,10 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void setupDrawingComposite() {
+    public void setupComposite() {
         Graphics2D g = TestHelper.createGraphics();
-        layer.setupDrawingComposite(g, true);
-        layer.setupDrawingComposite(g, false);
+        layer.setupComposite(g, true);
+        layer.setupComposite(g, false);
         iconUpdates.check(0, 0);
     }
 }

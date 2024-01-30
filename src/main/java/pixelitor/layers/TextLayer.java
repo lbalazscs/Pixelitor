@@ -238,7 +238,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public BufferedImage applyOnImage(BufferedImage src) {
+    public BufferedImage transformImage(BufferedImage src) {
         assert settings.hasWatermark(); // should be called only in this case
         return settings.watermarkImage(src, painter);
     }

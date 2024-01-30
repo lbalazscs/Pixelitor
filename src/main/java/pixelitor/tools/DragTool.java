@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
@@ -34,6 +35,10 @@ import java.awt.Graphics2D;
  */
 public abstract class DragTool extends Tool {
     protected Drag drag;
+
+    // Declared here, but the state transitions are
+    // managed by the concrete tool subclasses.
+    protected DragToolState state = DragToolState.NO_INTERACTION;
 
     private boolean endPointInitialized = false;
     protected boolean spaceDragStartPoint = false;
@@ -122,5 +127,18 @@ public abstract class DragTool extends Tool {
 
     protected DragDisplayType getDragDisplayType() {
         return DragDisplayType.WIDTH_HEIGHT;
+    }
+
+    public DragToolState getState() {
+        return state;
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.addAsString("state", state);
+
+        return node;
     }
 }

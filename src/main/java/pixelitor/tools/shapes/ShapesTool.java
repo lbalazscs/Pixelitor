@@ -119,8 +119,6 @@ public class ShapesTool extends DragTool {
     private StyledShape styledShape;
     private TransformBox transformBox;
 
-    private DragToolState state = NO_INTERACTION;
-
     private ShapesLayer shapesLayer;
 
     private final Action convertToSelectionAction = new PAction(
@@ -340,7 +338,7 @@ public class ShapesTool extends DragTool {
             // therefore the continuous drawing of the shape.
             // It repaints the whole image because
             // some shapes extend beyond their drag rectangle.
-            e.getComp().getActiveLayer().update(false);
+            styledShape.updateUI(e.getView());
         }
     }
 
@@ -765,10 +763,6 @@ public class ShapesTool extends DragTool {
         closeShapeSettingsDialog();
     }
 
-    public DragToolState getState() {
-        return state;
-    }
-
     @Override
     public boolean isDirectDrawing() {
         return state == NO_INTERACTION;
@@ -945,7 +939,6 @@ public class ShapesTool extends DragTool {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addAsString("state", state);
         node.addNullableDebuggable("transform box", transformBox);
         node.addNullableDebuggable("styled shape", styledShape);
         node.addAsString("type", getSelectedType());

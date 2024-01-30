@@ -106,16 +106,17 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             return prevImage;
         }
 
-        return adjustImageWithMasksAndBlending(prevImage, false);
+        return adjustImageWithMaskAndBlending(prevImage, false);
     }
 
+    // Smart filters don't use the normal layer painting mechanism,
+    // therefore overriding this method isn't really necessary.
     @Override
-    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
-                                                            boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {
-            return imgSoFar; // there's nothing we can do
-        }
-        BufferedImage transformed = applyOnImage(imgSoFar);
+    protected BufferedImage adjustImageWithMaskAndBlending(BufferedImage imgSoFar,
+                                                           boolean firstVisibleLayer) {
+        assert !firstVisibleLayer; // never true for smart filters
+
+        BufferedImage transformed = transformImage(imgSoFar);
 
         if (usesMask()) {
             // copy, because otherwise different masks
@@ -132,7 +133,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
             BufferedImage copy = ImageUtils.copyImage(imgSoFar);
 
             Graphics2D g = copy.createGraphics();
-            setupDrawingComposite(g, isFirstVisibleLayer);
+            setupComposite(g, firstVisibleLayer);
             g.drawImage(transformed, 0, 0, null);
             g.dispose();
             return copy;
@@ -140,7 +141,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    public BufferedImage applyOnImage(BufferedImage src) {
+    public BufferedImage transformImage(BufferedImage src) {
         if (cachedImage != null) {
             return cachedImage;
         }
@@ -357,6 +358,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
 
         return popup;
+    }
+
+    public void shapeDraggedOnMask() {
+        smartObject.invalidateImageCache();
     }
 
     private void replaceFilter() {

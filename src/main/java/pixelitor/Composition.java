@@ -82,7 +82,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private static long debugCounter = 0;
 
-    private volatile String name;
+    private String name;
 
     private final List<Layer> layerList = new ArrayList<>();
 

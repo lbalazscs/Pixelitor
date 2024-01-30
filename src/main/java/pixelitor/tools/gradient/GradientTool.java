@@ -33,7 +33,6 @@ import pixelitor.layers.GradientFillLayer;
 import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.DragToolState;
 import pixelitor.tools.Tool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
@@ -83,8 +82,6 @@ public class GradientTool extends DragTool {
     private boolean ignoreRegenerate = false;
 
     private GradientFillLayer gradientLayer;
-
-    private DragToolState state;
 
     public GradientTool() {
         super("Gradient", 'G',

@@ -203,7 +203,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    protected BufferedImage applyOnImage(BufferedImage src) {
+    protected BufferedImage transformImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,9 @@ import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGUI;
+import pixelitor.layers.SmartFilter;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.RasterizeShapeEdit;
 import pixelitor.tools.shapes.history.StyledShapeEdit;
@@ -310,7 +312,11 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
 
     @Override
     public void updateUI(View view) {
-        view.getComp().getActiveLayer().update(false);
+        Layer activeLayer = view.getComp().getActiveLayer();
+        if (activeLayer.isMaskEditing() && activeLayer instanceof SmartFilter smartFilter) {
+            smartFilter.shapeDraggedOnMask();
+        }
+        activeLayer.update(false);
     }
 
     private void reloadType(ShapesTool tool) {

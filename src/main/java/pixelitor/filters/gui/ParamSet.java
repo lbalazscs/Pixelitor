@@ -406,7 +406,7 @@ public class ParamSet implements Debuggable {
         seedChangedAction = newSeed -> {
             Noise.reseed(newSeed);
             random.setSeed(newSeed);
-            CachedFloatRandom.reBuildCache(random);
+            CachedFloatRandom.rebuildCache(random);
         };
 
         return FilterButtonModel.createReseed(() -> {

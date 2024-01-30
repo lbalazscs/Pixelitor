@@ -34,10 +34,10 @@ public class CachedFloatRandom {
     private final Random instanceRandom = new Random();
 
     static {
-        reBuildCache(new Random());
+        rebuildCache(new Random());
     }
 
-    public static void reBuildCache(Random staticRandom) {
+    public static void rebuildCache(Random staticRandom) {
         for (int i = 0; i < CACHE_SIZE; i++) {
             cache[i] = staticRandom.nextFloat();
         }

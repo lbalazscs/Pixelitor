@@ -190,6 +190,7 @@ public class SmartObject extends CompositeLayer {
             smartFilterIsVisible = true;
         }
 
+        this.imageNeedsRefresh = false;
         // more initialization happens later in afterDeserialization()
     }
 
@@ -1104,7 +1105,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    protected BufferedImage applyOnImage(BufferedImage src) {
+    protected BufferedImage transformImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 

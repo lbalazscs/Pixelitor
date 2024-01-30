@@ -2928,9 +2928,7 @@ public class AssertJSwingTest {
             isFg ? "RGB Mix with Background"
                 : "RGB Mix with Foreground");
 
-        testColorPaletteDialogWithPopup(button,
-            isFg ? "Foreground Color History"
-                : "Background Color History");
+        testColorPaletteDialogWithPopup(button, "Color History");
 
         clickPopupMenu(button.showPopupMenu(), "Copy Color");
         clickPopupMenu(button.showPopupMenu(), "Paste Color");

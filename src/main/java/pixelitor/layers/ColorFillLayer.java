@@ -143,7 +143,7 @@ public class ColorFillLayer extends Layer {
     }
 
     @Override
-    protected BufferedImage applyOnImage(BufferedImage src) {
+    protected BufferedImage transformImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 

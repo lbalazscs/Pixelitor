@@ -26,7 +26,6 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.debug.DebugNode;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
@@ -43,7 +42,6 @@ import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
 
 public class ZoomTool extends DragTool {
-    private DragToolState state = NO_INTERACTION;
     private PRectangle box;
 
     public ZoomTool() { // Do I need this false in super call?
@@ -184,13 +182,6 @@ public class ZoomTool extends DragTool {
     @Override
     public void loadUserPreset(UserPreset preset) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public DebugNode createDebugNode(String key) {
-        DebugNode node = super.createDebugNode(key);
-        node.addAsString("state", state);
-        return node;
     }
 
     @Override

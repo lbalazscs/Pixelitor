@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -691,20 +691,20 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     /**
-     * Applies the effect of this layer on the given Graphics2D
-     * or on the given BufferedImage.
+     * Paints the content of this layer on the given Graphics2D,
+     * or it transforms the given BufferedImage.
      * Adjustment layers and watermarked text layers change the
      * BufferedImage, while other layers just paint on the Graphics2D.
-     * If the BufferedImage is changed, this method returns the new image
-     * and null otherwise.
+     * If the BufferedImage is changed, this method returns
+     * the new image, otherwise it returns null.
      */
     public BufferedImage applyLayer(Graphics2D g,
                                     BufferedImage imageSoFar,
                                     boolean firstVisibleLayer) {
         if (isAdjustment) { // adjustment layer or watermarked text layer
-            return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
+            return adjustImageWithMaskAndBlending(imageSoFar, firstVisibleLayer);
         } else {
-            setupDrawingComposite(g, firstVisibleLayer);
+            setupComposite(g, firstVisibleLayer);
             if (usesMask()) {
                 paintLayerOnGraphicsWithMask(g, firstVisibleLayer);
             } else {
@@ -719,11 +719,6 @@ public abstract class Layer implements Serializable, Debuggable {
     // set up according to the transparency and blending mode
     public abstract void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
 
-    /**
-     * Returns the masked image for the non-adjustment case.
-     * The returned image is canvas-sized, and the masks and the
-     * translations are taken into account
-     */
     private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
         // 1. create the masked image
         // TODO the masked image should be cached
@@ -743,12 +738,12 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    protected BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
-                                                            boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {
+    protected BufferedImage adjustImageWithMaskAndBlending(BufferedImage imgSoFar,
+                                                           boolean firstVisibleLayer) {
+        if (firstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }
-        BufferedImage transformed = applyOnImage(imgSoFar);
+        BufferedImage transformed = transformImage(imgSoFar);
         if (usesMask()) {
             mask.applyTo(transformed);
         }
@@ -756,7 +751,7 @@ public abstract class Layer implements Serializable, Debuggable {
             return transformed;
         } else {
             Graphics2D g = imgSoFar.createGraphics();
-            setupDrawingComposite(g, isFirstVisibleLayer);
+            setupComposite(g, firstVisibleLayer);
             g.drawImage(transformed, 0, 0, null);
             g.dispose();
             return imgSoFar;
@@ -767,7 +762,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * Used by adjustment layers and watermarked text layers
      * to apply this layer's effect on the given image.
      */
-    protected abstract BufferedImage applyOnImage(BufferedImage src);
+    protected abstract BufferedImage transformImage(BufferedImage src);
 
     public abstract CompletableFuture<Void> resize(Dimension newSize);
 
@@ -795,8 +790,8 @@ public abstract class Layer implements Serializable, Debuggable {
      * Configures the composite of the given Graphics,
      * according to the blending mode and opacity of the layer
      */
-    public void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {
+    public void setupComposite(Graphics2D g, boolean firstVisibleLayer) {
+        if (firstVisibleLayer) {
             // the first visible layer is always painted with normal mode
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
         } else {
@@ -888,7 +883,7 @@ public abstract class Layer implements Serializable, Debuggable {
         if (applyOpacity) {
             // the layer's blending mode will be ignored
             // because firstVisibleLayer is set to true
-            setupDrawingComposite(g, true);
+            setupComposite(g, true);
         }
 
         if (applyMask && usesMask()) {

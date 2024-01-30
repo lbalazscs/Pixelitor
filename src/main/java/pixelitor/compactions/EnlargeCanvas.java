@@ -45,6 +45,7 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     public EnlargeCanvas(int north, int east, int south, int west) {
         super(NAME, true);
+
         this.north = north;
         this.east = east;
         this.south = south;
@@ -106,8 +107,8 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
-        return oldGuides.copyForEnlargedCanvas(north, east, south, west, view, oldCanvas);
+    protected Guides createGuidesCopy(Guides orig, View view, Canvas oldCanvas) {
+        return orig.copyForEnlargedCanvas(north, east, south, west, view, oldCanvas);
     }
 
     @Override

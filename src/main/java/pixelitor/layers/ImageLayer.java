@@ -1061,13 +1061,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
                                                   BufferedImage visibleImage,
                                                   boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing() && isActive() && !isMaskEditing()) {
-            paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
+            paintDraggedShapesOverActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
         }
     }
 
-    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g,
+    protected void paintDraggedShapesOverActiveLayer(Graphics2D g,
                                                      BufferedImage visibleImage,
                                                      boolean firstVisibleLayer) {
         if (firstVisibleLayer) {
@@ -1144,7 +1144,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public BufferedImage applyOnImage(BufferedImage src) {
+    public BufferedImage transformImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
 
