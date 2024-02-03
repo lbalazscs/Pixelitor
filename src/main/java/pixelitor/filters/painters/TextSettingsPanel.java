@@ -46,6 +46,7 @@ public class TextSettingsPanel extends FilterGUI
     implements ParamAdjustmentListener, ActionListener, Consumer<TextSettings> {
     private TextLayer textLayer;
     private FontInfo fontInfo;
+    private double relLineHeight; // stored here as long as the advanced dialog isn't created
 
     private JTextArea textTF;
     private JComboBox<String> fontFamilyChooserCB;
@@ -88,6 +89,8 @@ public class TextSettingsPanel extends FilterGUI
     private void init(TextSettings settings) {
         settings.setGuiUpdater(this);
         createGUI(settings);
+
+        this.relLineHeight = settings.getRelLineHeight();
     }
 
     private void createGUI(TextSettings settings) {
@@ -210,7 +213,7 @@ public class TextSettingsPanel extends FilterGUI
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
-                this, fontInfo);
+                this, fontInfo, relLineHeight);
             JDialog owner = GUIUtils.getDialogAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
                 .owner(owner)
@@ -243,6 +246,13 @@ public class TextSettingsPanel extends FilterGUI
         }
 
         return fontInfo.createStyledFont();
+    }
+
+    private double getRelLineHeight() {
+        if (advancedSettingsDialog != null) {
+            return advancedSettingsPanel.getRelLineHeight();
+        }
+        return relLineHeight;
     }
 
     private void createEffectsPanel(TextSettings settings) {
@@ -288,7 +298,8 @@ public class TextSettingsPanel extends FilterGUI
             text, selectedFont, color.getColor(), effects,
             alignment.getHorizontal(),
             alignment.getVertical(),
-            watermarkCB.isSelected(), textRotationAngle, this);
+            watermarkCB.isSelected(), textRotationAngle,
+            getRelLineHeight(), this);
 
         updateApp(settings);
     }
@@ -335,7 +346,7 @@ public class TextSettingsPanel extends FilterGUI
         // this stores the advanced settings
         fontInfo = new FontInfo(font);
         if (advancedSettingsPanel != null) {
-            advancedSettingsPanel.updateFrom(fontInfo);
+            advancedSettingsPanel.updateFrom(fontInfo, settings.getRelLineHeight());
         }
 
         effectsPanel.setEffects(settings.getEffects());

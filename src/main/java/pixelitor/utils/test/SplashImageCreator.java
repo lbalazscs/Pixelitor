@@ -179,7 +179,7 @@ public class SplashImageCreator {
         AreaEffects effects = createDropShadowEffect();
         var settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER,
-            VerticalAlignment.CENTER, false, 0, null);
+            VerticalAlignment.CENTER, false, 0, 1.0, null);
 
         addNewTextLayer(comp, text, settings, translationY);
     }

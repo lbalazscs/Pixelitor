@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 
 /**
- * GUI for the advanced font attribute settings
+ * GUI for the advanced text settings.
  */
 public class AdvancedTextSettingsPanel extends JPanel {
     private JCheckBox underlineCB;
@@ -34,17 +34,19 @@ public class AdvancedTextSettingsPanel extends JPanel {
     private JCheckBox kerningCB;
     private JCheckBox ligaturesCB;
     private RangeParam trackingParam;
+    private RangeParam lineHeightParam;
     private final GridBagHelper gbh;
     private final ActionListener actionListener;
 
     public AdvancedTextSettingsPanel(ActionListener actionListener,
-                                     FontInfo fontInfo) {
+                                     FontInfo fontInfo, double relLineHeight) {
         super(new GridBagLayout());
         this.actionListener = actionListener;
         gbh = new GridBagHelper(this);
 
         addCheckboxes(fontInfo);
         addTrackingGUI(fontInfo);
+        addLineHeightGUI(relLineHeight);
     }
 
     private void addCheckboxes(FontInfo font) {
@@ -74,6 +76,13 @@ public class AdvancedTextSettingsPanel extends JPanel {
         gbh.addParam(trackingParam, "trackingGUI");
     }
 
+    private void addLineHeightGUI(double relLineHeight) {
+        lineHeightParam = new RangeParam("Line Height (%)",
+            50, 100 * relLineHeight, 200, true, SliderSpinner.TextPosition.NONE);
+        lineHeightParam.addChangeListener(e -> actionListener.actionPerformed(null));
+        gbh.addParam(lineHeightParam);
+    }
+
     public void saveStateTo(FontInfo fontInfo) {
         boolean strikeThrough = strikeThroughCB.isSelected();
         boolean kerning = kerningCB.isSelected();
@@ -84,11 +93,16 @@ public class AdvancedTextSettingsPanel extends JPanel {
         fontInfo.updateAdvanced(strikeThrough, kerning, ligatures, underline, tracking);
     }
 
-    public void updateFrom(FontInfo font) {
+    public void updateFrom(FontInfo font, double relLineHeight) {
         strikeThroughCB.setSelected(font.hasStrikeThrough());
         kerningCB.setSelected(font.hasKerning());
         ligaturesCB.setSelected(font.hasLigatures());
         underlineCB.setSelected(font.hasUnderline());
         trackingParam.setValue(font.getTracking());
+        lineHeightParam.setValueNoTrigger(100 * relLineHeight);
+    }
+
+    public double getRelLineHeight() {
+        return lineHeightParam.getPercentage();
     }
 }

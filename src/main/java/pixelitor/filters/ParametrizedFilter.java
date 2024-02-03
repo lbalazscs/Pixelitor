@@ -24,6 +24,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Shape;
 import java.io.Serial;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A filter that keeps its settings in a ParamSet object
@@ -150,6 +151,23 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParametrizedFilter that = (ParametrizedFilter) o;
+        return Objects.equals(paramSet, that.paramSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paramSet);
     }
 
     @Override

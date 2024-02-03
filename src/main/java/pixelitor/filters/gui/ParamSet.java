@@ -442,6 +442,24 @@ public class ParamSet implements Debuggable {
 
     // end of reseed support
 
+    // used to determine whether two parametrized filters are equal
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParamSet that = (ParamSet) o;
+        return Objects.equals(paramList, that.paramList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paramList);
+    }
+
     @Override
     public String toString() {
         return "ParamSet {" + paramList + "}";

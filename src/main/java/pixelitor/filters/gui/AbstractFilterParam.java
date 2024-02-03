@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -158,6 +158,24 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public boolean isComplex() {
         return false;
+    }
+
+    // used to determine whether two filters are equal
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractFilterParam that = (AbstractFilterParam) o;
+        return Objects.equals(getParamValue(), that.getParamValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getParamValue());
     }
 
     @Override

@@ -300,8 +300,13 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public void onFilterDialogCanceled() {
+        boolean changed = filterSettingsChanged();
         super.onFilterDialogCanceled();
-        invalidateAll();
+        if (changed) {
+            // Force recalculating the image if this dialog session
+            // changed the filter (and therefore the image).
+            invalidateAll();
+        }
     }
 
     @Override

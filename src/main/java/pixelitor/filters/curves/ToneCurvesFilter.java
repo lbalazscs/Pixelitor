@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,9 +59,9 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.setActiveChannel(Channel.RGB);
         }
         lastGUI = new ToneCurvesGUI(this, layer);
-        if (!reset) {
-            lastGUI.startPreview(true);
-        }
+//        if (!reset) {
+//            lastGUI.startPreview(true);
+//        }
         return lastGUI;
     }
 

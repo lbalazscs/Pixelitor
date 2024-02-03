@@ -74,6 +74,8 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private Rectangle boundingBox;
     private Shape zeroShape;
     private Shape transformedShape;
+    private float lineHeight;
+    private double relLineHeight;
 
     //    private AffineTransform extraTransform;
     private SoftReference<BufferedImage> cachedImage;
@@ -229,7 +231,6 @@ public class TransformedTextPainter implements Painter, Debuggable {
         if (lines.length == 1) {
             g.drawString(text, effectsWidth, drawY);
         } else {
-            int lineHeight = metrics.getHeight();
             for (String line : lines) {
                 g.drawString(line, effectsWidth, drawY);
                 drawY += lineHeight;
@@ -300,7 +301,12 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private void updateLayout(int width, int height, Graphics2D g) {
         FontMetrics metrics = g.getFontMetrics(font);
         int textWidth = 0;
-        int textHeight = metrics.getHeight() * lines.length;
+        double fontLineHeight = metrics.getStringBounds(lines[0], g).getHeight();
+        lineHeight = (float) (fontLineHeight * relLineHeight);
+
+        // doesn't count the adjustment of the last line
+        int textHeight = (int) (fontLineHeight + lineHeight * (lines.length - 1));
+
         for (String line : lines) {
             int lineWidth = metrics.stringWidth(line);
             if (lineWidth > textWidth) {
@@ -339,6 +345,16 @@ public class TransformedTextPainter implements Painter, Debuggable {
         boolean change = this.rotation != newRotation;
         this.rotation = newRotation;
         if (change) {
+            clearCache();
+            invalidLayout = true;
+            invalidShape = true;
+        }
+    }
+
+    public void setRelLineHeight(double newRelLineHeight) {
+        boolean change = this.relLineHeight != newRelLineHeight;
+        if (change) {
+            this.relLineHeight = newRelLineHeight;
             clearCache();
             invalidLayout = true;
             invalidShape = true;
@@ -405,7 +421,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
             if (i == 0) {
                 retVal = new Area(lineShape);
             } else {
-                lineShape = Shapes.translate(lineShape, 0, i * metrics.getHeight());
+                lineShape = Shapes.translate(lineShape, 0, i * lineHeight);
                 retVal.add(new Area(lineShape));
             }
         }

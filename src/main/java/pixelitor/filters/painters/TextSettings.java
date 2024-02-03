@@ -65,6 +65,7 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_HOR_ALIGN = "hor_align";
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
     private static final String PRESET_KEY_WATERMARK = "watermark";
+    private static final String PRESET_KEY_REL_LINE_HEIGHT = "rel_line_height";
 
     private String text;
     private Font font;
@@ -75,13 +76,15 @@ public class TextSettings implements Serializable, Debuggable {
     private boolean watermark;
     private double rotation;
 
+    private double relLineHeight;
+
     private transient Consumer<TextSettings> guiUpdater;
 
     public TextSettings(String text, Font font, Color color,
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
-                        boolean watermark, double rotation,
+                        boolean watermark, double rotation, double relLineHeight,
                         Consumer<TextSettings> guiUpdater) {
         assert effects != null;
 
@@ -93,6 +96,7 @@ public class TextSettings implements Serializable, Debuggable {
         this.verticalAlignment = verticalAlignment;
         this.watermark = watermark;
         this.rotation = rotation;
+        this.relLineHeight = relLineHeight;
         this.guiUpdater = guiUpdater;
     }
 
@@ -108,6 +112,7 @@ public class TextSettings implements Serializable, Debuggable {
         verticalAlignment = VerticalAlignment.CENTER;
         watermark = false;
         rotation = 0;
+        relLineHeight = 1.0;
     }
 
     /**
@@ -124,6 +129,7 @@ public class TextSettings implements Serializable, Debuggable {
         horizontalAlignment = other.horizontalAlignment;
         watermark = other.watermark;
         rotation = other.rotation;
+        relLineHeight = other.relLineHeight;
     }
 
     public AreaEffects getEffects() {
@@ -146,10 +152,6 @@ public class TextSettings implements Serializable, Debuggable {
         this.font = font;
     }
 
-    public HorizontalAlignment getHorizontalAlignment() {
-        return horizontalAlignment;
-    }
-
     public BoxAlignment getBoxAlignment() {
         return BoxAlignment.forPair(horizontalAlignment, verticalAlignment);
     }
@@ -162,8 +164,8 @@ public class TextSettings implements Serializable, Debuggable {
         this.text = text;
     }
 
-    public VerticalAlignment getVerticalAlignment() {
-        return verticalAlignment;
+    public double getRelLineHeight() {
+        return relLineHeight;
     }
 
     public boolean hasWatermark() {
@@ -187,6 +189,7 @@ public class TextSettings implements Serializable, Debuggable {
         verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
         watermark = Rnd.nextBoolean();
         rotation = Rnd.nextDouble() * Math.PI * 2;
+        relLineHeight = 0.5 + Rnd.nextDouble();
     }
 
     public void configurePainter(TransformedTextPainter painter) {
@@ -196,6 +199,7 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setHorizontalAlignment(horizontalAlignment);
         painter.setVerticalAlignment(verticalAlignment);
         painter.setRotation(rotation);
+        painter.setRelLineHeight(relLineHeight);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TransformedTextPainter textPainter) {
@@ -257,6 +261,7 @@ public class TextSettings implements Serializable, Debuggable {
         areaEffects.saveStateTo(preset);
 
         preset.putBoolean(PRESET_KEY_WATERMARK, watermark);
+        preset.putDouble(PRESET_KEY_REL_LINE_HEIGHT, relLineHeight);
     }
 
     public void loadUserPreset(UserPreset preset) {
@@ -270,6 +275,7 @@ public class TextSettings implements Serializable, Debuggable {
 
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
+        relLineHeight = preset.getDouble(PRESET_KEY_REL_LINE_HEIGHT, 1.0);
 
         if (guiUpdater != null) { // can be null in tests that don't create a dialog
             guiUpdater.accept(this);

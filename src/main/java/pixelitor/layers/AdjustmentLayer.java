@@ -195,6 +195,12 @@ public class AdjustmentLayer extends Layer implements Filterable {
         showOriginal = false;
     }
 
+    protected boolean filterSettingsChanged() {
+        // equals is overridden for parametrized filters to
+        // compare the param values.
+        return !filter.equals(lastFilter);
+    }
+
     public void updateOptions() {
         if (filter instanceof ParametrizedFilter pf) {
             pf.getParamSet().updateOptions(this, false);
