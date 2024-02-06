@@ -26,6 +26,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
+import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
@@ -33,6 +34,7 @@ import pixelitor.io.TranslatedImage;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -282,16 +284,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         if (settings != null) {
             String raw = settings.getText().trim();
             String cleaned = ALL_WHITESPACE.matcher(raw).replaceAll(" ");
-            String shortened = shorten(cleaned, 30);
+            String shortened = Utils.shorten(cleaned, 30);
             setName(shortened, false);
         }
-    }
-
-    public static String shorten(String input, int maxLength) {
-        if (input.length() > maxLength) {
-            input = input.substring(0, maxLength - 3) + "...";
-        }
-        return input;
     }
 
     /**
@@ -307,13 +302,14 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        int newTx = getTx() + switch (painter.getHorizontalAlignment()) {
+        BoxAlignment alignment = settings.getBoxAlignment();
+        int newTx = getTx() + switch (alignment.getHorizontal()) {
             case LEFT -> west;
             case CENTER -> (west - east) / 2;
             case RIGHT -> -east;
         };
 
-        int newTy = getTy() + switch (painter.getVerticalAlignment()) {
+        int newTy = getTy() + switch (alignment.getVertical()) {
             case TOP -> north;
             case CENTER -> (north - south) / 2;
             case BOTTOM -> -south;

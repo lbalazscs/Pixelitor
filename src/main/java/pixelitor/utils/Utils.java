@@ -36,6 +36,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.FileSystems;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -306,6 +307,10 @@ public final class Utils {
         fontNames = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
+
+        // It's almost sorted already, but not completely.
+        Arrays.sort(fontNames);
+
         fontNamesLoaded.countDown();
     }
 
@@ -409,6 +414,13 @@ public final class Utils {
 
     public static String decodeNewlines(String input) {
         return input.replaceAll(ENCODED_NEWLINE, "\n");
+    }
+
+    public static String shorten(String input, int maxLength) {
+        if (input.length() > maxLength) {
+            input = input.substring(0, maxLength - 3) + "...";
+        }
+        return input;
     }
 }
 

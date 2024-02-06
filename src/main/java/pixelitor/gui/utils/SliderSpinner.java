@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,21 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
      * The possible positions of the label of a SliderSpinner.
      */
     public enum TextPosition {
-        BORDER, WEST, NORTH, NONE
+        BORDER(true),
+        WEST(false),
+        NORTH(false),
+        NONE(false),
+        NONE_TICKS(true);
+
+        private final boolean ticks;
+
+        TextPosition(boolean ticks) {
+            this.ticks = ticks;
+        }
+
+        boolean addTicks() {
+            return ticks;
+        }
     }
 
     public static final int HORIZONTAL = JSlider.HORIZONTAL;
@@ -114,7 +128,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         }
 
         slider = createSlider(model);
-        if (textPosition == TextPosition.BORDER) {
+        if (textPosition.addTicks()) {
             setupTicks();
         }
 

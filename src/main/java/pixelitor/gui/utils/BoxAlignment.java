@@ -57,7 +57,7 @@ public enum BoxAlignment {
         return guiName;
     }
 
-    public static BoxAlignment forPair(HorizontalAlignment horizontal, VerticalAlignment vertical) {
+    public static BoxAlignment of(HorizontalAlignment horizontal, VerticalAlignment vertical) {
         return switch (horizontal) {
             case CENTER -> switch (vertical) {
                 case CENTER -> CENTER_CENTER;

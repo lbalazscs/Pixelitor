@@ -178,8 +178,8 @@ public class SplashImageCreator {
                                      Font font, int translationY) {
         AreaEffects effects = createDropShadowEffect();
         var settings = new TextSettings(text, font, WHITE, effects,
-            HorizontalAlignment.CENTER,
-            VerticalAlignment.CENTER, false, 0, 1.0, null);
+            HorizontalAlignment.CENTER, VerticalAlignment.CENTER,
+            false, 0, 1.0, 1.0, 1.0, 0.0, 0.0, null);
 
         addNewTextLayer(comp, text, settings, translationY);
     }
@@ -219,10 +219,10 @@ public class SplashImageCreator {
 
         var pxcFile = new File(comp.getFile().getParent(),
             FileUtils.replaceExt(comp.getFile().getName(), "pxc"));
-        var psxSettings = new SaveSettings(FileFormat.PXC, pxcFile);
+        var pxcSettings = new SaveSettings(FileFormat.PXC, pxcFile);
 
         return comp.saveAsync(flatSettings, false)
-            .thenCompose(v -> comp.saveAsync(psxSettings, false))
+            .thenCompose(v -> comp.saveAsync(pxcSettings, false))
             .thenAcceptAsync(v -> comp.getView().close(), onEDT);
     }
 

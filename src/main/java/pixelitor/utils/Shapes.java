@@ -132,6 +132,17 @@ public class Shapes {
         g.fill(shape);
     }
 
+    /**
+     * Draws the given shape with the given color,
+     * and then resores the previous color.
+     */
+    public static void draw(Graphics2D g, Shape shape, Color c) {
+        Color prevColor = g.getColor();
+        g.setColor(c);
+        g.draw(shape);
+        g.setColor(prevColor);
+    }
+
     public static void drawDirectionArrow(Graphics2D g,
                                           double startX, double startY,
                                           double endX, double endY) {

@@ -24,15 +24,17 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
- * A rectangle rotated around its center
+ * A rectangle rotated/scaled/sheared around its center.
  */
-public class RotatedRectangle implements Debuggable {
+public class TransformedRectangle implements Debuggable {
     private final double origTopLeftX;
     private final double origTopLeftY;
     private final double origTopRightX;
@@ -41,6 +43,7 @@ public class RotatedRectangle implements Debuggable {
     private final double origBottomRightY;
     private final double origBottomLeftX;
     private final double origBottomLeftY;
+    private final double theta;
 
     private double topLeftX;
     private double topLeftY;
@@ -54,13 +57,18 @@ public class RotatedRectangle implements Debuggable {
     private GeneralPath cachedShape;
     private Rectangle cachedBox;
 
-    public RotatedRectangle(Rectangle r, double theta) {
-        this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), theta);
+    public TransformedRectangle(Rectangle r, double theta,
+                                double sx, double sy, double shx, double shy) {
+        this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), theta, sx, sy, shx, shy);
     }
 
-    public RotatedRectangle(double x, double y, double width, double height, double theta) {
+    public TransformedRectangle(double x, double y,
+                                double width, double height,
+                                double theta, double sx, double sy,
+                                double shx, double shy) {
         origTopLeftX = x;
         origTopLeftY = y;
+        this.theta = theta;
 
         origTopRightX = x + width;
         origTopRightY = y;
@@ -74,8 +82,18 @@ public class RotatedRectangle implements Debuggable {
         double cx = x + width / 2.0;
         double cy = y + height / 2.0;
 
-/*        // start of new, potentially more generic implementation
-        AffineTransform transform = AffineTransform.getRotateInstance(theta, cx, cy);
+        AffineTransform transform = AffineTransform.getTranslateInstance(cx, cy);
+        if (theta != 0) {
+            transform.rotate(theta);
+        }
+        if (sx != 1.0 || sy != 1.0) {
+            transform.scale(sx, sy);
+        }
+        if (shx != 0 || shy != 0) {
+            // the opposite direction seems to be more intuitive
+            transform.shear(-shx, -shy); 
+        }
+        transform.translate(-cx, -cy);
 
         Point2D topLeft = new Point2D.Double(origTopLeftX, origTopLeftY);
         Point2D bottomLeft = new Point2D.Double(origBottomLeftX, origBottomLeftY);
@@ -95,36 +113,6 @@ public class RotatedRectangle implements Debuggable {
         topRightY = topRight.getY();
         bottomRightX = bottomRight.getX();
         bottomRightY = bottomRight.getY();
-        // end of new implementation
-*/
-        // old implmementation
-        double xDist = origTopLeftX - cx;
-        double yDist = origTopLeftY - cy;
-
-        double cos = Math.cos(theta);
-        double sin = Math.sin(theta);
-
-        double xCos = xDist * cos;
-        double ySin = yDist * sin;
-        double xSin = xDist * sin;
-        double yCos = yDist * cos;
-
-        topLeftX = cx + xCos - ySin;
-        topLeftY = cy + xSin + yCos;
-
-        topRightX = cx - xCos - ySin;
-        topRightY = cy - xSin + yCos;
-
-        // taking advantage of rotation symmetry
-        double dx = topLeftX - origTopLeftX;
-        double dy = topLeftY - origTopLeftY;
-        bottomRightX = origBottomRightX - dx;
-        bottomRightY = origBottomRightY - dy;
-
-        dx = topRightX - origTopRightX;
-        dy = topRightY - origTopRightY;
-        bottomLeftX = origBottomLeftX - dx;
-        bottomLeftY = origBottomLeftY - dy;
     }
 
     public double getTopLeftX() {
@@ -159,10 +147,16 @@ public class RotatedRectangle implements Debuggable {
         double maxX = max(max(topLeftX, topRightX), max(bottomRightX, bottomLeftX));
         double maxY = max(max(topLeftY, topRightY), max(bottomRightY, bottomLeftY));
 
-        int width = 1 + (int) (maxX - minX);
-        int height = 1 + (int) (maxY - minY);
+        int width = (int) Math.ceil(maxX - minX);
+        int height = (int) Math.ceil(maxY - minY);
         cachedBox = new Rectangle((int) minX, (int) minY, width, height);
         return cachedBox;
+    }
+
+    public void align(Rectangle layout, Rectangle transformedBounds) {
+        int dx = layout.x - transformedBounds.x;
+        int dy = layout.y - transformedBounds.y;
+        translate(dx, dy);
     }
 
     public void translate(double dx, double dy) {
@@ -182,7 +176,27 @@ public class RotatedRectangle implements Debuggable {
         cachedBox = null;
     }
 
-    // paints the original and rotated corners for debugging
+    public void grow(double thickness) {
+        double cos = thickness * Math.cos(theta);
+        double sin = thickness * Math.sin(theta);
+
+        topLeftX -= (cos - sin);
+        topLeftY -= (cos + sin);
+
+        topRightX += (cos + sin);
+        topRightY -= (cos - sin);
+
+        bottomRightX += (cos - sin);
+        bottomRightY += (cos + sin);
+
+        bottomLeftX -= (cos + sin);
+        bottomLeftY += (cos - sin);
+
+        cachedShape = null;
+        cachedBox = null;
+    }
+
+    // paints the original and transformed corners for debugging
     public void paintCorners(Graphics2D g) {
         g.setColor(Color.RED);
         g.fillOval((int) topLeftX - 5, (int) topLeftY - 5, 10, 10);
@@ -213,3 +227,4 @@ public class RotatedRectangle implements Debuggable {
         return node;
     }
 }
+

@@ -46,7 +46,13 @@ public class TextSettingsPanel extends FilterGUI
     implements ParamAdjustmentListener, ActionListener, Consumer<TextSettings> {
     private TextLayer textLayer;
     private FontInfo fontInfo;
-    private double relLineHeight; // stored here as long as the advanced dialog isn't created
+
+    // stored here as long as the advanced dialog isn't created
+    private double relLineHeight;
+    private double sx;
+    private double sy;
+    private double shx;
+    private double shy;
 
     private JTextArea textTF;
     private JComboBox<String> fontFamilyChooserCB;
@@ -91,6 +97,10 @@ public class TextSettingsPanel extends FilterGUI
         createGUI(settings);
 
         this.relLineHeight = settings.getRelLineHeight();
+        this.sx = settings.getSx();
+        this.sy = settings.getSy();
+        this.shx = settings.getShx();
+        this.shy = settings.getShy();
     }
 
     private void createGUI(TextSettings settings) {
@@ -213,7 +223,7 @@ public class TextSettingsPanel extends FilterGUI
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
-                this, fontInfo, relLineHeight);
+                this, fontInfo, relLineHeight, sx, sy, shx, shy);
             JDialog owner = GUIUtils.getDialogAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
                 .owner(owner)
@@ -253,6 +263,34 @@ public class TextSettingsPanel extends FilterGUI
             return advancedSettingsPanel.getRelLineHeight();
         }
         return relLineHeight;
+    }
+
+    private double getSx() {
+        if (advancedSettingsDialog != null) {
+            return advancedSettingsPanel.getSx();
+        }
+        return sx;
+    }
+
+    private double getSy() {
+        if (advancedSettingsDialog != null) {
+            return advancedSettingsPanel.getSy();
+        }
+        return sy;
+    }
+
+    private double getShx() {
+        if (advancedSettingsDialog != null) {
+            return advancedSettingsPanel.getShx();
+        }
+        return shx;
+    }
+
+    private double getShy() {
+        if (advancedSettingsDialog != null) {
+            return advancedSettingsPanel.getShy();
+        }
+        return shy;
     }
 
     private void createEffectsPanel(TextSettings settings) {
@@ -299,7 +337,7 @@ public class TextSettingsPanel extends FilterGUI
             alignment.getHorizontal(),
             alignment.getVertical(),
             watermarkCB.isSelected(), textRotationAngle,
-            getRelLineHeight(), this);
+            getRelLineHeight(), getSx(), getSy(), getShx(), getShy(), this);
 
         updateApp(settings);
     }
@@ -346,7 +384,8 @@ public class TextSettingsPanel extends FilterGUI
         // this stores the advanced settings
         fontInfo = new FontInfo(font);
         if (advancedSettingsPanel != null) {
-            advancedSettingsPanel.updateFrom(fontInfo, settings.getRelLineHeight());
+            advancedSettingsPanel.updateFrom(fontInfo, settings.getRelLineHeight(),
+                settings.getSx(), settings.getSy(), settings.getShx(), settings.getShy());
         }
 
         effectsPanel.setEffects(settings.getEffects());

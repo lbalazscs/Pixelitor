@@ -38,6 +38,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -66,6 +68,10 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
     private static final String PRESET_KEY_WATERMARK = "watermark";
     private static final String PRESET_KEY_REL_LINE_HEIGHT = "rel_line_height";
+    private static final String PRESET_KEY_SX = "sx";
+    private static final String PRESET_KEY_SY = "sy";
+    private static final String PRESET_KEY_SHX = "shx";
+    private static final String PRESET_KEY_SHY = "shy";
 
     private String text;
     private Font font;
@@ -76,7 +82,15 @@ public class TextSettings implements Serializable, Debuggable {
     private boolean watermark;
     private double rotation;
 
+    private double sx;
+    private double sy;
+    private double shx;
+    private double shy;
     private double relLineHeight;
+
+    // in old pxc files this flag will not be present
+    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    private boolean transformFieldsInPxc = true;
 
     private transient Consumer<TextSettings> guiUpdater;
 
@@ -84,7 +98,10 @@ public class TextSettings implements Serializable, Debuggable {
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
-                        boolean watermark, double rotation, double relLineHeight,
+                        boolean watermark, double rotation,
+                        double relLineHeight,
+                        double sx, double sy,
+                        double shx, double shy,
                         Consumer<TextSettings> guiUpdater) {
         assert effects != null;
 
@@ -97,6 +114,10 @@ public class TextSettings implements Serializable, Debuggable {
         this.watermark = watermark;
         this.rotation = rotation;
         this.relLineHeight = relLineHeight;
+        this.sx = sx;
+        this.sy = sy;
+        this.shx = shx;
+        this.shy = shy;
         this.guiUpdater = guiUpdater;
     }
 
@@ -113,6 +134,10 @@ public class TextSettings implements Serializable, Debuggable {
         watermark = false;
         rotation = 0;
         relLineHeight = 1.0;
+        sx = 1.0;
+        sy = 1.0;
+        shx = 0.0;
+        shy = 0.0;
     }
 
     /**
@@ -130,6 +155,24 @@ public class TextSettings implements Serializable, Debuggable {
         watermark = other.watermark;
         rotation = other.rotation;
         relLineHeight = other.relLineHeight;
+        sx = other.sx;
+        sy = other.sy;
+        shx = other.shx;
+        shy = other.shy;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        guiUpdater = null;
+        // migrate old pxc files
+        if (!transformFieldsInPxc) {
+            relLineHeight = 1.0;
+            sx = 1.0;
+            sy = 1.0;
+            shx = 0.0;
+            shy = 0.0;
+        }
     }
 
     public AreaEffects getEffects() {
@@ -153,7 +196,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public BoxAlignment getBoxAlignment() {
-        return BoxAlignment.forPair(horizontalAlignment, verticalAlignment);
+        return BoxAlignment.of(horizontalAlignment, verticalAlignment);
     }
 
     public String getText() {
@@ -166,6 +209,22 @@ public class TextSettings implements Serializable, Debuggable {
 
     public double getRelLineHeight() {
         return relLineHeight;
+    }
+
+    public double getSx() {
+        return sx;
+    }
+
+    public double getSy() {
+        return sy;
+    }
+
+    public double getShx() {
+        return shx;
+    }
+
+    public double getShy() {
+        return shy;
     }
 
     public boolean hasWatermark() {
@@ -190,16 +249,19 @@ public class TextSettings implements Serializable, Debuggable {
         watermark = Rnd.nextBoolean();
         rotation = Rnd.nextDouble() * Math.PI * 2;
         relLineHeight = 0.5 + Rnd.nextDouble();
+        sx = 0.5 + Rnd.nextDouble();
+        sy = 0.5 + Rnd.nextDouble();
+        shx = -0.5 + Rnd.nextDouble();
+        shy = -0.5 + Rnd.nextDouble();
     }
 
     public void configurePainter(TransformedTextPainter painter) {
         painter.setText(text);
         painter.setFont(font);
         painter.setEffects(areaEffects);
-        painter.setHorizontalAlignment(horizontalAlignment);
-        painter.setVerticalAlignment(verticalAlignment);
+        painter.setAlignment(horizontalAlignment, verticalAlignment);
         painter.setRotation(rotation);
-        painter.setRelLineHeight(relLineHeight);
+        painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TransformedTextPainter textPainter) {
@@ -262,6 +324,10 @@ public class TextSettings implements Serializable, Debuggable {
 
         preset.putBoolean(PRESET_KEY_WATERMARK, watermark);
         preset.putDouble(PRESET_KEY_REL_LINE_HEIGHT, relLineHeight);
+        preset.putDouble(PRESET_KEY_SX, sx);
+        preset.putDouble(PRESET_KEY_SY, sy);
+        preset.putDouble(PRESET_KEY_SHX, shx);
+        preset.putDouble(PRESET_KEY_SHY, shy);
     }
 
     public void loadUserPreset(UserPreset preset) {
@@ -276,6 +342,10 @@ public class TextSettings implements Serializable, Debuggable {
         areaEffects.loadStateFrom(preset);
         watermark = preset.getBoolean(PRESET_KEY_WATERMARK);
         relLineHeight = preset.getDouble(PRESET_KEY_REL_LINE_HEIGHT, 1.0);
+        sx = preset.getDouble(PRESET_KEY_SX, 1.0);
+        sy = preset.getDouble(PRESET_KEY_SY, 1.0);
+        shx = preset.getDouble(PRESET_KEY_SHX, 0.0);
+        shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
 
         if (guiUpdater != null) { // can be null in tests that don't create a dialog
             guiUpdater.accept(this);

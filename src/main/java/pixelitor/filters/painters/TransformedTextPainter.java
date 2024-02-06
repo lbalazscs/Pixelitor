@@ -48,15 +48,11 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignmen
 /**
  * A {@link Painter} that can have an extra translation
  * (so that text layers can be moved with the move tool).
- * It also supports the rotation of the text.
+ * It also supports the rotation, scaling and shearing of the text.
  */
 public class TransformedTextPainter implements Painter, Debuggable {
-    // this class isn't ever actually serialized
-//    @Serial
-//    private static final long serialVersionUID = -2064757977654857961L;
-
-    private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
+    private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
 
     private String text = "";
     private Font font = null;
@@ -70,12 +66,16 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private int translationY = 0;
     private double rotation = 0;
 
-    private RotatedRectangle rotatedRect;
+    private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
     private Shape zeroShape;
     private Shape transformedShape;
     private float lineHeight;
     private double relLineHeight;
+    private double sx;
+    private double sy;
+    private double shx;
+    private double shy;
 
     //    private AffineTransform extraTransform;
     private SoftReference<BufferedImage> cachedImage;
@@ -105,9 +105,14 @@ public class TransformedTextPainter implements Painter, Debuggable {
             return;
         }
 
-        BufferedImage cache = cachedImage == null ? null : cachedImage.get();
         Rectangle imageBounds = getBoundingBox();
+        if (imageBounds.isEmpty()) {
+            // A zero-width bounding box can happen
+            // for some fonts like "EmojiOne Color".
+            return;
+        }
 
+        BufferedImage cache = cachedImage == null ? null : cachedImage.get();
         if (cache == null) {
             cache = GraphicsUtilities.createCompatibleTranslucentImage(imageBounds.width, imageBounds.height);
             Graphics2D cacheG = cache.createGraphics();
@@ -150,18 +155,18 @@ public class TransformedTextPainter implements Painter, Debuggable {
      * Note that this is an approximation.
      */
     public Rectangle getBoundingBox() {
-        return rotatedRect != null ? rotatedRect.getBoundingBox() : boundingBox;
+        return transformedRect != null ? transformedRect.getBoundingBox() : boundingBox;
     }
 
     /**
      * Return last painted shape of the rendered text's bounding box.
      */
     public Shape getBoundingShape() {
-        return rotatedRect != null ? rotatedRect.asShape() : boundingBox;
+        return transformedRect != null ? transformedRect.asShape() : boundingBox;
     }
 
-    private Rectangle calculateUnRotatedLayout(int contentWidth, int contentHeight,
-                                               int width, int height) {
+    private Rectangle calcAlignment(int contentWidth, int contentHeight,
+                                    int width, int height) {
         Rectangle rect = new Rectangle();
 
         rect.x = switch (horizontalAlignment) {
@@ -180,14 +185,18 @@ public class TransformedTextPainter implements Painter, Debuggable {
         return rect;
     }
 
-    private Rectangle calculateLayout(int textWidth, int textHeight, int width, int height) {
-        if (rotation == 0) {
-            Rectangle layout = calculateUnRotatedLayout(textWidth, textHeight, width, height);
-            rotatedRect = null;
+    private Rectangle calculateBoundingBox(int textWidth, int textHeight, int width, int height, Graphics2D g) {
+        if (hasNoTransform()) {
+            Rectangle layout = calcAlignment(textWidth, textHeight, width, height);
+            transformedRect = null;
 
             // support the Move tool
             layout.translate(translationX, translationY);
 
+            // The effect width is added only after considering
+            // the alignment. This means that in non-centered positions
+            // the effects don't fit into the canvas, but the text
+            // itself isn't shifted as effects are added.
             if (effectsWidth != 0) {
                 layout.grow(effectsWidth, effectsWidth);
             }
@@ -195,28 +204,40 @@ public class TransformedTextPainter implements Painter, Debuggable {
             return layout;
         }
 
-        if (effectsWidth != 0) {
-            int growAmount = 2 * effectsWidth;
-            textWidth += growAmount;
-            textHeight += growAmount;
-        }
+        // first calculate a transformed rectangle starting at 0, 0
+        transformedRect = new TransformedRectangle(0, 0, textWidth, textHeight, rotation, sx, sy, shx, shy);
+        Rectangle transformedBounds = transformedRect.getBoundingBox();
 
-        // first calculate a rotated rectangle starting at 0, 0
-        rotatedRect = new RotatedRectangle(0, 0, textWidth, textHeight, rotation);
-        Rectangle rotatedBounds = rotatedRect.getBoundingBox();
-
-        // use the rotated bounds to calculate the correct layout
-        Rectangle layout = calculateUnRotatedLayout(rotatedBounds.width, rotatedBounds.height, width, height);
+        // use the transformed bounds to calculate the correct layout
+        Rectangle layout = calcAlignment(transformedBounds.width, transformedBounds.height, width, height);
 
         // support the Move tool
         layout.translate(translationX, translationY);
 
-        // Also correct the rotatedRect, because it will be useful later.
-        int dx = layout.x - rotatedBounds.x;
-        int dy = layout.y - rotatedBounds.y;
-        rotatedRect.translate(dx, dy);
+        if (effectsWidth == 0) {
+            // Also correct the transformed rectangle,
+            // because it will be useful later.
+            transformedRect.align(layout, transformedBounds);
+            return layout;
+        }
+        // If we still didn't return, it means that we have both
+        // transformation and effects. 
+
+        // re-create the transformed rectangle to grow it
+        transformedRect = new TransformedRectangle(
+            -effectsWidth, -effectsWidth,
+            textWidth + 2 * effectsWidth,
+            textHeight + 2 * effectsWidth,
+            rotation, sx, sy, shx, shy);
+        transformedRect.align(layout, transformedBounds);
+
+        layout.grow(effectsWidth, effectsWidth);
 
         return layout;
+    }
+
+    private boolean hasNoTransform() {
+        return rotation == 0 && sx == 1.0 && sy == 1.0 && shx == 0 && shy == 0;
     }
 
     private void doPaint(Graphics2D g, AffineTransform origTransform) {
@@ -282,20 +303,25 @@ public class TransformedTextPainter implements Painter, Debuggable {
         assert font != null;
         g.setFont(font);
 
-        if (rotation == 0) {
-            assert rotatedRect == null;
+        if (hasNoTransform()) {
+            assert transformedRect == null;
             g.translate(boundingBox.x, boundingBox.y);
         } else {
-            assert rotatedRect != null;
+            assert transformedRect != null;
 
-            double topLeftX = rotatedRect.getTopLeftX();
-            double topLeftY = rotatedRect.getTopLeftY();
+            double topLeftX = transformedRect.getTopLeftX();
+            double topLeftY = transformedRect.getTopLeftY();
             g.translate(topLeftX, topLeftY);
-            g.rotate(rotation, 0, 0);
+            if (rotation != 0) {
+                g.rotate(rotation);
+            }
+            if (sx != 1.0 || sy != 1.0) {
+                g.scale(sx, sy);
+            }
+            if (shx != 0 || shy != 0) {
+                g.shear(-shx, -shy);
+            }
         }
-//        if (extraTransform != null) {
-//            g.transform(extraTransform);
-//        }
     }
 
     private void updateLayout(int width, int height, Graphics2D g) {
@@ -313,7 +339,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
                 textWidth = lineWidth;
             }
         }
-        boundingBox = calculateLayout(textWidth, textHeight, width, height);
+        boundingBox = calculateBoundingBox(textWidth, textHeight, width, height, g);
         invalidLayout = false;
     }
 
@@ -351,10 +377,18 @@ public class TransformedTextPainter implements Painter, Debuggable {
         }
     }
 
-    public void setRelLineHeight(double newRelLineHeight) {
-        boolean change = this.relLineHeight != newRelLineHeight;
+    public void setAdvancedSettings(double newRelLineHeight,
+                                    double sx, double sy,
+                                    double shx, double shy) {
+        boolean change = this.relLineHeight != newRelLineHeight
+            || this.sx != sx || this.sy != sy
+            || this.shx != shx || this.shy != shy;
         if (change) {
             this.relLineHeight = newRelLineHeight;
+            this.sx = sx;
+            this.sy = sy;
+            this.shx = shx;
+            this.shy = shy;
             clearCache();
             invalidLayout = true;
             invalidShape = true;
@@ -389,8 +423,13 @@ public class TransformedTextPainter implements Painter, Debuggable {
         copy.translationX = translationX;
         copy.translationY = translationY;
         copy.rotation = rotation;
+        copy.lineHeight = lineHeight;
+        copy.sx = sx;
+        copy.sy = sy;
+        copy.shx = shx;
+        copy.shy = shy;
 
-        copy.rotatedRect = rotatedRect;
+        copy.transformedRect = transformedRect;
         copy.boundingBox = boundingBox;
         copy.zeroShape = zeroShape;
         copy.transformedShape = transformedShape;
@@ -490,32 +529,16 @@ public class TransformedTextPainter implements Painter, Debuggable {
         return new Area(strikethroughShape);
     }
 
-    public void setVerticalAlignment(VerticalAlignment newAlignment) {
-        boolean change = this.verticalAlignment != newAlignment;
+    public void setAlignment(HorizontalAlignment newHorAlignment, VerticalAlignment newVerAlignment) {
+        boolean change = this.horizontalAlignment != newHorAlignment
+            || this.verticalAlignment != newVerAlignment;
         if (change) {
-            this.verticalAlignment = newAlignment;
+            this.horizontalAlignment = newHorAlignment;
+            this.verticalAlignment = newVerAlignment;
             clearCache();
             invalidLayout = true;
             invalidShape = true;
         }
-    }
-
-    public void setHorizontalAlignment(HorizontalAlignment newAlignment) {
-        boolean change = this.horizontalAlignment != newAlignment;
-        if (change) {
-            this.horizontalAlignment = newAlignment;
-            clearCache();
-            invalidLayout = true;
-            invalidShape = true;
-        }
-    }
-
-    public VerticalAlignment getVerticalAlignment() {
-        return verticalAlignment;
-    }
-
-    public HorizontalAlignment getHorizontalAlignment() {
-        return horizontalAlignment;
     }
 
     public void setColor(Color newColor) {
@@ -549,7 +572,6 @@ public class TransformedTextPainter implements Painter, Debuggable {
 
     public void setEffects(AreaEffects newEffects) {
         boolean change = newEffects != effects;
-        ;
         if (change) {
             this.effects = newEffects;
             clearCache();
@@ -573,10 +595,13 @@ public class TransformedTextPainter implements Painter, Debuggable {
         node.addInt("translationX", translationX);
         node.addInt("translationY", translationY);
         node.addDouble("rotation", rotation);
+        node.addDouble("sx", sx);
+        node.addDouble("sy", sy);
+        node.addDouble("shx", shx);
+        node.addDouble("shy", shy);
 
         node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
-        node.addNullableDebuggable("rotatedRect", rotatedRect);
-//        node.addNullableDebuggable("extraTransform", extraTransform, DebugNodes::createTransformNode);
+        node.addNullableDebuggable("transformedRect", transformedRect);
         node.addNullableProperty("transformedShape", transformedShape);
 
         return node;

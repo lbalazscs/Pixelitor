@@ -68,7 +68,8 @@ public class SmartObject extends CompositeLayer {
 
     // Only used for a deserialization check.
     // The field is not present in very old pxc versions.
-    private final boolean newVersion = true;
+    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    private boolean newVersion = true;
 
     // Null if the content is not linked.
     // This is the same object as the content's file field, but it's not transient.
