@@ -176,26 +176,6 @@ public class TransformedRectangle implements Debuggable {
         cachedBox = null;
     }
 
-    public void grow(double thickness) {
-        double cos = thickness * Math.cos(theta);
-        double sin = thickness * Math.sin(theta);
-
-        topLeftX -= (cos - sin);
-        topLeftY -= (cos + sin);
-
-        topRightX += (cos + sin);
-        topRightY -= (cos - sin);
-
-        bottomRightX += (cos - sin);
-        bottomRightY += (cos + sin);
-
-        bottomLeftX -= (cos + sin);
-        bottomLeftY += (cos - sin);
-
-        cachedShape = null;
-        cachedBox = null;
-    }
-
     // paints the original and transformed corners for debugging
     public void paintCorners(Graphics2D g) {
         g.setColor(Color.RED);

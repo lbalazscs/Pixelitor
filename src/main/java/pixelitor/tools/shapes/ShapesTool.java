@@ -604,13 +604,14 @@ public class ShapesTool extends DragTool {
 
         setNoInteractionState();
 
-        Views.onActiveComp(comp -> {
+        Composition comp = Views.getActiveComp();
+        if (comp != null) {
             if (hadShape) {
                 comp.getActiveLayer().update();
             } else {
                 comp.repaint();
             }
-        });
+        }
         shapesLayer = null;
     }
 

@@ -18,10 +18,12 @@
 package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.VerticalLayout;
+import pixelitor.Composition;
 import pixelitor.filters.gui.*;
 import pixelitor.gui.utils.*;
 import pixelitor.layers.Filterable;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -69,13 +71,14 @@ public class TextSettingsPanel extends FilterGUI
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
     private boolean ignoreGUIChanges = false;
+    private BoxAlignment lastAlignment;
 
     /**
      * Used for the text filter on images
      */
     public TextSettingsPanel(TextFilter textFilter, Filterable layer) {
         super(textFilter, layer);
-        init(textFilter.getSettings());
+        init(textFilter.getSettings(), layer.getComp());
     }
 
     /**
@@ -85,16 +88,16 @@ public class TextSettingsPanel extends FilterGUI
         super(null, null);
         this.textLayer = textLayer;
         TextSettings settings = textLayer.getSettings();
-        init(settings);
+        init(settings, textLayer.getComp());
 
         if (textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
             textTF.selectAll();
         }
     }
 
-    private void init(TextSettings settings) {
+    private void init(TextSettings settings, Composition comp) {
         settings.setGuiUpdater(this);
-        createGUI(settings);
+        createGUI(settings, comp);
 
         this.relLineHeight = settings.getRelLineHeight();
         this.sx = settings.getSx();
@@ -103,11 +106,11 @@ public class TextSettingsPanel extends FilterGUI
         this.shy = settings.getShy();
     }
 
-    private void createGUI(TextSettings settings) {
+    private void createGUI(TextSettings settings, Composition comp) {
         assert settings != null;
         setLayout(new VerticalLayout());
 
-        add(createTextPanel(settings));
+        add(createTextPanel(settings, comp));
         add(createFontPanel(settings));
 
         createEffectsPanel(settings);
@@ -116,7 +119,7 @@ public class TextSettingsPanel extends FilterGUI
         add(createBottomPanel(settings));
     }
 
-    private JPanel createTextPanel(TextSettings settings) {
+    private JPanel createTextPanel(TextSettings settings, Composition comp) {
         JPanel textPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(textPanel);
 
@@ -136,8 +139,22 @@ public class TextSettingsPanel extends FilterGUI
 
         alignmentCB = new JComboBox<>(BoxAlignment.values());
         alignmentCB.setName("alignmentCB");
-        alignmentCB.setSelectedItem(settings.getBoxAlignment());
-        alignmentCB.addActionListener(this);
+        BoxAlignment alignment = settings.getAlignment();
+        lastAlignment = alignment;
+        alignmentCB.setSelectedItem(alignment);
+
+        alignmentCB.addActionListener(e -> {
+            BoxAlignment selectedAlignment = getSelectedAlignment();
+            if (selectedAlignment == BoxAlignment.PATH && !comp.hasActivePath()) {
+                String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
+                Messages.showError("No Path", msg, this);
+                alignmentCB.setSelectedItem(lastAlignment);
+                return;
+            }
+
+            lastAlignment = selectedAlignment;
+            actionPerformed(e);
+        });
         gbh.addLabel("Alignment:", 0, 2);
         gbh.addControl(alignmentCB);
 
@@ -331,7 +348,7 @@ public class TextSettingsPanel extends FilterGUI
 
         Font selectedFont = getSelectedFont();
 
-        BoxAlignment alignment = (BoxAlignment) alignmentCB.getSelectedItem();
+        BoxAlignment alignment = getSelectedAlignment();
         var settings = new TextSettings(
             text, selectedFont, color.getColor(), effects,
             alignment.getHorizontal(),
@@ -340,6 +357,10 @@ public class TextSettingsPanel extends FilterGUI
             getRelLineHeight(), getSx(), getSy(), getShx(), getShy(), this);
 
         updateApp(settings);
+    }
+
+    private BoxAlignment getSelectedAlignment() {
+        return (BoxAlignment) alignmentCB.getSelectedItem();
     }
 
     private void updateApp(TextSettings settings) {
@@ -373,7 +394,7 @@ public class TextSettingsPanel extends FilterGUI
         textTF.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
-        alignmentCB.setSelectedItem(settings.getBoxAlignment());
+        alignmentCB.setSelectedItem(settings.getAlignment());
 
         Font font = settings.getFont();
         fontSizeSlider.setValue(font.getSize());

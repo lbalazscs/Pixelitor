@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.tools.pen;
 
 import pixelitor.GUIMode;
 import pixelitor.gui.View;
-import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -133,7 +132,7 @@ public final class PathEditor implements PenToolMode {
                 ap.showPopup((int) x, (int) y);
             } else {
                 activePoint.mouseReleased(x, y, e.isShiftDown());
-                activePoint.createMovedEdit(e.getComp()).ifPresent(History::add);
+                activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
             }
         }
     }

@@ -274,6 +274,11 @@ public interface LayerHolder extends Debuggable {
 
     String getName();
 
+    /**
+     * Recursively invalidate the image caches in the direction
+     * of the root of the holder tree until the composition's image
+     * cache is also invalidated.
+     */
     void invalidateImageCache();
 
     /**

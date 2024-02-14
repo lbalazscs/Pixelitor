@@ -30,6 +30,7 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
+import pixelitor.utils.Rnd;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -152,11 +153,11 @@ public class TextLayerTest {
     public void commitSettings() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
-        String expectedOldName = oldText.trim();
+        String expectedOldName = TextLayer.nameFromText(oldText);
 
         assertThat(layer).nameIs(expectedOldName);
-        String newText = "New Text  ";
-        String expectedNewName = newText.trim();
+        String newText = Rnd.createRandomString(10);
+        String expectedNewName = TextLayer.nameFromText(newText);
 
         TextSettings newSettings = oldSettings.copy();
         newSettings.setText(newText);

@@ -474,6 +474,11 @@ public class TestHelper {
     }
 
     public static void setUnitTestingMode() {
+        if (Texts.getResources() == null) {
+            Texts.init(); // needed for the views initialization
+        }
+        Views.reinitialize();
+
         if (GUIMode.isUnitTesting()) {
             // unit testing mode is already set
             return;

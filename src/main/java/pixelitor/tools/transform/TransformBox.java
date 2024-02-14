@@ -22,6 +22,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DDimension;
 import pixelitor.history.History;
 import pixelitor.tools.ToolWidget;
+import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -768,6 +769,11 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
 
     public TransformBoxChangedEdit createMovementEdit(Composition comp, String editName) {
         assert editName != null;
+
+        if (owner instanceof SubPath) {
+            comp.pathChanged(false);
+        }
+
         Memento afterMovement = copyState();
         return new TransformBoxChangedEdit(editName, comp,
             this, beforeMovement, afterMovement);

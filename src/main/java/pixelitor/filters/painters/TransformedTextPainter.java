@@ -17,10 +17,14 @@
 
 package pixelitor.filters.painters;
 
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
 import pixelitor.Canvas;
+import pixelitor.Views;
 import pixelitor.compactions.Flip;
+import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
@@ -32,9 +36,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 import java.util.Map;
@@ -42,8 +44,6 @@ import java.util.Objects;
 
 import static java.awt.RenderingHints.*;
 import static java.awt.font.TextAttribute.*;
-import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 
 /**
  * A {@link Painter} that can have an extra translation
@@ -69,7 +69,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
     private Shape zeroShape;
-    private Shape transformedShape;
+    private Shape textShape;
     private float lineHeight;
     private double relLineHeight;
     private double sx;
@@ -84,7 +84,9 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private boolean invalidShape = true;
     private boolean invalidShapeTransform = true;
 
+    // debug settings
     private static final boolean NO_CACHE = false;
+    private static final boolean DEBUG_LAYOUT = false;
 
     @Override
     public void paint(Graphics2D g, Object object, int width, int height) {
@@ -97,6 +99,12 @@ public class TransformedTextPainter implements Painter, Debuggable {
 
         if (invalidLayout) {
             updateLayout(width, height, g);
+            if (DEBUG_LAYOUT) {
+                Shapes.draw(g, getBoundingBox(), Color.RED);
+                if (transformedRect != null) {
+                    Shapes.draw(g, transformedRect.asShape(), Color.BLUE);
+                }
+            }
         }
 
         if (NO_CACHE) {
@@ -241,10 +249,18 @@ public class TransformedTextPainter implements Painter, Debuggable {
     }
 
     private void doPaint(Graphics2D g, AffineTransform origTransform) {
+        g.setColor(color);
+
+        if (isOnPath()) {
+            g.fill(textShape);
+            if (effects != null && effects.isNotEmpty()) {
+                effects.drawOn(g, textShape);
+            }
+            return;
+        }
+
         FontMetrics metrics = g.getFontMetrics(font);
         transformGraphics(g);
-
-        g.setColor(color);
 
         // Draw the lines relative to the bounding box.
         // Use the ascent, because drawY is relative to the baseline.
@@ -274,11 +290,11 @@ public class TransformedTextPainter implements Painter, Debuggable {
             }
             if (invalidShapeTransform) {
                 tx.translate(effectsWidth, effectsWidth);
-                transformedShape = tx.createTransformedShape(zeroShape);
+                textShape = tx.createTransformedShape(zeroShape);
                 invalidShapeTransform = false;
             }
 
-            effects.drawOn(g, transformedShape);
+            effects.drawOn(g, textShape);
         }
     }
 
@@ -325,6 +341,11 @@ public class TransformedTextPainter implements Painter, Debuggable {
     }
 
     private void updateLayout(int width, int height, Graphics2D g) {
+        if (isOnPath()) {
+            renderOnPath(g);
+            return;
+        }
+
         FontMetrics metrics = g.getFontMetrics(font);
         int textWidth = 0;
         double fontLineHeight = metrics.getStringBounds(lines[0], g).getHeight();
@@ -343,7 +364,116 @@ public class TransformedTextPainter implements Painter, Debuggable {
         invalidLayout = false;
     }
 
+    private void renderOnPath(Graphics2D g2) {
+        g2.setFont(font);
+        FontRenderContext frc = g2.getFontRenderContext();
+        GlyphVector glyphVector = font.createGlyphVector(frc, text);
+
+        Path2D path = Views.getActiveComp().getActivePath().toImageSpaceShape();
+        GeneralPath result = new GeneralPath();
+        PathIterator it = new FlatteningPathIterator(path.getPathIterator(null), 1);
+
+        double[] points = new double[6];
+
+        // the coordinates of the starting point of a path segment
+        double moveX = 0, moveY = 0;
+
+        // the coordinates of the last processed point
+        double lastX = 0, lastY = 0;
+
+        // the coordinates of the current point
+        double thisX, thisY;
+
+        int type;
+
+        // the distance to be covered before the next shape is placed
+        double thresholdDist = 0;
+
+        int glyphIndex = 0;
+        int numGlyphs = glyphVector.getNumGlyphs();
+        AffineTransform at = new AffineTransform();
+
+        double nextAdvance = 0;
+        double sxa = Math.abs(sx);
+
+        double tracking = 0.0;
+        var map = font.getAttributes();
+        Float trackingValue = (Float) map.get(TRACKING);
+        if (trackingValue != null) {
+            tracking = trackingValue * font.getSize();
+        }
+
+        while (glyphIndex < numGlyphs && !it.isDone()) {
+            type = it.currentSegment(points);
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    moveX = lastX = points[0];
+                    moveY = lastY = points[1];
+                    result.moveTo(moveX, moveY);
+                    nextAdvance = tracking + glyphVector.getGlyphMetrics(glyphIndex).getAdvance() * 0.5f;
+                    thresholdDist = nextAdvance;
+                    break;
+
+                case PathIterator.SEG_CLOSE:
+                    points[0] = moveX;
+                    points[1] = moveY;
+                    // Fall into....
+
+                case PathIterator.SEG_LINETO:
+                    thisX = points[0];
+                    thisY = points[1];
+                    double dx = thisX - lastX;
+                    double dy = thisY - lastY;
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance >= thresholdDist) {
+                        double angle = Math.atan2(dy, dx);
+                        while (glyphIndex < numGlyphs && distance >= thresholdDist) {
+                            Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
+                            Point2D p = glyphVector.getGlyphPosition(glyphIndex);
+                            double px = p.getX();
+                            double py = p.getY();
+                            double x = lastX + thresholdDist * dx / distance;
+                            double y = lastY + thresholdDist * dy / distance;
+                            double advance = nextAdvance;
+                            nextAdvance = glyphIndex < numGlyphs - 1 ? tracking + glyphVector.getGlyphMetrics(glyphIndex + 1).getAdvance() * 0.5f : 0;
+                            at.setToTranslation(x, y);
+                            at.rotate(angle + rotation);
+                            if (sx != 1.0 || sy != 1.0) {
+                                at.scale(sx, sy);
+                            }
+                            if (shx != 0 || shy != 0) {
+                                at.shear(-shx, -shy);
+                            }
+                            at.translate(-px - advance, -py);
+                            result.append(at.createTransformedShape(glyph), false);
+                            thresholdDist += sxa * (advance + nextAdvance);
+                            glyphIndex++;
+                        }
+                    }
+                    thresholdDist -= distance;
+                    lastX = thisX;
+                    lastY = thisY;
+                    break;
+            }
+            it.next();
+        }
+
+        textShape = result;
+        Rectangle textShapeBounds = result.getBounds();
+        textShapeBounds.grow(effectsWidth, effectsWidth);
+        boundingBox = textShapeBounds;
+
+        // text on path handles its own transformations: make sure
+        // that a leftover transformed rectangle is not interfering
+        // when calculating the rectangle covered by the cached image.
+        transformedRect = null;
+    }
+
     public Shape getTextShape() {
+        if (isOnPath()) {
+            return textShape;
+        }
+
         // This image is created just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = tmp.createGraphics();
@@ -432,7 +562,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
         copy.transformedRect = transformedRect;
         copy.boundingBox = boundingBox;
         copy.zeroShape = zeroShape;
-        copy.transformedShape = transformedShape;
+        copy.textShape = textShape;
 //        copy.extraTransform = extraTransform;
 
         return copy;
@@ -529,6 +659,10 @@ public class TransformedTextPainter implements Painter, Debuggable {
         return new Area(strikethroughShape);
     }
 
+    public void setAlignment(BoxAlignment newAlignment) {
+        setAlignment(newAlignment.getHorizontal(), newAlignment.getVertical());
+    }
+
     public void setAlignment(HorizontalAlignment newHorAlignment, VerticalAlignment newVerAlignment) {
         boolean change = this.horizontalAlignment != newHorAlignment
             || this.verticalAlignment != newVerAlignment;
@@ -588,6 +722,15 @@ public class TransformedTextPainter implements Painter, Debuggable {
         }
     }
 
+    public boolean isOnPath() {
+        return horizontalAlignment == null || verticalAlignment == null;
+    }
+
+    public void pathChanged() {
+        assert isOnPath();
+        clearCache();
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
@@ -602,7 +745,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
 
         node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
         node.addNullableDebuggable("transformedRect", transformedRect);
-        node.addNullableProperty("transformedShape", transformedShape);
+        node.addNullableProperty("transformedShape", textShape);
 
         return node;
     }

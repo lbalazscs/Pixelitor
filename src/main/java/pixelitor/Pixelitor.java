@@ -274,7 +274,7 @@ public class Pixelitor {
             }
         }
 
-//        NewImage.addNewImage(FillType.WHITE, 700, 500, "Test");
+//        NewImage.addNewImage(FillType.BLACK, 700, 500, "Test");
 
 //        GradientFillLayer.createNew();
 

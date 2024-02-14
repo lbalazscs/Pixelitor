@@ -42,7 +42,6 @@ class TransformedRectangleTester extends JPanel {
     private double sy;
     private double shx;
     private double shy;
-    private double growth;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(TransformedRectangleTester::createGUI);
@@ -113,15 +112,12 @@ class TransformedRectangleTester extends JPanel {
 
         // paint the transformed rectangle in red
         var transformedRect = new TransformedRectangle(rect, rotation, sx, sy, shx, shy);
-        if (growth != 0) {
-            transformedRect.grow(growth);
-        }
         Shape transformedShape = transformedRect.asShape();
         g2.setColor(Color.RED);
         g2.draw(transformedShape);
 
         // paint the bounding box of the transformed rectangle in black
-        if (rotation != 0 || sx != 1.0 || sy != 1.0 || shx != 0 || shy != 0 || growth != 0) {
+        if (rotation != 0 || sx != 1.0 || sy != 1.0 || shx != 0 || shy != 0) {
             g2.setColor(Color.BLACK);
             g2.draw(transformedRect.getBoundingBox());
         }
@@ -133,7 +129,6 @@ class TransformedRectangleTester extends JPanel {
                                  double sx, double sy,
                                  double shx, double shy) {
         this.rotation = rotation;
-        this.growth = growth;
         this.sx = sx;
         this.sy = sy;
         this.shx = shx;

@@ -174,7 +174,10 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void invalidateImageCache() {
-        cachedImage = null;
+        if (cachedImage != null) {
+            cachedImage.flush();
+            cachedImage = null;
+        }
         holder.invalidateImageCache();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.tools.pen;
 import pixelitor.Composition;
 import pixelitor.GUIMode;
 import pixelitor.gui.View;
-import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -274,7 +273,7 @@ public final class PathBuilder implements PenToolMode {
 
         if (state == DRAG_EDITING_PREVIOUS) {
             activePoint.mouseReleased(x, y, e.isShiftDown());
-            activePoint.createMovedEdit(e.getComp()).ifPresent(History::add);
+            activePoint.createMovedEdit(e.getComp()).ifPresent(path::handleMoved);
             // after the dragging is finished, determine the next state
             if (path.getPrevBuildState() == NO_INTERACTION) {
                 path.setBuildState(NO_INTERACTION);

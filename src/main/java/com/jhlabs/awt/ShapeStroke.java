@@ -18,16 +18,17 @@ package com.jhlabs.awt;
 
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.FlatteningPathIterator;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 
 import static java.awt.geom.PathIterator.SEG_CLOSE;
 import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 
+/**
+ * A {@link Stroke} which takes an array of existing {@link Shape}s,
+ * and draws them along the path to be drawn.
+ * See http://jhlabs.com/java/java2d/strokes/
+ */
 public class ShapeStroke implements Stroke {
     private final Shape[] shapes;
     private final float advance;
@@ -35,14 +36,15 @@ public class ShapeStroke implements Stroke {
     private final AffineTransform t = new AffineTransform();
     private static final float FLATNESS = 1;
 
-    public ShapeStroke(Shape shapes, float advance) {
-        this(new Shape[]{shapes}, advance);
+    public ShapeStroke(Shape shape, float advance) {
+        this(new Shape[]{shape}, advance);
     }
 
     public ShapeStroke(Shape[] shapes, float advance) {
         this.advance = advance;
         this.shapes = new Shape[shapes.length];
 
+        // Move each shape to be centered at the origin
         for (int i = 0; i < this.shapes.length; i++) {
             Rectangle2D bounds = shapes[i].getBounds2D();
             t.setToTranslation(-bounds.getCenterX(), -bounds.getCenterY());
@@ -55,22 +57,24 @@ public class ShapeStroke implements Stroke {
         GeneralPath result = new GeneralPath();
         PathIterator it = new FlatteningPathIterator(shape.getPathIterator(null), FLATNESS);
         float[] points = new float[6];
+
         float moveX = 0, moveY = 0;
         float lastX = 0, lastY = 0;
         float thisX = 0, thisY = 0;
         int type = 0;
-        float next = 0;
-        int currentShape = 0;
-        int length = shapes.length;
+        float thresholdDist = 0;
 
-        while (currentShape < length && !it.isDone()) {
+        int shapeIndex = 0;
+        int numShapes = shapes.length;
+
+        while (shapeIndex < numShapes && !it.isDone()) {
             type = it.currentSegment(points);
             switch (type) {
                 case SEG_MOVETO:
                     moveX = lastX = points[0];
                     moveY = lastY = points[1];
                     result.moveTo(moveX, moveY);
-                    next = 0;
+                    thresholdDist = 0;
                     break;
 
                 case SEG_CLOSE:
@@ -84,23 +88,24 @@ public class ShapeStroke implements Stroke {
                     float dx = thisX - lastX;
                     float dy = thisY - lastY;
                     float distance = (float) Math.sqrt(dx * dx + dy * dy);
-                    if (distance >= next) {
-                        float r = 1.0f / distance;
+                    if (distance >= thresholdDist) {
                         float angle = (float) Math.atan2(dy, dx);
-                        while (currentShape < length && distance >= next) {
-                            float x = lastX + next * dx * r;
-                            float y = lastY + next * dy * r;
+                        // handles segments which are long enough
+                        // to require several shapes along their length
+                        while (shapeIndex < numShapes && distance >= thresholdDist) {
+                            float x = lastX + thresholdDist * dx / distance;
+                            float y = lastY + thresholdDist * dy / distance;
                             t.setToTranslation(x, y);
                             t.rotate(angle);
-                            result.append(t.createTransformedShape(shapes[currentShape]), false);
-                            next += advance;
-                            currentShape++;
+                            result.append(t.createTransformedShape(shapes[shapeIndex]), false);
+                            thresholdDist += advance;
+                            shapeIndex++;
                             if (repeat) {
-                                currentShape %= length;
+                                shapeIndex %= numShapes;
                             }
                         }
                     }
-                    next -= distance;
+                    thresholdDist -= distance;
                     lastX = thisX;
                     lastY = thisY;
                     break;

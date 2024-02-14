@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.history.HandleMovedEdit;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.PathEdit;
@@ -328,8 +329,14 @@ public class Path implements Serializable, Debuggable {
         PathEdit edit = new PathEdit("Delete Path", comp, this, null);
 
         Tools.PEN.removePath();
+        comp.pathChanged(true);
         comp.repaint();
 
+        History.add(edit);
+    }
+
+    public void handleMoved(HandleMovedEdit edit) {
+        comp.pathChanged(false);
         History.add(edit);
     }
 

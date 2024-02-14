@@ -195,8 +195,13 @@ public class TextSettings implements Serializable, Debuggable {
         this.font = font;
     }
 
-    public BoxAlignment getBoxAlignment() {
+    public BoxAlignment getAlignment() {
         return BoxAlignment.of(horizontalAlignment, verticalAlignment);
+    }
+
+    public void setAlignment(BoxAlignment newAlignment) {
+        this.horizontalAlignment = newAlignment.getHorizontal();
+        this.verticalAlignment = newAlignment.getVertical();
     }
 
     public String getText() {
@@ -237,6 +242,10 @@ public class TextSettings implements Serializable, Debuggable {
 
     public double getRotation() {
         return rotation;
+    }
+
+    public boolean isOnPath() {
+        return horizontalAlignment == null || verticalAlignment == null;
     }
 
     public void randomize() {

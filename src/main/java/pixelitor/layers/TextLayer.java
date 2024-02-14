@@ -282,11 +282,13 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     public void updateLayerName() {
         if (settings != null) {
-            String raw = settings.getText().trim();
-            String cleaned = ALL_WHITESPACE.matcher(raw).replaceAll(" ");
-            String shortened = Utils.shorten(cleaned, 30);
-            setName(shortened, false);
+            setName(nameFromText(settings.getText()), false);
         }
+    }
+
+    public static String nameFromText(String rawText) {
+        String cleaned = ALL_WHITESPACE.matcher(rawText.trim()).replaceAll(" ");
+        return Utils.shorten(cleaned, 30);
     }
 
     /**
@@ -302,7 +304,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void enlargeCanvas(int north, int east, int south, int west) {
-        BoxAlignment alignment = settings.getBoxAlignment();
+        BoxAlignment alignment = settings.getAlignment();
+        if (alignment == BoxAlignment.PATH) {
+            return;
+        }
+
         int newTx = getTx() + switch (alignment.getHorizontal()) {
             case LEFT -> west;
             case CENTER -> (west - east) / 2;
@@ -415,6 +421,30 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public String getTypeString() {
         return "Text Layer";
+    }
+
+    public void pathChanged(boolean deleted) {
+        if (painter.isOnPath()) {
+            painter.pathChanged();
+            holder.invalidateImageCache();
+
+            if (deleted) {
+                settings.setAlignment(BoxAlignment.CENTER_CENTER);
+                painter.setAlignment(BoxAlignment.CENTER_CENTER);
+            }
+        }
+    }
+
+    public void usePathEditing() {
+        settings.setAlignment(BoxAlignment.PATH);
+        painter.setAlignment(BoxAlignment.PATH);
+
+        painter.pathChanged();
+        holder.invalidateImageCache();
+    }
+
+    public boolean isOnPath() {
+        return painter.isOnPath();
     }
 
     @Override

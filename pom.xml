@@ -53,9 +53,6 @@
                                     <excludes>
                                         <!-- Pixelitor has its own modified version for these -->
                                         <exclude>org/jdesktop/swingx/graphics/BlendComposite*</exclude>
-                                        <exclude>org/jdesktop/swingx/painter/AbstractPainter*</exclude>
-                                        <exclude>org/jdesktop/swingx/painter/AbstractLayoutPainter*</exclude>
-                                        <exclude>org/jdesktop/swingx/painter/TextPainter*</exclude>
                                         <exclude>org/jdesktop/swingx/painter/effects/**</exclude>
                                         <exclude>org/jdesktop/swingx/JXTipOfTheDay*</exclude>
                                         <exclude>org/jdesktop/swingx/plaf/basic/BasicTipOfTheDayUI*</exclude>

@@ -32,7 +32,8 @@ public enum BoxAlignment {
     TOP_LEFT("Top Left", HorizontalAlignment.LEFT, VerticalAlignment.TOP),
     TOP_RIGHT("Top Right", HorizontalAlignment.RIGHT, VerticalAlignment.TOP),
     BOTTOM_LEFT("Bottom Left", HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM),
-    BOTTOM_RIGHT("Bottom Right", HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM);
+    BOTTOM_RIGHT("Bottom Right", HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM),
+    PATH("Path", null, null);
 
     private final String guiName;
     private final HorizontalAlignment horizontalAlignment;
@@ -58,6 +59,9 @@ public enum BoxAlignment {
     }
 
     public static BoxAlignment of(HorizontalAlignment horizontal, VerticalAlignment vertical) {
+        if (horizontal == null || vertical == null) {
+            return PATH;
+        }
         return switch (horizontal) {
             case CENTER -> switch (vertical) {
                 case CENTER -> CENTER_CENTER;
