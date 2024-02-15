@@ -104,24 +104,20 @@ public class FileChoosers {
         Messages.showError("Error", msg);
     }
 
-    public static boolean saveWithSingleAllowedExtension(Composition comp,
-                                                         String suggestedFileName,
-                                                         Object extraInfo,
-                                                         FileNameExtensionFilter extensionFilter) {
-        File selectedFile = selectSaveFileForFormat(
-            suggestedFileName, extensionFilter);
-        return saveSelectedFile(comp, selectedFile, extraInfo);
-    }
-
     public static File selectSaveFileForFormat(String suggestedFileName, FileFilter fileFilter) {
         FileChooserInfo chooserInfo = FileChooserInfo.forSingleFormat(suggestedFileName, fileFilter);
         return picker.showSaveDialog(chooserInfo);
     }
 
-    private static boolean saveSelectedFile(Composition comp, File file, Object extraInfo) {
+    /**
+     * Returns true if the file was saved, false if the user cancels the saving
+     */
+    public static boolean saveWithChooser(Composition comp) {
+        File file = picker.showSaveDialog(FileChooserInfo.forSavingComp(comp));
         if (file == null) {
             return false;
         }
+
         String extension = picker.getSelectedSaveExtension(file);
         if (extension == null) {
             extension = FileFormat.getLastSaved().toString();
@@ -132,16 +128,12 @@ public class FileChoosers {
                 "<html> The extension <b>" + extension + "</b> isn't supported.");
             return false;
         }
-        IO.saveToChosenFile(comp, file, extraInfo, extension);
-        return true;
-    }
 
-    /**
-     * Returns true if the file was saved, false if the user cancels the saving
-     */
-    public static boolean saveWithChooser(Composition comp) {
-        File selectedFile = picker.showSaveDialog(FileChooserInfo.forSavingComp(comp));
-        return saveSelectedFile(comp, selectedFile, null);
+        FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
+        SaveSettings settings = new SaveSettings.Simple(format, file);
+
+        comp.saveAsync(settings, true);
+        return true;
     }
 
     public static File showSaveDialog(FileChooserInfo chooserInfo) {

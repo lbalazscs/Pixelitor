@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,20 +19,16 @@ package pixelitor.io;
 
 import java.io.File;
 
-public class SaveSettings {
-    private final File outputFile;
-    private final FileFormat format;
+public sealed interface SaveSettings
+    permits SaveSettings.Simple, JpegSettings {
 
-    public SaveSettings(FileFormat format, File outputFile) {
-        this.outputFile = outputFile;
-        this.format = format;
+    /**
+     * Uncustomized save settings with default encoding values.
+     */
+    record Simple(FileFormat format, File file) implements SaveSettings {
     }
 
-    public File getFile() {
-        return outputFile;
-    }
+    File file();
 
-    public FileFormat getFormat() {
-        return format;
-    }
+    FileFormat format();
 }

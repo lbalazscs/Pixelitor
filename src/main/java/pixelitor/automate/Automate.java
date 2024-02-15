@@ -121,7 +121,7 @@ public class Automate {
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
-        var saveSettings = new SaveSettings(format, file);
+        var saveSettings = new SaveSettings.Simple(format, file);
         CompletableFuture<Void> retVal = null;
 
         View view = comp.getView();

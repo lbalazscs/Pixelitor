@@ -137,14 +137,15 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     private void updatePreviewAsync() {
         CompletableFuture
-            .supplyAsync(() -> createPreview(getSettings()), onPool)
+            .supplyAsync(() -> createPreview(getQuality(), isProgressive()), onPool)
             .thenAcceptAsync(this::setPreview, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private ImageWithSize createPreview(JpegInfo config) {
-        var tracker = new JProgressBarTracker(progressPanel);
-        return JpegOutput.writeJPGtoPreviewImage(image, config, tracker);
+    private ImageWithSize createPreview(float quality, boolean progressive) {
+        return JpegOutput.writeJPGtoPreviewImage(image,
+            JpegSettings.createJpegCustomizer(quality, progressive),
+            new JProgressBarTracker(progressPanel));
     }
 
     private void setPreview(ImageWithSize imageWithSize) {
@@ -155,9 +156,12 @@ public class OptimizedJpegSavePanel extends JPanel {
         sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
     }
 
-    private JpegInfo getSettings() {
-        return new JpegInfo((float) qualityParam.getPercentage(),
-            progressiveCB.isSelected());
+    private float getQuality() {
+        return (float) qualityParam.getPercentage();
+    }
+
+    private boolean isProgressive() {
+        return progressiveCB.isSelected();
     }
 
     public static void showInDialog(BufferedImage image, String title) {
@@ -168,7 +172,7 @@ public class OptimizedJpegSavePanel extends JPanel {
             .content(savePanel)
             .title(title)
             .okText(i18n("save"))
-            .okAction(() -> IO.saveJpegWithQuality(savePanel.getSettings()))
+            .okAction(() -> IO.saveJpegWithQuality(savePanel.getQuality(), savePanel.isProgressive()))
             .show();
     }
 }

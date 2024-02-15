@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,14 @@ import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.SubtaskProgressTracker;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Utility class with static methods related to writing JPEG images
@@ -36,7 +38,7 @@ public final class JpegOutput {
     private JpegOutput() {
     }
 
-    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegInfo config, ProgressTracker pt) {
+    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, Consumer<ImageWriteParam> customizer, ProgressTracker pt) {
         var bos = new ByteArrayOutputStream(32768);
         BufferedImage previewImage = null;
         byte[] bytes = null;
@@ -45,7 +47,7 @@ public final class JpegOutput {
             // approximately 70% of the total time is spent here
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
             var pt1 = new SubtaskProgressTracker(0.7, pt);
-            TrackedIO.writeToIOS(image, ios, "jpg", pt1, config.toCustomizer());
+            TrackedIO.writeToIOS(image, ios, "jpg", pt1, customizer);
 
             // ...then reads it back into an image
             // approximately 30% of the total time is spent here

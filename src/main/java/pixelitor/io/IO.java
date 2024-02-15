@@ -153,7 +153,7 @@ public class IO {
             }
             Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
             if (fileFormat.isPresent()) {
-                var saveSettings = new SaveSettings(fileFormat.get(), file);
+                var saveSettings = new SaveSettings.Simple(fileFormat.get(), file);
                 comp.saveAsync(saveSettings, true);
                 return true;
             } else {
@@ -166,8 +166,8 @@ public class IO {
 
     public static void saveImageToFile(BufferedImage image,
                                        SaveSettings saveSettings) {
-        FileFormat format = saveSettings.getFormat();
-        File selectedFile = saveSettings.getFile();
+        FileFormat format = saveSettings.format();
+        File selectedFile = saveSettings.file();
 
         Objects.requireNonNull(format);
         Objects.requireNonNull(selectedFile);
@@ -177,7 +177,7 @@ public class IO {
         try {
             if (format == FileFormat.JPG) {
                 JpegSettings settings = JpegSettings.from(saveSettings);
-                Consumer<ImageWriteParam> customizer = settings.getJpegInfo().toCustomizer();
+                Consumer<ImageWriteParam> customizer = settings.toCustomizer();
                 TrackedIO.write(image, "jpg", selectedFile, customizer);
             } else {
                 TrackedIO.write(image, format.toString(), selectedFile, null);
@@ -264,7 +264,7 @@ public class IO {
         String fileName = format("%03d_%s.png", layerIndex, FileUtils.toFileName(layerName));
         File file = new File(outputDir, fileName);
 
-        saveImageToFile(image, new SaveSettings(FileFormat.PNG, file));
+        saveImageToFile(image, new SaveSettings.Simple(FileFormat.PNG, file));
     }
 
     public static void saveInAllFormats(Composition comp) {
@@ -277,31 +277,18 @@ public class IO {
             FileFormat[] fileFormats = FileFormat.values();
             for (FileFormat format : fileFormats) {
                 File f = new File(saveDir, "all_formats." + format);
-                var saveSettings = new SaveSettings(format, f);
+                var saveSettings = new SaveSettings.Simple(format, f);
                 comp.saveAsync(saveSettings, false);
             }
         }
     }
 
-    public static void saveJpegWithQuality(JpegInfo jpegInfo) {
+    public static void saveJpegWithQuality(float quality, boolean progressive) {
         var comp = Views.getActiveComp();
-        FileChoosers.saveWithSingleAllowedExtension(comp,
-            comp.createFileNameWithExt("jpg"), jpegInfo, FileChoosers.jpegFilter);
-    }
-
-    static void saveToChosenFile(Composition comp, File file,
-                                 Object extraInfo, String extension) {
-        FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
-        SaveSettings settings;
-        if (extraInfo != null) {
-            // currently the only type of extra information
-            assert format == FileFormat.JPG : "format = " + format + ", extraInfo = " + extraInfo;
-            JpegInfo jpegInfo = (JpegInfo) extraInfo;
-            settings = new JpegSettings(jpegInfo, file);
-        } else {
-            settings = new SaveSettings(format, file);
-        }
-
+        String suggestedFileName = comp.createFileNameWithExt("jpg");
+        File selectedFile = FileChoosers.selectSaveFileForFormat(
+            suggestedFileName, FileChoosers.jpegFilter);
+        JpegSettings settings = new JpegSettings(quality, progressive, selectedFile);
         comp.saveAsync(settings, true);
     }
 

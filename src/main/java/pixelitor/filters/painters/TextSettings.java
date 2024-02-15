@@ -64,8 +64,13 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_TEXT = "text";
     private static final String PRESET_KEY_COLOR = "color";
     private static final String PRESET_KEY_ROTATION = "rotation";
+
+    // old, but still supported keys
     private static final String PRESET_KEY_HOR_ALIGN = "hor_align";
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
+
+    private static final String PRESET_KEY_ALIGN = "align";
+
     private static final String PRESET_KEY_WATERMARK = "watermark";
     private static final String PRESET_KEY_REL_LINE_HEIGHT = "rel_line_height";
     private static final String PRESET_KEY_SX = "sx";
@@ -273,20 +278,20 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);
     }
 
-    public BufferedImage watermarkImage(BufferedImage src, TransformedTextPainter textPainter) {
+    public BufferedImage watermarkImage(BufferedImage src, TransformedTextPainter textPainter, Composition comp) {
         BufferedImage bumpImage = createBumpMapImage(
-            textPainter, src.getWidth(), src.getHeight());
+            textPainter, src.getWidth(), src.getHeight(), comp);
         return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
     }
 
     // the bump map image has white text on a black background
     private BufferedImage createBumpMapImage(TransformedTextPainter textPainter,
-                                             int width, int height) {
+                                             int width, int height, Composition comp) {
         BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D g = bumpImage.createGraphics();
         Colors.fillWith(BLACK, g, width, height);
         textPainter.setColor(WHITE);
-        textPainter.paint(g, this, width, height);
+        textPainter.paint(g, width, height, comp);
         g.dispose();
 
         return bumpImage;
@@ -324,8 +329,9 @@ public class TextSettings implements Serializable, Debuggable {
         preset.put(PRESET_KEY_TEXT, Utils.encodeNewlines(text));
         preset.putColor(PRESET_KEY_COLOR, color);
         preset.putFloat(PRESET_KEY_ROTATION, (float) rotation);
-        preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
-        preset.putInt(PRESET_KEY_VER_ALIGN, verticalAlignment.ordinal());
+//        preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
+//        preset.putInt(PRESET_KEY_VER_ALIGN, verticalAlignment.ordinal());
+        preset.putInt(PRESET_KEY_ALIGN, getAlignment().ordinal());
 
         new FontInfo(font).saveStateTo(preset);
 
@@ -343,8 +349,20 @@ public class TextSettings implements Serializable, Debuggable {
         text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
         color = preset.getColor(PRESET_KEY_COLOR);
         rotation = preset.getFloat(PRESET_KEY_ROTATION);
-        horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
-        verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
+
+        int alignIndex = preset.getInt(PRESET_KEY_ALIGN, -1);
+        if (alignIndex == -1) {
+            // old preset, can't have path alignment
+            horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
+            verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
+        } else {
+            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
+            if (alignment == BoxAlignment.PATH && !Views.getActiveComp().hasActivePath()) {
+                alignment = BoxAlignment.CENTER_CENTER;
+            }
+            horizontalAlignment = alignment.getHorizontal();
+            verticalAlignment = alignment.getVertical();
+        }
 
         font = new FontInfo(preset).createStyledFont();
 

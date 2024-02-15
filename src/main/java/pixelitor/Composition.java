@@ -1616,13 +1616,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                                              boolean addToRecentMenus) {
         assert calledOnEDT() : threadInfo();
 
-        FileFormat format = saveSettings.getFormat();
+        FileFormat format = saveSettings.format();
         Runnable saveTask = format.createSaveTask(this, saveSettings);
         FileFormat.setLastSaved(format);
 
         // prevents starting a new save on the EDT while an asynchronous
         // save is already scheduled or running on the IO thread.
-        File savedFile = saveSettings.getFile();
+        File savedFile = saveSettings.file();
         String path = savedFile.getAbsolutePath();
         if (IOTasks.isProcessing(path)) {
             return CompletableFuture.completedFuture(null);

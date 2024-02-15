@@ -227,7 +227,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         painter.setColor(settings.getColor());
-        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
+        painter.paint(g, comp.getCanvasWidth(), comp.getCanvasHeight(), comp);
     }
 
     @Override
@@ -244,7 +244,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public BufferedImage transformImage(BufferedImage src) {
         assert settings.hasWatermark(); // should be called only in this case
-        return settings.watermarkImage(src, painter);
+        return settings.watermarkImage(src, painter, comp);
     }
 
     @Override

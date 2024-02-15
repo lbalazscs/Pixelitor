@@ -215,11 +215,11 @@ public class SplashImageCreator {
     }
 
     private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp, FileFormat format) {
-        var flatSettings = new SaveSettings(format, comp.getFile());
+        var flatSettings = new SaveSettings.Simple(format, comp.getFile());
 
         var pxcFile = new File(comp.getFile().getParent(),
             FileUtils.replaceExt(comp.getFile().getName(), "pxc"));
-        var pxcSettings = new SaveSettings(FileFormat.PXC, pxcFile);
+        var pxcSettings = new SaveSettings.Simple(FileFormat.PXC, pxcFile);
 
         return comp.saveAsync(flatSettings, false)
             .thenCompose(v -> comp.saveAsync(pxcSettings, false))

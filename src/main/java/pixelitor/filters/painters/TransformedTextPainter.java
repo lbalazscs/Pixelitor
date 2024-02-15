@@ -22,6 +22,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.BoxAlignment;
@@ -50,7 +51,7 @@ import static java.awt.font.TextAttribute.*;
  * (so that text layers can be moved with the move tool).
  * It also supports the rotation, scaling and shearing of the text.
  */
-public class TransformedTextPainter implements Painter, Debuggable {
+public class TransformedTextPainter implements Debuggable {
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
 
@@ -88,8 +89,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
     private static final boolean NO_CACHE = false;
     private static final boolean DEBUG_LAYOUT = false;
 
-    @Override
-    public void paint(Graphics2D g, Object object, int width, int height) {
+    public void paint(Graphics2D g, int width, int height, Composition comp) {
         if (text.isBlank()) {
             return;
         }
@@ -98,7 +98,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
         optimizeGraphics(g);
 
         if (invalidLayout) {
-            updateLayout(width, height, g);
+            updateLayout(width, height, g, comp);
             if (DEBUG_LAYOUT) {
                 Shapes.draw(g, getBoundingBox(), Color.RED);
                 if (transformedRect != null) {
@@ -340,9 +340,12 @@ public class TransformedTextPainter implements Painter, Debuggable {
         }
     }
 
-    private void updateLayout(int width, int height, Graphics2D g) {
+    private void updateLayout(int width, int height, Graphics2D g, Composition comp) {
         if (isOnPath()) {
-            renderOnPath(g);
+            if (comp == null) { // the text filter, not a text layer
+                comp = Views.getActiveComp();
+            }
+            renderOnPath(g, comp.getActivePath().toImageSpaceShape());
             return;
         }
 
@@ -364,13 +367,12 @@ public class TransformedTextPainter implements Painter, Debuggable {
         invalidLayout = false;
     }
 
-    private void renderOnPath(Graphics2D g2) {
+    private void renderOnPath(Graphics2D g2, Path2D path) {
         g2.setFont(font);
         FontRenderContext frc = g2.getFontRenderContext();
         GlyphVector glyphVector = font.createGlyphVector(frc, text);
 
-        Path2D path = Views.getActiveComp().getActivePath().toImageSpaceShape();
-        GeneralPath result = new GeneralPath();
+        Path2D result = new Path2D.Float();
         PathIterator it = new FlatteningPathIterator(path.getPathIterator(null), 1);
 
         double[] points = new double[6];
@@ -429,9 +431,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
                         double angle = Math.atan2(dy, dx);
                         while (glyphIndex < numGlyphs && distance >= thresholdDist) {
                             Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
-                            Point2D p = glyphVector.getGlyphPosition(glyphIndex);
-                            double px = p.getX();
-                            double py = p.getY();
+                            Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
                             double x = lastX + thresholdDist * dx / distance;
                             double y = lastY + thresholdDist * dy / distance;
                             double advance = nextAdvance;
@@ -444,7 +444,7 @@ public class TransformedTextPainter implements Painter, Debuggable {
                             if (shx != 0 || shy != 0) {
                                 at.shear(-shx, -shy);
                             }
-                            at.translate(-px - advance, -py);
+                            at.translate(-origGlyphPos.getX() - advance, -origGlyphPos.getY());
                             result.append(at.createTransformedShape(glyph), false);
                             thresholdDist += sxa * (advance + nextAdvance);
                             glyphIndex++;

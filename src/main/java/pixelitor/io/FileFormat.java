@@ -43,7 +43,7 @@ public enum FileFormat {
     }, ORA(true, null, FileChoosers.oraFilter) {
         @Override
         public Runnable createSaveTask(Composition comp, SaveSettings settings) {
-            return () -> OpenRaster.uncheckedWrite(comp, settings.getFile());
+            return () -> OpenRaster.uncheckedWrite(comp, settings.file());
         }
 
         @Override
@@ -67,7 +67,7 @@ public enum FileFormat {
     }, PXC(true, null, FileChoosers.pxcFilter) {
         @Override
         public Runnable createSaveTask(Composition comp, SaveSettings settings) {
-            return () -> PXCFormat.write(comp, settings.getFile());
+            return () -> PXCFormat.write(comp, settings.file());
         }
 
         @Override
