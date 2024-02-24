@@ -1,10 +1,14 @@
 package pixelitor.filters.truchets;
 
+import pixelitor.gui.utils.VectorIcon;
+import pixelitor.tools.Tool;
+import pixelitor.tools.gui.ToolButton;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
@@ -72,12 +76,9 @@ public enum TileType {
         return new BasicStroke(lineWidth).createStrokedShape(path);
     }),
     DIAGONAL(2, false, false, (tileSize, lineWidth) -> {
-        Path2D lines = new Path2D.Double();
-        lines.moveTo(tileSize, tileSize / 2d);
-        lines.lineTo(tileSize, 3 * tileSize / 2d);
-        lines.moveTo(tileSize / 2d, tileSize);
-        lines.lineTo(3 * tileSize / 2d, tileSize);
-        return new BasicStroke(lineWidth).createStrokedShape(lines);
+        Line2D line = new Line2D.Double(tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d, 3 * tileSize / 2d);
+        BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        return stroke.createStrokedShape(line);
     }),
     LINE(2, true, true, (tileSize, lineWidth) -> {
         double firsts = Math.floor(tileSize / 2d);
@@ -126,28 +127,28 @@ public enum TileType {
     }
 
     public void draw(Graphics2D g, int tileSize, int lineWidth, int rotation, boolean flipAboutHorizontal, boolean flipAboutVertical) {
+        if (flipAboutHorizontal) {
+            g.scale(1, -1);
+            g.translate(0, -tileSize);
+        }
+        if (flipAboutVertical) {
+            g.scale(-1, 1);
+            g.translate(-tileSize, 0);
+        }
         if (rotation != 0) {
             g.rotate(rotation * Math.PI / 2, tileSize / 2d, tileSize / 2d);
         }
-        if (flipAboutHorizontal) {
-            g.scale(1, -1);
-            g.translate(0, -tileSize);
-        }
-        if (flipAboutVertical) {
-            g.scale(-1, 1);
-            g.translate(-tileSize, 0);
-        }
         draw(g, tileSize, lineWidth);
-        if (flipAboutHorizontal) {
-            g.scale(1, -1);
-            g.translate(0, -tileSize);
-        }
-        if (flipAboutVertical) {
-            g.scale(-1, 1);
-            g.translate(-tileSize, 0);
-        }
         if (rotation != 0) {
             g.rotate(-rotation * Math.PI / 2, tileSize / 2d, tileSize / 2d);
+        }
+        if (flipAboutHorizontal) {
+            g.scale(1, -1);
+            g.translate(0, -tileSize);
+        }
+        if (flipAboutVertical) {
+            g.scale(-1, 1);
+            g.translate(-tileSize, 0);
         }
     }
 
@@ -156,29 +157,18 @@ public enum TileType {
         return Utils.screamingSnakeCaseToSentenceCase(super.toString());
     }
 
-    public interface DrawAction {
-        Shape create(int tileSize, int lineWidth);
+    public VectorIcon createIcon() {
+        return new Tool.ToolIcon() {
+            @Override
+            protected void paintIcon(Graphics2D g) {
+                g.translate(4, 4);
+                draw(g, ToolButton.TOOL_ICON_SIZE-8, 5);
+                g.translate(-4, -4);
+            }
+        };
     }
 
-    public static void main(String[] args) {
-        final int tileSize = 500;
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.add(new JPanel() {
-            {
-                setBackground(Color.WHITE);
-                setPreferredSize(new Dimension(tileSize, tileSize));
-            }
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(Color.CYAN);
-                TileType.TRIANGE.draw((Graphics2D) g, tileSize, 10, 0, false, false);
-            }
-        });
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+    public interface DrawAction {
+        Shape create(int tileSize, int lineWidth);
     }
 }

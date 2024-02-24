@@ -32,7 +32,7 @@ public class TruchetSwatch {
         columns = pattern.getColumns();
         int size = rows * columns;
         for (int i = tiles.size(); i < size; i++) {
-            tiles.add(new TileState(palette.tiles[0]));
+            tiles.add(palette.getTileState(0, null));
         }
         while (tiles.size() > size) {
             tiles.removeLast();
@@ -40,9 +40,11 @@ public class TruchetSwatch {
         int x = 0;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                palette.getTileState(pattern.getState(i, j), tiles.get(x++));
+                TileState tileState = tiles.get(x++);
+                palette.getTileState(pattern.getState(i, j), tileState);
+                pattern.sharePatternTweaks(i, j, tileState);
             }
         }
-    }
 
+    }
 }

@@ -369,7 +369,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         return shortName; // so that they can be selected from a JComboBox
     }
 
-    protected abstract static class ToolIcon extends VectorIcon {
+    public abstract static class ToolIcon extends VectorIcon {
         protected ToolIcon() {
             super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,
                 ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);

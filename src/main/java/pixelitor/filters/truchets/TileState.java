@@ -31,4 +31,9 @@ public class TileState {
         this.flipAboutHorizontal = tileState.flipAboutHorizontal;
         this.flipAboutVertical = tileState.flipAboutVertical;
     }
+
+    public void shallowCopyFrom(TileState tileState) {
+        this.type = tileState.type;
+        this.rotation = tileState.rotation;
+    }
 }
