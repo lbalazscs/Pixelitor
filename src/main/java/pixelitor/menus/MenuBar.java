@@ -44,6 +44,8 @@ import pixelitor.filters.transitions.BlindsTransition;
 import pixelitor.filters.transitions.CheckerboardTransition;
 import pixelitor.filters.transitions.GooTransition;
 import pixelitor.filters.transitions.ShapesGridTransition;
+import pixelitor.filters.truchets.NeoTruchet;
+import pixelitor.filters.truchets.Truchet;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.Filters;
@@ -1115,6 +1117,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(Rose.NAME, Rose::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
         sub.addFilter(Truchet.NAME, Truchet::new);
+        sub.addFilter(NeoTruchet.NAME, NeoTruchet::new);
 
         return sub;
     }

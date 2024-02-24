@@ -15,8 +15,9 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters;
+package pixelitor.filters.truchets;
 
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;

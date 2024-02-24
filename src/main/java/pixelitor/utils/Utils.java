@@ -422,5 +422,18 @@ public final class Utils {
         }
         return input;
     }
+
+    public static String screamingSnakeCaseToSentenceCase(String string) {
+        StringBuilder builder = new StringBuilder();
+        for (String word : string.split("^(?=\\w)|_(?=\\w)")) {
+            String[] split = word.split("(?<=^\\w)(?=\\w)");
+            builder.append(split[0]);
+            if (split.length > 1) {
+                builder.append(split[1].toLowerCase());
+            }
+            builder.append(" ");
+        }
+        return builder.toString().stripTrailing();
+    }
 }
 
