@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import com.bric.geom.ShapeStringUtils;
 import pixelitor.Composition;
 import pixelitor.GUIMode;
 import pixelitor.Views;
@@ -493,6 +494,9 @@ public class PenTool extends Tool {
     public void saveStateTo(UserPreset preset) {
         preset.put("Mode", getSelectedMode().toString());
         preset.putBoolean(SHOW_RUBBER_BAND_TEXT, rubberBandCB.isSelected());
+        if (hasPath()) {
+            preset.put("Path", ShapeStringUtils.toString(path.toImageSpaceShape()));
+        }
     }
 
     @Override
@@ -506,6 +510,15 @@ public class PenTool extends Tool {
         }
 
         rubberBandCB.setSelected(preset.getBoolean(SHOW_RUBBER_BAND_TEXT));
+
+        String pathString = preset.get("Path");
+        if (pathString != null) {
+            Composition comp = Views.getActiveComp();
+            if (comp != null) {
+                Shape pathShape = ShapeStringUtils.createGeneralPath(pathString);
+                comp.createPathFromShape(pathShape, false, false);
+            }
+        }
     }
 
     @Override

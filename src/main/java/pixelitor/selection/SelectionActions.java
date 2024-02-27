@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,12 +27,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.PAction;
-import pixelitor.history.History;
 import pixelitor.menus.view.ShowHideSelectionAction;
-import pixelitor.tools.Tools;
-import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
-import pixelitor.utils.Shapes;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
@@ -42,7 +37,6 @@ import java.awt.Shape;
 import static pixelitor.Views.getActiveComp;
 import static pixelitor.Views.getActiveSelection;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
-import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -94,17 +88,8 @@ public final class SelectionActions {
 
     public static void selectionToPath(Composition comp, boolean addToHistory) {
         Shape shape = comp.getSelection().getShape();
-        Path oldActivePath = comp.getActivePath();
         comp.deselect(false);
-        Path path = Shapes.shapeToPath(shape, comp.getView());
-        comp.setActivePath(path);
-        Tools.PEN.setPath(path);
-        Tools.PEN.startMode(EDIT, false);
-        Tools.PEN.activate();
-
-        if (addToHistory) {
-            History.add(new ConvertSelectionToPathEdit(comp, shape, oldActivePath));
-        }
+        comp.createPathFromShape(shape, addToHistory, true);
     }
 
     private static final Action modify = new PAction(i18n("modify_sel") + "...", () -> {
