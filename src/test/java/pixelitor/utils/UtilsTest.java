@@ -44,4 +44,48 @@ class UtilsTest {
             Assertions.assertEquals(a, b, 0.01);
         }
     }
+
+    @Test
+    void shortenLongString() {
+        String input = "Long string test";
+        int maxLength = 10;
+        String expected = "Long st...";
+        String result = Utils.shorten(input, maxLength);
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void shortenShortString() {
+        String input = "Short test";
+        int maxLength = 10;
+        String expected = "Short test";
+        String result = Utils.shorten(input, maxLength);
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void shortenEmptyString() {
+        String input = "";
+        int maxLength = 10;
+        String expected = "";
+        String result = Utils.shorten(input, maxLength);
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void addArticleVowel() {
+        String input = "airplane";
+        String expected = "an airplane";
+        String result = Utils.addArticle(input);
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void addArticleConsonant() {
+        String input = "piano";
+        String expected = "a piano";
+        String result = Utils.addArticle(input);
+        Assertions.assertEquals(expected, result);
+    }
+
 }
