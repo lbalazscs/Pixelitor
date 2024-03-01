@@ -336,7 +336,7 @@ public class Path implements Serializable, Debuggable {
     }
 
     public void handleMoved(HandleMovedEdit edit) {
-        comp.pathChanged(false);
+        comp.pathChanged();
         History.add(edit);
     }
 

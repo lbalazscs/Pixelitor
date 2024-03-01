@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.tools.pen.AnchorPoint;
+import pixelitor.tools.pen.ControlPoint;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -46,15 +48,25 @@ public class HandleMovedEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        handle.setLocation(before);
-        comp.repaint();
+        moveHandleTo(before);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        handle.setLocation(after);
+        moveHandleTo(after);
+    }
+
+    private void moveHandleTo(Point2D before) {
+        handle.setLocation(before);
+
+        if (handle instanceof AnchorPoint ap) {
+            ap.getSubPath().getComp().pathChanged();
+        } else if (handle instanceof ControlPoint cp) {
+            cp.getAnchor().getSubPath().getComp().pathChanged();
+        }
+
         comp.repaint();
     }
 

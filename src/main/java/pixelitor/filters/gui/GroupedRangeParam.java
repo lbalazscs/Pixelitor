@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,9 +39,8 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  */
 public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     private final RangeParam[] children;
-    private final ButtonModel linkedModel;
+    private ButtonModel linkedModel;
     private final boolean linkedByDefault;
-    private boolean linkable = true; // whether a "Linked" checkbox appears
 
     private boolean autoNormalizable = false;
     private boolean autoNormalizationEnabled = false;
@@ -137,7 +136,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         assert !linkedByDefault;
         assert calcCurrentSumOfValues() == 100;
 
-        linkable = false;
+        linkedModel = null;
         for (RangeParam param : children) {
             param.addChangeListener(e -> autoNormalize(param));
         }
@@ -269,16 +268,6 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public boolean isLinked() {
-        return linkedModel.isSelected();
-    }
-
-    @Override
-    public void setLinked(boolean linked) {
-        linkedModel.setSelected(linked);
-    }
-
-    @Override
     protected void doRandomize() {
         if (isLinked()) {
             children[0].randomize();
@@ -348,13 +337,8 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     public GroupedRangeParam notLinkable() {
-        linkable = false;
+        linkedModel = null;
         return this;
-    }
-
-    @Override
-    public boolean isLinkable() {
-        return linkable;
     }
 
     @Override
@@ -412,7 +396,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
             values[i] = Double.parseDouble(s);
         }
 
-        if (linkable) {
+        if (isLinkable()) {
             boolean linked = linkedByDefault;
             if (st.hasMoreTokens()) {
                 linked = Boolean.parseBoolean(st.nextToken());

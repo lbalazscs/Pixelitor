@@ -1706,6 +1706,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         paths.setActivePath(path);
     }
 
+    public void pathChanged() {
+        pathChanged(false);
+    }
+
     public void pathChanged(boolean deleted) {
         forEachNestedLayer(TextLayer.class, textLayer -> textLayer.pathChanged(deleted));
     }

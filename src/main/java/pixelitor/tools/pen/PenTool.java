@@ -86,12 +86,8 @@ public class PenTool extends Tool {
     private static final Action traceWithSmudgeAction = new TraceAction(
         "Stroke with Smudge", Tools.SMUDGE);
 
-    private static final Action deletePath = new PAction("Delete Path", new Runnable() {
-        @Override
-        public void run() {
-            path.delete();
-        }
-    });
+    private static final Action deletePath = new PAction(
+        "Delete Path", PenTool::deletePath);
 
     public PenTool() {
         super("Pen", 'P',
@@ -159,16 +155,7 @@ public class PenTool extends Tool {
     }
 
     public void startBuilding(boolean calledFromModeChooser) {
-        if (!calledFromModeChooser) {
-            ignoreModeChooser = true;
-            setModeChooserCombo(BUILD);
-            ignoreModeChooser = false;
-        }
-        changeMode(BUILD);
-        enableActions(hasPath());
-        Views.repaintActive();
-
-        assert checkPathConsistency();
+        startMode(BUILD, calledFromModeChooser);
     }
 
     public void startMode(PenToolMode mode, boolean calledFromModeChooser) {
@@ -199,16 +186,6 @@ public class PenTool extends Tool {
             ignoreModeChooser = false;
         }
 
-        changeMode(mode);
-        enableActions(true);
-        Views.repaintActive();
-
-        assert checkPathConsistency();
-    }
-
-    // This method should not be called directly,
-    // otherwise the mode and the combo box get out of sync.
-    private void changeMode(PenToolMode mode) {
         if (this.mode != mode) {
             this.mode.modeEnded(Views.getActiveComp());
             mode.modeStarted(this.mode);
@@ -219,6 +196,9 @@ public class PenTool extends Tool {
         rubberBandCB.setEnabled(mode == BUILD);
 
         Messages.showInStatusBar(mode.getToolMessage());
+        enableActions(hasPath());
+        Views.repaintActive();
+
         assert checkPathConsistency();
     }
 
@@ -246,6 +226,7 @@ public class PenTool extends Tool {
 
         PenToolMode oldMode = mode;
         removePath();
+        comp.pathChanged(true);
         History.add(new ConvertPathToSelectionEdit(
             comp, oldPath, selectionEdit, oldMode));
         assert checkPathConsistency();
@@ -402,11 +383,11 @@ public class PenTool extends Tool {
 
     private void setPathFromComp(Composition comp) {
         if (comp == null) {
-            setNoPath();
+            clearToolPath();
         } else {
             Path compPath = comp.getActivePath();
             if (compPath == null) {
-                setNoPath();
+                clearToolPath();
             } else {
                 path = compPath;
                 PenToolMode preferredMode = compPath.getPreferredPenToolMode();
@@ -419,7 +400,19 @@ public class PenTool extends Tool {
         enableActions(path != null);
     }
 
-    private void setNoPath() {
+    private static void deletePath() {
+        path.delete();
+    }
+
+    // removes a path from the tool and from the composition,
+    // without adding a history edit.
+    public void removePath() {
+        Views.setActivePath(null);
+        clearToolPath();
+        enableActions(false);
+    }
+
+    private void clearToolPath() {
         path = null;
         if (mode.requiresExistingPath()) {
             startBuilding(false);
@@ -430,20 +423,14 @@ public class PenTool extends Tool {
         return path;
     }
 
-    public void setPath(Path path) {
-        if (path == null) { // can happen when undoing
+    public void setPath(Path newPath) {
+        if (newPath == null) { // can happen when undoing
             removePath();
             return;
         }
-        PenTool.path = path;
+        path = newPath;
 
         assert checkPathConsistency();
-    }
-
-    public void removePath() {
-        Views.setActivePath(null);
-        setNoPath();
-        enableActions(false);
     }
 
     @Override

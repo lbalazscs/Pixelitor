@@ -113,23 +113,6 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     }
 
     @Override
-    public boolean isLinkable() {
-        return linkedModel != null;
-    }
-
-    @Override
-    public boolean isLinked() {
-        return isLinkable() ? linkedModel.isSelected() : false;
-    }
-
-    @Override
-    public void setLinked(boolean linked) {
-        if (isLinkable()) {
-            linkedModel.setSelected(linked);
-        }
-    }
-
-    @Override
     public ButtonModel getLinkedModel() {
         return linkedModel;
     }
