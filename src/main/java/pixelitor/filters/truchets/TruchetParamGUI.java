@@ -12,9 +12,8 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI {
@@ -184,48 +183,49 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
     private JToolBar createPaletteBar(TruchetConfigurablePalette palette, TruchetSwatch swatch, TruchetConfigurablePattern pattern) {
         var toolBar = new JToolBar();
-        var addButton = new JButton(Icons.loadThemed("add_layer.gif", ThemedImageIcon.BLACK));
-        var popupMenu = new JPopupMenu();
+        var showToolBarEditorButton = new JButton(Icons.loadThemed("add_layer.gif", ThemedImageIcon.BLACK));
+        var toolBarEditor = new JPopupMenu();
+        toolBarEditor.setLayout(new GridLayout(0, 1));
 
-        popupMenu.setLayout(new GridLayout(0, 1));
+        ArrayList<TileType> selectedTileTypes = new ArrayList<>();
+        selectedTileTypes.add(TileType.TRIANGE);
+        palette.updateStates(selectedTileTypes);
 
-        JPanel panel = null;
-        Set<TileType> sourceTiles = new TreeSet<>();
-        sourceTiles.add(TileType.TRIANGE);
-        palette.updateStates(sourceTiles);
-        for (TileType value : TileType.values()) {
-            if (panel == null || panel.getComponentCount() >= 2) {
-                popupMenu.add(panel = new JPanel(new GridLayout(1, 0)));
+        JPanel toolBarEditorRow = null;
+        for (TileType tileType : TileType.values()) {
+            if (toolBarEditorRow == null || toolBarEditorRow.getComponentCount() >= 2) {
+                toolBarEditor.add(toolBarEditorRow = new JPanel(new GridLayout(1, 0)));
             }
-            panel.add(new JToggleButton(value.toString(), value.createIcon()) {{
+            toolBarEditorRow.add(new JToggleButton(tileType.toString(), tileType.createIcon()) {{
                 setHorizontalAlignment(SwingConstants.LEFT);
-                JButton addTileButton = new JButton(value.createIcon());
-                if (value == TileType.TRIANGE) {
-                    toolBar.add(addTileButton);
+                JButton tileTypeToolButton = new JButton(tileType.createIcon());
+                if (selectedTileTypes.contains(tileType)) {
+                    setSelected(true);
+                    toolBar.add(tileTypeToolButton);
                 }
                 addActionListener(e -> {
                     if (isSelected()) {
-                        toolBar.remove(addButton);
-                        toolBar.add(addTileButton);
-                        toolBar.add(addButton);
-                        sourceTiles.add(value);
+                        toolBar.remove(showToolBarEditorButton);
+                        toolBar.add(tileTypeToolButton);
+                        toolBar.add(showToolBarEditorButton);
+                        selectedTileTypes.add(tileType);
                     } else {
-                        toolBar.remove(addTileButton);
+                        toolBar.remove(tileTypeToolButton);
                         toolBar.revalidate();
-                        sourceTiles.remove(value);
+                        selectedTileTypes.remove(tileType);
                     }
-                    if (sourceTiles.isEmpty()) {
+                    if (selectedTileTypes.isEmpty()) {
                         return;
                     }
-                    palette.updateStates(sourceTiles);
+                    palette.updateStates(selectedTileTypes);
                     swatch.adapt(palette, pattern);
                     truchetParam.paramAdjusted();
                 });
             }});
         }
-        popupMenu.pack();
-        toolBar.add(addButton);
-        addButton.addActionListener(e -> popupMenu.show(toolBar, 0 /*(toolBar.getWidth() - popupMenu.getWidth()) / 2*/, addButton.getHeight()));
+        toolBarEditor.pack();
+        toolBar.add(showToolBarEditorButton);
+        showToolBarEditorButton.addActionListener(e -> toolBarEditor.show(toolBar, 0 /*(toolBar.getWidth() - toolBarEditor.getWidth()) / 2*/, showToolBarEditorButton.getHeight()));
         return toolBar;
     }
 

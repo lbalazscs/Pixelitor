@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
@@ -56,6 +58,7 @@ public class NeoTruchet extends ParametrizedFilter {
         g.setColor(bgColor.getColor());
         g.fillRect(0, 0, W, H);
         g.setColor(fgColor.getColor());
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         int numTilesHor = W / w + 1;
         int numTilesVer = H / h + 1;

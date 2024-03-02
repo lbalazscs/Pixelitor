@@ -9,6 +9,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+
 public class TruchetTileDisplay extends JPanel {
     private TruchetSwatch swatch;
 
@@ -51,6 +54,7 @@ public class TruchetTileDisplay extends JPanel {
         }
         int columns = swatch.getWidth(1), rows = swatch.getHeight(1);
         Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         boolean widthFirst = W * 1d / H > columns * 1d / rows;
         __tileSize = widthFirst ? H / rows : W / columns;
         g2.translate(__xOffset = (widthFirst ? (W - columns * __tileSize) / 2 : 0),
