@@ -94,8 +94,6 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                     verSymSet.setSelected(false);
                     horSymSet.setEnabled(false);
                     verSymSet.setEnabled(false);
-//                    rowSlider.setValue(rowSlider.getValue() & 0xfffffffe);
-//                    columnSlider.setValue(columnSlider.getValue() & 0xfffffffe);
                 }
                 pattern.setRotation(rotationSet.getSelectedIndex());
             }));
@@ -189,7 +187,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         toolBarEditor.setLayout(new GridLayout(0, 1));
 
         ArrayList<TileType> selectedTileTypes = new ArrayList<>();
-        selectedTileTypes.add(TileType.TRIANGE);
+        selectedTileTypes.add(TileType.TRIANGLE);
         palette.updateStates(selectedTileTypes);
 
         JPanel toolBarEditorRow = null;

@@ -20,9 +20,9 @@ public class TruchetTileDisplay extends JPanel {
     private int mouseX;
     private int mouseY;
 
-    private int __xOffset;
-    private int __yOffset;
-    private int __tileSize;
+    private int xOffset;
+    private int yOffset;
+    private int tileSize;
 
     public TruchetTileDisplay(TruchetSwatch swatch) {
         this.swatch = swatch;
@@ -57,21 +57,21 @@ public class TruchetTileDisplay extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         boolean widthFirst = W * 1d / H > columns * 1d / rows;
-        __tileSize = widthFirst ? H / rows : W / columns;
-        g2.translate(__xOffset = (widthFirst ? (W - columns * __tileSize) / 2 : 0),
-            __yOffset = (widthFirst ? 0 : (H - rows * __tileSize) / 2));
+        tileSize = widthFirst ? H / rows : W / columns;
+        g2.translate(xOffset = (widthFirst ? (W - columns * tileSize) / 2 : 0),
+            yOffset = (widthFirst ? 0 : (H - rows * tileSize) / 2));
         if (enableMouseOverlay && mouseIn) {
             g2.setColor(Color.GRAY);
-            g2.fillRect(mouseX * __tileSize, mouseY * __tileSize, __tileSize, __tileSize);
+            g2.fillRect(mouseX * tileSize, mouseY * tileSize, tileSize, tileSize);
         }
         g2.setColor(Color.BLACK);
-        swatch.draw(g2, __tileSize, 5);
-        g2.translate(widthFirst ? -(W - columns * __tileSize) / 2 : 0, widthFirst ? 0 : -(H - rows * __tileSize) / 2);
+        swatch.draw(g2, tileSize, 5);
+        g2.translate(widthFirst ? -(W - columns * tileSize) / 2 : 0, widthFirst ? 0 : -(H - rows * tileSize) / 2);
     }
 
     private void preprocess(MouseEvent e, Consumer<MouseEvent> l) {
         int x = e.getX(), y = e.getY();
-        e.translatePoint(-x + (x - __xOffset + __tileSize) / __tileSize - 1, -y + (y - __yOffset + __tileSize) / __tileSize - 1);
+        e.translatePoint(-x + (x - xOffset + tileSize) / tileSize - 1, -y + (y - yOffset + tileSize) / tileSize - 1);
         x = e.getX();
         y = e.getY();
         if (x < 0 || x >= swatch.columns || y < 0 || y >= swatch.rows) {

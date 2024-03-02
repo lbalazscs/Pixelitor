@@ -5,9 +5,12 @@ import pixelitor.utils.Utils;
 import java.util.ArrayList;
 
 public enum TruchetPreconfiguredPalette implements TruchetPalette {
-    TRIANGLES(TileType.TRIANGE, TileType.SQUARE, TileType.BLANK),
-    QUARTER_CIRCLES(TileType.QUARTER_CIRCLE, TileType.PLUS, TileType.CIRCLE_CROSS),
-    DIAGONALS(TileType.DIAGONAL, TileType.LINE),
+    TRIANGLES(TileType.TRIANGLE, TileType.SQUARE, TileType.BLANK),
+    CIRCULAR(TileType.QUARTER_CIRCLE, TileType.CIRCLE_CROSS),
+    DIAGONALS(TileType.DIAGONAL, TileType.PARALLEL),
+    CIRCUIT(TileType.PLUS, TileType.CENTER_WELL, TileType.CORNER),
+    STREETS(TileType.PLUS, TileType.FLAT_JOIN, TileType.DIVIDE, TileType.THREE_WAY),
+    BOIDS(TileType.FILLED_QUARTERS, TileType.CORNER_BOID),
     ;
     private final TileState[] tileStates;
 
