@@ -5,6 +5,10 @@ import java.util.Random;
 public class TruchetProceduralPattern extends TruchetConfigurablePattern {
 
 
+    public TruchetProceduralPattern(int rows, int columns) {
+        super(rows, columns);
+    }
+
     public void setState(ProceduralStateSpace selectedItem) {
         Random r = new Random();
         var space = selectedItem.createState(getColumns(), getRows(), 12, r);

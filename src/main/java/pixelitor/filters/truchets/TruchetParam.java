@@ -1,9 +1,6 @@
 package pixelitor.filters.truchets;
 
-import pixelitor.filters.gui.AbstractFilterParam;
-import pixelitor.filters.gui.ParamGUIWithAction;
-import pixelitor.filters.gui.ParamState;
-import pixelitor.filters.gui.RandomizePolicy;
+import pixelitor.filters.gui.*;
 
 import javax.swing.*;
 
@@ -27,6 +24,12 @@ public class TruchetParam extends AbstractFilterParam {
         }
 
         return truchetParamGUI;
+    }
+
+    @Override
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+        if (paramGUI!=null)((TruchetParamGUI)paramGUI).setAdjustmentListener(listener);
     }
 
     @Override

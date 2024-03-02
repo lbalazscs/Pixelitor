@@ -2,16 +2,17 @@ package pixelitor.filters.truchets;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 public class TruchetTileDisplay extends JPanel {
     private TruchetSwatch swatch;
 
+    private boolean mouseIn;
     private int mouseX;
     private int mouseY;
 
@@ -38,6 +39,7 @@ public class TruchetTileDisplay extends JPanel {
                 repaint();
             }
         });
+        setPreferredSize(new Dimension(0, 100));
     }
 
     @Override
@@ -53,8 +55,10 @@ public class TruchetTileDisplay extends JPanel {
         __tileSize = widthFirst ? H / rows : W / columns;
         g2.translate(__xOffset = (widthFirst ? (W - columns * __tileSize) / 2 : 0),
             __yOffset = (widthFirst ? 0 : (H - rows * __tileSize) / 2));
-        g2.setColor(Color.GRAY);
-        g2.fillRect(mouseX * __tileSize, mouseY * __tileSize, __tileSize, __tileSize);
+        if (mouseIn) {
+            g2.setColor(Color.GRAY);
+            g2.fillRect(mouseX * __tileSize, mouseY * __tileSize, __tileSize, __tileSize);
+        }
         g2.setColor(Color.BLACK);
         swatch.draw(g2, __tileSize, 5);
         g2.translate(widthFirst ? -(W - columns * __tileSize) / 2 : 0, widthFirst ? 0 : -(H - rows * __tileSize) / 2);
@@ -62,16 +66,27 @@ public class TruchetTileDisplay extends JPanel {
 
     private void preprocess(MouseEvent e, Consumer<MouseEvent> l) {
         int x = e.getX(), y = e.getY();
-        e.translatePoint(-x + (x - __xOffset) / __tileSize, -y + (y - __yOffset) / __tileSize);
+        e.translatePoint(-x + (x - __xOffset + __tileSize) / __tileSize - 1, -y + (y - __yOffset + __tileSize) / __tileSize - 1);
         x = e.getX();
         y = e.getY();
         if (x < 0 || x >= swatch.columns || y < 0 || y >= swatch.rows) {
+            mouseIn = false;
             return;
         }
+        mouseIn = true;
         l.accept(e);
     }
 
-    @Override
+    public void addMousePressListener(Consumer<MouseEvent> eventConsumer) {
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                preprocess(e, eventConsumer);
+            }
+        });
+    }
+
+    /*@Override
     public synchronized void addMouseListener(MouseListener l) {
         super.addMouseListener(new MouseListener() {
             @Override
@@ -99,5 +114,5 @@ public class TruchetTileDisplay extends JPanel {
                 preprocess(e, l::mouseExited);
             }
         });
-    }
+    }*/
 }

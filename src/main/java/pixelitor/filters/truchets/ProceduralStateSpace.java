@@ -8,7 +8,6 @@ import java.util.Random;
 
 public enum ProceduralStateSpace {
     RANDOM((w, h, x, y, limit, random, state) -> random.nextInt(limit)),
-    EX_RANDOM((w, h, x, y, limit, random, state) -> random.nextInt(limit)),
     WAVE_FUNCTION((w, h, x, y, limit, random, state) -> ((int[][]) state)[x][y]) {
         private void collapse(int x, int y, int w, int h, int v, float likeliness, int[][] space, int limit, Random random) {
             if (x < 0 || y < 0 || x >= w || y >= h || space[x][y] != -1) {

@@ -6,10 +6,8 @@ import java.util.ArrayList;
 
 public enum TruchetPreconfiguredPalette implements TruchetPalette {
     TRIANGLES(TileType.TRIANGE, TileType.SQUARE, TileType.BLANK),
-    QUARTER_CIRCLES(TileType.QUARTER_CIRCLE),
-    EX_QUARTER_CIRCLES(TileType.QUARTER_CIRCLE, TileType.PLUS, TileType.CIRCLE_CROSS),
-    DIAGONALS(TileType.DIAGONAL),
-    EX_DIAGONALS(TileType.DIAGONAL, TileType.LINE, TileType.LINE_DOWN),
+    QUARTER_CIRCLES(TileType.QUARTER_CIRCLE, TileType.PLUS, TileType.CIRCLE_CROSS),
+    DIAGONALS(TileType.DIAGONAL, TileType.LINE),
     ;
     private final TileState[] tileStates;
 

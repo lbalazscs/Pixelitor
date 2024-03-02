@@ -91,6 +91,7 @@ public enum TileType {
         BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
         return stroke.createStrokedShape(lines);
     }),
+    // TODO: Remove this
     LINE_DOWN(2, true, true, (tileSize, lineWidth) -> {
         double firsts = Math.floor(tileSize / 2d);
         double thirds = Math.ceil(3 * tileSize / 2d);

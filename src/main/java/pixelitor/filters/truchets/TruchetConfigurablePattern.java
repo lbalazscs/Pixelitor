@@ -9,6 +9,16 @@ public class TruchetConfigurablePattern implements TruchetPattern {
     boolean symmetricAboutHorizontal;
     boolean symmetricAboutVertical;
 
+    public TruchetConfigurablePattern(int rows, int columns) {
+        updateRows(rows);
+        updateColumns(columns);
+    }
+
+    public void update(int rows, int column) {
+        updateRows(rows);
+        updateColumns(column);
+    }
+
     public void updateRows(int rows) {
         if (rotation != 0) {
             rows = rows & 0xfffffffe;

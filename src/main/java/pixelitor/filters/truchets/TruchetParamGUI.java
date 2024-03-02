@@ -1,6 +1,7 @@
 package pixelitor.filters.truchets;
 
-import pixelitor.filters.gui.ParamGUI;
+import pixelitor.filters.gui.*;
+import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 
@@ -8,12 +9,9 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,75 +19,57 @@ import java.util.function.Consumer;
 
 public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI {
     TruchetParam truchetParam;
+    TruchetSwatch swatch;
+
 
     public TruchetParamGUI(TruchetParam truchetParam, TruchetSwatch swatch) {
         this.truchetParam = truchetParam;
-        add(new JTabbedPane() {
-            {
-                add("Presets", createPresetsTab(this, swatch));
-                add("Customize", createCustomizerTab(this, swatch));
-                add("Procedural", createProceduralTab(this, swatch));
-            }
-        });
+        this.swatch = swatch;
+
+        add(new JTabbedPane() {{
+            add("Presets", createPresetsTab(this));
+            add("Customize", createCustomizerTab(this));
+            add("Procedural", createProceduralTab(this));
+        }});
     }
 
-    private JPanel createPresetsTab(JTabbedPane tabbedPane, TruchetSwatch swatch) {
+    private JPanel createPresetsTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
-            setPreferredSize(new Dimension(400, 400));
-
-            var paletteChoice = new JComboBox<>(TruchetPreconfiguredPalette.values());
-            var patternChoice = new JComboBox<>(TruchetPreconfiguredPattern.values());
-
-            swatch.adapt(
-                paletteChoice.getItemAt(Math.max(0, paletteChoice.getSelectedIndex())),
-                patternChoice.getItemAt(Math.max(0, patternChoice.getSelectedIndex())));
-
+            var paletteChoice = new EnumParam<>("Palette", TruchetPreconfiguredPalette.class);
+            var patternChoice = new EnumParam<>("Pattern", TruchetPreconfiguredPattern.class);
             var truchetDisplay = new TruchetTileDisplay(swatch);
+            swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
 
-            ActionListener updateAction = e -> {
-                swatch.adapt(
-                    paletteChoice.getItemAt(Math.max(0, paletteChoice.getSelectedIndex())),
-                    patternChoice.getItemAt(Math.max(0, patternChoice.getSelectedIndex())));
+            Runnable updateAction = () -> {
+                swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            paletteChoice.addActionListener(updateAction);
-            patternChoice.addActionListener(updateAction);
+            paletteChoice.setAdjustmentListener(updateAction::run);
+            patternChoice.setAdjustmentListener(updateAction::run);
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Runnable) () -> {}).run());
 
-            tabbedPane.addChangeListener(e -> {
-                if (tabbedPane.getSelectedComponent() != this) {
-                    return;
-                }
-                updateAction.actionPerformed(null);
-            });
-
-            add(new JPanel(new GridLayout(0, 1)) {{
-                add(paletteChoice);
-                add(patternChoice);
+            add(new JPanel(new GridBagLayout()) {{
+                GridBagHelper helper = new GridBagHelper(this);
+                helper.addParam(paletteChoice);
+                helper.addParam(patternChoice);
             }}, BorderLayout.NORTH);
             add(truchetDisplay, BorderLayout.CENTER);
         }};
     }
 
-    private JPanel createCustomizerTab(JTabbedPane tabbedPane, TruchetSwatch swatch) {
+    private JPanel createCustomizerTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
-            setBackground(Color.CYAN);
-
             var palette = new TruchetConfigurablePalette();
-            var pattern = new TruchetConfigurablePattern();
-            pattern.updateRows(3);
-            pattern.updateColumns(4);
-
-            tabbedPane.addChangeListener(e -> {
-                if (tabbedPane.getSelectedComponent() != this) {
-                    return;
-                }
-                swatch.adapt(palette, pattern);
-                truchetParam.paramAdjusted();
-            });
-
+            var pattern = new TruchetConfigurablePattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
-
+            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
+            var horSymSet = new JToggleButton("Horizontal");
+            var verSymSet = new JToggleButton("Vertical");
+            var rangeParam = new GroupedRangeParam("Swatch Shape", new RangeParam[]{
+                new RangeParam("Rows", 1, pattern.getRows(), 20),
+                new RangeParam("Columns", 1, pattern.getColumns(), 20)
+            }, false);
             var truchetDisplay = new TruchetTileDisplay(swatch);
 
             Consumer<Runnable> updateAction = action -> {
@@ -98,26 +78,13 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
+                pattern.setState(e.getY(), e.getX(),
+                    (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree())));
+            rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
+                pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
 
-            truchetDisplay.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    updateAction.accept(() ->
-                        pattern.setState(e.getY(), e.getX(),
-                            (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree()));
-                }
-            });
-
-            JSlider rowSlider = new JSlider(1, 20, pattern.getRows());
-            rowSlider.addChangeListener(e -> updateAction.accept(() ->
-                pattern.updateRows(rowSlider.getValue())));
-            JSlider columnSlider = new JSlider(1, 20, pattern.getColumns());
-            columnSlider.addChangeListener(e -> updateAction.accept(() ->
-                pattern.updateColumns(columnSlider.getValue())));
-
-            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
-            var horSymSet = new JToggleButton("Horizontal");
-            var verSymSet = new JToggleButton("Vertical");
             rotationSet.addActionListener(e -> updateAction.accept(() -> {
                 if (Objects.equals(rotationSet.getSelectedItem(), "None")) {
                     horSymSet.setEnabled(true);
@@ -127,8 +94,8 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                     verSymSet.setSelected(false);
                     horSymSet.setEnabled(false);
                     verSymSet.setEnabled(false);
-                    rowSlider.setValue(rowSlider.getValue() & 0xfffffffe);
-                    columnSlider.setValue(columnSlider.getValue() & 0xfffffffe);
+//                    rowSlider.setValue(rowSlider.getValue() & 0xfffffffe);
+//                    columnSlider.setValue(columnSlider.getValue() & 0xfffffffe);
                 }
                 pattern.setRotation(rotationSet.getSelectedIndex());
             }));
@@ -137,12 +104,12 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             verSymSet.addActionListener(e -> updateAction.accept(() ->
                 pattern.setSymmetricAboutVertical(verSymSet.isSelected())));
 
-            add(new JPanel(new GridLayout(0, 1)) {{
-                add(toolBar);
-                add(new JLabel("Number of rows:"));
-                add(rowSlider);
-                add(new JLabel("Number of columns:"));
-                add(columnSlider);
+            add(new JPanel(new GridBagLayout()) {{
+                GridBagConstraints constraints = new GridBagConstraints() {{
+                    weighty = (gridx = (anchor = WEST) - WEST) + 1;
+                }};
+                add(toolBar, constraints);
+                add(rangeParam.createGUI(), constraints);
             }}, BorderLayout.NORTH);
             add(truchetDisplay, BorderLayout.CENTER);
             add(new JPanel(new GridLayout(1, 0)) {{
@@ -153,29 +120,21 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         }};
     }
 
-    private JPanel createProceduralTab(JTabbedPane tabbedPane, TruchetSwatch swatch) {
+    private JPanel createProceduralTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
-            // Random
-            // Gaussian (prefer a specific tile inbr center and another towards the out)
-            // Wave Func Collapse
-            // Noise
-
             var palette = new TruchetConfigurablePalette();
-            var pattern = new TruchetProceduralPattern();
-            pattern.updateRows(3);
-            pattern.updateColumns(4);
-
-            tabbedPane.addChangeListener(e -> {
-                if (tabbedPane.getSelectedComponent() != this) {
-                    return;
-                }
-                swatch.adapt(palette, pattern);
-                truchetParam.paramAdjusted();
-            });
-
+            var pattern = new TruchetProceduralPattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
-            var patternChoice = new JComboBox<>(ProceduralStateSpace.values());
+            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
+            var horSymSet = new JToggleButton("Horizontal");
+            var verSymSet = new JToggleButton("Vertical");
+            var rangeParam = new GroupedRangeParam("Swatch Shape", new RangeParam[]{
+                new RangeParam("Rows", 1, pattern.getRows(), 20),
+                new RangeParam("Columns", 1, pattern.getColumns(), 20)
+            }, false);
             var truchetDisplay = new TruchetTileDisplay(swatch);
+            var patternChoice = new EnumParam<>("Pattern", ProceduralStateSpace.class);
+            pattern.setState(patternChoice.getSelected());
 
             Consumer<Runnable> updateAction = action -> {
                 action.run();
@@ -183,24 +142,12 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-
-            patternChoice.setSelectedIndex(0);
-            patternChoice.addActionListener(e -> updateAction.accept(() -> {
-                System.out.println("hgcfgbn");
-                pattern.setState(((ProceduralStateSpace) patternChoice.getSelectedItem()));
-            }));
-            pattern.setState(((ProceduralStateSpace) patternChoice.getSelectedItem()));
-
-            JSlider rowSlider = new JSlider(1, 20, pattern.getRows());
-            rowSlider.addChangeListener(e -> updateAction.accept(() ->
-                pattern.updateRows(rowSlider.getValue())));
-            JSlider columnSlider = new JSlider(1, 20, pattern.getColumns());
-            columnSlider.addChangeListener(e -> updateAction.accept(() ->
-                pattern.updateColumns(columnSlider.getValue())));
-
-            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
-            var horSymSet = new JToggleButton("Horizontal");
-            var verSymSet = new JToggleButton("Vertical");
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            patternChoice.withAction(FilterButtonModel.createNoOpReseed());
+            patternChoice.setAdjustmentListener(() -> updateAction.accept(() ->
+                pattern.setState(patternChoice.getSelected())));
+            rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
+                pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
             rotationSet.addActionListener(e -> updateAction.accept(() -> {
                 if (Objects.equals(rotationSet.getSelectedItem(), "None")) {
                     horSymSet.setEnabled(true);
@@ -210,8 +157,6 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                     verSymSet.setSelected(false);
                     horSymSet.setEnabled(false);
                     verSymSet.setEnabled(false);
-                    rowSlider.setValue(rowSlider.getValue() & 0xfffffffe);
-                    columnSlider.setValue(columnSlider.getValue() & 0xfffffffe);
                 }
                 pattern.setRotation(rotationSet.getSelectedIndex());
             }));
@@ -220,14 +165,13 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             verSymSet.addActionListener(e -> updateAction.accept(() ->
                 pattern.setSymmetricAboutVertical(verSymSet.isSelected())));
 
-            add(new JPanel(new GridLayout(0, 1)) {{
-                add(toolBar);
-                add(new JLabel("Number of rows:"));
-                add(rowSlider);
-                add(new JLabel("Number of columns:"));
-                add(columnSlider);
-                add(new JLabel("Choose a pattern"));
-                add(patternChoice);
+            add(new JPanel(new GridBagLayout()) {{
+                GridBagConstraints constraints = new GridBagConstraints() {{
+                    weighty = (gridx = (anchor = WEST) - WEST) + 1;
+                }};
+                add(toolBar, constraints);
+                add(rangeParam.createGUI(), constraints);
+                add(patternChoice.createGUI(), constraints);
             }}, BorderLayout.NORTH);
             add(truchetDisplay, BorderLayout.CENTER);
             add(new JPanel(new GridLayout(1, 0)) {{
@@ -304,4 +248,10 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
     public int getNumLayoutColumns() {
         return 1;
     }
+
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+//        paramList.forEach(fp -> fp.setAdjustmentListener(listener));
+    }
+
+
 }
