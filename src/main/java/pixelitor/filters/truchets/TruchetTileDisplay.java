@@ -15,6 +15,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class TruchetTileDisplay extends JPanel {
     private TruchetSwatch swatch;
 
+    private boolean enableMouseOverlay;
     private boolean mouseIn;
     private int mouseX;
     private int mouseY;
@@ -59,7 +60,7 @@ public class TruchetTileDisplay extends JPanel {
         __tileSize = widthFirst ? H / rows : W / columns;
         g2.translate(__xOffset = (widthFirst ? (W - columns * __tileSize) / 2 : 0),
             __yOffset = (widthFirst ? 0 : (H - rows * __tileSize) / 2));
-        if (mouseIn) {
+        if (enableMouseOverlay && mouseIn) {
             g2.setColor(Color.GRAY);
             g2.fillRect(mouseX * __tileSize, mouseY * __tileSize, __tileSize, __tileSize);
         }
@@ -90,33 +91,7 @@ public class TruchetTileDisplay extends JPanel {
         });
     }
 
-    /*@Override
-    public synchronized void addMouseListener(MouseListener l) {
-        super.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                preprocess(e, l::mouseClicked);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                preprocess(e, l::mousePressed);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                preprocess(e, l::mouseReleased);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                preprocess(e, l::mouseEntered);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                preprocess(e, l::mouseExited);
-            }
-        });
-    }*/
+    public void setEnableMouseOverlay(boolean enableMouseOverlay) {
+        this.enableMouseOverlay = enableMouseOverlay;
+    }
 }

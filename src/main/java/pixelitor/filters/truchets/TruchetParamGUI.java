@@ -27,8 +27,8 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
         add(new JTabbedPane() {{
             add("Presets", createPresetsTab(this));
-            add("Customize", createCustomizerTab(this));
-            add("Procedural", createProceduralTab(this));
+            add("Design", createCustomizerTab(this));
+            add("Generate", createProceduralTab(this));
         }});
     }
 
@@ -39,14 +39,15 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             var truchetDisplay = new TruchetTileDisplay(swatch);
             swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
 
-            Runnable updateAction = () -> {
+            Consumer<Runnable> updateAction = action -> {
+                action.run();
                 swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            paletteChoice.setAdjustmentListener(updateAction::run);
-            patternChoice.setAdjustmentListener(updateAction::run);
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Runnable) () -> {}).run());
+            paletteChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
+            patternChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) x -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(false)));
 
             add(new JPanel(new GridBagLayout()) {{
                 GridBagHelper helper = new GridBagHelper(this);
@@ -62,7 +63,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             var palette = new TruchetConfigurablePalette();
             var pattern = new TruchetConfigurablePattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
-            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
+            var rotationSet = new JComboBox<>(new String[]{"No Rotation", "Quarter", "Half"});
             var horSymSet = new JToggleButton("Horizontal");
             var verSymSet = new JToggleButton("Vertical");
             var rangeParam = new GroupedRangeParam("Swatch Shape", new RangeParam[]{
@@ -77,7 +78,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(true)));
             truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
                 pattern.setState(e.getY(), e.getX(),
                     (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree())));
@@ -85,7 +86,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
 
             rotationSet.addActionListener(e -> updateAction.accept(() -> {
-                if (Objects.equals(rotationSet.getSelectedItem(), "None")) {
+                if (Objects.equals(rotationSet.getSelectedItem(), "No Rotation")) {
                     horSymSet.setEnabled(true);
                     verSymSet.setEnabled(true);
                 } else {
@@ -124,7 +125,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             var palette = new TruchetConfigurablePalette();
             var pattern = new TruchetProceduralPattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
-            var rotationSet = new JComboBox<>(new String[]{"None", "Quarter", "Vertical", "Horizontal"});
+            var rotationSet = new JComboBox<>(new String[]{"No Rotation", "Quarter", "Half"});
             var horSymSet = new JToggleButton("Horizontal");
             var verSymSet = new JToggleButton("Vertical");
             var rangeParam = new GroupedRangeParam("Swatch Shape", new RangeParam[]{
@@ -141,14 +142,14 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(true)));
             patternChoice.withAction(FilterButtonModel.createNoOpReseed());
             patternChoice.setAdjustmentListener(() -> updateAction.accept(() ->
                 pattern.setState(patternChoice.getSelected())));
             rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
                 pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
             rotationSet.addActionListener(e -> updateAction.accept(() -> {
-                if (Objects.equals(rotationSet.getSelectedItem(), "None")) {
+                if (Objects.equals(rotationSet.getSelectedItem(), "No Rotation")) {
                     horSymSet.setEnabled(true);
                     verSymSet.setEnabled(true);
                 } else {
