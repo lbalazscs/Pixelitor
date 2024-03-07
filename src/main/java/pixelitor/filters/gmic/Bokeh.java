@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,6 +97,7 @@ public class Bokeh extends GMICFilter {
             scales.getValue() + "," +
                 shape.getValue() + "," +
                 seed + "," +
+
                 density.getValue(0) + "," +
                 radius.getValue(0) + "," +
                 outline.getValue(0) + "," +

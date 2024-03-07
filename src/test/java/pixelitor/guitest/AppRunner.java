@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,6 +58,7 @@ import java.awt.Color;
 import java.io.File;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -517,7 +518,9 @@ public class AppRunner {
     }
 
     DialogFixture findFilterDialog() {
-        return WindowFinder.findDialog("filterDialog").using(robot);
+        return WindowFinder.findDialog("filterDialog")
+            .withTimeout(1, TimeUnit.MINUTES)
+            .using(robot);
     }
 
     DialogFixture findAnyDialog() {

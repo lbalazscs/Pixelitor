@@ -190,6 +190,9 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
         @Serial
         protected Object readResolve() {
+            // When deserializing, the filter constructor is called,
+            // and then the state is restored from the preset.
+            // Serializable filters must have a no-argument constructor.
             Filter filter = null;
             try {
                 filter = filterClass.getDeclaredConstructor().newInstance();

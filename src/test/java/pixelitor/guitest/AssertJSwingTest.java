@@ -182,7 +182,7 @@ public class AssertJSwingTest {
         if (testOneMethodSlowly) {
             app.runSlowly();
 
-            testPreferences();
+            testGMICFilters();
         } else {
             runMenuCommand("Set Default Workspace");
 
@@ -1625,6 +1625,7 @@ public class AssertJSwingTest {
         testDisplaceFilters();
         testDistortFilters();
         testFindEdgesFilters();
+        testGMICFilters();
         testLightFilters();
         testNoiseFilters();
         testOtherFilters();
@@ -1789,6 +1790,30 @@ public class AssertJSwingTest {
         testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
+    }
+
+    private void testGMICFilters() {
+        app.resize(200);
+
+        // Artistic
+        testFilterWithDialog("Bokeh", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Box Fitting", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Brushify", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Cubism", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Huffman Glitches", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Random 3D Objects", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Rodilius", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Voronoi", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+
+        // Blur/Sharpen
+        testFilterWithDialog("Anisothropic Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Bilateral Smoothing", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+
+        testFilterWithDialog("G'MIC Command", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Light Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Local Normalization", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Stroke", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Vibrance", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testOtherFilters() {
