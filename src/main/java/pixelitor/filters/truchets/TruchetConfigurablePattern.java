@@ -2,7 +2,9 @@ package pixelitor.filters.truchets;
 
 import com.jhlabs.image.ImageMath;
 
+import java.awt.Point;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class TruchetConfigurablePattern implements TruchetPattern {
 
@@ -157,7 +159,7 @@ public class TruchetConfigurablePattern implements TruchetPattern {
         }
     }
 
-    private void setStateFreely(int row, int column, int state) {
+    protected void setStateFreely(int row, int column, int state) {
         pattern.get(row).set(column, state);
     }
 
@@ -232,5 +234,10 @@ public class TruchetConfigurablePattern implements TruchetPattern {
                 }
             }
         }
+    }
+
+    @Override
+    public Stream<Point> streamHighlightRule(int mouseX, int mouseY) {
+        return Stream.of(new Point(mouseX, mouseY));
     }
 }

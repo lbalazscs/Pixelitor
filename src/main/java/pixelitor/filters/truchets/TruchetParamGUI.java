@@ -39,7 +39,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         return new JPanel(new BorderLayout()) {{
             var paletteChoice = new EnumParam<>("Palette", TruchetPreconfiguredPalette.class);
             var patternChoice = new EnumParam<>("Pattern", TruchetPreconfiguredPattern.class);
-            var truchetDisplay = new TruchetTileDisplay(swatch);
+            var truchetDisplay = new TruchetTileDisplay(swatch, null);
             swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
 
             Consumer<Runnable> updateAction = action -> {
@@ -50,7 +50,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             };
             paletteChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
             patternChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) x -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(false)));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) x -> {}).accept(() -> {}));
 
             add(new JPanel(new GridBagLayout()) {{
                 GridBagHelper helper = new GridBagHelper(this);
@@ -73,7 +73,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 new RangeParam("Rows", 1, pattern.getRows(), 20),
                 new RangeParam("Columns", 1, pattern.getColumns(), 20)
             }, false);
-            var truchetDisplay = new TruchetTileDisplay(swatch);
+            var truchetDisplay = new TruchetTileDisplay(swatch, pattern);
 
             Consumer<Runnable> updateAction = action -> {
                 action.run();
@@ -81,10 +81,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(true)));
-//            truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
-//                pattern.setState(e.getY(), e.getX(),
-//                    (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree())));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
             truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
                 toolBar.takeAction(e.getX(), e.getY())));
             rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
@@ -135,7 +132,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 new RangeParam("Rows", 1, pattern.getRows(), 20),
                 new RangeParam("Columns", 1, pattern.getColumns(), 20)
             }, false);
-            var truchetDisplay = new TruchetTileDisplay(swatch);
+            var truchetDisplay = new TruchetTileDisplay(swatch, pattern);
             var patternChoice = new EnumParam<>("Pattern", ProceduralStateSpace.class);
             pattern.setState(patternChoice.getSelected());
 
@@ -145,7 +142,9 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(true)));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
+                toolBar.takeAction(e.getX(), e.getY())));
             patternChoice.withAction(FilterButtonModel.createNoOpReseed());
             patternChoice.setAdjustmentListener(() -> updateAction.accept(() ->
                 pattern.setState(patternChoice.getSelected())));

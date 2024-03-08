@@ -14,6 +14,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public class TruchetTileDisplay extends JPanel {
     private TruchetSwatch swatch;
+    private TruchetPattern pattern;
 
     private boolean enableMouseOverlay;
     private boolean mouseIn;
@@ -24,8 +25,9 @@ public class TruchetTileDisplay extends JPanel {
     private int yOffset;
     private int tileSize;
 
-    public TruchetTileDisplay(TruchetSwatch swatch) {
+    public TruchetTileDisplay(TruchetSwatch swatch, TruchetPattern pattern) {
         this.swatch = swatch;
+        this.pattern = pattern;
         addMouseMotionListener(new MouseAdapter() {
             long then = System.currentTimeMillis();
 
@@ -60,9 +62,11 @@ public class TruchetTileDisplay extends JPanel {
         tileSize = widthFirst ? H / rows : W / columns;
         g2.translate(xOffset = (widthFirst ? (W - columns * tileSize) / 2 : 0),
             yOffset = (widthFirst ? 0 : (H - rows * tileSize) / 2));
-        if (enableMouseOverlay && mouseIn) {
-            g2.setColor(Color.GRAY);
-            g2.fillRect(mouseX * tileSize, mouseY * tileSize, tileSize, tileSize);
+        if (pattern != null) {
+            pattern.streamHighlightRule(mouseX, mouseY).forEach(point -> {
+                g2.setColor(Color.GRAY);
+                g2.fillRect(point.x * tileSize, point.y * tileSize, tileSize, tileSize);
+            });
         }
         g2.setColor(Color.BLACK);
         swatch.draw(g2, tileSize, 5);
@@ -89,9 +93,5 @@ public class TruchetTileDisplay extends JPanel {
                 preprocess(e, eventConsumer);
             }
         });
-    }
-
-    public void setEnableMouseOverlay(boolean enableMouseOverlay) {
-        this.enableMouseOverlay = enableMouseOverlay;
     }
 }

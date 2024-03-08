@@ -2,6 +2,9 @@ package pixelitor.filters.truchets;
 
 import pixelitor.utils.Utils;
 
+import java.awt.Point;
+import java.util.stream.Stream;
+
 public enum TruchetPreconfiguredPattern implements TruchetPattern {
     Citrine(new int[][]{
         {2, 2, 1, 1, 2, 2, 3, 3, 0, 0, 3, 3},
@@ -194,5 +197,10 @@ public enum TruchetPreconfiguredPattern implements TruchetPattern {
     @Override
     public int getState(int row, int column) {
         return pattern[row][column];
+    }
+
+    @Override
+    public Stream<Point> streamHighlightRule(int mouseX, int mouseY) {
+        return Stream.of();
     }
 }

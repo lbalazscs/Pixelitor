@@ -1,5 +1,8 @@
 package pixelitor.filters.truchets;
 
+import java.awt.Point;
+import java.util.stream.Stream;
+
 public interface TruchetPattern {
     int getRows();
 
@@ -8,4 +11,6 @@ public interface TruchetPattern {
     int getState(int row, int column);
 
     default void sharePatternTweaks(int row, int column, TileState tileState){}
+
+    Stream<Point> streamHighlightRule(int mouseX, int mouseY);
 }
