@@ -41,7 +41,7 @@ public enum TileType {
         return path;
     }),
 
-    CENTER_WELL(4, false, true, (tileSize, lineWidth) -> {
+    CENTER_WELL(1, true, true, (tileSize, lineWidth) -> {
         Path2D path = new Path2D.Double();
 
         path.moveTo(tileSize / 2d, tileSize);

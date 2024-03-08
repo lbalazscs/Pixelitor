@@ -41,4 +41,16 @@ public enum TruchetPreconfiguredPalette implements TruchetPalette {
     public int getDegree() {
         return tileStates.length;
     }
+
+    @Override
+    public int getFirstStateOf(TileType tileType) {
+        int state = 0;
+        for (TileState tileState : tileStates) {
+            if (tileState.type == tileType) {
+                return state;
+            }
+            state += tileState.type.rotationalDegree;
+        }
+        throw new IllegalStateException("Tile type " + tileType + " not in palette!");
+    }
 }

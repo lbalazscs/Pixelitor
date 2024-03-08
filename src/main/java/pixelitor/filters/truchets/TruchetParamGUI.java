@@ -1,6 +1,8 @@
 package pixelitor.filters.truchets;
 
 import pixelitor.filters.gui.*;
+import pixelitor.filters.truchets.editableToolBar.EditableToolBar;
+import pixelitor.filters.truchets.editableToolBar.STool;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
@@ -13,6 +15,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -79,9 +82,11 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetParam.paramAdjusted();
             };
             tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> truchetDisplay.setEnableMouseOverlay(true)));
+//            truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
+//                pattern.setState(e.getY(), e.getX(),
+//                    (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree())));
             truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
-                pattern.setState(e.getY(), e.getX(),
-                    (pattern.getState(e.getY(), e.getX()) + 1) % palette.getDegree())));
+                toolBar.takeAction(e.getX(), e.getY())));
             rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
                 pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
 
@@ -180,7 +185,48 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         }};
     }
 
-    private JToolBar createPaletteBar(TruchetConfigurablePalette palette, TruchetSwatch swatch, TruchetConfigurablePattern pattern) {
+    private EditableToolBar createPaletteBar(TruchetConfigurablePalette palette, TruchetSwatch swatch, TruchetConfigurablePattern pattern) {
+        var toolBar = new EditableToolBar(JToolBar.HORIZONTAL);
+
+        ArrayList<TileType> selectedTileTypes = new ArrayList<>();
+        HashMap<STool, TileType> availableTools = new HashMap<>();
+        for (TileType tileType : TileType.values()) {
+            TileTypeTool tool = new TileTypeTool(tileType, palette, pattern);
+            toolBar.addTool(tool);
+            availableTools.put(tool, tileType);
+        }
+        toolBar.setToolSelectionListener(new EditableToolBar.ToolSelectionListener() {
+            {
+                toolAdded(toolBar.getSelectedTool());
+                selectionChanged();
+            }
+
+            @Override
+            public void toolAdded(STool tool) {
+                selectedTileTypes.add(availableTools.get(tool));
+            }
+
+            @Override
+            public void toolRemoved(STool tool) {
+                selectedTileTypes.remove(availableTools.get(tool));
+            }
+
+            @Override
+            public void selectionChanged() {
+                if (selectedTileTypes.isEmpty()) {
+                    return;
+                }
+                palette.updateStates(selectedTileTypes);
+                swatch.adapt(palette, pattern);
+                truchetParam.paramAdjusted();
+            }
+        });
+
+        palette.updateStates(selectedTileTypes);
+        return toolBar;
+    }
+
+    private JToolBar createPaletteBarOld(TruchetConfigurablePalette palette, TruchetSwatch swatch, TruchetConfigurablePattern pattern) {
         var toolBar = new JToolBar();
         var showToolBarEditorButton = new JButton(Icons.loadThemed("add_layer.gif", ThemedImageIcon.BLACK));
         var toolBarEditor = new JPopupMenu();
@@ -191,13 +237,17 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         palette.updateStates(selectedTileTypes);
 
         JPanel toolBarEditorRow = null;
+        ButtonGroup group = new ButtonGroup();
         for (TileType tileType : TileType.values()) {
             if (toolBarEditorRow == null || toolBarEditorRow.getComponentCount() >= 2) {
                 toolBarEditor.add(toolBarEditorRow = new JPanel(new GridLayout(1, 0)));
             }
             toolBarEditorRow.add(new JToggleButton(tileType.toString(), tileType.createIcon()) {{
                 setHorizontalAlignment(SwingConstants.LEFT);
-                JButton tileTypeToolButton = new JButton(tileType.createIcon());
+//                JButton tileTypeToolButton = new JButton(tileType.createIcon());
+                JToggleButton tileTypeToolButton = new JToggleButton(tileType.createIcon());
+                tileTypeToolButton.addActionListener(e -> System.out.println(tileTypeToolButton.isSelected()));
+                group.add(tileTypeToolButton);
                 if (selectedTileTypes.contains(tileType)) {
                     setSelected(true);
                     toolBar.add(tileTypeToolButton);
