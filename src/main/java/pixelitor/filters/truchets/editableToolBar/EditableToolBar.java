@@ -71,7 +71,7 @@ public class EditableToolBar extends JToolBar {
                 // add one another and then remove the current?
             }
         });
-        editorMenu.add(toolSelectionButton);
+        __editorMenuRow.add(toolSelectionButton);
 
         if (getComponentCount() == 2) {
             toolSelectionButton.setSelected(true);
