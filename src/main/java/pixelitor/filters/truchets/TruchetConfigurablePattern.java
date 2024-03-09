@@ -240,4 +240,23 @@ public class TruchetConfigurablePattern implements TruchetPattern {
     public Stream<Point> streamHighlightRule(int mouseX, int mouseY) {
         return Stream.of(new Point(mouseX, mouseY));
     }
+
+    @Override
+    public void updateFrom(TruchetPattern source) {
+        update(source.getRows(), source.getColumns());
+        if (source instanceof TruchetConfigurablePattern pattern) {
+            rotation = (pattern.rotation);
+            symmetricAboutVertical = (pattern.symmetricAboutVertical);
+            symmetricAboutHorizontal = (pattern.symmetricAboutHorizontal);
+        } else {
+            setRotation(0);
+            setSymmetricAboutVertical(false);
+            setSymmetricAboutHorizontal(false);
+        }
+        for (int i = 0; i < source.getRows(); i++) {
+            for (int j = 0; j < source.getColumns(); j++) {
+                setStateFreely(i, j, source.getState(i, j));
+            }
+        }
+    }
 }

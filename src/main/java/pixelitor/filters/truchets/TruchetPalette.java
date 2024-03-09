@@ -7,4 +7,5 @@ public interface TruchetPalette {
 
     int getFirstStateOf(TileType tileType);
 
+    void updateFrom(TruchetPalette source);
 }

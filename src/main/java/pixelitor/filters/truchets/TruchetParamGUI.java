@@ -4,8 +4,6 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.truchets.editableToolBar.EditableToolBar;
 import pixelitor.filters.truchets.editableToolBar.STool;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ThemedImageIcon;
-import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -16,12 +14,23 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI {
+    public static final String PRESETS = "Presets";
+    public static final String DESIGN = "Design";
+    public static final String GENERATE = "Generate";
+
     TruchetParam truchetParam;
     TruchetSwatch swatch;
+
+    // Inter-tab communication states
+    JPanel currentTab = null;
+    TruchetPalette currentPalette = null;
+    TruchetPattern currentPattern = null;
 
 
     public TruchetParamGUI(TruchetParam truchetParam, TruchetSwatch swatch) {
@@ -29,28 +38,29 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         this.swatch = swatch;
 
         add(new JTabbedPane() {{
-            add("Presets", createPresetsTab(this));
-            add("Design", createCustomizerTab(this));
-            add("Generate", createProceduralTab(this));
+            add(PRESETS, createPresetsTab(this));
+            add(DESIGN, createCustomizerTab(this));
+            add(GENERATE, createProceduralTab(this));
         }});
     }
 
     private JPanel createPresetsTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
+            setName(PRESETS);
+
             var paletteChoice = new EnumParam<>("Palette", TruchetPreconfiguredPalette.class);
             var patternChoice = new EnumParam<>("Pattern", TruchetPreconfiguredPattern.class);
             var truchetDisplay = new TruchetTileDisplay(swatch, null);
-            swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
 
-            Consumer<Runnable> updateAction = action -> {
-                action.run();
-                swatch.adapt(paletteChoice.getSelected(), patternChoice.getSelected());
+            Updater updater = () -> {
+                swatch.adapt(currentPalette = paletteChoice.getSelected(), currentPattern = patternChoice.getSelected());
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            paletteChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
-            patternChoice.setAdjustmentListener(() -> updateAction.accept(() -> {}));
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) x -> {}).accept(() -> {}));
+            paletteChoice.setAdjustmentListener(updater::update);
+            patternChoice.setAdjustmentListener(updater::update);
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updater : (Updater) () -> {}).accept(() -> currentTab = this));
+            updater.update();
 
             add(new JPanel(new GridBagLayout()) {{
                 GridBagHelper helper = new GridBagHelper(this);
@@ -63,6 +73,8 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
     private JPanel createCustomizerTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
+            setName(DESIGN);
+
             var palette = new TruchetConfigurablePalette();
             var pattern = new TruchetConfigurablePattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
@@ -77,11 +89,45 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
             Consumer<Runnable> updateAction = action -> {
                 action.run();
+//                swatch.adapt(currentPalette = palette, currentPattern = pattern);
                 swatch.adapt(palette, pattern);
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {
+                System.out.println(currentTab);
+                System.out.println(currentTab.getName());
+                if (PRESETS.equals(currentTab.getName()) ||
+                    GENERATE.equals(currentTab.getName())) {
+                    rotationSet.setSelectedIndex(0);
+                    horSymSet.setSelected(false);
+                    verSymSet.setSelected(false);
+                    rangeParam.setValue(0, currentPattern.getRows());
+                    rangeParam.setValue(1, currentPattern.getColumns());
+                    pattern.updateFrom(currentPattern);
+                    palette.updateFrom(currentPalette);
+                    toolBar.deselectCurrentTool();
+
+                    HashMap<STool, JToggleButton> toolMap = toolBar.getSelectionButtons();
+                    Map<STool, TileType> map = toolMap.keySet().stream().collect(Collectors.toMap(tool -> tool, tool -> ((TileTypeTool) tool).tileType));
+
+                    ArrayList<TileType> tileTypes = new ArrayList<>(palette.tileTypes);
+                    toolMap.forEach((tool, button) -> {
+                        toolBar.getToolSelectionListener().toolRemoved(tool);
+                        toolBar.deselectTool(tool);
+                    });
+                    toolMap.forEach((tool, button) -> {
+                        toolBar.getToolSelectionListener().toolAdded(tool);
+                        if (tileTypes.contains(map.get(tool))) {
+                            toolBar.selectTool(tool);
+                        }
+                    });
+                    toolBar.repaint();
+
+                    updateAction.accept(() -> {});
+                }
+                currentTab = this;
+            }));
             truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
                 toolBar.takeAction(e.getX(), e.getY())));
             rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
@@ -122,6 +168,8 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
     private JPanel createProceduralTab(JTabbedPane tabbedPane) {
         return new JPanel(new BorderLayout()) {{
+            setName(GENERATE);
+
             var palette = new TruchetConfigurablePalette();
             var pattern = new TruchetProceduralPattern(3, 4);
             var toolBar = createPaletteBar(palette, swatch, pattern);
@@ -138,11 +186,13 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
             Consumer<Runnable> updateAction = action -> {
                 action.run();
-                swatch.adapt(palette, pattern);
+                swatch.adapt(currentPalette = palette, currentPattern = pattern);
                 truchetDisplay.repaint();
                 truchetParam.paramAdjusted();
             };
-            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {}));
+            tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {
+                currentTab = this;
+            }));
             truchetDisplay.addMousePressListener(e -> updateAction.accept(() ->
                 toolBar.takeAction(e.getX(), e.getY())));
             patternChoice.withAction(FilterButtonModel.createNoOpReseed());
@@ -202,12 +252,18 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 
             @Override
             public void toolAdded(STool tool) {
-                selectedTileTypes.add(availableTools.get(tool));
+                TileType tileType = availableTools.get(tool);
+                if (!selectedTileTypes.contains(tileType)) {
+                    selectedTileTypes.add(tileType);
+                }
             }
 
             @Override
             public void toolRemoved(STool tool) {
-                selectedTileTypes.remove(availableTools.get(tool));
+                TileType tileType = availableTools.get(tool);
+                if (tileType != null) {
+                    selectedTileTypes.remove(tileType);
+                }
             }
 
             @Override
@@ -222,58 +278,6 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         });
 
         palette.updateStates(selectedTileTypes);
-        return toolBar;
-    }
-
-    private JToolBar createPaletteBarOld(TruchetConfigurablePalette palette, TruchetSwatch swatch, TruchetConfigurablePattern pattern) {
-        var toolBar = new JToolBar();
-        var showToolBarEditorButton = new JButton(Icons.loadThemed("add_layer.gif", ThemedImageIcon.BLACK));
-        var toolBarEditor = new JPopupMenu();
-        toolBarEditor.setLayout(new GridLayout(0, 1));
-
-        ArrayList<TileType> selectedTileTypes = new ArrayList<>();
-        selectedTileTypes.add(TileType.TRIANGLE);
-        palette.updateStates(selectedTileTypes);
-
-        JPanel toolBarEditorRow = null;
-        ButtonGroup group = new ButtonGroup();
-        for (TileType tileType : TileType.values()) {
-            if (toolBarEditorRow == null || toolBarEditorRow.getComponentCount() >= 2) {
-                toolBarEditor.add(toolBarEditorRow = new JPanel(new GridLayout(1, 0)));
-            }
-            toolBarEditorRow.add(new JToggleButton(tileType.toString(), tileType.createIcon()) {{
-                setHorizontalAlignment(SwingConstants.LEFT);
-//                JButton tileTypeToolButton = new JButton(tileType.createIcon());
-                JToggleButton tileTypeToolButton = new JToggleButton(tileType.createIcon());
-                tileTypeToolButton.addActionListener(e -> System.out.println(tileTypeToolButton.isSelected()));
-                group.add(tileTypeToolButton);
-                if (selectedTileTypes.contains(tileType)) {
-                    setSelected(true);
-                    toolBar.add(tileTypeToolButton);
-                }
-                addActionListener(e -> {
-                    if (isSelected()) {
-                        toolBar.remove(showToolBarEditorButton);
-                        toolBar.add(tileTypeToolButton);
-                        toolBar.add(showToolBarEditorButton);
-                        selectedTileTypes.add(tileType);
-                    } else {
-                        toolBar.remove(tileTypeToolButton);
-                        toolBar.revalidate();
-                        selectedTileTypes.remove(tileType);
-                    }
-                    if (selectedTileTypes.isEmpty()) {
-                        return;
-                    }
-                    palette.updateStates(selectedTileTypes);
-                    swatch.adapt(palette, pattern);
-                    truchetParam.paramAdjusted();
-                });
-            }});
-        }
-        toolBarEditor.pack();
-        toolBar.add(showToolBarEditorButton);
-        showToolBarEditorButton.addActionListener(e -> toolBarEditor.show(toolBar, 0 /*(toolBar.getWidth() - toolBarEditor.getWidth()) / 2*/, showToolBarEditorButton.getHeight()));
         return toolBar;
     }
 
@@ -301,5 +305,19 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
 //        paramList.forEach(fp -> fp.setAdjustmentListener(listener));
     }
 
+    public interface Updater extends Consumer<Runnable> {
+        @Override
+        default void accept(Runnable runnable) {
+            if (runnable != null) {
+                runnable.run();
+            }
+            update();
+        }
 
+        void update();
+
+        default void update(Runnable runnable) {
+            accept(runnable);
+        }
+    }
 }

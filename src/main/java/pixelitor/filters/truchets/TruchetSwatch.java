@@ -18,8 +18,8 @@ public class TruchetSwatch {
 
     public void draw(Graphics2D g, int tileSize, int lineWidth) {
         int x = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.columns; j++) {
                 g.translate(j * tileSize, i * tileSize);
                 tiles.get(x++).draw(g, tileSize, lineWidth);
                 g.translate(-j * tileSize, -i * tileSize);
@@ -45,6 +45,5 @@ public class TruchetSwatch {
                 pattern.sharePatternTweaks(i, j, tileState);
             }
         }
-
     }
 }

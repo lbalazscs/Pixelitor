@@ -12,9 +12,11 @@ public enum TruchetPreconfiguredPalette implements TruchetPalette {
     STREETS(TileType.PLUS, TileType.FLAT_JOIN, TileType.DIVIDE, TileType.THREE_WAY),
     BOIDS(TileType.FILLED_QUARTERS, TileType.CORNER_BOID),
     ;
+    private final TileType[] tileTypes;
     private final TileState[] tileStates;
 
     TruchetPreconfiguredPalette(TileType... tiles) {
+        this.tileTypes = tiles;
         var list = new ArrayList<TileState>();
         for (TileType tile : tiles) {
             for (int i = 0; i < tile.rotationalDegree; i++) {
@@ -52,5 +54,14 @@ public enum TruchetPreconfiguredPalette implements TruchetPalette {
             state += tileState.type.rotationalDegree;
         }
         throw new IllegalStateException("Tile type " + tileType + " not in palette!");
+    }
+
+    @Override
+    public void updateFrom(TruchetPalette source) {
+        throw new UnsupportedOperationException("Enums are immutable!");
+    }
+
+    public TileType[] getTileTypes() {
+        return tileTypes;
     }
 }

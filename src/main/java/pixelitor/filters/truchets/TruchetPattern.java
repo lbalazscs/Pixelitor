@@ -13,4 +13,6 @@ public interface TruchetPattern {
     default void sharePatternTweaks(int row, int column, TileState tileState){}
 
     Stream<Point> streamHighlightRule(int mouseX, int mouseY);
+
+    void updateFrom(TruchetPattern source);
 }

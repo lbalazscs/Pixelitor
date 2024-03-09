@@ -62,7 +62,7 @@ public class TruchetTileDisplay extends JPanel {
         tileSize = widthFirst ? H / rows : W / columns;
         g2.translate(xOffset = (widthFirst ? (W - columns * tileSize) / 2 : 0),
             yOffset = (widthFirst ? 0 : (H - rows * tileSize) / 2));
-        if (pattern != null) {
+        if (pattern != null && mouseIn) {
             pattern.streamHighlightRule(mouseX, mouseY).forEach(point -> {
                 g2.setColor(Color.GRAY);
                 g2.fillRect(point.x * tileSize, point.y * tileSize, tileSize, tileSize);

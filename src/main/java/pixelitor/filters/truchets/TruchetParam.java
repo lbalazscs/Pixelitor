@@ -77,7 +77,6 @@ public class TruchetParam extends AbstractFilterParam {
         return swatch;
     }
 
-
     public void paramAdjusted() {
         if (adjustmentListener != null) {
             adjustmentListener.paramAdjusted();

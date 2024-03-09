@@ -203,4 +203,9 @@ public enum TruchetPreconfiguredPattern implements TruchetPattern {
     public Stream<Point> streamHighlightRule(int mouseX, int mouseY) {
         return Stream.of();
     }
+
+    @Override
+    public void updateFrom(TruchetPattern source) {
+        throw new UnsupportedOperationException("Enums are immutable!");
+    }
 }

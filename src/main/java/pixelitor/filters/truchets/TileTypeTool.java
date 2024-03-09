@@ -6,9 +6,9 @@ import java.awt.Graphics2D;
 
 public class TileTypeTool implements STool {
 
-    private TileType tileType;
-    private TruchetPalette palette;
-    private TruchetConfigurablePattern pattern;
+    TileType tileType;
+    TruchetPalette palette;
+    TruchetConfigurablePattern pattern;
 
     public TileTypeTool(TileType tileType, TruchetPalette palette, TruchetConfigurablePattern pattern) {
         this.tileType = tileType;
