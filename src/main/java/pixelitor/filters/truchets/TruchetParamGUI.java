@@ -95,8 +95,6 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 truchetParam.paramAdjusted();
             };
             tabbedPane.addChangeListener(e -> (tabbedPane.getSelectedComponent() == this ? updateAction : (Consumer<Runnable>) (x) -> {}).accept(() -> {
-                System.out.println(currentTab);
-                System.out.println(currentTab.getName());
                 if (PRESETS.equals(currentTab.getName()) ||
                     GENERATE.equals(currentTab.getName())) {
                     rotationSet.setSelectedIndex(0);
@@ -182,7 +180,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
             }, false);
             var truchetDisplay = new TruchetTileDisplay(swatch, pattern);
             var patternChoice = new EnumParam<>("Pattern", ProceduralStateSpace.class);
-            pattern.setState(patternChoice.getSelected());
+            pattern.setState(patternChoice.getSelected(), palette.getDegree() + 1);
 
             Consumer<Runnable> updateAction = action -> {
                 action.run();
@@ -197,7 +195,7 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
                 toolBar.takeAction(e.getX(), e.getY())));
             patternChoice.withAction(FilterButtonModel.createNoOpReseed());
             patternChoice.setAdjustmentListener(() -> updateAction.accept(() ->
-                pattern.setState(patternChoice.getSelected())));
+                pattern.setState(patternChoice.getSelected(), palette.getDegree() + 1)));
             rangeParam.setAdjustmentListener(() -> updateAction.accept(() ->
                 pattern.update(rangeParam.getValue(0), rangeParam.getValue(1))));
             rotationSet.addActionListener(e -> updateAction.accept(() -> {
@@ -247,7 +245,8 @@ public class TruchetParamGUI extends JPanel implements ChangeListener, ParamGUI 
         toolBar.setToolSelectionListener(new EditableToolBar.ToolSelectionListener() {
             {
                 toolAdded(toolBar.getSelectedTool());
-                selectionChanged();
+                palette.updateStates(selectedTileTypes);
+//                swatch.adapt(palette, pattern);
             }
 
             @Override

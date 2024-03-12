@@ -5,12 +5,21 @@ import pixelitor.utils.Utils;
 import java.util.ArrayList;
 
 public enum TruchetPreconfiguredPalette implements TruchetPalette {
-    TRIANGLES(TileType.TRIANGLE, TileType.SQUARE, TileType.BLANK),
-    CIRCULAR(TileType.QUARTER_CIRCLE, TileType.CIRCLE_CROSS),
-    DIAGONALS(TileType.DIAGONAL, TileType.PARALLEL),
-    CIRCUIT(TileType.PLUS, TileType.CENTER_WELL, TileType.CORNER),
-    STREETS(TileType.PLUS, TileType.FLAT_JOIN, TileType.DIVIDE, TileType.THREE_WAY),
+    TRIANGLES(TileType.TRIANGLE, TileType.BLANK, TileType.SQUARE),
+    CIRCULAR(TileType.QUARTER_CIRCLE, TileType.QUARTER_CIRCLE, TileType.PLUS, TileType.CIRCLE_CROSS),
+    DIAGONALS(TileType.DIAGONAL, TileType.DIAGONAL, TileType.PARALLEL),
+    CELLS(TileType.QUARTER_CIRCLE, TileType.CIRCLE_CROSS),
+    KNOTS(TileType.FLAT_JOIN, TileType.PLUS),
+    SPACE_BEND(TileType.PLUS, TileType.CIRCLE_CROSS),
+    WALLS(TileType.FLAT_JOIN),
+    WEAVE(TileType.SQUARE, TileType.PARALLEL),
+    ROUND_EDGE(TileType.QUARTER_CIRCLE, TileType.THREE_WAY),
     BOIDS(TileType.FILLED_QUARTERS, TileType.CORNER_BOID),
+
+
+    // Very High Degree Filters (>6) (Too high for TruchetPreconfiguredPattern)
+//    CIRCUIT(TileType.PLUS, TileType.WELL, TileType.CORNER, TileType.JUMP),
+//    STREETS(TileType.PLUS, TileType.FLAT_JOIN, TileType.DIVIDE, TileType.THREE_WAY),
     ;
     private final TileType[] tileTypes;
     private final TileState[] tileStates;
@@ -24,6 +33,7 @@ public enum TruchetPreconfiguredPalette implements TruchetPalette {
             }
         }
         this.tileStates = list.toArray(TileState[]::new);
+        System.out.println(this + " degree\t : " + getDegree());
     }
 
     @Override

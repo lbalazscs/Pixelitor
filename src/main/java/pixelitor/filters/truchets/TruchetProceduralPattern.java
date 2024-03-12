@@ -14,7 +14,7 @@ public class TruchetProceduralPattern extends TruchetConfigurablePattern {
         super(rows, columns);
     }
 
-    public void setState(ProceduralStateSpace selectedItem) {
+    public void setState(ProceduralStateSpace selectedItem, int limit) {
         isInternalCall = true;
         Queue<Point> stash = new LinkedList<>();
         forwardMap.values().forEach(points -> {
@@ -24,10 +24,10 @@ public class TruchetProceduralPattern extends TruchetConfigurablePattern {
         forwardMap.clear();
         reverseMap.clear();
         Random r = new Random();
-        var space = selectedItem.createState(getColumns(), getRows(), 12, r);
+        var space = selectedItem.createState(getColumns(), getRows(), limit, r);
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getColumns(); j++) {
-                int state = selectedItem.getState(getColumns(), getRows(), j, i, 12, r, space);
+                int state = selectedItem.getState(getColumns(), getRows(), j, i, limit, r, space);
                 setState(i, j, state);
 
                 var point = stash.isEmpty() ? new Point() : stash.poll();
@@ -57,7 +57,6 @@ public class TruchetProceduralPattern extends TruchetConfigurablePattern {
     @Override
     public Stream<Point> streamHighlightRule(int mouseX, int mouseY) {
         Integer state = reverseMap.get(new Point(mouseX, mouseY));
-        System.out.println("forwardMap.get(state) = " + forwardMap.get(state));
         return forwardMap.get(state).stream();
     }
 }

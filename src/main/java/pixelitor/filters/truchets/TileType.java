@@ -41,7 +41,7 @@ public enum TileType {
         return path;
     }),
 
-    CENTER_WELL(1, true, true, (tileSize, lineWidth) -> {
+    WELL(1, true, true, (tileSize, lineWidth) -> {
         Path2D path = new Path2D.Double();
 
         path.moveTo(tileSize / 2d, tileSize);
@@ -57,6 +57,20 @@ public enum TileType {
 
         path.moveTo(tileSize, 3 * tileSize / 2d);
         path.lineTo(tileSize, 5 * tileSize / 4d);
+
+        return new BasicStroke(lineWidth).createStrokedShape(path);
+    }),
+    JUMP(4, false, true, (tileSize, lineWidth) -> {
+        Path2D path = new Path2D.Double();
+
+        path.moveTo(tileSize, tileSize / 2d);
+        path.lineTo(tileSize, 3 * tileSize / 4d);
+
+        path.append(new Ellipse2D.Double(3 * tileSize / 4d, 3 * tileSize / 4d, tileSize / 2d, tileSize / 2d), false);
+
+        Rectangle2D jump = new Rectangle2D.Double(
+            tileSize / 2d, tileSize / 2d, tileSize, tileSize);
+        path.append(new Arc2D.Double(jump, 180, 180, Arc2D.OPEN), false);
 
         return new BasicStroke(lineWidth).createStrokedShape(path);
     }),
@@ -96,7 +110,8 @@ public enum TileType {
     }),
 
     DIAGONAL(2, false, false, (tileSize, lineWidth) -> {
-        Line2D line = new Line2D.Double(3 * tileSize / 2d, tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d);
+//        Line2D line = new Line2D.Double(3 * tileSize / 2d, tileSize / 2d, tileSize / 2d, 3 * tileSize / 2d);
+        Line2D line = new Line2D.Double(3 * tileSize / 2d, 3 * tileSize / 2d, tileSize / 2d, tileSize / 2d);
         BasicStroke stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
         return stroke.createStrokedShape(line);
     }),
