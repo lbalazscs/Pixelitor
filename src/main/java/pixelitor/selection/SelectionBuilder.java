@@ -93,6 +93,12 @@ public class SelectionBuilder {
             Shape shape = inProgressSelection.getShape();
             if (selectionType == SelectionType.SELECTION_MAGIC_WAND) {
                 newShape = selectionType.createShape(pm, shape);
+                if (comp.getInProgressSelection() == null) {
+                    comp.setInProgressSelection(new Selection(newShape, pm.getView()));
+                }
+                if (inProgressSelection.getView() == null) {
+                    inProgressSelection.setView(comp.getView());
+                }
             } else {
                 newShape = selectionType.createShape(mouseInfo, shape);
             }
