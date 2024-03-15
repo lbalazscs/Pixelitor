@@ -312,6 +312,10 @@ public class Selection implements Debuggable {
         startMarching();
     }
 
+    public View getView() {
+        return view;
+    }
+
     public boolean isAlive() {
         return !dead;
     }
