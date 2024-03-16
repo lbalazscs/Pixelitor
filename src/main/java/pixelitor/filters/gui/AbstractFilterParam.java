@@ -41,7 +41,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     // will be enabled only for specific values of this filter parameter.
     protected FilterButtonModel action;
 
-    AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
+    public AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
         this.name = Objects.requireNonNull(name);
         this.randomizePolicy = randomizePolicy;
     }

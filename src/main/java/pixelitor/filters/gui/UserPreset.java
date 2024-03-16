@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import com.bric.util.JVM;
 import pixelitor.GUIMode;
 import pixelitor.colors.Colors;
-import pixelitor.filters.Truchet;
+import pixelitor.filters.truchets.Truchet;
 import pixelitor.gui.utils.PAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
