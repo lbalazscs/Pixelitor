@@ -189,7 +189,7 @@ public class ZoomTool extends DragTool {
         return new ZoomToolIcon();
     }
 
-    private static class ZoomToolIcon extends Tool.ToolIcon {
+    private static class ZoomToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on zoom_tool.svg

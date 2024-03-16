@@ -56,10 +56,6 @@ import static pixelitor.utils.Keys.CTRL_T;
 public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Serial
     private static final long serialVersionUID = 2L;
-    public static final String TEXT_PRESETS_DIR_NAME = "text";
-    private static final Pattern ALL_WHITESPACE = Pattern.compile("\\s+");
-
-    private transient TransformedTextPainter painter;
     private TextSettings settings;
 
     public TextLayer(Composition comp) {

@@ -171,7 +171,7 @@ public class SmudgeTool extends AbstractBrushTool {
         return new SmudgeToolIcon();
     }
 
-    private static class SmudgeToolIcon extends Tool.ToolIcon {
+    private static class SmudgeToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on smudge_tool.svg

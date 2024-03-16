@@ -8,6 +8,7 @@
 package pd;
 
 import net.jafama.FastMath;
+import pd.fastnoise.DomainWarp;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -50,7 +51,6 @@ public class CannyEdgeDetector {
     private static final float MAGNITUDE_SCALE = 100.0F;
     private static final float MAGNITUDE_LIMIT = 1000.0F;
     private static final int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
-
     // fields
 
     private int height;

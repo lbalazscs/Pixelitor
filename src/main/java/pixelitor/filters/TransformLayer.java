@@ -94,26 +94,11 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private AffineTransform calcTransform(BufferedImage src) {
-        Point2D centerShift = calcCenterShift(src);
+        Point2D centerShift = center.calcCenterShift(src);
         var transform = calcRotateTransform(centerShift);
         applyScale(transform, centerShift);
         applyShear(transform, centerShift);
         return transform;
-    }
-
-    private Point2D calcCenterShift(BufferedImage src) {
-        int tx = 0;
-        int ty = 0;
-        // if this can run as a smart filter, then it shouldn't assume
-        // that the active layer is the owner of the image
-        if (!Features.enableExperimental) {
-            Drawable dr = Views.getActiveDrawable();
-            tx = -dr.getTx();
-            ty = -dr.getTy();
-        }
-        double centerShiftX = (tx + src.getWidth()) * center.getRelativeX();
-        double centerShiftY = (ty + src.getHeight()) * center.getRelativeY();
-        return new Point2D.Double(centerShiftX, centerShiftY);
     }
 
     private AffineTransform calcRotateTransform(Point2D centerShift) {

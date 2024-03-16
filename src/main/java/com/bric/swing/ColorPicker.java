@@ -60,8 +60,8 @@ import java.util.function.Consumer;
  * a <code>PropertyChangeListener</code> listening
  * for changes to the <code>OPACITY_PROPERTY</code>.
  *
- * @see com.bric.swing.ColorPickerDialog
- * @see com.bric.swing.ColorPickerPanel
+ * @see ColorPickerDialog
+ * @see ColorPickerPanel
  */
 public class ColorPicker extends JPanel {
     @Serial

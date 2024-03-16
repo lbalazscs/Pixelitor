@@ -137,48 +137,99 @@ public enum SelectionType {
             }
 
             boolean [][] visited = new boolean[workingImage.getWidth()][workingImage.getHeight()];
-            int targetColor = getColorAtEvent(x, y, pm);
+            int targetColor = getColorAtEvent(new Point(x, y), pm);
 
-            selectedArea(workingImage, x, y, colorTolerance, targetColor, selectedArea, pm, visited);
+            int finalX = x;
+            int finalY = y;
+
+            selectArea(workingImage, finalX, finalY, colorTolerance, targetColor, selectedArea, pm, visited, 1);
+            selectArea(workingImage, finalX, finalY, colorTolerance, targetColor, selectedArea, pm, visited, -1);
+
             return selectedArea;
         }
 
-        private void selectedArea(BufferedImage img, int x, int y, int tolerance,
-                                  int rgbAtMouse, Area selectedArea,
-                                  PMouseEvent pm, boolean[][] visited) {
+        private void selectArea(BufferedImage img, int x, int y, int tolerance,
+                                int rgbAtMouse, Area selectedArea, PMouseEvent pm,
+                                boolean[][] visited, int yOffset) {
 
-            int imgHeight = img.getHeight();
-            int imgWidth = img.getWidth();
+            Stack<Point> pixelsToProcess = new Stack<>();
+            pixelsToProcess.push(new Point(x, y));
 
-            Stack<Area> areasToProcess = new Stack<>();
-            areasToProcess.push(new Area(new Rectangle2D.Double(x, y, 1, 1)));
+            while (!pixelsToProcess.isEmpty()) {
+                Point currentPixel = pixelsToProcess.pop();
+                System.out.println("working");
 
-            while (!areasToProcess.isEmpty()) {
+                int startX = currentPixel.x;
+                int startY = currentPixel.y;
 
-                    Area currentArea = areasToProcess.pop();
-                    Rectangle2D bounds = currentArea.getBounds2D();
-                    int currentX = (int) bounds.getX();
-                    int currentY = (int) bounds.getY();
+                if (canBeSelected(currentPixel, img, rgbAtMouse, tolerance, visited, pm)) {
 
-                    int targetColor = getColorAtEvent(currentX, currentY, pm);
+                    int leftX = walkDirection(currentPixel, img, rgbAtMouse, tolerance, visited, -1, pixelsToProcess, pm); // Walk left
+                    int lineEndX = walkDirection(currentPixel, img, rgbAtMouse, tolerance, visited, 1, pixelsToProcess, pm); // Walk right
 
-                    if (currentX > 0 && currentX < imgWidth && currentY > 0 && currentY < imgHeight &&
-                            colorWithinTolerance(new Color(rgbAtMouse), new Color(targetColor), tolerance) &&
-                            !visited[currentX][currentY]) {
+                    // Create an area based on the line segment
+                    int lineStartX = leftX + 1;
+                    int lineLength = lineEndX - lineStartX;
 
-                        selectedArea.add(currentArea);
-                        visited[currentX][currentY] = true;
-
-                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX + 1, currentY, 1, 1)));
-                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX - 1, currentY, 1, 1)));
-                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY + 1, 1, 1)));
-                        areasToProcess.push(new Area(new Rectangle2D.Double(currentX, currentY - 1, 1, 1)));
+                    if (lineLength > 0) {
+                        Area lineSegment = new Area(new Rectangle2D.Double(lineStartX, startY, lineLength, 1));
+                        selectedArea.add(lineSegment);
                     }
 
+                    pixelsToProcess.push(new Point(startX, startY + yOffset));
+                }
             }
         }
 
-        private int getColorAtEvent(int x, int y, PMouseEvent pm) {
+        private int walkDirection(Point currentPixel, BufferedImage img, int rgbAtMouse, int tolerance, boolean[][] visited,
+                                  int xStep, Stack<Point> pixelsToProcess, PMouseEvent pm) {
+
+            int startX = currentPixel.x;
+            int startY = currentPixel.y;
+            int currentX = startX + xStep;
+
+            while (canBeSelected(new Point(currentX, startY), img, rgbAtMouse, tolerance, visited, pm)) {
+                visited[currentX][startY] = true;
+
+                Point pointAbove = new Point(currentX, startY - 1);
+                boolean canBeSelectedAbove = canBeSelected(pointAbove, img, rgbAtMouse, tolerance, visited, pm);
+
+                Point pointBelow = new Point(currentX, startY + 1);
+                boolean canBeSelectedBelow = canBeSelected(pointBelow, img, rgbAtMouse, tolerance, visited, pm);
+
+                selectPixelIfPossible(canBeSelectedAbove, pixelsToProcess, pointAbove);
+                selectPixelIfPossible(canBeSelectedBelow, pixelsToProcess, pointBelow);
+
+                currentX += xStep;
+            }
+            return currentX;
+        }
+
+        private void selectPixelIfPossible(boolean canBeSelected, Stack<Point> pixelsToProcess, Point pointToSelect) {
+            if (canBeSelected) {
+                pixelsToProcess.push(pointToSelect);
+            }
+        }
+
+        private boolean canBeSelected(Point currentPixel, BufferedImage img,
+                                      int rgbAtMouse, int tolerance, boolean[][] visited, PMouseEvent pm) {
+            int imgHeight = img.getHeight();
+            int imgWidth = img.getWidth();
+
+            int currentX = currentPixel.x;
+            int currentY = currentPixel.y;
+
+            int targetColor = getColorAtEvent(currentPixel, pm);
+
+            return currentX >= 0 && currentX < imgWidth && currentY >= 0 && currentY < imgHeight &&
+                colorWithinTolerance(new Color(rgbAtMouse), new Color(targetColor), tolerance) &&
+                !visited[currentX][currentY];
+        }
+
+        private int getColorAtEvent(Point p, PMouseEvent pm) {
+            int x = p.x;
+            int y = p.y;
+
             View view = pm.getView();
             BufferedImage img;
             Composition comp = view.getComp();

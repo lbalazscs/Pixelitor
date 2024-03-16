@@ -65,8 +65,8 @@ import static net.jafama.FastMath.sin;
  * <P>The graphic in this panel will be based on either the width or
  * the height of this component: depending on which is smaller.
  *
- * @see com.bric.swing.ColorPicker
- * @see com.bric.swing.ColorPickerDialog
+ * @see ColorPicker
+ * @see ColorPickerDialog
  */
 public class ColorPickerPanel extends JPanel {
     @Serial

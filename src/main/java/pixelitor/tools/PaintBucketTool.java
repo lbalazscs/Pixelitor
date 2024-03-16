@@ -367,7 +367,7 @@ public class PaintBucketTool extends Tool {
         return new PaintBucketToolIcon();
     }
 
-    private static class PaintBucketToolIcon extends Tool.ToolIcon {
+    private static class PaintBucketToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on paint_bucket_tool.svg

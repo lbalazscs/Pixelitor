@@ -280,7 +280,7 @@ public class MoveTool extends DragTool {
         return new MoveToolIcon();
     }
 
-    private static class MoveToolIcon extends Tool.ToolIcon {
+    private static class MoveToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on move_tool.svg

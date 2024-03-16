@@ -771,7 +771,7 @@ public class TransformBox implements ToolWidget, Debuggable, Serializable {
         assert editName != null;
 
         if (owner instanceof SubPath) {
-            comp.pathChanged(false);
+            comp.pathChanged();
         }
 
         Memento afterMovement = copyState();

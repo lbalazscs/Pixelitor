@@ -166,7 +166,7 @@ public class ColorPickerTool extends Tool {
         return new ColorPickerToolIcon();
     }
 
-    private static class ColorPickerToolIcon extends Tool.ToolIcon {
+    private static class ColorPickerToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
 //            boolean dark = Themes.getCurrent().isDark();

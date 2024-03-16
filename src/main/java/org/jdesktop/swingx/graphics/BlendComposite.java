@@ -42,9 +42,9 @@ import java.awt.image.*;
  * (known as the source) is mixed with existing graphics (know as the
  * destination.)</p>
  * <p><code>BlendComposite</code> is an implementation of the
- * {@link java.awt.Composite} interface and must therefore be set as a state on
- * a {@link java.awt.Graphics2D} surface.</p>
- * <p>Please refer to {@link java.awt.Graphics2D#setComposite(java.awt.Composite)}
+ * {@link Composite} interface and must therefore be set as a state on
+ * a {@link Graphics2D} surface.</p>
+ * <p>Please refer to {@link Graphics2D#setComposite(Composite)}
  * for more information on how to use this class with a graphics surface.</p>
  * <h2>Blending Modes</h2>
  * <p>This class offers a certain number of blending modes, or compositing
@@ -79,15 +79,15 @@ import java.awt.image.*;
  * <p>TThe blending mode <em>SoftLight</em> has not been implemented yet.</p>
  *
  * @author Romain Guy <romain.guy@mac.com>
- * @see org.jdesktop.swingx.graphics.BlendComposite.BlendingMode
- * @see java.awt.Graphics2D
- * @see java.awt.Composite
- * @see java.awt.AlphaComposite
+ * @see BlendingMode
+ * @see Graphics2D
+ * @see Composite
+ * @see AlphaComposite
  */
 public final class BlendComposite implements Composite {
     /**
      * <p>A blending mode defines the compositing rule of a
-     * {@link org.jdesktop.swingx.graphics.BlendComposite}.</p>
+     * {@link BlendComposite}.</p>
      *
      * @author Romain Guy <romain.guy@mac.com>
      */

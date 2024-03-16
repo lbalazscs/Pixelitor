@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,19 +23,33 @@ import javax.swing.*;
  * A {@link FilterParam} that can have a "Linked" checkbox.
  */
 public interface Linkable {
+    ButtonModel getLinkedModel();
+
+    String createLinkedToolTip();
+
     /**
      * Whether this particular instance has a "Linked" checkbox.
      */
-    boolean isLinkable();
+    default boolean isLinkable() {
+        return getLinkedModel() != null;
+    }
 
     /**
      * Whether the checkbox is selected.
      */
-    boolean isLinked();
+    default boolean isLinked() {
+        ButtonModel linkedModel = getLinkedModel();
+        if (linkedModel == null) {
+            return false; // not even linkable
+        }
+        return linkedModel.isSelected();
+    }
 
-    void setLinked(boolean linked);
-
-    ButtonModel getLinkedModel();
-
-    String createLinkedToolTip();
+    default void setLinked(boolean linked) {
+        ButtonModel linkedModel = getLinkedModel();
+        if (linkedModel == null) {
+            return; // not linkable
+        }
+        linkedModel.setSelected(linked);
+    }
 }

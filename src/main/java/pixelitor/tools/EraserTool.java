@@ -55,7 +55,7 @@ public class EraserTool extends AbstractBrushTool {
         return new EraserToolIcon();
     }
 
-    private static class EraserToolIcon extends Tool.ToolIcon {
+    private static class EraserToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on eraser_tool.svg

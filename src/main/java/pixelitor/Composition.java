@@ -37,6 +37,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
+import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
@@ -65,6 +66,7 @@ import static java.lang.String.format;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.tools.pen.PenToolMode.EDIT;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -1704,8 +1706,27 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         paths.setActivePath(path);
     }
 
+    public void pathChanged() {
+        pathChanged(false);
+    }
+
     public void pathChanged(boolean deleted) {
         forEachNestedLayer(TextLayer.class, textLayer -> textLayer.pathChanged(deleted));
+    }
+
+    public void createPathFromShape(Shape shape, boolean addToHistory, boolean startEditMode) {
+        Path oldActivePath = getActivePath();
+        Path newPath = Shapes.shapeToPath(shape, getView());
+        setActivePath(newPath);
+        Tools.PEN.setPath(newPath);
+        if (startEditMode) {
+            Tools.PEN.startMode(EDIT, false);
+        }
+        Tools.PEN.activate();
+
+        if (addToHistory) {
+            History.add(new ConvertSelectionToPathEdit(this, shape, oldActivePath));
+        }
     }
 
     public Guides getGuides() {

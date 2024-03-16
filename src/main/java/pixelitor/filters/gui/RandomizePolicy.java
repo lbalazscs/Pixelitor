@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.filters.gui;
 
 /**
- * Whether a filter parameter should be affected
- * when the user presses "Randomize"
+ * Whether a filter parameter should be affected when the
+ * "Randomize Settings" button in the filter's dialog is pressed.
  */
 public enum RandomizePolicy {
     IGNORE_RANDOMIZE, ALLOW_RANDOMIZE

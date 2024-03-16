@@ -36,9 +36,9 @@ import java.util.prefs.Preferences;
  * Provides the "Tip of The Day" pane and dialog.<br>
  *
  * <p>
- * Tips are retrieved from the {@link org.jdesktop.swingx.tips.TipOfTheDayModel}.
+ * Tips are retrieved from the {@link TipOfTheDayModel}.
  * In the most common usage, a tip (as returned by
- * {@link org.jdesktop.swingx.tips.TipOfTheDayModel.Tip#getTip()}) is just a
+ * {@link Tip#getTip()}) is just a
  * <code>String</code>. However, the return type of this method is actually
  * <code>Object</code>. Its interpretation depends on its type:
  * <dl compact>
@@ -54,8 +54,8 @@ import java.util.prefs.Preferences;
  * </dl>
  *
  * <p>
- * <code>JXTipOfTheDay</code> finds its tips in its {@link org.jdesktop.swingx.tips.TipOfTheDayModel}.
- * Such model can be programmatically built using {@link org.jdesktop.swingx.tips.DefaultTipOfTheDayModel}
+ * <code>JXTipOfTheDay</code> finds its tips in its {@link TipOfTheDayModel}.
+ * Such model can be programmatically built using {@link DefaultTipOfTheDayModel}
  * and {@link org.jdesktop.swingx.tips.DefaultTip} but
  * the {@link org.jdesktop.swingx.tips.TipLoader} provides a convenient method to
  * build a model and its tips from a {@link java.util.Properties} object.
@@ -89,8 +89,8 @@ import java.util.prefs.Preferences;
  * <p>
  * Additionally, <code>JXTipOfTheDay</code> features an option enabling the end-user
  * to choose to not display the "Tip Of The Day" dialog. This user choice can be stored
- * in the user {@link java.util.prefs.Preferences} but <code>JXTipOfTheDay</code> also
- * supports custom storage through the {@link org.jdesktop.swingx.JXTipOfTheDay.ShowOnStartupChoice} interface.
+ * in the user {@link Preferences} but <code>JXTipOfTheDay</code> also
+ * supports custom storage through the {@link ShowOnStartupChoice} interface.
  *
  * <pre>
  * <code>
@@ -105,8 +105,8 @@ import java.util.prefs.Preferences;
  * As the choice is saved in the user Preferences, it will persist when the application is relaunched.
  *
  * @see org.jdesktop.swingx.tips.TipLoader
- * @see org.jdesktop.swingx.tips.TipOfTheDayModel
- * @see org.jdesktop.swingx.tips.TipOfTheDayModel.Tip
+ * @see TipOfTheDayModel
+ * @see Tip
  * @see #showDialog(Component, Preferences)
  * @see #showDialog(Component, ShowOnStartupChoice)
  *
@@ -161,7 +161,7 @@ public class JXTipOfTheDay extends JXPanel {
    * Replaces the current UI object with the latest version from the
    * <code>UIManager</code>.
    *
-   * @see javax.swing.JComponent#updateUI
+   * @see JComponent#updateUI
    */
   @Override
 public void updateUI() {
@@ -173,7 +173,7 @@ public void updateUI() {
    *
    * @param ui
    *          the <code>TipOfTheDayUI</code> L&F object
-   * @see javax.swing.UIDefaults#getUI
+   * @see UIDefaults#getUI
    *
    * @beaninfo bound: true hidden: true description: The UI object that
    *           implements the taskpane group's LookAndFeel.
@@ -196,8 +196,8 @@ public void updateUI() {
    * Returns the name of the L&F class that renders this component.
    *
    * @return the string {@link #uiClassID}
-   * @see javax.swing.JComponent#getUIClassID
-   * @see javax.swing.UIDefaults#getUI
+   * @see JComponent#getUIClassID
+   * @see UIDefaults#getUI
    */
   @Override
   public String getUIClassID() {
@@ -423,7 +423,7 @@ public void updateUI() {
 
   /**
    * Calls
-   * {@link TipOfTheDayUI#createDialog(Component, JXTipOfTheDay.ShowOnStartupChoice)}.
+   * {@link TipOfTheDayUI#createDialog(Component, ShowOnStartupChoice)}.
    *
    * This method can be overriden in order to control things such as the
    * placement of the dialog or its title.

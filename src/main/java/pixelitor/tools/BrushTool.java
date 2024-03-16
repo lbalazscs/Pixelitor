@@ -115,7 +115,7 @@ public class BrushTool extends BlendingModeBrushTool {
         return new BrushToolIcon();
     }
 
-    private static class BrushToolIcon extends Tool.ToolIcon {
+    private static class BrushToolIcon extends ToolIcon {
         @Override
         protected void paintIcon(Graphics2D g) {
             // based on brush_tool.svg

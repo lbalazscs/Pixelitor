@@ -1789,7 +1789,22 @@ public class Shapes {
     }
 
     /**
-     * Connects the given points smoothly with cubic Bézier curves.
+     * Creates a Path2D that connects the given points with line segments.
+     */
+    public static Path2D lineConnect(List<Point2D> points) {
+        int numPoints = points.size();
+        Path2D.Double path = new Path2D.Double();
+        Point2D firstPoint = points.getFirst();
+        path.moveTo(firstPoint.getX(), firstPoint.getY());
+        for (int i = 1; i < numPoints; i++) {
+            Point2D point = points.get(i);
+            path.lineTo(point.getX(), point.getY());
+        }
+        return path;
+    }
+
+    /**
+     * Creates a Path2D that connects the given points smoothly with cubic Bézier curves.
      * Based on http://web.archive.org/web/20131027060328/http://www.antigrain.com/research/bezier_interpolation/index.html#PAGE_BEZIER_INTERPOLATION
      */
     public static Path2D smoothConnect(List<Point2D> points) {
@@ -1802,7 +1817,7 @@ public class Shapes {
         return path;
     }
 
-    public static void smoothConnect(List<Point2D> points, Path2D.Double path) {
+    public static void smoothConnect(List<Point2D> points, Path2D path) {
         int numPoints = points.size();
         if (numPoints <= 2) {
             throw new IllegalArgumentException("numPoints = " + numPoints);

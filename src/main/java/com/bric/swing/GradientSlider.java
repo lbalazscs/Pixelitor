@@ -39,7 +39,7 @@ import java.io.Serial;
  * slider itself represents a range of values from zero to one, so the thumbs
  * must always be within this range.  Each thumb maps to a specific <code>Color</code>.
  * <P>There are some specific properties you can set to customize the look-and-feel
- * of this slider in the default {@link com.bric.plaf.GradientSliderUI} class.
+ * of this slider in the default {@link GradientSliderUI} class.
  * <P>The UI for each slider is loaded from the UIManager property: "GradientSliderUI".
  * By default this is "com.bric.plaf.GradientSliderUI".
  * <p>The {@link GradientSliderDemoHelper} creates this sample graphic:

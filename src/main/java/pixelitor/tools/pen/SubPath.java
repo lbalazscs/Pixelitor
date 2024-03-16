@@ -532,7 +532,7 @@ public class SubPath implements Serializable, Transformable {
 
         anchorPoints.remove(index);
 
-        comp.pathChanged(false);
+        comp.pathChanged();
     }
 
     public void deleteLast() {

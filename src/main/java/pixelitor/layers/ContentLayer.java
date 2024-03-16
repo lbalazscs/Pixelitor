@@ -19,6 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.compactions.Flip;
+import pixelitor.filters.painters.TextSettings;
+import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
@@ -29,6 +31,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.Serial;
+import java.util.regex.Pattern;
 
 /**
  * A layer with a content (text or image layer) that
@@ -37,6 +40,13 @@ import java.io.Serial;
 public abstract class ContentLayer extends Layer {
     @Serial
     private static final long serialVersionUID = 2L;
+    protected static final String TEXT_PRESETS_DIR_NAME = "text";
+    protected static final Pattern ALL_WHITESPACE = Pattern.compile("\\s+");
+
+    protected transient TransformedTextPainter painter;
+
+    protected TextSettings settings;
+
 
     // used only while dragging
     private transient int tmpTx = 0;

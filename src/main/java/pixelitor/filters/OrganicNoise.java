@@ -18,8 +18,11 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PointFilter;
+import pd.fastnoise.DomainWarp;
 import pd.fastnoise.FastNoiseLite;
 import pd.fastnoise.FastNoiseLite.*;
+import pd.fastnoise.Fractal;
+import pd.fastnoise.Vectors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.EnumParam;
@@ -63,6 +66,7 @@ public class OrganicNoise extends ParametrizedFilter {
 //        "Second", Color.WHITE,
 //        NO_TRANSPARENCY, false, false);
     private final AngleParam angle = new AngleParam("Rotate", 0);
+    private final Fractal fractal = new Fractal();
 
     private final EnumParam<DomainWarpType> domainWarpType
         = new EnumParam<>("Distortion Type", DomainWarpType.class);
@@ -121,7 +125,7 @@ public class OrganicNoise extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (impl == null) {
-            impl = new Impl();
+            impl = new Impl(fractal);
         }
 
         impl.setCenter(src.getWidth() / 2.0f, src.getHeight() / 2.0f);
@@ -170,7 +174,9 @@ public class OrganicNoise extends ParametrizedFilter {
 
 class Impl extends PointFilter {
     private final FastNoiseLite fastNoise;
+    private final Fractal fractal;
     private boolean domainWarp;
+    private DomainWarp DW;
     private float scale;
     private float cx;
     private float cy;
@@ -179,8 +185,9 @@ class Impl extends PointFilter {
     private double cos;
     private double sin;
 
-    protected Impl() {
+    protected Impl(Fractal fractal) {
         super(OrganicNoise.NAME);
+        this.fractal = fractal;
         fastNoise = new FastNoiseLite();
     }
 
@@ -197,8 +204,8 @@ class Impl extends PointFilter {
         }
 
         if (domainWarp) {
-            Vector2 vec = new Vector2(sampleX, sampleY);
-            fastNoise.DomainWarp(vec);
+            Vectors.Vector2 vec = new Vectors.Vector2(sampleX, sampleY);
+            DW.DomainWarp(vec);
             sampleX = vec.x;
             sampleY = vec.y;
         }
@@ -220,7 +227,7 @@ class Impl extends PointFilter {
     }
 
     public void setFractalType(FractalType type) {
-        fastNoise.SetFractalType(type);
+        fractal.SetFractalType(type);
     }
 
     public void setCellularDistanceFunction(CellularDistanceFunction cdf) {
@@ -236,11 +243,11 @@ class Impl extends PointFilter {
     }
 
     public void setDomainWarpType(DomainWarpType type) {
-        fastNoise.SetDomainWarpType(type);
+        DW.SetDomainWarpType(type);
     }
 
     public void setDomainWarpAmp(float dwa) {
-        fastNoise.SetDomainWarpAmp(dwa);
+        DW.SetDomainWarpAmp(dwa);
     }
 
     public void setDomainWarp(boolean domainWarp) {
@@ -256,27 +263,27 @@ class Impl extends PointFilter {
     }
 
     public void setDomainWarpFractalType(DomainWarpFractalType fractalType) {
-        fastNoise.SetDomainFractalType(fractalType);
+        DW.SetDomainFractalType(fractalType);
     }
 
     public void setOctaves(int octaves) {
-        fastNoise.SetFractalOctaves(octaves);
+        fractal.SetFractalOctaves(octaves);
     }
 
     public void setFractalLacunarity(float lacunarity) {
-        fastNoise.SetFractalLacunarity(lacunarity);
+        fractal.SetFractalLacunarity(lacunarity);
     }
 
     public void setFractalGain(float gain) {
-        fastNoise.SetFractalGain(gain);
+        fractal.SetFractalGain(gain);
     }
 
     public void setFractalWeightedStrength(float weightedStrength) {
-        fastNoise.SetFractalWeightedStrength(weightedStrength);
+        fractal.SetFractalWeightedStrength(weightedStrength);
     }
 
     public void setFractalPingPongStrength(float pingPongStrength) {
-        fastNoise.SetFractalPingPongStrength(pingPongStrength);
+        fractal.SetFractalPingPongStrength(pingPongStrength);
     }
 
     public void setCenter(float cx, float cy) {

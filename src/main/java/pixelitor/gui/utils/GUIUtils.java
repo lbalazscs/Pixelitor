@@ -250,7 +250,7 @@ public final class GUIUtils {
     public static void runWithBusyCursor(Runnable task, Component parent) {
         assert parent.isShowing() || GUIMode.isUnitTesting();
         
-        java.util.Timer timer = new Timer();
+        Timer timer = new Timer();
         var startBusyCursorTask = new TimerTask() {
             @Override
             public void run() {

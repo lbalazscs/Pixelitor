@@ -955,7 +955,7 @@ public class ShapesTool extends DragTool {
         return new ShapesToolIcon();
     }
 
-    private static class ShapesToolIcon extends Tool.ToolIcon {
+    private static class ShapesToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on shapes_tool.svg

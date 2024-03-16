@@ -645,7 +645,7 @@ public class GradientTool extends DragTool {
         return node;
     }
 
-    private static class GradientToolIcon extends Tool.ToolIcon {
+    private static class GradientToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             Color startColor = Color.BLACK;

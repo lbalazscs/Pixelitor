@@ -290,7 +290,7 @@ public class AbstractLights extends ParametrizedFilter {
         }
     }
 
-    private static class FrameParticle extends AbstractLights.Particle {
+    private static class FrameParticle extends Particle {
         private static final int STATE_TOP = 0;
         private static final int STATE_RIGHT = 1;
         private static final int STATE_BOTTOM = 2;

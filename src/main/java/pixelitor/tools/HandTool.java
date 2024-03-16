@@ -85,7 +85,7 @@ public class HandTool extends Tool {
         return new HandToolIcon();
     }
 
-    private static class HandToolIcon extends Tool.ToolIcon {
+    private static class HandToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on hand_tool.svg

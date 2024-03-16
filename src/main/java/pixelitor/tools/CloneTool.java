@@ -317,7 +317,7 @@ public class CloneTool extends BlendingModeBrushTool {
         return new CloneToolIcon();
     }
 
-    private static class CloneToolIcon extends Tool.ToolIcon {
+    private static class CloneToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on clone_tool.svg

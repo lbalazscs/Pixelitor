@@ -91,7 +91,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public String getPresetDirName() {
-        return TextLayer.TEXT_PRESETS_DIR_NAME;
+        return getPresetDirName();
     }
 
     @Override

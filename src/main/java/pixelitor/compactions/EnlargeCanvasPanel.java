@@ -254,7 +254,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         private BufferedImage thumb;
 
         public PreviewPanel() {
-            addComponentListener(new PreviewPanel.EventAdaptor());
+            addComponentListener(new EventAdaptor());
             setBorder(createTitledBorder("Preview"));
         }
 

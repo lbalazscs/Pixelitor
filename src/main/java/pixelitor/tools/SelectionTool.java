@@ -62,8 +62,8 @@ public class SelectionTool extends DragTool {
         "<b>Shift-drag</b> adds to an existing selection, " +
         "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
     private static final String MAGIC_WAND_HELP_TEXT = "MagicWand selection: " +
-        "<b>click</b> on the area that you want to select. " +
-        "<b>right-click</b> to close the selection." +
+        "<b>click</b> on the area you want to select. " +
+        "<b>right-click</b> to cancel the selection." +
         "<b>Shift</b> adds to an existing selection, " +
         "<b>Alt</b> removes from it, <b>Shift-Alt</b> intersects.";
     private static final String NEW_SELECTION_TEXT = "New Selection";
@@ -82,7 +82,7 @@ public class SelectionTool extends DragTool {
         = new EnumComboBoxModel<>(ShapeCombinator.class);
 
     private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private static SliderSpinner sliderSpinner;
+    private static final SliderSpinner sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);;
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);
@@ -110,6 +110,11 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addButton(SelectionActions.getConvertToPath(),
             "toPathButton", "Convert the selection to a path");
+
+        settingsPanel.addSeparator();
+
+        sliderSpinner.setEnabled(false);
+        settingsPanel.add(sliderSpinner);
     }
 
     private void selectionTypeChanged() {
@@ -120,22 +125,17 @@ public class SelectionTool extends DragTool {
         magicWand = type == SelectionType.SELECTION_MAGIC_WAND;
         displayWidthHeight = type.displayWidthHeight();
 
+        if (!magicWand) { sliderSpinner.setEnabled(false); }
+
         if (polygonal) {
             Messages.showInStatusBar(POLY_HELP_TEXT);
         } else if (type == SelectionType.LASSO) {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
         } else if (magicWand) {
             Messages.showInStatusBar(MAGIC_WAND_HELP_TEXT);
-            if (sliderSpinner == null) {
-                sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);
-                settingsPanel.add(sliderSpinner);
-            }
+            sliderSpinner.setEnabled(true);
         } else {
             Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
-            if (sliderSpinner != null) {
-                settingsPanel.remove(sliderSpinner);
-                sliderSpinner = null;
-            }
         }
     }
 
@@ -254,9 +254,21 @@ public class SelectionTool extends DragTool {
             if (e.isRight()) {
                 cancelSelection(comp);
             } else if (selectionBuilder != null && e.getClickCount() == 1) {
-                selectionBuilder.updateInProgressSelection(e, comp);
-                selectionBuilder.combineShapes(comp);
-                stopBuildingSelection();
+                SelectionBuilder sb = selectionBuilder;
+                SwingWorker<Void,Void> swingWorker = new SwingWorker<>() {
+                    @Override
+                    public Void doInBackground() {
+                        try {
+                            sb.updateInProgressSelection(e, comp);
+                            sb.combineShapes(comp);
+                            stopBuildingSelection();
+                        } catch (Exception e) {
+                            cancelSelection(comp);
+                        }
+                    return null;
+                    }
+                };
+                swingWorker.execute();
             }
         }
 
@@ -426,7 +438,7 @@ public class SelectionTool extends DragTool {
         return new SelectionToolIcon();
     }
 
-    private static class SelectionToolIcon extends Tool.ToolIcon {
+    private static class SelectionToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // based on selection_tool.svg

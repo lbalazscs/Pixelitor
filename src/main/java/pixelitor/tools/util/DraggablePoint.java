@@ -161,7 +161,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public final void coTransformOnlyThis(AffineTransform at, PPoint refPoint) {
-        Point2D transformed = new Point2D.Double();
+        Point2D transformed = new Double();
         Point2D orig = refPoint.asCoPoint2D();
         at.transform(orig, transformed);
         setLocationOnlyForThis(transformed);
@@ -350,11 +350,11 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public Point2D getCoLocationCopy() {
-        return new Point2D.Double(x, y);
+        return new Double(x, y);
     }
 
     public Point2D getImLocationCopy() {
-        return new Point2D.Double(imX, imY);
+        return new Double(imX, imY);
     }
 
     public PPoint getLocationCopy() {
@@ -381,7 +381,7 @@ public class DraggablePoint extends Point2D.Double {
             return Optional.empty();
         }
 
-        Point2D before = new Point2D.Double(origX, origY);
+        Point2D before = new Double(origX, origY);
         HandleMovedEdit edit = new HandleMovedEdit(
             getMoveEditName(), this, before, comp);
         return Optional.of(edit);

@@ -63,8 +63,8 @@ public abstract class PathSegment {
 
     public static class Float extends PathSegment {
         public float[] data;
-        public PathSegment.Float next;
-        public PathSegment.Float prev;
+        public Float next;
+        public Float prev;
         private float[] xCoeffs;
         private float[] yCoeffs;
 

@@ -92,7 +92,7 @@ public abstract class CurveFilter extends ParametrizedFilter {
 
     private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
     protected final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, true);
+    private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
     private final EnumParam<NonlinTransform> nonlinType = NonlinTransform.asParam();
     private final RangeParam nonlinTuning = new RangeParam("Nonlinear Tuning", -100, 0, 100);

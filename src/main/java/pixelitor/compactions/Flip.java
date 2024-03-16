@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
  * Flips all content layers of a composition horizontally or vertically
  */
 public class Flip extends SimpleCompAction {
-    private final Flip.Direction direction;
+    private final Direction direction;
 
     public Flip(Direction dir) {
         super(dir.getGUIName(), false);

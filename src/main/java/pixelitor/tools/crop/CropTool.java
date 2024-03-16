@@ -552,7 +552,7 @@ public class CropTool extends DragTool {
         return new CropToolIcon();
     }
 
-    private static class CropToolIcon extends Tool.ToolIcon {
+    private static class CropToolIcon extends ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
             // the shape is based on crop_tool.svg

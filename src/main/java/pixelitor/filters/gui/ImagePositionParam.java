@@ -18,6 +18,9 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.Features;
+import pixelitor.Views;
+import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.geom.Point2D;
@@ -94,6 +97,21 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     public Point2D getAbsolutePoint(BufferedImage src) {
         return new Point2D.Double(relativeX * src.getWidth(), relativeY * src.getHeight());
+    }
+
+    public Point2D calcCenterShift(BufferedImage src) {
+        int tx = 0;
+        int ty = 0;
+        // if this can run as a smart filter, then it shouldn't assume
+        // that the active layer is the owner of the image
+        if (!Features.enableExperimental) {
+            Drawable dr = Views.getActiveDrawable();
+            tx = -dr.getTx();
+            ty = -dr.getTy();
+        }
+        double centerShiftX = (tx + src.getWidth()) * getRelativeX();
+        double centerShiftY = (ty + src.getHeight()) * getRelativeY();
+        return new Point2D.Double(centerShiftX, centerShiftY);
     }
 
     public void setRelativeValues(double relX, double relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
@@ -185,4 +203,5 @@ public class ImagePositionParam extends AbstractFilterParam {
             return "%.4f,%.4f".formatted(relativeX, relativeY);
         }
     }
+
 }
