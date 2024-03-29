@@ -108,7 +108,11 @@ public class ColorPickerSliderUI extends BasicSliderUI {
     @Override
     public synchronized void paintTrack(Graphics g) {
         int mode = colorPicker.getMode();
-        if (mode == ColorPicker.HUE || mode == ColorPicker.BRI || mode == ColorPicker.SAT) {
+        boolean isHueMode = (mode == ColorPicker.HUE);
+        boolean isBriMode = (mode == ColorPicker.BRI);
+        boolean isSatMode = (mode == ColorPicker.SAT);
+        boolean isAnyModeSelected = isHueMode || isBriMode || isSatMode;
+        if (isAnyModeSelected) {
             float[] hsb = colorPicker.getHSB();
             if (mode == ColorPicker.HUE) {
                 for (int y = 0; y < trackRect.height; y++) {

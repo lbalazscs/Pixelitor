@@ -87,33 +87,29 @@ public class MeasuredShape implements Serializable {
      */
     public static MeasuredShape[] getSubpaths(PathIterator i, float spacing) {
         List<MeasuredShape> v = new ArrayList<>();
-        GeneralPath path = null;
+        GeneralPath path = new GeneralPath();
         float[] coords = new float[6];
-        while (!i.isDone()) {
+
+        while (!i.isDone()){
             int k = i.currentSegment(coords);
-            if (k == SEG_MOVETO) {
-                if (path != null) {
-                    v.add(new MeasuredShape(path, spacing));
-                    path = null;
-                }
-                path = new GeneralPath();
-                path.moveTo(coords[0], coords[1]);
-            } else if (k == SEG_LINETO) {
-                path.lineTo(coords[0], coords[1]);
-            } else if (k == SEG_QUADTO) {
-                path.quadTo(coords[0], coords[1], coords[2], coords[3]);
-            } else if (k == SEG_CUBICTO) {
-                path.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-            } else if (k == SEG_CLOSE) {
-                path.closePath();
+            implSegment(path, k, coords);
+            if (path != null) {
+                v.add(new MeasuredShape(path, spacing));
+                path = null;
             }
-            i.next();
         }
-        if (path != null) {
-            v.add(new MeasuredShape(path, spacing));
-            path = null;
-        }
+
         return v.toArray(new MeasuredShape[v.size()]);
+    }
+
+    private static void implSegment(GeneralPath path, int segment, float[] coords) {
+        switch (segment) {
+            case PathIterator.SEG_MOVETO -> path.moveTo(coords[0], coords[1]);
+            case PathIterator.SEG_LINETO -> path.lineTo(coords[0], coords[1]);
+            case PathIterator.SEG_QUADTO -> path.quadTo(coords[0], coords[1], coords[2], coords[3]);
+            case PathIterator.SEG_CUBICTO ->
+                    path.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+        }
     }
 
     static class Segment implements Serializable {

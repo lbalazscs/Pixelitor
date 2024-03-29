@@ -52,20 +52,20 @@ public class ShapeBounds {
     }
 
     public static Rectangle2D getBounds(Shape[] shapes) {
-        Rectangle2D r = null;
+        Rectangle2D bounds = null;
         for (Shape shape : shapes) {
             try {
-                Rectangle2D t = getBounds(shape);
-                if (r == null) {
-                    r = t;
+                Rectangle2D shapeBounds = getBounds(shape);
+                if (bounds == null) {
+                    bounds = shapeBounds;
                 } else {
-                    r.add(t);
+                    bounds.add(shapeBounds);
                 }
             } catch (EmptyPathException e) {
                 e.printStackTrace();
             }
         }
-        return r;
+        return bounds;
     }
 
     /**
