@@ -135,7 +135,6 @@ public class Spheres extends ParametrizedFilter {
         for (int i = 0; i < numCircles; i++) {
             double r;
             if (minR != maxR) {
-                //r = minR + (maxR - minR) * rand.nextDouble();
                 r = maxR - i * deltaR;
             } else {
                 r = minR;

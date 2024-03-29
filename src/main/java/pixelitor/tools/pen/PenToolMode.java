@@ -88,7 +88,6 @@ public sealed interface PenToolMode permits PathBuilder, PathEditor, PathTransfo
                 } else {
                     // should be already set
                     assert comp.getActivePath() == path;
-                    //comp.setActivePath(path);
                 }
                 comp.repaint();
             }

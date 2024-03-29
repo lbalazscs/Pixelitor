@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,6 @@ class TwoLimitsUndoManagerTest {
     @BeforeEach
     void beforeEachTest() {
         undoManager = new TwoLimitsUndoManager(3, 8);
-//        undoManager = new PixelitorUndoManager();
 
         assertThat(undoManager.getHeavyEditLimit()).isEqualTo(3);
         assertThat(undoManager.getLightEditLimit()).isEqualTo(8);

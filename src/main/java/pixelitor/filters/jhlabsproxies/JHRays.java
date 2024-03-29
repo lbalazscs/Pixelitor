@@ -80,9 +80,7 @@ public class JHRays extends ParametrizedFilter {
 
         filter.setStrength((float) strength.getPercentage());
         filter.setRotation(rotation.getValueInRadians());
-//        filter.setOpacity(opacity.getValueAsPercentage());
         filter.setThreshold((float) threshold.getPercentage());
-//        filter.setRaysOnly(raysOnly.isChecked());
 
         // this value should not be divided by resizeFactor because
         // this is a scale and not really a length
@@ -98,7 +96,6 @@ public class JHRays extends ParametrizedFilter {
             workUnits += resizeUnits;
         }
         var pt = new StatusBarProgressTracker(NAME, workUnits);
-//        var pt = new DebugProgressTracker(NAME, workUnits);
         filter.setProgressTracker(pt);
 
         BufferedImage rays;

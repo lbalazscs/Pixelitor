@@ -83,7 +83,6 @@ public class JHPointillize extends ParametrizedFilter {
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.isChecked());
         filter.setEdgeColor(edgeColor.getColor().getRGB());
-//        filter.setRndGenerator(rndGen.getValue());
 
         return filter.filter(src, dest);
     }

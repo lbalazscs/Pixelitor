@@ -62,7 +62,6 @@ public class GradientMap extends ParametrizedFilter {
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-//            int average = (r + g + b) / 3;
             int lum = (r + r + b + g + g + g) / 6;
 
             int gr = gradientLookup[lum];

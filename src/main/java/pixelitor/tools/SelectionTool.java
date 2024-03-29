@@ -83,7 +83,7 @@ public class SelectionTool extends DragTool {
         = new EnumComboBoxModel<>(ShapeCombinator.class);
 
     private static final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private static final SliderSpinner sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);;
+    private static final SliderSpinner sliderSpinner = new SliderSpinner(toleranceParam, WEST, false);
 
     SelectionTool() {
         super("Selection", 'M', HELP_TEXT, Cursors.DEFAULT, false);

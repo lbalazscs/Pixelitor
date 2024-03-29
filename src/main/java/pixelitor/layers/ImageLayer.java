@@ -158,7 +158,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         layer.setTranslationForPasted(pastedImage);
 
-//        layer.updateIconImage();
         layer.checkConstructorPostConditions();
 
         return layer;
@@ -450,7 +449,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g2.dispose();
 
             Graphics2D srcG = src.createGraphics();
-//            srcG.setComposite(AlphaComposite.Src);
             srcG.drawImage(tmpImg, bounds.x - getTx(), bounds.y - getTy(), null);
             srcG.dispose();
 
@@ -1020,9 +1018,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Returns true if the layer image is bigger than the canvas
      */
     public boolean isBigLayer() {
-//        Rectangle canvasBounds = comp.getCanvasBounds();
-//        Rectangle layerBounds = getContentBounds();
-//        return !canvasBounds.contains(layerBounds);
         return image.getWidth() > comp.getCanvasWidth()
             || image.getHeight() > comp.getCanvasHeight();
     }

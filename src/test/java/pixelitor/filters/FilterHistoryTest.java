@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,6 +70,5 @@ class FilterHistoryTest {
         layer.startFilter(filter, FilterContext.FILTER_WITHOUT_DIALOG, busyCursorParent);
 
         TestHelper.assertHistoryEditsAre("Invert");
-//        ImageEdit lastEdit = (ImageEdit) History.getLastEdit();
     }
 }

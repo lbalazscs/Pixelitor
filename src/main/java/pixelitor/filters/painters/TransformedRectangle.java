@@ -43,7 +43,6 @@ public class TransformedRectangle implements Debuggable {
     private final double origBottomRightY;
     private final double origBottomLeftX;
     private final double origBottomLeftY;
-    private final double theta;
 
     private double topLeftX;
     private double topLeftY;
@@ -68,7 +67,6 @@ public class TransformedRectangle implements Debuggable {
                                 double shx, double shy) {
         origTopLeftX = x;
         origTopLeftY = y;
-        this.theta = theta;
 
         origTopRightX = x + width;
         origTopRightY = y;

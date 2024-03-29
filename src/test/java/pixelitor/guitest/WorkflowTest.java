@@ -547,9 +547,8 @@ public class WorkflowTest {
     }
 
     private void addTextLayer(String text, String alignment) {
-        app.addTextLayer(text, dialog -> {
-            dialog.comboBox("alignmentCB").selectItem(alignment);
-        }, "Pixelitor");
+        app.addTextLayer(text, dialog ->
+            dialog.comboBox("alignmentCB").selectItem(alignment), "Pixelitor");
     }
 
     private void addGuide() {

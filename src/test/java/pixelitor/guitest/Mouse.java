@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Random;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_ALT;
+import static java.awt.event.KeyEvent.VK_CONTROL;
+import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.swing.core.MouseButton.LEFT_BUTTON;
@@ -292,8 +294,6 @@ public class Mouse {
     void recalcCanvasBounds() {
         canvasBounds = EDT.call(() ->
             Views.getActive().getVisibleCanvasBoundsOnScreen());
-
-//        debugCanvasBounds();
     }
 
     private void debugCanvasBounds() {

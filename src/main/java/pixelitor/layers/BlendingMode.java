@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,98 +41,82 @@ public enum BlendingMode {
     }, DARKEN("Darken", "svg:darken") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Darken;
             return new DarkenComposite(opacity);
         }
     },
     MULTIPLY("Multiply", "svg:multiply") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Multiply;
             return new MultiplyComposite(opacity);
         }
     }, COLOR_BURN("Color Burn", "svg:color-burn") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.ColorBurn;
             return new ColorBurnComposite(opacity);
         }
     }, LIGHTEN("Lighten", "svg:lighten") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Lighten;
             return new LightenComposite(opacity);
         }
     }, SCREEN("Screen", "svg:screen") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Screen;
             return new ScreenComposite(opacity);
         }
     }, COLOR_DODGE("Color Dodge", "svg:color-dodge") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.ColorDodge;
             return new ColorDodgeComposite(opacity);
         }
     }, LINEAR_DODGE("Linear Dodge (Add)", "svg:plus") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Add;
             return new AddComposite(opacity);
         }
     }, OVERLAY("Overlay", "svg:overlay") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Overlay;
             return new OverlayComposite(opacity);
         }
     }, SOFT_LIGHT("Soft Light", "svg:soft-light") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.SoftLight;
             return new SoftLightComposite(opacity);
         }
     }, HARD_LIGHT("Hard Light", "svg:hard-light") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.HardLight;
             return new HardLightComposite(opacity);
         }
     }, DIFFERENCE("Difference", "svg:difference") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Difference;
             return new DifferenceComposite(opacity);
         }
     }, EXCLUSION("Exclusion", "svg:exclusion") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Exclusion;
             return new ExclusionComposite(opacity);
         }
     }, HUE(GUIText.HUE, "svg:hue") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Hue;
             return new HueComposite(opacity);
         }
     }, SATURATION(GUIText.SATURATION, "svg:saturation") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Saturation;
             return new SaturationComposite(opacity);
         }
     }, COLOR(GUIText.COLOR, "svg:color") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Color;
             return new ColorComposite(opacity);
         }
     }, LUMINOSITY(GUIText.BRIGHTNESS, "svg:luminosity") {
         @Override
         public Composite getComposite(float opacity) {
-//            return BlendComposite.Luminosity;
             return new ValueComposite(opacity);
         }
     }, ERASE("Erase", "svg:dst-out") {
@@ -181,5 +165,4 @@ public enum BlendingMode {
         }
         return NORMAL;
     }
-
 }

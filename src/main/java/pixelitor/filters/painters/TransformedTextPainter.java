@@ -78,7 +78,6 @@ public class TransformedTextPainter implements Debuggable {
     private double shx;
     private double shy;
 
-    //    private AffineTransform extraTransform;
     private SoftReference<BufferedImage> cachedImage;
 
     private boolean invalidLayout = true;
@@ -131,7 +130,7 @@ public class TransformedTextPainter implements Debuggable {
             doPaint(cacheG, origTransform);
 
             cacheG.dispose();
-            cachedImage = new SoftReference<BufferedImage>(cache);
+            cachedImage = new SoftReference<>(cache);
         }
 
         deOptimizeGraphics(g);
@@ -419,7 +418,7 @@ public class TransformedTextPainter implements Debuggable {
                 case PathIterator.SEG_CLOSE:
                     points[0] = moveX;
                     points[1] = moveY;
-                    // Fall into....
+                    // fall through
 
                 case PathIterator.SEG_LINETO:
                     thisX = points[0];
@@ -563,7 +562,6 @@ public class TransformedTextPainter implements Debuggable {
         copy.boundingBox = boundingBox;
         copy.zeroShape = zeroShape;
         copy.textShape = textShape;
-//        copy.extraTransform = extraTransform;
 
         return copy;
     }

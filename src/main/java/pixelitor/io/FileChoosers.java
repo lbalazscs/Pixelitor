@@ -18,6 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
+import pixelitor.io.FileChooserConfig.SelectableFormats;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 
@@ -105,15 +106,15 @@ public class FileChoosers {
     }
 
     public static File selectSaveFileForFormat(String suggestedFileName, FileFilter fileFilter) {
-        FileChooserInfo chooserInfo = FileChooserInfo.forSingleFormat(suggestedFileName, fileFilter);
-        return picker.showSaveDialog(chooserInfo);
+        return picker.showSaveDialog(new FileChooserConfig(
+            suggestedFileName, fileFilter, SelectableFormats.SINGLE));
     }
 
     /**
      * Returns true if the file was saved, false if the user cancels the saving
      */
     public static boolean saveWithChooser(Composition comp) {
-        File file = picker.showSaveDialog(FileChooserInfo.forSavingComp(comp));
+        File file = picker.showSaveDialog(FileChooserConfig.forSavingComp(comp));
         if (file == null) {
             return false;
         }
@@ -136,8 +137,8 @@ public class FileChoosers {
         return true;
     }
 
-    public static File showSaveDialog(FileChooserInfo chooserInfo) {
-        return picker.showSaveDialog(chooserInfo);
+    public static File showSaveDialog(FileChooserConfig chooserConfig) {
+        return picker.showSaveDialog(chooserConfig);
     }
 
     public static boolean useNativeDialogs() {

@@ -276,7 +276,6 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             // can happen with pixel snapping
             return;
         }
-//        assert !drag.isImClick();
 
         drag.setStartFromCenter(altDown);
         if (shapeType.isDirectional()) {

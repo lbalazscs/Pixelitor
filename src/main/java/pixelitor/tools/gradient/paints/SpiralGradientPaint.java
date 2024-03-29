@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.*;
+import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
+import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
 
 /**
  * A Paint that creates a "spiral gradient"
@@ -196,7 +198,6 @@ public record SpiralGradientPaint(boolean clockwise, Drag drag,
             }
             relativeAngle /= 2.0 * Math.PI;
 
-//                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
             double renderDist = drag.getStartDistanceFrom(x, y);
 
             double relativeDist = renderDist / dragDistance;

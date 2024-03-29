@@ -22,7 +22,8 @@ package com.bric.awt;
 import com.bric.geom.MeasuredShape;
 import net.jafama.FastMath;
 
-import java.awt.*;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Random;
@@ -172,44 +173,48 @@ public class BristleStroke implements Stroke {
                         thisShape = r.nextInt(2);
                     }
 
-                    if (thisShape == SHAPE_TRIANGLE) {
-                        path.moveTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 3)),
+                    switch (thisShape) {
+                        case SHAPE_TRIANGLE -> {
+                            path.moveTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 3)),
                                 (float) (y + grain / 2.0 * sin(rotation + 2 * PI / 3)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 3)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 3)),
                                 (float) (y + grain / 2.0 * sin(rotation + 4 * PI / 3)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
                                 (float) (y + grain / 2.0 * sin(rotation)));
-                        path.closePath();
-                    } else if (thisShape == SHAPE_SQUARE) {
-                        path.moveTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 4)),
+                            path.closePath();
+                        }
+                        case SHAPE_SQUARE -> {
+                            path.moveTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 4)),
                                 (float) (y + grain / 2.0 * sin(rotation + 2 * PI / 4)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 4)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 4)),
                                 (float) (y + grain / 2.0 * sin(rotation + 4 * PI / 4)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + 6 * PI / 4)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 6 * PI / 4)),
                                 (float) (y + grain / 2.0 * sin(rotation + 6 * PI / 4)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
                                 (float) (y + grain / 2.0 * sin(rotation)));
-                        path.closePath();
-                    } else if (thisShape == SHAPE_STAR) {
-                        path.moveTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation)),
+                            path.closePath();
+                        }
+                        case SHAPE_STAR -> {
+                            path.moveTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation)),
                                 (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 8.0)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 2 * PI / 8.0)),
                                 (float) (y + grain / 2.0 * sin(rotation + 2 * PI / 8.0)));
 
-                        path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI / 2)),
+                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI / 2)),
                                 (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + PI / 2)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI / 2 + 2 * PI / 8.0)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI / 2 + 2 * PI / 8.0)),
                                 (float) (y + grain / 2.0 * sin(rotation + PI / 2 + 2 * PI / 8.0)));
 
-                        path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI)),
+                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI)),
                                 (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + PI)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI + 2 * PI / 8.0)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI + 2 * PI / 8.0)),
                                 (float) (y + grain / 2.0 * sin(rotation + PI + 2 * PI / 8.0)));
 
-                        path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + 3 * PI / 2)),
+                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + 3 * PI / 2)),
                                 (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + 3 * PI / 2)));
-                        path.lineTo((float) (x + grain / 2.0 * cos(rotation + 3 * PI / 2 + 2 * PI / 8.0)),
+                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 3 * PI / 2 + 2 * PI / 8.0)),
                                 (float) (y + grain / 2.0 * sin(rotation + 3 * PI / 2 + 2 * PI / 8.0)));
+                        }
                     }
 
                     d = d + gapDistance;

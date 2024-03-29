@@ -329,8 +329,6 @@ public class TextSettings implements Serializable, Debuggable {
         preset.put(PRESET_KEY_TEXT, Utils.encodeNewlines(text));
         preset.putColor(PRESET_KEY_COLOR, color);
         preset.putFloat(PRESET_KEY_ROTATION, (float) rotation);
-//        preset.putInt(PRESET_KEY_HOR_ALIGN, horizontalAlignment.ordinal());
-//        preset.putInt(PRESET_KEY_VER_ALIGN, verticalAlignment.ordinal());
         preset.putInt(PRESET_KEY_ALIGN, getAlignment().ordinal());
 
         new FontInfo(font).saveStateTo(preset);

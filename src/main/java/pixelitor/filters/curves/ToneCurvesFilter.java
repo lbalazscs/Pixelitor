@@ -59,9 +59,6 @@ public class ToneCurvesFilter extends FilterWithGUI {
             curves.setActiveChannel(Channel.RGB);
         }
         lastGUI = new ToneCurvesGUI(this, layer);
-//        if (!reset) {
-//            lastGUI.startPreview(true);
-//        }
         return lastGUI;
     }
 

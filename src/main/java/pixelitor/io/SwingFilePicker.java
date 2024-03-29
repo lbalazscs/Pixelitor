@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,8 @@ import java.nio.file.Files;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
+import static pixelitor.io.FileChooserConfig.SelectableFormats.ANY;
+import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
 import static pixelitor.io.FileChoosers.OPEN_FILTERS;
 import static pixelitor.io.FileChoosers.SAVE_FILTERS;
 import static pixelitor.utils.Texts.i18n;
@@ -69,16 +71,17 @@ public class SwingFilePicker implements FilePicker {
     }
 
     @Override
-    public File showSaveDialog(FileChooserInfo chooserInfo) {
+    public File showSaveDialog(FileChooserConfig chooserConfig) {
         initSaveChooser();
 
-        String suggestedFileName = chooserInfo.suggestedFileName();
-        if (chooserInfo.anyFormat()) {
+        String suggestedFileName = chooserConfig.suggestedFileName();
+        var selectableFormats = chooserConfig.formats();
+        if (selectableFormats == ANY) {
             saveChooser.setAcceptAllFileFilterUsed(true);
             setOnlyOneSaveExtension(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
         } else {
-            FileFilter fileFilter = chooserInfo.defaultFileFilter();
-            if (chooserInfo.singleFormat()) {
+            FileFilter fileFilter = chooserConfig.defaultFileFilter();
+            if (selectableFormats == SINGLE) {
                 setOnlyOneSaveExtension(fileFilter);
             } else {
                 // If the file is saved normally, don't suggest an extension,
@@ -101,7 +104,7 @@ public class SwingFilePicker implements FilePicker {
             Messages.showException(e);
             return null;
         } finally {
-            if (chooserInfo.anyFormat() || chooserInfo.singleFormat()) {
+            if (selectableFormats == ANY || selectableFormats == SINGLE) {
                 setDefaultSaveExtensions();
             }
         }

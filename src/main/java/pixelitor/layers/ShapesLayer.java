@@ -249,7 +249,6 @@ public class ShapesLayer extends ContentLayer {
         PixelitorEdit edit = super.endMovement();
         if (hasShape() && transformBox != null) {
             transformBox.endMovement();
-//            updateIconImage();
         }
         return edit;
     }

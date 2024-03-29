@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,8 @@ import pixelitor.tools.gui.ToolButton;
 
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Window;
 import java.util.Collections;
 
 public class Themes {
@@ -34,7 +35,6 @@ public class Themes {
     }
 
     public static final Color LIGHT_ICON_COLOR = new ColorUIResource(187, 187, 187);
-//    public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
 
     public static final Theme DEFAULT = Theme.NIMBUS;
 
@@ -86,7 +86,6 @@ public class Themes {
             // has an effect only for the flat lafs
             UIManager.put("Component.focusWidth", 1);
 
-//            UIManager.put("defaultFont", new Font("Comic Neue", Font.PLAIN, 30) );
             UIManager.setLookAndFeel(theme.getLAFClassName());
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);

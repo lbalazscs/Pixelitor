@@ -23,6 +23,7 @@ import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
+import pixelitor.io.FileChooserConfig.SelectableFormats;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -60,7 +61,9 @@ public class ImageMagick {
         }
 
         BufferedImage image = comp.getCompositeImage();
-        File file = FileChoosers.showSaveDialog(FileChooserInfo.forMagickExport(comp));
+        String suggestedFileName = FileUtils.stripExtension(comp.getName());
+        File file = FileChoosers.showSaveDialog(new FileChooserConfig(
+            suggestedFileName, null, SelectableFormats.ANY));
         if (file == null) { // canceled
             return;
         }

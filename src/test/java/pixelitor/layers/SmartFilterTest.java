@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,8 +89,6 @@ class SmartFilterTest {
 
     @Test
     void resize() {
-//        Composition resized = new Resize(10, 5).process(smartObject.getComp()).join();
-
         smartObject.resize(new Dimension(10, 5)).join();
         forceRecalculatingImage();
         checkNumFilterRuns(1, 1, 1);

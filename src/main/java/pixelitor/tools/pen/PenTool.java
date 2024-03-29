@@ -449,7 +449,6 @@ public class PenTool extends Tool {
         traceWithBrushAction.setEnabled(b);
         traceWithEraserAction.setEnabled(b);
         traceWithSmudgeAction.setEnabled(b);
-//        traceAction.setEnabled(b);
 
         deletePath.setEnabled(b);
     }

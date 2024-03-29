@@ -64,21 +64,19 @@ public class FlowField extends ParametrizedFilter {
     private static final float ITERATION_TO_FORCE_RATIO = FORCE_MAGNITUDE / LIMITING_ITERATIONS;
     private static final float ITERATION_TO_TOLERANCE_RATIO = TOLERANCE / LIMITING_ITERATIONS;
 
-    private static Vector2D createSinkForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
+    private static void createSinkForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
         if (magnitude == 0) {
-            return out;
+            return;
         }
 
         out.set(center);
         out.subtract(position);
         out.setMagnitude(magnitude);
-
-        return out;
     }
 
-    private static Vector2D createRevolveForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
+    private static void createRevolveForce(Vector2D position, Vector2D center, float magnitude, Vector2D out) {
         if (magnitude == 0) {
-            return out;
+            return;
         }
 
         out.set(center);
@@ -87,15 +85,12 @@ public class FlowField extends ParametrizedFilter {
         out.setMagnitude(magnitude);
         out.normalizeIfNonZero();
         out.multiply(magnitude);
-
-        return out;
     }
 
-    private static Vector2D createNoiseForce(float magnitude, float initTheta, float variantPI, double sampleX, double sampleY, double sampleZ, int turbulence, OpenSimplex2F noise, Vector2D out) {
+    private static void createNoiseForce(float magnitude, float initTheta, float variantPI, double sampleX, double sampleY, double sampleZ, int turbulence, OpenSimplex2F noise, Vector2D out) {
         double value = initTheta + noise.turbulence3(sampleX, sampleY, sampleZ, turbulence) * variantPI;
         out.set((float) cos(value), (float) sin(value));
         out.setMagnitude(magnitude);
-        return out;
     }
 
     private enum ForceMode implements Modifier<FlowFieldParticle> {
@@ -396,13 +391,12 @@ public class FlowField extends ParametrizedFilter {
     }
 
     private FilterState createVortexPreset(GroupedRangeParam forceMixerParam) {
-        FilterState vortex = new FilterState("Vortex")
+        return new FilterState("Vortex")
             .with(forceMixerParam, new GroupedRangeParamState(new double[]{5, 35, 60}, false))
             .with(strokeParam, StrokeSettings.defaultsWith(StrokeType.TAPERING_REV, 4))
             .with(widthRandomnessParam, new RangeParamState(100))
             .with(antiAliasParam, YES)
             .withReset();
-        return vortex;
     }
 
     @Override
@@ -533,23 +527,20 @@ public class FlowField extends ParametrizedFilter {
 
     private static void initializeAcceleration(float multiplierNoise, float multiplierSink, float multiplierRevolve, float zoom, int turbulence, int fieldWidth, int fieldHeight, OpenSimplex2F noise, Vector2D center, float variantPI, float initTheta, Vector2D[][] fieldAccelerations) {
         Vector2D position = new Vector2D();
-        Vector2D forceDueToNoise = new Vector2D();
-        Vector2D forceDueToSink = new Vector2D();
-        Vector2D forceDueToRevolution = new Vector2D();
+        Vector2D noiseForce = new Vector2D();
+        Vector2D sinkForce = new Vector2D();
+        Vector2D revolutionForce = new Vector2D();
 
         for (int i = 0; i < fieldWidth; i++) {
             for (int j = 0; j < fieldHeight; j++) {
-
                 position.set(i, j);
 
-                createSinkForce(position, center, multiplierSink, forceDueToSink);
-
-                createRevolveForce(position, center, multiplierRevolve, forceDueToRevolution);
-
+                createSinkForce(position, center, multiplierSink, sinkForce);
+                createRevolveForce(position, center, multiplierRevolve, revolutionForce);
                 createNoiseForce(multiplierNoise, initTheta, variantPI, position.x / zoom,
-                    position.y / zoom, 0, turbulence, noise, forceDueToNoise);
+                    position.y / zoom, 0, turbulence, noise, noiseForce);
 
-                fieldAccelerations[i][j] = Vector2D.add(forceDueToRevolution, forceDueToSink, forceDueToNoise);
+                fieldAccelerations[i][j] = Vector2D.add(revolutionForce, sinkForce, noiseForce);
             }
         }
     }
@@ -560,7 +551,7 @@ public class FlowField extends ParametrizedFilter {
             if ((sourcePixels[i] & 0xFF_00_00_00) != 0) {
                 int y = i / imgWidth;
                 int x = i - y * imgWidth;
-                spawns.add(new Point(x *= fieldDensity, y *= fieldDensity));
+                spawns.add(new Point((int) (x * fieldDensity), (int) (y * fieldDensity)));
             }
         }
         return spawns;
@@ -592,8 +583,8 @@ public class FlowField extends ParametrizedFilter {
     }
 
     private static Color colorFromSourceImage(int x, int y, int imgWidth, int[] sourcePixels, float fieldDensity) {
-        x /= fieldDensity;
-        y /= fieldDensity;
+        x = (int) (x / fieldDensity);
+        y = (int) (y / fieldDensity);
         int i = toRange(0, sourcePixels.length, x + y * imgWidth);
         return new Color(sourcePixels[i], true);
     }

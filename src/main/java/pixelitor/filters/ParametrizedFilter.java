@@ -146,11 +146,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         }
 
         FilterParam singleParam = params.getFirst();
-        if (singleParam.isComplex()) {
-            return true;
-        }
-
-        return false;
+        return singleParam.isComplex();
     }
 
     @Override

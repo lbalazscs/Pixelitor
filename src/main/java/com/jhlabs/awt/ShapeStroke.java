@@ -32,7 +32,6 @@ import static java.awt.geom.PathIterator.SEG_MOVETO;
 public class ShapeStroke implements Stroke {
     private final Shape[] shapes;
     private final float advance;
-    private final boolean repeat = true;
     private final AffineTransform t = new AffineTransform();
     private static final float FLATNESS = 1;
 
@@ -100,9 +99,7 @@ public class ShapeStroke implements Stroke {
                             result.append(t.createTransformedShape(shapes[shapeIndex]), false);
                             thresholdDist += advance;
                             shapeIndex++;
-                            if (repeat) {
-                                shapeIndex %= numShapes;
-                            }
+                            shapeIndex %= numShapes;
                         }
                     }
                     thresholdDist -= distance;

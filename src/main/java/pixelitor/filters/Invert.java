@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,6 @@ public class Invert extends Filter {
 
         for (int i = 0; i < destData.length; i++) {
             int srcPixel = srcData[i];
-//            int alpha = srcPixel & 0xFF000000;
             int a = (srcPixel >>> 24) & 0xFF;
 
             if (a == 255 || simple) {

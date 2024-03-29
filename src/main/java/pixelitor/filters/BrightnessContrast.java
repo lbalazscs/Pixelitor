@@ -90,9 +90,7 @@ public class BrightnessContrast extends ParametrizedFilter {
         for (int i = 0; i < destData.length; i++) {
             int rgb = srcData[i];
 
-//            int a = (rgb >>> 24) & 0xFF;
-            int a = rgb & 0xFF_00_00_00;
-
+            int a = rgb & 0xFF_00_00_00; // not in the range 0..255!
             if (a == 0) {
                 destData[i] = 0; // for premultiplied images
             } else {

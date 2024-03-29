@@ -36,7 +36,6 @@ public abstract class GMICFilter extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-//        Threads.dumpStack();
         List<String> args = getArgs();
         System.out.println(String.join(" ", args));
 

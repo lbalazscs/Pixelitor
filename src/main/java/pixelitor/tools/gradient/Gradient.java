@@ -237,6 +237,7 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public void endMovement() {
+        // nothing to do
     }
 
     public boolean hasTransparency() {

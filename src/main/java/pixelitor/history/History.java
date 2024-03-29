@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,8 +58,6 @@ public class History {
     }
 
     public static void add(PixelitorEdit edit) {
-//        Debug.debugCall(edit.getDebugName(), 4);
-
         assert edit != null;
         if (forbidEdits) {
             // TODO we can get here if undoing something activates a view, and this in turn
@@ -109,7 +107,6 @@ public class History {
         if (GUIMode.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeUndone();
             Events.postUndoEvent(edit);
-//            Debug.call(edit.getDebugName());
         }
 
         try {
@@ -126,7 +123,6 @@ public class History {
         if (GUIMode.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeRedone();
             Events.postRedoEvent(edit);
-//            Debug.call(edit.getDebugName());
         }
 
         try {

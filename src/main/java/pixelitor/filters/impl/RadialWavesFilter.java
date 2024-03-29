@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,11 +52,8 @@ public class RadialWavesFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
         double angle = FastMath.atan2(dy, dx);
 
-//        double angularWL = 1.0 / angularDivision;
         double nr = angle * angularDivision - phase;
-
         double fr = WaveType.wave(nr, waveType);
-
         r += fr * radialAmplitude * r / maxSize;
 
         double zoomedR = r / zoom;

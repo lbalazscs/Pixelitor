@@ -999,7 +999,6 @@ public class SmartObject extends CompositeLayer {
     private void debugImages() {
         BufferedImage soImage = image;
         BufferedImage contentImage = content.getCompositeImage();
-//        BufferedImage calcContentImage = content.calculateCompositeImage();
 
         Debug.debugImage(soImage, "image");
         Debug.debugImage(contentImage, "contentImage");
@@ -1015,7 +1014,6 @@ public class SmartObject extends CompositeLayer {
                 Debug.debugImage(filterCache, "filterCache for " + filter.getName());
             }
         }
-//        Debug.debugImage(calcContentImage, "calcContentImage");
     }
 
     public int indexOf(SmartFilter sf) {

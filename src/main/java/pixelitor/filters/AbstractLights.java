@@ -155,7 +155,7 @@ public class AbstractLights extends ParametrizedFilter {
         double speed = speedParam.getValueAsDouble();
         int type = typeParam.getValue();
 
-        ArrayList<Particle> points = new ArrayList<>();
+        List<Particle> points = new ArrayList<>();
         for (int i = 0; i < numPoints; i++) {
             int x = random.nextInt(width);
             int y = random.nextInt(height);

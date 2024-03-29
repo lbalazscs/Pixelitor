@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,10 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 
-import java.awt.*;
+import java.awt.FileDialog;
 import java.io.File;
 
+import static pixelitor.io.FileChooserConfig.SelectableFormats.SINGLE;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -46,14 +47,14 @@ public class AWTFilePicker implements FilePicker {
     }
 
     @Override
-    public File showSaveDialog(FileChooserInfo chooserInfo) {
+    public File showSaveDialog(FileChooserConfig chooserConfig) {
         initSavePicker();
 
-        if (chooserInfo.singleFormat()) {
+        if (chooserConfig.formats() == SINGLE) {
             saveDialog.setFilenameFilter((dir, name) ->
-                chooserInfo.defaultFileFilter().accept(new File(dir, name)));
+                chooserConfig.defaultFileFilter().accept(new File(dir, name)));
         }
-        String suggestedFileName = chooserInfo.suggestedFileName();
+        String suggestedFileName = chooserConfig.suggestedFileName();
         if (suggestedFileName != null) {
             saveDialog.setFile(suggestedFileName);
         }

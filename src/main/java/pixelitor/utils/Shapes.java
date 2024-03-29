@@ -2213,7 +2213,6 @@ public class Shapes {
         }, RECT_TO_POLAR("Rectangular to Polar", false) {
             @Override
             public PointMapper createMapper(Point2D center, double tuning, int width, int height) {
-//                double maxR = Math.sqrt(width * width + height * height) / 2.0;
                 double maxR = Math.min(width, height) / 2.0;
                 return (x, y) -> {
                     double r = x * maxR / width;

@@ -354,9 +354,6 @@ public class TestHelper {
     public static void move(Composition comp,
                             boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
-//        if(makeDuplicateLayer) {
-//            comp.getActiveLayer().setUI(new TestLayerUI());
-//        }
         comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
         comp.endMovement(MOVE_LAYER_ONLY);
     }

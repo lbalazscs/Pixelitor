@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 public class ImageDabsBrush extends DabsBrush {
     private static final Map<ImageBrushType, BufferedImage> templateImages
         = new EnumMap<>(ImageBrushType.class);
+
     private final BufferedImage templateImg;
     private BufferedImage coloredBrushImg;
     private BufferedImage finalScaledImg;
@@ -82,7 +83,7 @@ public class ImageDabsBrush extends DabsBrush {
         int newSize = (int) diameter;
         assert newSize > 0 : "newSize = " + newSize;
 
-        if (!colorChanged && brushImageHasSize(newSize)) {
+        if (!colorChanged && brushImageSizeIs(newSize)) {
             return;
         }
 
@@ -97,7 +98,7 @@ public class ImageDabsBrush extends DabsBrush {
         g.dispose();
     }
 
-    private boolean brushImageHasSize(double size) {
+    private boolean brushImageSizeIs(double size) {
         return finalScaledImg != null && finalScaledImg.getWidth() == size;
     }
 

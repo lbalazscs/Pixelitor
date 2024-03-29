@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,6 @@ public class ToolButton extends JToggleButton {
                 Tools.start(tool);
             }
         });
-//        addActionListener(e -> Tools.start(tool));
 
         if (tool.canHaveUserPresets()) {
             createPresetsPopup(tool);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,6 @@ public interface BlurredShape {
 
     int TYPE_ELLIPSE = 0;
     int TYPE_RECTANGLE = 1;
-    int TYPE_RECTANGLE2 = 10;
     int TYPE_HEART = 2;
     int TYPE_DIAMOND = 3;
     int TYPE_HEXAGON = 4;
@@ -51,8 +50,7 @@ public interface BlurredShape {
     static IntChoiceParam getChoices() {
         return new IntChoiceParam("Shape", new Item[]{
             new Item("Ellipse", TYPE_ELLIPSE),
-//                new Value("Rectangle", TYPE_RECTANGLE),
-            new Item("Rectangle", TYPE_RECTANGLE2),
+            new Item("Rectangle", TYPE_RECTANGLE),
             new Item("Heart", TYPE_HEART),
             new Item("Diamond", TYPE_DIAMOND),
             new Item("Hexagon", TYPE_HEXAGON),
@@ -71,10 +69,7 @@ public interface BlurredShape {
             case TYPE_ELLIPSE -> new BlurredEllipse(center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
-//            case TYPE_RECTANGLE -> new BlurredRectangle(center,
-//                innerRadiusX, innerRadiusY,
-//                outerRadiusX, outerRadiusY);
-            case TYPE_RECTANGLE2 -> GenericBlurredShape.of(
+            case TYPE_RECTANGLE -> GenericBlurredShape.of(
                 drag -> ShapeType.RECTANGLE.createShape(drag, null), center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);

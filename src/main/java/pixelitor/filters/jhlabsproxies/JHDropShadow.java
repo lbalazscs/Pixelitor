@@ -95,7 +95,6 @@ public class JHDropShadow extends ParametrizedFilter {
                 workUnits++;
             }
             var pt = new StatusBarProgressTracker(NAME, workUnits);
-//            var pt = new DebugProgressTracker(NAME, workUnits);
             filter.setProgressTracker(ProgressTracker.NULL_TRACKER);
 
             double resizeFactor = helper.getResizeFactor();

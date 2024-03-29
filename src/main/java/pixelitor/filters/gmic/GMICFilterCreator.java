@@ -25,6 +25,7 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -132,8 +133,7 @@ public class GMICFilterCreator {
     private static JScrollPane addScrollBars(JTextArea area) {
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
-        JScrollPane pane = new JScrollPane(area);
-        return pane;
+        return new JScrollPane(area);
     }
 
     public String getOutput() {
@@ -436,12 +436,12 @@ public class GMICFilterCreator {
 
         if (words.length > 0) {
             // Convert the first word to lowercase
-            StringBuilder camelCase = new StringBuilder(words[0].toLowerCase());
+            StringBuilder camelCase = new StringBuilder(words[0].toLowerCase(Locale.ENGLISH));
 
             // Convert the subsequent words, capitalizing the first letter of each
             for (int i = 1; i < words.length; i++) {
-                camelCase.append(words[i].substring(0, 1).toUpperCase())
-                    .append(words[i].substring(1).toLowerCase());
+                camelCase.append(words[i].substring(0, 1).toUpperCase(Locale.ENGLISH))
+                    .append(words[i].substring(1).toLowerCase(Locale.ENGLISH));
             }
 
             return camelCase.toString();

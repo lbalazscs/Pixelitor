@@ -62,6 +62,7 @@ import static pixelitor.utils.Texts.i18n;
 public class Views {
     private static final List<View> views = new ArrayList<>();
     public static int thumbSize;
+    private static int pastedCount = 1;
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
@@ -417,6 +418,10 @@ public class Views {
         EventQueue.invokeLater(() -> PixelitorWindow.get().repaint());
 
         return comp;
+    }
+
+    public static void addNewPasted(BufferedImage pastedImage) {
+        addNew(pastedImage, null, "Pasted Image " + pastedCount++);
     }
 
     public static void addNew(BufferedImage image, File file, String name) {

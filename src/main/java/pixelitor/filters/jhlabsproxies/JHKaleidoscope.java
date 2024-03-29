@@ -42,7 +42,6 @@ public class JHKaleidoscope extends ParametrizedFilter {
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam sides = new RangeParam("Sides", 0, 3, 10);
-//    private final RangeParam radius = new RangeParam("Radius", 0, 999, 0);
 
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
@@ -74,7 +73,6 @@ public class JHKaleidoscope extends ParametrizedFilter {
         filter.setAngle((float) angle.getValueInRadians());
         filter.setAngle2((float) rotateResult.getValueInRadians());
         filter.setCentre(center.getRelativePoint());
-//        filter.setRadius(radius.getValue());
         filter.setSides(sides.getValue());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

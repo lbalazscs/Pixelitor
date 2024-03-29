@@ -163,7 +163,7 @@ public class XYZTest extends ParametrizedFilter {
 
         // Convert linear sRGB with D50 white point to CIE XYZ
         for (int i = 0; i < 3; i++) {
-            xyz[i] = MATRIX_SRGB2XYZ_D50[i * 3 + 0] * rgbLin[0] +
+            xyz[i] = MATRIX_SRGB2XYZ_D50[i * 3] * rgbLin[0] +
                      MATRIX_SRGB2XYZ_D50[i * 3 + 1] * rgbLin[1] +
                      MATRIX_SRGB2XYZ_D50[i * 3 + 2] * rgbLin[2];
         }
@@ -174,7 +174,7 @@ public class XYZTest extends ParametrizedFilter {
     public static double[] xyz2rgb(double[] xyz, double[] rgb) {
         // XYZ to linear sRGB with D50 white point
         for (int i = 0; i < 3; i++) {
-            rgb[i] = MATRIX_XYZ2SRGB_D50[i * 3 + 0] * xyz[0] +
+            rgb[i] = MATRIX_XYZ2SRGB_D50[i * 3] * xyz[0] +
                      MATRIX_XYZ2SRGB_D50[i * 3 + 1] * xyz[1] +
                      MATRIX_XYZ2SRGB_D50[i * 3 + 2] * xyz[2];
         }

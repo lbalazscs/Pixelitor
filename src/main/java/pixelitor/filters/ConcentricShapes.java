@@ -146,7 +146,6 @@ public class ConcentricShapes extends ParametrizedFilter {
         FilterButtonModel reseedAction = paramSet.createReseedAction("", "Reseed Randomness");
         type.setupEnableOtherIf(sides, ConcentricShapeType::hasSides);
         type.setupEnableOtherIf(tuning, ConcentricShapeType::hasTuning);
-//        type.setupEnableOtherIf(rotate, t -> t != ConcentricShapeType.CIRCLES);
 
         setParams(
             type,

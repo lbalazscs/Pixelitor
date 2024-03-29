@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,9 +42,8 @@ public class SepiaFilter extends PointFilter {
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        int gry = (r + g + b) / 3;
-//        int gry = (r + r + b + g + g + g) / 6;
-        r = g = b = gry;
+        int lum = (r + g + b) / 3;
+        r = g = b = lum;
 
         int depth = 20;
         r += (depth * 2);

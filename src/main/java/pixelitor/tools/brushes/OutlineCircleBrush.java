@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,6 @@ public class OutlineCircleBrush extends OutlineBrush {
 
         Shape circle = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
         targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
-//        targetG.setStroke(StrokeType.OUTLINE.getStroke(1, CAP_ROUND, JOIN_ROUND, null));
         targetG.draw(circle);
 
         targetG.setStroke(savedStroke);

@@ -55,11 +55,8 @@ public class Spiral extends CurveFilter {
     private final BooleanParam log = new BooleanParam("Logarithmic", false);
     private final BooleanParam scale = new BooleanParam("Scale", true);
 
-//    RangeParam steps = new RangeParam("Steps per spin", 1, 10, 100);
-
     public Spiral() {
         addParamsToFront(
-            //          steps,
             numSpinsParam,
             typeParam,
             sidesParam,

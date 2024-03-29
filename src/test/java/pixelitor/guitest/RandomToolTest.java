@@ -212,7 +212,6 @@ public class RandomToolTest {
     private static Tool selectNextToolForTesting() {
         // this can't be a field because the tools
         // are initialized after the fields of this class
-//        List<Tool> preferredTools = List.of(SHAPES);
         List<Tool> preferredTools = List.of();
 
         Tool selectedTool;

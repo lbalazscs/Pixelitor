@@ -58,6 +58,8 @@ public class Flashlight extends ParametrizedFilter {
     public Flashlight() {
         super(true);
 
+        radius.setPresetKey("Radius");
+
         setParams(
             center,
             radius.withAdjustedRange(1.0),

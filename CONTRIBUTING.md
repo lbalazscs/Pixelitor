@@ -11,7 +11,9 @@ Alternatively, you can also send an email or discuss your idea on [Discord](http
 
 ## Focused Changes
 
-Each pull request should focus on addressing a single issue or implementing a specific feature. Avoid making a lot of unrelated changes. Provide a clear and concise description of the problem you're solving or the feature you're implementing.
+Each pull request should focus on addressing a single issue or implementing a specific feature. 
+Avoid making a lot of unrelated changes. 
+Provide a clear and concise description of the problem you're solving or the feature you're implementing.
 
 ## Not Recommended: Refactorings, Stylistic Changes, and Unit Tests
 
@@ -22,7 +24,7 @@ If you are considering refactorings, it's especially important to discuss them f
 Just because your IDE can propose many changes, I won't automatically agree with them. 
 Also, note that all code outside the "pixelitor" package is essentially library code that, for some reason, can't be pulled from Maven Central.
 
-Don't even think about purely stylistic changes (such as removing "final" from fields or adding "final" to local variables).
+Don't make purely stylistic changes (such as removing "final" from fields or adding "final" to local variables).
 
 If you can add a test without truly understanding the code ("call a setter, then a getter"), then it probably isn't useful. 
 By all means, add or update tests if you change the functionality of the code, but think twice before adding low-effort new tests.

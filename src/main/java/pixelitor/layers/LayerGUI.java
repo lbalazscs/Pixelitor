@@ -284,7 +284,6 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 if (smartFilter) {
                     super.processMouseEvent(e);
                 } else if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                    //String s = Debug.mouseEventAsString(e);
                     boolean altDown = (e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK;
                     if (altDown) {
                         layer.isolate();

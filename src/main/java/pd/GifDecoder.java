@@ -317,7 +317,7 @@ public final class GifDecoder {
          * @param index Index of the current frame, 0 to N-1
          * @return 32 bit ARGB color in the form 0xAARRGGBB
          */
-        public final int getBackgroundColor() {
+        public int getBackgroundColor() {
             GifFrame frame = frames.getFirst();
             if (frame.hasLocColTbl) {
                 return frame.localColTbl[bgColIndex];
@@ -334,7 +334,7 @@ public final class GifDecoder {
          * @param index Index of the current frame, 0 to N-1
          * @return Delay as number of hundredths (1/100) of a second
          */
-        public final int getDelay(int index) {
+        public int getDelay(int index) {
             return frames.get(index).delay;
         }
 
@@ -349,7 +349,7 @@ public final class GifDecoder {
          *              is more or less O(0) to retrieve it from the list.
          * @return A BufferedImage for the specified frame.
          */
-        public final BufferedImage getFrame(int index) {
+        public BufferedImage getFrame(int index) {
             if (img == null) { // Init
                 img = new BufferedImage(w, h, 2); // 2 = ARGB
                 g = img.createGraphics();
@@ -371,21 +371,21 @@ public final class GifDecoder {
         /**
          * @return The number of frames contained in this GIF image
          */
-        public final int getFrameCount() {
+        public int getFrameCount() {
             return frames.size();
         }
 
         /**
          * @return The height of the GIF image
          */
-        public final int getHeight() {
+        public int getHeight() {
             return h;
         }
 
         /**
          * @return The width of the GIF image
          */
-        public final int getWidth() {
+        public int getWidth() {
             return w;
         }
     }

@@ -489,8 +489,6 @@ public class MenuBar extends JMenuBar {
         sub.add(new OpenViewEnabledAction("Convert Visible to Group",
             comp -> comp.getHolderForGrouping().convertVisibleLayersToGroup()), CTRL_SHIFT_G);
 
-//        Condition isLayerGroup = new ClassCondition(LayerGroup.class, "layer group");
-
         sub.add(new OpenViewEnabledAction("Ungroup",
             comp -> comp.getActiveLayer().unGroup()), CTRL_U);
 
@@ -553,9 +551,8 @@ public class MenuBar extends JMenuBar {
             }
 
             IO.loadCompAsync(file)
-                .thenAcceptAsync(content -> {
-                    comp.add(new SmartObject(file, comp, content));
-                }, Threads.onEDT)
+                .thenAcceptAsync(content ->
+                    comp.add(new SmartObject(file, comp, content)), Threads.onEDT)
                 .exceptionally(Messages::showExceptionOnEDT);
         }));
 

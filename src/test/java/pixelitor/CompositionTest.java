@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -681,7 +681,6 @@ class CompositionTest {
         String[] expectedLayers = {"layer 1"};
         if (makeDuplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy"};
-//            comp.getLayer(1).setUI(new TestLayerUI());
         }
 
         assertThat(comp)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,16 +35,12 @@ public class Lissajous extends CurveFilter {
     private final RangeParam a = new RangeParam("a", 1, 4, 41);
     private final RangeParam b = new RangeParam("b", 1, 5, 41);
     private final RangeParam time = new RangeParam("Time", 0, 100, 100);
-//    private final RangeParam steps = new RangeParam("Num steps", 100, 5000, 10000);
-//    private final RangeParam trd = new RangeParam("Dist Treshold", 1, 20, 100);
-//    private final RangeParam tra = new RangeParam("Angle Treshold", 1, 20, 100);
 
     public Lissajous() {
         addParamsToFront(
             a,
             b,
             time
-//            , trd, tra, steps
         );
 
         helpURL = "https://en.wikipedia.org/wiki/Lissajous_curve";
@@ -55,7 +51,6 @@ public class Lissajous extends CurveFilter {
         double aVal = a.getValueAsDouble();
         double bVal = b.getValueAsDouble();
 
-//        int numSteps = steps.getValue();
         int numSteps = 5000;
 
         double cx = width * center.getRelativeX();
@@ -65,10 +60,7 @@ public class Lissajous extends CurveFilter {
         double h = height / 2.0;
         double dt = 2 * Math.PI / numSteps;
 
-//        double distThreshold = trd.getValueAsDouble();
         double distThreshold = Math.sqrt(width * width + height * height) / 50;
-
-//        double angleThreshold = tra.getPercentage();
         double angleThreshold = calcAngleThreshold(aVal, bVal);
 
         PathConnector connector = new PathConnector(numSteps + 1, distThreshold, angleThreshold);

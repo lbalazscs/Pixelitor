@@ -213,8 +213,6 @@ public class GlobalEvents {
         if (numModalDialogs == 1) {
             Tools.firstModalDialogShown();
         }
-
-//        System.out.printf("dialog '%s' opened, numModalDialogs = %d%n", title, numModalDialogs);
     }
 
     // keeps track of dialog nesting
@@ -226,8 +224,6 @@ public class GlobalEvents {
         if (numModalDialogs == 0) {
             Tools.firstModalDialogHidden();
         }
-
-//        System.out.printf("dialog '%s' closed, numModalDialogs = %d%n", title, numModalDialogs);
     }
 
     public static void assertDialogNestingIs(int expected) {

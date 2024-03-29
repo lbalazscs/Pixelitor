@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,6 @@ public enum PasteDestination {
                 "Pasted Layer", "New Pasted Layer");
         }
     }, NEW_IMAGE(false) {
-        private int pastedCount = 1;
-
         @Override
         public String getResourceKey() {
             return "paste_as_new_img";
@@ -55,10 +53,9 @@ public enum PasteDestination {
 
         @Override
         void paste(BufferedImage pastedImage) {
-            String title = "Pasted Image " + pastedCount;
-            Views.addNew(pastedImage, null, title);
-            pastedCount++;
+            Views.addNewPasted(pastedImage);
         }
+
     }, MASK(true) {
         @Override
         public String getResourceKey() {
@@ -76,7 +73,7 @@ public enum PasteDestination {
             int imgHeight = pastedImage.getHeight();
 
             // the mask image will be canvas-sized, even
-            // if the pasted image is bigger then the canvas
+            // if the pasted image has a different size
             BufferedImage bwImage = new BufferedImage(
                 canvasWidth, canvasHeight, TYPE_BYTE_GRAY);
 

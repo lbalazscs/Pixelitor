@@ -50,8 +50,6 @@ public class JHCheckerFilter extends ParametrizedFilter {
         new RangeParam("Phase (Time)", 0, 0, 100)}, false);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
-//    private final RangeParam aaRes = new RangeParam("Anti-aliasing Quality", 1, 10, 2);
-
     private CheckFilter filter;
 
     public JHCheckerFilter() {
@@ -73,8 +71,6 @@ public class JHCheckerFilter extends ParametrizedFilter {
         if (filter == null) {
             filter = new CheckFilter(NAME);
         }
-
-//        filter.setAaRes(aaRes.getValue());
 
         filter.setFuzziness(fuzziness.getValue());
         filter.setBackground(color1.getColor().getRGB());

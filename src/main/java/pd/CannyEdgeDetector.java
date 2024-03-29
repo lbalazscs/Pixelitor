@@ -56,7 +56,7 @@ public class CannyEdgeDetector {
     private int height;
     private int width;
     private int picsize;
-    private int[] data;
+    private int[] luminance;
     private int[] magnitude;
     private BufferedImage sourceImage;
     private BufferedImage edgesImage;
@@ -297,15 +297,15 @@ public class CannyEdgeDetector {
         thresholdEdges();
         pt.unitDone();
 
-        writeEdges(data);
+        writeEdges(luminance);
         pt.finished();
     }
 
     // private utility methods
 
     private void initArrays() {
-        if (data == null || picsize != data.length) {
-            data = new int[picsize];
+        if (luminance == null || picsize != luminance.length) {
+            luminance = new int[picsize];
             magnitude = new int[picsize];
 
             xConv = new float[picsize];
@@ -354,13 +354,13 @@ public class CannyEdgeDetector {
         for (int x = initX; x < maxX; x++) {
             for (int y = initY; y < maxY; y += width) {
                 int index = x + y;
-                float sumX = data[index] * kernel[0];
+                float sumX = luminance[index] * kernel[0];
                 float sumY = sumX;
                 int xOffset = 1;
                 int yOffset = width;
                 while (xOffset < kwidth) {
-                    sumY += kernel[xOffset] * (data[index - yOffset] + data[index + yOffset]);
-                    sumX += kernel[xOffset] * (data[index - xOffset] + data[index + xOffset]);
+                    sumY += kernel[xOffset] * (luminance[index - yOffset] + luminance[index + yOffset]);
+                    sumX += kernel[xOffset] * (luminance[index - xOffset] + luminance[index + xOffset]);
                     yOffset += width;
                     xOffset++;
                 }
@@ -503,12 +503,12 @@ public class CannyEdgeDetector {
         //luminance data from the image, and edge intensity from the processing.
         //This is done for memory efficiency, other implementations may wish
         //to separate these functions.
-        Arrays.fill(data, 0);
+        Arrays.fill(luminance, 0);
 
         int offset = 0;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (data[offset] == 0 && magnitude[offset] >= high) {
+                if (luminance[offset] == 0 && magnitude[offset] >= high) {
                     follow(x, y, offset, low);
                 }
                 offset++;
@@ -522,12 +522,12 @@ public class CannyEdgeDetector {
         int y0 = y1 == 0 ? y1 : y1 - 1;
         int y2 = y1 == height - 1 ? y1 : y1 + 1;
 
-        data[i1] = magnitude[i1];
+        luminance[i1] = magnitude[i1];
         for (int x = x0; x <= x2; x++) {
             for (int y = y0; y <= y2; y++) {
                 int i2 = x + y * width;
                 if ((y != y1 || x != x1)
-                    && data[i2] == 0
+                    && luminance[i2] == 0
                     && magnitude[i2] >= threshold) {
                     follow(x, y, i2, threshold);
                     return;
@@ -538,7 +538,7 @@ public class CannyEdgeDetector {
 
     private void thresholdEdges() {
         for (int i = 0; i < picsize; i++) {
-            data[i] = data[i] > 0 ? -1 : 0xff000000;
+            luminance[i] = luminance[i] > 0 ? -1 : 0xff000000;
         }
     }
 
@@ -548,64 +548,79 @@ public class CannyEdgeDetector {
 
     private void readLuminance() {
         int type = sourceImage.getType();
-        if (type == BufferedImage.TYPE_INT_RGB || type == BufferedImage.TYPE_INT_ARGB) {
-            int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
-            for (int i = 0; i < picsize; i++) {
-                int p = pixels[i];
-                int r = (p & 0xff0000) >> 16;
-                int g = (p & 0xff00) >> 8;
-                int b = p & 0xff;
-                data[i] = luminance(r, g, b);
-            }
-        } else if (type == BufferedImage.TYPE_INT_ARGB_PRE) {
-            int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
-            for (int i = 0; i < picsize; i++) {
-                int p = pixels[i];
-                int a = (p >>> 24) & 0xff;
-                int r = (p & 0xff0000) >> 16;
-                int g = (p & 0xff00) >> 8;
-                int b = p & 0xff;
-                int lum = luminance(r, g, b);
-                if (a != 255) {
-                    if (a == 0) {
-                        lum = 0;
-                    } else {
-                        float af = a / 255.0f;
-                        lum = (int) (lum / af);
-                        if (lum > 255) {
-                            lum = 255;
-                        }
+        switch (type) {
+            case BufferedImage.TYPE_INT_RGB, BufferedImage.TYPE_INT_ARGB -> readRGBLuminance();
+            case BufferedImage.TYPE_INT_ARGB_PRE -> readArgbPremultipliedLuminance();
+            case BufferedImage.TYPE_BYTE_GRAY -> readByteGrayLuminance();
+            case BufferedImage.TYPE_USHORT_GRAY -> readShortGrayLuminance();
+            case BufferedImage.TYPE_3BYTE_BGR -> readBGRLuminance();
+            default -> throw new IllegalArgumentException("Unsupported image type: " + type);
+        }
+    }
+
+    private void readRGBLuminance() {
+        int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+        for (int i = 0; i < picsize; i++) {
+            int p = pixels[i];
+            int r = (p & 0xff0000) >> 16;
+            int g = (p & 0xff00) >> 8;
+            int b = p & 0xff;
+            luminance[i] = luminance(r, g, b);
+        }
+    }
+
+    private void readArgbPremultipliedLuminance() {
+        int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+        for (int i = 0; i < picsize; i++) {
+            int p = pixels[i];
+            int a = (p >>> 24) & 0xff;
+            int r = (p & 0xff0000) >> 16;
+            int g = (p & 0xff00) >> 8;
+            int b = p & 0xff;
+            int lum = luminance(r, g, b);
+            if (a != 255) {
+                if (a == 0) {
+                    lum = 0;
+                } else {
+                    float af = a / 255.0f;
+                    lum = (int) (lum / af);
+                    if (lum > 255) {
+                        lum = 255;
                     }
                 }
-                data[i] = lum;
             }
-        } else if (type == BufferedImage.TYPE_BYTE_GRAY) {
-            byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
-            for (int i = 0; i < picsize; i++) {
-                data[i] = (pixels[i] & 0xff);
-            }
-        } else if (type == BufferedImage.TYPE_USHORT_GRAY) {
-            short[] pixels = (short[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
-            for (int i = 0; i < picsize; i++) {
-                data[i] = (pixels[i] & 0xffff) / 256;
-            }
-        } else if (type == BufferedImage.TYPE_3BYTE_BGR) {
-            byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
-            int offset = 0;
-            for (int i = 0; i < picsize; i++) {
-                int b = pixels[offset++] & 0xff;
-                int g = pixels[offset++] & 0xff;
-                int r = pixels[offset++] & 0xff;
-                data[i] = luminance(r, g, b);
-            }
-        } else {
-            throw new IllegalArgumentException("Unsupported image type: " + type);
+            luminance[i] = lum;
+        }
+    }
+
+    private void readByteGrayLuminance() {
+        byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+        for (int i = 0; i < picsize; i++) {
+            luminance[i] = (pixels[i] & 0xff);
+        }
+    }
+
+    private void readShortGrayLuminance() {
+        short[] pixels = (short[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+        for (int i = 0; i < picsize; i++) {
+            luminance[i] = (pixels[i] & 0xffff) / 256;
+        }
+    }
+
+    private void readBGRLuminance() {
+        byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+        int offset = 0;
+        for (int i = 0; i < picsize; i++) {
+            int b = pixels[offset++] & 0xff;
+            int g = pixels[offset++] & 0xff;
+            int r = pixels[offset++] & 0xff;
+            luminance[i] = luminance(r, g, b);
         }
     }
 
     private void normalizeContrast() {
         int[] histogram = new int[256];
-        for (int datum : data) {
+        for (int datum : luminance) {
             histogram[datum]++;
         }
         int[] remap = new int[256];
@@ -620,8 +635,8 @@ public class CannyEdgeDetector {
             j = target;
         }
 
-        for (int i = 0; i < data.length; i++) {
-            data[i] = remap[data[i]];
+        for (int i = 0; i < luminance.length; i++) {
+            luminance[i] = remap[luminance[i]];
         }
     }
 

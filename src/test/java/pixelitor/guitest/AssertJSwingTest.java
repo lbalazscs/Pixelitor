@@ -382,7 +382,6 @@ public class AssertJSwingTest {
         layer1Button.requireSelected();
 
         keyboard.redo("New Empty Layer");
-//        layer2Button = findLayerButton("layer 2"); // new instance
         app.checkNumLayersIs(2);
         layer2Button.requireSelected();
         maskMode.set(this);
@@ -1745,7 +1744,7 @@ public class AssertJSwingTest {
         // Curves
         testFilterWithDialog("Circle Weave", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Fractal Curves", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("L-Systems", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spider Web", Randomize.YES, Reseed.NO, ShowOriginal.NO);
@@ -2677,7 +2676,6 @@ public class AssertJSwingTest {
         mouse.dragToCanvas(450, 450);
         mouse.moveToCanvas(200, 200); // move to the top left corner
         mouse.dragToCanvas(150, 150);
-//        Utils.sleep(1, SECONDS);
 
         keyboard.nudge();
         // currently there is no undo after resizing or nudging the crop rectangle
