@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,8 +89,11 @@ public class TipsOfTheDay {
         String fileName = "/tips.properties";
 
         // TODO do it in a generic way
-        if ("pt".equals(Locale.getDefault().getLanguage())) {
+        String langCode = Locale.getDefault().getLanguage();
+        if ("pt".equals(langCode)) {
             fileName = "/tips_pt_BR.properties";
+        } else if("fr".equals(langCode)) {
+            fileName = "/tips_fr.properties";
         }
 
         try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream(fileName)) {
