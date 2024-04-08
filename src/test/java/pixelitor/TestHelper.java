@@ -46,6 +46,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_MOVED;
@@ -466,10 +467,10 @@ public class TestHelper {
         assertThat(edits).containsExactly(values);
     }
 
-    public static void initTool(Tool tool) throws InvocationTargetException, InterruptedException {
+    public static void initTool(Tool tool, ResourceBundle resources) throws InvocationTargetException, InterruptedException {
         if (!tool.hasSettingsPanel()) {
             tool.setSettingsPanel(new ToolSettingsPanel());
-            SwingUtilities.invokeAndWait(tool::initSettingsPanel);
+            SwingUtilities.invokeAndWait(() -> tool.initSettingsPanel(resources));
         }
     }
 

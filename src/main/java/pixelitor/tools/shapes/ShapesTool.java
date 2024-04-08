@@ -58,6 +58,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import static pixelitor.tools.DragToolState.AFTER_FIRST_MOUSE_PRESS;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
@@ -137,7 +138,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         strokeParam.setAdjustmentListener(this::strokeUIChanged);
         effectsParam.setAdjustmentListener(this::effectsUIChanged);
 

@@ -36,6 +36,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -70,7 +71,7 @@ public class PaintBucketTool extends Tool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
         settingsPanel.addComboBox(GUIText.FILL_WITH + ":", fillCB, "fillCB");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.util.ResourceBundle;
 
 /**
  * The eraser tool.
@@ -35,7 +36,7 @@ public class EraserTool extends AbstractBrushTool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         addTypeSelector();
         addBrushSettingsButton();
 

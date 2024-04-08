@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import pixelitor.utils.Cursors;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
+import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -42,7 +43,7 @@ public class HandTool extends Tool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         settingsPanel.addAutoZoomButtons();
     }
 

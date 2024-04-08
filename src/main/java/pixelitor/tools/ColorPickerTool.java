@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
@@ -58,7 +59,7 @@ public class ColorPickerTool extends Tool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         settingsPanel.add(sampleLayerOnly);
     }
 

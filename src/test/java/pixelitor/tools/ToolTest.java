@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,14 +32,18 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.PenTool;
+import pixelitor.utils.Texts;
 
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.ResourceBundle;
 
-import static java.awt.event.MouseEvent.*;
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 
 /**
  * Behavior that is common to all tools
@@ -79,8 +83,10 @@ public class ToolTest {
 //        Tool[] tools = {Tools.BRUSH};
 
         List<Object[]> instances = new ArrayList<>();
+        ResourceBundle resources = Texts.getResources();
+
         for (Tool tool : tools) {
-            TestHelper.initTool(tool);
+            TestHelper.initTool(tool, resources);
 
             // for each combination create an independent test run
             for (Alt alt : Alt.values()) {

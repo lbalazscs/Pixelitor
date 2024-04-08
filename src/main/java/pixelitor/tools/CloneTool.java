@@ -42,6 +42,7 @@ import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -93,7 +94,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         brushModel = settingsPanel.addCopyBrushTypeSelector(
             CopyBrushType.SOFT, cloneBrush::typeChanged);
         addSizeSelector();

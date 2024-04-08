@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.ResourceBundle;
 
 /**
  * The move tool.
@@ -62,8 +63,9 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void initSettingsPanel() {
-        settingsPanel.addComboBox("Move:", modeSelector, "modeSelector");
+    public void initSettingsPanel(ResourceBundle resources) {
+        String moveText = resources.getString("mt_move");
+        settingsPanel.addComboBox(moveText, modeSelector, "modeSelector");
         modeSelector.addActionListener(e -> currentMode = (MoveMode) modeSelector.getSelectedItem());
 
         settingsPanel.addSeparator();

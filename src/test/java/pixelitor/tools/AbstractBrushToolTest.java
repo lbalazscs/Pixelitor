@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,14 +28,22 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.TestHelper;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
+import pixelitor.utils.Texts;
 
 import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.ResourceBundle;
 
-import static org.mockito.Mockito.*;
-import static pixelitor.tools.Tools.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static pixelitor.tools.Tools.BRUSH;
+import static pixelitor.tools.Tools.CLONE;
+import static pixelitor.tools.Tools.ERASER;
+import static pixelitor.tools.Tools.SMUDGE;
 
 /**
  * Tests the functionality common to all AbstractBrush subclasses
@@ -61,8 +69,9 @@ public class AbstractBrushToolTest {
         TestHelper.setUnitTestingMode();
 
         Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
+        ResourceBundle resources = Texts.getResources();
         for (Tool tool : tools) {
-            TestHelper.initTool(tool);
+            TestHelper.initTool(tool, resources);
         }
 
         return Arrays.asList(new Object[][]{

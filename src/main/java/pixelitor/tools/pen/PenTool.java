@@ -46,6 +46,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
+import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -102,7 +103,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         JComboBox<PenToolMode> modeChooser = new JComboBox<>(modeModel);
 
         modeChooser.addActionListener(e -> onModeChooserAction());

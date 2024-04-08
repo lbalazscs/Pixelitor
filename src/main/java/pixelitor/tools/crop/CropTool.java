@@ -48,6 +48,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ResourceBundle;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
@@ -101,7 +102,7 @@ public class CropTool extends DragTool {
      * Initialize settings panel controls
      */
     @Override
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         addMaskOpacitySelector();
 
         settingsPanel.addSeparator();

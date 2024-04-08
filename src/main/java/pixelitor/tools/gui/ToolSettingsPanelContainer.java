@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,11 @@ package pixelitor.tools.gui;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.CardLayout;
+import java.util.ResourceBundle;
 
 /**
  * The {@link ToolSettingsPanel}s for each tool in a CardLayout
@@ -32,11 +34,13 @@ public class ToolSettingsPanelContainer extends JPanel {
     private ToolSettingsPanelContainer() {
         super(new CardLayout());
 
+        ResourceBundle resources = Texts.getResources();
+
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
             var p = new ToolSettingsPanel();
             tool.setSettingsPanel(p);
-            tool.initSettingsPanel();
+            tool.initSettingsPanel(resources);
             add(p, tool.getShortName());
         }
     }

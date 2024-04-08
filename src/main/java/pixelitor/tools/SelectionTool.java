@@ -38,6 +38,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
+import java.util.ResourceBundle;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.selection.ShapeCombinator.ADD;
@@ -92,7 +93,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void initSettingsPanel() {
+    public void initSettingsPanel(ResourceBundle resources) {
         var typeCB = new JComboBox<SelectionType>(typeModel);
         typeCB.addActionListener(e -> selectionTypeChanged());
         settingsPanel.addComboBox(GUIText.TYPE + ":", typeCB, "typeCB");
