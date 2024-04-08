@@ -51,6 +51,7 @@ public interface Transition {
      * @param progress a value between zero and one indicating how
      *                 progressed this transition is.
      *                 <P>At progress = 0, frameA should be shown.  At progress = 1, frameB should be shown.
+     * @param invert
      */
-    void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB, float progress);
+    void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB, float progress, boolean invert);
 }

@@ -71,6 +71,13 @@ public class ImageInstruction extends Transition2DInstruction {
                 .create(new Rectangle2D.Double(0, 0, frameSize.width, frameSize.height), dest), clipping);
     }
 
+    @Override
+    public void invert(int width, int height) {
+        if (clipping != null) {
+            clipping = invert(clipping, width, height);
+        }
+    }
+
     /**
      * Renders a completely opaque image, anchored at (0,0), at its original
      * size with no clipping.

@@ -34,8 +34,8 @@ public class ReversedTransition implements Transition {
 
     @Override
     public void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB,
-                      float progress) {
-        transition.paint(g, frameB, frameA, 1 - progress);
+                      float progress, boolean invert) {
+        transition.paint(g, frameB, frameA, 1 - progress, false);
     }
 
 }

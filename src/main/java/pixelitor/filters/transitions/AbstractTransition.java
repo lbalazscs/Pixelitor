@@ -19,6 +19,7 @@ package pixelitor.filters.transitions;
 
 import com.bric.image.transition.Transition;
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
 
@@ -30,10 +31,13 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 public abstract class AbstractTransition extends ParametrizedFilter {
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 50, 100);
+    protected final BooleanParam invert = new BooleanParam("Invert Transparency", false);
 
     protected AbstractTransition() {
         super(true);
 
+        // invert is added in the subclasses because
+        // the blind transition doesn't work with it
         setParams(progress);
     }
 
@@ -47,7 +51,7 @@ public abstract class AbstractTransition extends ParametrizedFilter {
 
         Graphics2D g2 = dest.createGraphics();
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        transition.paint(g2, frameA, frameB, (float) progress.getPercentage());
+        transition.paint(g2, frameA, frameB, (float) progress.getPercentage(), invert.isChecked());
         g2.dispose();
 
         return dest;

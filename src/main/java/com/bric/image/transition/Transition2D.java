@@ -45,10 +45,14 @@ public abstract class Transition2D extends AbstractTransition {
      * all that is needed to implement these transitions.
      */
     @Override
-    protected final void doPaint(Graphics2D g, BufferedImage frameA, BufferedImage frameB, float progress) {
-        Transition2DInstruction[] i = getInstructions(progress, new Dimension(frameA.getWidth(), frameA.getHeight()));
-        for (Transition2DInstruction transition2DInstruction : i) {
-            transition2DInstruction.paint(g, frameA, frameB);
+    protected final void doPaint(Graphics2D g, BufferedImage frameA, BufferedImage frameB, float progress, boolean invert) {
+        Transition2DInstruction[] instructions = getInstructions(progress, new Dimension(frameA.getWidth(), frameA.getHeight()));
+        for (Transition2DInstruction instruction : instructions) {
+            if (invert) {
+                instruction.invert(frameA.getWidth(), frameA.getHeight());
+            }
+            instruction.paint(g, frameA, frameB);
         }
     }
+
 }

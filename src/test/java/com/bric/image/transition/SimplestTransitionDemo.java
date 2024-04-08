@@ -22,7 +22,9 @@ package com.bric.image.transition;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
@@ -88,10 +90,10 @@ public class SimplestTransitionDemo extends JPanel {
         float progress = (t % ((long) (DURATION * 2)));
         if (progress > DURATION) {
             progress = (progress - DURATION) / DURATION;
-            transition.paint((Graphics2D) g, bi2, bi1, progress);
+            transition.paint((Graphics2D) g, bi2, bi1, progress, false);
         } else {
             progress = progress / DURATION;
-            transition.paint((Graphics2D) g, bi1, bi2, progress);
+            transition.paint((Graphics2D) g, bi1, bi2, progress, false);
         }
     }
 }

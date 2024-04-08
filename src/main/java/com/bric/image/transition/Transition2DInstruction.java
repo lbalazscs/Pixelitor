@@ -41,10 +41,19 @@ import java.util.List;
  * on top of each other) they create the desired effect.
  */
 public abstract class Transition2DInstruction {
+    public static Shape invert(Shape in, int width, int height) {
+        Area full = new Area(new Rectangle(0, 0, width, height));
+        full.subtract(new Area(in));
+        return full;
+    }
+
     /**
      * This renders this instruction.
      */
     public abstract void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB);
+
+    // inverts the transparency
+    public abstract void invert(int width, int height);
 
     /**
      * This examines the instructions provided and returns only those instructions

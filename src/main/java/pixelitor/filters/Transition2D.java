@@ -76,6 +76,7 @@ public class Transition2D extends ParametrizedFilter {
         new Item("Venetian Blinds", BLINDS),
         new Item("Wave", WAVE),
     });
+//    private final BooleanParam invert = new BooleanParam("Invert Transparency", false);
 
     private BricTransitionFilter filter;
 
@@ -95,6 +96,7 @@ public class Transition2D extends ParametrizedFilter {
 
         filter.setType(type.getValue());
         filter.setProgress((float) progress.getPercentage());
+//        filter.setInvert(invert.isChecked());
 
         return filter.filter(src, dest);
     }

@@ -19,12 +19,7 @@
  */
 package com.bric.image.transition;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 
@@ -73,6 +68,11 @@ public class ShapeInstruction extends Transition2DInstruction {
     public ShapeInstruction(Shape shape, Color fillColor) {
         this.shape = new GeneralPath(shape);
         this.fillColor = fillColor;
+    }
+
+    @Override
+    public void invert(int width, int height) {
+        invert(shape, width, height);
     }
 
     @Override

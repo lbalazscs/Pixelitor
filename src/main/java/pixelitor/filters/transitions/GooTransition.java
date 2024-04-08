@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class GooTransition extends AbstractTransition {
     private long lastSeed;
 
     public GooTransition() {
-        addParamsToFront(columns, strokeWidth);
+        addParamsToFront(columns, strokeWidth, invert);
         paramSet.withAction(paramSet.createReseedAction(this::reseed));
         reseed(paramSet.getLastSeed());
         lastSeed = seed;

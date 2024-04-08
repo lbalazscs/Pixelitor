@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,6 +70,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
     private int type;
     private float progress;
+    private boolean invert;
 
     // these have to be cached
     private GooTransition2D gooTransition2D;
@@ -132,7 +133,7 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
             progress = 1.0f;
         }
 
-        transition.paint(g2, frameA, frameB, progress);
+        transition.paint(g2, frameA, frameB, progress, invert);
         g2.dispose();
 
         return dest;
@@ -160,6 +161,10 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
     public void setProgress(float progress) {
         this.progress = progress;
+    }
+
+    public void setInvert(boolean invert) {
+        this.invert = invert;
     }
 
     public void setType(int type) {

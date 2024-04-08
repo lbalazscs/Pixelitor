@@ -97,25 +97,13 @@ public abstract class AbstractTransition implements Transition {
 
     @Override
     public final void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB,
-                            float progress) {
-        if (g == null) {
-            throw new NullPointerException();
-        }
-        if (frameA == null) {
-            throw new NullPointerException();
-        }
-        if (frameB == null) {
-            throw new NullPointerException();
-        }
-        if (!(frameA.getHeight() == frameB.getHeight() && frameA.getWidth() == frameB.getWidth())) {
-            throw new IllegalArgumentException(
-                    "the two images must be the same dimensions (" + frameA.getWidth() + "x" + frameA
-                            .getHeight() + " != " + frameB.getWidth() + "x" + frameB.getHeight());
-        }
-        if (progress < 0 || progress > 1) {
-            throw new IllegalArgumentException("progress (" + progress + ") should be between [0,1]");
-        }
-        doPaint(g, frameA, frameB, progress);
+                            float progress, boolean invert) {
+        assert g != null;
+        assert frameA != null;
+        assert frameB != null;
+        assert frameA.getHeight() == frameB.getHeight() && frameA.getWidth() == frameB.getWidth();
+        assert progress >= 0 && progress <= 1;
+        doPaint(g, frameA, frameB, progress, invert);
     }
 
     /**
@@ -123,7 +111,7 @@ public abstract class AbstractTransition implements Transition {
      * all the arguments.
      */
     protected abstract void doPaint(Graphics2D g, BufferedImage frameA, BufferedImage frameB,
-                                    float progress);
+                                    float progress, boolean invert);
 
     /**
      * Return a rectangle including all the points in the argument.
