@@ -13,8 +13,10 @@ dependency-reduced-pom.xml
 installer/runtime/*
 out/*
 target/*
-.idea/*
 /target/
+.idea/*
+.vscode/*
+.VSCodeCounter/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,linux
