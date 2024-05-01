@@ -30,7 +30,9 @@ public enum Language {
     GERMAN("German", "de") {},
     ITALIAN("Italian", "it") {},
     PORTUGUESE("Portuguese (Br)", "pt-br") {},
+    RUSSIAN("Russian", "ru") {},
     SPANISH("Spanish", "es") {};
+
 
     private final String guiName;
     private final String code;
