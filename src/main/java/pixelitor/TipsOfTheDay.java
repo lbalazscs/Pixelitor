@@ -94,6 +94,8 @@ public class TipsOfTheDay {
             fileName = "/tips_pt_BR.properties";
         } else if("fr".equals(langCode)) {
             fileName = "/tips_fr.properties";
+        } else if("ru".equals(langCode)) {
+            fileName = "/tips_ru.properties";
         }
 
         try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream(fileName)) {
