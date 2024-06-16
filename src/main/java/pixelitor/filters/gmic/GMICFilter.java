@@ -23,10 +23,14 @@ import pixelitor.io.IO;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GMICFilter extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = -8131876811008610684L;
+
     public static File GMIC_PATH;
     protected long seed;
 
