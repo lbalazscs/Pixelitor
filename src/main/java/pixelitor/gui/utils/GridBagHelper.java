@@ -193,7 +193,7 @@ public class GridBagHelper {
         container.add(c, lastControlConstraint);
     }
 
-    public void addOnlyControl(Component c) {
+    public void addRow(Component c) {
         lastControlConstraint.gridx = 0;
         lastControlConstraint.gridy = autoIncrementedGridY;
         autoIncrementedGridY++;
@@ -210,7 +210,7 @@ public class GridBagHelper {
 
             int numColumns = ((ParamGUI) control).getNumLayoutColumns();
             if (numColumns == 1) {
-                addOnlyControl(control);
+                addRow(control);
             } else if (numColumns == 2) {
                 addLabelAndLastControl(setting.getName() + ':', control);
             } else {

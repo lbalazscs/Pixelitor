@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ class TransformBoxTest {
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createMockComp();
+        var comp = TestHelper.createMockComp("TransformBoxTest");
         view = comp.getView();
     }
 

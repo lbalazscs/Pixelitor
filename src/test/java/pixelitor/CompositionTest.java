@@ -43,11 +43,11 @@ class CompositionTest {
 
     @BeforeEach
     void beforeEachTest() {
-        comp = TestHelper.createComp(2, true);
+        comp = TestHelper.createComp("CompositionTest", 2, true);
         assertThat(comp)
             .isNotDirty()
             .isNotEmpty()
-            .hasName("Test")
+            .hasName("CompositionTest")
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
             .activeLayerNameIs("layer 2")
@@ -676,7 +676,7 @@ class CompositionTest {
         History.assertNumEditsIs(1);
 
         // 1. direction south-east
-        TestHelper.move(comp, makeDuplicateLayer, 2, 2);
+        TestHelper.move(comp, 2, 2, makeDuplicateLayer);
 
         String[] expectedLayers = {"layer 1"};
         if (makeDuplicateLayer) {
@@ -693,7 +693,7 @@ class CompositionTest {
         History.assertLastEditNameIs("Move Layer");
 
         // 2. direction north-west
-        TestHelper.move(comp, makeDuplicateLayer, -2, -2);
+        TestHelper.move(comp, -2, -2, makeDuplicateLayer);
 
         assertThat(comp)
             // this time we have a non-zero translation
@@ -705,7 +705,7 @@ class CompositionTest {
         }
 
         // 3. direction north-west again
-        TestHelper.move(comp, makeDuplicateLayer, -2, -2);
+        TestHelper.move(comp, -2, -2, makeDuplicateLayer);
 
         assertThat(comp)
             // the translation increases
@@ -717,7 +717,7 @@ class CompositionTest {
         }
 
         // 4. direction north-east
-        TestHelper.move(comp, makeDuplicateLayer, 2, -2);
+        TestHelper.move(comp, 2, -2, makeDuplicateLayer);
         assertThat(comp)
             // the translation increases
             .activeLayerTranslationIs(-2, -6)
@@ -728,7 +728,7 @@ class CompositionTest {
         }
 
         // 5. opposite movement: direction south-west
-        TestHelper.move(comp, makeDuplicateLayer, -2, 2);
+        TestHelper.move(comp, -2, 2, makeDuplicateLayer);
 
         if (makeDuplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy",
@@ -845,15 +845,15 @@ class CompositionTest {
     @Test
     void rename() {
         comp.setView(null); // avoid the creation of the main window
-        assertThat(comp).hasName("Test").isNotOpen();
+        assertThat(comp).hasName("CompositionTest").isNotOpen();
 
-        comp.rename("Test", "new name");
-        assertThat(comp).hasName("new name");
+        comp.rename("CompositionTest", "CompositionTest New Name");
+        assertThat(comp).hasName("CompositionTest New Name");
 
         History.undo("Rename Image");
-        assertThat(comp).hasName("Test");
+        assertThat(comp).hasName("CompositionTest");
 
         History.redo("Rename Image");
-        assertThat(comp).hasName("new name");
+        assertThat(comp).hasName("CompositionTest New Name");
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ class NewImageTest {
     @ParameterizedTest(name = "filled with {0}")
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
-        var comp = NewImage.createNewComposition(fillType, 20, 20, "New Image");
+        var comp = NewImage.createNewComposition(fillType, 20, 20, "NewImageTest");
         assert comp.checkInvariants();
         assertThat(comp)
             .numLayersIs(1)

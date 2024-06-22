@@ -42,7 +42,7 @@ public class JHSparkle extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
     private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
-    private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 200, 501);
+    private final RangeParam numRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
@@ -58,7 +58,7 @@ public class JHSparkle extends ParametrizedFilter {
             center,
             lightOnly,
             color,
-            nrOfRays,
+            numRays,
             radius.withAdjustedRange(1.0),
             shine,
             randomness.withAction(reseed)
@@ -75,7 +75,7 @@ public class JHSparkle extends ParametrizedFilter {
         filter.setRelativeCentreX((float) center.getRelativeX());
         filter.setRelativeCentreY((float) center.getRelativeY());
         filter.setRadius(radius.getValue());
-        filter.setNumRays(nrOfRays.getValue());
+        filter.setNumRays(numRays.getValue());
         filter.setAmount(shine.getValue());
         filter.setRandomness(randomness.getValue());
         filter.setColor(color.getColor().getRGB());

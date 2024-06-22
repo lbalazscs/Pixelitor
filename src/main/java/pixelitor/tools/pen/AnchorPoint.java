@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,6 @@ import java.io.Serial;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.AnchorPointType.addTypePopupItems;
 
 /**
  * A point on a {@link SubPath}
@@ -234,7 +233,10 @@ public class AnchorPoint extends DraggablePoint {
 
     public void showPopup(int x, int y) {
         var popup = new JPopupMenu();
-        addTypePopupItems(this, popup);
+
+        for (var anchorPointType : AnchorPointType.values()) {
+            popup.add(anchorPointType.createConvertMenuItem(this));
+        }
 
         popup.addSeparator();
 

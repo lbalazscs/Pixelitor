@@ -223,7 +223,7 @@ public class RandomGUITest {
             printProgressPercentage(numTests, onePercent, roundNr);
 
             if (!GUIUtils.appHasFocus()) {
-                tryToRegainWindowFocus(3);
+                tryRegainingWindowFocus(3);
 
                 if (!GUIUtils.appHasFocus()) {
                     System.out.println("\nRandomGUITest app focus lost.");
@@ -270,7 +270,7 @@ public class RandomGUITest {
         }
     }
 
-    private static void tryToRegainWindowFocus(int attempts) {
+    private static void tryRegainingWindowFocus(int attempts) {
         if (attempts <= 0) {
             return; // give up
         }
@@ -285,7 +285,7 @@ public class RandomGUITest {
         if (!GUIUtils.appHasFocus()) {
             Utils.sleep(1, TimeUnit.SECONDS);
             //noinspection TailRecursion
-            tryToRegainWindowFocus(attempts - 1);
+            tryRegainingWindowFocus(attempts - 1);
         }
     }
 
@@ -293,8 +293,8 @@ public class RandomGUITest {
     private Point generateRandomPoint() {
         Rectangle windowBounds = PixelitorWindow.get().getBounds();
         if (!windowBounds.equals(startBounds)) {
-            // Window moved. Shouldn't happen, but as a workaround
-            // restore it to the starting state
+            // The main frame was moved. Shouldn't happen, but
+            // as a workaround restore it to the starting bounds.
             System.out.println("Restoring the original window bounds " + startBounds);
             PixelitorWindow.get().setBounds(startBounds);
         }
@@ -319,9 +319,7 @@ public class RandomGUITest {
             throw new IllegalStateException("small window");
         }
 
-        return new Point(
-            Rnd.intInRange(minX, maxX),
-            Rnd.intInRange(minY, maxY));
+        return Rnd.pointInRect(minX, maxX, minY, maxY);
     }
 
     private void finishRunning() {
@@ -368,15 +366,9 @@ public class RandomGUITest {
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        String stateInfo = tool.getStateInfo();
-        if (stateInfo == null) {
-            stateInfo = "";
-        } else {
-            stateInfo = " (" + stateInfo + ")";
-        }
         String modifiers = runWithModifiers(robot, () -> robot.mouseMove(x, y));
-        log(tool.getName() + stateInfo + " " + modifiers
-            + "drag to (" + x + ", " + y + ')');
+        log("%s (%s) %s drag to (%d, %d)".formatted(
+            tool.getName(), tool.getStateInfo(), modifiers, x, y));
     }
 
     private void randomClick(Robot robot) {
@@ -645,7 +637,7 @@ public class RandomGUITest {
         if (rand.nextBoolean()) {
             view.setZoom(randomZoomLevel);
         } else {
-            Point mousePos = pickRandomPointOn(view);
+            Point mousePos = randomPointOn(view);
             view.setZoom(randomZoomLevel, mousePos);
         }
     }
@@ -660,7 +652,7 @@ public class RandomGUITest {
         return level;
     }
 
-    private static Point pickRandomPointOn(View view) {
+    private static Point randomPointOn(View view) {
         Rectangle vp = view.getVisiblePart();
         int randX = vp.x;
         if (vp.width >= 2) {
@@ -681,7 +673,7 @@ public class RandomGUITest {
             if (rand.nextBoolean()) {
                 view.setZoom(newZoom);
             } else {
-                Point mousePos = pickRandomPointOn(view);
+                Point mousePos = randomPointOn(view);
                 view.setZoom(newZoom, mousePos);
             }
         }
@@ -1138,7 +1130,7 @@ public class RandomGUITest {
 
     private ParametrizedFilter getRandomTweenFilter() {
         if (preferredTweenFilter != null) {
-            assert !preferredTweenFilter.excludedFromAnimation();
+            assert preferredTweenFilter.supportsTweenAnimation();
             assert preferredTweenFilter.getParamSet().isAnimatable();
             return preferredTweenFilter;
         }

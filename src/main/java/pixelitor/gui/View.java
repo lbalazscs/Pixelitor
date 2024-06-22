@@ -917,6 +917,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return (Component) viewContainer;
     }
 
+    public boolean checkInvariants() {
+        // calls getComp() instead of accessing the field
+        // so that it works in mocked views.
+        if (getComp().getView() != this) {
+            throw new AssertionError("view error in " + comp.getName());
+        }
+        return true;
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -144,7 +144,7 @@ public class DialogBuilder {
         return validator(d -> {
             ValidationResult validationResult = validatedPanel.validateSettings();
             if (validationResult.isOK()) {
-                return true; // valid, let the dialog close
+                return true; // valid, allow the closing of the dialog
             } else {
                 validationResult.showErrorDialog(d);
                 return false;

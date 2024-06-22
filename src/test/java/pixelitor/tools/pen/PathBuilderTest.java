@@ -32,7 +32,11 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.*;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 @DisplayName("Pen Tool/PathBuilder tests")
@@ -54,7 +58,7 @@ class PathBuilderTest {
     void beforeEachTest() {
         // A real composition that can store paths.
         // The layer type doesn't matter.
-        var comp = TestHelper.createRealComp(ColorFillLayer.class);
+        var comp = TestHelper.createRealComp("PathBuilderTest", ColorFillLayer.class);
 
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);

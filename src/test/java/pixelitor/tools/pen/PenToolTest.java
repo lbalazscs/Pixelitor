@@ -52,7 +52,7 @@ class PenToolTest {
 
         // A real composition that can store paths.
         // The layer type doesn't matter.
-        comp = TestHelper.createRealComp(ColorFillLayer.class, 300, 300);
+        comp = TestHelper.createRealComp("PenToolTest", ColorFillLayer.class, 300, 300);
 
         view = comp.getView(); // a mock view
         PenTool.path = null;

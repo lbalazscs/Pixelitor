@@ -84,7 +84,7 @@ public class AbstractBrushToolTest {
 
     @Before
     public void beforeEachTest() {
-        var comp = TestHelper.createComp(2, false);
+        var comp = TestHelper.createComp("AbstractBrushToolTest", 2, false);
 
         dr = comp.getActiveDrawableOrThrow();
 

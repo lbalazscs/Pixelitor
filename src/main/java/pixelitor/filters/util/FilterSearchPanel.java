@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -241,8 +241,9 @@ public class FilterSearchPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    // double-clicking on a selected filter starts it
                     if (panel.hasSelection()) {
+                        // Double-clicking on a selected filter will
+                        // start it after the modal dialog is closed.
                         GUIUtils.closeDialog(dialog, true);
                     }
                 }
@@ -263,7 +264,7 @@ public class FilterSearchPanel extends JPanel {
         @Override
         protected void paintIcon(Graphics2D g) {
             // the shape is based on search.svg
-            Path2D shape = new Path2D.Float();
+            Path2D shape = new Path2D.Double();
             shape.moveTo(7.897525, 8.923619);
             shape.lineTo(12.009847, 12.81312);
             shape.curveTo(12.009847, 12.81312, 12.87233, 13.229692, 13.303571, 12.81312);

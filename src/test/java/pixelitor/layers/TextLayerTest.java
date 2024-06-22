@@ -61,7 +61,7 @@ public class TextLayerTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.createEmptyComp();
+        comp = TestHelper.createEmptyComp("TextLayerTest");
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
         comp.add(layer);

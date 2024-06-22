@@ -42,7 +42,7 @@ class StyledShapeTest {
 
     @BeforeEach
     void beforeEachTest() {
-        Composition comp = TestHelper.createEmptyComp();
+        Composition comp = TestHelper.createEmptyComp("StyledShapeTest");
         view = comp.getView();
     }
 

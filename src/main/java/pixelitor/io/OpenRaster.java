@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -185,7 +185,7 @@ public class OpenRaster {
         }
 
         if (stackXML == null) {
-            throw new IllegalStateException("No stack.xml found.");
+            throw new IllegalStateException("No stack.xml found in " + file.getAbsolutePath());
         }
 
         Element doc = loadXMLFromString(stackXML).getDocumentElement();
@@ -248,16 +248,12 @@ public class OpenRaster {
     }
 
     private static void readLayer(Map<String, BufferedImage> images, LayerHolder holder, Element element) {
-        String layerName = element.getAttribute("name");
-        String layerImageSource = element.getAttribute("src");
-
-        BufferedImage image = images.get(layerImageSource);
+        BufferedImage image = images.get(element.getAttribute("src"));
         image = ImageUtils.toSysCompatibleImage(image);
 
-        String layerX = element.getAttribute("x");
-        String layerY = element.getAttribute("y");
-        int tx = Utils.parseInt(layerX, 0);
-        int ty = Utils.parseInt(layerY, 0);
+        int tx = Utils.parseInt(element.getAttribute("x"), 0);
+        int ty = Utils.parseInt(element.getAttribute("y"), 0);
+        String layerName = element.getAttribute("name");
 
         ImageLayer layer = new ImageLayer(holder.getComp(), image, layerName, 0, 0);
         // Pixelitor doesn't support > 0 translations for image layers
@@ -274,21 +270,18 @@ public class OpenRaster {
 
     private static void readBasicAttributes(Element element, Layer layer) {
         String layerVisibility = element.getAttribute("visibility");
-        String layerVisible = element.getAttribute("visible");
-        String layerBlendingMode = element.getAttribute("composite-op");
-        String layerOpacity = element.getAttribute("opacity");
         if (layerVisibility == null || layerVisibility.isEmpty()) {
             //workaround: paint.net exported files use "visible" attribute instead of "visibility"
-            layerVisibility = layerVisible;
+            layerVisibility = element.getAttribute("visible");
         }
         boolean visibility = layerVisibility == null || layerVisibility.equals("visible");
-
         layer.setVisible(visibility);
-        BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
-        layer.setBlendingMode(blendingMode);
-        float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-        layer.setOpacity(opacity);
+        layer.setBlendingMode(BlendingMode.fromSVGName(
+            element.getAttribute("composite-op")));
+
+        layer.setOpacity(Utils.parseFloat(
+            element.getAttribute("opacity"), 1.0f));
     }
 
     private static int countNumImageFiles(ZipFile zipFile) {

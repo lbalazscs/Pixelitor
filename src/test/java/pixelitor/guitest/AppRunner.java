@@ -62,7 +62,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.VK_CONTROL;
+import static java.awt.event.KeyEvent.VK_ENTER;
+import static java.awt.event.KeyEvent.VK_G;
+import static java.awt.event.KeyEvent.VK_S;
+import static java.awt.event.KeyEvent.VK_T;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -982,9 +986,12 @@ public class AppRunner {
         });
     }
 
+    // Whether a "randomize settings" button should be tested for a filter.
     public enum Randomize {YES, NO}
 
+    // Whether a "reseed" button should be tested for a filter.
     public enum Reseed {YES, NO}
 
+    // Whether a "show original" checkbox should be tested for a filter.
     public enum ShowOriginal {YES, NO}
 }

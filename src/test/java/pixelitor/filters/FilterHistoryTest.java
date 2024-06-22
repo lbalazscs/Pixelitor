@@ -61,7 +61,7 @@ class FilterHistoryTest {
     @ParameterizedTest
     @MethodSource("provideParameters")
     void filterHistory(WithTranslation withTranslation, WithSelection withSelection) {
-        Composition comp = TestHelper.createComp(1, false);
+        Composition comp = TestHelper.createComp("FilterHistoryTest", 1, false);
         withTranslation.move(comp);
         withSelection.setupFor(comp);
 

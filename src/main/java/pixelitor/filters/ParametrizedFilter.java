@@ -21,7 +21,6 @@ import pixelitor.filters.gui.*;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Shape;
 import java.io.Serial;
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +37,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     protected final transient ParamSet paramSet;
 
     private final transient boolean addShowOriginal;
-
-    // not fully implemented - the idea is to show interactively
-    // the area affected by a filter
-    private transient Shape[] affectedAreaShapes;
 
     protected ParametrizedFilter(boolean addShowOriginal) {
         this.addShowOriginal = addShowOriginal;
@@ -74,16 +69,12 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         return paramSet;
     }
 
-    public void setAffectedAreaShapes(Shape[] affectedAreaShapes) {
-        this.affectedAreaShapes = affectedAreaShapes;
-    }
-
     /**
      * Some filters can't be animated well, they can return true
      * here in order to be excluded from the list of animation filters
      */
-    public boolean excludedFromAnimation() {
-        return false;
+    public boolean supportsTweenAnimation() {
+        return true;
     }
 
     public void addParams(FilterParam... params) {

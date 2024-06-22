@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,22 +41,21 @@ public class ImagePanel extends JPanel {
         }
     }
 
-    public void setImage(BufferedImage image) {
-        this.image = image;
-    }
-
-    public void changeImage(BufferedImage newImage) {
+    public void setImage(BufferedImage newImage) {
         if (image != null) {
             image.flush();
         }
+        this.image = newImage;
+    }
 
-        image = newImage;
+    public void changeImage(BufferedImage newImage) {
+        setImage(newImage);
         repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        // otherwise strange artifacts happen when the panel is larger than the image
+        // for the case when the panel is larger than the image
         g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
 

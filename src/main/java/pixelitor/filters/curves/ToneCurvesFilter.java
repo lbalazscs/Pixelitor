@@ -92,8 +92,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        Channel[] channels = Channel.values();
-        for (Channel channel : channels) {
+        for (Channel channel : Channel.values()) {
             String saveString = curves.getCurve(channel).toSaveString();
             preset.put(channel.getPresetKey(), saveString);
         }
@@ -101,8 +100,7 @@ public class ToneCurvesFilter extends FilterWithGUI {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        Channel[] channels = Channel.values();
-        for (Channel channel : channels) {
+        for (Channel channel : Channel.values()) {
             String saveString = preset.get(channel.getPresetKey());
             curves.getCurve(channel).setStateFrom(saveString);
         }

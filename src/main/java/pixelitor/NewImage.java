@@ -52,13 +52,13 @@ public final class NewImage {
         return comp;
     }
 
-    public static Composition createNewComposition(FillType bg, int width, int height, String title) {
+    public static Composition createNewComposition(FillType bg, int width, int height, String name) {
         BufferedImage newImage = ImageUtils.createSysCompatibleImage(width, height);
         if (bg != TRANSPARENT) {
             Fill.fillImage(newImage, bg.getColor());
         }
 
-        return Composition.fromImage(newImage, null, title);
+        return Composition.fromImage(newImage, null, name);
     }
 
     private static void showInDialog() {

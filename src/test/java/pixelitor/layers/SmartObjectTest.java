@@ -36,8 +36,8 @@ class SmartObjectTest {
 
     @BeforeEach
     void beforeEachTest() {
-        Composition content = TestHelper.createComp(1, false, true);
-        Composition comp = TestHelper.createEmptyComp();
+        Composition content = TestHelper.createComp("SmartObjectTest Content", 1, false, true);
+        Composition comp = TestHelper.createEmptyComp("SmartObjectTest");
         smartObject = new SmartObject(comp, content);
         comp.addLayerNoUI(smartObject);
 

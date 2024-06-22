@@ -87,7 +87,7 @@ public class Magnify extends ParametrizedFilter {
         filter.setShape(shape.getValue());
 
         dest = filter.filter(src, dest);
-        setAffectedAreaShapes(filter.getAffectedAreaShapes());
+//        setAffectedAreaShapes(filter.getAffectedAreaShapes());
         return dest;
     }
 }

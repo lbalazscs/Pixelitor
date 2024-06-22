@@ -72,7 +72,7 @@ public class ContentLayerTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.createEmptyComp();
+        comp = TestHelper.createEmptyComp("ContentLayerTest");
         layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
         comp.addLayerNoUI(layer);

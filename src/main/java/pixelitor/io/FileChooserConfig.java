@@ -50,7 +50,7 @@ public record FileChooserConfig(String suggestedFileName,
     }
 
     /**
-     * The file formats that can be choosen in the save dialog.
+     * The file formats that can be chosen in the save dialog.
      */
     public enum SelectableFormats {
         /**

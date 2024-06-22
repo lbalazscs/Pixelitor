@@ -703,9 +703,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createModeSubmenu() {
         PMenu sub = new PMenu("Mode");
 
-        ImageMode[] modes = ImageMode.values();
         var radioGroup = new ButtonGroup();
-        for (ImageMode mode : modes) {
+        for (ImageMode mode : ImageMode.values()) {
             var menuItem = mode.getMenuItem();
             sub.add(menuItem);
             radioGroup.add(menuItem);

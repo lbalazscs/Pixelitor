@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,11 @@
 package pixelitor.filters.util;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.ValueNoise;
 
+/**
+ * The interpolations used in {@link ValueNoise}.
+ */
 public enum NoiseInterpolation {
     NONE("None") {
         @Override

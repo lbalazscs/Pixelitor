@@ -18,6 +18,7 @@
 package pixelitor.utils.debug;
 
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Utils;
 
 import java.awt.Font;
@@ -153,12 +154,22 @@ public class DebugNodes {
     public static DebugNode createTransformNode(String name, AffineTransform at) {
         DebugNode node = new DebugNode(name, at);
 
+        // These are affected by rotation, they correspond
+        // to the actual scaling only if there is no rotation.
         node.addDouble("scaleX (m00)", at.getScaleX());
         node.addDouble("scaleY (m11)", at.getScaleY());
+
         node.addDouble("shearX (m01)", at.getShearX());
         node.addDouble("shearY (m10)", at.getShearY());
         node.addDouble("translateX (m02)", at.getTranslateX());
         node.addDouble("translateY (m12)", at.getTranslateY());
+
+        // the rotation-independent sx*sy
+        node.addDouble("overall scaling", at.getDeterminant());
+
+        // the scaling-independent rotation angle
+        double angleRad = Math.atan2(at.getShearY(), at.getScaleX());
+        node.addDouble("angle (degrees)", AngleUnit.RADIANS.toIntuitiveDegrees(angleRad));
 
         return node;
     }

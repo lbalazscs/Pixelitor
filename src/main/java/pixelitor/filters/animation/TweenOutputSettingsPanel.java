@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,14 +44,14 @@ import static pixelitor.utils.Utils.parseDouble;
 public class TweenOutputSettingsPanel extends ValidatedPanel {
     private final JTextField numSecondsTF = new JTextField("2", 5);
     private final JTextField fpsTF = new JTextField("24", 5);
-    private int nrFrames;
+    private int numFrames;
     private final JLabel numFramesLabel = new JLabel();
     private double fps;
     private JComboBox<TimeInterpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(
-        Dirs.getLastSave().getAbsolutePath());
+        Dirs.getLastSavePath());
     private JTextField fileNameTF;
 
     private final TextFieldValidator numSecondsValidator = textField ->
@@ -128,7 +128,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(createValidatedTF(fileNameTF, fileNameValidator));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        gbh.addOnlyControl(filePanel);
+        gbh.addRow(filePanel);
     }
 
     private void outputTypeChanged() {
@@ -148,9 +148,9 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     private void updateCalculations() {
         try {
-            numFramesLabel.setText(calculateNrFramesText());
+            numFramesLabel.setText(calculateNumFramesText());
         } catch (ParseException e) {
-            // expected behaviour, we can swallow the exception
+            // expected behaviour, ignore the exception
             numFramesLabel.setText("??");
         } catch (Exception e) {
             Messages.showException(e);
@@ -158,14 +158,14 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         }
     }
 
-    private String calculateNrFramesText() throws ParseException {
-        double nrSeconds = parseDouble(numSecondsTF.getText().trim());
+    private String calculateNumFramesText() throws ParseException {
+        double numSeconds = parseDouble(numSecondsTF.getText().trim());
         fps = parseDouble(fpsTF.getText().trim());
-        nrFrames = (int) (nrSeconds * fps);
-        String labelText = String.valueOf(nrFrames);
+        numFrames = (int) (numSeconds * fps);
+        String labelText = String.valueOf(numFrames);
 
         if (pingPongCB.isSelected()) {
-            int totalFrames = 2 * nrFrames - 2;
+            int totalFrames = 2 * numFrames - 2;
             double totalSeconds = totalFrames / fps;
             labelText += format(" (with PP: %d frames, %.2f seconds)",
                 totalFrames, totalSeconds);
@@ -186,7 +186,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         File output = browseFilesSupport.getSelectedFile();
         animation.setOutput(output);
 
-        animation.setNumFrames(nrFrames);
+        animation.setNumFrames(numFrames);
         animation.setMillisBetweenFrames((int) (1000.0 / fps));
         animation.setInterpolation((TimeInterpolation) ipCB.getSelectedItem());
         animation.setPingPong(pingPongCB.isSelected());

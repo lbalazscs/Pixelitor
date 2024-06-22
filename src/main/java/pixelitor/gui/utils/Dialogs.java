@@ -44,7 +44,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
+import static javax.swing.JOptionPane.OK_OPTION;
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
+import static javax.swing.JOptionPane.YES_NO_OPTION;
+import static javax.swing.JOptionPane.YES_OPTION;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.Threads.threadName;
 
@@ -83,7 +91,7 @@ public class Dialogs {
         }
 
         GlobalEvents.dialogOpened(title);
-        showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -106,7 +114,7 @@ public class Dialogs {
                                             int messageType) {
         assert !(parent instanceof View);
         GlobalEvents.dialogOpened(title);
-        int answer = showOptionDialog(parent, new JLabel(question),
+        int answer = JOptionPane.showOptionDialog(parent, new JLabel(question),
             title, YES_NO_CANCEL_OPTION,
             messageType, null, options, options[0]);
         GlobalEvents.dialogClosed(title);
@@ -127,7 +135,7 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         GlobalEvents.dialogOpened(title);
-        int reply = showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
+        int reply = JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
         GlobalEvents.dialogClosed(title);
 
         return reply == YES_OPTION;
@@ -155,7 +163,7 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         GlobalEvents.dialogOpened(title);
-        int userAnswer = showOptionDialog(parent, msg, title,
+        int userAnswer = JOptionPane.showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
             options, options[initialOptionIndex]);
         GlobalEvents.dialogClosed(title);
@@ -183,7 +191,7 @@ public class Dialogs {
         }
 
         GlobalEvents.dialogOpened(title);
-        showMessageDialog(parent, msg, title, ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -221,7 +229,7 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         GlobalEvents.dialogOpened(title);
-        showMessageDialog(parent, msg, title, WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -388,9 +396,9 @@ public class Dialogs {
             An extension (such as ".png") must be added at the end,
             because the file format depends on it.""";
         if (parent == null) {
-            showMessageDialog(getMainWindow(), msg, title, ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(getMainWindow(), msg, title, ERROR_MESSAGE);
         } else {
-            showMessageDialog(parent, msg, title, ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         }
     }
 

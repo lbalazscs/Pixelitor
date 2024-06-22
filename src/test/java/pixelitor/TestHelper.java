@@ -53,7 +53,13 @@ import static java.awt.event.MouseEvent.MOUSE_MOVED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyDouble;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
+import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
@@ -71,24 +77,24 @@ public class TestHelper {
     /**
      * Creates a real (non-mocked) composition with a layer of the given class
      */
-    public static Composition createRealComp(Class<? extends Layer> layerClass) {
-        return createRealComp(layerClass, TEST_WIDTH, TEST_HEIGHT);
+    public static Composition createRealComp(String name, Class<? extends Layer> layerClass) {
+        return createRealComp(name, layerClass, TEST_WIDTH, TEST_HEIGHT);
     }
 
-    public static Composition createRealComp(Class<? extends Layer> layerClass, int width, int height) {
-        Composition comp = createEmptyComp(width, height, true);
+    public static Composition createRealComp(String name, Class<? extends Layer> layerClass, int width, int height) {
+        Composition comp = createEmptyComp(name, width, height, true);
         Layer layer = createLayerOfClass(layerClass, comp);
         comp.addLayerNoUI(layer);
         return comp;
     }
 
-    public static Composition createEmptyComp() {
-        return createEmptyComp(TEST_WIDTH, TEST_HEIGHT, true);
+    public static Composition createEmptyComp(String name) {
+        return createEmptyComp(name, TEST_WIDTH, TEST_HEIGHT, true);
     }
 
-    private static Composition createEmptyComp(int width, int height, boolean addMockView) {
+    private static Composition createEmptyComp(String name, int width, int height, boolean addMockView) {
         var comp = Composition.createEmpty(width, height, ImageMode.RGB);
-        comp.setName("Test");
+        comp.setName(name);
         comp.createDebugName();
 
         if (addMockView) {
@@ -98,12 +104,14 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition createMockComp() {
+    public static Composition createMockComp(String name) {
         var comp = mock(Composition.class);
-        var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
+        when(comp.getName()).thenReturn(name);
         when(comp.isOpen()).thenReturn(true);
         when(comp.checkInvariants()).thenReturn(true); // for assertions
+
+        var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasBounds()).thenReturn(
             new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
@@ -131,14 +139,14 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition createComp(int numLayers, boolean addMasks) {
-        Composition comp = createComp(numLayers, addMasks, true);
+    public static Composition createComp(String name, int numLayers, boolean addMasks) {
+        Composition comp = createComp(name, numLayers, addMasks, true);
         assert comp.checkInvariants();
         return comp;
     }
 
-    public static Composition createComp(int numLayers, boolean addMasks, boolean addMockView) {
-        var comp = createEmptyComp(TEST_WIDTH, TEST_HEIGHT, addMockView);
+    public static Composition createComp(String name, int numLayers, boolean addMasks, boolean addMockView) {
+        var comp = createEmptyComp(name, TEST_WIDTH, TEST_HEIGHT, addMockView);
 
         for (int i = 0; i < numLayers; i++) {
             var layer = createEmptyImageLayer(comp, "layer " + (i + 1));
@@ -224,11 +232,11 @@ public class TestHelper {
     }
 
     public static SmartObject createSmartObject(Composition comp, String name) {
-        Composition content = createComp(1, false, true);
-        SmartObject layer = new SmartObject(comp, content);
-        layer.setName(name, false);
-        layer.createUI();
-        return layer;
+        Composition content = createComp(comp.getName() + " Content", 1, false, true);
+        SmartObject so = new SmartObject(comp, content);
+        so.setName(name, false);
+        so.createUI();
+        return so;
     }
 
     public static ColorFillLayer createColorFillLayer(Composition comp, String name) {
@@ -301,6 +309,9 @@ public class TestHelper {
     public static View createMockViewWithoutComp() {
         View view = mock(View.class);
 
+        // otherwise checkInvariants() always returns false
+        when(view.checkInvariants()).thenCallRealMethod();
+
         when(view.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
         when(view.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
 
@@ -351,8 +362,8 @@ public class TestHelper {
         }
     }
 
-    public static void move(Composition comp,
-                            boolean makeDuplicateLayer, int relX, int relY) {
+    public static void move(Composition comp, int relX, int relY,
+                            boolean makeDuplicateLayer) {
         comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
         comp.moveActiveContent(MOVE_LAYER_ONLY, relX, relY);
         comp.endMovement(MOVE_LAYER_ONLY);

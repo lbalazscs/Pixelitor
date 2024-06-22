@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ class LayerBlendingModesTest {
 
     @BeforeEach
     void beforeEachTest() {
-        comp = fromImage(create1x1Image(lowerColor), null, "test");
+        comp = fromImage(create1x1Image(lowerColor), null, "LayerBlendingModesTest");
         TestHelper.setupMockViewFor(comp);
 
         upperLayer = TestHelper.createImageLayer(

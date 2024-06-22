@@ -55,7 +55,7 @@ class ParamSetTest {
         extraParam.setAdjustmentListener(adjustmentListener);
         params.insertParam(extraParam, 3);
 
-        Composition comp = TestHelper.createRealComp(ImageLayer.class);
+        Composition comp = TestHelper.createRealComp("ParamSetTest", ImageLayer.class);
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
         params.updateOptions(layer, true);
     }

@@ -65,9 +65,9 @@ import static pixelitor.utils.Threads.onEDT;
  */
 public class ImageLayer extends ContentLayer implements Drawable {
     public enum State {
-        NORMAL, // no filter is running on the layer
+        NORMAL, // no GUI filter is running on the layer
         PREVIEW, // a filter dialog is shown
-        SHOW_ORIGINAL // a filter dialog is shown + "Show Original" is checked
+        SHOW_ORIGINAL // a filter dialog is shown, and "Show Original" is checked
     }
 
     @Serial
@@ -103,7 +103,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient boolean imageContentChanged = false;
 
-    ImageLayer(Composition comp, String name) {
+    private ImageLayer(Composition comp, String name) {
         super(comp, name);
     }
 
@@ -116,17 +116,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     public ImageLayer(Composition comp, BufferedImage image,
                       String name, int tx, int ty) {
-        this(comp, name);
-
-        requireNonNull(image);
+        super(comp, name);
 
         setImage(image);
 
         // has to be set before creating the icon image
         // because it could be nonzero when duplicating
         setTranslation(tx, ty);
-
-        checkConstructorPostConditions();
     }
 
     /**
@@ -138,7 +134,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage emptyImage = imageLayer.createEmptyLayerImage(
             comp.getCanvasWidth(), comp.getCanvasHeight());
         imageLayer.setImage(emptyImage);
-        imageLayer.checkConstructorPostConditions();
 
         return imageLayer;
     }
@@ -147,78 +142,66 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Creates an image layer from an external (pasted or drag-and-dropped)
      * image, which can have a different size than the canvas.
      */
-    public static ImageLayer fromExternalImage(BufferedImage pastedImage,
+    public static ImageLayer fromExternalImage(BufferedImage externalImg,
                                                Composition comp,
                                                String layerName) {
         ImageLayer layer = new ImageLayer(comp, layerName);
-        requireNonNull(pastedImage);
+        requireNonNull(externalImg);
 
-        BufferedImage newImage = layer.calcNewImageFromPasted(pastedImage);
+        BufferedImage newImage = layer.calcNewImageFromExternal(externalImg);
         layer.setImage(newImage);
 
-        layer.setTranslationForPasted(pastedImage);
-
-        layer.checkConstructorPostConditions();
+        layer.setTranslationForExternal(externalImg);
 
         return layer;
     }
 
-    private BufferedImage calcNewImageFromPasted(BufferedImage pastedImage) {
+    private BufferedImage calcNewImageFromExternal(BufferedImage img) {
         Canvas canvas = comp.getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
 
-        int pastedWidth = pastedImage.getWidth();
-        int pastedHeight = pastedImage.getHeight();
-
-        if (canvas.isFullyCoveredBy(pastedImage)) {
-            return ImageUtils.toSysCompatibleImage(pastedImage);
+        if (canvas.isFullyCoveredBy(img)) {
+            return ImageUtils.toSysCompatibleImage(img);
         }
 
-        // the pasted image is too small: a new image is created,
-        // and the pasted image is centered within it
-        int newWidth = Math.max(canvasWidth, pastedWidth);
-        int newHeight = Math.max(canvasHeight, pastedHeight);
+        // the external image is too small: center it in a new image
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
+
+        int newWidth = Math.max(canvasWidth, imgWidth);
+        int newHeight = Math.max(canvasHeight, imgHeight);
         BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
         Graphics2D g = newImage.createGraphics();
 
-        // center the pasted image within the new image
-        int drawX = Math.max((canvasWidth - pastedWidth) / 2, 0);
-        int drawY = Math.max((canvasHeight - pastedHeight) / 2, 0);
+        int drawX = Math.max((canvasWidth - imgWidth) / 2, 0);
+        int drawY = Math.max((canvasHeight - imgHeight) / 2, 0);
 
-        g.drawImage(pastedImage, drawX, drawY, null);
+        g.drawImage(img, drawX, drawY, null);
         g.dispose();
 
         return newImage;
     }
 
-    private void setTranslationForPasted(BufferedImage pastedImage) {
+    // if the external image is bigger than the canvas, then add a
+    // translation to it in order to make it centered around the canvas
+    private void setTranslationForExternal(BufferedImage img) {
         int canvasWidth = comp.getCanvasWidth();
         int canvasHeight = comp.getCanvasHeight();
-
-        int pastedWidth = pastedImage.getWidth();
-        int pastedHeight = pastedImage.getHeight();
-
-        // if the pasted image is bigger than the canvas, then add a
-        // translation to it in order to make it centered within the canvas
-        boolean addXTranslation = pastedWidth > canvasWidth;
-        boolean addYTranslation = pastedHeight > canvasHeight;
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
 
         int newTx = 0;
-        if (addXTranslation) {
-            newTx = -(pastedWidth - canvasWidth) / 2;
+        if (imgWidth > canvasWidth) {
+            newTx = -(imgWidth - canvasWidth) / 2;
         }
 
         int newTy = 0;
-        if (addYTranslation) {
-            newTy = -(pastedHeight - canvasHeight) / 2;
+        if (imgHeight > canvasHeight) {
+            newTy = -(imgHeight - canvasHeight) / 2;
         }
 
         setTranslation(newTx, newTy);
-    }
-
-    private void checkConstructorPostConditions() {
-        assert image != null;
     }
 
     @Serial
@@ -248,8 +231,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private void setState(State newState) {
         state = newState;
         if (newState == NORMAL) { // back to normal: cleanup
-            previewImage = null;
-            filterSourceImage = null;
+            if (previewImage != null) {
+                previewImage.flush();
+                previewImage = null;
+            }
+            if (filterSourceImage != null) {
+                filterSourceImage.flush();
+                filterSourceImage = null;
+            }
         }
     }
 
@@ -559,10 +548,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
-        // typically we should be in PREVIEW mode
-        if (state == SHOW_ORIGINAL) {
-            // this is OK, something was adjusted while in show original mode
-        } else if (state == NORMAL) {
+        if (state == NORMAL) {
             throw new IllegalStateException(format(
                 "change preview in normal state, filter = %s, context = %s, class = %s)",
                 filterName, context, getClass().getSimpleName()));

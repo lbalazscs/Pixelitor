@@ -46,8 +46,8 @@ class SmartFilterTest {
 
     @BeforeEach
     void beforeEachTest() {
-        Composition parent = TestHelper.createComp(1, false);
-        Composition content = TestHelper.createComp(1, false);
+        Composition parent = TestHelper.createComp("SmartFilterTest parent", 1, false);
+        Composition content = TestHelper.createComp("SmartFilterTest content", 1, false);
 
         smartObject = new SmartObject(parent, content);
         parent.addLayerNoUI(smartObject);

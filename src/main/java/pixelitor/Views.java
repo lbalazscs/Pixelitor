@@ -52,7 +52,11 @@ import java.util.function.Predicate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.CANCEL_OPTION;
+import static javax.swing.JOptionPane.CLOSED_OPTION;
+import static javax.swing.JOptionPane.NO_OPTION;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.YES_OPTION;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.utils.Texts.i18n;
 
@@ -146,6 +150,8 @@ public class Views {
                 ImageArea.activateView(view);
             }
         }
+
+        assert view == null || view.checkInvariants();
         activeView = view;
     }
 

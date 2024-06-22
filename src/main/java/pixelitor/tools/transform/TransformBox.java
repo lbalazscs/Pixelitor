@@ -53,7 +53,7 @@ import static pixelitor.utils.Cursors.MOVE;
 /**
  * A widget that manipulates a {@link Transformable} by
  * calculating an {@link AffineTransform}
- * based on the interactive movement of handles
+ * based on the interactive movement of its handles.
  */
 public class TransformBox implements ToolWidget, Debuggable, Serializable {
     @Serial

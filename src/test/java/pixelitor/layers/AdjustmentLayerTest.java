@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ class AdjustmentLayerTest {
     @BeforeEach
     void beforeEachTest() {
         filter = new MockFilter("Filter");
-        Composition comp = TestHelper.createComp(1, false, true);
+        Composition comp = TestHelper.createComp("AdjustmentLayerTest", 1, false, true);
         layer = new AdjustmentLayer(comp, "adjustment", filter);
         comp.addLayerNoUI(layer);
         comp.getCompositeImage();

@@ -40,10 +40,7 @@ public class SliceFilter extends RotatedEffectFilter {
 
     private double calcShift(double coord, double shift) {
         double mod = ImageMath.mod(coord - shift, 2 * size) - size;
-        if (mod >= 0) {
-            return offset;
-        }
-        return -offset;
+        return mod >= 0 ? offset : -offset;
     }
 
     public void setShiftHorizontal(double t) {

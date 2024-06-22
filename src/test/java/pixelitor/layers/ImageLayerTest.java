@@ -84,7 +84,7 @@ public class ImageLayerTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.createMockComp();
+        comp = TestHelper.createMockComp("ImageLayerTest");
 
         layer = createEmptyImageLayer(comp, "layer 1");
 

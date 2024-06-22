@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,6 +56,10 @@ public class ValidationResult {
         return new ValidationResult(false, msg);
     }
 
+    public boolean isOK() {
+        return valid;
+    }
+
     /**
      * Returns a composed result that represents a
      * logical AND of this result and the given one.
@@ -103,15 +107,6 @@ public class ValidationResult {
         }
     }
 
-    public boolean isOK() {
-        return valid;
-    }
-
-    public void showErrorDialog(Component dialogParent) {
-        assert !errorMsg.startsWith("<html>") : "errorMsg = " + errorMsg;
-        Dialogs.showErrorDialog(dialogParent, "Error", "<html>" + errorMsg);
-    }
-
     public ValidationResult addErrorIfZero(int value, String fieldName) {
         if (value == 0) {
             return addError(format("<b>%s</b> can't be zero.", fieldName));
@@ -126,6 +121,11 @@ public class ValidationResult {
         } else {
             return this;
         }
+    }
+
+    public void showErrorDialog(Component dialogParent) {
+        assert !errorMsg.startsWith("<html>") : "errorMsg = " + errorMsg;
+        Dialogs.showErrorDialog(dialogParent, "Error", "<html>" + errorMsg);
     }
 
     private static String composeErrorMessages(String first, String second) {

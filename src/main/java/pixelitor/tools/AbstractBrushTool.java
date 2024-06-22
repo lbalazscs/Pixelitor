@@ -136,8 +136,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addTypeSelector() {
-        var brushTypes = BrushType.values();
-        typeCB = GUIUtils.createComboBox(brushTypes);
+        typeCB = GUIUtils.createComboBox(BrushType.values());
         settingsPanel.addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
         typeCB.addActionListener(e -> brushTypeChanged());
     }

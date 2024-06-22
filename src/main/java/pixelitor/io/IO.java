@@ -26,18 +26,14 @@ import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.Layer;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Result;
-import pixelitor.utils.Shapes;
+import pixelitor.utils.Error;
+import pixelitor.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.swing.*;
 import java.awt.EventQueue;
-import java.awt.SecondaryLoop;
 import java.awt.Shape;
-import java.awt.Toolkit;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -58,8 +54,6 @@ import static pixelitor.utils.Threads.*;
  * Utility class with static methods related to opening and saving files.
  */
 public class IO {
-    private static final boolean USE_SECOND_LOOP = false;
-
     private IO() {
     }
 
@@ -273,13 +267,10 @@ public class IO {
             return;
         }
         File saveDir = Dirs.getLastSave();
-        if (saveDir != null) {
-            FileFormat[] fileFormats = FileFormat.values();
-            for (FileFormat format : fileFormats) {
-                File f = new File(saveDir, "all_formats." + format);
-                var saveSettings = new SaveSettings.Simple(format, f);
-                comp.saveAsync(saveSettings, false);
-            }
+        for (FileFormat format : FileFormat.values()) {
+            File f = new File(saveDir, "all_formats." + format);
+            var saveSettings = new SaveSettings.Simple(format, f);
+            comp.saveAsync(saveSettings, false);
         }
     }
 
@@ -378,36 +369,19 @@ public class IO {
     }
 
     public static BufferedImage commandLineFilter(BufferedImage src, String filterName, List<String> command) {
-        Result<BufferedImage, String> result;
-        if (USE_SECOND_LOOP) {
-            var progressHandler = Messages.startProgress(filterName, -1);
-
-            SecondaryLoop secondaryLoop = Toolkit.getDefaultToolkit().getSystemEventQueue().createSecondaryLoop();
-            CompletableFuture<Result<BufferedImage, String>> cf = CompletableFuture
-                .supplyAsync(() ->
-                    runCommandLineFilter(src, command))
-                .thenApplyAsync(r -> {
-                    EventQueue.invokeLater(progressHandler::stopProgress);
-                    secondaryLoop.exit();
-                    return r;
-                });
-            secondaryLoop.enter();
-            result = cf.join();
-        } else {
-            result = runCommandLineFilter(src, command);
-        }
-        if (result.wasSuccess()) {
-            return ImageUtils.toSysCompatibleImage(result.get());
-        } else {
-            Messages.showError("Command Line Error", result.errorDetail());
-            return src;
-        }
+        return switch (runCommandLineFilter(src, command)) {
+            case Success<BufferedImage, ?>(var img) -> ImageUtils.toSysCompatibleImage(img);
+            case Error<?, String>(String errorMsg) -> {
+                Messages.showError("Command Line Error", errorMsg);
+                yield src;
+            }
+        };
     }
 
     public static Result<BufferedImage, String> runCommandLineFilter(BufferedImage src, List<String> command) {
-        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
-        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
-        pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+        ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new))
+            .redirectInput(ProcessBuilder.Redirect.PIPE)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE);
 
         BufferedImage out;
 
@@ -432,7 +406,7 @@ public class IO {
             }
             String errorMsg = null;
             if (out == null) {
-                // There was an error. Try to get an error message.
+                // There was an error. Try to get the error message.
                 try (InputStream processError = p.getErrorStream()) {
                     errorMsg = new String(processError.readAllBytes(), UTF_8);
                 }

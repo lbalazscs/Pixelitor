@@ -599,9 +599,7 @@ public class RandomToolTest {
         String toolInfo = tool.getShortName();
 
         String stateInfo = EDT.call(tool::getStateInfo);
-        if (stateInfo != null) {
-            toolInfo += (" [" + stateInfo + "]");
-        }
+        toolInfo += (" [" + stateInfo + "]");
 
         String printed = Ansi.red(testNr + ".") + " " + Ansi.blue(toolInfo + ": ") + msg;
         if (EDT.getActiveSelection() != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,10 +66,14 @@ public class Rnd {
         return rand.nextInt(bound);
     }
 
-    public static Point nextPoint(Rectangle bounds) {
+    public static Point pointInRect(Rectangle bounds) {
         int x = intInRange(bounds.x, bounds.x + bounds.width);
         int y = intInRange(bounds.y, bounds.y + bounds.height);
         return new Point(x, y);
+    }
+
+    public static Point pointInRect(int minX, int maxX, int minY, int maxY) {
+        return new Point(intInRange(minX, maxX), intInRange(minY, maxY));
     }
 
     public static int intInRange(int min, int max) {

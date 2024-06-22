@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
 
         swatches = new ArrayList<>(numVisibleSwatches);
         for (int i = 0; i < numVisibleSwatches; i++) {
-            createAndAddColorSwatch(colors[i], i);
+            createAndAddSwatch(colors[i], i);
         }
 
         resetButton = new ResetButton(model);
@@ -80,7 +80,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         setBorder(createTitledBorder(model.getName()));
     }
 
-    private ColorSwatch createAndAddColorSwatch(Color color, int index) {
+    private ColorSwatch createAndAddSwatch(Color color, int index) {
         ColorSwatch swatch = new ColorSwatch(color, BUTTON_SIZE);
         swatches.add(swatch);
         colorsPanel.add(swatch);
@@ -100,20 +100,17 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     private void changeNumVisibleSwatches(int newNum) {
         if (newNum == numVisibleSwatches) {
             return;
-        }
-
-        if (newNum < numVisibleSwatches) {
+        } else if (newNum < numVisibleSwatches) {
             for (int i = newNum; i < numVisibleSwatches; i++) {
                 swatches.get(i).setVisible(false);
             }
-        } else if (newNum > numVisibleSwatches) {
+        } else { // newNum > numVisibleSwatches
             int numInstantiated = swatches.size();
             for (int i = numVisibleSwatches; i < newNum; i++) {
                 if (i < numInstantiated) {
                     swatches.get(i).setVisible(true);
                 } else {
-                    Color newColor = candidateColors[i];
-                    ColorSwatch swatch = createAndAddColorSwatch(newColor, i);
+                    ColorSwatch swatch = createAndAddSwatch(candidateColors[i], i);
                     swatch.revalidate();
                 }
             }

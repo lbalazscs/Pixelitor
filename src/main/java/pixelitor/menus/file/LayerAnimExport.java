@@ -68,7 +68,7 @@ public class LayerAnimExport {
         private final JTextField delayTF;
         private final JCheckBox pingPongCB;
 
-        public ExportPanel(int nrLayers) {
+        public ExportPanel(int numLayers) {
             super(new VerticalLayout(10));
             setBorder(createEmptyBorder(10, 10, 10, 10));
 
@@ -82,7 +82,7 @@ public class LayerAnimExport {
 
             add(settingsPanel);
 
-            if (nrLayers > 2) {
+            if (numLayers > 2) {
                 pingPongCB = new JCheckBox("Ping Pong Animation");
             } else {
                 pingPongCB = new JCheckBox("Ping Pong Animation (min 3 layers needed)");

@@ -355,7 +355,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
 
     // used for debugging
     public String getStateInfo() {
-        return null;
+        return "";
     }
 
     @Override

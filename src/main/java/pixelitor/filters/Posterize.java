@@ -68,8 +68,8 @@ public class Posterize extends ParametrizedFilter {
     }
 
     @Override
-    public boolean excludedFromAnimation() {
-        return true;
+    public boolean supportsTweenAnimation() {
+        return false;
     }
 
     @Override

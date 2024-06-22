@@ -71,7 +71,7 @@ public class CircleToSquare extends ParametrizedFilter {
         filter.setInterpolation(interpolation.getValue());
 
         dest = filter.filter(src, dest);
-        setAffectedAreaShapes(filter.getAffectedAreaShapes());
+//        setAffectedAreaShapes(filter.getAffectedAreaShapes());
         return dest;
     }
 }

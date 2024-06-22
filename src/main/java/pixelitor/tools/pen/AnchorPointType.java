@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,7 +85,7 @@ public enum AnchorPointType {
                                             AnchorPoint anchor,
                                             ControlPoint other);
 
-    private JRadioButtonMenuItem createTypeMenuItem(AnchorPoint ap) {
+    public JRadioButtonMenuItem createConvertMenuItem(AnchorPoint ap) {
         return new AnchorPointTypeMenuItem(ap, this);
     }
 
@@ -103,11 +103,4 @@ public enum AnchorPointType {
         }
     }
 
-    public static void addTypePopupItems(AnchorPoint ap, JPopupMenu p) {
-        //noinspection UnnecessarilyQualifiedStaticUsage
-        AnchorPointType[] types = AnchorPointType.values();
-        for (AnchorPointType type : types) {
-            p.add(type.createTypeMenuItem(ap));
-        }
-    }
 }

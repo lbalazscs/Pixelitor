@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,9 @@ import java.util.Collection;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.utils.QuadrantAngle.*;
+import static pixelitor.utils.QuadrantAngle.ANGLE_180;
+import static pixelitor.utils.QuadrantAngle.ANGLE_270;
+import static pixelitor.utils.QuadrantAngle.ANGLE_90;
 
 @RunWith(Parameterized.class)
 public class CompActionTest {
@@ -100,10 +102,10 @@ public class CompActionTest {
 
     @Before
     public void beforeEachTest() {
-        origComp = TestHelper.createComp(2, true);
+        origComp = TestHelper.createComp("CompActionTest", 2, true);
         assertThat(origComp)
             .isNotEmpty()
-            .hasName("Test")
+            .hasName("CompActionTest")
             .numLayersIs(2)
             .layerNamesAre("layer 1", "layer 2")
             .activeLayerNameIs("layer 2")

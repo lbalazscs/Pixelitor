@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,8 @@ public enum WithTranslation {
 
         @Override
         public void move(Composition comp) {
-            TestHelper.move(comp, false, 2, 2);
-            TestHelper.move(comp, false, -4, -4);
+            TestHelper.move(comp, 2, 2, false);
+            TestHelper.move(comp, -4, -4, false);
         }
 
         @Override
