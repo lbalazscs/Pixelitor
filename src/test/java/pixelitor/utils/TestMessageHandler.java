@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,8 +36,7 @@ public class TestMessageHandler implements MessageHandler {
 
     @Override
     public void showInfo(String title, String msg, Component parent) {
-        // info messages would pollute the regular test output
-        //        System.err.println(title + ": " + msg);
+        // do nothing
     }
 
     @Override

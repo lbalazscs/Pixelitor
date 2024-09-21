@@ -38,6 +38,7 @@ public record FileChooserConfig(String suggestedFileName,
 
     public static FileChooserConfig forSavingComp(Composition comp) {
         String suggestedFileName = comp.getName();
+
         String defaultExt = FileUtils
             .findExtension(comp.getName())
             .orElse(FileFormat.getLastSaved().toString());
@@ -77,6 +78,7 @@ public record FileChooserConfig(String suggestedFileName,
         ANY {
             @Override
             public boolean allows(FileFilter defaultFileFilter) {
+                // No default file filter should be set for this mode
                 return defaultFileFilter == null;
             }
         };

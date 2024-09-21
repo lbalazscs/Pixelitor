@@ -364,7 +364,7 @@ public abstract class AbstractBrushTool extends Tool {
         var originalImage = drawDestination.getOriginalImage(dr, this);
 
         double maxBrushRadius = brush.getMaxEffectiveRadius();
-        var affectedRect = affectedArea.asRectangle(maxBrushRadius);
+        var affectedRect = affectedArea.toRectangle(maxBrushRadius);
         assert !affectedRect.isEmpty() : "brush radius = " + maxBrushRadius
             + ", affected area = " + affectedArea;
 

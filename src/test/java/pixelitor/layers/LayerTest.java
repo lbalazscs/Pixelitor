@@ -96,7 +96,7 @@ public class LayerTest {
     public void beforeEachTest() {
         comp = TestHelper.createEmptyComp("LayerTest");
         // make sure each test runs with a fresh Layer
-        layer = TestHelper.createLayerOfClass(layerClass, comp);
+        layer = TestHelper.createLayer(layerClass, comp);
 
         // for smart filters add their smart object
         comp.addLayerNoUI(layer.getTopLevelLayer());

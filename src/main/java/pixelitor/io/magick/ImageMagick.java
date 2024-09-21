@@ -23,6 +23,7 @@ import pixelitor.Views;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.*;
+import pixelitor.io.IO;
 import pixelitor.io.FileChooserConfig.SelectableFormats;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -30,13 +31,7 @@ import pixelitor.utils.Utils;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +62,7 @@ public class ImageMagick {
         }
 
         BufferedImage image = comp.getCompositeImage();
-        String suggestedFileName = FileUtils.stripExtension(comp.getName());
+        String suggestedFileName = FileUtils.removeExtension(comp.getName());
         File file = FileChoosers.showSaveDialog(new FileChooserConfig(
             suggestedFileName, null, SelectableFormats.ANY));
         if (file == null) { // canceled
@@ -101,7 +96,7 @@ public class ImageMagick {
     }
 
     private static ExportSettings settingsFromExtension(File file) {
-        String ext = FileUtils.calcExtension(file.getName());
+        String ext = FileUtils.getExtension(file.getName());
         if (ext == null) {
             return ExportSettings.DEFAULTS;
         }
@@ -146,7 +141,7 @@ public class ImageMagick {
                 if (e != null) {
                     progressHandler.stopProgressOnEDT();
                 }
-                IO.handleReadingProblems(e);
+                IO.handleReadingErrors(e);
             });
     }
 

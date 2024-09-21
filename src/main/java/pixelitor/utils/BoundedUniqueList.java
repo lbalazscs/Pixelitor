@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,9 @@ import java.util.List;
 
 /**
  * A data structure for the recent files.
+ * It  maintains a list of unique elements with a fixed maximum size.
+ * If an element is added that already exists, it will be moved to the front.
+ * When the size exceeds the maximum size, the oldest elements are removed.
  */
 public class BoundedUniqueList<E> implements Iterable<E> {
     private final int maxSize;
@@ -33,18 +36,23 @@ public class BoundedUniqueList<E> implements Iterable<E> {
         list = new ArrayList<>(maxSize);
     }
 
-    public void addIfNotThere(E elem) {
+    public void addIfAbsent(E elem) {
         if (!list.contains(elem)) {
             list.add(elem);
+            maintainBound();
         }
     }
 
     public void addToFront(E elem) {
-        list.remove(elem); // just to be sure
-        list.addFirst(elem); // add to the front
+        list.remove(elem);
+        list.addFirst(elem);
 
+        maintainBound();
+    }
+
+    private void maintainBound() {
         if (list.size() > maxSize) {
-            list.remove(maxSize);
+            list.removeLast();
         }
     }
 

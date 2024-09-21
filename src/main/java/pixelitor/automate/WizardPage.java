@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,33 +25,53 @@ import java.awt.Component;
 import java.util.Optional;
 
 /**
- * A page in a {@link Wizard}
+ * A single page in a {@link Wizard}.
+ * Each page manages its own state, validation, and transition logic.
  */
 public interface WizardPage {
+    /**
+     * Returns the HTML help text to be displayed for this page.
+     */
     String getHelpText(Wizard wizard);
 
-    Optional<WizardPage> getNext();
+    /**
+     * Determines the next page in the wizard sequence.
+     */
+    Optional<WizardPage> getNextPage();
 
+    /**
+     * Creates and returns the UI panel for this page.
+     */
     JComponent createPanel(Wizard wizard, Drawable dr);
 
     /**
-     * Called if the wizard was canceled while in this state
+     * Called if the wizard was canceled while on this page.
      */
     void onWizardCanceled(Drawable dr);
 
     /**
-     * Called if next was pressed while in this state before moving to the next
+     * Performs completion actions for this page before transitioning to the next.
      */
-    void finish(Wizard wizard, Drawable dr);
+    void onComplete(Wizard wizard, Drawable dr);
 
-    default boolean isValid(Wizard wizard, Component dialogParent) {
+    /**
+     * Validates the current page state.
+     */
+    default boolean validatePage(Wizard wizard, Component dialogParent) {
         return true;
     }
 
-    default boolean isLast() {
-        return getNext().isEmpty();
+    /**
+     * Checks if this is the final page in the wizard sequence.
+     */
+    default boolean isFinalPage() {
+        return getNextPage().isEmpty();
     }
 
-    default void onShowingInDialog(OKCancelDialog dialog) {
+    /**
+     * Called when the page is about to be displayed in the dialog.
+     * Allows for any necessary initialization or setup.
+     */
+    default void onPageShown(OKCancelDialog dialog) {
     }
 }

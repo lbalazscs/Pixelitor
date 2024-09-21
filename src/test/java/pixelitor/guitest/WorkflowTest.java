@@ -51,8 +51,8 @@ import static java.awt.event.KeyEvent.VK_F3;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
+import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.layers.MaskViewMode.EDIT_MASK;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.layers.MaskViewMode.RUBYLITH;
@@ -686,7 +686,7 @@ public class WorkflowTest {
         app.clickTool(Tools.SHAPES);
 
         app.runMenuCommand("Actual Pixels");
-        mouse.recalcCanvasBounds();
+        mouse.updateCanvasBounds();
 
         pw.comboBox("shapeTypeCB").selectItem(RECTANGLE.toString());
         pw.comboBox("fillPaintCB").selectItem(NONE.toString());
@@ -765,7 +765,7 @@ public class WorkflowTest {
         assertThat(EDT.active(Composition::getCanvasWidth)).isEqualTo(canvasWidth);
         assertThat(EDT.active(Composition::getCanvasHeight)).isEqualTo(canvasHeight);
 
-        mouse.recalcCanvasBounds();
+        mouse.updateCanvasBounds();
         int margin = 100;
         mouse.moveToCanvas(margin, margin);
         mouse.dragToCanvas(canvasWidth - margin, canvasHeight - margin);

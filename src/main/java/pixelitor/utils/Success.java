@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,12 @@ package pixelitor.utils;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * Represents a successful computation result.
+ */
 public record Success<S, E>(S value) implements Result<S, E> {
     @Override
-    public boolean wasSuccess() {
+    public boolean isSuccess() {
         return true;
     }
 
@@ -32,7 +35,7 @@ public record Success<S, E>(S value) implements Result<S, E> {
     }
 
     @Override
-    public E errorDetail() {
+    public E errorDetails() {
         throw new IllegalStateException("no error");
     }
 

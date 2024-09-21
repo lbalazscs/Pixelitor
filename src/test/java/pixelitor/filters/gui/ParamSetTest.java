@@ -100,8 +100,8 @@ class ParamSetTest {
 
     @Test
     void setFinalAnimationSettingMode() {
-        params.setFinalAnimationSettingMode(false);
-        params.setFinalAnimationSettingMode(true);
+        params.setFinalAnimationMode(false);
+        params.setFinalAnimationMode(true);
 
         verify(adjustmentListener, never()).paramAdjusted();
     }

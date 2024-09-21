@@ -20,7 +20,7 @@ package pixelitor.utils;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
-import pixelitor.testutils.ShapeChecker;
+import pixelitor.testutils.SegmentCounter;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 
@@ -78,8 +78,8 @@ class ShapesTest {
         checkEllipsePath(path.getActiveSubpath());
     }
 
-    private static void checkRectangleShape(Shape s) {
-        ShapeChecker checker = new ShapeChecker(s);
+    private static void checkRectangleShape(Shape shape) {
+        SegmentCounter checker = new SegmentCounter(shape);
         checker.assertNumMoveTosIs(1);
         checker.assertNumLineTosIs(4);
         checker.assertNumQuadTosIs(0);
@@ -92,29 +92,25 @@ class ShapesTest {
             .numAnchorsIs(4)
             .isClosed();
 
-        var p1 = sp.getAnchor(0);
-        assertThat(p1)
+        assertThat(sp.getAnchor(0))
             .isAt(2, 2)
             .bothControlsAreRetracted();
 
-        var p2 = sp.getAnchor(1);
-        assertThat(p2)
+        assertThat(sp.getAnchor(1))
             .isAt(12, 2)
             .bothControlsAreRetracted();
 
-        var p3 = sp.getAnchor(2);
-        assertThat(p3)
+        assertThat(sp.getAnchor(2))
             .isAt(12, 12)
             .bothControlsAreRetracted();
 
-        var p4 = sp.getAnchor(3);
-        assertThat(p4)
+        assertThat(sp.getAnchor(3))
             .isAt(2, 12)
             .bothControlsAreRetracted();
     }
 
-    private static void checkEllipseShape(Shape s) {
-        ShapeChecker checker = new ShapeChecker(s);
+    private static void checkEllipseShape(Shape shape) {
+        SegmentCounter checker = new SegmentCounter(shape);
         checker.assertNumMoveTosIs(1);
         checker.assertNumLineTosIs(0);
         checker.assertNumQuadTosIs(0);
@@ -152,36 +148,36 @@ class ShapesTest {
 
     @Test
     void toPositiveRect_fromRectangle_whenWidthHeightPositive() {
-        Rectangle rect = new Rectangle(30, 40, 10, 20);
-        Rectangle rectOut = Shapes.toPositiveRect(rect);
+        Rectangle input = new Rectangle(30, 40, 10, 20);
+        Rectangle output = Shapes.toPositiveRect(input);
 
-        assertThat(rectOut).isEqualTo(rect);
+        assertThat(output).isEqualTo(input);
     }
 
     @Test
     void toPositiveRect_fromRectangle_whenWidthNegative() {
-        Rectangle rect = new Rectangle(30, 40, -10, 20);
-        Rectangle rectExcepted = new Rectangle(20, 40, 10, 20);
+        Rectangle input = new Rectangle(30, 40, -10, 20);
+        Rectangle expectedOutput = new Rectangle(20, 40, 10, 20);
 
-        Rectangle rectOut = Shapes.toPositiveRect(rect);
-        assertThat(rectOut).isEqualTo(rectExcepted);
+        Rectangle output = Shapes.toPositiveRect(input);
+        assertThat(output).isEqualTo(expectedOutput);
     }
 
     @Test
     void toPositiveRect_fromRectangle_whenHeightNegative() {
-        Rectangle rect = new Rectangle(30, 40, 10, -20);
-        Rectangle rectExcepted = new Rectangle(30, 20, 10, 20);
+        Rectangle input = new Rectangle(30, 40, 10, -20);
+        Rectangle expectedOutput = new Rectangle(30, 20, 10, 20);
 
-        Rectangle rectOut = Shapes.toPositiveRect(rect);
-        assertThat(rectOut).isEqualTo(rectExcepted);
+        Rectangle output = Shapes.toPositiveRect(input);
+        assertThat(output).isEqualTo(expectedOutput);
     }
 
     @Test
     void toPositiveRect_fromRectangle_whenWidthHeightNegative() {
-        Rectangle rect = new Rectangle(30, 40, -10, -20);
-        Rectangle rectExcepted = new Rectangle(20, 20, 10, 20);
+        Rectangle input = new Rectangle(30, 40, -10, -20);
+        Rectangle expectedOutput = new Rectangle(20, 20, 10, 20);
 
-        Rectangle rectOut = Shapes.toPositiveRect(rect);
-        assertThat(rectOut).isEqualTo(rectExcepted);
+        Rectangle output = Shapes.toPositiveRect(input);
+        assertThat(output).isEqualTo(expectedOutput);
     }
 }

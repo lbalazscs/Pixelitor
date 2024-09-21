@@ -18,25 +18,26 @@
 package pixelitor.utils;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
- * Represents either the result of a computation or an error.
+ * Represents the outcome of a computation that may either succeed with a value or fail with an error.
  *
- * @param <S> the type of the successful result
- * @param <E> the type of the error details
+ * @param <S> the type of the successful result value
+ * @param <E> the type of the error details in case of failure
  */
 public sealed interface Result<S, E> permits Success, Error {
-    boolean wasSuccess();
+    boolean isSuccess();
 
     /**
-     * Returns the successful result.
+     * Returns the successful result value if present.
      */
     S get();
 
     /**
-     * Returns the error details.
+     * Returns the error details if present.
      */
-    E errorDetail();
+    E errorDetails();
 
     /**
      * Maps the successful result using an S->T mapper function.
@@ -49,6 +50,25 @@ public sealed interface Result<S, E> permits Success, Error {
     <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper);
 
     /**
+     * Returns the success value if present,
+     * or the given default value if this is an error.
+     */
+    default S orElse(S defaultValue) {
+        return isSuccess() ? get() : defaultValue;
+    }
+
+    /**
+     * Returns the success value if present, or throws the exception
+     * created by the supplier if this is an error.
+     */
+    default <T extends Throwable> S orElseThrow(Supplier<? extends T> exceptionSupplier) throws T {
+        if (isSuccess()) {
+            return get();
+        }
+        throw exceptionSupplier.get();
+    }
+
+    /**
      * Creates a new Result representing a successful result.
      */
     static <V, E> Result<V, E> success(V value) {
@@ -58,10 +78,14 @@ public sealed interface Result<S, E> permits Success, Error {
     /**
      * Creates a new Result representing an error.
      */
-    static <V, E> Result<V, E> error(E errorDetail) {
-        return new Error<>(errorDetail);
+    static <V, E> Result<V, E> error(E errorDetails) {
+        return new Error<>(errorDetails);
     }
 
+    /**
+     * Returns a successful result if the value is non-null,
+     * or an error result with null error details if the value is null.
+     */
     static <V, E> Result<V, E> ofNullable(V value) {
         if (value == null) {
             return error(null);

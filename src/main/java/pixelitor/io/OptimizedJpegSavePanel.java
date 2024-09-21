@@ -17,6 +17,7 @@
 
 package pixelitor.io;
 
+import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
@@ -76,7 +77,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         var imageSize = new Dimension(image.getWidth(), image.getHeight());
 
         original = createViewPanel(imageSize);
-        original.setImage(image);
+        original.replaceImage(image);
 
         optimized = createViewPanel(imageSize);
 
@@ -150,7 +151,7 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     private void setPreview(ImageWithSize imageWithSize) {
         BufferedImage newPreview = imageWithSize.image();
-        optimized.changeImage(newPreview);
+        optimized.refreshImage(newPreview);
 
         int numBytes = imageWithSize.size();
         sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
@@ -164,7 +165,8 @@ public class OptimizedJpegSavePanel extends JPanel {
         return progressiveCB.isSelected();
     }
 
-    public static void showInDialog(BufferedImage image, String title) {
+    public static void showInDialog(Composition comp, String title) {
+        BufferedImage image = comp.getCompositeImage();
         var rgbImage = ImageUtils.convertToRGB(image, false);
         var savePanel = new OptimizedJpegSavePanel(rgbImage);
 
@@ -172,7 +174,7 @@ public class OptimizedJpegSavePanel extends JPanel {
             .content(savePanel)
             .title(title)
             .okText(i18n("save"))
-            .okAction(() -> IO.saveJpegWithQuality(savePanel.getQuality(), savePanel.isProgressive()))
+            .okAction(() -> IO.saveJpegWithQuality(comp, savePanel.getQuality(), savePanel.isProgressive()))
             .show();
     }
 }

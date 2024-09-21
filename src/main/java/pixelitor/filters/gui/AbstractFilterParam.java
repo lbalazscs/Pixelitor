@@ -90,9 +90,9 @@ public abstract class AbstractFilterParam implements FilterParam {
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
             case APP_LOGIC -> enabledByAppLogic = b;
-            case FINAL_ANIMATION_SETTING -> {
+            case ANIMATION_ENDING_STATE -> {
                 if (isAnimatable()) {
-                    // the purpose of the final animation setting mode is to
+                    // the purpose of the animation ending mode is to
                     // disable/enable the filter params that can't be animated
                     return;
                 }

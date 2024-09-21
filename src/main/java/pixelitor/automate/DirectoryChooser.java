@@ -32,30 +32,30 @@ import static java.awt.BorderLayout.WEST;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
- * A panel that can be used to select a single directory
- * and optionally an output format.
+ * A panel that can be used to select a directory and optionally
+ * specify an output format.
  */
 public class DirectoryChooser extends ValidatedPanel {
-    private final BrowseFilesSupport chooserSupport;
-    private JComboBox<FileFormat> outputFormatSelector;
+    private final BrowseFilesSupport directoryBrowser;
+    private JComboBox<FileFormat> formatComboBox;
 
-    private DirectoryChooser(String label, String initialPath,
+    private DirectoryChooser(String label, String defaultPath,
                              String chooserDialogTitle,
                              FileFormat defaultOutputFormat) {
-        chooserSupport = new BrowseFilesSupport(initialPath, chooserDialogTitle, DIRECTORY);
-        JTextField dirTF = chooserSupport.getNameTF();
-        JButton browseButton = chooserSupport.getBrowseButton();
+        directoryBrowser = new BrowseFilesSupport(defaultPath, chooserDialogTitle, DIRECTORY);
+        JTextField dirTF = directoryBrowser.getPathTextField();
+        JButton browseButton = directoryBrowser.getBrowseButton();
 
-        boolean addOutputChooser = defaultOutputFormat != null;
-        if (addOutputChooser) {
+        boolean includeFormatSelector = defaultOutputFormat != null;
+        if (includeFormatSelector) {
             setLayout(new GridBagLayout());
             var gbh = new GridBagHelper(this);
             gbh.addLabelAndTwoControls(label, dirTF, browseButton);
 
-            outputFormatSelector = new JComboBox<>(FileFormat.values());
-            outputFormatSelector.setSelectedItem(defaultOutputFormat);
+            formatComboBox = new JComboBox<>(FileFormat.values());
+            formatComboBox.setSelectedItem(defaultOutputFormat);
 
-            gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
+            gbh.addLabelAndControlNoStretch("Output Format:", formatComboBox);
         } else {
             setLayout(new BorderLayout());
             add(new JLabel(label), WEST);
@@ -65,33 +65,35 @@ public class DirectoryChooser extends ValidatedPanel {
     }
 
     private FileFormat getSelectedFormat() {
-        return (FileFormat) outputFormatSelector.getSelectedItem();
+        if (formatComboBox == null) {
+            throw new IllegalStateException();
+        }
+        return (FileFormat) formatComboBox.getSelectedItem();
     }
 
     private File getSelectedDir() {
-        return chooserSupport.getSelectedFile();
+        return directoryBrowser.getSelectedFile();
     }
 
     @Override
     public ValidationResult validateSettings() {
         File selectedDir = getSelectedDir();
-        boolean exists = selectedDir.exists();
-        boolean isDir = selectedDir.isDirectory();
-        if (exists && isDir) {
-            return ValidationResult.ok();
-        } else {
-            if (exists) {
-                return ValidationResult.error(
-                    "The selected path "
-                        + selectedDir.getAbsolutePath()
-                        + " isn't a folder.");
-            } else {
-                return ValidationResult.error(
-                    "The selected folder "
-                        + selectedDir.getAbsolutePath()
-                        + " doesn't exist.");
-            }
+
+        if (!selectedDir.exists()) {
+            return ValidationResult.invalid(
+                "The selected folder <b>"
+                    + selectedDir.getAbsolutePath()
+                    + "</b> doesn't exist.");
         }
+
+        if (!selectedDir.isDirectory()) {
+            return ValidationResult.invalid(
+                "The selected path <b>"
+                    + selectedDir.getAbsolutePath()
+                    + "</b> isn't a folder.");
+        }
+
+        return ValidationResult.valid();
     }
 
     public static boolean selectOutputDir() {
@@ -107,14 +109,14 @@ public class DirectoryChooser extends ValidatedPanel {
             Dirs.getLastSavePath(),
             "Select Output Folder", defaultFormat);
 
-        boolean[] selectionWasMade = {false};
+        boolean[] selectionConfirmed = {false};
         new DialogBuilder()
             .validatedContent(chooserPanel)
             .title("Select Output Folder")
             .okAction(() -> {
                 File dir = chooserPanel.getSelectedDir();
                 Dirs.setLastSave(dir);
-                selectionWasMade[0] = true;
+                selectionConfirmed[0] = true;
             })
             .show();
 
@@ -122,6 +124,6 @@ public class DirectoryChooser extends ValidatedPanel {
             FileFormat.setLastSaved(chooserPanel.getSelectedFormat());
         }
 
-        return selectionWasMade[0];
+        return selectionConfirmed[0];
     }
 }

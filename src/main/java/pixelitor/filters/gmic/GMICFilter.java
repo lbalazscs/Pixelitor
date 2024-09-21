@@ -51,7 +51,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
         command.add("-output");
         command.add("-.png");
 
-        return IO.commandLineFilter(src, getName(), command);
+        return IO.commandLineFilter(src, command);
     }
 
     public abstract List<String> getArgs();

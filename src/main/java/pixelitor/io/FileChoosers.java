@@ -25,6 +25,7 @@ import pixelitor.utils.Messages;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.util.Optional;
 
 public class FileChoosers {
     private static boolean useNativeDialogs = AppPreferences.loadNativeChoosers();
@@ -35,6 +36,7 @@ public class FileChoosers {
 
     private static FilePicker picker;
 
+    // File filters for different image file formats
     public static final FileNameExtensionFilter bmpFilter = new FileNameExtensionFilter(
         "BMP files", "bmp");
     public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter(
@@ -63,7 +65,7 @@ public class FileChoosers {
         "WebP files", "webp");
 
     // All NetPBM files can be opened, but only PAM and PPM can be saved.
-    // Also, webp can only be opened, but not saved.
+    // WebP can only be opened, but not saved.
     public static final FileNameExtensionFilter[] OPEN_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, netPBMFilters, oraFilter,
         pngFilter, pxcFilter, tiffFilter, tgaFilter, webpFilter};
@@ -88,19 +90,20 @@ public class FileChoosers {
             String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
                 IO.openFileAsync(selectedFile, true);
-            } else { // unsupported extension
-                handleUnsupportedExtensionWhileOpening(fileName);
+            } else {
+                showUnsupportedExtensionError(fileName);
             }
         }
     }
 
-    private static void handleUnsupportedExtensionWhileOpening(String fileName) {
-        String extension = FileUtils.findExtension(fileName).orElse("");
+    private static void showUnsupportedExtensionError(String fileName) {
         String msg = "<html>Could not open <b>" + fileName + "</b>, because ";
+
+        Optional<String> extension = FileUtils.findExtension(fileName);
         if (extension.isEmpty()) {
             msg += "it has no extension.";
         } else {
-            msg += "files of type <b>" + extension + "</b> are not supported.";
+            msg += "files of type <b>" + extension.get() + "</b> are not supported.";
         }
         Messages.showError("Error", msg);
     }
@@ -132,13 +135,12 @@ public class FileChoosers {
 
         FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
         SaveSettings settings = new SaveSettings.Simple(format, file);
-
         comp.saveAsync(settings, true);
         return true;
     }
 
-    public static File showSaveDialog(FileChooserConfig chooserConfig) {
-        return picker.showSaveDialog(chooserConfig);
+    public static File showSaveDialog(FileChooserConfig config) {
+        return picker.showSaveDialog(config);
     }
 
     public static boolean useNativeDialogs() {

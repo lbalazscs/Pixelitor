@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,26 +21,29 @@ import javax.swing.*;
 import javax.swing.text.*;
 
 /**
- * A DocumentFilter implementation that allows entering only ints within a range.
+ * A DocumentFilter that restricts text input to integer values within a range.
  */
 public class IntDocumentFilter extends DocumentFilter {
     private final int min;
     private final int max;
-    private final boolean checkRange;
+    private final boolean isRangeConstrained;
 
     public IntDocumentFilter() {
         this.min = -1;
         this.max = -1;
-        this.checkRange = false;
+        this.isRangeConstrained = false;
     }
 
     public IntDocumentFilter(int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException(min + " > " + max);
+        }
         this.min = min;
         this.max = max;
-        checkRange = true;
+        isRangeConstrained = true;
     }
 
-    public void setOn(JTextField tf) {
+    public void applyOn(JTextField tf) {
         ((AbstractDocument) tf.getDocument()).setDocumentFilter(this);
     }
 
@@ -52,11 +55,11 @@ public class IntDocumentFilter extends DocumentFilter {
         String before = currentText.substring(0, offset);
         String after = currentText.substring(length + offset, currentLength);
         String newString = before + (text == null ? "" : text) + after;
-        check(newString, offset);
+        validateInteger(newString, offset);
         fb.replace(offset, length, text, attrs);
     }
 
-    private void check(String newString, int offset) throws BadLocationException {
+    private void validateInteger(String newString, int offset) throws BadLocationException {
         int newInt;
         try {
             newInt = Integer.parseInt(newString);
@@ -64,7 +67,7 @@ public class IntDocumentFilter extends DocumentFilter {
             throw new BadLocationException(newString, offset);
         }
 
-        if (checkRange && (newInt < min || newInt > max)) {
+        if (isRangeConstrained && (newInt < min || newInt > max)) {
             throw new BadLocationException(newString, offset);
         }
     }

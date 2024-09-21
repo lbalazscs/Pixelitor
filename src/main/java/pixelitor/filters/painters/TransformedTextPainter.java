@@ -43,8 +43,24 @@ import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.awt.RenderingHints.*;
-import static java.awt.font.TextAttribute.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_DEFAULT;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_DEFAULT;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
+import static java.awt.font.TextAttribute.KERNING;
+import static java.awt.font.TextAttribute.KERNING_ON;
+import static java.awt.font.TextAttribute.LIGATURES;
+import static java.awt.font.TextAttribute.LIGATURES_ON;
+import static java.awt.font.TextAttribute.STRIKETHROUGH;
+import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
+import static java.awt.font.TextAttribute.TRACKING;
+import static java.awt.font.TextAttribute.UNDERLINE;
+import static java.awt.font.TextAttribute.UNDERLINE_ON;
 
 /**
  * A {@link Painter} that can have an extra translation
@@ -99,9 +115,9 @@ public class TransformedTextPainter implements Debuggable {
         if (invalidLayout) {
             updateLayout(width, height, g, comp);
             if (DEBUG_LAYOUT) {
-                Shapes.draw(g, getBoundingBox(), Color.RED);
+                Shapes.draw(getBoundingBox(), Color.RED, g);
                 if (transformedRect != null) {
-                    Shapes.draw(g, transformedRect.asShape(), Color.BLUE);
+                    Shapes.draw(transformedRect.asShape(), Color.BLUE, g);
                 }
             }
         }

@@ -142,7 +142,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return IO.loadCompAsync(file)
             .thenApplyAsync(this::replaceJustReloadedComp, onEDT)
             .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.handleReadingProblems(e));
+            .whenComplete((v, e) -> IO.handleReadingErrors(e));
     }
 
     private void setComp(Composition comp) {
@@ -323,7 +323,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return scaling;
     }
 
-    public void updateViewContainerTitle() {
+    public void updateTitle() {
         if (viewContainer != null) {
             viewContainer.updateTitle(this);
         }
@@ -590,7 +590,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         canvas.recalcCoSize(this, true);
 
         if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
-            updateViewContainerTitle();
+            updateTitle();
         } else {
             // otherwise the scrollbars don't appear
             // when using the tabbed UI

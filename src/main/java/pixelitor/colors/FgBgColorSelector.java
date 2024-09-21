@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -314,9 +314,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalEvents.addHotKey('D', resetToDefaultAction);
-        GlobalEvents.addHotKey('X', swapColorsAction);
-        GlobalEvents.addHotKey('R', randomizeColorsAction);
+        GlobalEvents.registerHotKey('D', resetToDefaultAction);
+        GlobalEvents.registerHotKey('X', swapColorsAction);
+        GlobalEvents.registerHotKey('R', randomizeColorsAction);
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {

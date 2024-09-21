@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,29 +24,41 @@ import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
 /**
- * The left panel used in the "Mask from Color Range"
+ * A specialized {@link ImagePanel} that allows users to pick colors
+ * by clicking or dragging on the displayed image.
+ * Used as the left panel in "Mask from Color Range",
+ * to sample colors from the source image.
  */
 public class ColorPickerPanel extends ImagePanel {
     public ColorPickerPanel(BufferedImage img,
-                            Consumer<Color> changeListener) {
+                            Consumer<Color> colorSelectionHandler) {
         super(true);
-        setImage(img);
+
+        replaceImage(img);
+        initMouseHandlers(colorSelectionHandler);
+    }
+
+    private void initMouseHandlers(Consumer<Color> colorSelectionHandler) {
         var ma = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                sampleColor(e.getX(), e.getY());
+                sampleColorAt(e.getX(), e.getY());
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                sampleColor(e.getX(), e.getY());
+                sampleColorAt(e.getX(), e.getY());
             }
 
-            private void sampleColor(int x, int y) {
-                if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
+            private void sampleColorAt(int x, int y) {
+                if (isWithinImageBounds(x, y)) {
                     int rgb = image.getRGB(x, y);
-                    changeListener.accept(new Color(rgb));
+                    colorSelectionHandler.accept(new Color(rgb));
                 }
+            }
+
+            private boolean isWithinImageBounds(int x, int y) {
+                return x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight();
             }
         };
         addMouseListener(ma);

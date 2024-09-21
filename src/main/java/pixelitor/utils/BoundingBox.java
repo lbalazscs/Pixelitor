@@ -23,7 +23,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.StringJoiner;
 
 /**
- * A class that can calculate a 2D bounding box from a set of points.
+ * A class that calculates a 2D bounding box from a set of points.
  */
 public class BoundingBox {
     private double minX = Double.MAX_VALUE;
@@ -47,6 +47,9 @@ public class BoundingBox {
         return maxY;
     }
 
+    /**
+     * Expands the bounding box to include the given point.
+     */
     public void add(double x, double y) {
         if (x > maxX) {
             maxX = x;
@@ -66,6 +69,10 @@ public class BoundingBox {
         add(point.getX(), point.getY());
     }
 
+    /**
+     * Resets the bounding box to its initial state,
+     * effectively removing all added points.
+     */
     public void reset() {
         minX = Double.MAX_VALUE;
         minY = Double.MAX_VALUE;
@@ -73,7 +80,7 @@ public class BoundingBox {
         maxY = Double.MIN_VALUE;
     }
 
-    public Rectangle2D asRectangle2D() {
+    public Rectangle2D toRectangle2D() {
         return new Rectangle2D.Double(
             minX,
             minY,
@@ -81,7 +88,7 @@ public class BoundingBox {
             maxY - minY);
     }
 
-    public Rectangle2D asRectangle2D(double margin) {
+    public Rectangle2D toRectangle2D(double margin) {
         return new Rectangle2D.Double(
             minX - margin,
             minY - margin,
@@ -89,7 +96,7 @@ public class BoundingBox {
             maxY - minY + 2 * margin);
     }
 
-    public Rectangle asRectangle(double margin) {
+    public Rectangle toRectangle(double margin) {
         return new Rectangle(
             (int) (minX - margin),
             (int) (minY - margin),

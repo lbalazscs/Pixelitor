@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-        // We can get here as the result of a user click or as part
+        // Called as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
         Views.viewActivated(view);
@@ -109,20 +109,16 @@ public class ImageFrame extends JInternalFrame
 
     public void setToCanvasSize() {
         Canvas canvas = view.getCanvas();
-        int zoomedWidth = canvas.getCoWidth();
-        int zoomedHeight = canvas.getCoHeight();
-        setSize(zoomedWidth, zoomedHeight);
+        setSize(canvas.getCoWidth(), canvas.getCoHeight());
     }
 
     @Override
     public void setSize(int width, int height) {
         Point loc = getLocation();
-        int locX = loc.x;
-        int locY = loc.y;
-
         Dimension desktopSize = ImageArea.getSize();
-        int maxWidth = Math.max(0, desktopSize.width - 20 - locX);
-        int maxHeight = Math.max(0, desktopSize.height - 40 - locY);
+
+        int maxWidth = Math.max(0, desktopSize.width - 20 - loc.x);
+        int maxHeight = Math.max(0, desktopSize.height - 40 - loc.y);
 
         if (width > maxWidth) {
             width = maxWidth;

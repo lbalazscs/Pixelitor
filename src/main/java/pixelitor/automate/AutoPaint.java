@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,11 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.SplittableRandom;
 
-import static pixelitor.colors.FgBgColors.*;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.colors.FgBgColors.randomizeColors;
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.Tools.BRUSH;
 import static pixelitor.tools.Tools.CLONE;
 import static pixelitor.tools.Tools.ERASER;
@@ -47,19 +51,20 @@ import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * The "Auto Paint" functionality
+ * The "Auto Paint" functionality.
  */
 public class AutoPaint {
-    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
+    public static final Tool[] SUPPORTED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
     private static Color origFg;
     private static Color origBg;
-    private static final Lazy<AutoPaintPanel> panelFactory = Lazy.of(AutoPaintPanel::new);
+    private static final Lazy<AutoPaintPanel> CONFIG_PANEL_FACTORY = Lazy.of(AutoPaintPanel::new);
 
     private AutoPaint() {
+        // Utility class, no instantiation
     }
 
     public static void showDialog(Drawable dr) {
-        var configPanel = panelFactory.get();
+        var configPanel = CONFIG_PANEL_FACTORY.get();
         new DialogBuilder()
             .validatedContent(configPanel)
             .title(i18n("auto_paint"))
@@ -72,14 +77,14 @@ public class AutoPaint {
         assert calledOnEDT() : threadInfo();
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
-        String msg = "Auto Paint with " + settings.getTool().getName();
-        ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
+        String statusBarMessage = "Auto Paint with " + settings.getTool().getName();
+        ProgressHandler progressHandler = Messages.startProgress(statusBarMessage, settings.getNumStrokes());
 
         try {
-            saveFgBgColors();
+            rememberOriginalColors();
             History.setIgnoreEdits(true);
 
-            doAllStrokes(settings, dr, progressHandler);
+            generateStrokes(settings, dr, progressHandler);
         } catch (Exception e) {
             Messages.showException(e);
         } finally {
@@ -88,49 +93,49 @@ public class AutoPaint {
                 dr, backupImage, false));
 
             progressHandler.stopProgress();
-            Messages.showPlainInStatusBar(msg + "finished.");
+            Messages.showPlainInStatusBar(statusBarMessage + "finished.");
 
-            restoreFgBgColors(settings);
+            restoreOriginalColors(settings);
         }
     }
 
-    private static void doAllStrokes(AutoPaintSettings settings,
-                                     Drawable dr,
-                                     ProgressHandler progressHandler) {
+    private static void generateStrokes(AutoPaintSettings settings,
+                                        Drawable dr,
+                                        ProgressHandler progressHandler) {
         assert calledOnEDT() : threadInfo();
 
         var random = new SplittableRandom();
         var comp = dr.getComp();
-        int numStrokes = settings.getNumStrokes();
+        int strokeCount = settings.getNumStrokes();
 
-        for (int i = 0; i < numStrokes; i++) {
+        for (int i = 0; i < strokeCount; i++) {
             progressHandler.updateProgress(i);
 
-            doSingleStroke(dr, settings, comp, random);
+            generateSingleStroke(dr, settings, comp, random);
             comp.getView().paintImmediately();
         }
     }
 
-    private static void doSingleStroke(Drawable dr,
-                                       AutoPaintSettings settings,
-                                       Composition comp,
-                                       SplittableRandom rand) {
+    private static void generateSingleStroke(Drawable dr,
+                                             AutoPaintSettings settings,
+                                             Composition comp,
+                                             SplittableRandom rand) {
         assert calledOnEDT() : threadInfo();
 
-        setFgBgColors(settings, rand);
+        setColors(settings, rand);
         PPoint start = comp.getRandomPointInCanvas();
         PPoint end = settings.calcRandomEndPoint(start, comp, rand);
 
         Tool tool = settings.getTool();
         if (tool instanceof AbstractBrushTool abt) {
-            Path2D shape = calcStrokePath(start, end, settings);
-            abt.trace(dr, shape);
+            Path2D strokePath = createStrokePath(start, end, settings);
+            abt.trace(dr, strokePath);
         } else {
             throw new IllegalStateException("tool = " + tool.getClass().getName());
         }
     }
 
-    private static void setFgBgColors(AutoPaintSettings settings, SplittableRandom rand) {
+    private static void setColors(AutoPaintSettings settings, SplittableRandom rand) {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
@@ -138,27 +143,30 @@ public class AutoPaint {
         }
     }
 
-    private static Path2D calcStrokePath(PPoint start, PPoint end, AutoPaintSettings settings) {
+    private static Path2D createStrokePath(PPoint start, PPoint end, AutoPaintSettings settings) {
         Path2D path = new Path2D.Double();
         path.moveTo(start.getImX(), start.getImY());
-        double controlPointX = (start.getImX() + end.getImX()) / 2.0;
-        double controlPointY = (start.getImY() + end.getImY()) / 2.0;
-        double maxCurvature = settings.getMaxCurvature();
-        if (maxCurvature > 0) {
-            double maxShift = start.imDist(end) * maxCurvature;
-            controlPointX += (Rnd.nextDouble() - 0.5) * maxShift;
-            controlPointY += (Rnd.nextDouble() - 0.5) * maxShift;
+
+        double controlX = (start.getImX() + end.getImX()) / 2.0;
+        double controlY = (start.getImY() + end.getImY()) / 2.0;
+
+        double curvature = settings.getMaxCurvature();
+        if (curvature > 0) {
+            double maxShift = start.imDist(end) * curvature;
+            controlX += (Rnd.nextDouble() - 0.5) * maxShift;
+            controlY += (Rnd.nextDouble() - 0.5) * maxShift;
         }
-        path.quadTo(controlPointX, controlPointY, end.getImX(), end.getImY());
+
+        path.quadTo(controlX, controlY, end.getImX(), end.getImY());
         return path;
     }
 
-    private static void saveFgBgColors() {
+    private static void rememberOriginalColors() {
         origFg = getFGColor();
         origBg = getBGColor();
     }
 
-    private static void restoreFgBgColors(AutoPaintSettings settings) {
+    private static void restoreOriginalColors(AutoPaintSettings settings) {
         // if colors were changed, restore the original
         if (settings.changeColors()) {
             setFGColor(origFg);

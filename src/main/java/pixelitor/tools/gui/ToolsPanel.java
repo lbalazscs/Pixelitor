@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,7 @@ public class ToolsPanel extends JPanel {
     private static void setupTShortCut() {
         // There is no text tool, but pressing T should add a text layer.
         // In the menu it was added using T, not t.
-        GlobalEvents.addHotKey('T', AddTextLayerAction.INSTANCE);
+        GlobalEvents.registerHotKey('T', AddTextLayerAction.INSTANCE);
     }
 
     private static Dimension calcToolButtonSize(Dimension screen, PixelitorWindow pw) {
@@ -98,6 +98,6 @@ public class ToolsPanel extends JPanel {
             }
         });
 
-        GlobalEvents.addHotKey(tool.getActivationKey(), activateAction);
+        GlobalEvents.registerHotKey(tool.getActivationKey(), activateAction);
     }
 }

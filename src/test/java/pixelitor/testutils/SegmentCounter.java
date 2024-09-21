@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,16 +19,23 @@ package pixelitor.testutils;
 
 import java.awt.Shape;
 
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_CUBICTO;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.SEG_QUADTO;
 
-public class ShapeChecker {
+/**
+ * Analyzes shapes by counting different types of path segments.
+ */
+public class SegmentCounter {
     private int numMoveTos = 0;
     private int numLineTos = 0;
     private int numQuadTos = 0;
     private int numCubicTos = 0;
     private int numCloses = 0;
 
-    public ShapeChecker(Shape shape) {
+    public SegmentCounter(Shape shape) {
         var pathIterator = shape.getPathIterator(null);
         float[] coords = new float[6];
         while (!pathIterator.isDone()) {

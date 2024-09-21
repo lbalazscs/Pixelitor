@@ -218,7 +218,7 @@ public class SplashImageCreator {
         var flatSettings = new SaveSettings.Simple(format, comp.getFile());
 
         var pxcFile = new File(comp.getFile().getParent(),
-            FileUtils.replaceExt(comp.getFile().getName(), "pxc"));
+            FileUtils.replaceExtension(comp.getFile().getName(), "pxc"));
         var pxcSettings = new SaveSettings.Simple(FileFormat.PXC, pxcFile);
 
         return comp.saveAsync(flatSettings, false)

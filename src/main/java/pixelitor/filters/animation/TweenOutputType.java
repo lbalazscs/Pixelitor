@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static java.lang.String.format;
  * The output type of the tweening animation.
  */
 public enum TweenOutputType {
-    PNG_FILE_SEQUENCE("PNG File Sequence") {
+    PNG_FILE_SEQUENCE("PNG File Sequence", true) {
         @Override
         AnimationWriter createWriter(File file, int delayMillis) {
             return new PNGFileSequenceWriter(file);
@@ -41,15 +41,10 @@ public enum TweenOutputType {
         }
 
         @Override
-        public boolean needsDirectory() {
-            return true;
-        }
-
-        @Override
         public FileNameExtensionFilter getFileFilter() {
             return null;
         }
-    }, ANIM_GIF("Animated GIF File") {
+    }, ANIM_GIF("Animated GIF File", false) {
         @Override
         AnimationWriter createWriter(File file, int delayMillis) {
             return new AnimGIFWriter(file, delayMillis);
@@ -61,27 +56,26 @@ public enum TweenOutputType {
         }
 
         @Override
-        public boolean needsDirectory() {
-            return false;
-        }
-
-        @Override
         public FileNameExtensionFilter getFileFilter() {
             return FileChoosers.gifFilter;
         }
     };
 
     private final String guiName;
+    private final boolean needsDirectory;
 
-    TweenOutputType(String guiName) {
+    TweenOutputType(String guiName, boolean needsDirectory) {
         this.guiName = guiName;
+        this.needsDirectory = needsDirectory;
+    }
+
+    public boolean needsDirectory() {
+        return needsDirectory;
     }
 
     abstract AnimationWriter createWriter(File file, int delayMillis);
 
     public abstract ValidationResult validate(File output);
-
-    public abstract boolean needsDirectory();
 
     private static ValidationResult checkFile(File output,
                                               TweenOutputType type,
@@ -92,12 +86,12 @@ public enum TweenOutputType {
                         "<br>For the \"%s\" output type, " +
                         "select a (new or existing) %s file in an existing folder.",
                     output.getAbsolutePath(), type, fileType);
-                return ValidationResult.error(msg);
+                return ValidationResult.invalid(msg);
             }
         } else { // if it doesn't exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
             if (parentDir == null) {
-                return ValidationResult.error("Folder not found");
+                return ValidationResult.invalid("Folder not found");
             }
             if (!parentDir.exists()) {
                 String msg = format("The folder %s of the %s file does not exist." +
@@ -105,10 +99,10 @@ public enum TweenOutputType {
                         "select a (new or existing) %s file in an existing folder.",
                     parentDir.getName(), output.getAbsolutePath(),
                     type, fileType);
-                return ValidationResult.error(msg);
+                return ValidationResult.invalid(msg);
             }
         }
-        return ValidationResult.ok();
+        return ValidationResult.valid();
     }
 
     private static ValidationResult checkDir(File output, TweenOutputType type) {
@@ -117,12 +111,12 @@ public enum TweenOutputType {
             String msg = format("\"<b>%s</b>\" isn't a folder." +
                     "<br>For the \"%s\" output type, select an existing folder.",
                 output.getAbsolutePath(), type);
-            return ValidationResult.error(msg);
+            return ValidationResult.invalid(msg);
         }
         if (!output.exists()) {
-            return ValidationResult.error(output.getAbsolutePath() + " doesn't exist.");
+            return ValidationResult.invalid(output.getAbsolutePath() + " doesn't exist.");
         }
-        return ValidationResult.ok();
+        return ValidationResult.valid();
     }
 
     public abstract FileNameExtensionFilter getFileFilter();

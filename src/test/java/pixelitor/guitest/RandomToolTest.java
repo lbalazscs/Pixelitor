@@ -65,11 +65,26 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static pixelitor.guitest.AJSUtils.checkRandomly;
-import static pixelitor.guitest.AJSUtils.chooseRandomly;
-import static pixelitor.guitest.AJSUtils.slideRandomly;
-import static pixelitor.tools.Tools.*;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.guitest.GUITestUtils.checkRandomly;
+import static pixelitor.guitest.GUITestUtils.chooseRandomly;
+import static pixelitor.guitest.GUITestUtils.slideRandomly;
+import static pixelitor.tools.Tools.BRUSH;
+import static pixelitor.tools.Tools.CLONE;
+import static pixelitor.tools.Tools.CROP;
+import static pixelitor.tools.Tools.ERASER;
+import static pixelitor.tools.Tools.HAND;
+import static pixelitor.tools.Tools.MOVE;
+import static pixelitor.tools.Tools.PEN;
+import static pixelitor.tools.Tools.SELECTION;
+import static pixelitor.tools.Tools.SHAPES;
+import static pixelitor.tools.Tools.SMUDGE;
+import static pixelitor.tools.Tools.ZOOM;
+import static pixelitor.tools.Tools.getRandomTool;
+import static pixelitor.utils.Threads.calledOn;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.threadInfo;
+import static pixelitor.utils.Threads.threadName;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
@@ -278,9 +293,9 @@ public class RandomToolTest {
         Utils.sleep(200, MILLISECONDS);
         activate(tool);
 
-        EDT.assertNumModalDialogsIs(0);
+        EDT.assertModalDialogCountIs(0);
         randomizeToolSettings(tool);
-        EDT.assertNumModalDialogsIs(0);
+        EDT.assertModalDialogCountIs(0);
 
         // set the source point for the clone tool
         if (tool == CLONE) {
@@ -297,14 +312,14 @@ public class RandomToolTest {
         randomEvents();
 
         cleanupAfterTool();
-        EDT.assertNumModalDialogsIs(0);
+        EDT.assertModalDialogCountIs(0);
 
         Utils.sleep(200, MILLISECONDS);
         checkControlVariables();
     }
 
     private void closeRareDialog(Tool tool) {
-        if (EDT.getNumModalDialogs() == 0) {
+        if (EDT.getModalDialogCount() == 0) {
             return;
         }
         JOptionPaneFixture optionPane;
@@ -322,7 +337,7 @@ public class RandomToolTest {
                 + tool + ", title = " + title);
         }
         Utils.sleep(200, MILLISECONDS);
-        EDT.assertNumModalDialogsIs(0);
+        EDT.assertModalDialogCountIs(0);
     }
 
     private void activate(Tool tool) {
@@ -342,7 +357,7 @@ public class RandomToolTest {
 
         if (tool == PEN && !PenTool.hasPath()) {
             // error dialog when switching to Edit or Transform mode
-            if (EDT.getNumModalDialogs() > 0) {
+            if (EDT.getModalDialogCount() > 0) {
                 app.findJOptionPane().okButton().click();
             }
         }
@@ -390,7 +405,7 @@ public class RandomToolTest {
         Collections.shuffle(events);
         for (Runnable event : events) {
             Rnd.withProbability(0.2, event);
-            keyboard.assertModifiersAreReleased();
+            keyboard.assertModifiersReleased();
         }
     }
 
@@ -502,7 +517,7 @@ public class RandomToolTest {
     }
 
     private void dragRandomly(Tool tool) {
-        EDT.assertNumModalDialogsIs(0);
+        EDT.assertModalDialogCountIs(0);
 
         int numDrags = Rnd.intInRange(1, 5);
         for (int i = 0; i < numDrags; i++) {
@@ -532,7 +547,7 @@ public class RandomToolTest {
             }
 
             possiblyUndoRedo();
-            keyboard.assertModifiersAreReleased();
+            keyboard.assertModifiersReleased();
         }
     }
 
@@ -962,7 +977,7 @@ public class RandomToolTest {
     }
 
     private void setupPauseKey() {
-        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.registerHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pauseKeyPressed();
@@ -987,7 +1002,7 @@ public class RandomToolTest {
 
     private void setupExitKey() {
         // This key not only pauses the testing, but also exits the app
-        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
+        GlobalEvents.registerHotKey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 exitKeyPressed();

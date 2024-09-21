@@ -130,7 +130,7 @@ public class SprayBrush extends AbstractBrush {
             boundingBox.add(x, y);
         }
 
-        Rectangle2D imArea = boundingBox.asRectangle2D(maxShapeRadius + 1);
+        Rectangle2D imArea = boundingBox.toRectangle2D(maxShapeRadius + 1);
         dr.repaintRegion(PRectangle.fromIm(imArea, view));
     }
 

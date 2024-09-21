@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,39 +41,39 @@ import static java.lang.String.format;
  * Manages external files drag-and-dropped on the app
  */
 public class DropListener extends DropTargetAdapter {
-    private final Destination destination;
+    private final DropAction dropAction;
 
     /**
-     * Determines what happens with the dropped files
+     * Defines how the dropped files should be handled.
      */
-    public enum Destination {
+    public enum DropAction {
         /**
-         * Open the dropped files as new images
+         * Opens each dropped file as a new image.
          */
-        NEW_IMAGES {
+        OPEN_AS_NEW_IMAGES {
             @Override
             protected void handleDrop(List<File> files, Component target) {
                 for (File file : files) {
-                    addDroppedFileAsNewImage(file, target);
+                    openFileAsNewImage(file, target);
                 }
             }
         },
         /**
-         * Open the dropped files as new image layers in the active composition
+         * Adds each dropped file as a new layer in the active composition.
          */
-        NEW_LAYERS {
+        ADD_AS_NEW_LAYERS {
             @Override
             protected void handleDrop(List<File> files, Component target) {
                 var comp = Views.getActiveComp();
                 if (comp == null) {
-                    // if there is no active composition,
+                    // If there is no active composition,
                     // fall back to opening the files as new images
-                    NEW_IMAGES.handleDrop(files, target);
+                    OPEN_AS_NEW_IMAGES.handleDrop(files, target);
                     return;
                 }
 
                 for (File file : files) {
-                    addDroppedFileAsNewLayer(file, comp, target);
+                    addFileAsNewLayer(file, comp, target);
                 }
             }
         };
@@ -81,8 +81,8 @@ public class DropListener extends DropTargetAdapter {
         protected abstract void handleDrop(List<File> files, Component target);
     }
 
-    public DropListener(Destination destination) {
-        this.destination = destination;
+    public DropListener(DropAction dropAction) {
+        this.dropAction = dropAction;
     }
 
     @Override
@@ -104,42 +104,43 @@ public class DropListener extends DropTargetAdapter {
     }
 
     @Override
-    public void drop(DropTargetDropEvent e) {
-        Transferable transferable = e.getTransferable();
+    public void drop(DropTargetDropEvent dropEvent) {
+        Transferable transferable = dropEvent.getTransferable();
         DataFlavor[] flavors = transferable.getTransferDataFlavors();
+
         for (DataFlavor flavor : flavors) {
             if (flavor.equals(DataFlavor.imageFlavor)) {
                 // it is unclear how this could be used
-                e.rejectDrop();
+                dropEvent.rejectDrop();
                 return;
             }
+
             if (flavor.isFlavorJavaFileListType()) {
                 // this is where we get after dropping a file or directory
-                e.acceptDrop(DnDConstants.ACTION_COPY);
-
+                dropEvent.acceptDrop(DnDConstants.ACTION_COPY);
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> files = (List<File>) transferable.getTransferData(flavor);
-                    destination.handleDrop(files, e.getDropTargetContext().getComponent());
+                    dropAction.handleDrop(files, dropEvent.getDropTargetContext().getComponent());
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Messages.showException(ex);
-                    e.rejectDrop();
+                    dropEvent.rejectDrop();
                 }
-                e.dropComplete(true);
+                dropEvent.dropComplete(true);
                 return;
             }
         }
 
-        // DataFlavor not recognized
-        e.rejectDrop();
+        // No recognized data flavors, reject the drop.
+        dropEvent.rejectDrop();
     }
 
-    private static void addDroppedFileAsNewImage(File file, Component target) {
+    private static void openFileAsNewImage(File file, Component target) {
         if (file.isDirectory()) {
             String question = format("<html>You have dropped the folder <b>\"%s\"</b>."
                 + "<br>Do you want to open all image files inside it?", file.getName());
 
-            if (Dialogs.showYesNoQuestionDialog(target, "Question", question)) {
+            if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
                 IO.openAllSupportedImagesInDir(file);
             }
         } else if (file.isFile()) {
@@ -151,13 +152,13 @@ public class DropListener extends DropTargetAdapter {
         }
     }
 
-    private static void addDroppedFileAsNewLayer(File file, Composition comp, Component target) {
+    private static void addFileAsNewLayer(File file, Composition comp, Component target) {
         if (file.isDirectory()) {
             String question = format("You have dropped the folder \"%s\".\n" +
-                "Do you want all image files inside it to be added as layers to "
-                + comp.getName() + "?", file.getName());
+                    "Do you want all image files inside it to be added as layers to \"%s\"?",
+                file.getName(), comp.getName());
 
-            if (Dialogs.showYesNoQuestionDialog(target, "Question", question)) {
+            if (Dialogs.showYesNoQuestionDialog(target, "Dropped Folder", question)) {
                 IO.addAllImagesInDirAsLayers(file, comp);
             }
         } else if (file.isFile()) {
@@ -165,7 +166,7 @@ public class DropListener extends DropTargetAdapter {
                 Dialogs.showFileNotReadableError(target, file);
                 return;
             }
-            IO.loadNewImageLayerAsync(file, comp);
+            IO.addNewImageLayerAsync(file, comp);
         }
     }
 }

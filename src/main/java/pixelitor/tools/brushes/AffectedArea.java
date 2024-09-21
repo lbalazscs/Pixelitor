@@ -54,8 +54,8 @@ public class AffectedArea implements Debuggable {
     /**
      * Returns the rectangle affected by a brush stroke for the undo
      */
-    public Rectangle asRectangle(double radius) {
-        return boundingBox.asRectangle(radius + 1.0);
+    public Rectangle toRectangle(double radius) {
+        return boundingBox.toRectangle(radius + 1.0);
     }
 
     @Override

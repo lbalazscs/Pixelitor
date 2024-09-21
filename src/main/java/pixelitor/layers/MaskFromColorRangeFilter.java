@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,15 +23,15 @@ import net.jafama.FastMath;
 import java.awt.Color;
 
 /**
- * A filter used internally by the "Mask from Color Range".
- * It creates a grayscale mask.
+ * A filter that creates a grayscale mask based on color similarity
+ * to a reference color. Used internally by the "Mask from Color Range".
  */
 class MaskFromColorRangeFilter extends PointFilter {
     public static final int RGB = 1;
     public static final int HSB = 2;
     public static final int HUE = 3;
     public static final int SAT = 4;
-    private int distType = HSB;
+    private int distanceMetric = HSB;
 
     private static final int WHITE_PIXEL = 0xFF_FF_FF_FF;
     private static final int BLACK_PIXEL = 0xFF_00_00_00;
@@ -42,18 +42,21 @@ class MaskFromColorRangeFilter extends PointFilter {
     private int refR, refG, refB; // the reference color in RGB
     private float refHue, refSat, refBri; // the reference color in HSB
 
-    private boolean invert;
+    private boolean isInverted;
 
     protected MaskFromColorRangeFilter(String filterName) {
         super(filterName);
     }
 
-    public void setColor(Color c) {
+    /**
+     * Sets the reference color against which other colors will be compared.
+     */
+    public void setReferenceColor(Color c) {
         refR = c.getRed();
         refG = c.getGreen();
         refB = c.getBlue();
 
-        if (distType != RGB) {
+        if (distanceMetric != RGB) {
             float[] hsb = Color.RGBtoHSB(refR, refG, refB, null);
             refHue = hsb[0];
             refSat = hsb[1];
@@ -61,20 +64,30 @@ class MaskFromColorRangeFilter extends PointFilter {
         }
     }
 
-    public void setDistType(int distType) {
-        this.distType = distType;
+    /**
+     * Sets the color distance calculation method.
+     */
+    public void setDistanceMetric(int distanceMetric) {
+        this.distanceMetric = distanceMetric;
     }
 
-    public void setTolerance(double tolerance, double fuzziness) {
+    /**
+     * Sets the tolerance and softness parameters for the mask creation.
+     */
+    public void setTolerance(double tolerance, double softness) {
         // otherwise tolerance = 0 does not select exact matches - why?
         double adjustedTolerance = tolerance + 0.1;
 
-        maxTolerance = adjustedTolerance * (1.0 - fuzziness);
-        minTolerance = adjustedTolerance * (1.0 + fuzziness);
+        maxTolerance = adjustedTolerance * (1.0 - softness);
+        minTolerance = adjustedTolerance * (1.0 + softness);
     }
 
-    public void setInvert(boolean invert) {
-        this.invert = invert;
+    /**
+     * Sets whether the mask should be inverted
+     * (exclude matching colors instead of including them).
+     */
+    public void setInvertMask(boolean inverted) {
+        this.isInverted = inverted;
     }
 
     @Override
@@ -82,13 +95,13 @@ class MaskFromColorRangeFilter extends PointFilter {
         double dist = calcDistance(rgb);
 
         if (dist > minTolerance) {
-            if (invert) {
+            if (isInverted) {
                 return WHITE_PIXEL;
             } else {
                 return BLACK_PIXEL;
             }
         } else if (dist < maxTolerance) {
-            if (invert) {
+            if (isInverted) {
                 return BLACK_PIXEL;
             } else {
                 return WHITE_PIXEL;
@@ -96,7 +109,7 @@ class MaskFromColorRangeFilter extends PointFilter {
         } else {
             // linear interpolation
             int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
-            if (invert) {
+            if (isInverted) {
                 v = 255 - v;
             }
             return 0xFF_00_00_00 | v << 16 | v << 8 | v;
@@ -108,12 +121,12 @@ class MaskFromColorRangeFilter extends PointFilter {
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        return switch (distType) {
+        return switch (distanceMetric) {
             case RGB -> calcRGBDistance(r, g, b);
             case HSB -> calcHSBDistance(r, g, b);
             case HUE -> calcHueDistance(r, g, b);
             case SAT -> calcSatDistance(r, g, b);
-            default -> throw new IllegalStateException("distType = " + distType);
+            default -> throw new IllegalStateException("distType = " + distanceMetric);
         };
     }
 

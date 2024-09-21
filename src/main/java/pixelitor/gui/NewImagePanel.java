@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,31 +77,31 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
 
     @Override
     public ValidationResult validateSettings() {
-        var retVal = ValidationResult.ok();
+        var retVal = ValidationResult.valid();
         int width = 0;
         try {
             width = getSelectedWidth();
-            retVal = retVal.addErrorIfZero(width, "Width");
-            retVal = retVal.addErrorIfNegative(width, "Width");
+            retVal = retVal.validateNonZero(width, "Width");
+            retVal = retVal.validatePositive(width, "Width");
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("The width must be an integer.");
+            retVal = retVal.withError("The width must be an integer.");
         }
         int height = 0;
         try {
             height = getSelectedHeight();
-            retVal = retVal.addErrorIfZero(height, "Height");
-            retVal = retVal.addErrorIfNegative(height, "Height");
+            retVal = retVal.validateNonZero(height, "Height");
+            retVal = retVal.validatePositive(height, "Height");
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("The height must be an integer.");
+            retVal = retVal.withError("The height must be an integer.");
         }
 
-        if (retVal.isOK()) {
+        if (retVal.isValid()) {
             // issue #49: check approximately whether the image
             // would even fit into the available memory
             long numPixels = ((long) width) * height;
             if (numPixels > Integer.MAX_VALUE) {
                 // theoretical limit, as the pixels ultimately will be stored in an array
-                return retVal.addError(format(
+                return retVal.withError(format(
                     "Pixelitor doesn't support images with more than %d pixels." +
                         "<br>%dx%d would be %d pixels.",
                     Integer.MAX_VALUE, width, height, numPixels));
@@ -110,7 +110,7 @@ public class NewImagePanel extends ValidatedPanel implements DialogMenuOwner {
                 long allocatedMemory = rt.totalMemory() - rt.freeMemory();
                 long availableMemory = rt.maxMemory() - allocatedMemory;
                 if (numPixels * 4 > availableMemory) {
-                    return retVal.addError(format(
+                    return retVal.withError(format(
                         "The image would not fit into memory." +
                             "<br>An image of %dx%d pixels needs at least %d megabytes." +
                             "<br>Available memory is at most %d megabytes.",

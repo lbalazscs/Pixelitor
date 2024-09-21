@@ -48,13 +48,18 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.isWritable;
 import static pixelitor.io.FileChoosers.svgFilter;
-import static pixelitor.utils.Threads.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onIOThread;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Utility class with static methods related to opening and saving files.
  */
 public class IO {
     private IO() {
+        // Prevent instantiation
     }
 
     public static CompletableFuture<Composition> openFileAsync(File file,
@@ -64,7 +69,7 @@ public class IO {
         }
         return loadCompAsync(file)
             .thenApplyAsync(Views::addJustLoadedComp, onEDT)
-            .whenComplete((comp, e) -> handleReadingProblems(e));
+            .whenComplete((comp, e) -> handleReadingErrors(e));
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
@@ -79,39 +84,38 @@ public class IO {
         return format.readSync(file);
     }
 
-    public static CompletableFuture<Void> loadNewImageLayerAsync(File file,
-                                                                 Composition comp) {
-        return CompletableFuture
+    public static void addNewImageLayerAsync(File file, Composition comp) {
+        CompletableFuture
             .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                     img, file.getName(), "Dropped Layer"),
                 onEDT)
-            .whenComplete((v, e) -> handleReadingProblems(e));
+            .whenComplete((v, e) -> handleReadingErrors(e));
     }
 
     /**
      * Utility method designed to be used with CompletableFuture.
      * Can be called on any thread.
      */
-    public static void handleReadingProblems(Throwable e) {
-        if (e == null) {
+    public static void handleReadingErrors(Throwable error) {
+        if (error == null) {
             // do nothing if the stage didn't complete exceptionally
             return;
         }
-        if (e instanceof CompletionException) {
+        if (error instanceof CompletionException) {
             // if the exception was thrown in a previous
             // stage, handle it the same way
-            handleReadingProblems(e.getCause());
+            handleReadingErrors(error.getCause());
             return;
         }
-        if (e instanceof DecodingException de) {
+        if (error instanceof DecodingException de) {
             if (calledOnEDT()) {
                 showDecodingError(de);
             } else {
                 EventQueue.invokeLater(() -> showDecodingError(de));
             }
         } else {
-            Messages.showExceptionOnEDT(e);
+            Messages.showExceptionOnEDT(error);
         }
     }
 
@@ -121,17 +125,18 @@ public class IO {
             Messages.showError("Error", msg);
         } else {
             String[] options = {"Try with ImageMagick Import", GUIText.CANCEL};
-            boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error",
+            boolean retryWithMagick = Dialogs.showOKCancelDialog(msg, "Error",
                 options, 0, JOptionPane.ERROR_MESSAGE);
-            if (doMagick) {
+            if (retryWithMagick) {
                 ImageMagick.importComposition(de.getFile(), false);
             }
         }
     }
 
     /**
-     * Returns true if the file was saved,
-     * false if the user cancels the saving or if it could not be saved
+     * Saves a {@link Composition}, optionally using a file chooser
+     * for the file location. Returns true if the file was saved,
+     * false if the user cancels the saving or if it could not be saved.
      */
     public static boolean save(Composition comp, boolean saveAs) {
         boolean needsFileChooser = saveAs || comp.getFile() == null;
@@ -191,34 +196,34 @@ public class IO {
             "Can't save to%n%s%nbecause this file is being used by another program.",
             file.getAbsolutePath());
 
-        EventQueue.invokeLater(() -> Messages.showError("Can't save", msg));
+        EventQueue.invokeLater(() -> Messages.showError("Save Error", msg));
     }
 
     public static void openAllSupportedImagesInDir(File dir) {
-        List<File> files = FileUtils.listSupportedInputFilesIn(dir);
+        List<File> files = FileUtils.listSupportedInputFiles(dir);
         boolean found = false;
         for (File file : files) {
             found = true;
             openFileAsync(file, false);
         }
         if (!found) {
-            Messages.showInfo("No files found",
+            Messages.showInfo("No Images Found",
                 format("<html>No supported image files found in <b>%s</b>.", dir.getName()));
         }
     }
 
     public static void addAllImagesInDirAsLayers(File dir, Composition comp) {
-        List<File> files = FileUtils.listSupportedInputFilesIn(dir);
+        List<File> files = FileUtils.listSupportedInputFiles(dir);
         for (File file : files) {
-            loadNewImageLayerAsync(file, comp);
+            addNewImageLayerAsync(file, comp);
         }
     }
 
     public static void exportLayersToPNGAsync(Composition comp) {
         assert calledOnEDT() : threadInfo();
 
-        boolean okPressed = DirectoryChooser.selectOutputDir();
-        if (!okPressed) {
+        boolean directorySelected = DirectoryChooser.selectOutputDir();
+        if (!directorySelected) {
             return;
         }
 
@@ -255,7 +260,7 @@ public class IO {
         assert calledOutsideEDT() : "on EDT";
 
         File outputDir = Dirs.getLastSave();
-        String fileName = format("%03d_%s.png", layerIndex, FileUtils.toFileName(layerName));
+        String fileName = format("%03d_%s.png", layerIndex, FileUtils.sanitizeToFileName(layerName));
         File file = new File(outputDir, fileName);
 
         saveImageToFile(image, new SaveSettings.Simple(FileFormat.PNG, file));
@@ -268,24 +273,19 @@ public class IO {
         }
         File saveDir = Dirs.getLastSave();
         for (FileFormat format : FileFormat.values()) {
-            File f = new File(saveDir, "all_formats." + format);
-            var saveSettings = new SaveSettings.Simple(format, f);
-            comp.saveAsync(saveSettings, false);
+            File outFile = new File(saveDir, "all_formats." + format);
+            comp.saveAsync(new SaveSettings.Simple(format, outFile), false);
         }
     }
 
-    public static void saveJpegWithQuality(float quality, boolean progressive) {
-        var comp = Views.getActiveComp();
-        String suggestedFileName = comp.createFileNameWithExt("jpg");
+    public static void saveJpegWithQuality(Composition comp, float quality, boolean progressive) {
         File selectedFile = FileChoosers.selectSaveFileForFormat(
-            suggestedFileName, FileChoosers.jpegFilter);
-        JpegSettings settings = new JpegSettings(quality, progressive, selectedFile);
-        comp.saveAsync(settings, true);
+            comp.suggestFileName("jpg"), FileChoosers.jpegFilter);
+        comp.saveAsync(new JpegSettings(quality, progressive, selectedFile), true);
     }
 
     public static void saveSVG(Shape shape, StrokeParam strokeParam, String suggestedFileName) {
-        String svg = createSVGContent(shape, strokeParam);
-        saveSVG(svg, suggestedFileName);
+        saveSVG(createSVGContent(shape, strokeParam), suggestedFileName);
     }
 
     public static void saveSVG(String content, String suggestedFileName) {
@@ -326,23 +326,18 @@ public class IO {
 
         String svgFillAttr = exportFilled ? "black" : "none";
         String svgStrokeAttr = exportFilled ? "none" : "black";
-        String svgStrokeDescr = "";
+        String svgStrokeStyle = "";
         if (strokeParam != null && !exportFilled) {
-            svgStrokeDescr = strokeParam.copyState().toSVGString();
+            svgStrokeStyle = strokeParam.copyState().toSVGStyle();
         }
 
+        Canvas canvas = Views.getActiveComp().getCanvas();
         return """
             %s
               <path d="%s" fill="%s" stroke="%s" fill-rule="%s" %s/>
             </svg>
-            """.formatted(createSVGElement(), svgPath,
-            svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeDescr);
-    }
-
-    public static String createSVGElement() {
-        Canvas canvas = Views.getActiveComp().getCanvas();
-        return "<svg width=\"%d\" height=\"%d\" xmlns=\"http://www.w3.org/2000/svg\">"
-            .formatted(canvas.getWidth(), canvas.getHeight());
+            """.formatted(canvas.createSVGElement(), svgPath,
+            svgFillAttr, svgStrokeAttr, svgFillRule, svgStrokeStyle);
     }
 
     public static void writeToOutStream(BufferedImage img, OutputStream magickInput) throws IOException {
@@ -368,7 +363,7 @@ public class IO {
 //        }
     }
 
-    public static BufferedImage commandLineFilter(BufferedImage src, String filterName, List<String> command) {
+    public static BufferedImage commandLineFilter(BufferedImage src, List<String> command) {
         return switch (runCommandLineFilter(src, command)) {
             case Success<BufferedImage, ?>(var img) -> ImageUtils.toSysCompatibleImage(img);
             case Error<?, String>(String errorMsg) -> {

@@ -47,14 +47,15 @@ public class AWTFilePicker implements FilePicker {
     }
 
     @Override
-    public File showSaveDialog(FileChooserConfig chooserConfig) {
+    public File showSaveDialog(FileChooserConfig config) {
         initSavePicker();
 
-        if (chooserConfig.formats() == SINGLE) {
+        if (config.formats() == SINGLE) {
             saveDialog.setFilenameFilter((dir, name) ->
-                chooserConfig.defaultFileFilter().accept(new File(dir, name)));
+                config.defaultFileFilter().accept(new File(dir, name)));
         }
-        String suggestedFileName = chooserConfig.suggestedFileName();
+
+        String suggestedFileName = config.suggestedFileName();
         if (suggestedFileName != null) {
             saveDialog.setFile(suggestedFileName);
         }
@@ -72,9 +73,9 @@ public class AWTFilePicker implements FilePicker {
             boolean extAdded = false;
             if (suggestedFileName != null) {
                 // if there was a suggested file name, then try using its extension
-                String ext = FileUtils.calcExtension(suggestedFileName);
-                if (ext != null) {
-                    selectedFileName += ("." + ext);
+                String extension = FileUtils.getExtension(suggestedFileName);
+                if (extension != null) {
+                    selectedFileName += ("." + extension);
                     extAdded = true;
                 }
             }
@@ -106,7 +107,7 @@ public class AWTFilePicker implements FilePicker {
 
     @Override
     public String getSelectedSaveExtension(File selectedFile) {
-        return FileUtils.calcExtension(selectedFile.getName());
+        return FileUtils.getExtension(selectedFile.getName());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -113,7 +113,7 @@ public class FilterButtonModel implements FilterSetting {
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
             case APP_LOGIC -> enabledByFilterLogic = b;
-            case FINAL_ANIMATION_SETTING -> {
+            case ANIMATION_ENDING_STATE -> {
                 if (ignoreFinalAnimationSettingMode) {
                     return;
                 }

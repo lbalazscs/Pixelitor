@@ -482,7 +482,7 @@ public class Debug {
     }
 
     private static File createFileForSerializedFilter(Filter filter) {
-        String fileName = FileUtils.toFileName(filter.getName()) + ".ser";
+        String fileName = FileUtils.sanitizeToFileName(filter.getName()) + ".ser";
         return new File("ser", fileName);
     }
 

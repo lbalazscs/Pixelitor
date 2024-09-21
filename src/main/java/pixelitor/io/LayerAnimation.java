@@ -30,54 +30,65 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A layer animation (an animation based on the layers of a composition)
+ * A layer animation (an animation based on the layers of a composition).
  */
 public class LayerAnimation {
+    // The delay between frames in milliseconds.
     private final int delayMillis;
+
     private final List<BufferedImage> images = new ArrayList<>();
-    private int numFrames;
+    private final int numFrames;
 
-    public LayerAnimation(Composition comp, int delayMillis, boolean pingPong) {
+    public LayerAnimation(Composition comp, int delayMillis, boolean isPingPong) {
         this.delayMillis = delayMillis;
-
         int numLayers = comp.getNumLayers();
-        numFrames = numLayers;
-        if (pingPong && numLayers > 2) {
-            numFrames += (numLayers - 1);
+
+        if (isPingPong && numLayers > 2) {
+            numFrames = 2 * numLayers - 1;
+        } else {
+            numFrames = numLayers;
         }
 
+        addFramesFromLayers(comp, isPingPong, numLayers);
+    }
+
+    private void addFramesFromLayers(Composition comp, boolean isPingPong, int numLayers) {
+        // Add frames in the forward direction.
         for (int i = 0; i < numLayers; i++) {
-            addLayer(comp, i);
+            addLayerFrame(comp, i);
         }
-        if (pingPong && numLayers > 2) {
+
+        // Add frames in reverse direction if ping-pong is enabled.
+        if (isPingPong && numLayers > 2) {
             for (int i = numLayers - 2; i > 0; i--) {
-                addLayer(comp, i);
+                addLayerFrame(comp, i);
             }
         }
     }
 
-    private void addLayer(Composition comp, int layerIndex) {
+    private void addLayerFrame(Composition comp, int layerIndex) {
         Layer layer = comp.getLayer(layerIndex);
-        BufferedImage image = layer.asImage(true, true);
-        if (image == null) {
-            return;
+        BufferedImage layerImage = layer.asImage(true, true);
+        if (layerImage != null) {
+            images.add(layerImage);
         }
-        images.add(image);
     }
 
     private void export(File f) {
         ProgressTracker pt = new StatusBarProgressTracker("Writing " + f.getName(), numFrames);
 
-        AnimatedGifEncoder e = new AnimatedGifEncoder();
-        e.start(f);
-        e.setDelay(delayMillis);
-        e.setRepeat(0);
+        var encoder = new AnimatedGifEncoder();
+        encoder.start(f);
+        encoder.setDelay(delayMillis);
+        encoder.setRepeat(0);
+
         for (BufferedImage image : images) {
-            e.addFrame(image);
+            encoder.addFrame(image);
             pt.unitDone();
         }
+
         pt.finished();
-        e.finish();
+        encoder.finish();
     }
 
     public void saveToFile(File selectedFile) {

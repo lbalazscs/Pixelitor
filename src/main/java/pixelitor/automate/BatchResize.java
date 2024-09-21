@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public class BatchResize {
         int maxHeight = p.getNewHeight();
 
         var resizeAction = new Resize(maxWidth, maxHeight, true);
-        Automate.processFiles(resizeAction, "Batch Resize...");
+        new BatchProcessor(resizeAction, "Batch Resize...").processFiles();
     }
 
     /**
@@ -85,17 +85,18 @@ public class BatchResize {
             JTextField tf = new JTextField(String.valueOf(defaultValue), 5);
             tf.setName(name);
             sizePanel.add(createPositiveIntLayer(label, tf, false));
-            documentFilter.setOn(tf);
+            documentFilter.applyOn(tf);
+
             return tf;
         }
 
         @Override
         public ValidationResult validateSettings() {
             return openSaveDirsPanel.validateSettings()
-                .addErrorIf(widthTF.getText().trim().isEmpty(),
-                    "The 'width' field is empty")
-                .addErrorIf(heightTF.getText().trim().isEmpty(),
-                    "The 'height' field is empty");
+                .withErrorIf(widthTF.getText().trim().isEmpty(),
+                    "The \"width\" field is empty")
+                .withErrorIf(heightTF.getText().trim().isEmpty(),
+                    "The \"height\" field is empty");
         }
 
         private void saveValues() {

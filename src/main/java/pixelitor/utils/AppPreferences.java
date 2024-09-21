@@ -253,7 +253,7 @@ public final class AppPreferences {
             File file = new File(fileName);
 
             if (file.exists()) {
-                retVal.addIfNotThere(new RecentFile(file));
+                retVal.addIfAbsent(new RecentFile(file));
             }
         }
         return retVal;
@@ -395,7 +395,7 @@ public final class AppPreferences {
 
     public static void savePreferences() {
         saveDesktopMode();
-        saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFileInfosForSaving());
+        saveRecentFiles(RecentFilesMenu.INSTANCE.getRecentFiles());
         saveFramePosition(PixelitorWindow.get());
         saveLastOpenDir();
         saveLastSaveDir();

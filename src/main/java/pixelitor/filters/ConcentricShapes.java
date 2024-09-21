@@ -231,11 +231,11 @@ public class ConcentricShapes extends ParametrizedFilter {
     }
 
     private void exportSVG() {
+        Canvas canvas = Views.getActiveComp().getCanvas();
         StringBuilder content = new StringBuilder();
-        content.append(IO.createSVGElement());
+        content.append(canvas.createSVGElement());
         content.append("\n");
 
-        Canvas canvas = Views.getActiveComp().getCanvas();
         List<ColoredShape> coloredShapes = createShapes(canvas.getWidth(), canvas.getHeight(), paramSet.getLastSeedRandom(), rotate.getValueInRadians(), tuning.getPercentage());
         for (ColoredShape coloredShape : coloredShapes) {
             String svgPath = Shapes.toSVGPath(coloredShape.shape());

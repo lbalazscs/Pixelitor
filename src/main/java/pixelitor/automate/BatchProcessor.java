@@ -39,103 +39,113 @@ import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * Utility class with static methods for batch processing.
+ * Handles the batch processing of compositions.
  */
-public class Automate {
+public class BatchProcessor {
     private static final String OVERWRITE_YES = "Yes";
     private static final String OVERWRITE_YES_ALL = "Yes, All";
     private static final String OVERWRITE_NO = "No (Skip)";
     private static final String OVERWRITE_CANCEL = "Cancel Processing";
 
-    private static volatile boolean overwriteAll = false;
-    private static volatile boolean stopProcessing = false;
+    private boolean overwriteAll = false;
+    private boolean stopProcessing = false;
 
-    private Automate() {
+    private final CompAction action;
+    private final String dialogTitle;
+    private final File inputDir;
+    private final File outputDir;
+
+    public BatchProcessor(CompAction action, String dialogTitle) {
+        this.action = action;
+        this.dialogTitle = dialogTitle;
+
+        inputDir = Dirs.getLastOpen();
+        outputDir = Dirs.getLastSave();
     }
 
     /**
      * Processes each file in the input directory
-     * with the given {@link CompAction}.
+     * using the given {@link CompAction}.
      */
-    public static void processFiles(CompAction action, String dialogTitle) {
+    public void processFiles() {
         assert calledOnEDT() : threadInfo();
 
-        File openDir = Dirs.getLastOpen();
-        File saveDir = Dirs.getLastSave();
-
-        List<File> inputFiles = FileUtils.listSupportedInputFilesIn(openDir);
-        if (inputFiles.isEmpty()) {
-            String msg = "There are no supported files in " + openDir.getAbsolutePath();
-            Messages.showInfo("No files", msg);
+        List<File> filesToProcess = FileUtils.listSupportedInputFiles(inputDir);
+        if (filesToProcess.isEmpty()) {
+            String msg = "No supported files found in " + inputDir.getAbsolutePath();
+            Messages.showInfo("No Files Found", msg);
             return;
         }
 
         stopProcessing = false;
-        var pm = GUIUtils.createPercentageProgressMonitor(dialogTitle);
+        var progressMonitor = GUIUtils.createPercentageProgressMonitor(dialogTitle);
         var worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-                return processFilesInBackground(inputFiles, action, saveDir, pm);
+                return processFilesSequentially(filesToProcess, progressMonitor);
             } // end of doInBackground
         };
         worker.execute();
     }
 
-    private static Void processFilesInBackground(List<File> inputFiles,
-                                                 CompAction action,
-                                                 File saveDir,
-                                                 ProgressMonitor monitor) {
+    private Void processFilesSequentially(List<File> filesToProcess,
+                                          ProgressMonitor monitor) {
         assert calledOutsideEDT() : "on EDT";
 
         overwriteAll = false;
 
-        for (int i = 0, numFiles = inputFiles.size(); i < numFiles; i++) {
+        for (int i = 0, fileCount = filesToProcess.size(); i < fileCount; i++) {
             if (monitor.isCanceled() || stopProcessing) {
                 break;
             }
 
-            monitor.setProgress((int) (i * 100.0 / numFiles));
-            monitor.setNote("Processing " + (i + 1) + " of " + numFiles);
-
-            processFile(inputFiles.get(i), action, saveDir);
+            updateProgress(monitor, i, fileCount);
+            processIndividualFile(filesToProcess.get(i));
         }
+
         monitor.close();
         return null;
     }
 
-    private static void processFile(File file, CompAction action, File saveDir) {
+    private static void updateProgress(ProgressMonitor monitor, int currentIndex, int total) {
+        monitor.setProgress((int) (currentIndex * 100.0 / total));
+        monitor.setNote("Processing " + (currentIndex + 1) + " of " + total);
+    }
+
+    private void processIndividualFile(File file) {
         assert calledOutsideEDT() : "on EDT";
+
         IO.openFileAsync(file, false)
             .thenComposeAsync(action::process, onEDT)
-            .thenComposeAsync(comp -> saveAndClose(comp, saveDir), onEDT)
+            .thenComposeAsync(this::saveAndClose, onEDT)
             .exceptionally(Messages::showExceptionOnEDT)
             .join();
     }
 
-    private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
+    private CompletableFuture<Void> saveAndClose(Composition comp) {
         assert calledOnEDT() : threadInfo();
 
         var format = FileFormat.getLastSaved();
-        File file = calcOutputFile(comp, lastSaveDir, format);
+        File outputFile = createOutputPath(comp, format);
 
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
-        var saveSettings = new SaveSettings.Simple(format, file);
-        CompletableFuture<Void> retVal = null;
+        var saveSettings = new SaveSettings.Simple(format, outputFile);
+        CompletableFuture<Void> saveFuture = null;
 
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
 
-        if (file.exists() && !overwriteAll) {
-            String answer = showOverwriteWarningDialog(file);
+        if (outputFile.exists() && !overwriteAll) {
+            String userChoice = promptOverwriteConfirmation(outputFile);
 
-            switch (answer) {
+            switch (userChoice) {
                 case OVERWRITE_YES:
-                    retVal = comp.saveAsync(saveSettings, false);
+                    saveFuture = comp.saveAsync(saveSettings, false);
                     break;
                 case OVERWRITE_YES_ALL:
-                    retVal = comp.saveAsync(saveSettings, false);
+                    saveFuture = comp.saveAsync(saveSettings, false);
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
@@ -146,28 +156,29 @@ public class Automate {
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
                 default:
-                    throw new IllegalStateException("Unexpected value: " + answer);
+                    throw new IllegalStateException("Unexpected value: " + userChoice);
             }
         } else { // the file doesn't exist or "overwrite all" was selected previously
             view.paintImmediately();
-            retVal = comp.saveAsync(saveSettings, false);
+            saveFuture = comp.saveAsync(saveSettings, false);
         }
         Views.warnAndClose(view);
         stopProcessing = false;
-        if (retVal != null) {
-            return retVal;
+
+        if (saveFuture != null) {
+            return saveFuture;
         } else {
             return CompletableFuture.completedFuture(null);
         }
     }
 
-    private static File calcOutputFile(Composition comp, File lastSaveDir, FileFormat format) {
+    private File createOutputPath(Composition comp, FileFormat format) {
         String inFileName = comp.getFile().getName();
-        String outFileName = FileUtils.replaceExt(inFileName, format.toString());
-        return new File(lastSaveDir, outFileName);
+        String outFileName = FileUtils.replaceExtension(inFileName, format.toString());
+        return new File(outputDir, outFileName);
     }
 
-    private static String showOverwriteWarningDialog(File outputFile) {
+    private static String promptOverwriteConfirmation(File outputFile) {
         String msg = format("File %s already exists. Overwrite?", outputFile);
         var optionPane = new JOptionPane(msg, WARNING_MESSAGE);
 
@@ -177,6 +188,7 @@ public class Automate {
 
         JDialog dialog = optionPane.createDialog(PixelitorWindow.get(), "Warning");
         dialog.setVisible(true);
+
         String selectedValue = (String) optionPane.getValue();
 
         String answer;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
-import static pixelitor.io.DropListener.Destination.NEW_IMAGES;
+import static pixelitor.io.DropListener.DropAction.OPEN_AS_NEW_IMAGES;
 
 /**
  * Represents the area of the app where the edited images are.
@@ -84,7 +84,7 @@ public class ImageArea {
 
     private static void setupKeysAndDnD() {
         JComponent component = (JComponent) ui;
-        new DropTarget(component, new DropListener(NEW_IMAGES));
+        new DropTarget(component, new DropListener(OPEN_AS_NEW_IMAGES));
     }
 
     public static JComponent getUI() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,6 +65,6 @@ public interface FilterSetting {
      * The possible reasons for enabling or disabling a filter.
      */
     enum EnabledReason {
-        APP_LOGIC, FINAL_ANIMATION_SETTING
+        APP_LOGIC, ANIMATION_ENDING_STATE
     }
 }

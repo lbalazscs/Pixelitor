@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,8 @@ import pixelitor.layers.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -35,7 +35,11 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 @DisplayName("Composition I/O tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class CompositionIOTest {
-    private static final String TEST_IMAGES_DIR = "src/test/resources/";
+    private static final String TEST_RESOURCES_PATH = "src/test/resources/";
+
+    // all test files have a 10x10 canvas
+    private static final int EXPECTED_CANVAS_WIDTH = 10;
+    private static final int EXPECTED_CANVAS_HEIGHT = 10;
 
     @BeforeAll
     static void beforeAllTests() {
@@ -43,124 +47,138 @@ class CompositionIOTest {
     }
 
     @Test
-    void readJPEG() {
-        checkReadSingleLayerImage("jpeg_test_input.jpg");
+    @DisplayName("read JPEG")
+    void shouldReadJPEGFormat() {
+        checkSingleLayerImageRead("jpeg_test_input.jpg");
     }
 
     @Test
-    void readPNG() {
-        checkReadSingleLayerImage("png_test_input.png");
+    @DisplayName("read PNG")
+    void shouldReadPNGFormat() {
+        checkSingleLayerImageRead("png_test_input.png");
     }
 
     @Test
-    void readBMP() {
-        checkReadSingleLayerImage("bmp_test_input.bmp");
+    @DisplayName("read BMP")
+    void shouldReadBMPFormat() {
+        checkSingleLayerImageRead("bmp_test_input.bmp");
     }
 
     @Test
-    void readGIF() {
-        checkReadSingleLayerImage("gif_test_input.gif");
+    @DisplayName("read GIF")
+    void shouldReadGIFFormat() {
+        checkSingleLayerImageRead("gif_test_input.gif");
     }
 
     @Test
-    void readTiff() {
-        checkReadSingleLayerImage("tiff_test_input.tiff");
+    @DisplayName("read TIFF")
+    void shouldReadTIFFFormat() {
+        checkSingleLayerImageRead("tiff_test_input.tiff");
     }
 
     @Test
-    void readTGA() {
-        checkReadSingleLayerImage("tga_test_input.tga");
+    @DisplayName("read TGA")
+    void shouldReadTGAFormat() {
+        checkSingleLayerImageRead("tga_test_input.tga");
     }
 
     @Test
-    void readPAM() {
-        checkReadSingleLayerImage("pam_test_input.pam");
+    @DisplayName("read PAM")
+    void shouldReadPAMFormat() {
+        checkSingleLayerImageRead("pam_test_input.pam");
     }
 
     @Test
-    void readPBM() {
-        checkReadSingleLayerImage("pbm_test_input.pbm");
+    @DisplayName("read PBM")
+    void shouldReadPBMFormat() {
+        checkSingleLayerImageRead("pbm_test_input.pbm");
     }
 
     @Test
-    void readPGM() {
-        checkReadSingleLayerImage("pgm_test_input.pgm");
+    @DisplayName("read PGM")
+    void shouldReadPGMFormat() {
+        checkSingleLayerImageRead("pgm_test_input.pgm");
     }
 
     @Test
-    void readPPM() {
-        checkReadSingleLayerImage("ppm_test_input.ppm");
+    @DisplayName("read PPM")
+    void shouldReadPPMFormat() {
+        checkSingleLayerImageRead("ppm_test_input.ppm");
     }
 
     @Test
-    void readPFM() {
-        checkReadSingleLayerImage("pfm_test_input.pfm");
+    @DisplayName("read PFM")
+    void shouldReadPFMFormat() {
+        checkSingleLayerImageRead("pfm_test_input.pfm");
     }
 
     @Test
-    void readWritePXC() {
-        // read and test
-        String[] fileNames = {
-            "pxc_test_input.pxc",
-            "pxc_file_w_layer_mask.pxc",
-            "pxc_file_w_text_layer.pxc",
-            "pxc_file_w_adj_layer.pxc",
-        };
+    @DisplayName("read/write PXC")
+    void shouldReadAndWritePXCFormat() {
+        Map<String, Consumer<Layer>> tests = initSimplePXCTests();
 
-        List<Consumer<Layer>> extraChecks = new ArrayList<>();
-        // extra check for simple pxc file
-        extraChecks.add(secondLayer -> assertThat(secondLayer)
-            .classIs(ImageLayer.class)
-            .blendingModeIs(BlendingMode.MULTIPLY)
-            .opacityIs(0.75f));
-        // extra check for pxc with layer mask
-        extraChecks.add(secondLayer -> assertThat(secondLayer)
-            .classIs(ImageLayer.class)
-            .hasMask()
-            .maskIsLinked()
-            .maskIsEnabled());
-        // extra check for pxc with text layer
-        extraChecks.add(secondLayer -> {
+        for (var testCase : tests.entrySet()) {
+            String fileName = testCase.getKey();
+            Consumer<Layer> secondLayerValidator = testCase.getValue();
+            try {
+                File inputFile = getTestResourceFile(fileName);
+
+                // test reading
+                var comp = checkMultiLayerRead(inputFile, secondLayerValidator);
+
+                // Test round-trip by writing to temporary file and reading back
+                File tmpFile = File.createTempFile("pix_tmp", ".pxc");
+                PXCFormat.write(comp, tmpFile);
+                checkMultiLayerRead(tmpFile, secondLayerValidator);
+
+                cleanupTempFile(tmpFile);
+            } catch (Exception e) {
+                throw new IllegalStateException("Error while testing " + fileName, e);
+            }
+        }
+    }
+
+    private static Map<String, Consumer<Layer>> initSimplePXCTests() {
+        // map files to file-specific extra checks for the second layer
+        Map<String, Consumer<Layer>> tests = new LinkedHashMap<>();
+
+        tests.put("pxc_test_input.pxc", secondLayer ->
+            assertThat(secondLayer)
+                .classIs(ImageLayer.class)
+                .blendingModeIs(BlendingMode.MULTIPLY)
+                .opacityIs(0.75f));
+
+        tests.put("pxc_file_w_layer_mask.pxc", secondLayer ->
+            assertThat(secondLayer)
+                .classIs(ImageLayer.class)
+                .hasMask()
+                .maskIsLinked()
+                .maskIsEnabled());
+
+        tests.put("pxc_file_w_text_layer.pxc", secondLayer -> {
             assert secondLayer instanceof TextLayer;
             assertThat((TextLayer) secondLayer)
                 .textIs("T")
                 .hasNumEffects(4)
                 .hasNoMask();
         });
-        // extra check for pxc with adjustment layer
-        extraChecks.add(secondLayer -> assertThat(secondLayer)
-            .classIs(AdjustmentLayer.class)
-            .hasNoMask());
 
-        for (int i = 0; i < fileNames.length; i++) {
-            try {
-                File inputFile = new File(TEST_IMAGES_DIR, fileNames[i]);
-                var comp = checkMultiLayerRead(inputFile, extraChecks.get(i));
+        tests.put("pxc_file_w_adj_layer.pxc", secondLayer ->
+            assertThat(secondLayer)
+                .classIs(AdjustmentLayer.class)
+                .hasNoMask());
 
-                // write to tmp file
-                File tmpFile = File.createTempFile("pix_tmp", ".pxc");
-                PXCFormat.write(comp, tmpFile);
-
-                // read back and test
-                checkMultiLayerRead(tmpFile, extraChecks.get(i));
-
-                boolean deleted = tmpFile.delete();
-                if (!deleted) {
-                    throw new IllegalStateException("could not delete " + tmpFile.getAbsolutePath());
-                }
-            } catch (Exception e) {
-                throw new IllegalStateException("Error while testing " + fileNames[i], e);
-            }
-        }
+        return tests;
     }
 
     @Test
+    @DisplayName("read/write complete PXC")
     void readPXCWithAllFeatures() {
         String fileName = "pxc_all_features.pxc";
-        File inputFile = new File(TEST_IMAGES_DIR, fileName);
+        File inputFile = getTestResourceFile(fileName);
 
-        var future = IO.loadCompAsync(inputFile);
-        var comp = future.join();
+        var loadFuture = IO.loadCompAsync(inputFile);
+        var comp = loadFuture.join();
         assertThat(comp)
             .numLayersIs(6)
             .typeOfLayerNIs(0, ImageLayer.class)
@@ -169,45 +187,62 @@ class CompositionIOTest {
             .typeOfLayerNIs(3, ShapesLayer.class)
             .typeOfLayerNIs(4, ColorFillLayer.class)
             .typeOfLayerNIs(5, SmartObject.class)
-            .canvasSizeIs(10, 10)
+            .canvasSizeIs(EXPECTED_CANVAS_WIDTH, EXPECTED_CANVAS_HEIGHT)
             .hasGuides()
             .hasPath()
             .invariantsAreOK();
-        checkAsyncReadResult(future);
+
+        checkAsyncReadResult(loadFuture);
     }
 
     @Test
+    @DisplayName("read/write ORA")
     void readWriteORA() throws IOException {
-        Consumer<Layer> extraCheck = secondLayer ->
+        Consumer<Layer> secondLayerValidator = secondLayer ->
             assertThat(secondLayer)
                 .classIs(ImageLayer.class)
                 .blendingModeIs(BlendingMode.MULTIPLY)
                 .opacityIs(0.75f);
 
-        // read and test
-        File inputFile = new File(TEST_IMAGES_DIR, "gimp_ora_test_input.ora");
-        var comp = checkMultiLayerRead(inputFile, extraCheck);
+        // Test reading
+        File inputFile = getTestResourceFile("gimp_ora_test_input.ora");
+        var comp = checkMultiLayerRead(inputFile, secondLayerValidator);
 
+        // Test round-trip
         File tmpFile = File.createTempFile("pix_tmp", ".ora");
         OpenRaster.write(comp, tmpFile);
+        checkMultiLayerRead(tmpFile, secondLayerValidator);
 
-        // read back and test
-        checkMultiLayerRead(tmpFile, extraCheck);
-
-        tmpFile.delete();
+        cleanupTempFile(tmpFile);
     }
 
-    private static void checkReadSingleLayerImage(String fileName) {
-        File inputFile = new File(TEST_IMAGES_DIR, fileName);
-        var future = IO.loadCompAsync(inputFile);
+    private static void checkSingleLayerImageRead(String fileName) {
+        File inputFile = getTestResourceFile(fileName);
+        var loadFuture = IO.loadCompAsync(inputFile);
 
-        var comp = future.join();
+        var comp = loadFuture.join();
         assertThat(comp)
             .numLayersIs(1)
-            .canvasSizeIs(10, 10)
+            .canvasSizeIs(EXPECTED_CANVAS_WIDTH, EXPECTED_CANVAS_HEIGHT)
             .invariantsAreOK();
 
-        checkAsyncReadResult(future);
+        checkAsyncReadResult(loadFuture);
+    }
+
+    private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerValidator) {
+        var loadFuture = IO.loadCompAsync(f);
+
+        var comp = loadFuture.join();
+        assertThat(comp)
+            .numLayersIs(2)
+            .canvasSizeIs(EXPECTED_CANVAS_WIDTH, EXPECTED_CANVAS_HEIGHT)
+            .invariantsAreOK();
+        checkAsyncReadResult(loadFuture);
+
+        Layer secondLayer = comp.getLayer(1);
+        secondLayerValidator.accept(secondLayer);
+
+        return comp;
     }
 
     private static void checkAsyncReadResult(CompletableFuture<Composition> cf) {
@@ -217,19 +252,14 @@ class CompositionIOTest {
             .isNotCompletedExceptionally();
     }
 
-    private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        var future = IO.loadCompAsync(f);
+    private static File getTestResourceFile(String fileName) {
+        return new File(TEST_RESOURCES_PATH, fileName);
+    }
 
-        var comp = future.join();
-        assertThat(comp)
-            .numLayersIs(2)
-            .canvasSizeIs(10, 10)
-            .invariantsAreOK();
-        checkAsyncReadResult(future);
-
-        var secondLayer = comp.getLayer(1);
-        secondLayerChecker.accept(secondLayer);
-
-        return comp;
+    private static void cleanupTempFile(File tmpFile) {
+        boolean deleted = tmpFile.delete();
+        if (!deleted) {
+            throw new IllegalStateException("could not delete " + tmpFile.getAbsolutePath());
+        }
     }
 }

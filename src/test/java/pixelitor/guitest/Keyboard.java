@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import java.awt.event.KeyEvent;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
+import static pixelitor.guitest.AppRunner.DEFAULT_ROBOT_DELAY;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
@@ -45,7 +45,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
 public class Keyboard {
     // on some Linux environments robot key events could be
     // generated multiple times
-    private static final boolean osLevelKeyEvents = !JVM.isLinux;
+    private static final boolean USE_OS_LEVEL_EVENTS = !JVM.isLinux;
 
     private final FrameFixture pw;
     private final Robot robot;
@@ -61,51 +61,48 @@ public class Keyboard {
         this.runner = runner;
     }
 
-    void undo(String edit) {
-        EDT.assertEditToBeUndoneNameIs(edit);
-        if (osLevelKeyEvents) {
+    void undo(String editName) {
+        EDT.assertEditToBeUndoneNameIs(editName);
+
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-Z
-            pw.pressKey(VK_CONTROL).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_Z);
         } else {
-            Utils.sleep(ROBOT_DELAY_DEFAULT, MILLISECONDS);
-            EDT.undo(edit);
+            Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
+            EDT.undo(editName);
         }
 
         robot.waitForIdle();
     }
 
-    // undo without expected edit name for random tests
+    // undo without edit name verification for random tests
     void undo() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-Z
-            pw.pressKey(VK_CONTROL).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_Z);
         } else {
             EDT.undo();
         }
     }
 
-    void redo(String edit) {
-        EDT.assertEditToBeRedoneNameIs(edit);
-        if (osLevelKeyEvents) {
+    void redo(String editName) {
+        EDT.assertEditToBeRedoneNameIs(editName);
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-Shift-Z
-            pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_SHIFT, VK_Z);
         } else {
-            Utils.sleep(ROBOT_DELAY_DEFAULT, MILLISECONDS);
-            EDT.redo(edit);
+            Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
+            EDT.redo(editName);
         }
 
         robot.waitForIdle();
     }
 
-    // redo without expected edit name for random tests
+    // redo without edit name verification for random tests
     void redo() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-Shift-Z
-            pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_SHIFT, VK_Z);
         } else {
             EDT.redo();
         }
@@ -123,18 +120,18 @@ public class Keyboard {
     }
 
     void invert() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-I
-            pw.pressKey(VK_CONTROL).pressKey(VK_I).releaseKey(VK_I).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_I);
         } else {
             runner.runMenuCommand("Invert");
         }
     }
 
     void deselect() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-D
-            pw.pressKey(VK_CONTROL).pressKey(VK_D).releaseKey(VK_D).releaseKey(VK_CONTROL);
+            pressKeys(VK_CONTROL, VK_D);
             robot.waitForIdle();
         } else {
             // runMenuCommand("Deselect");
@@ -143,24 +140,24 @@ public class Keyboard {
     }
 
     void fgBgDefaults() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press D
-            pw.pressKey(VK_D).releaseKey(VK_D);
+            pressKeys(VK_D);
         } else {
             EDT.run(FgBgColors::setDefaultColors);
         }
     }
 
     void randomizeColors() {
-        if (osLevelKeyEvents) {
-            pw.pressAndReleaseKeys(VK_R);
+        if (USE_OS_LEVEL_EVENTS) {
+            pressKeys(VK_R);
         } else {
             EDT.run(FgBgColors::randomizeColors);
         }
     }
 
     void actualPixels() {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             // press Ctrl-0
             pw.pressKey(VK_CONTROL).pressKey(VK_0).releaseKey(VK_0).releaseKey(VK_CONTROL);
         } else {
@@ -175,7 +172,7 @@ public class Keyboard {
     void nudge(ArrowKey key) {
         int keyCode = key.getKeyCode();
 
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             if (key.isShiftDown()) {
                 // TODO for some reason the shift is not detected
                 pw.pressKey(VK_SHIFT).pressKey(keyCode)
@@ -185,9 +182,9 @@ public class Keyboard {
             }
         } else {
             if (key.isShiftDown()) {
-                postKeyEventToEventQueue(SHIFT_DOWN_MASK, keyCode);
+                postKeyToEventQueue(SHIFT_DOWN_MASK, keyCode);
             } else {
-                postKeyEventToEventQueue(0, keyCode);
+                postKeyToEventQueue(0, keyCode);
             }
         }
     }
@@ -195,7 +192,7 @@ public class Keyboard {
     static <S, C extends Window, D extends WindowDriver>
     void pressCtrlPlus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
-            if (osLevelKeyEvents) {
+            if (USE_OS_LEVEL_EVENTS) {
                 window.pressKey(VK_CONTROL);
                 window.pressKey(VK_ADD);
                 window.releaseKey(VK_ADD);
@@ -209,7 +206,7 @@ public class Keyboard {
     static <S, C extends Window, D extends WindowDriver>
     void pressCtrlMinus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
-            if (osLevelKeyEvents) {
+            if (USE_OS_LEVEL_EVENTS) {
                 window.pressKey(VK_CONTROL);
                 window.pressKey(VK_SUBTRACT);
                 window.releaseKey(VK_SUBTRACT);
@@ -233,30 +230,30 @@ public class Keyboard {
     }
 
     void press(int keyCode) {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             pw.pressKey(keyCode).releaseKey(keyCode);
         } else {
-            postKeyEventToEventQueue(0, keyCode);
+            postKeyToEventQueue(0, keyCode);
         }
         Utils.sleep(100, MILLISECONDS);
     }
 
     void ctrlPress(int keyCode) {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             pw.pressKey(VK_CONTROL).pressKey(keyCode)
                 .releaseKey(keyCode).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(CTRL_DOWN_MASK, keyCode);
+            postKeyToEventQueue(CTRL_DOWN_MASK, keyCode);
         }
         Utils.sleep(100, MILLISECONDS);
     }
 
     void ctrlAltPress(int keyCode) {
-        if (osLevelKeyEvents) {
+        if (USE_OS_LEVEL_EVENTS) {
             pw.pressKey(VK_CONTROL).pressKey(VK_ALT).pressKey(keyCode)
                 .releaseKey(keyCode).releaseKey(VK_ALT).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(CTRL_DOWN_MASK | ALT_DOWN_MASK, keyCode);
+            postKeyToEventQueue(CTRL_DOWN_MASK | ALT_DOWN_MASK, keyCode);
         }
         Utils.sleep(100, MILLISECONDS);
     }
@@ -285,7 +282,7 @@ public class Keyboard {
         ctrlPress('\t');
     }
 
-    private void postKeyEventToEventQueue(int modifiers, int keyCode) {
+    private void postKeyToEventQueue(int modifiers, int keyCode) {
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
         Frame eventSource = pw.target();
         queue.postEvent(new KeyEvent(eventSource, KEY_PRESSED,
@@ -326,10 +323,10 @@ public class Keyboard {
         shiftDown = false;
     }
 
-    public void assertModifiersAreReleased() {
-        assert !ctrlDown;
-        assert !shiftDown;
-        assert !altDown;
+    public void assertModifiersReleased() {
+        assert !ctrlDown : "Control key is still pressed";
+        assert !shiftDown : "Shift key is still pressed";
+        assert !altDown : "Alt key is still pressed";
     }
 
     // make sure that the modifier keys don't remain
@@ -348,6 +345,19 @@ public class Keyboard {
             thread.start();
         } else {
             releaseModifierKeys();
+        }
+    }
+
+    /**
+     * Simulates a keyboard shortcut with multiple modifier keys.
+     */
+    private void pressKeys(int... keys) {
+        for (int key : keys) {
+            pw.pressKey(key);
+        }
+
+        for (int i = keys.length - 1; i >= 0; i--) {
+            pw.releaseKey(keys[i]);
         }
     }
 }

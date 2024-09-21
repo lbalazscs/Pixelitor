@@ -143,7 +143,7 @@ public class DialogBuilder {
         content = validatedPanel;
         return validator(d -> {
             ValidationResult validationResult = validatedPanel.validateSettings();
-            if (validationResult.isOK()) {
+            if (validationResult.isValid()) {
                 return true; // valid, allow the closing of the dialog
             } else {
                 validationResult.showErrorDialog(d);
@@ -431,10 +431,10 @@ public class DialogBuilder {
             if (isModal) {
                 if (b) {
                     GlobalEvents.dialogOpened(getTitle());
-                    assert !rootDialog || GlobalEvents.getNumModalDialogs() == 1;
+                    assert !rootDialog || GlobalEvents.getModalDialogCount() == 1;
                 } else {
                     GlobalEvents.dialogClosed(getTitle());
-                    assert !rootDialog || GlobalEvents.getNumModalDialogs() == 0;
+                    assert !rootDialog || GlobalEvents.getModalDialogCount() == 0;
                 }
             }
             super.setVisible(b);

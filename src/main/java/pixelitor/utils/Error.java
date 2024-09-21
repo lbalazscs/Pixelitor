@@ -19,9 +19,12 @@ package pixelitor.utils;
 
 import java.util.function.Function;
 
-public record Error<S, E>(E errorDetail) implements Result<S, E> {
+/**
+ * Represents a failed computation result.
+ */
+public record Error<S, E>(E errorDetails) implements Result<S, E> {
     @Override
-    public boolean wasSuccess() {
+    public boolean isSuccess() {
         return false;
     }
 
@@ -32,11 +35,11 @@ public record Error<S, E>(E errorDetail) implements Result<S, E> {
 
     @Override
     public <T> Result<T, E> map(Function<? super S, ? extends T> mapper) {
-        return new Error<>(errorDetail);
+        return new Error<>(errorDetails);
     }
 
     @Override
     public <T> Result<T, E> flatMap(Function<? super S, ? extends Result<? extends T, E>> mapper) {
-        return new Error<>(errorDetail);
+        return new Error<>(errorDetails);
     }
 }

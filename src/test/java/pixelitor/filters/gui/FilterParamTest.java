@@ -31,14 +31,18 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.BLUE;
+import static java.awt.Color.CYAN;
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
-import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
 import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
@@ -211,14 +215,14 @@ public class FilterParamTest {
         param.setEnabled(true, APP_LOGIC);
         assertThat(gui.isEnabled()).isTrue();
 
-        param.setEnabled(false, FINAL_ANIMATION_SETTING);
+        param.setEnabled(false, ANIMATION_ENDING_STATE);
         if (param.isAnimatable()) {
             assertThat(gui.isEnabled()).isTrue();
         } else {
             assertThat(gui.isEnabled()).isFalse();
         }
 
-        param.setEnabled(true, FINAL_ANIMATION_SETTING);
+        param.setEnabled(true, ANIMATION_ENDING_STATE);
         assertThat(gui.isEnabled()).isTrue();
 
         checkThatFilterWasNotCalled();

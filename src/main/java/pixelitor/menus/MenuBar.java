@@ -83,7 +83,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
-import static pixelitor.Views.*;
+import static pixelitor.Views.CLOSE_ACTIVE_ACTION;
+import static pixelitor.Views.CLOSE_ALL_ACTION;
+import static pixelitor.Views.addActivationListener;
+import static pixelitor.Views.addNew;
+import static pixelitor.Views.repaintActive;
 import static pixelitor.colors.FillType.BACKGROUND;
 import static pixelitor.colors.FillType.FOREGROUND;
 import static pixelitor.colors.FillType.TRANSPARENT;
@@ -93,8 +97,17 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.HAS_LAYER_MASK;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.LayerClassRestriction;
 import static pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction.NO_LAYER_MASK;
-import static pixelitor.layers.LayerMaskAddType.*;
-import static pixelitor.layers.LayerMoveAction.*;
+import static pixelitor.layers.LayerMaskAddType.FROM_LAYER;
+import static pixelitor.layers.LayerMaskAddType.FROM_TRANSPARENCY;
+import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
+import static pixelitor.layers.LayerMoveAction.LAYER_TO_BOTTOM;
+import static pixelitor.layers.LayerMoveAction.LAYER_TO_TOP;
+import static pixelitor.layers.LayerMoveAction.LOWER_LAYER_SELECTION;
+import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
+import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
+import static pixelitor.layers.LayerMoveAction.RAISE_LAYER_SELECTION;
 import static pixelitor.utils.Keys.*;
 import static pixelitor.utils.QuadrantAngle.ANGLE_180;
 import static pixelitor.utils.QuadrantAngle.ANGLE_270;
@@ -148,7 +161,7 @@ public class MenuBar extends JMenuBar {
         String exportOptimizedName = texts.getString("export_optimized_jpeg");
         fileMenu.add(new OpenViewEnabledAction(
             exportOptimizedName + "...",
-            comp -> OptimizedJpegSavePanel.showInDialog(comp.getCompositeImage(), exportOptimizedName)));
+            comp -> OptimizedJpegSavePanel.showInDialog(comp, exportOptimizedName)));
 
         fileMenu.add(createImageMagickSubmenu());
 
@@ -217,10 +230,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu automateMenu = new PMenu(texts.getString("automate"));
 
-        String batchResizeName = texts.getString("batch_resize");
-        automateMenu.add(new PAction(
-            batchResizeName + "...",
-            () -> BatchResize.showDialog(batchResizeName)));
+        automateMenu.add(new DrawableAction(texts.getString("auto_paint")) {
+            @Override
+            protected void process(Drawable dr) {
+                AutoPaint.showDialog(dr);
+            }
+        });
 
         String batchFilterName = texts.getString("batch_filter");
         automateMenu.add(new DrawableAction(batchFilterName) {
@@ -230,16 +245,14 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        String batchResizeName = texts.getString("batch_resize");
+        automateMenu.add(new PAction(
+            batchResizeName + "...",
+            () -> BatchResize.showDialog(batchResizeName)));
+
         automateMenu.add(new OpenViewEnabledAction(
             texts.getString("export_layers_to_png") + "...",
             IO::exportLayersToPNGAsync));
-
-        automateMenu.add(new DrawableAction(texts.getString("auto_paint")) {
-            @Override
-            protected void process(Drawable dr) {
-                AutoPaint.showDialog(dr);
-            }
-        });
 
         return automateMenu;
     }
@@ -1302,8 +1315,8 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.add(new OpenViewEnabledAction("Debug Mouse to System.out",
-            comp -> GlobalEvents.registerDebugMouseWatching(false)));
+        sub.add(new OpenViewEnabledAction("Enable Mouse Debugging",
+            comp -> GlobalEvents.enableMouseEventDebugging(false)));
 
         sub.add(new OpenViewEnabledAction("Dump Event Queue",
             comp -> Events.dumpAll()));

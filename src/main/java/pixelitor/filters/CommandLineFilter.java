@@ -54,7 +54,7 @@ public class CommandLineFilter extends ParametrizedFilter {
         }
 
         List<String> commands = parseCommands(textParam.getValue());
-        return IO.commandLineFilter(src, NAME, commands);
+        return IO.commandLineFilter(src, commands);
     }
 
     // Splits the input by whitespace, considering quoted parts

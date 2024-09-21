@@ -66,8 +66,10 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 
 public class TestHelper {
+    // Default dimensions for test compositions
     public static final int TEST_WIDTH = 20;
     public static final int TEST_HEIGHT = 10;
+
     private static Composition currentComp;
     private static Selection currentSel;
 
@@ -83,7 +85,7 @@ public class TestHelper {
 
     public static Composition createRealComp(String name, Class<? extends Layer> layerClass, int width, int height) {
         Composition comp = createEmptyComp(name, width, height, true);
-        Layer layer = createLayerOfClass(layerClass, comp);
+        Layer layer = createLayer(layerClass, comp);
         comp.addLayerNoUI(layer);
         return comp;
     }
@@ -168,7 +170,8 @@ public class TestHelper {
         return comp;
     }
 
-    public static Layer createLayerOfClass(Class<? extends Layer> layerClass, Composition comp) {
+    public static Layer createLayer(Class<? extends Layer> layerClass,
+                                    Composition comp) {
         Layer layer;
         if (layerClass == ImageLayer.class) {
             layer = createEmptyImageLayer(comp, "layer 1");
@@ -309,14 +312,9 @@ public class TestHelper {
     public static View createMockViewWithoutComp() {
         View view = mock(View.class);
 
-        // otherwise checkInvariants() always returns false
         when(view.checkInvariants()).thenCallRealMethod();
-
         when(view.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
         when(view.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
-
-//        Mockito.doCallRealMethod().when(view).replaceComp(any(Composition.class));
-//        Mockito.doCallRealMethod().when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
@@ -332,9 +330,7 @@ public class TestHelper {
         when(view.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(view.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(view.getScaling()).thenReturn(1.0);
-
-        Point fakeLocationOnScreen = new Point(0, 0);
-        when(view.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
+        when(view.getLocationOnScreen()).thenReturn(new Point(0, 0));
 
         Cursor cursor = Cursor.getDefaultCursor();
         when(view.getCursor()).thenReturn(cursor);

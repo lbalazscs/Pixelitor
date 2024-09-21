@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,12 +26,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A wizard. The individual pages implement
- * the {@link WizardPage} interface.
+ * A wizard that manages navigation
+ * through a sequence of {@link WizardPage}s.
  */
 public abstract class Wizard {
     private OKCancelDialog dialog = null;
-    private WizardPage currentPage;
+    private WizardPage activePage;
     private final String title;
     private final String finishButtonText;
     private final int initialWidth;
@@ -39,7 +39,7 @@ public abstract class Wizard {
     protected final Drawable dr;
 
     protected Wizard(WizardPage initialPage, String title, String finishButtonText, int initialWidth, int initialHeight, Drawable dr) {
-        currentPage = initialPage;
+        activePage = initialPage;
         this.title = title;
         this.finishButtonText = finishButtonText;
         this.initialWidth = initialWidth;
@@ -54,70 +54,70 @@ public abstract class Wizard {
         try {
             showDialog(dialogParent, title);
         } finally {
-            finalCleanup();
+            performCleanup();
         }
     }
 
     private void showDialog(JFrame dialogParent, String title) {
         assert dialog == null; // this should be called once per object
 
-        dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next") {
+        dialog = new OKCancelDialog(activePage.createPanel(this, dr), dialogParent, title, "Next") {
             @Override
             protected void cancelAction() {
-                currentPage.onWizardCanceled(dr);
+                activePage.onWizardCanceled(dr);
                 super.cancelAction();
             }
 
             @Override
             protected void okAction() {
-                nextPressed(dialog);
+                handleNextButtonPress(dialog);
             }
         };
-        dialog.setHeaderMessage(currentPage.getHelpText(this));
+        dialog.setHeaderMessage(activePage.getHelpText(this));
 
         // It's packed already, but not correctly, because of the header message,
         // and anyway we don't know the size of the filter dialogs in advance.
         dialog.setSize(initialWidth, initialHeight);
-        currentPage.onShowingInDialog(dialog);
+        activePage.onPageShown(dialog);
         GUIUtils.showDialog(dialog);
     }
 
-    private void nextPressed(OKCancelDialog dialog) {
-        if (!currentPage.isValid(this, dialog)) {
+    private void handleNextButtonPress(OKCancelDialog dialog) {
+        if (!activePage.validatePage(this, dialog)) {
             return;
         }
 
-        currentPage.finish(this, dr);
+        activePage.onComplete(this, dr);
 
-        Optional<WizardPage> nextPage = currentPage.getNext();
+        Optional<WizardPage> nextPage = activePage.getNextPage();
         if (nextPage.isPresent()) {
-            showNextPage(dialog, nextPage.get());
+            transitionToNextPage(dialog, nextPage.get());
         } else {
             // dialog finished
             dialog.close();
-            finalAction();
+            onWizardComplete();
         }
     }
 
-    private void showNextPage(OKCancelDialog dialog, WizardPage nextPage) {
+    private void transitionToNextPage(OKCancelDialog dialog, WizardPage nextPage) {
         JComponent panel = nextPage.createPanel(this, dr);
         dialog.changeForm(panel);
         dialog.setHeaderMessage(nextPage.getHelpText(this));
-        currentPage = nextPage;
+        activePage = nextPage;
 
-        if (currentPage.isLast()) {
+        if (activePage.isFinalPage()) {
             dialog.setOKButtonText(finishButtonText);
         }
     }
 
     /**
-     * Called when the wizard is finished (the "Finish" button was clicked).
+     * Called when the wizard completes successfully (the "Finish" button was clicked).
      */
-    protected abstract void finalAction();
+    protected abstract void onWizardComplete();
 
     /**
-     * Called when the wizard is closed, either by the user
-     * clicking the "Cancel" button or by the wizard finishing.
+     * Performs final cleanup operations when the wizard terminates.
+     * Called after both successful completion and cancellation.
      */
-    protected abstract void finalCleanup();
+    protected abstract void performCleanup();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -141,13 +141,13 @@ public class Tools {
         return SHAPES.shouldDrawOverLayer();
     }
 
-    public static void increaseActiveBrushSize() {
+    public static void increaseBrushSize() {
         if (currentTool instanceof AbstractBrushTool abt) {
             abt.increaseBrushSize();
         }
     }
 
-    public static void decreaseActiveBrushSize() {
+    public static void decreaseBrushSize() {
         if (currentTool instanceof AbstractBrushTool abt) {
             abt.decreaseBrushSize();
         }

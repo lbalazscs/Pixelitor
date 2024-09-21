@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,55 +28,56 @@ import java.awt.geom.Point2D;
 import java.util.SplittableRandom;
 
 /**
- * The settings of Auto Paint
+ * The parameters that control the auto-painting.
  */
 public class AutoPaintSettings {
+    public static final int DIRECTION_RANDOM = 0;
+    public static final int DIRECTION_RADIAL = 1;
+    public static final int DIRECTION_CIRCULAR = 2;
+    public static final int DIRECTION_NOISE = 3;
+    private final int strokeDirection;
+
     private final Tool tool;
     private final int numStrokes;
     private final double maxCurvature;
     private final int minStrokeLength;
     private final int maxStrokeLength;
-    private final boolean randomColors;
-    private final boolean interpolatedColors;
+    private final boolean useRandomColors;
+    private final boolean useInterpolatedColors;
 
-    public static final int ANGLE_TYPE_RANDOM = 0;
-    public static final int ANGLE_TYPE_RADIAL = 1;
-    public static final int ANGLE_TYPE_CIRCULAR = 2;
-    public static final int ANGLE_TYPE_NOISE = 3;
-    private final int angleType;
-
-    AutoPaintSettings(Tool tool, int numStrokes, int strokeLength,
-                      boolean randomColors, double lengthVariability,
-                      double maxCurvature, boolean interpolatedColors, int angleType) {
+    AutoPaintSettings(Tool tool, int numStrokes, int baseStrokeLength,
+                      boolean useRandomColors, double lengthVariation,
+                      double maxCurvature, boolean useInterpolatedColors, int strokeDirection) {
         this.tool = tool;
         this.numStrokes = numStrokes;
         this.maxCurvature = maxCurvature;
-        this.angleType = angleType;
+        this.strokeDirection = strokeDirection;
 
-        if (lengthVariability == 0.0f) {
-            minStrokeLength = strokeLength;
-            maxStrokeLength = strokeLength;
+        if (lengthVariation == 0.0f) {
+            minStrokeLength = baseStrokeLength;
+            maxStrokeLength = baseStrokeLength;
         } else {
-            minStrokeLength = (int) (strokeLength - lengthVariability * strokeLength);
-            maxStrokeLength = (int) (strokeLength + lengthVariability * strokeLength);
+            double variation = lengthVariation * baseStrokeLength;
+            minStrokeLength = (int) (baseStrokeLength - variation);
+            maxStrokeLength = (int) (baseStrokeLength + variation);
         }
 
-        this.randomColors = randomColors;
-        this.interpolatedColors = interpolatedColors;
+        this.useRandomColors = useRandomColors;
+        this.useInterpolatedColors = useInterpolatedColors;
     }
 
     public PPoint calcRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
         Canvas canvas = comp.getCanvas();
-        double angle = switch (angleType) {
-            case ANGLE_TYPE_RANDOM -> rand.nextDouble() * 2 * Math.PI;
-            case ANGLE_TYPE_RADIAL -> getRadialAngle(start, canvas);
-            case ANGLE_TYPE_CIRCULAR -> getRadialAngle(start, canvas) + Math.PI / 2.0;
-            case ANGLE_TYPE_NOISE -> {
+        double angle = switch (strokeDirection) {
+            case DIRECTION_RANDOM -> rand.nextDouble() * 2 * Math.PI;
+            case DIRECTION_RADIAL -> getRadialAngle(start, canvas);
+            case DIRECTION_CIRCULAR -> getRadialAngle(start, canvas) + Math.PI / 2.0;
+            case DIRECTION_NOISE -> {
                 float nx = (float) (start.getImX() * canvas.getAspectRatio() / canvas.getWidth());
                 float ny = (float) (start.getImY() / canvas.getHeight());
                 yield Noise.noise2(nx * 3.0f, ny * 3.0f) * Math.PI;
             }
-            default -> throw new IllegalStateException("Unexpected value: " + angleType);
+            default -> throw new IllegalStateException("Unexpected value: " + strokeDirection);
         };
 
         int strokeLength = genStrokeLength(rand);
@@ -112,14 +113,14 @@ public class AutoPaintSettings {
     }
 
     public boolean useRandomColors() {
-        return randomColors;
+        return useRandomColors;
     }
 
     public boolean useInterpolatedColors() {
-        return interpolatedColors;
+        return useInterpolatedColors;
     }
 
     public boolean changeColors() {
-        return randomColors || interpolatedColors;
+        return useRandomColors || useInterpolatedColors;
     }
 }

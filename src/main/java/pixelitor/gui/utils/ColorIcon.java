@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 
+/**
+ * A custom Icon implementation that draws a solid colored rectangle.
+ */
 public class ColorIcon implements Icon {
     private Color color;
     private final int width;

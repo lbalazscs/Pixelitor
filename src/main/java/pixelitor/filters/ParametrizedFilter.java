@@ -70,8 +70,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Some filters can't be animated well, they can return true
-     * here in order to be excluded from the list of animation filters
+     * Returns true if this filter should be included
+     * into the list of tween animation filters.
      */
     public boolean supportsTweenAnimation() {
         return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,40 +32,40 @@ public interface TextFieldValidator {
     static ValidationResult hasPositiveDouble(JTextField textField, String label) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
-            return ValidationResult.error("<b>" + label + "</b> can't be empty.");
+            return ValidationResult.invalid("<b>" + label + "</b> can't be empty.");
         }
         double value;
         try {
             value = Utils.parseDouble(text);
         } catch (ParseException ex) {
-            return ValidationResult.error(text + " isn't a valid number for <b>" + label + "</b>");
+            return ValidationResult.invalid(text + " isn't a valid number for <b>" + label + "</b>");
         }
         if (value > 0) {
-            return ValidationResult.ok();
+            return ValidationResult.valid();
         } else if (value == 0) {
-            return ValidationResult.error("<b>" + label + "</b> can't be zero.");
+            return ValidationResult.invalid("<b>" + label + "</b> can't be zero.");
         } else {
-            return ValidationResult.error("<b>" + label + "</b> must be positive.");
+            return ValidationResult.invalid("<b>" + label + "</b> must be positive.");
         }
     }
 
     static ValidationResult hasPositiveInt(JTextField textField, String label, boolean allowZero) {
         String text = textField.getText().trim();
         if (text.isEmpty()) {
-            return ValidationResult.error("<b>" + label + "</b> can't be empty.");
+            return ValidationResult.invalid("<b>" + label + "</b> can't be empty.");
         }
         try {
             int value = Integer.parseInt(text);
             if (value == 0 && !allowZero) {
-                return ValidationResult.error("<b>" + label + "</b> can't be 0.");
+                return ValidationResult.invalid("<b>" + label + "</b> can't be 0.");
             }
             if (value < 0) {
-                return ValidationResult.error("<b>" + label + "</b> must be positive.");
+                return ValidationResult.invalid("<b>" + label + "</b> must be positive.");
             }
         } catch (NumberFormatException ex) {
-            return ValidationResult.error("<b>" + label + "</b> must be an integer.");
+            return ValidationResult.invalid("<b>" + label + "</b> must be an integer.");
         }
-        return ValidationResult.ok();
+        return ValidationResult.valid();
     }
 
     static JLayer<JTextField> createPositiveIntLayer(String label,

@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.function.LongConsumer;
 
 import static java.util.Locale.Category.FORMAT;
-import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING_STATE;
 
 /**
  * All the information needed to automatically
@@ -190,12 +190,12 @@ public class ParamSet implements Debuggable {
         return false;
     }
 
-    public void setFinalAnimationSettingMode(boolean b) {
+    public void setFinalAnimationMode(boolean b) {
         for (FilterParam param : paramList) {
-            param.setEnabled(!b, FINAL_ANIMATION_SETTING);
+            param.setEnabled(!b, ANIMATION_ENDING_STATE);
         }
         for (FilterButtonModel action : actionList) {
-            action.setEnabled(!b, FINAL_ANIMATION_SETTING);
+            action.setEnabled(!b, ANIMATION_ENDING_STATE);
         }
     }
 

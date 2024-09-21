@@ -78,7 +78,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -93,9 +92,9 @@ import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
+import static pixelitor.guitest.GUITestUtils.findButtonByText;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.menus.view.ZoomLevel.zoomLevels;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
@@ -113,7 +112,7 @@ import static pixelitor.tools.DragToolState.TRANSFORM;
  * Assertj-Swing requires using the following VM option:
  * --add-opens java.base/java.util=ALL-UNNAMED
  */
-public class AssertJSwingTest {
+public class MainGuiTest {
     private static boolean quick = false;
 
     private static File baseDir;
@@ -160,10 +159,10 @@ public class AssertJSwingTest {
 
 //        GlobalKeyboardWatch.registerDebugMouseWatching(false);
 
-        new AssertJSwingTest();
+        new MainGuiTest();
     }
 
-    private AssertJSwingTest() {
+    private MainGuiTest() {
         long startMillis = System.currentTimeMillis();
 
         app = new AppRunner(inputDir, "a.jpg");
@@ -174,7 +173,7 @@ public class AssertJSwingTest {
         mouse = app.getMouse();
 
         if (EDT.call(FileChoosers::useNativeDialogs)) {
-            System.out.println("AssertJSwingTest::AssertJSwingTest: native dialogs, exiting");
+            System.out.println("MainGuiTest::MainGuiTest: native dialogs, exiting");
             System.exit(0);
         }
 
@@ -186,15 +185,15 @@ public class AssertJSwingTest {
         } else {
             runMenuCommand("Set Default Workspace");
 
-            MaskMode[] maskModes = decideMaskModes();
-            TestTarget target = decideTarget();
+            MaskMode[] maskModes = MaskMode.load();
+            TestSuite testSuite = TestSuite.load();
             System.out.println("Quick = " + quick
-                + ", target = " + target
+                + ", test suite = " + testSuite
                 + ", mask modes = " + Arrays.toString(maskModes));
 
             for (int i = 0; i < maskModes.length; i++) {
                 MaskMode mode = maskModes[i];
-                runTests(mode, target);
+                runTests(mode, testSuite);
 
                 if (i < maskModes.length - 1) {
                     resetState();
@@ -203,7 +202,7 @@ public class AssertJSwingTest {
         }
 
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
-        System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in ",
+        System.out.printf("MainGuiTest: finished at %s after %s, exiting in ",
             getCurrentTimeHM(), Utils.formatMillis(totalTimeMillis));
 
         app.exit();
@@ -221,7 +220,7 @@ public class AssertJSwingTest {
 
     private void openFileWithDialog(File inputDir, String fileName) {
         app.openFileWithDialog("Open...", inputDir, fileName);
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     private void clickAndResetSelectTool() {
@@ -234,57 +233,15 @@ public class AssertJSwingTest {
         pw.toggleButton("Shapes Tool Button").click();
     }
 
-    private static TestTarget decideTarget() {
-        String targetProp = System.getProperty("test.target");
-        if (targetProp == null || targetProp.equalsIgnoreCase("all")) {
-            return TestTarget.ALL; // default target
-        }
-        targetProp = targetProp.toUpperCase(Locale.ENGLISH);
-
-        TestTarget target = null;
-        try {
-            target = TestTarget.valueOf(targetProp);
-        } catch (IllegalArgumentException e) {
-            String msg = "Target " + targetProp + " not found.\n" +
-                "Available targets: " + Arrays.toString(TestTarget.values());
-            System.err.println(msg);
-            System.exit(1);
-        }
-        return target;
-    }
-
-    private static MaskMode[] decideMaskModes() {
-        String maskMode = System.getProperty("mask.mode");
-        if (maskMode == null || maskMode.equalsIgnoreCase("all")) {
-//            Collections.shuffle(Arrays.asList(usedMaskModes));
-            return MaskMode.values();
-        }
-
-        maskMode = maskMode.toUpperCase(Locale.ENGLISH);
-        MaskMode[] usedMaskModes;
-        // if a specific test mode was configured, test only that
-        MaskMode mode = null;
-        try {
-            mode = MaskMode.valueOf(maskMode);
-        } catch (IllegalArgumentException e) {
-            String msg = "Mask mode " + maskMode + " not found.\n" +
-                "Available mask modes: " + Arrays.toString(MaskMode.values());
-            System.err.println(msg);
-            System.exit(1);
-        }
-        usedMaskModes = new MaskMode[]{mode};
-        return usedMaskModes;
-    }
-
-    private void runTests(MaskMode maskMode, TestTarget target) {
+    private void runTests(MaskMode maskMode, TestSuite testSuite) {
         this.maskMode = maskMode;
-        maskMode.set(this);
-        app.setupDelayBetweenEvents();
+        maskMode.apply(this);
+        app.configureRobotDelay();
 
-        System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
-            target, maskMode, getCurrentTimeHM());
+        System.out.printf("MainGuiTest: testSuite = %s, testingMode = %s, started at %s%n",
+            testSuite, maskMode, getCurrentTimeHM());
 
-        app.runTests(() -> target.run(this));
+        app.runTests(() -> testSuite.run(this));
     }
 
     void testAll() {
@@ -328,14 +285,14 @@ public class AssertJSwingTest {
         testShapesTool();
 
         runMenuCommand("Reload");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         checkConsistency();
     }
 
     void testLayers() {
         log(0, "layers");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         testChangeLayerOpacityAndBM();
 
@@ -384,7 +341,7 @@ public class AssertJSwingTest {
         keyboard.redo("New Empty Layer");
         app.checkNumLayersIs(2);
         layer2Button.requireSelected();
-        maskMode.set(this);
+        maskMode.apply(this);
 
         app.drawGradient(GradientType.SPIRAL_CW);
     }
@@ -427,7 +384,7 @@ public class AssertJSwingTest {
         app.checkNumLayersIs(1);
         layer1Button.requireSelected();
 
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     private void testDuplicateLayer() {
@@ -448,7 +405,7 @@ public class AssertJSwingTest {
         app.checkNumLayersIs(2);
         findLayerButton("layer 1 copy").requireSelected();
 
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     private void testLayerVisibilityChange() {
@@ -512,25 +469,25 @@ public class AssertJSwingTest {
 
         runMenuCommand("New from Visible");
         keyboard.undoRedo("New Layer from Visible");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         app.mergeDown();
 
         runMenuCommand("Duplicate Layer");
         keyboard.undoRedo("Duplicate Layer");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         runMenuCommand("New Layer");
         keyboard.undoRedo("New Empty Layer");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         runMenuCommand("Delete Layer");
         keyboard.undoRedo("Delete layer 3");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         runMenuCommand("Flatten Image");
         assertFalse(History.canUndo());
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     private void testLayerMasks() {
@@ -543,7 +500,7 @@ public class AssertJSwingTest {
 
         deleteLayerMask();
 
-        maskMode.set(this);
+        maskMode.apply(this);
 
         checkConsistency();
     }
@@ -595,8 +552,8 @@ public class AssertJSwingTest {
 
         dialog.slider("toleranceSlider").slideTo(20);
         dialog.slider("softnessSlider").slideTo(20);
-        dialog.checkBox("invertCheckBox").check();
-        dialog.comboBox("distTypeCombo").selectItem("RGB");
+        dialog.checkBox("invertMaskCheckBox").check();
+        dialog.comboBox("distMetricCombo").selectItem("RGB");
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -605,7 +562,7 @@ public class AssertJSwingTest {
             // delete the created layer mask
             runMenuCommand("Delete");
         }
-        maskMode.set(this);
+        maskMode.apply(this);
 
         maskFromColorRangeTested = true;
     }
@@ -617,7 +574,7 @@ public class AssertJSwingTest {
 
         String text = "some text";
         app.addTextLayer(text, null, "Pixelitor");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         app.editTextLayer(dialog -> testTextDialog(dialog, text));
 
@@ -630,7 +587,7 @@ public class AssertJSwingTest {
 
         app.mergeDown();
 
-        maskMode.set(this);
+        maskMode.apply(this);
         checkConsistency();
     }
 
@@ -926,7 +883,7 @@ public class AssertJSwingTest {
             .click();
         app.checkNumLayersIs(1);
 
-        maskMode.setMaskViewMode(keyboard);
+        maskMode.apply(this);
         maskMode.check();
         checkConsistency();
     }
@@ -1001,7 +958,7 @@ public class AssertJSwingTest {
         runMenuCommand("Delete Layer");
         app.checkNumLayersIs(1);
 
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     void testFileMenu() {
@@ -1061,7 +1018,7 @@ public class AssertJSwingTest {
 
         // create a new image to be saved
         app.createNewImage(400, 400, null);
-        maskMode.set(this);
+        maskMode.apply(this);
 
         // the new image is unsaved => has no file
         assertThat(EDT.active(Composition::getFile)).isNull();
@@ -1073,7 +1030,7 @@ public class AssertJSwingTest {
         String fileName = "saved." + extension;
         File file = new File(baseDir, fileName);
 
-        System.out.println("AssertJSwingTest::testSave: found file chooser, file = " + file);
+        System.out.println("MainGuiTest::testSave: found file chooser, file = " + file);
 
         boolean fileExistsAlready = file.exists();
 
@@ -1093,7 +1050,7 @@ public class AssertJSwingTest {
         Utils.sleep(500, MILLISECONDS);
         assertThat(file).exists().isFile();
 
-        System.out.println("AssertJSwingTest::testSave: run Save, expect no file chooser");
+        System.out.println("MainGuiTest::testSave: run Save, expect no file chooser");
 
         // now that the file is saved, save again:
         // no file chooser should appear
@@ -1109,7 +1066,7 @@ public class AssertJSwingTest {
 
         runMenuCommand("Close");
         openFileWithDialog(baseDir, fileName);
-        maskMode.set(this);
+        maskMode.apply(this);
 
         // can be dirty if a masked mask mode is set
         boolean dirty = EDT.active(Composition::isDirty);
@@ -1120,7 +1077,7 @@ public class AssertJSwingTest {
             app.closeDoYouWantToSaveChangesDialog();
         }
 
-        maskMode.set(this);
+        maskMode.apply(this);
         checkConsistency();
     }
 
@@ -1231,7 +1188,7 @@ public class AssertJSwingTest {
 
         EDT.assertNumOpenImagesIs(1);
 
-        maskMode.set(this);
+        maskMode.apply(this);
         checkConsistency();
     }
 
@@ -1262,7 +1219,7 @@ public class AssertJSwingTest {
 
     private void testBatchResize() {
         log(1, "testing batch resize");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         EDT.run(() -> {
             Dirs.setLastOpen(inputDir);
@@ -1281,7 +1238,7 @@ public class AssertJSwingTest {
         Utils.sleep(5, SECONDS);
         checkConsistency();
 
-        for (File inputFile : FileUtils.listSupportedInputFilesIn(inputDir)) {
+        for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
             String fileName = inputFile.getName();
 
             File outFile = new File(batchResizeOutputDir, fileName);
@@ -1296,7 +1253,7 @@ public class AssertJSwingTest {
         Dirs.setLastSave(batchFilterOutputDir);
 
         EDT.assertNumOpenImagesIsAtLeast(1);
-        maskMode.set(this);
+        maskMode.apply(this);
 
         runMenuCommand("Batch Filter...");
         var dialog = findDialogByTitle("Batch Filter");
@@ -1313,7 +1270,7 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        for (File inputFile : FileUtils.listSupportedInputFilesIn(inputDir)) {
+        for (File inputFile : FileUtils.listSupportedInputFiles(inputDir)) {
             String fileName = inputFile.getName();
 
             File outFile = new File(batchFilterOutputDir, fileName);
@@ -1342,12 +1299,12 @@ public class AssertJSwingTest {
     }
 
     private void testAutoPaintTask() {
-        for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+        for (Tool tool : AutoPaint.SUPPORTED_TOOLS) {
             if (skipThis()) {
                 continue;
             }
             if (tool == Tools.BRUSH) {
-                for (String colorSetting : AutoPaintPanel.COLOR_CHOICES) {
+                for (String colorSetting : AutoPaintPanel.COLOR_MODES) {
                     EDT.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
                     testAutoPaintWithTool(tool, colorSetting);
                 }
@@ -1365,11 +1322,11 @@ public class AssertJSwingTest {
         var toolSelector = dialog.comboBox("toolSelector");
         toolSelector.selectItem(tool.toString());
 
-        var numStrokesTF = dialog.textBox("numStrokesTF");
+        var strokeCountTF = dialog.textBox("strokeCountTF");
         String testNumStrokes = "111";
-        if (!numStrokesTF.text().equals(testNumStrokes)) {
-            numStrokesTF.deleteText();
-            numStrokesTF.enterText(testNumStrokes);
+        if (!strokeCountTF.text().equals(testNumStrokes)) {
+            strokeCountTF.deleteText();
+            strokeCountTF.enterText(testNumStrokes);
         }
 
         var colorsCB = dialog.comboBox("colorsCB");
@@ -1410,7 +1367,7 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
         dialog.requireNotVisible();
 
-        maskMode.set(this);
+        maskMode.apply(this);
 
         checkConsistency();
     }
@@ -1424,7 +1381,7 @@ public class AssertJSwingTest {
         IOTasks.waitForIdle();
 
         keyboard.undoRedo("Reload");
-        maskMode.set(this);
+        maskMode.apply(this);
 
         checkConsistency();
     }
@@ -1970,7 +1927,7 @@ public class AssertJSwingTest {
 
         int max = 1000;
         for (int i = 0; i < max; i++) {
-            System.out.println("AssertJSwingTest stress testing " + nameWithoutDots + ": " + (i + 1) + " of " + max);
+            System.out.println("MainGuiTest stress testing " + nameWithoutDots + ": " + (i + 1) + " of " + max);
             if (randomize == Randomize.YES) {
                 findButtonByText(dialog, "Randomize Settings").click();
             }
@@ -2295,7 +2252,7 @@ public class AssertJSwingTest {
                     }
                     pw.comboBox("colorTypeCB").selectItem(colorType.toString());
 
-                    AJSUtils.checkRandomly(pw.checkBox("revertCB"));
+                    GUITestUtils.checkRandomly(pw.checkBox("revertCB"));
 
                     // drag the gradient
                     Point start = mouse.moveRandomlyWithinCanvas();
@@ -2720,7 +2677,7 @@ public class AssertJSwingTest {
             .requireEnabled()
             .click();
         app.checkNumLayersIs(1);
-        maskMode.set(this);
+        maskMode.apply(this);
 
         checkConsistency();
     }
@@ -2768,7 +2725,7 @@ public class AssertJSwingTest {
 
         ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
-        mouse.moveToActiveICCenter();
+        mouse.moveToActiveCanvasCenter();
 
         mouse.click();
         EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
@@ -2965,7 +2922,7 @@ public class AssertJSwingTest {
     private static void cleanOutputs() {
         try {
             String cleanerScriptPath = cleanerScript.getCanonicalPath();
-            System.out.println("AssertJSwingTest::cleanOutputs: running " + cleanerScript);
+            System.out.println("MainGuiTest::cleanOutputs: running " + cleanerScript);
             Process process = Runtime.getRuntime().exec(new String[]{cleanerScriptPath});
             int exitValue = process.waitFor();
             if (exitValue != 0) {
@@ -3063,7 +3020,7 @@ public class AssertJSwingTest {
             System.exit(1);
         }
         if (args[0].equals("help")) {
-            System.out.println("Test targets: " + Arrays.toString(TestTarget.values()));
+            System.out.println("Test targets: " + Arrays.toString(TestSuite.values()));
             System.out.println("Mask modes: " + Arrays.toString(MaskMode.values()));
 
             System.exit(0);
@@ -3132,7 +3089,7 @@ public class AssertJSwingTest {
         runMenuCommand("Duplicate Layer");
         app.checkNumLayersIs(numLayers + 1);
         keyboard.invert();
-        maskMode.set(this);
+        maskMode.apply(this);
     }
 
     private void selectCheckBox(String name, boolean newSelected) {

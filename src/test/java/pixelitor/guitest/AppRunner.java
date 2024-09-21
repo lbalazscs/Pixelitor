@@ -71,10 +71,10 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.guitest.AJSUtils.checkRandomly;
-import static pixelitor.guitest.AJSUtils.chooseRandomly;
-import static pixelitor.guitest.AJSUtils.pushRandomly;
-import static pixelitor.guitest.AJSUtils.slideRandomly;
+import static pixelitor.guitest.GUITestUtils.checkRandomly;
+import static pixelitor.guitest.GUITestUtils.chooseRandomly;
+import static pixelitor.guitest.GUITestUtils.pushRandomly;
+import static pixelitor.guitest.GUITestUtils.slideRandomly;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
@@ -86,12 +86,13 @@ import static pixelitor.utils.Utils.toPercentage;
  * A utility class for running Pixelitor with assertj-swing based tests
  */
 public class AppRunner {
-    public static final int ROBOT_DELAY_DEFAULT = 50; // millis
-    private static final int ROBOT_DELAY_SLOW = 300; // millis
+    public static final int DEFAULT_ROBOT_DELAY = 50; // millis
+    private static final int SLOW_ROBOT_DELAY = 300; // millis
+    private static final int APP_START_TIMEOUT = 30; // seconds
 
-    private static final DateTimeFormatter DATE_FORMAT_HM =
+    private static final DateTimeFormatter TIME_FORMAT_HM =
         DateTimeFormatter.ofPattern("HH:mm");
-    private static final DateTimeFormatter DATE_FORMAT_HMS =
+    private static final DateTimeFormatter TIME_FORMAT_HMS =
         DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private static boolean newImageValidationTested = false;
@@ -102,26 +103,27 @@ public class AppRunner {
     private final FrameFixture pw;
     private final LayersContainerFixture layersContainer;
 
-    private static File startingOpenDir;
-    private static File startingSaveDir;
+    private static File initialOpenDir;
+    private static File initialSaveDir;
 
     public AppRunner(File inputDir, String... fileNames) {
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
-        String[] paths = Stream.of(fileNames)
+        // Converts filenames to full paths
+        String[] filePaths = Stream.of(fileNames)
             .map(fileName -> new File(inputDir, fileName).getPath())
             .toArray(String[]::new);
 
         ApplicationLauncher
             .application("pixelitor.Pixelitor")
-            .withArgs(paths)
+            .withArgs(filePaths)
             .start();
 
         new PixelitorEventListener().register();
-        saveNormalSettings();
+        rememberNormalSettings();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
-            .withTimeout(30, SECONDS)
+            .withTimeout(APP_START_TIMEOUT, SECONDS)
             .using(robot);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
@@ -131,22 +133,23 @@ public class AppRunner {
             throw new IllegalStateException("language is " + Language.getCurrent());
         }
 
+        // initialize the AWT native picker here, if it is used
         boolean nativeChoosers = EDT.call(FileChoosers::useNativeDialogs);
         if (nativeChoosers) {
             EDT.run(() -> FileChoosers.setUseNativeDialogs(false));
         }
 
-        if (fileNames.length == 0) {
-            return;
+        if (fileNames.length > 0) {
+            waitForImageLoading();
+            mouse.updateCanvasBounds();
         }
-
-        waitForImageLoading();
-        mouse.recalcCanvasBounds();
     }
 
     private static void waitForImageLoading() {
         // wait even after the frame is shown to
         // make sure that the image is also loaded
+        // TODO this is waiting for only one image, but
+        //   multiple images can be specified
         var comp = EDT.getComp();
         while (comp == null) {
             Utils.sleep(1, SECONDS);
@@ -154,58 +157,39 @@ public class AppRunner {
         }
     }
 
-    public Robot getRobot() {
-        return robot;
-    }
-
-    public Mouse getMouse() {
-        return mouse;
-    }
-
-    public Keyboard getKeyboard() {
-        return keyboard;
-    }
-
-    public FrameFixture getPW() {
-        return pw;
-    }
-
     public void runTests(Runnable tests) {
         assert calledOutsideEDT() : "on EDT";
 
         try {
             tests.run();
-        } catch (Throwable t) {
+        } finally {
             keyboard.releaseModifierKeys();
-            throw t;
         }
-        keyboard.releaseModifierKeys();
     }
 
-    void setupDelayBetweenEvents() {
+    void configureRobotDelay() {
         // for example -Drobot.delay.millis=500 could be added to
         // the command line to slow it down
-        String s = System.getProperty("robot.delay.millis");
-        if (s == null) {
-            delayBetweenEvents(ROBOT_DELAY_DEFAULT);
-        } else {
-            int delay = Integer.parseInt(s);
-            delayBetweenEvents(delay);
-        }
+        String customDelay = System.getProperty("robot.delay.millis");
+        int delayMs = customDelay != null ?
+            Integer.parseInt(customDelay) :
+            DEFAULT_ROBOT_DELAY;
+        setRobotDelay(delayMs);
     }
 
-    private void delayBetweenEvents(int millis) {
+    private void setRobotDelay(int millis) {
         robot.settings().delayBetweenEvents(millis);
         robot.settings().eventPostingDelay(2 * millis);
     }
 
     void runSlowly() {
-        delayBetweenEvents(ROBOT_DELAY_SLOW);
+        setRobotDelay(SLOW_ROBOT_DELAY);
     }
 
     void exit() {
         countDownBeforeExit();
-        restoreNormalSettings();
+        restoreInitialSettings();
+        
         String exitMenuName = JVM.isMac ? "Quit" : "Exit";
         runMenuCommand(exitMenuName);
         findJOptionPane().yesButton().click();
@@ -293,12 +277,12 @@ public class AppRunner {
         pw.button(FgBgColorSelector.RANDOMIZE_BUTTON_NAME).click();
     }
 
-    public void createNewImage(int width, int height, String title) {
+    public void createNewImage(int width, int height, String name) {
         runMenuCommand("New Image...");
 
         var dialog = findDialogByTitle("New Image");
-        if (title != null) {
-            dialog.textBox("nameTF").deleteText().enterText(title);
+        if (name != null) {
+            dialog.textBox("nameTF").deleteText().enterText(name);
         }
         dialog.textBox("widthTF").deleteText().enterText(String.valueOf(width));
 
@@ -322,14 +306,14 @@ public class AppRunner {
         dialog.requireNotVisible();
 
         String activeCompName = EDT.active(Composition::getName);
-        if (title != null) {
-            assertThat(activeCompName).isEqualTo(title);
+        if (name != null) {
+            assertThat(activeCompName).isEqualTo(name);
         } else {
             assertThat(activeCompName).startsWith("Untitled");
         }
         assert !EDT.active(Composition::isDirty);
 
-        mouse.recalcCanvasBounds();
+        mouse.updateCanvasBounds();
         checkNumLayersIs(1);
     }
 
@@ -372,7 +356,7 @@ public class AppRunner {
 
         // wait a bit to make sure that the async open completed
         IOTasks.waitForIdle();
-        mouse.recalcCanvasBounds();
+        mouse.updateCanvasBounds();
 
         if (EDT.active(Composition::isDirty)) {
             String compName = EDT.active(Composition::getName);
@@ -475,10 +459,10 @@ public class AppRunner {
         dialog.comboBox("type").selectItem(type.toString());
 
         for (int i = 0; i < numClicks; i++) {
-            AJSUtils.findButtonByText(dialog, "Change!").click();
+            GUITestUtils.findButtonByText(dialog, "Change!").click();
         }
 
-        AJSUtils.findButtonByText(dialog, "Close").click();
+        GUITestUtils.findButtonByText(dialog, "Close").click();
         dialog.requireNotVisible();
     }
 
@@ -487,23 +471,23 @@ public class AppRunner {
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text, boolean onlyIfVisible) {
-        AJSUtils.findPopupMenuItemByText(popupMenu, text, onlyIfVisible)
+        GUITestUtils.findPopupMenuItemByText(popupMenu, text, onlyIfVisible)
             .requireEnabled()
             .click();
     }
 
     void expectAndCloseErrorDialog() {
         var errorDialog = findDialogByTitle("Error");
-        AJSUtils.findButtonByText(errorDialog, "OK").click();
+        GUITestUtils.findButtonByText(errorDialog, "OK").click();
         errorDialog.requireNotVisible();
     }
 
     static String getCurrentTimeHM() {
-        return DATE_FORMAT_HM.format(LocalTime.now());
+        return TIME_FORMAT_HM.format(LocalTime.now());
     }
 
     static String getCurrentTimeHMS() {
-        return DATE_FORMAT_HMS.format(LocalTime.now());
+        return TIME_FORMAT_HMS.format(LocalTime.now());
     }
 
     JMenuItemFixture findMenuItemByText(String guiName) {
@@ -524,10 +508,6 @@ public class AppRunner {
         return WindowFinder.findDialog("filterDialog")
             .withTimeout(1, TimeUnit.MINUTES)
             .using(robot);
-    }
-
-    DialogFixture findAnyDialog() {
-        return WindowFinder.findDialog(JDialog.class).using(robot);
     }
 
     DialogFixture findDialogByTitle(String title) {
@@ -581,7 +561,7 @@ public class AppRunner {
     }
 
     public JButtonFixture findButtonByText(String text) {
-        return AJSUtils.findButtonByText(pw, text);
+        return GUITestUtils.findButtonByText(pw, text);
     }
 
     public void setMaskViewModeViaRightClick(String layerName, MaskViewMode maskViewMode) {
@@ -742,14 +722,14 @@ public class AppRunner {
         layersContainer.requireLayerNames(expectedNames);
     }
 
-    private static void saveNormalSettings() {
-        startingOpenDir = Dirs.getLastOpen();
-        startingSaveDir = Dirs.getLastSave();
+    private static void rememberNormalSettings() {
+        initialOpenDir = Dirs.getLastOpen();
+        initialSaveDir = Dirs.getLastSave();
     }
 
-    private static void restoreNormalSettings() {
-        Dirs.setLastOpen(startingOpenDir);
-        Dirs.setLastSave(startingSaveDir);
+    private static void restoreInitialSettings() {
+        Dirs.setLastOpen(initialOpenDir);
+        Dirs.setLastSave(initialSaveDir);
     }
 
     void closeDoYouWantToSaveChangesDialog() {
@@ -852,7 +832,7 @@ public class AppRunner {
 
         runMenuCommand("New Color Fill Layer...");
         var colorSelector = findDialogByTitle("Add Color Fill Layer");
-        AJSUtils.findButtonByText(colorSelector, "OK").click();
+        GUITestUtils.findButtonByText(colorSelector, "OK").click();
 
         EDT.run(() -> ((ColorFillLayer) Views.getActiveLayer()).changeColor(c, true));
 
@@ -984,6 +964,22 @@ public class AppRunner {
                 return "layerOpacity".equals(c.getParent().getName());
             }
         });
+    }
+
+    public Robot getRobot() {
+        return robot;
+    }
+
+    public Mouse getMouse() {
+        return mouse;
+    }
+
+    public Keyboard getKeyboard() {
+        return keyboard;
+    }
+
+    public FrameFixture getPW() {
+        return pw;
     }
 
     // Whether a "randomize settings" button should be tested for a filter.

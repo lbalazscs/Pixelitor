@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,7 +77,7 @@ public class UserPreset implements Preset {
      * Used when the existence of a preset file is detected
      */
     public UserPreset(File file, String presetDirName) {
-        this.name = FileUtils.stripExtension(file.getName());
+        this.name = FileUtils.removeExtension(file.getName());
         this.file = file;
         this.presetDirName = presetDirName;
         loaded = false;

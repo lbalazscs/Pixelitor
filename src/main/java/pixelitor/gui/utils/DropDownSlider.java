@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class DropDownSlider extends JComboBox<String> {
         recalcPreferredSize();
         setEditable(true);
 
-        new IntDocumentFilter(minValue, maxValue).setOn(getEditorComponent());
+        new IntDocumentFilter(minValue, maxValue).applyOn(getEditorComponent());
 
         slider = new JSlider(HORIZONTAL, minValue, maxValue, value);
         popupMenu = new JPopupMenu();

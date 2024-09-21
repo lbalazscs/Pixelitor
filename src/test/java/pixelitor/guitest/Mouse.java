@@ -26,7 +26,6 @@ import pixelitor.Views;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Dialog;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -44,8 +43,8 @@ import static org.assertj.swing.core.MouseButton.LEFT_BUTTON;
  */
 public class Mouse {
     private final Robot robot;
-    private Rectangle canvasBounds;
-    private static final int CANVAS_SAFETY_DIST = 20;
+    private Rectangle canvasBounds; // relative to the screen
+    private static final int CANVAS_SAFETY_MARGIN = 20;
     private final FrameFixture pw;
     private final Random random = new Random();
 
@@ -54,27 +53,37 @@ public class Mouse {
         this.pw = pw;
     }
 
-    // move relative to the screen
-    void moveToScreen(int x, int y) {
-        robot.moveMouse(x, y);
+    /**
+     * Moves the mouse to absolute screen coordinates.
+     */
+    void moveToScreen(int screenX, int screenY) {
+        robot.moveMouse(screenX, screenY);
     }
 
-    // move relative to the canvas
-    void moveToCanvas(int x, int y) {
-        moveToScreen(x + canvasBounds.x, y + canvasBounds.y);
+    /**
+     * Moves the mouse to coordinates relative to the canvas.
+     */
+    void moveToCanvas(int canvasX, int canvasY) {
+        moveToScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY);
     }
 
     // drag relative to the screen
-    void dragToScreen(int x, int y) {
-        Point currentLoc = MouseInfo.getPointerInfo().getLocation();
+    void dragToScreen(int targetX, int targetY) {
+        Point currentPos = MouseInfo.getPointerInfo().getLocation();
 
         robot.pressMouse(LEFT_BUTTON);
 
+        // Move to intermediate point
         Utils.sleep(50, MILLISECONDS);
-        moveToScreen((x + currentLoc.x) / 2, (y + currentLoc.y) / 2);
+        moveToScreen(
+            (targetX + currentPos.x) / 2,
+            (targetY + currentPos.y) / 2);
 
+        // Move to final position
         Utils.sleep(50, MILLISECONDS);
-        moveToScreen(x, y);
+        moveToScreen(targetX, targetY);
 
         Utils.sleep(50, MILLISECONDS);
         robot.releaseMouse(LEFT_BUTTON);
@@ -82,8 +91,10 @@ public class Mouse {
     }
 
     // drag relative to the canvas
-    void dragToCanvas(int x, int y) {
-        dragToScreen(x + canvasBounds.x, y + canvasBounds.y);
+    void dragToCanvas(int canvasX, int canvasY) {
+        dragToScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY);
     }
 
     public void drag(CanvasDrag drag) {
@@ -92,74 +103,72 @@ public class Mouse {
     }
 
     // move relative to the given dialog
-    void moveTo(DialogFixture dialog, int x, int y) {
-        Dialog c = dialog.target();
-
-        robot.moveMouse(c, x, y);
+    void moveTo(DialogFixture dialog, int dialogX, int dialogY) {
+        robot.moveMouse(dialog.target(), dialogX, dialogY);
     }
 
     // drag relative to the given dialog
-    void dragTo(DialogFixture dialog, int x, int y) {
-        Dialog c = dialog.target();
-
+    void dragTo(DialogFixture dialog, int dialogX, int dialogY) {
         robot.pressMouse(LEFT_BUTTON);
-        robot.moveMouse(c, x, y);
+        robot.moveMouse(dialog.target(), dialogX, dialogY);
         robot.releaseMouse(LEFT_BUTTON);
     }
 
-    void altDragToScreen(int x, int y) {
+    void altDragToScreen(int screenX, int screenY) {
         robot.pressKey(VK_ALT);
-        dragToScreen(x, y);
+        dragToScreen(screenX, screenY);
         robot.releaseKey(VK_ALT);
         robot.waitForIdle();
     }
 
-    void altDragToCanvas(int x, int y) {
-        altDragToScreen(x + canvasBounds.x, y + canvasBounds.y);
+    void altDragToCanvas(int canvasX, int canvasY) {
+        altDragToScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY);
     }
 
     Point moveRandomlyWithinCanvas() {
-        int x = createRandomScreenXWithinCanvas();
-        int y = createRandomScreenYWithinCanvas();
+        int randomX = generateRandomScreenXWithinCanvas();
+        int randomY = generateRandomScreenYWithinCanvas();
 
-        Point p = new Point(x, y);
-        assert canvasBounds.contains(p);
-        moveToScreen(x, y);
+        Point randomPoint = new Point(randomX, randomY);
+        assert canvasBounds.contains(randomPoint);
+        moveToScreen(randomX, randomY);
 
-        return p;
+        return randomPoint;
     }
 
     Point dragRandomlyWithinCanvas() {
-        int x = createRandomScreenXWithinCanvas();
-        int y = createRandomScreenYWithinCanvas();
+        int randomX = generateRandomScreenXWithinCanvas();
+        int randomY = generateRandomScreenYWithinCanvas();
 
-        Point p = new Point(x, y);
-        assert canvasBounds.contains(p);
-        dragToScreen(x, y);
+        Point randomPoint = new Point(randomX, randomY);
+        assert canvasBounds.contains(randomPoint);
+        dragToScreen(randomX, randomY);
 
-        return p;
+        return randomPoint;
     }
 
-    private int createRandomScreenXWithinCanvas() {
-        return canvasBounds.x + CANVAS_SAFETY_DIST
-            + random.nextInt(canvasBounds.width - CANVAS_SAFETY_DIST * 2);
+    private int generateRandomScreenXWithinCanvas() {
+        return canvasBounds.x + CANVAS_SAFETY_MARGIN
+            + random.nextInt(canvasBounds.width - CANVAS_SAFETY_MARGIN * 2);
     }
 
-    private int createRandomScreenYWithinCanvas() {
-        return canvasBounds.y + CANVAS_SAFETY_DIST
-            + random.nextInt(canvasBounds.height - CANVAS_SAFETY_DIST * 2);
+    private int generateRandomScreenYWithinCanvas() {
+        return canvasBounds.y + CANVAS_SAFETY_MARGIN
+            + random.nextInt(canvasBounds.height - CANVAS_SAFETY_MARGIN * 2);
     }
 
     void shiftMoveClickRandom() {
-        int x = createRandomScreenXWithinCanvas();
-        int y = createRandomScreenYWithinCanvas();
+        int randomX = generateRandomScreenXWithinCanvas();
+        int randomY = generateRandomScreenYWithinCanvas();
         pw.pressKey(VK_SHIFT);
-        moveToScreen(x, y);
+        moveToScreen(randomX, randomY);
         click();
         pw.releaseKey(VK_SHIFT);
     }
 
-    void moveToActiveICCenter() {
+    void moveToActiveCanvasCenter() {
         moveToScreen(canvasBounds.x + canvasBounds.width / 2,
             canvasBounds.y + canvasBounds.height / 2);
         robot.waitForIdle();
@@ -184,21 +193,23 @@ public class Mouse {
 
     // this should be used only in special cases, where the
     // built-in AssertJ-Swing methods don't work
-    JPopupMenuFixture showPopupAtCanvas(int x, int y) {
-        moveToCanvas(x, y);
+    JPopupMenuFixture showPopupAtCanvas(int canvasX, int canvasY) {
+        moveToCanvas(canvasX, canvasY);
         rightClick();
         JPopupMenu popup = robot.findActivePopupMenu();
-        assert popup != null : "no popup at (" + x + ", " + y + ")";
+        assert popup != null : "no popup at (" + canvasX + ", " + canvasY + ")";
         return new JPopupMenuFixture(robot, popup);
     }
 
-    void clickScreen(int x, int y) {
-        moveToScreen(x, y);
+    void clickScreen(int screenX, int screenY) {
+        moveToScreen(screenX, screenY);
         click();
     }
 
-    void clickCanvas(int x, int y) {
-        clickScreen(x + canvasBounds.x, y + canvasBounds.y);
+    void clickCanvas(int canvasX, int canvasY) {
+        clickScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY);
     }
 
     void randomClick() {
@@ -258,13 +269,15 @@ public class Mouse {
         robot.releaseKey(VK_SHIFT);
     }
 
-    void ctrlClickScreen(int x, int y) {
-        moveToScreen(x, y);
+    void ctrlClickScreen(int screenX, int screenY) {
+        moveToScreen(screenX, screenY);
         ctrlClick();
     }
 
-    void ctrlClickCanvas(int x, int y) {
-        ctrlClickScreen(x + canvasBounds.x, y + canvasBounds.y);
+    void ctrlClickCanvas(int canvasX, int canvasY) {
+        ctrlClickScreen(
+            canvasBounds.x + canvasX,
+            canvasBounds.y + canvasY);
     }
 
     void randomCtrlClick() {
@@ -291,7 +304,7 @@ public class Mouse {
             canvasBounds.y + canvasBounds.height / 2);
     }
 
-    void recalcCanvasBounds() {
+    void updateCanvasBounds() {
         canvasBounds = EDT.call(() ->
             Views.getActive().getVisibleCanvasBoundsOnScreen());
     }

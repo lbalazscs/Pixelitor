@@ -48,7 +48,8 @@ public class SwingFilePicker implements FilePicker {
     public SwingFilePicker() {
         UIManager.addPropertyChangeListener(evt -> {
             if (evt.getPropertyName().equals("lookAndFeel")) {
-                // force reinitialization of the cached file pickers
+                // force the reinitialization of the cached
+                // file pickers when the look and feel changes
                 openChooser = null;
                 saveChooser = null;
             }
@@ -59,10 +60,10 @@ public class SwingFilePicker implements FilePicker {
     public File getSupportedOpenFile() {
         initOpenChooser();
         GlobalEvents.dialogOpened("Open");
-        int result = openChooser.showOpenDialog(PixelitorWindow.get());
+        int userChoice = openChooser.showOpenDialog(PixelitorWindow.get());
         GlobalEvents.dialogClosed("Open");
 
-        if (result == JFileChooser.APPROVE_OPTION) {
+        if (userChoice == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
             Dirs.setLastOpen(selectedFile.getParentFile());
             return selectedFile;
@@ -71,22 +72,22 @@ public class SwingFilePicker implements FilePicker {
     }
 
     @Override
-    public File showSaveDialog(FileChooserConfig chooserConfig) {
+    public File showSaveDialog(FileChooserConfig config) {
         initSaveChooser();
 
-        String suggestedFileName = chooserConfig.suggestedFileName();
-        var selectableFormats = chooserConfig.formats();
+        String suggestedFileName = config.suggestedFileName();
+        var selectableFormats = config.formats();
         if (selectableFormats == ANY) {
             saveChooser.setAcceptAllFileFilterUsed(true);
-            setOnlyOneSaveExtension(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
+            setSingleSaveExtension(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
         } else {
-            FileFilter fileFilter = chooserConfig.defaultFileFilter();
+            FileFilter fileFilter = config.defaultFileFilter();
             if (selectableFormats == SINGLE) {
-                setOnlyOneSaveExtension(fileFilter);
+                setSingleSaveExtension(fileFilter);
             } else {
                 // If the file is saved normally, don't suggest an extension,
                 // because the chooser should add it based on the selected file filter.
-                suggestedFileName = FileUtils.stripExtension(suggestedFileName);
+                suggestedFileName = FileUtils.removeExtension(suggestedFileName);
 
                 saveChooser.setFileFilter(fileFilter);
             }
@@ -95,10 +96,10 @@ public class SwingFilePicker implements FilePicker {
 
         assert saveChooser.getFileSelectionMode() == JFileChooser.FILES_ONLY;
 
-        int result;
+        int userChoice;
         try {
             GlobalEvents.dialogOpened("Save");
-            result = saveChooser.showSaveDialog(PixelitorWindow.get());
+            userChoice = saveChooser.showSaveDialog(PixelitorWindow.get());
             GlobalEvents.dialogClosed("Save");
         } catch (Exception e) {
             Messages.showException(e);
@@ -110,14 +111,14 @@ public class SwingFilePicker implements FilePicker {
         }
 
         //noinspection IfCanBeSwitch
-        if (result == JFileChooser.APPROVE_OPTION) {
+        if (userChoice == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
             Dirs.setLastSave(selectedFile.getParentFile());
             return selectedFile;
-        } else if (result == JFileChooser.CANCEL_OPTION) {
+        } else if (userChoice == JFileChooser.CANCEL_OPTION) {
             // cancelled
             return null;
-        } else if (result == JFileChooser.ERROR_OPTION) {
+        } else if (userChoice == JFileChooser.ERROR_OPTION) {
             // error or dismissed
             return null;
         }
@@ -132,42 +133,40 @@ public class SwingFilePicker implements FilePicker {
         openChooser = new JFileChooser(Dirs.getLastOpen()) {
             @Override
             public void approveSelection() {
-                File f = getSelectedFile();
-                if (!f.exists()) {
+                File selectedFile = getSelectedFile();
+                if (!selectedFile.exists()) {
                     Dialogs.showErrorDialog(this, "File not found",
-                        "<html>The file <b>" + f.getAbsolutePath()
+                        "<html>The file <b>" + selectedFile.getAbsolutePath()
                             + " </b> doesn't exist. " +
                             "<br>Check the file name and try again."
                     );
                     return;
                 }
-                if (!Files.isReadable(f.toPath())) {
-                    Dialogs.showFileNotReadableError(this, f);
+                if (!Files.isReadable(selectedFile.toPath())) {
+                    Dialogs.showFileNotReadableError(this, selectedFile);
                     return;
                 }
                 super.approveSelection();
             }
         };
         openChooser.setName("open");
-
         setDefaultOpenExtensions();
 
         var accessoryPanel = new JPanel(new BorderLayout());
         var progressPanel = new ProgressPanel();
-        var preview = new ImagePreviewPanel(progressPanel);
-        accessoryPanel.add(preview, CENTER);
+        var previewPanel = new ImagePreviewPanel(progressPanel);
+        accessoryPanel.add(previewPanel, CENTER);
         accessoryPanel.add(progressPanel, SOUTH);
 
         openChooser.setAccessory(accessoryPanel);
-        openChooser.addPropertyChangeListener(preview);
+        openChooser.addPropertyChangeListener(previewPanel);
     }
 
     private void initSaveChooser() {
         assert calledOnEDT() : threadInfo();
 
         if (saveChooser == null) {
-            File lastSaveDir = Dirs.getLastSave();
-            saveChooser = new SaveFileChooser(lastSaveDir);
+            saveChooser = new SaveFileChooser(Dirs.getLastSave());
             saveChooser.setName("save");
             saveChooser.setDialogTitle(i18n("save_as"));
             setDefaultSaveExtensions();
@@ -186,16 +185,16 @@ public class SwingFilePicker implements FilePicker {
         }
     }
 
-    private void setOnlyOneSaveExtension(FileFilter filter) {
-        setupFilterToOnlyOneFormat(saveChooser, filter);
+    private void setSingleSaveExtension(FileFilter filter) {
+        configureSingleFileFilter(saveChooser, filter);
     }
 
-    private void setOnlyOneOpenExtension(FileFilter filter) {
-        setupFilterToOnlyOneFormat(openChooser, filter);
+    private void setSingleOpenExtension(FileFilter filter) {
+        configureSingleFileFilter(openChooser, filter);
     }
 
-    private void setupFilterToOnlyOneFormat(JFileChooser chooser,
-                                            FileFilter chosenFilter) {
+    private void configureSingleFileFilter(JFileChooser chooser,
+                                           FileFilter chosenFilter) {
         FileFilter[] allFilters;
         if (chooser == openChooser) {
             allFilters = OPEN_FILTERS;
@@ -204,6 +203,7 @@ public class SwingFilePicker implements FilePicker {
         } else {
             throw new IllegalArgumentException("chooser = " + chooser.getClass().getName());
         }
+
         for (FileFilter filter : allFilters) {
             if (filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
@@ -223,7 +223,7 @@ public class SwingFilePicker implements FilePicker {
         try {
             initOpenChooser();
             openChooser.setAcceptAllFileFilterUsed(true);
-            setOnlyOneOpenExtension(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
+            setSingleOpenExtension(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
             return getSupportedOpenFile();
         } catch (Exception e) {
             Messages.showException(e);

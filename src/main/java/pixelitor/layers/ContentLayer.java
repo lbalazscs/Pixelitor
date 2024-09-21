@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,19 +28,17 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 
 /**
- * A layer with a content (text or image layer) that
- * can be moved/rotated.
+ * An abstract base class that defines common properties and behaviors
+ * for layers that have content that can be moved or rotated.
  */
 public abstract class ContentLayer extends Layer {
     @Serial
     private static final long serialVersionUID = 2L;
-
-    // used only while dragging
-    private transient int tmpTx = 0;
-    private transient int tmpTy = 0;
 
     /**
      * The translation relative to the default position.
@@ -51,8 +49,22 @@ public abstract class ContentLayer extends Layer {
     private int translationX = 0;
     private int translationY = 0;
 
+    // Store the relative movement of the layer content while
+    // the user is actively dragging it with the Move Tool.
+    private transient int tmpTx = 0;
+    private transient int tmpTy = 0;
+
     protected ContentLayer(Composition comp, String name) {
         super(comp, name);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        // defaults for transient fields
+        tmpTx = 0;
+        tmpTy = 0;
     }
 
     /**

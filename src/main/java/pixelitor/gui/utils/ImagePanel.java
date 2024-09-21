@@ -26,51 +26,61 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A panel that shows an image,
- * optionally on a checkerboard
+ * A panel that displays an image with an optional checkerboard background.
  */
 public class ImagePanel extends JPanel {
     protected BufferedImage image;
-    private final boolean drawCheckerBoard;
+    private final boolean isCheckerboardEnabled;
     private CheckerboardPainter checkerboardPainter;
 
     public ImagePanel(boolean useCheckerBoard) {
-        drawCheckerBoard = useCheckerBoard;
+        isCheckerboardEnabled = useCheckerBoard;
         if (useCheckerBoard) {
             checkerboardPainter = ImageUtils.createCheckerboardPainter();
         }
     }
 
-    public void setImage(BufferedImage newImage) {
+    public void replaceImage(BufferedImage newImage) {
+        // clean up resources of the previous image
         if (image != null) {
             image.flush();
         }
+
+        // sets the new image without repainting
         this.image = newImage;
     }
 
-    public void changeImage(BufferedImage newImage) {
-        setImage(newImage);
+    public void refreshImage(BufferedImage newImage) {
+        replaceImage(newImage);
         repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        // for the case when the panel is larger than the image
-        g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth(), getHeight());
+        // needed when the panel is larger than the image
+        paintPanelBackground(g);
 
         if (image == null) {
             return;
         }
 
         try {
-            if (drawCheckerBoard) {
-                Graphics2D g2 = (Graphics2D) g;
-                checkerboardPainter.paint(g2, null, image.getWidth(), image.getHeight());
-            }
-            g.drawImage(image, 0, 0, null);
+            renderImage(g);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
+    }
+
+    private void paintPanelBackground(Graphics g) {
+        g.setColor(getBackground());
+        g.fillRect(0, 0, getWidth(), getHeight());
+    }
+
+    private void renderImage(Graphics g) {
+        if (isCheckerboardEnabled) {
+            Graphics2D g2 = (Graphics2D) g;
+            checkerboardPainter.paint(g2, null, image.getWidth(), image.getHeight());
+        }
+        g.drawImage(image, 0, 0, null);
     }
 }

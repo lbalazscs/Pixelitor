@@ -125,21 +125,21 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
     private void addFileSelector(GridBagHelper gbh) {
         JPanel filePanel = new JPanel(new FlowLayout());
         filePanel.setBorder(createTitledBorder("Output File/Folder"));
-        fileNameTF = browseFilesSupport.getNameTF();
+        fileNameTF = browseFilesSupport.getPathTextField();
         filePanel.add(createValidatedTF(fileNameTF, fileNameValidator));
         filePanel.add(browseFilesSupport.getBrowseButton());
         gbh.addRow(filePanel);
     }
 
     private void outputTypeChanged() {
-        TweenOutputType selected = getOutputType();
-        if (selected.needsDirectory()) {
+        TweenOutputType outputType = getOutputType();
+        if (outputType.needsDirectory()) {
             browseFilesSupport.setSelectionMode(DIRECTORY);
             browseFilesSupport.setChooserDialogTitle("Select Output Folder");
         } else {
             browseFilesSupport.setSelectionMode(FILE);
             browseFilesSupport.setChooserDialogTitle("Select Output File");
-            browseFilesSupport.setFileFilter(selected.getFileFilter());
+            browseFilesSupport.setFileFilter(outputType.getFileFilter());
         }
         if (fileNameTF != null) { // not the initial setup
             fileNameTF.repaint();

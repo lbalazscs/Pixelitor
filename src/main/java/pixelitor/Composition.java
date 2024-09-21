@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static pixelitor.io.FileUtils.stripExtension;
+import static pixelitor.io.FileUtils.removeExtension;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.layers.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
@@ -257,7 +257,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.dirty = false;
             compCopy.file = null;
             compCopy.fileTime = 0;
-            compCopy.name = createCopyName(stripExtension(name));
+            compCopy.name = createCopyName(removeExtension(name));
             if (guides != null) {
                 compCopy.guides = guides.copyForNewComp(view);
             }
@@ -477,16 +477,20 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void setName(String name) {
         this.name = name;
         if (isOpen()) {
-            view.updateViewContainerTitle();
+            view.updateTitle();
             PixelitorWindow.get().updateTitle(this);
         }
     }
 
-    public String createFileNameWithExt(String ext) {
+    /**
+     * Create a file name that will be suggested as the default
+     * file name in the save dialog.
+     */
+    public String suggestFileName(String ext) {
         if (file == null) {
             return name + "." + ext;
         } else {
-            return FileUtils.replaceExt(file.getName(), ext);
+            return FileUtils.replaceExtension(file.getName(), ext);
         }
     }
 

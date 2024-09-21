@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,9 @@ package pixelitor.tools.crop;
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,38 +37,28 @@ class CropBoxTest {
 
     @Test
     void aspectRatio() {
-        double aspectRatio;
-        Rectangle rect;
-
         // width: 0
-        rect = new Rectangle(30, 40, 0, 20);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(0);
+        checkAspectRatio(new Rectangle(30, 40, 0, 20), 0);
 
         // height: 0
-        rect = new Rectangle(30, 40, 20, 0);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(0);
+        checkAspectRatio(new Rectangle(30, 40, 20, 0), 0);
 
         // width, height: 0
-        rect = new Rectangle(30, 40, 0, 0);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(0);
+        checkAspectRatio(new Rectangle(30, 40, 0, 0), 0);
 
         // height > width
-        rect = new Rectangle(30, 40, 10, 20);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(0.5);
+        checkAspectRatio(new Rectangle(30, 40, 10, 20), 0.5);
 
         // width > height
-        rect = new Rectangle(30, 40, 20, 10);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(2.0);
+        checkAspectRatio(new Rectangle(30, 40, 20, 10), 2.0);
 
         // width == height
-        rect = new Rectangle(30, 40, 20, 20);
-        aspectRatio = CropBox.calcAspectRatio(rect);
-        assertThat(aspectRatio).isEqualTo(1.0);
+        checkAspectRatio(new Rectangle(30, 40, 20, 20), 1.0);
+    }
+
+    private static void checkAspectRatio(Rectangle rect, double expected) {
+        double aspectRatio = CropBox.calcAspectRatio(rect);
+        assertThat(aspectRatio).isEqualTo(expected);
     }
 
     @Test

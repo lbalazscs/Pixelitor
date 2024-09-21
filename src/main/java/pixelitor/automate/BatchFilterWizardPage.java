@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
+        public Optional<WizardPage> getNextPage() {
             var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
             if (filter instanceof FilterWithGUI) {
@@ -68,7 +68,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onShowingInDialog(OKCancelDialog dialog) {
+        public void onPageShown(OKCancelDialog dialog) {
             JButton okButton = dialog.getOkButton();
 
             okButton.setEnabled(false);
@@ -82,7 +82,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
+        public void onComplete(Wizard wizard, Drawable dr) {
             var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
 
@@ -97,7 +97,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
+        public Optional<WizardPage> getNextPage() {
             return Optional.empty();
         }
 
@@ -120,7 +120,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
+        public void onComplete(Wizard wizard, Drawable dr) {
             // cancel the previewing
             onWizardCanceled(dr);
         }

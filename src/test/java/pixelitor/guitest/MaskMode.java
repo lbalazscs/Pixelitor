@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,16 +20,24 @@ package pixelitor.guitest;
 import pixelitor.Views;
 import pixelitor.layers.MaskViewMode;
 
-import static pixelitor.layers.MaskViewMode.*;
+import java.util.Arrays;
+import java.util.Locale;
+
+import static pixelitor.layers.MaskViewMode.EDIT_MASK;
+import static pixelitor.layers.MaskViewMode.NORMAL;
+import static pixelitor.layers.MaskViewMode.RUBYLITH;
+import static pixelitor.layers.MaskViewMode.SHOW_MASK;
 
 /**
- * What mask state is tested in an {@link AssertJSwingTest}
+ * The possible states of the active layer with regards to its mask.
+ * Used to test all states with the same mouse and keyboard input
+ * in {@link MainGuiTest}.
  */
 enum MaskMode {
     /**
-     * A layer with no mask is tested
+     * The active layer has no mask.
      */
-    NO_MASK(NORMAL) {
+    NO_MASK(null) {
         @Override
         public void check() {
             if (EDT.activeLayerHasMask()) {
@@ -38,7 +46,7 @@ enum MaskMode {
         }
 
         @Override
-        public void setLayer(AssertJSwingTest tester) {
+        public void configureActiveLayer(MainGuiTest tester) {
             if (EDT.activeLayerHasMask()) {
                 tester.deleteLayerMask();
             }
@@ -46,11 +54,11 @@ enum MaskMode {
 
         @Override
         public void setMaskViewMode(Keyboard keyboard) {
-            keyboard.pressCtrlOne();
+            // do nothing
         }
     },
     /**
-     * A layer with a mask is tested
+     * The active layer has a mask and it's in NORMAL mask view mode
      */
     WITH_MASK(NORMAL) {
         @Override
@@ -65,7 +73,7 @@ enum MaskMode {
         }
 
         @Override
-        public void setLayer(AssertJSwingTest tester) {
+        public void configureActiveLayer(MainGuiTest tester) {
             // existing masks are allowed because even if they result
             // from a layer duplication, a correct mask must be set up
             tester.addLayerMask(true);
@@ -94,7 +102,7 @@ enum MaskMode {
         }
 
         @Override
-        public void setLayer(AssertJSwingTest tester) {
+        public void configureActiveLayer(MainGuiTest tester) {
             tester.addLayerMask(true);
         }
 
@@ -121,7 +129,7 @@ enum MaskMode {
         }
 
         @Override
-        public void setLayer(AssertJSwingTest tester) {
+        public void configureActiveLayer(MainGuiTest tester) {
             tester.addLayerMask(true);
         }
 
@@ -148,7 +156,7 @@ enum MaskMode {
         }
 
         @Override
-        public void setLayer(AssertJSwingTest tester) {
+        public void configureActiveLayer(MainGuiTest tester) {
             tester.addLayerMask(true);
         }
 
@@ -184,13 +192,36 @@ enum MaskMode {
     /**
      * Make sure that the testing more is set on the active layer
      */
-    public void set(AssertJSwingTest tester) {
-        setLayer(tester);
+    public void apply(MainGuiTest tester) {
+        configureActiveLayer(tester);
         setMaskViewMode(tester.keyboard());
         tester.checkConsistency();
     }
 
-    public abstract void setLayer(AssertJSwingTest tester);
+    abstract void configureActiveLayer(MainGuiTest tester);
 
-    public abstract void setMaskViewMode(Keyboard keyboard);
+    abstract void setMaskViewMode(Keyboard keyboard);
+
+    public static MaskMode[] load() {
+        String maskMode = System.getProperty("mask.mode");
+        if (maskMode == null || maskMode.equalsIgnoreCase("all")) {
+//            Collections.shuffle(Arrays.asList(usedMaskModes));
+            return values();
+        }
+
+        maskMode = maskMode.toUpperCase(Locale.ENGLISH);
+        MaskMode[] usedMaskModes;
+        // if a specific test mode was configured, test only that
+        MaskMode mode = null;
+        try {
+            mode = valueOf(maskMode);
+        } catch (IllegalArgumentException e) {
+            String msg = "Mask mode " + maskMode + " not found.\n" +
+                "Available mask modes: " + Arrays.toString(values());
+            System.err.println(msg);
+            System.exit(1);
+        }
+        usedMaskModes = new MaskMode[]{mode};
+        return usedMaskModes;
+    }
 }

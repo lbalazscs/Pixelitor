@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ public class UpdatesCheck {
 
     public static void checkForUpdates() {
         Result<Properties, String> result = getLastVersionInfo();
-        if (!result.wasSuccess()) {
-            showCouldNotCheckForUpdatesDialog(result.errorDetail());
+        if (!result.isSuccess()) {
+            showCouldNotCheckForUpdatesDialog(result.errorDetails());
             return;
         }
         Properties versionInfo = result.get();

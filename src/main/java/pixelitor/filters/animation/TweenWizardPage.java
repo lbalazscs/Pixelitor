@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,45 +36,47 @@ import java.util.Optional;
  * A page in the tweening animation wizard.
  */
 public enum TweenWizardPage implements WizardPage {
-    SELECT_FILTER {
-        private FilterSearchPanel searchPanel;
+    FILTER_SELECTION {
+        private FilterSearchPanel filterSelector;
 
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html> Create a tweening animation based on the settings of the selected filter.";
+            return "<html>Select a filter to create your tweening animation. The animation " +
+                "will interpolate between two states of the selected filter.";
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
-            return Optional.of(INITIAL_FILTER_SETTINGS);
+        public Optional<WizardPage> getNextPage() {
+            return Optional.of(STARTING_FILTER_STATE);
         }
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            searchPanel = new FilterSearchPanel(Filters.getAnimationFilters());
-            return searchPanel;
+            filterSelector = new FilterSearchPanel(Filters.getAnimationFilters());
+            return filterSelector;
         }
 
         @Override
-        public void onShowingInDialog(OKCancelDialog dialog) {
+        public void onPageShown(OKCancelDialog dialog) {
             JButton okButton = dialog.getOkButton();
 
             okButton.setEnabled(false);
-            searchPanel.addSelectionListener(e ->
-                okButton.setEnabled(searchPanel.hasSelection()));
+            filterSelector.addSelectionListener(e ->
+                okButton.setEnabled(filterSelector.hasSelection()));
         }
 
         @Override
         public void onWizardCanceled(Drawable dr) {
+            // No cleanup needed
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
-            FilterAction selectedItem = searchPanel.getSelectedFilter();
+        public void onComplete(Wizard wizard, Drawable dr) {
+            FilterAction selectedItem = filterSelector.getSelectedFilter();
             ParametrizedFilter filter = (ParametrizedFilter) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
         }
-    }, INITIAL_FILTER_SETTINGS {
+    }, STARTING_FILTER_STATE {
         @Override
         public String getHelpText(Wizard wizard) {
             String color = Themes.getCurrent().isDark() ? "#76ABFF" : "blue";
@@ -83,16 +85,15 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
-            return Optional.of(FINAL_FILTER_SETTINGS);
+        public Optional<WizardPage> getNextPage() {
+            return Optional.of(ENDING_FILTER_STATE);
         }
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            ParametrizedFilter filter = getFilter(wizard);
             dr.startPreviewing();
 
-            return filter.createGUI(dr, true);
+            return getFilter(wizard).createGUI(dr, true);
         }
 
         @Override
@@ -101,11 +102,11 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
+        public void onComplete(Wizard wizard, Drawable dr) {
             getAnimation(wizard).rememberInitialState();
-            getFilter(wizard).getParamSet().setFinalAnimationSettingMode(true);
+            getFilter(wizard).getParamSet().setFinalAnimationMode(true);
         }
-    }, FINAL_FILTER_SETTINGS {
+    }, ENDING_FILTER_STATE {
         @Override
         public String getHelpText(Wizard wizard) {
             String color = Themes.getCurrent().isDark() ? "#5DCF6E" : "blue";
@@ -113,14 +114,14 @@ public enum TweenWizardPage implements WizardPage {
                 + getFilter(wizard).getName() + "</i> filter.";
             boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
             if (hasGradient) {
-                text += "<br>Don't change the number of thumbs for the gradient, only their color or position.";
+                text += "<br>Note: Only modify gradient thumb colors and positions, not the number of thumbs.";
             }
             return text;
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
-            return Optional.of(OUTPUT_SETTINGS);
+        public Optional<WizardPage> getNextPage() {
+            return Optional.of(ANIMATION_SETTINGS);
         }
 
         @Override
@@ -140,32 +141,33 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
+        public void onComplete(Wizard wizard, Drawable dr) {
             // cancel the previewing
-            onWizardCanceled(dr);
+            dr.onFilterDialogCanceled();
 
             // save the final state
             getAnimation(wizard).rememberFinalState();
         }
-    }, OUTPUT_SETTINGS {
+    }, ANIMATION_SETTINGS {
         TweenOutputSettingsPanel outputSettingsPanel;
 
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html> <b>Output settings</b>" +
-                "<p>For file sequence output select an existing folder." +
-                "<br>For file output select a new or existing file in an existing folder.";
+            return "<html><b>Animation Output Settings</b>" +
+                "<br>Choose how to save your animation:<ul>" +
+                "<li>For file sequences: Select an existing folder" +
+                "<li>For single file: Choose a new or existing file in an existing folder";
         }
 
         @Override
-        public Optional<WizardPage> getNext() {
+        public Optional<WizardPage> getNextPage() {
             return Optional.empty();
         }
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
             if (outputSettingsPanel == null) {
-                // keeps the output settings by reusing the panel
+                // keeps the output settings by caching the panel
                 outputSettingsPanel = new TweenOutputSettingsPanel();
             }
             return outputSettingsPanel;
@@ -173,13 +175,13 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onWizardCanceled(Drawable dr) {
-
+            // No cleanup needed
         }
 
         @Override
-        public boolean isValid(Wizard wizard, Component dialogParent) {
+        public boolean validatePage(Wizard wizard, Component dialogParent) {
             ValidationResult validity = outputSettingsPanel.validateSettings();
-            if (!validity.isOK()) {
+            if (!validity.isValid()) {
                 validity.showErrorDialog(dialogParent);
                 return false;
             }
@@ -191,8 +193,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void finish(Wizard wizard, Drawable dr) {
-            // the settings were already saved while validating
+        public void onComplete(Wizard wizard, Drawable dr) {
+            // the settings were already saved during validation
         }
     };
 

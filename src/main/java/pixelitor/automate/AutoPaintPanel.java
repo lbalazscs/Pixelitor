@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,35 +34,35 @@ import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 import static pixelitor.tools.Tools.BRUSH;
 
 /**
- * The GUI of the "Auto Paint" dialog
+ * Configuration panel for the "Auto Paint".
  */
 public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
-    private static final String COLOR_FOREGROUND = "Foreground";
-    private static final String COLOR_INTERPOLATED = "Foreground-Background Mix";
-    private static final String COLOR_RANDOM = "Random";
-    public static final String[] COLOR_CHOICES =
-        {COLOR_INTERPOLATED, COLOR_FOREGROUND, COLOR_RANDOM};
+    private static final String COLOR_MODE_FOREGROUND = "Foreground";
+    private static final String COLOR_MODE_INTERPOLATED = "Foreground-Background Mix";
+    private static final String COLOR_MODE_RANDOM = "Random";
+    public static final String[] COLOR_MODES =
+        {COLOR_MODE_INTERPOLATED, COLOR_MODE_FOREGROUND, COLOR_MODE_RANDOM};
 
     private static final String STROKE_LENGTH_TEXT = "Average Stroke Length";
-    private static final String NUM_STROKES_TEXT = "Number of Strokes";
+    private static final String STROKE_COUNT_TEXT = "Number of Strokes";
 
     private final ListParam<Tool> toolsParam = new ListParam<>(
-        "Tool", AutoPaint.ALLOWED_TOOLS);
-    private final JTextField numStrokesTF;
-    private final JTextField lengthTF;
+        "Tool", AutoPaint.SUPPORTED_TOOLS);
+    private final JTextField strokeCountTF;
+    private final JTextField strokeLengthTF;
     private final ListParam<String> colorsParam = new ListParam<>(
-        "Random Colors", COLOR_CHOICES);
+        "Random Colors", COLOR_MODES);
 
-    private final RangeParam lengthVariability = new RangeParam(
-        "Stroke Length Variability (%)", 0, 50, 100, true, TextPosition.NONE);
-    private final RangeParam maxCurvature = new RangeParam(
-        "Maximal Curvature (%)", 0, 100, 300, true, TextPosition.NONE);
+    private final RangeParam lengthVariation = new RangeParam(
+        "Stroke Length Variation (%)", 0, 50, 100, true, TextPosition.NONE);
+    private final RangeParam curvature = new RangeParam(
+        "Stroke Curvature (%)", 0, 100, 300, true, TextPosition.NONE);
 
-    private final IntChoiceParam angleType = new IntChoiceParam("Angle", new Item[]{
-        new Item("Random", AutoPaintSettings.ANGLE_TYPE_RANDOM),
-        new Item("Radial", AutoPaintSettings.ANGLE_TYPE_RADIAL),
-        new Item("Circular", AutoPaintSettings.ANGLE_TYPE_CIRCULAR),
-        new Item("Noise", AutoPaintSettings.ANGLE_TYPE_NOISE),
+    private final IntChoiceParam strokeDirection = new IntChoiceParam("Direction", new Item[]{
+        new Item("Random", AutoPaintSettings.DIRECTION_RANDOM),
+        new Item("Radial", AutoPaintSettings.DIRECTION_RADIAL),
+        new Item("Circular", AutoPaintSettings.DIRECTION_CIRCULAR),
+        new Item("Noise", AutoPaintSettings.DIRECTION_NOISE),
     });
 
     AutoPaintPanel() {
@@ -70,21 +70,21 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         var gbh = new GridBagHelper(this);
 
         gbh.addParam(toolsParam, "toolSelector");
-        gbh.addParam(angleType);
+        gbh.addParam(strokeDirection);
 
-        numStrokesTF = new JTextField("100");
-        numStrokesTF.setName("numStrokesTF");
-        gbh.addLabelAndControl(NUM_STROKES_TEXT + ":",
+        strokeCountTF = new JTextField("100");
+        strokeCountTF.setName("strokeCountTF");
+        gbh.addLabelAndControl(STROKE_COUNT_TEXT + ":",
             createPositiveIntLayer(
-                NUM_STROKES_TEXT, numStrokesTF, false));
+                STROKE_COUNT_TEXT, strokeCountTF, false));
 
-        lengthTF = new JTextField("100");
+        strokeLengthTF = new JTextField("100");
         gbh.addLabelAndControl(STROKE_LENGTH_TEXT + ":",
             createPositiveIntLayer(
-                STROKE_LENGTH_TEXT, lengthTF, false));
+                STROKE_LENGTH_TEXT, strokeLengthTF, false));
 
-        gbh.addParam(lengthVariability);
-        gbh.addParam(maxCurvature);
+        gbh.addParam(lengthVariation);
+        gbh.addParam(curvature);
         gbh.addParam(colorsParam, "colorsCB");
 
         toolsParam.setupEnableOtherIf(colorsParam, AutoPaintPanel::useColors);
@@ -95,51 +95,51 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     }
 
     public AutoPaintSettings getSettings() {
-        int numStrokes = getNumStrokes();
+        int numStrokes = getStrokCount();
         int strokeLength = getStrokeLength();
         Tool tool = getSelectedTool();
 
         boolean colorsEnabled = colorsParam.isEnabled();
         String colors = colorsParam.getSelected();
-        boolean randomColors = colorsEnabled && colors.equals(COLOR_RANDOM);
-        boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_INTERPOLATED);
+        boolean randomColors = colorsEnabled && colors.equals(COLOR_MODE_RANDOM);
+        boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_MODE_INTERPOLATED);
 
-        double lengthRandomnessPercentage = lengthVariability.getPercentage();
-        double maxCurvaturePercentage = maxCurvature.getPercentage();
+        double lengthRandomnessPercentage = lengthVariation.getPercentage();
+        double maxCurvaturePercentage = curvature.getPercentage();
 
         return new AutoPaintSettings(tool, numStrokes, strokeLength, randomColors,
             lengthRandomnessPercentage, maxCurvaturePercentage, interpolatedColors,
-            angleType.getValue());
+            strokeDirection.getValue());
     }
 
     private Tool getSelectedTool() {
         return toolsParam.getSelected();
     }
 
-    private int getNumStrokes() {
-        return parseInt(numStrokesTF.getText().trim());
+    private int getStrokCount() {
+        return parseInt(strokeCountTF.getText().trim());
     }
 
     private int getStrokeLength() {
-        return parseInt(lengthTF.getText().trim());
+        return parseInt(strokeLengthTF.getText().trim());
     }
 
     @Override
     public ValidationResult validateSettings() {
-        var retVal = ValidationResult.ok();
+        var retVal = ValidationResult.valid();
         try {
-            int ns = getNumStrokes();
-            retVal = retVal.addErrorIfZero(ns, NUM_STROKES_TEXT);
-            retVal = retVal.addErrorIfNegative(ns, NUM_STROKES_TEXT);
+            int ns = getStrokCount();
+            retVal = retVal.validateNonZero(ns, STROKE_COUNT_TEXT);
+            retVal = retVal.validatePositive(ns, STROKE_COUNT_TEXT);
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("\"" + NUM_STROKES_TEXT + "\" must be an integer.");
+            retVal = retVal.withError("\"" + STROKE_COUNT_TEXT + "\" must be an integer.");
         }
         try {
             int ln = getStrokeLength();
-            retVal = retVal.addErrorIfZero(ln, STROKE_LENGTH_TEXT);
-            retVal = retVal.addErrorIfNegative(ln, STROKE_LENGTH_TEXT);
+            retVal = retVal.validateNonZero(ln, STROKE_LENGTH_TEXT);
+            retVal = retVal.validatePositive(ln, STROKE_LENGTH_TEXT);
         } catch (NumberFormatException e) {
-            retVal = retVal.addError("\"" + STROKE_LENGTH_TEXT + "\" must be an integer.");
+            retVal = retVal.withError("\"" + STROKE_LENGTH_TEXT + "\" must be an integer.");
         }
         return retVal;
     }
@@ -152,13 +152,13 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     @Override
     public void saveStateTo(UserPreset preset) {
         toolsParam.saveStateTo(preset);
-        angleType.saveStateTo(preset);
+        strokeDirection.saveStateTo(preset);
 
-        preset.putInt(NUM_STROKES_TEXT, getNumStrokes());
+        preset.putInt(STROKE_COUNT_TEXT, getStrokCount());
         preset.putInt(STROKE_LENGTH_TEXT, getStrokeLength());
 
-        lengthVariability.saveStateTo(preset);
-        maxCurvature.saveStateTo(preset);
+        lengthVariation.saveStateTo(preset);
+        curvature.saveStateTo(preset);
         colorsParam.saveStateTo(preset);
 
         if (useColors(getSelectedTool())) {
@@ -169,13 +169,13 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     @Override
     public void loadUserPreset(UserPreset preset) {
         toolsParam.loadStateFrom(preset);
-        angleType.loadStateFrom(preset);
+        strokeDirection.loadStateFrom(preset);
 
-        numStrokesTF.setText(preset.get(NUM_STROKES_TEXT));
-        lengthTF.setText(preset.get(STROKE_LENGTH_TEXT));
+        strokeCountTF.setText(preset.get(STROKE_COUNT_TEXT));
+        strokeLengthTF.setText(preset.get(STROKE_LENGTH_TEXT));
 
-        lengthVariability.loadStateFrom(preset);
-        maxCurvature.loadStateFrom(preset);
+        lengthVariation.loadStateFrom(preset);
+        curvature.loadStateFrom(preset);
         colorsParam.loadStateFrom(preset);
 
         if (useColors(getSelectedTool())) {

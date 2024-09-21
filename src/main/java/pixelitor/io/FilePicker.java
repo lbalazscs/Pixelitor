@@ -19,12 +19,21 @@ package pixelitor.io;
 
 import java.io.File;
 
+/**
+ * A common interface for the Swing and native (AWT) file pickers.
+ */
 public interface FilePicker {
+    /**
+     * Shows an "open" file picker that allows the selection of supported input files.
+     */
     File getSupportedOpenFile();
 
-    File showSaveDialog(FileChooserConfig chooserConfig);
+    /**
+     * Shows an "open" file picker that allows the selection of any file.
+     */
+    File getAnyOpenFile();
+
+    File showSaveDialog(FileChooserConfig config);
 
     String getSelectedSaveExtension(File selectedFile);
-
-    File getAnyOpenFile();
 }

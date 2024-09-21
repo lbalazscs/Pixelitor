@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,34 +21,42 @@ import pixelitor.automate.Wizard;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.layers.Drawable;
 
-import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
+import static pixelitor.filters.animation.TweenWizardPage.FILTER_SELECTION;
 
 /**
- * The {@link Wizard} for tweening animations.
+ * The {@link Wizard} used for tweening animations.
  */
 public class TweenWizard extends Wizard {
+    private static final int DEFAULT_DIALOG_WIDTH = 500;
+    private static final int DEFAULT_DIALOG_HEIGHT = 500;
+    private static final String WIZARD_TITLE = "Export Tweening Animation";
+    private static final String FINISH_BUTTON_TEXT = "Render";
+
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard(Drawable dr) {
-        super(SELECT_FILTER, "Export Tweening Animation",
-            "Render", 500, 500, dr);
-    }
-
-    public TweenAnimation getAnimation() {
-        return animation;
+        super(FILTER_SELECTION, WIZARD_TITLE, FINISH_BUTTON_TEXT,
+            DEFAULT_DIALOG_WIDTH, DEFAULT_DIALOG_HEIGHT, dr);
     }
 
     @Override
-    protected void finalAction() {
+    protected void onWizardComplete() {
         new RenderTweenFramesTask(animation, dr).execute();
     }
 
     @Override
-    protected void finalCleanup() {
+    protected void performCleanup() {
         ParametrizedFilter filter = animation.getFilter();
         if (filter != null) { // a filter was already selected
-            filter.getParamSet().setFinalAnimationSettingMode(false);
+            filter.getParamSet().setFinalAnimationMode(false);
         }
+    }
+
+    /**
+     * Returns the {@link TweenAnimation} instance being configured by this wizard.
+     */
+    public TweenAnimation getAnimation() {
+        return animation;
     }
 }
 

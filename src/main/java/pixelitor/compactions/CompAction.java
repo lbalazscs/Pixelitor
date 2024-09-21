@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * An action that acts on all layers of a {@link Composition}
+ * An operation that is applied to all layers of a {@link Composition}.
  */
 public interface CompAction {
     /**

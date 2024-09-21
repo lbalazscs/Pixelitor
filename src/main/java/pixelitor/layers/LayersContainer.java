@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
+import static pixelitor.io.DropListener.DropAction.ADD_AS_NEW_LAYERS;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.calledOnEDT;
 
@@ -65,7 +65,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
 
         Views.addActivationListener(this);
 
-        new DropTarget(this, new DropListener(NEW_LAYERS));
+        new DropTarget(this, new DropListener(ADD_AS_NEW_LAYERS));
     }
 
     private static JPanel createSouthPanel() {

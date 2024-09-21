@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class Canvas implements Serializable, Debuggable {
     private int width;
     private int height;
 
-    // size in component space
+    // size in component space (the size in image space * zooming)
     private transient int coWidth;
     private transient int coHeight;
 
@@ -197,9 +197,9 @@ public class Canvas implements Serializable, Debuggable {
     }
 
     public Shape invertShape(Shape shape) {
-        Area area = new Area(shape);
+        Area shapeArea = new Area(shape);
         Area fullArea = new Area(getBounds());
-        fullArea.subtract(area);
+        fullArea.subtract(shapeArea);
         return fullArea;
     }
 
@@ -264,6 +264,13 @@ public class Canvas implements Serializable, Debuggable {
         return thumbDimension;
     }
 
+    public String createSVGElement() {
+        return ("""
+            <svg width="%d" height="%d"
+                 xmlns="http://www.w3.org/2000/svg">""")
+            .formatted(width, height);
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
@@ -278,6 +285,6 @@ public class Canvas implements Serializable, Debuggable {
 
     @Override
     public String toString() {
-        return "Canvas{width=" + width + ", height=" + height + '}';
+        return "Canvas[" + width + ", " + height + ']';
     }
 }

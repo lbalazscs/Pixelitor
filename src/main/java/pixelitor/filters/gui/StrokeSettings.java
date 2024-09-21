@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public record StrokeSettings(double width, StrokeCap cap, StrokeJoin join,
         throw new UnsupportedOperationException();
     }
 
-    public String toSVGString() {
+    public String toSVGStyle() {
         String svg = format("stroke-width=\"%.2f\" %s %s",
             width, cap.toSVG(), join.toSVG());
         if (dashed) {

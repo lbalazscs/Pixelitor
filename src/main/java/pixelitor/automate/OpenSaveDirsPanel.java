@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
  * A panel for selecting an input folder,
- * an output folder, and a saving format.
+ * an output folder, and a saving file format.
  */
 class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport inputChooser
@@ -49,19 +49,19 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         super(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
-        addDirChooser("Input Folder:", inputChooser, gbh);
-        addDirChooser("Output Folder:", outputChooser, gbh);
+        addDirChooserRow("Input Folder:", inputChooser, gbh);
+        addDirChooserRow("Output Folder:", outputChooser, gbh);
 
         outputFormatSelector = new JComboBox<>(FileFormat.values());
         outputFormatSelector.setSelectedItem(FileFormat.getLastSaved());
         gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
-    private static void addDirChooser(String label,
-                                      BrowseFilesSupport chooser,
-                                      GridBagHelper gbh) {
+    private static void addDirChooserRow(String label,
+                                         BrowseFilesSupport chooser,
+                                         GridBagHelper gbh) {
         gbh.addLabelAndTwoControls(label,
-            chooser.getNameTF(),
+            chooser.getPathTextField(),
             chooser.getBrowseButton());
     }
 
@@ -74,35 +74,32 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         File inputDir = inputChooser.getSelectedFile();
         File outputDir = outputChooser.getSelectedFile();
 
-        var retVal = ValidationResult.ok();
-        retVal = addDirExistenceCheck(retVal, inputDir, "input");
-        retVal = addDirExistenceCheck(retVal, outputDir, "output");
+        var result = ValidationResult.valid();
+        result = validateDirExists(result, inputDir, "input");
+        result = validateDirExists(result, outputDir, "output");
 
         if (inputDir.equals(outputDir)) {
-            ValidationResult err = ValidationResult.error(
+            ValidationResult sameDirError = ValidationResult.invalid(
                 "The input and output folders must be different.");
-            return retVal.and(err);
+            return result.and(sameDirError);
         }
-        return retVal;
+        return result;
     }
 
-    private static ValidationResult addDirExistenceCheck(ValidationResult v,
-                                                         File dir, String type) {
+    private static ValidationResult validateDirExists(ValidationResult currentResult,
+                                                      File dir,
+                                                      String directoryType) {
         if (!dir.exists()) {
             String msg = format("The selected %s folder %s doesn't exist.",
-                type, dir.getAbsolutePath());
-            v = v.and(ValidationResult.error(msg));
+                directoryType, dir.getAbsolutePath());
+            currentResult = currentResult.and(ValidationResult.invalid(msg));
         }
-        return v;
+        return currentResult;
     }
 
     public void rememberValues() {
-        File in = inputChooser.getSelectedFile();
-        Dirs.setLastOpen(in);
-
-        File out = outputChooser.getSelectedFile();
-        Dirs.setLastSave(out);
-
+        Dirs.setLastOpen(inputChooser.getSelectedFile());
+        Dirs.setLastSave(outputChooser.getSelectedFile());
         FileFormat.setLastSaved(getSelectedFormat());
     }
 }

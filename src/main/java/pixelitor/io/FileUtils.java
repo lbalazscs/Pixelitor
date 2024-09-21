@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,27 +23,32 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-
 /**
- * Utility class with static methods related to files
+ * Utility class with static methods related to files.
  */
 public class FileUtils {
-    // the extensions supported by the file open and save dialogs
+    // Supported file extensions for the open file dialog.
     private static final Set<String> SUPPORTED_OPEN_EXTENSIONS =
         extensionSet(FileChoosers.OPEN_FILTERS);
+
+    // Supported file extensions for the save file dialog.
     private static final Set<String> SUPPORTED_SAVE_EXTENSIONS =
         extensionSet(FileChoosers.SAVE_FILTERS);
 
-    // export-only formats that aren't offered when using save
+    // Export-only formats that aren't offered when using save.
     private static final Set<String> SUPPORTED_EXPORT_EXTENSIONS =
         Set.of("svg");
-    private static Pattern fileNamePattern = null;
 
+    private static Pattern specialCharsPattern = null;
+
+    // Private constructor to prevent instantiation.
     private FileUtils() {
     }
 
-    public static String calcExtension(String fileName) {
+    /**
+     * Returns the file extension or null if none is found.
+     */
+    public static String getExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return null;
@@ -51,30 +56,35 @@ public class FileUtils {
         return fileName.substring(lastIndex + 1);
     }
 
+    /**
+     * Returns the file extension as an Optional.
+     */
     public static Optional<String> findExtension(String fileName) {
-        return Optional.ofNullable(calcExtension(fileName));
+        return Optional.ofNullable(getExtension(fileName));
     }
 
+    /**
+     * Checks if the given file name has an extension.
+     */
     public static boolean hasExtension(String fileName) {
         return findExtension(fileName).isPresent();
     }
 
-    private static boolean hasTheExtension(String fileName, String ext) {
+    /**
+     * Checks if the given file name has the given extension.
+     */
+    private static boolean hasSpecificExtension(String fileName, String ext) {
         return findExtension(fileName)
             .filter(s -> s.equalsIgnoreCase(ext))
             .isPresent();
     }
 
     public static boolean hasPNGExtension(String fileName) {
-        return hasTheExtension(fileName, "png");
+        return hasSpecificExtension(fileName, "png");
     }
 
     public static boolean hasGIFExtension(String fileName) {
-        return hasTheExtension(fileName, "gif");
-    }
-
-    public static boolean hasTGAExtension(String fileName) {
-        return hasTheExtension(fileName, "tga");
+        return hasSpecificExtension(fileName, "gif");
     }
 
     public static boolean hasMultiLayerExtension(File file) {
@@ -86,7 +96,7 @@ public class FileUtils {
         return ext.equals("pxc") || ext.equals("ora");
     }
 
-    public static String stripExtension(String fileName) {
+    public static String removeExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return fileName;
@@ -117,14 +127,15 @@ public class FileUtils {
             || SUPPORTED_EXPORT_EXTENSIONS.contains(extension);
     }
 
-    public static String replaceExt(String fileName, String newExt) {
-        if (findExtension(fileName).isEmpty()) {
-            return fileName + '.' + newExt;
-        }
-        return stripExtension(fileName) + '.' + newExt;
+    public static String replaceExtension(String fileName, String newExtension) {
+        return removeExtension(fileName) + '.' + newExtension;
     }
 
-    public static List<File> listSupportedInputFilesIn(File dir) {
+    /**
+     * Returns a list of all files in the given directory
+     * that have supported input extensions.
+     */
+    public static List<File> listSupportedInputFiles(File dir) {
         FileFilter imageFilter = FileUtils::hasSupportedInputExt;
         File[] files = dir.listFiles(imageFilter);
         if (files == null) {
@@ -134,7 +145,7 @@ public class FileUtils {
         // filter out crazily named directories with image file extensions
         return Stream.of(files)
             .filter(File::isFile)
-            .collect(toList());
+            .toList();
     }
 
     private static Set<String> extensionSet(FileNameExtensionFilter[] filters) {
@@ -146,13 +157,13 @@ public class FileUtils {
     }
 
     /**
-     * Replaces all the special characters in s string with an underscore
+     * Replaces all special characters in the given string with an underscore
      */
-    public static String toFileName(String s) {
-        if (fileNamePattern == null) {
+    public static String sanitizeToFileName(String s) {
+        if (specialCharsPattern == null) {
             //noinspection NonThreadSafeLazyInitialization
-            fileNamePattern = Pattern.compile("[/\\\\?%*:|\"<>.,;=]");
+            specialCharsPattern = Pattern.compile("[/\\\\?%*:|\"<>.,;=]");
         }
-        return fileNamePattern.matcher(s.trim()).replaceAll("_");
+        return specialCharsPattern.matcher(s.trim()).replaceAll("_");
     }
 }

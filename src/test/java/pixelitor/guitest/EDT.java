@@ -241,12 +241,12 @@ public class EDT {
             .hasSize(expectedWidth, expectedHeight);
     }
 
-    public static int getNumModalDialogs() {
-        return call(GlobalEvents::getNumModalDialogs);
+    public static int getModalDialogCount() {
+        return call(GlobalEvents::getModalDialogCount);
     }
 
-    public static void assertNumModalDialogsIs(int expected) {
-        int actual = getNumModalDialogs();
+    public static void assertModalDialogCountIs(int expected) {
+        int actual = getModalDialogCount();
         if (actual != expected) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }

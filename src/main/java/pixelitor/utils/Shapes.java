@@ -37,7 +37,11 @@ import java.util.Random;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.geom.PathIterator.*;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_CUBICTO;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.SEG_QUADTO;
 import static java.lang.Math.PI;
 import static java.lang.String.format;
 import static net.jafama.FastMath.atan2;
@@ -64,13 +68,14 @@ public class Shapes {
         Composition comp = view == null ? null : view.getComp();
         Path path = new Path(comp, comp != null);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
-        PathIterator it = shape.getPathIterator(null);
+
+        PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
 
         SubPath lastSubPath = null;
 
-        while (!it.isDone()) {
-            int type = it.currentSegment(coords);
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
             double x = coords[0];
             double y = coords[1];
             double xx = coords[2];
@@ -87,29 +92,29 @@ public class Shapes {
                 default -> throw new IllegalArgumentException("type = " + type);
             }
 
-            it.next();
+            pathIterator.next();
         }
 
         path.mergeOverlappingAnchors();
-
         path.setHeuristicTypes();
         assert path.checkConsistency();
+
         return path;
     }
 
     /**
-     * Draws the given Shape on the given Graphics so that
+     * Draws the given Shape on the given Graphics2D so that
      * it is clearly visible over any background.
      */
     public static void drawVisibly(Graphics2D g, Shape shape) {
         assert shape != null;
 
-        // black at the edges
+        // Draw with a thick black outline.
         g.setStroke(BIG_STROKE);
         g.setColor(BLACK);
         g.draw(shape);
 
-        // white in the middle
+        // Draw with a thinner white stroke inside.
         g.setStroke(SMALL_STROKE);
         g.setColor(WHITE);
         g.draw(shape);
@@ -118,9 +123,9 @@ public class Shapes {
     /**
      * Fills the given Shape with the given color and also adds a black outline.
      */
-    public static void fillVisibly(Graphics2D g, Shape shape, Color c) {
+    public static void fillVisibly(Graphics2D g, Shape shape, Color fillColor) {
         assert shape != null;
-        assert c != BLACK;
+        assert fillColor != BLACK;
 
         // black at the edges
         g.setStroke(BIG_STROKE);
@@ -128,7 +133,7 @@ public class Shapes {
         g.draw(shape);
 
         // fill with the given color in the middle
-        g.setColor(c);
+        g.setColor(fillColor);
         g.fill(shape);
     }
 
@@ -136,7 +141,7 @@ public class Shapes {
      * Draws the given shape with the given color,
      * and then resores the previous color.
      */
-    public static void draw(Graphics2D g, Shape shape, Color c) {
+    public static void draw(Shape shape, Color c, Graphics2D g) {
         Color prevColor = g.getColor();
         g.setColor(c);
         g.draw(shape);
@@ -180,20 +185,23 @@ public class Shapes {
         float halfArrowWidth = arrowWidth / 2.0f;
         float halfArrowHeadWidth = UNIT_ARROW_HEAD_WIDTH / 2;
 
-        GeneralPath unitArrow = new GeneralPath();
-        unitArrow.moveTo(0.0f, -halfArrowWidth);
-        unitArrow.lineTo(0.0f, halfArrowWidth);
-        unitArrow.lineTo(arrowHeadStart, halfArrowWidth);
-        unitArrow.lineTo(arrowHeadStart, halfArrowHeadWidth);
-        unitArrow.lineTo(1.0f, 0.0f);
-        unitArrow.lineTo(arrowHeadStart, -halfArrowHeadWidth);
-        unitArrow.lineTo(arrowHeadStart, -halfArrowWidth);
-        unitArrow.closePath();
-        return unitArrow;
+        GeneralPath path = new GeneralPath();
+
+        path.moveTo(0.0f, -halfArrowWidth);
+        path.lineTo(0.0f, halfArrowWidth);
+        path.lineTo(arrowHeadStart, halfArrowWidth);
+        path.lineTo(arrowHeadStart, halfArrowHeadWidth);
+        path.lineTo(1.0f, 0.0f);
+        path.lineTo(arrowHeadStart, -halfArrowHeadWidth);
+        path.lineTo(arrowHeadStart, -halfArrowWidth);
+        path.closePath();
+
+        return path;
     }
 
     public static Shape createTextLayerIconShape() {
         Path2D path = new Path2D.Double();
+
         path.moveTo(6, 4);
         path.lineTo(18, 4);
         path.lineTo(18, 8);
@@ -209,6 +217,7 @@ public class Shapes {
 
     public static Shape createAdjLayerIconShape() {
         Path2D path = new Path2D.Double();
+
         path.moveTo(9.5, 4);
         path.lineTo(14.5, 4);
         path.lineTo(20.5, 21);
@@ -249,7 +258,7 @@ public class Shapes {
     }
 
     /**
-     * Makes sure that the returned rectangle has positive width and height.
+     * Ensures that the returned rectangle has positive width and height.
      */
     public static Rectangle toPositiveRect(int x1, int x2, int y1, int y2) {
         int topX, topY, width, height;
@@ -274,7 +283,7 @@ public class Shapes {
     }
 
     /**
-     * Makes sure that the returned rectangle has positive width and height.
+     * Ensures that the returned rectangle has positive width and height.
      */
     public static Rectangle2D toPositiveRect(Rectangle2D input) {
         double inX = input.getX();
@@ -302,7 +311,7 @@ public class Shapes {
     }
 
     /**
-     * Makes sure that the returned rectangle has positive width and height.
+     * Ensures that the returned rectangle has positive width and height.
      */
     public static Rectangle toPositiveRect(Rectangle rect) {
         int width = rect.width;
@@ -331,38 +340,39 @@ public class Shapes {
         StringBuilder sb = new StringBuilder();
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
+
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
-            addSVGPathSegment(coords, type, sb);
+            addSVGPathSegment(type, coords, sb);
             pathIterator.next();
         }
         return sb.toString();
     }
 
-    private static void addSVGPathSegment(double[] coords, int type, StringBuilder sb) {
+    private static void addSVGPathSegment(int type, double[] coords, StringBuilder pathBuilder) {
         int numCoords;
-        String prefix;
+        String command;
 
         switch (type) {
             case SEG_MOVETO -> {
                 numCoords = 2;
-                prefix = "M ";
+                command = "M ";
             }
             case SEG_LINETO -> {
                 numCoords = 2;
-                prefix = "L ";
+                command = "L ";
             }
             case SEG_QUADTO -> {
                 numCoords = 4;
-                prefix = "Q ";
+                command = "Q ";
             }
             case SEG_CUBICTO -> {
                 numCoords = 6;
-                prefix = "C ";
+                command = "C ";
             }
             case SEG_CLOSE -> {
                 numCoords = 0;
-                prefix = "Z ";
+                command = "Z ";
             }
             default -> throw new IllegalArgumentException("type = " + type);
         }
@@ -374,16 +384,17 @@ public class Shapes {
             }
         }
 
-        sb.append(prefix);
+        pathBuilder.append(command);
         for (int i = 0; i < numCoords; i++) {
-            sb.append(format("%.3f ", coords[i]));
+            pathBuilder.append(format("%.3f ", coords[i]));
         }
-        sb.append("\n");
+        pathBuilder.append("\n");
     }
 
     public static void debugPathIterator(Shape shape) {
         PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
+
         while (!pathIterator.isDone()) {
             int type = pathIterator.currentSegment(coords);
 
@@ -404,31 +415,26 @@ public class Shapes {
      * Converts the first n elements of the given array to a String representation.
      */
     private static String arrayToString(double[] array, int n) {
-        if (n == array.length) {
-            return Arrays.toString(array);
-        }
-        double[] shortArray = new double[n];
-        System.arraycopy(array, 0, shortArray, 0, n);
-        return Arrays.toString(shortArray);
+        return Arrays.toString(Arrays.copyOf(array, n));
     }
 
     /**
-     * Returns true if the two given shapes have identical path iterators.
+     * Returns true if the two given shapes have identical path iterators within the given tolerance.
      */
-    public static boolean pathIteratorIsEqual(Shape s1, Shape s2, double tolerance) {
-        PathIterator it1 = s1.getPathIterator(null);
-        PathIterator it2 = s2.getPathIterator(null);
+    public static boolean pathIteratorIsEqual(Shape shape1, Shape shape2, double tolerance) {
+        PathIterator pathIterator1 = shape1.getPathIterator(null);
+        PathIterator pathIterator2 = shape2.getPathIterator(null);
 
         double[] coords1 = new double[6];
         double[] coords2 = new double[6];
 
-        while (!it1.isDone()) {
-            if (it2.isDone()) {
+        while (!pathIterator1.isDone()) {
+            if (pathIterator2.isDone()) {
                 return false;
             }
 
-            int type1 = it1.currentSegment(coords1);
-            int type2 = it2.currentSegment(coords2);
+            int type1 = pathIterator1.currentSegment(coords1);
+            int type2 = pathIterator2.currentSegment(coords2);
             if (type1 != type2) {
                 return false;
             }
@@ -439,87 +445,17 @@ public class Shapes {
                 }
             }
 
-            it1.next();
-            it2.next();
+            pathIterator1.next();
+            pathIterator2.next();
         }
 
-        return it2.isDone();
+        return pathIterator2.isDone();
     }
 
     public static Shape randomize(Shape in, Random rng, double amount) {
         Path path = shapeToPath(in, null);
         path.randomize(rng, amount);
         return path.toImageSpaceShape();
-    }
-
-    public static Shape randomize2(Shape in, double amount) {
-        Path2D out = new Path2D.Double();
-        PathIterator pathIterator = in.getPathIterator(null);
-
-        record PathPoint(int type, double[] coords) {
-        }
-        List<PathPoint> points = new ArrayList<>();
-
-        boolean closed = false;
-        while (!pathIterator.isDone()) {
-            double[] coords = new double[6];
-            int type = pathIterator.currentSegment(coords);
-            if (type == SEG_CLOSE) {
-                closed = true;
-            }
-            points.add(new PathPoint(type, coords));
-            pathIterator.next();
-        }
-
-        // randomize
-        int numPoints = points.size();
-        for (int i = 0; i < numPoints; i++) {
-            double[] coords = points.get(i).coords();
-            int type = points.get(i).type();
-            if (closed && i == numPoints - 2) {
-                // make sure that at the end we arrive at the first point
-                PathPoint first = points.getFirst();
-                double[] firstCoords = first.coords();
-                switch (type) {
-                    case SEG_LINETO -> {
-                        coords[0] = firstCoords[0];
-                        coords[1] = firstCoords[1];
-                    }
-                    case SEG_QUADTO -> {
-                        coords[2] = firstCoords[0];
-                        coords[3] = firstCoords[1];
-                    }
-                    case SEG_CUBICTO -> {
-                        coords[4] = firstCoords[0];
-                        coords[5] = firstCoords[1];
-                    }
-                    default -> throw new IllegalStateException("unexpected type " + type);
-                }
-            } else {
-                for (int j = 0; j < 6; j++) {
-                    coords[j] += ((2 * Math.random() - 2) * amount);
-                }
-            }
-        }
-
-        for (PathPoint point : points) {
-            double[] coords = point.coords();
-            switch (point.type()) {
-                case SEG_MOVETO -> out.moveTo(coords[0], coords[1]);
-                case SEG_LINETO -> out.lineTo(coords[0], coords[1]);
-                case SEG_QUADTO -> out.quadTo(coords[0], coords[1], coords[2], coords[3]);
-                case SEG_CUBICTO -> out.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-                case SEG_CLOSE -> out.closePath();
-                default -> throw new IllegalArgumentException("type = " + point.type());
-            }
-        }
-
-        return out;
-    }
-
-    public static Shape createSquare(double cx, double cy, double radius) {
-        double diameter = 2 * radius;
-        return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
     public static Shape createCircumscribedPolygon(int n, double cx, double cy, double radius, double tuning) {
@@ -548,6 +484,7 @@ public class Shapes {
             }
         }
         path.closePath();
+
         return path;
     }
 
@@ -581,6 +518,11 @@ public class Shapes {
         }
 
         return path;
+    }
+
+    public static Shape createSquare(double cx, double cy, double radius) {
+        double diameter = 2 * radius;
+        return new Rectangle2D.Double(cx - radius, cy - radius, diameter, diameter);
     }
 
     public static Shape createHexagon(double cx, double cy, double radius) {
@@ -704,7 +646,7 @@ public class Shapes {
         for (Point2D point : points) {
             boundingBox.add(point);
         }
-        return boundingBox.asRectangle2D();
+        return boundingBox.toRectangle2D();
     }
 
     public static Shape createDiamond(double x, double y, double width, double height) {
@@ -1793,7 +1735,7 @@ public class Shapes {
      */
     public static Path2D lineConnect(List<Point2D> points) {
         int numPoints = points.size();
-        Path2D.Double path = new Path2D.Double();
+        Path2D path = new Path2D.Double();
         Point2D firstPoint = points.getFirst();
         path.moveTo(firstPoint.getX(), firstPoint.getY());
         for (int i = 1; i < numPoints; i++) {
@@ -2076,8 +2018,9 @@ public class Shapes {
         List<Point2D> points = new ArrayList<>();
         double[] coords = new double[6];
 
-        for (PathIterator it = shape.getPathIterator(null); !it.isDone(); it.next()) {
-            int type = it.currentSegment(coords);
+        PathIterator pathIterator = shape.getPathIterator(null);
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
             switch (type) {
                 case SEG_MOVETO, SEG_LINETO:
                     points.add(new Point2D.Double(coords[0], coords[1]));
@@ -2091,6 +2034,7 @@ public class Shapes {
                 case SEG_CLOSE:
                     break;
             }
+            pathIterator.next();
         }
         return points;
     }
@@ -2105,8 +2049,9 @@ public class Shapes {
         Point2D target;
         Point2D cp1;
         Point2D cp2;
-        for (PathIterator it = shape.getPathIterator(null); !it.isDone(); it.next()) {
-            int type = it.currentSegment(coords);
+        PathIterator pathIterator = shape.getPathIterator(null);
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
             switch (type) {
                 case SEG_MOVETO:
                     target = mapper.map(coords[0], coords[1]);
@@ -2134,6 +2079,7 @@ public class Shapes {
                     transformedShape.closePath();
                     break;
             }
+            pathIterator.next();
         }
         return transformedShape;
     }

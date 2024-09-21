@@ -38,29 +38,45 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
-import static java.awt.event.KeyEvent.*;
+import static java.awt.event.KeyEvent.KEY_PRESSED;
+import static java.awt.event.KeyEvent.KEY_RELEASED;
+import static java.awt.event.KeyEvent.VK_ALT;
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_ESCAPE;
+import static java.awt.event.KeyEvent.VK_KP_DOWN;
+import static java.awt.event.KeyEvent.VK_KP_LEFT;
+import static java.awt.event.KeyEvent.VK_KP_RIGHT;
+import static java.awt.event.KeyEvent.VK_KP_UP;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_SPACE;
+import static java.awt.event.KeyEvent.VK_UP;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * A global listener for AWT/Swing events
+ * Manages global keyboard and mouse event handling.
  */
 public class GlobalEvents {
     private static boolean spaceDown = false;
 
     // Dialogs can be inside dialogs, and this keeps track of the nesting
-    private static int numModalDialogs = 0;
+    private static int modalDialogCount = 0;
 
     private static KeyListener keyListener;
 
-    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION =
-        new PAction(Tools::increaseActiveBrushSize);
-    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION =
-        new PAction(Tools::decreaseActiveBrushSize);
+    private static final Action INCREASE_BRUSH_SIZE_ACTION =
+        new PAction(Tools::increaseBrushSize);
+    private static final Action DECREASE_BRUSH_SIZE_ACTION =
+        new PAction(Tools::decreaseBrushSize);
 
     private static final Map<KeyStroke, Action> hotKeyMap = new HashMap<>();
 
     static {
+        initGlobalKeyListener();
+    }
+
+    private static void initGlobalKeyListener() {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             KeyEvent keyEvent = (KeyEvent) event;
             if (keyEvent.getID() != KEY_PRESSED) {
@@ -71,7 +87,7 @@ public class GlobalEvents {
                 // hotkeys should be inactive while editing text
                 return;
             }
-            if (numModalDialogs > 0) {
+            if (modalDialogCount > 0) {
                 return;
             }
 
@@ -84,16 +100,16 @@ public class GlobalEvents {
     }
 
     private GlobalEvents() {
-        // only static utility methods
+        // Private constructor to prevent instantiation of utility class
     }
 
-    public static void addHotKey(char key, Action action) {
-        addHotKey(key, action, false);
+    public static void registerHotKey(char key, Action action) {
+        registerHotKey(key, action, false);
     }
 
-    private static void addHotKey(char key, Action action, boolean caseSensitive) {
+    private static void registerHotKey(char key, Action action, boolean caseSensitive) {
         if (!caseSensitive) {
-            assert Character.isUpperCase(key);
+            assert Character.isUpperCase(key) : "Non-case-sensitive keys must be uppercase";
 
             // see issue #31 for why key codes and not key characters are used here
             hotKeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_DOWN_MASK), action);
@@ -102,9 +118,15 @@ public class GlobalEvents {
     }
 
     public static void init() {
+        var keyboardFocusManager = configureKeyboardManager();
+        configureFocusTraversal(keyboardFocusManager);
+        registerBrushSizeShortcuts();
+    }
+
+    private static KeyboardFocusManager configureKeyboardManager() {
         KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         keyboardFocusManager.addKeyEventDispatcher(e -> {
-            if (numModalDialogs > 0) {
+            if (modalDialogCount > 0) {
                 return false;
             }
             int id = e.getID();
@@ -115,7 +137,10 @@ public class GlobalEvents {
             }
             return false;
         });
+        return keyboardFocusManager;
+    }
 
+    private static void configureFocusTraversal(KeyboardFocusManager keyboardFocusManager) {
         // Remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
         // so that they can be used to switch between tabs/internal frames.
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
@@ -129,8 +154,11 @@ public class GlobalEvents {
         backwardKeys = new HashSet<>(backwardKeys); // make modifiable
         backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
+    }
 
-        addBrushSizeActions();
+    private static void registerBrushSizeShortcuts() {
+        registerHotKey(']', INCREASE_BRUSH_SIZE_ACTION, true);
+        registerHotKey('[', DECREASE_BRUSH_SIZE_ACTION, true);
     }
 
     private static void keyPressed(KeyEvent e) {
@@ -153,7 +181,7 @@ public class GlobalEvents {
         // event, but not the space released-event, and the app gets
         // stuck in Hand mode. This looks like a freeze when there
         // are no scrollbars. See issue #29.
-        if (numModalDialogs == 0 && !e.isAltDown()) {
+        if (modalDialogCount == 0 && !e.isAltDown()) {
             keyListener.spacePressed();
             spaceDown = true;
             e.consume();
@@ -161,26 +189,25 @@ public class GlobalEvents {
     }
 
     private static void arrowKeyPressed(KeyEvent e, ArrowKey key) {
-        if (numModalDialogs == 0 && keyListener.arrowKeyPressed(key)) {
+        if (modalDialogCount == 0 && keyListener.arrowKeyPressed(key)) {
             e.consume();
         }
     }
 
     private static void escPressed() {
-        if (numModalDialogs == 0) {
+        if (modalDialogCount == 0) {
             keyListener.escPressed();
         }
     }
 
     private static void altPressed() {
-        if (numModalDialogs == 0) {
+        if (modalDialogCount == 0) {
             keyListener.altPressed();
         }
     }
 
     private static void keyReleased(KeyEvent e) {
-        int keyCode = e.getKeyCode();
-        switch (keyCode) {
+        switch (e.getKeyCode()) {
             case VK_SPACE -> spaceReleased();
             case VK_ALT -> altReleased();
         }
@@ -192,7 +219,7 @@ public class GlobalEvents {
     }
 
     private static void altReleased() {
-        if (numModalDialogs == 0) {
+        if (modalDialogCount == 0) {
             keyListener.altReleased();
         }
     }
@@ -206,43 +233,38 @@ public class GlobalEvents {
     }
 
     // keeps track of dialog nesting
-    public static void dialogOpened(String title) {
+    public static void dialogOpened(String dialogTitle) {
         assert calledOnEDT() : threadInfo();
 
-        numModalDialogs++;
-        if (numModalDialogs == 1) {
+        modalDialogCount++;
+        if (modalDialogCount == 1) {
             Tools.firstModalDialogShown();
         }
     }
 
     // keeps track of dialog nesting
-    public static void dialogClosed(String title) {
+    public static void dialogClosed(String dialogTitle) {
         assert calledOnEDT() : threadInfo();
 
-        numModalDialogs--;
-        assert numModalDialogs >= 0;
-        if (numModalDialogs == 0) {
+        modalDialogCount--;
+        assert modalDialogCount >= 0;
+        if (modalDialogCount == 0) {
             Tools.firstModalDialogHidden();
         }
     }
 
-    public static void assertDialogNestingIs(int expected) {
-        if (numModalDialogs != expected) {
-            throw new AssertionError("numNestedDialogs = " + numModalDialogs
-                + ", expected = " + expected);
+    public static void assertDialogNestingIs(int expectedCount) {
+        if (modalDialogCount != expectedCount) {
+            throw new AssertionError("numNestedDialogs = " + modalDialogCount
+                + ", expectedCount = " + expectedCount);
         }
     }
 
-    public static int getNumModalDialogs() {
-        return numModalDialogs;
+    public static int getModalDialogCount() {
+        return modalDialogCount;
     }
 
-    private static void addBrushSizeActions() {
-        addHotKey(']', INCREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
-        addHotKey('[', DECREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
-    }
-
-    public static void registerDebugMouseWatching(boolean postEvents) {
+    public static void enableMouseEventDebugging(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
             String msg = Tools.getCurrent().getName() + ": " + Debug.mouseEventAsString(e);
@@ -265,7 +287,7 @@ public class GlobalEvents {
      *
      * See https://stackoverflow.com/questions/5541493/how-do-i-profile-the-edt-in-swing
      */
-    public static void showEventsSlowerThan(long threshold, TimeUnit unit) {
+    public static void monitorSlowEvents(long threshold, TimeUnit unit) {
         Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
             final long thresholdNanos = unit.toNanos(threshold);
 
