@@ -111,7 +111,7 @@ public class TmpLayer {
         if (smallImage) {
             // the drag was relative to the canvas, but if small images are used,
             // then it must be translated to be relative to the selection
-            return drag.translatedCopy(-selStartX, -selStartY);
+            return drag.imTranslatedCopy(-selStartX, -selStartY);
         } else {
             return drag;
         }

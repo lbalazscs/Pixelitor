@@ -59,7 +59,7 @@ public enum FileFormat {
         @Override
         public CompletableFuture<Composition> readAsync(File file) {
             return CompletableFuture.supplyAsync(
-                Utils.toSupplier(() -> OpenRaster.read(file)), onIOThread);
+                Utils.uncheck(() -> OpenRaster.read(file)), onIOThread);
         }
     }, PAM(false, ImageUtils::convertToInterleavedRGBA, FileChoosers.pamFilter) {
     }, PNG(false, null, FileChoosers.pngFilter) {
@@ -83,7 +83,7 @@ public enum FileFormat {
         @Override
         public CompletableFuture<Composition> readAsync(File file) {
             return CompletableFuture.supplyAsync(
-                Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
+                Utils.uncheck(() -> PXCFormat.read(file)), onIOThread);
         }
     }, TGA(false, null, FileChoosers.tgaFilter) {
     }, TIFF(false, null, FileChoosers.tiffFilter) {

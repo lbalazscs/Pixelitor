@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,54 +22,61 @@ package pixelitor.utils;
  * of a subtask within a larger task.
  */
 public class SubtaskProgressTracker implements ProgressTracker {
-    private final ProgressTracker superTask;
+    private final ProgressTracker parentTracker;
 
-    // Determines how many units in this task correspond
-    // to a unit in the larger task.
-    private final double ratio;
+    // how many subtask units equal one parent task unit
+    private final double conversionRatio;
 
-    // the progress in the super task
-    private double totalProgress;
+    // the unreported progress in the parent task
+    private double accumulatedParentProgress;
 
-    public SubtaskProgressTracker(double ratio, ProgressTracker superTask) {
-        this.ratio = ratio;
-        this.superTask = superTask;
-        totalProgress = 0.0;
+    public SubtaskProgressTracker(double conversionRatio, ProgressTracker parentTracker) {
+        assert conversionRatio > 0 && conversionRatio <= 1 : "conversionRatio = " + conversionRatio;
+
+        this.conversionRatio = conversionRatio;
+        this.parentTracker = parentTracker;
+        accumulatedParentProgress = 0.0;
     }
 
     @Override
     public void unitDone() {
-        totalProgress += ratio;
-        update();
+        accumulatedParentProgress += conversionRatio;
+        notifyParent();
     }
 
     @Override
-    public void unitsDone(int units) {
-        totalProgress += (units * ratio);
-        update();
+    public void unitsDone(int completedUnits) {
+        assert completedUnits > 0;
+        accumulatedParentProgress += (completedUnits * conversionRatio);
+        notifyParent();
     }
 
-    private void update() {
-        if (totalProgress < 1.0) {
-            return; // nothing to do as we don't have yet a super work unit
+    private void notifyParent() {
+        if (accumulatedParentProgress < 1.0) {
+            return; // nothing to do as we don't have accumulated yet a parent work unit
         }
-        if (totalProgress < 2.0) {
-            totalProgress -= 1.0;
-            superTask.unitDone();
+        if (accumulatedParentProgress < 2.0) {
+            accumulatedParentProgress -= 1.0;
+            parentTracker.unitDone();
             return;
         }
 
         // as these are positive numbers,
         // there is no need for Math.floor()
-        int doneUnits = (int) totalProgress;
+        int parentUnits = (int) accumulatedParentProgress;
 
-        totalProgress -= doneUnits;
-        superTask.unitsDone(doneUnits);
+        accumulatedParentProgress -= parentUnits;
+        parentTracker.unitsDone(parentUnits);
     }
 
     @Override
     public void finished() {
-        // some fractional progress might be lost,
-        // no big deal
+        // Handle any remaining fractional progress
+        if (accumulatedParentProgress >= 0.5) {
+            // Round up to one final parent unit if we're at least halfway
+            parentTracker.unitDone();
+        }
+
+        // Doesn't finish the parent as it may have other subtasks
     }
 }

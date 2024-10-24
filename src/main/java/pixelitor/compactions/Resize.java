@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -149,7 +149,7 @@ public class Resize implements CompAction {
         view.revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();
-        Messages.showInStatusBar(format("<b>%s</b> was resized to %dx%d pixels.",
+        Messages.showStatusMessage(format("<b>%s</b> was resized to %dx%d pixels.",
             newComp.getName(), newCanvasSize.width, newCanvasSize.height));
 
         return newComp;

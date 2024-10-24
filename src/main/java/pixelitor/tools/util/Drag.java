@@ -21,7 +21,6 @@ import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
 import pixelitor.utils.Geometry;
-import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
@@ -33,6 +32,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -40,15 +41,14 @@ import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
 
 /**
- * Represents the mouse drag on the image made
- * by the user while using a {@link DragTool}.
- * Only the start and end points are relevant.
+ * Represents a mouse drag performed by the user while using
+ * a {@link DragTool}. Only the start and end points are relevant.
  */
 public class Drag implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // The coordinates in the image space.
+    // Image-space coordinates (relative to the canvas, adjusted for zooming)
     private double imStartX;
     private double imStartY;
     private double imEndX;
@@ -56,7 +56,7 @@ public class Drag implements Serializable {
 
     // transient variables from here
 
-    // The coordinates in the component (mouse) space.
+    // Component-space coordinates (relative to the View component)
     private transient double coStartX;
     private transient double coEndX;
     private transient double coStartY;
@@ -69,9 +69,9 @@ public class Drag implements Serializable {
     private transient boolean dragging;
     private transient boolean canceled;
     private transient boolean startAdjusted;
-    private transient boolean constrained;
-    private transient boolean startFromCenter;
-    private transient boolean equallySized;
+    private transient boolean angleConstrained;
+    private transient boolean expandFromCenter;
+    private transient boolean enforceEqualDimensions;
 
     public Drag() {
         hasCoCoords = false;
@@ -87,45 +87,40 @@ public class Drag implements Serializable {
     }
 
     public Drag(PPoint start, PPoint end) {
-        imStartX = start.getImX();
-        imStartY = start.getImY();
-        imEndX = end.getImX();
-        imEndY = end.getImY();
-
-        hasCoCoords = false;
+        this(start.getImX(), start.getImY(),
+            end.getImX(), end.getImY());
     }
 
-    public Drag(Rectangle2D r) {
-        imStartX = r.getX();
-        imStartY = r.getY();
-        imEndX = imStartX + r.getWidth();
-        imEndY = imStartY + r.getHeight();
+    public Drag(Rectangle2D bounds) {
+        this(bounds.getX(),
+            bounds.getY(),
+            bounds.getX() + bounds.getWidth(),
+            bounds.getY() + bounds.getHeight());
+    }
 
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        // Initializes all transient fields to their default values
         hasCoCoords = false;
+        coStartX = 0;
+        coEndX = 0;
+        coStartY = 0;
+        coEndY = 0;
+        prevCoEndX = 0;
+        prevCoEndY = 0;
+
+        dragging = false;
+        canceled = false;
+        startAdjusted = false;
+        angleConstrained = false;
+        expandFromCenter = false;
+        enforceEqualDimensions = false;
     }
 
     public Drag copy() {
         return new Drag(imStartX, imStartY, imEndX, imEndY);
-    }
-
-    public static Drag createRandom(int width, int height, int minDist) {
-        int minDist2 = minDist * minDist;
-        Drag drag;
-
-        while (true) {
-            int x1 = Rnd.intInRange(-width, 2 * width);
-            int x2 = Rnd.intInRange(-width, 2 * width);
-            int y1 = Rnd.intInRange(-height, 2 * height);
-            int y2 = Rnd.intInRange(-height, 2 * height);
-
-            int dx = x2 - x1;
-            int dy = y2 - y1;
-            if (dx * dx + dy * dy > minDist2) {
-                drag = new Drag(x1, y1, x2, y2);
-                break;
-            }
-        }
-        return drag;
     }
 
     public Drag imTransformedCopy(AffineTransform at) {
@@ -136,7 +131,7 @@ public class Drag implements Serializable {
         return new Drag(start.getX(), start.getY(), end.getX(), end.getY());
     }
 
-    public Drag translatedCopy(double tx, double ty) {
+    public Drag imTranslatedCopy(double tx, double ty) {
         return new Drag(
             imStartX + tx, imStartY + ty,
             imEndX + tx, imEndY + ty);
@@ -158,11 +153,11 @@ public class Drag implements Serializable {
         coEndX = e.getCoX();
         coEndY = e.getCoY();
 
-        if (constrained) {
-            Point2D newEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
+        if (angleConstrained) {
+            Point2D newEnd = Utils.constrainToNearestAngle(coStartX, coStartY, coEndX, coEndY);
             coEndX = newEnd.getX();
             coEndY = newEnd.getY();
-        } else if (equallySized) { // the two special cases are not used at the same time
+        } else if (enforceEqualDimensions) { // the two special cases are not used at the same time
             double width = Math.abs(coEndX - coStartX);
             double height = Math.abs(coEndY - coStartY);
             double max = Math.max(width, height);
@@ -200,7 +195,7 @@ public class Drag implements Serializable {
     // returns the start x coordinate in component space
     public double getCoStartX(boolean centerAdjust) {
         assert hasCoCoords;
-        if (centerAdjust && startFromCenter) {
+        if (centerAdjust && expandFromCenter) {
             return coStartX - (coEndX - coStartX);
         } else {
             return coStartX;
@@ -210,7 +205,7 @@ public class Drag implements Serializable {
     // returns the start y coordinate in component space
     public double getCoStartY(boolean centerAdjust) {
         assert hasCoCoords;
-        if (centerAdjust && startFromCenter) {
+        if (centerAdjust && expandFromCenter) {
             return coStartY - (coEndY - coStartY);
         } else {
             return coStartY;
@@ -238,7 +233,7 @@ public class Drag implements Serializable {
     }
 
     public double getStartXFromCenter() {
-        if (startFromCenter) {
+        if (expandFromCenter) {
             return imStartX - (imEndX - imStartX);
         } else {
             return imStartX;
@@ -246,7 +241,7 @@ public class Drag implements Serializable {
     }
 
     public double getStartYFromCenter() {
-        if (startFromCenter) {
+        if (expandFromCenter) {
             return imStartY - (imEndY - imStartY);
         } else {
             return imStartY;
@@ -294,7 +289,7 @@ public class Drag implements Serializable {
      */
     public Drag getCenterHorizontalDrag() {
         double centerY;
-        if (startFromCenter) {
+        if (expandFromCenter) {
             centerY = imStartY;
             return new Drag(imStartX - getDX(), centerY, imEndX, centerY);
         } else {
@@ -302,7 +297,7 @@ public class Drag implements Serializable {
             return new Drag(imStartX, centerY, imEndX, centerY);
         }
     }
-    
+
     public boolean isClick() {
         assert hasCoCoords;
         return coStartX == coEndX && coStartY == coEndY;
@@ -330,8 +325,8 @@ public class Drag implements Serializable {
         return imStartY == imEndY;
     }
 
-    public void setConstrained(boolean constrained) {
-        this.constrained = constrained;
+    public void setAngleConstrained(boolean angleConstrained) {
+        this.angleConstrained = angleConstrained;
     }
 
     /**
@@ -370,16 +365,16 @@ public class Drag implements Serializable {
         startAdjusted = true;
     }
 
-    public void setStartFromCenter(boolean startFromCenter) {
-        this.startFromCenter = startFromCenter;
+    public void setExpandFromCenter(boolean expandFromCenter) {
+        this.expandFromCenter = expandFromCenter;
     }
 
-    public boolean isStartFromCenter() {
-        return startFromCenter;
+    public boolean isExpandingFromCenter() {
+        return expandFromCenter;
     }
 
-    public void setEquallySized(boolean equallySized) {
-        this.equallySized = equallySized;
+    public void setEnforceEqualDimensions(boolean enforceEqualDimensions) {
+        this.enforceEqualDimensions = enforceEqualDimensions;
     }
 
     public Line2D asLine() {
@@ -409,7 +404,7 @@ public class Drag implements Serializable {
         int width;
         int height;
 
-        if (startFromCenter) {
+        if (expandFromCenter) {
             double halfWidth = coEndX - coStartX; // can be negative
             double halfHeight = coEndY - coStartY; // can be negative
 
@@ -433,7 +428,7 @@ public class Drag implements Serializable {
         double width;
         double height;
 
-        if (startFromCenter) {
+        if (expandFromCenter) {
             double halfWidth = imEndX - imStartX; // can be negative
             double halfHeight = imEndY - imStartY; // can be negative
 
@@ -474,7 +469,7 @@ public class Drag implements Serializable {
         double width;
         double height;
 
-        if (startFromCenter) {
+        if (expandFromCenter) {
             double halfWidth = imEndX - imStartX; // can be negative
             double halfHeight = imEndY - imStartY; // can be negative
 
@@ -504,7 +499,7 @@ public class Drag implements Serializable {
         double width;
         double height;
 
-        if (startFromCenter) {
+        if (expandFromCenter) {
             double halfWidth;  // positive or zero
             if (imEndX > imStartX) {
                 halfWidth = imEndX - imStartX;
@@ -555,7 +550,7 @@ public class Drag implements Serializable {
         double dx = coEndX - coStartX;
         double dy = coEndY - coStartY;
         double dist = Math.sqrt(dx * dx + dy * dy);
-        if (startFromCenter) {
+        if (expandFromCenter) {
             dist *= 2;
         }
         return dist;
@@ -565,7 +560,7 @@ public class Drag implements Serializable {
         double dx = imEndX - imStartX;
         double dy = imEndY - imStartY;
         double dist = Math.sqrt(dx * dx + dy * dy);
-        if (startFromCenter) {
+        if (expandFromCenter) {
             dist *= 2.0;
         }
         return dist;
@@ -745,7 +740,7 @@ public class Drag implements Serializable {
     }
 
     public void debug(Graphics2D g, Color c) {
-        var line = new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
+        Line2D line = new Line2D.Double(imStartX, imStartY, imEndX, imEndY);
         Shape circle = Shapes.createCircle(imStartX, imStartY, 10);
         Shapes.debug(g, c, line);
         Shapes.debug(g, c, circle);
@@ -753,7 +748,7 @@ public class Drag implements Serializable {
 
     @Override
     public String toString() {
-        return format("(%.2f, %.2f) => (%.2f, %.2f), center start = %s",
-            imStartX, imStartY, imEndX, imEndY, startFromCenter);
+        return format("(%.2f, %.2f) => (%.2f, %.2f), expanded = %s",
+            imStartX, imStartY, imEndX, imEndY, expandFromCenter);
     }
 }

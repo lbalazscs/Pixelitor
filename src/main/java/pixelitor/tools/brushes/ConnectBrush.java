@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class ConnectBrush extends AbstractBrush {
     @Override
     public void continueTo(PPoint p) {
         float lineWidth = settings.getLineWidth();
-        var line = new Line2D.Double();
+        Line2D line = new Line2D.Double();
         Stroke stroke = new BasicStroke(lineWidth);
         targetG.setStroke(stroke);
 

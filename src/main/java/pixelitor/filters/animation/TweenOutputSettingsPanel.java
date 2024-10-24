@@ -36,7 +36,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 import static pixelitor.gui.utils.TFValidationLayerUI.createValidatedTF;
-import static pixelitor.utils.Utils.parseDouble;
+import static pixelitor.utils.Utils.parseLocalizedDouble;
 
 /**
  * The settings for the tweening animation output
@@ -159,8 +159,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
     }
 
     private String calculateNumFramesText() throws ParseException {
-        double numSeconds = parseDouble(numSecondsTF.getText().trim());
-        fps = parseDouble(fpsTF.getText().trim());
+        double numSeconds = parseLocalizedDouble(numSecondsTF.getText().trim());
+        fps = parseLocalizedDouble(fpsTF.getText().trim());
         numFrames = (int) (numSeconds * fps);
         String labelText = String.valueOf(numFrames);
 

@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.ProgressTracker;
+
 import java.awt.Rectangle;
 import java.util.SplittableRandom;
 
@@ -271,7 +273,12 @@ public class PlasmaFilter extends WholeImageFilter {
 
         int estimatedDoPlasmaCalls = estimateDoPlasmaCalls(width, height);
         int workUnits = estimatedDoPlasmaCalls / DO_PLASMA_CALL_PER_UNIT;
-        pt = createProgressTracker(workUnits);
+
+        if (workUnits > 0) {
+            pt = createProgressTracker(workUnits);
+        } else {
+            pt = ProgressTracker.NULL_TRACKER;
+        }
 
         doPlasmaCalls = 0;
 

@@ -129,14 +129,14 @@ public class SelectionTool extends DragTool {
         if (!magicWand) { sliderSpinner.setEnabled(false); }
 
         if (polygonal) {
-            Messages.showInStatusBar(POLY_HELP_TEXT);
+            Messages.showStatusMessage(POLY_HELP_TEXT);
         } else if (type == SelectionType.LASSO) {
-            Messages.showInStatusBar(FREEHAND_HELP_TEXT);
+            Messages.showStatusMessage(FREEHAND_HELP_TEXT);
         } else if (magicWand) {
-            Messages.showInStatusBar(MAGIC_WAND_HELP_TEXT);
+            Messages.showStatusMessage(MAGIC_WAND_HELP_TEXT);
             sliderSpinner.setEnabled(true);
         } else {
-            Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
+            Messages.showStatusMessage("Selection Tool: " + HELP_TEXT);
         }
     }
 
@@ -168,7 +168,7 @@ public class SelectionTool extends DragTool {
             altMeansSubtract = false;
         }
 
-        drag.setStartFromCenter(startFromCenter);
+        drag.setExpandFromCenter(startFromCenter);
         selectionBuilder.updateInProgressSelection(drag, e.getComp(), e);
     }
 
@@ -221,7 +221,7 @@ public class SelectionTool extends DragTool {
         restoreCombinator();
 
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
-        drag.setStartFromCenter(startFromCenter);
+        drag.setExpandFromCenter(startFromCenter);
 
         selectionBuilder.updateInProgressSelection(drag, comp, e);
         selectionBuilder.combineShapes(comp);
@@ -301,7 +301,7 @@ public class SelectionTool extends DragTool {
     @Override
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
-            drag.setStartFromCenter(true);
+            drag.setExpandFromCenter(true);
             selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = true;
@@ -310,7 +310,7 @@ public class SelectionTool extends DragTool {
     @Override
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
-            drag.setStartFromCenter(false);
+            drag.setExpandFromCenter(false);
             selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
         }
         altDown = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class GradientDefiningPoint extends DraggablePoint {
     public void setConstrainedLocation(double mouseX, double mouseY) {
         // constrain it relative to the other point:
         // it seems more useful than constraining it relative to its own drag start
-        Point2D p = Utils.constrainEndPoint(other.x, other.y, mouseX, mouseY);
+        Point2D p = Utils.constrainToNearestAngle(other.x, other.y, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 

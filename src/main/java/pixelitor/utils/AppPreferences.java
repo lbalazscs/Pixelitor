@@ -447,7 +447,7 @@ public final class AppPreferences {
     }
 
     private static int calcDefaultUndoLevels() {
-        int sizeInMegaBytes = Utils.getMaxHeapMb();
+        int sizeInMegaBytes = MemoryInfo.getMaxHeapMb();
         int retVal = 1 + sizeInMegaBytes / 50;
 
         // rounds up to the nearest multiple of 5

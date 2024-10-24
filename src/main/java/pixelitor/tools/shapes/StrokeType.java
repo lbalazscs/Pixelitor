@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,13 +43,7 @@ public enum StrokeType {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BasicStroke(width, cap, join, 1.5f,
-                dashFloats,
-                0.0f);
-        }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
+                dashFloats, 0.0f);
         }
     }, ZIGZAG("Zigzag", false) {
         private Stroke tmp;
@@ -105,20 +99,10 @@ public enum StrokeType {
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CharcoalStroke(width, 0.5f);
         }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
-        }
     }, BRISTLE("Bristle (can be slow!)", true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BristleStroke(width, 0.5f);
-        }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
         }
     }, OUTLINE("Outline", false) {
         @Override
@@ -132,20 +116,10 @@ public enum StrokeType {
         public Stroke getInnerStroke() {
             return innerOutlineStroke;
         }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
-        }
     }, CALLIGRAPHY("Calligraphy", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CalligraphyStroke(width);
-        }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
         }
     }, SHAPE("Shape", false) {
         @Override
@@ -165,31 +139,15 @@ public enum StrokeType {
             Shape shape = shapeType.createShape(new Drag(0, 0, width, width), null);
             return new ShapeStroke(shape, advance);
         }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
-        }
-    },
-    TAPERING("Tapering", false) {
+    }, TAPERING("Tapering", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new TaperingStroke(width);
-        }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
         }
     }, TAPERING_REV("Reversed Tapering", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new TaperingStroke(width, true);
-        }
-
-        @Override
-        public double getExtraThickness(double specifiedWidth) {
-            return 0;
         }
     };
 
@@ -230,7 +188,9 @@ public enum StrokeType {
      * Return the real thickness (for the undo), which can be bigger
      * than the specified width.
      */
-    public abstract double getExtraThickness(double specifiedWidth);
+    public double getExtraThickness(double specifiedWidth) {
+        return 0; // return 0 by default, can be overridden
+    }
 
     public static EnumParam<StrokeType> asParam() {
         return new EnumParam<>(NAME, StrokeType.class);

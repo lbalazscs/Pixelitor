@@ -18,9 +18,9 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.PAction;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
-import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.Keys;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Events;
@@ -63,7 +63,7 @@ public class GlobalEvents {
     // Dialogs can be inside dialogs, and this keeps track of the nesting
     private static int modalDialogCount = 0;
 
-    private static KeyListener keyListener;
+    private static Tool activeTool;
 
     private static final Action INCREASE_BRUSH_SIZE_ACTION =
         new PAction(Tools::increaseBrushSize);
@@ -171,7 +171,7 @@ public class GlobalEvents {
             case VK_DOWN, VK_KP_DOWN -> arrowKeyPressed(e, ArrowKey.down(e.isShiftDown()));
             case VK_ESCAPE -> escPressed();
             case VK_ALT -> altPressed();
-            default -> keyListener.otherKeyPressed(e);
+            default -> activeTool.otherKeyPressed(e);
         }
     }
 
@@ -182,27 +182,27 @@ public class GlobalEvents {
         // stuck in Hand mode. This looks like a freeze when there
         // are no scrollbars. See issue #29.
         if (modalDialogCount == 0 && !e.isAltDown()) {
-            keyListener.spacePressed();
+            activeTool.spacePressed();
             spaceDown = true;
             e.consume();
         }
     }
 
     private static void arrowKeyPressed(KeyEvent e, ArrowKey key) {
-        if (modalDialogCount == 0 && keyListener.arrowKeyPressed(key)) {
+        if (modalDialogCount == 0 && activeTool.arrowKeyPressed(key)) {
             e.consume();
         }
     }
 
     private static void escPressed() {
         if (modalDialogCount == 0) {
-            keyListener.escPressed();
+            activeTool.escPressed();
         }
     }
 
     private static void altPressed() {
         if (modalDialogCount == 0) {
-            keyListener.altPressed();
+            activeTool.altPressed();
         }
     }
 
@@ -214,13 +214,13 @@ public class GlobalEvents {
     }
 
     private static void spaceReleased() {
-        keyListener.spaceReleased();
+        activeTool.spaceReleased();
         spaceDown = false;
     }
 
     private static void altReleased() {
         if (modalDialogCount == 0) {
-            keyListener.altReleased();
+            activeTool.altReleased();
         }
     }
 
@@ -278,8 +278,8 @@ public class GlobalEvents {
             | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
-    public static void setKeyListener(KeyListener keyListener) {
-        GlobalEvents.keyListener = keyListener;
+    public static void setActiveTool(Tool activeTool) {
+        GlobalEvents.activeTool = activeTool;
     }
 
     /**

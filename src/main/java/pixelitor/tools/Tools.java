@@ -105,7 +105,7 @@ public class Tools {
     // Normally the Tool's activate() method should be called instead.
     public static void start(Tool newTool) {
         // showing the message could be useful even if the tool didn't change
-        Messages.showInStatusBar(newTool.getStatusBarMessage());
+        Messages.showStatusMessage(newTool.getStatusBarMessage());
 
         Tool previousTool = currentTool;
         if (previousTool == newTool) {

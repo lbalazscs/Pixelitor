@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
         if (oldComp.containsLayerWithClass(SmartObject.class)) {
-            Messages.showNotImplementedForSmartObjects(getText());
+            Messages.showSmartObjectUnsupportedWarning(getText());
             return CompletableFuture.completedFuture(oldComp);
         }
 
@@ -93,7 +93,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
             view.revalidate(); // make sure the scrollbars are OK
         }
 
-        Messages.showPlainInStatusBar(getStatusBarMessage());
+        Messages.showPlainStatusMessage(getStatusBarMessage());
 
         return CompletableFuture.completedFuture(newComp);
     }

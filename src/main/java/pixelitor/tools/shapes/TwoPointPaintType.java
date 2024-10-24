@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,11 +30,9 @@ import static java.awt.AlphaComposite.DST_OUT;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * A Paint type based on two endpoints.
+ * Different types of {@link Paint} implementations.
  */
 public enum TwoPointPaintType {
     NONE("None", false) {
@@ -59,12 +57,12 @@ public enum TwoPointPaintType {
         }
 
         @Override
-        public void prepare(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
+        public void prepareGraphics(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
             g.setComposite(AlphaComposite.getInstance(DST_OUT));
         }
 
         @Override
-        public void finish(Graphics2D g) {
+        public void cleanupGraphics(Graphics2D g) {
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
         }
     }, LINEAR_GRADIENT("Linear Gradient", true) {
@@ -79,17 +77,17 @@ public enum TwoPointPaintType {
                 bgColor);
         }
     }, RADIAL_GRADIENT("Radial Gradient", true) {
-        private final float[] FRACTIONS = {0.0f, 1.0f};
+        private static final float[] FRACTIONS = {0.0f, 1.0f};
         private final AffineTransform gradientTransform = new AffineTransform();
 
         @Override
         protected Paint createPaint(Drag drag, Color fgColor, Color bgColor) {
             Point2D center = drag.getCenterPoint();
             float distance = (float) drag.calcImDist();
+            Color[] gradientColors = {fgColor, bgColor};
 
             return new RadialGradientPaint(center, distance / 2, center, FRACTIONS,
-                new Color[]{fgColor, bgColor},
-                NO_CYCLE, SRGB, gradientTransform);
+                gradientColors, NO_CYCLE, SRGB, gradientTransform);
         }
     }, ANGLE_GRADIENT("Angle Gradient", false) {
         @Override
@@ -122,23 +120,19 @@ public enum TwoPointPaintType {
         this.hasBlendingIssue = hasBlendingIssue;
     }
 
-    protected final Paint createPaint(Drag drag) {
-        return createPaint(drag, getFGColor(), getBGColor());
-    }
-
     protected abstract Paint createPaint(Drag drag, Color fgColor, Color bgColor);
 
     /**
      * Called before the drawing/filling
      */
-    public void prepare(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
+    public void prepareGraphics(Graphics2D g, Drag drag, Color fgColor, Color bgColor) {
         g.setPaint(createPaint(drag, fgColor, bgColor));
     }
 
     /**
      * Called after the drawing/filling
      */
-    public void finish(Graphics2D g) {
+    public void cleanupGraphics(Graphics2D g) {
         // by default do nothing
     }
 

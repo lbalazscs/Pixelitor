@@ -79,7 +79,7 @@ public abstract class DragTool extends Tool {
             drag.saveEndValues();
         }
         if (shiftConstrains) {
-            drag.setConstrained(e.isShiftDown());
+            drag.setAngleConstrained(e.isShiftDown());
         }
 
         drag.setEnd(e);

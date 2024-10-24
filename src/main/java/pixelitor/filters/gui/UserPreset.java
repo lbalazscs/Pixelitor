@@ -261,7 +261,7 @@ public class UserPreset implements Preset {
             throw new UncheckedIOException(e);
         }
 
-        Messages.showInStatusBar("Preset saved to <b>" + outFile.getAbsolutePath() + "</b>");
+        Messages.showStatusMessage("Preset saved to <b>" + outFile.getAbsolutePath() + "</b>");
     }
 
     private void saveTo(PrintWriter writer) {

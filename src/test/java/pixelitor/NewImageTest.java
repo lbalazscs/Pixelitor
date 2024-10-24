@@ -40,6 +40,7 @@ class NewImageTest {
         assert comp.checkInvariants();
         assertThat(comp)
             .numLayersIs(1)
-            .canvasSizeIs(20, 20);
+            .canvasSizeIs(20, 20)
+            .hasName("NewImageTest");
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,14 @@ import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
-import pixelitor.utils.NotANumberException;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.X_AXIS;
@@ -66,6 +67,29 @@ public class ConvolveGUI extends FilterGUI {
                 setMatrix(kernelMatrix);
             }
         }
+    }
+
+    private static float userInputToFloat(String s) throws NumberFormatException {
+        String trimmed = s.trim();
+        if (trimmed.isEmpty()) {
+            return 0.0f;
+        }
+
+        NumberFormat nf = NumberFormat.getInstance();
+        Number number;
+        try {
+            // try locale-specific parsing
+            number = nf.parse(trimmed);
+        } catch (ParseException e) {
+            NumberFormat englishFormat = NumberFormat.getInstance(Locale.ENGLISH);
+            try {
+                // second chance: English
+                number = englishFormat.parse(trimmed);
+            } catch (ParseException e1) {
+                throw new NumberFormatException('\"' + s + "\" is not a number.");
+            }
+        }
+        return number.floatValue();
     }
 
     private void initLeftVerticalBox() {
@@ -296,8 +320,8 @@ public class ConvolveGUI extends FilterGUI {
         for (int i = 0; i < values.length; i++) {
             String s = textFields[i].getText();
             try {
-                values[i] = Utils.stringToFloat(s);
-            } catch (NotANumberException ex) {
+                values[i] = userInputToFloat(s);
+            } catch (NumberFormatException ex) {
                 Messages.showError("Wrong Number Format", ex.getMessage(), this);
                 return;
             }
@@ -333,7 +357,12 @@ public class ConvolveGUI extends FilterGUI {
 
         float sum = 0;
         for (int i = 0; i < textFields.length; i++) {
-            textFields[i].setText(Utils.floatToString(values[i]));
+            String valueAsString = "";
+            if (values[i] != 0.0f) {
+                valueAsString = String.format("%.3f", values[i]);
+            }
+
+            textFields[i].setText(valueAsString);
             sum += values[i];
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,20 +36,23 @@ import static pixelitor.utils.Threads.threadInfo;
  * The status bar of the app.
  */
 public class StatusBar extends JPanel {
-    private final JLabel statusBarLabel;
-    private final JPanel leftPanel;
-
+    private static final String INITIAL_MESSAGE = "Pixelitor started";
     private static final StatusBar INSTANCE = new StatusBar();
+
+    private final JLabel messageLabel;
+    private final JPanel progressPanel;
+
     private static int numProgressBars = 0;
 
     private StatusBar() {
         super(new BorderLayout(0, 0));
 
-        leftPanel = new JPanel(new FlowLayout(LEFT, 5, 0));
-        statusBarLabel = new JLabel("Pixelitor started");
-        leftPanel.add(statusBarLabel);
+        progressPanel = new JPanel(new FlowLayout(LEFT, 5, 0));
+        messageLabel = new JLabel(INITIAL_MESSAGE);
+        // messageLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        progressPanel.add(messageLabel);
 
-        add(leftPanel, CENTER);
+        add(progressPanel, CENTER);
         add(ZoomControl.get(), EAST);
 
         setBorder(createEtchedBorder());
@@ -60,18 +63,21 @@ public class StatusBar extends JPanel {
         if (numProgressBars > 0) {
             // ignore any messages
         } else {
-            statusBarLabel.setText(msg);
+            messageLabel.setText(msg);
         }
     }
 
+    /**
+     * Creates and starts a new progress bar in the status bar.
+     */
     public ProgressHandler startProgress(String msg, int max) {
         assert calledOnEDT() : threadInfo();
         assert msg != null;
 
-        statusBarLabel.setText("");
+        messageLabel.setText("");
 
         numProgressBars++;
-        return new StatusBarProgressHandler(leftPanel, msg, max);
+        return new StatusBarProgressHandler(progressPanel, msg, max);
     }
 
     public static StatusBar get() {
@@ -82,19 +88,22 @@ public class StatusBar extends JPanel {
         return INSTANCE.getParent() != null;
     }
 
+    /**
+     * Handles the display and updates of a progress bar within the status bar.
+     */
     static class StatusBarProgressHandler implements ProgressHandler {
         private final JLabel msgLabel;
         private final JPanel container;
         private final JProgressBar progressBar;
-        private final boolean determinate;
+        private final boolean isDeterminate;
 
         public StatusBarProgressHandler(JPanel container, String msg, int max) {
             assert calledOnEDT() : threadInfo();
+
             this.container = container;
+            isDeterminate = max > 0;
 
-            determinate = max > 0;
-
-            if (determinate) {
+            if (isDeterminate) {
                 progressBar = new JProgressBar(0, max);
             } else {
                 progressBar = new JProgressBar(0, 100);
@@ -112,11 +121,11 @@ public class StatusBar extends JPanel {
         }
 
         @Override
-        public void updateProgress(int value) {
+        public void updateProgress(int currentValue) {
             assert calledOnEDT() : threadInfo();
-            assert determinate;
+            assert isDeterminate;
 
-            progressBar.setValue(value);
+            progressBar.setValue(currentValue);
             container.paintImmediately(progressBar.getBounds());
         }
 
@@ -124,7 +133,7 @@ public class StatusBar extends JPanel {
         public void stopProgress() {
             assert calledOnEDT() : threadInfo();
 
-            if (!determinate) {
+            if (!isDeterminate) {
                 // probably this is not necessary to stop
                 // the indeterminate animation, but can't be bad
                 progressBar.setValue(100);

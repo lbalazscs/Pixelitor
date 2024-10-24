@@ -22,7 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.ProgressTracker;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -95,7 +95,7 @@ public class AddNoise extends ParametrizedFilter {
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = numPixels / workUnit;
-        var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
+        var pt = ProgressTracker.createSafeTracker(numWorkUnits);
 
         for (int i = 0; i < numPixels; i++) {
             // count at the beginning of the loop because of early returns
@@ -186,7 +186,7 @@ public class AddNoise extends ParametrizedFilter {
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = length / workUnit;
-        var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
+        var pt = ProgressTracker.createSafeTracker(numWorkUnits);
 
         double destWeight = opacityParam.getPercentage();
         double srcWeight = 1.0 - destWeight;

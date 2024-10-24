@@ -615,7 +615,7 @@ public class SmartObject extends CompositeLayer {
                 linkedContentFileTime = newLinkedContentFileTime;
 
                 Views.activate(getParentView());
-                boolean reload = Messages.reloadFileQuestion(linkedContentFile);
+                boolean reload = Messages.showReloadFileQuestion(linkedContentFile);
                 if (reload) {
                     // if this content is reloaded, then return because
                     // the nested smart objects don't have to be checked

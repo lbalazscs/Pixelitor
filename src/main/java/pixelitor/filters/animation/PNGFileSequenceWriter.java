@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,12 @@ import static java.lang.String.format;
 
 /**
  * An {@link AnimationWriter} implementation
- * that writes a sequence of PNG files
+ * that writes a sequence of PNG files.
  */
 public class PNGFileSequenceWriter implements AnimationWriter {
     private final File outputDir;
-    private int sequenceNumber;
-    private int numWrittenImages = 0;
+    private int frameNumber;
+    private int numFramesWritten = 0;
 
     public PNGFileSequenceWriter(File outputDir) {
         this.outputDir = outputDir;
@@ -41,21 +41,21 @@ public class PNGFileSequenceWriter implements AnimationWriter {
 
     @Override
     public void addFrame(BufferedImage image) throws IOException {
-        String fileName = format("frame_%05d.png", sequenceNumber);
-        sequenceNumber++;
+        String fileName = format("frame_%05d.png", frameNumber);
+        frameNumber++;
         File outputFile = new File(outputDir, fileName);
 
         TrackedIO.write(image, "PNG", outputFile, null);
-        numWrittenImages++;
+        numFramesWritten++;
     }
 
     @Override
     public void finish() {
-        Messages.showFilesSavedMessage(numWrittenImages, outputDir);
+        Messages.showBulkSaveMessage(numFramesWritten, outputDir);
     }
 
     @Override
     public void cancel() {
-
+        // do nothing
     }
 }

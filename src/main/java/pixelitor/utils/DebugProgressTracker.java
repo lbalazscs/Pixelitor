@@ -23,31 +23,35 @@ import java.util.List;
 import static java.lang.String.format;
 
 /**
- * A progress tracker that is used only for development
- * to check that the work units were correctly estimated.
+ * A diagnostic progress tracker that verifies work unit estimations
+ * and collects timing statistics.
  *
  * It can be a decorator for another {@link ProgressTracker}
  * to get both the statistics and the visual feedback.
  */
 public class DebugProgressTracker implements ProgressTracker {
     private final long startTimeMillis;
-    private final List<CallInfo> callInfos;
-    private final String name;
-    private final int totalUnitsExpected;
+    private final List<ProgressUpdate> progressUpdates;
+    private final String opName;
+    private final int expectedTotalUnits;
     private final ProgressTracker delegateTracker;
-    private long lastTime;
-    private int unitsCalled;
+    private long lastUpdateTimeMillis;
+    private int numCompletedUnits;
 
-    public DebugProgressTracker(String name, int totalUnitsExpected,
+    public DebugProgressTracker(String opName, int expectedTotalUnits,
                                 ProgressTracker delegateTracker) {
-        this.name = name;
-        this.totalUnitsExpected = totalUnitsExpected;
+        assert expectedTotalUnits > 0;
+
+        this.opName = opName;
+        this.expectedTotalUnits = expectedTotalUnits;
         this.delegateTracker = delegateTracker;
+
         startTimeMillis = System.currentTimeMillis();
-        lastTime = 0;
-        unitsCalled = 0;
-        callInfos = new ArrayList<>();
-        log("created " + name + ", totalUnitsExpected = " + totalUnitsExpected);
+        lastUpdateTimeMillis = 0;
+        numCompletedUnits = 0;
+        progressUpdates = new ArrayList<>();
+
+        log("created " + opName + ", expectedTotalUnits = " + expectedTotalUnits);
     }
 
     @Override
@@ -56,18 +60,18 @@ public class DebugProgressTracker implements ProgressTracker {
             delegateTracker.unitDone();
         }
 
-        unitsCalled++;
+        numCompletedUnits++;
         log("unitDone");
     }
 
     @Override
-    public void unitsDone(int units) {
+    public void unitsDone(int completedUnits) {
         if (delegateTracker != null) {
-            delegateTracker.unitsDone(units);
+            delegateTracker.unitsDone(completedUnits);
         }
 
-        unitsCalled += units;
-        log("addUnits " + units);
+        numCompletedUnits += completedUnits;
+        log("unitsDone " + completedUnits);
     }
 
     @Override
@@ -76,57 +80,63 @@ public class DebugProgressTracker implements ProgressTracker {
             delegateTracker.finished();
         }
 
-        log("finish");
+        log("finished");
 
-        System.out.print("Progress for " + name + ", received units = " + unitsCalled);
-        if (unitsCalled == totalUnitsExpected) {
-            System.out.println(", OK");
-        } else {
-            System.out.println(", NOK, expectedTotalUnits = " + totalUnitsExpected);
-        }
-
-        printCallInfoStatistics();
-    }
-
-    private void printCallInfoStatistics() {
-        long totalDuration = System.currentTimeMillis() - startTimeMillis;
-
-        callInfos.stream()
-            .map(callInfo -> callInfo.asString(totalDuration))
-            .map(s -> s.replace("pixelitor.", ""))
-            .map(s -> s.replace("filters.", ""))
-            .map(s -> s.replace("jhlabsproxies.", ""))
-            .map(s -> s.replace("utils.", ""))
-            .forEach(System.out::println);
-        System.out.println();
+        printSummary();
     }
 
     private void log(String method) {
         long time = System.currentTimeMillis() - startTimeMillis;
-        StackTraceElement ste = new Throwable().getStackTrace()[2];
+        StackTraceElement caller = new Throwable().getStackTrace()[2];
 
-        callInfos.add(new CallInfo(method, time, lastTime, ste, totalUnitsExpected));
+        progressUpdates.add(new ProgressUpdate(
+            method, time, lastUpdateTimeMillis, caller, expectedTotalUnits));
 
-        lastTime = time;
+        lastUpdateTimeMillis = time;
+    }
+
+    private void printSummary() {
+        System.out.print("Progress for " + opName + ", received units = " + numCompletedUnits);
+        if (numCompletedUnits == expectedTotalUnits) {
+            System.out.println(", OK");
+        } else {
+            System.out.println(", NOK, expectedTotalUnits = " + expectedTotalUnits);
+        }
+
+        long totalDuration = System.currentTimeMillis() - startTimeMillis;
+
+        progressUpdates.stream()
+            .map(progressUpdate -> progressUpdate.asString(totalDuration))
+            .map(DebugProgressTracker::simplifyPackageNames)
+            .forEach(System.out::println);
+        System.out.println();
+    }
+
+    private static String simplifyPackageNames(String name) {
+        return name
+            .replace("pixelitor.", "")
+            .replace("filters.", "")
+            .replace("jhlabsproxies.", "")
+            .replace("utils.", "");
     }
 
     /**
      * Information about one call to a {@link DebugProgressTracker} method.
      */
-    private static class CallInfo {
-        private final StackTraceElement ste;
+    private static class ProgressUpdate {
+        private final StackTraceElement caller;
         private final String method;
         private final long time;
         private final int totalUnits;
         private final long duration;
 
-        public CallInfo(String method, long time, long lastTime,
-                        StackTraceElement ste, int totalUnits) {
+        public ProgressUpdate(String method, long time, long lastTime,
+                              StackTraceElement caller, int totalUnits) {
             this.method = method;
             this.time = time;
             this.totalUnits = totalUnits;
             this.duration = time - lastTime;
-            this.ste = ste;
+            this.caller = caller;
         }
 
         public String asString(long totalDuration) {
@@ -139,8 +149,8 @@ public class DebugProgressTracker implements ProgressTracker {
 
             return format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
                 timeSeconds, durationSeconds, whatWithPercent,
-                ste.getClassName(), ste.getMethodName(),
-                ste.getFileName(), ste.getLineNumber());
+                caller.getClassName(), caller.getMethodName(),
+                caller.getFileName(), caller.getLineNumber());
         }
     }
 }

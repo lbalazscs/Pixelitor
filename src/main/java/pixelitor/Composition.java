@@ -906,7 +906,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             }
             History.add(new IsolateEdit(this, layer, backupVisibility));
 
-            Messages.showInStatusBar("Layer <b>" + layer.getName() + "</b> was isolated.");
+            Messages.showStatusMessage("Layer <b>" + layer.getName() + "</b> was isolated.");
         }
 
         for (Layer other : layerList) {
@@ -1781,7 +1781,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (newFileTime > fileTime) { // a newer version is on the disk
                 fileTime = newFileTime;
                 Views.activate(view);
-                boolean reload = Messages.reloadFileQuestion(file);
+                boolean reload = Messages.showReloadFileQuestion(file);
                 if (reload) {
                     return view.reloadAsync();
                 }

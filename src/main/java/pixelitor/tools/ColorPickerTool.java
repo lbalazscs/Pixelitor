@@ -129,14 +129,14 @@ public class ColorPickerTool extends Tool {
                 a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
-        Messages.showPlainInStatusBar(msg);
+        Messages.showPlainStatusMessage(msg);
     }
 
     @Override
     public void activeLayerChanged(Layer layer) {
         if (sampleLayerOnly.isSelected()) {
             // don't show the values for the old layer
-            Messages.showPlainInStatusBar("");
+            Messages.clearStatusBar();
         }
     }
 

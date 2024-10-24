@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,14 +111,14 @@ public class VoronoiFilter extends PointFilter {
             radius = 1;
         }
 
-        sampling.showSamples(g, radius);
+        sampling.renderPoints(g, radius);
 
         g.dispose();
     }
 
     @Override
     public int filterRGB(int x, int y, int rgb) {
-        int closestIndex = sampling.findClosestPointTo(x, y,
+        int closestIndex = sampling.findClosestPointIndex(x, y,
             metric.asIntPrecisionDistance());
         if (closestIndex == -1) {
             // there wasn't a point in the cell or in its neighbours
@@ -170,7 +170,7 @@ public class VoronoiFilter extends PointFilter {
             for (int j = 0; j < aaRes; j++) {
                 double xx = x + 1.0 / aaRes * j - 0.5;
                 // xx and yy are the supersampling coordinates
-                int closestIndex = sampling.findClosestPointTo(xx, yy, metric.asDoublePrecisionDistance());
+                int closestIndex = sampling.findClosestPointIndex(xx, yy, metric.asDoublePrecisionDistance());
                 int color = colors[closestIndex];
                 r += (color >>> 16) & 0xFF;
                 g += (color >>> 8) & 0xFF;
@@ -206,7 +206,7 @@ public class VoronoiFilter extends PointFilter {
     public void debugGrid(BufferedImage dest) {
         Graphics2D g2 = dest.createGraphics();
         g2.setColor(Color.WHITE);
-        sampling.showGrid(g2);
+        sampling.renderGrid(g2);
         g2.dispose();
     }
 }

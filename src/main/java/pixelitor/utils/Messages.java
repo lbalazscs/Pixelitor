@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,32 +20,32 @@ package pixelitor.utils;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerGroup;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
 /**
- * Static methods for displaying status bar and dialog messages.
+ * Centralized message handling for the display of status messages,
+ * dialogs, and progress bars through a pluggable message handler.
  */
 public class Messages {
     private static MessageHandler msgHandler;
 
-    private Messages() { // should not be instantiated
+    private Messages() {
+        // only static methods, should not be instantiated
     }
 
+    // Must be set before any other methods are used.
     public static void setHandler(MessageHandler msgHandler) {
-        Messages.msgHandler = msgHandler;
+        Messages.msgHandler = Objects.requireNonNull(msgHandler);
     }
 
     public static void showInfo(String title, String message) {
         msgHandler.showInfo(title, message, null);
-    }
-
-    public static void showNotImplementedForSmartObjects(String what) {
-        msgHandler.showInfo("Not Supported Yet",
-            what + " isn't yet supported if one of the layers is a smart object.", null);
     }
 
     public static void showInfo(String title, String message, Component parent) {
@@ -69,39 +69,44 @@ public class Messages {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static <T> T showExceptionOnEDT(Throwable e) {
-        msgHandler.showExceptionOnEDT(e);
+    public static <T> T showExceptionOnEDT(Throwable exception) {
+        msgHandler.showExceptionOnEDT(exception);
         // Returns a null of the desired type...
         // This way it fits into CompletableFuture.exceptionally.
         return null;
     }
 
-    public static void showException(Throwable e) {
-        msgHandler.showException(e);
+    public static void showException(Throwable exception) {
+        msgHandler.showException(exception);
     }
 
-    public static void showException(Throwable e, Thread srcThread) {
-        msgHandler.showException(e, srcThread);
+    public static void showException(Throwable exception, Thread srcThread) {
+        msgHandler.showException(exception, srcThread);
     }
 
-    public static void showFileSavedMessage(File file) {
-        showInStatusBar("<b>" + file.getAbsolutePath() + "</b> was saved.");
+    public static void showSmartObjectUnsupportedWarning(String what) {
+        msgHandler.showInfo("Feature Not Supported",
+            what + " isn't yet supported if one of the layers is a smart object.", null);
     }
 
     public static void showFileOpenedMessage(Composition comp) {
-        showInStatusBar("<b>" + comp.getName() + "</b> ("
+        showStatusMessage("<b>" + comp.getName() + "</b> ("
             + comp.getCanvas().getSizeString() + ") was opened.");
     }
 
-    public static void showFilesSavedMessage(int numFiles, File dir) {
+    public static void showFileSavedMessage(File file) {
+        showStatusMessage("<b>" + file.getAbsolutePath() + "</b> was saved.");
+    }
+
+    public static void showBulkSaveMessage(int numFiles, File dir) {
         assert dir.isDirectory();
-        showInStatusBar(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
+        showStatusMessage(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
     }
 
     /**
      * Shows an HTML text message in the status bar.
      */
-    public static void showInStatusBar(String msg) {
+    public static void showStatusMessage(String msg) {
         assert !msg.startsWith("<html>");
         msgHandler.showInStatusBar("<html>" + msg);
     }
@@ -109,9 +114,13 @@ public class Messages {
     /**
      * Shows a non-HTML text message in the status bar.
      */
-    public static void showPlainInStatusBar(String msg) {
+    public static void showPlainStatusMessage(String msg) {
         assert !msg.startsWith("<html>");
         msgHandler.showInStatusBar(msg);
+    }
+
+    public static void clearStatusBar() {
+        showPlainStatusMessage("");
     }
 
     public static ProgressHandler startProgress(String msg, int max) {
@@ -119,17 +128,24 @@ public class Messages {
     }
 
     public static void showNotImageLayerError(Layer layer) {
-        msgHandler.showNotImageLayerError(layer);
+        if (!RandomGUITest.isRunning()) {
+            String msg = format("The active layer \"%s\" isn't an image layer.",
+                layer.getName());
+            showError("Not an image layer", msg);
+        }
     }
 
     public static void showNotDrawableError(Layer layer) {
-        msgHandler.showNotDrawableError(layer);
+        String msg = format("The active layer \"%s\" isn't an image layer or mask.",
+            layer.getName());
+        showError("Not an image layer or mask", msg);
     }
 
     public static boolean showYesNoQuestion(String title, String msg) {
         return msgHandler.showYesNoQuestion(title, msg);
     }
 
+    // Shows a performance timing message in the status bar.
     public static void showPerformanceMessage(String filterName, long timeMillis) {
         String msg;
         if (timeMillis < 1000) {
@@ -138,10 +154,10 @@ public class Messages {
             float seconds = timeMillis / 1000.0f;
             msg = format("%s took %.1f s", filterName, seconds);
         }
-        showPlainInStatusBar(msg);
+        showPlainStatusMessage(msg);
     }
 
-    public static boolean reloadFileQuestion(File file) {
+    public static boolean showReloadFileQuestion(File file) {
         String title = "Reload " + file.getName() + "?";
         String msg = "<html>The file <b>" + file.getAbsolutePath()
             + "</b><br> has been modified by another program." +
@@ -150,7 +166,7 @@ public class Messages {
     }
 
     public static void showNoVisibleLayersError(Composition comp) {
-        showError("No visible layers",
+        showError("No Visible Layers",
             "There are no visible layers in " + comp.getName());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,7 +75,7 @@ public class ColorHistory {
             panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
         }
 
-        Messages.showInStatusBar("Color History: " + (forFilters ?
+        Messages.showStatusMessage("Color History: " + (forFilters ?
             ColorSwatchClickHandler.FILTER_HTML_HELP :
             ColorSwatchClickHandler.STANDARD_HTML_HELP));
 

@@ -41,6 +41,7 @@ import static pixelitor.utils.Threads.onIOThread;
 
 public class PrintAction extends OpenViewEnabledAction.Checked implements Printable {
     private static final float DPI = 72.0f;
+    private static final float MARGIN_INCHES = 0.25f;
     private final ResourceBundle texts;
 
     private BufferedImage img;
@@ -64,23 +65,28 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
 
     private void showPreview() {
         PrinterJob job = PrinterJob.getPrinterJob();
-        page = createDefaultPage(job, img);
+        page = createDefaultPageFormat(job, img);
 
-        JPanel p = new JPanel(new BorderLayout());
+        JPanel previewContainer = createPreviewContainer(job);
+
+        new DialogBuilder()
+            .title(texts.getString("print_preview"))
+            .content(previewContainer)
+            .okText(texts.getString("print") + "...")
+            .okAction(() -> previewAccepted(job))
+            .show();
+    }
+
+    private JPanel createPreviewContainer(PrinterJob job) {
+        JPanel previewContainer = new JPanel(new BorderLayout());
         PrintPreviewPanel previewPanel = new PrintPreviewPanel(page, this);
         JButton setupPageButton = new JButton("Setup Page...");
         setupPageButton.addActionListener(e -> setupPageClicked(job, previewPanel));
         JPanel northPanel = new JPanel();
         northPanel.add(setupPageButton);
-        p.add(northPanel, BorderLayout.NORTH);
-        p.add(previewPanel, BorderLayout.CENTER);
-
-        new DialogBuilder()
-            .title(texts.getString("print_preview"))
-            .content(p)
-            .okText(texts.getString("print") + "...")
-            .okAction(() -> previewAccepted(job))
-            .show();
+        previewContainer.add(northPanel, BorderLayout.NORTH);
+        previewContainer.add(previewPanel, BorderLayout.CENTER);
+        return previewContainer;
     }
 
     private void setupPageClicked(PrinterJob job, PrintPreviewPanel previewPanel) {
@@ -91,7 +97,7 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         }
     }
 
-    private static PageFormat createDefaultPage(PrinterJob job, BufferedImage img) {
+    private static PageFormat createDefaultPageFormat(PrinterJob job, BufferedImage img) {
         PageFormat page = job.defaultPage();
         if (img.getWidth() > img.getHeight()) {
             page.setOrientation(PageFormat.LANDSCAPE);
@@ -100,8 +106,7 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         }
         Paper paper = page.getPaper();
 
-        float marginInch = 0.25f;
-        float margin = marginInch * DPI;
+        float margin = MARGIN_INCHES * DPI;
         paper.setImageableArea(margin, margin,
             paper.getWidth() - 2 * margin, paper.getHeight() - 2 * margin);
         page.setPaper(paper);
@@ -122,7 +127,7 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
                 .thenAcceptAsync(printingFinished -> {
                     progressHandler.stopProgress();
                     if (!printingFinished) {
-                        Messages.showInStatusBar("Printing was cancelled.");
+                        Messages.showStatusMessage("Printing was cancelled.");
                     }
                 }, onEDT);
         }
@@ -182,6 +187,8 @@ public class PrintAction extends OpenViewEnabledAction.Checked implements Printa
         Graphics2D g2 = (Graphics2D) g;
         g2.translate(pf.getImageableX(), pf.getImageableY());
 
+        // Scale to fit the image within the printable area
+        // while maintaining the aspect ratio.
         double pageWidth = pf.getImageableWidth();
         double pageHeight = pf.getImageableHeight();
         double imageWidth = img.getWidth();

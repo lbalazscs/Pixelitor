@@ -28,7 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
+import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
 
 /**
  * Canny edge detector - see http://en.wikipedia.org/wiki/Canny_edge_detector

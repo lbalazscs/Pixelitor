@@ -253,8 +253,8 @@ public class CropTool extends DragTool {
         if (state == TRANSFORM) {
             cropBox.mouseDragged(e);
         } else if (drag != null) {
-            drag.setStartFromCenter(e.isAltDown());
-            drag.setEquallySized(e.isShiftDown());
+            drag.setExpandFromCenter(e.isAltDown());
+            drag.setEnforceEqualDimensions(e.isShiftDown());
         }
 
         PRectangle cropRect = getCropRect(e.getView());
@@ -473,7 +473,7 @@ public class CropTool extends DragTool {
         }
 
         resetInitialState();
-        Messages.showPlainInStatusBar("Crop canceled.");
+        Messages.showPlainStatusMessage("Crop canceled.");
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,34 +17,42 @@
 
 package pixelitor.utils;
 
+import pixelitor.filters.AddNoise;
+
 /**
- * Tracks the progress of an operation.
+ * Tracks the progress of a long-running operation by counting
+ * completed work units. A work unit represents an atomic piece
+ * of work, such as processing one line of pixels.
  */
 public interface ProgressTracker {
     /**
-     * Signals the completion of a single work unit, often a line of pixels.
+     * Signals that a single work unit has been completed.
      */
     void unitDone();
 
     /**
-     * Signals the completion of multiple work units.
-     *
-     * @param units The number of work units completed.
+     * Signals that multiple work units have been completed.
      */
-    void unitsDone(int units);
+    void unitsDone(int completedUnits);
 
     /**
      * Signals that all work has been completed.
      */
     void finished();
 
+    static ProgressTracker createSafeTracker(int numWorkUnits) {
+        if (numWorkUnits > 0) {
+            return new StatusBarProgressTracker(AddNoise.NAME, numWorkUnits);
+        }
+        return NULL_TRACKER;
+    }
+
     /**
-     * A "null object" tracker that does nothing and
-     * can be shared because it has no state
+     * A no-op implementation that discards all progress updates.
      */
     ProgressTracker NULL_TRACKER = new ProgressTracker() {
         @Override
-        public void unitsDone(int units) {
+        public void unitsDone(int completedUnits) {
         }
 
         @Override

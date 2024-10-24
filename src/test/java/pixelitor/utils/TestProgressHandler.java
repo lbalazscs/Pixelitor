@@ -17,39 +17,39 @@
 
 package pixelitor.utils;
 
-import java.util.function.Supplier;
-
 /**
- * A memoizing Supplier
+ * Test implementation of {@link ProgressHandler}.
  */
-public class Lazy<T> implements Supplier<T> {
-    private final Supplier<T> supplier;
-    private volatile T cachedValue;
+public class TestProgressHandler implements ProgressHandler {
+    private final int maxValue;
+    private boolean completed = false;
+    private int currentValue;
 
-    private Lazy(Supplier<T> supplier) {
-        this.supplier = supplier;
-    }
-
-    public static <T> Lazy<T> of(Supplier<T> supplier) {
-        return new Lazy<>(supplier);
+    TestProgressHandler(int maxValue) {
+        this.maxValue = maxValue;
     }
 
     @Override
-    public T get() {
-        if (cachedValue != null) {
-            return cachedValue;
-        }
-        cachedValue = supplier.get();
-        if (cachedValue == null) {
+    public void updateProgress(int value) {
+        if (completed) {
             throw new IllegalStateException();
         }
-        return cachedValue;
+        if (value < 0 || (maxValue > 0 && value > maxValue)) {
+            throw new IllegalArgumentException("value = " + value);
+        }
+        currentValue = value;
     }
 
-    /**
-     * Make sure that the value is re-calculated the next time
-     */
-    public void invalidate() {
-        cachedValue = null;
+    @Override
+    public void stopProgress() {
+        completed = true;
+    }
+
+    public int getCurrentValue() {
+        return currentValue;
+    }
+
+    public boolean isCompleted() {
+        return completed;
     }
 }

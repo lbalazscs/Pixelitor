@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,86 +20,104 @@ package pixelitor.utils;
 import java.awt.EventQueue;
 
 /**
- * An abstract superclass for progress tracking classes that
- * show progress information after a time threshold has been exceeded.
+ * Base class for progress trackers that only show visual feedback
+ * after a time threshold is exceeded. This prevents UI updates
+ * for operations that complete quickly.
  */
 public abstract class ThresholdProgressTracker implements ProgressTracker {
-    private static final int THRESHOLD_MILLIS = 200;
+    private static final int VISIBILITY_THRESHOLD_MS = 200;
 
-    private final long startTime;
-    private final int numComputationUnits;
+    private final long startTimeMillis;
+    private final int numTotalUnits;
 
-    private int finished = 0;
-    private int lastPercent = 0;
+    private int completedUnits = 0;
+    private int lastReportedPercent = 0;
 
-    private boolean showingProgress = false;
-    private final boolean runningOnEDT;
+    private boolean isTrackingVisible = false;
+    private final boolean isRunningOnEDT;
 
     // In this class this field is used only for debugging.
     // The status bar progress tracker subclass uses it to label the progress bar.
-    protected final String name;
+    protected final String opName;
 
-    protected ThresholdProgressTracker(int numComputationUnits, String name) {
-        this.numComputationUnits = numComputationUnits;
-        this.name = name;
-        startTime = System.currentTimeMillis();
-        runningOnEDT = Threads.calledOnEDT();
+    protected ThresholdProgressTracker(String opName, int numTotalUnits) {
+        assert numTotalUnits > 0;
+
+        this.numTotalUnits = numTotalUnits;
+        this.opName = opName;
+        startTimeMillis = System.currentTimeMillis();
+        isRunningOnEDT = Threads.calledOnEDT();
     }
 
     @Override
     public void unitDone() {
-        finished++;
+        completedUnits++;
         update();
     }
 
     @Override
     public void unitsDone(int units) {
-        finished += units;
+        assert units > 0;
+        this.completedUnits += units;
         update();
     }
 
     private void update() {
-        if (!showingProgress) {
-            double millis = System.currentTimeMillis() - startTime;
-            if (millis > THRESHOLD_MILLIS) {
-                if (runningOnEDT) {
-                    startProgressTracking();
+        // Check if we should start showing progress
+        if (!isTrackingVisible) {
+            double elapsedTime = System.currentTimeMillis() - startTimeMillis;
+            if (elapsedTime > VISIBILITY_THRESHOLD_MS) {
+                if (isRunningOnEDT) {
+                    onProgressStart();
                 } else {
-                    EventQueue.invokeLater(this::startProgressTracking);
+                    EventQueue.invokeLater(this::onProgressStart);
                 }
-                showingProgress = true;
+                isTrackingVisible = true;
             }
         }
 
-        if (showingProgress) {
-            int percent = (int) (finished * 100.0 / numComputationUnits);
-            if (percent > lastPercent) {
-                if (runningOnEDT) {
-                    updateProgressTracking(percent);
+        // Update progress if visible
+        if (isTrackingVisible) {
+            int currentPercent = (int) (completedUnits * 100.0 / numTotalUnits);
+            if (currentPercent > lastReportedPercent) {
+                if (isRunningOnEDT) {
+                    onProgressUpdate(currentPercent);
                 } else {
-                    EventQueue.invokeLater(() -> updateProgressTracking(percent));
+                    EventQueue.invokeLater(() -> onProgressUpdate(currentPercent));
                 }
-                lastPercent = percent;
+                lastReportedPercent = currentPercent;
             }
         }
     }
 
     @Override
     public void finished() {
-        if (showingProgress) {
-            if (runningOnEDT) {
-                finishProgressTracking();
+        if (isTrackingVisible) {
+            if (isRunningOnEDT) {
+                onProgressComplete();
             } else {
-                EventQueue.invokeLater(this::finishProgressTracking);
+                EventQueue.invokeLater(this::onProgressComplete);
             }
-            showingProgress = false;
-            lastPercent = 0;
+            isTrackingVisible = false;
+            lastReportedPercent = 0;
         }
     }
 
-    abstract void startProgressTracking();
+    /**
+     * Called when progress tracking should become visible.
+     * This is called on the EDT after the time threshold is exceeded.
+     */
+    protected abstract void onProgressStart();
 
-    abstract void updateProgressTracking(int percent);
+    /**
+     * Called when progress percentage has increased.
+     * This is called on the EDT with the new percentage value.
+     */
+    protected abstract void onProgressUpdate(int percentComplete);
 
-    abstract void finishProgressTracking();
+    /**
+     * Called when progress tracking should be hidden.
+     * This is called on the EDT when the operation completes.
+     */
+    protected abstract void onProgressComplete();
 }

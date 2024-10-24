@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,21 +28,31 @@ import java.util.List;
 import java.util.SplittableRandom;
 
 /**
- * Implements "Fast Poisson Disk Sampling in Arbitrary Dimensions" by Robert Bridson.
- * If the improved constructor argument is true,
+ * Poisson disk sampling generates a set of randomly distributed points with
+ * the constraint that no two points are closer than a specified minimum distance.
+ *
+ * This class implements "Fast Poisson Disk Sampling in Arbitrary Dimensions" by Robert Bridson.
+ * If the useImprovedAlgorithm constructor argument is true,
  * then it uses the algorithm improvement by Martin Roberts described at
  * http://extremelearning.com.au/an-improved-version-of-bridsons-algorithm-n-for-poisson-disc-sampling/
  */
 public class PoissonDiskSampling {
+    // dimensions of the sampling region
     private final int width;
     private final int height;
-    private final double r;
-    private final List<Point2D> samples;
+
+    private final double r; // minimum distance between points
+
+    private final List<Point2D> samples; // the generated points
+
+    // acceleration grid parameters
+    private final int[][] grid;
     private final int numHorCells;
     private final int numVerCells;
-    private final int[][] grid;
     private final double cellWidth;
     private final double cellHeight;
+
+    private static final double SQRT_2 = 1.414213562373095;
 
     public PoissonDiskSampling(int width, int height, double minDist, int k,
                                boolean improved, SplittableRandom rnd) {
@@ -50,12 +60,15 @@ public class PoissonDiskSampling {
         this.height = height;
         this.r = minDist;
 
-        // ensures that each grid cell contains at most one point
-        double cellSize = minDist / 1.414213562373095;
+        // Calculate grid cell size to ensure each cell
+        // can contain at most one point
+        double cellSize = minDist / SQRT_2;
         numHorCells = (int) Math.ceil(width / cellSize);
         numVerCells = (int) Math.ceil(height / cellSize);
         cellWidth = width / (double) numHorCells;
         cellHeight = height / (double) numVerCells;
+
+        // Initialize acceleration grid with -1 (empty cells)
         grid = new int[numHorCells][numVerCells];
         for (int x = 0; x < numHorCells; x++) {
             for (int y = 0; y < numVerCells; y++) {
@@ -63,8 +76,9 @@ public class PoissonDiskSampling {
             }
         }
 
+        // Start with center point
         Point2D initialSample = new Point2D.Double(width / 2.0, height / 2.0);
-        putPointInGrid(initialSample, 0);
+        addSamplePoint(initialSample, 0);
 
         samples = new ArrayList<>();
         samples.add(initialSample);
@@ -95,13 +109,13 @@ public class PoissonDiskSampling {
                 } else if (candidate.y < 0 || candidate.y > height) {
                     reject = true;
                 } else {
-                    reject = checkNeighbours(candidate);
+                    reject = hasNearbyPoints(candidate);
                 }
 
                 if (!reject) {
                     goodPointFound = true;
-                    Point2D newPoint = candidate.asPoint();
-                    putPointInGrid(newPoint, samples.size());
+                    Point2D newPoint = candidate.toPoint();
+                    addSamplePoint(newPoint, samples.size());
                     samples.add(newPoint);
                     activeList.add(newPoint);
                     break;
@@ -113,15 +127,17 @@ public class PoissonDiskSampling {
         }
     }
 
-    private void putPointInGrid(Point2D p, int atIndex) {
+    private void addSamplePoint(Point2D p, int atIndex) {
         int gridX = (int) (p.getX() / cellWidth);
         int gridY = (int) (p.getY() / cellHeight);
         grid[gridX][gridY] = atIndex;
     }
 
-    private boolean checkNeighbours(Vector2D candidate) {
+    private boolean hasNearbyPoints(Vector2D candidate) {
         int gridX = (int) (candidate.x / cellWidth);
         int gridY = (int) (candidate.y / cellHeight);
+
+        // Check neighboring cells for nearby points
         for (int gx = gridX - 1; gx <= gridX + 1; gx++) {
             if (gx < 0 || gx >= numHorCells) {
                 continue;
@@ -133,7 +149,7 @@ public class PoissonDiskSampling {
                 int index = grid[gx][gy];
                 if (index != -1) {
                     Point2D point = samples.get(index);
-                    if (candidate.distance(point) < r) {
+                    if (candidate.distanceTo(point) < r) {
                         return true;
                     }
                 }
@@ -142,48 +158,40 @@ public class PoissonDiskSampling {
         return false;
     }
 
-    public void showGrid(Graphics2D g2) {
+    public void renderGrid(Graphics2D g2) {
         double yy = 0;
         while (yy < height) {
             yy += cellHeight;
-            Line2D line = new Line2D.Double(0, yy, width, yy);
-            g2.draw(line);
+            g2.draw(new Line2D.Double(0, yy, width, yy));
         }
         double xx = 0;
         while (xx < width) {
             xx += cellWidth;
-            Line2D line = new Line2D.Double(xx, 0, xx, height);
-            g2.draw(line);
+            g2.draw(new Line2D.Double(xx, 0, xx, height));
         }
     }
 
-    public void showSamples(Graphics2D g2, double radius) {
-        for (Point2D s : samples) {
-            g2.fill(Shapes.createCircle(s, radius));
+    public void renderPoints(Graphics2D g2, double radius) {
+        for (Point2D sample : samples) {
+            g2.fill(Shapes.createCircle(sample, radius));
         }
     }
 
-    public void showSamples(Graphics2D g2, double radius, Color[] colors) {
-        int colorIndex = 0;
-        for (Point2D s : samples) {
-            g2.setColor(colors[colorIndex]);
-            g2.fill(Shapes.createCircle(s, radius));
-
-            colorIndex++;
-            if (colorIndex == colors.length) {
-                colorIndex = 0;
-            }
+    public void renderPoints(Graphics2D g2, double radius, Color[] colors) {
+        for (int i = 0; i < samples.size(); i++) {
+            g2.setColor(colors[i % colors.length]);
+            g2.fill(Shapes.createCircle(samples.get(i), radius));
         }
     }
 
     /**
      * Returns the index of the closest sample
      */
-    public int findClosestPointTo(double x, double y,
-                                  DistanceFunction distanceFunction) {
+    public int findClosestPointIndex(double x, double y,
+                                     DistanceFunction distanceFunction) {
         int searchDist = 1;
         while (true) {
-            int index = findClosestPointTo(x, y, searchDist, distanceFunction);
+            int index = searchNeighborhood(x, y, searchDist, distanceFunction);
             if (index != -1) {
                 return index;
             }
@@ -191,7 +199,7 @@ public class PoissonDiskSampling {
         }
     }
 
-    private int findClosestPointTo(double x, double y, int searchDist,
+    private int searchNeighborhood(double x, double y, int searchDist,
                                    DistanceFunction distanceFunction) {
         int gridX = (int) (x / cellWidth);
         int gridY = (int) (y / cellHeight);

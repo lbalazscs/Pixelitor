@@ -75,7 +75,7 @@ public class CopyAction extends OpenViewEnabledAction {
 
     private static void afterCopyActions(ProgressHandler handler) {
         handler.stopProgress();
-        Messages.showInStatusBar("Image copied to the clipboard.");
+        Messages.showStatusMessage("Image copied to the clipboard.");
     }
 }
 

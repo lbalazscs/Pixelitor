@@ -32,7 +32,6 @@ import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.toolhandlers.ToolHandlerChain;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.Debuggable;
@@ -52,7 +51,7 @@ import static java.awt.Color.BLACK;
  * A tool defines the interaction between the
  * mouse and key events and a {@link Composition}
  */
-public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
+public abstract class Tool implements PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
     private final String toolMessage;
@@ -134,7 +133,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     }
 
     protected void toolStarted() {
-        GlobalEvents.setKeyListener(this);
+        GlobalEvents.setActiveTool(this);
         Views.setCursorForAll(cursor);
         View.toolSnappingChanged(pixelSnapping, this == Tools.CROP);
     }
@@ -161,7 +160,7 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
     }
 
     /**
-     * Paint on the {@link Composition} after all the layers have been painted.
+     * Paint over the given {@link Composition} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
     public void paintOverImage(Graphics2D g2, Composition comp) {
@@ -198,30 +197,26 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         GUIUtils.randomizeChildren(settingsPanel);
     }
 
-    @Override
     public void spacePressed() {
         handlerChain.spacePressed();
     }
 
-    @Override
     public void spaceReleased() {
         handlerChain.spaceReleased();
     }
 
     /**
      * Returns true if the key event was used for something
+     * and it should not be further processed.
      */
-    @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         return false; // not consumed
     }
 
-    @Override
     public void escPressed() {
         // empty by default
     }
 
-    @Override
     public void altPressed() {
         if (!altDown && hasColorPickerForwarding()) {
             Views.setCursorForAll(
@@ -230,7 +225,6 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         altDown = true;
     }
 
-    @Override
     public void altReleased() {
         if (hasColorPickerForwarding()) {
             Views.setCursorForAll(cursor);
@@ -238,7 +232,6 @@ public abstract class Tool implements KeyListener, PresetOwner, Debuggable {
         altDown = false;
     }
 
-    @Override
     public void otherKeyPressed(KeyEvent e) {
         // empty by default
     }

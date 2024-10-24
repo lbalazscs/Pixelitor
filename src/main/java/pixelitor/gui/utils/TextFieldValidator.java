@@ -36,7 +36,7 @@ public interface TextFieldValidator {
         }
         double value;
         try {
-            value = Utils.parseDouble(text);
+            value = Utils.parseLocalizedDouble(text);
         } catch (ParseException ex) {
             return ValidationResult.invalid(text + " isn't a valid number for <b>" + label + "</b>");
         }

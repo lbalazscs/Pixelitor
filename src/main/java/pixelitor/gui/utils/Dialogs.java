@@ -233,20 +233,6 @@ public class Dialogs {
         GlobalEvents.dialogClosed(title);
     }
 
-    public static void showNotImageLayerDialog(Layer layer) {
-        if (!RandomGUITest.isRunning()) {
-            String msg = format("The active layer \"%s\" isn't an image layer.",
-                layer.getName());
-            showErrorDialog("Not an image layer", msg);
-        }
-    }
-
-    public static void showNotDrawableDialog(Layer layer) {
-        String msg = format("The active layer \"%s\" isn't an image layer or mask.",
-            layer.getName());
-        showErrorDialog("Not an image layer or mask", msg);
-    }
-
     public static void showExceptionDialog(Throwable e) {
         Thread currentThread = Thread.currentThread();
         showExceptionDialog(e, currentThread);

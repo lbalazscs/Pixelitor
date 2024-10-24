@@ -95,28 +95,22 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     }
 
     public AutoPaintSettings getSettings() {
-        int numStrokes = getStrokCount();
-        int strokeLength = getStrokeLength();
-        Tool tool = getSelectedTool();
-
         boolean colorsEnabled = colorsParam.isEnabled();
         String colors = colorsParam.getSelected();
         boolean randomColors = colorsEnabled && colors.equals(COLOR_MODE_RANDOM);
         boolean interpolatedColors = colorsEnabled && colors.equals(COLOR_MODE_INTERPOLATED);
 
-        double lengthRandomnessPercentage = lengthVariation.getPercentage();
-        double maxCurvaturePercentage = curvature.getPercentage();
-
-        return new AutoPaintSettings(tool, numStrokes, strokeLength, randomColors,
-            lengthRandomnessPercentage, maxCurvaturePercentage, interpolatedColors,
-            strokeDirection.getValue());
+        return new AutoPaintSettings(getSelectedTool(),
+            getStrokeCount(), getStrokeLength(), strokeDirection.getValue(),
+            randomColors, interpolatedColors,
+            lengthVariation.getPercentage(), curvature.getPercentage());
     }
 
     private Tool getSelectedTool() {
         return toolsParam.getSelected();
     }
 
-    private int getStrokCount() {
+    private int getStrokeCount() {
         return parseInt(strokeCountTF.getText().trim());
     }
 
@@ -128,7 +122,7 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
     public ValidationResult validateSettings() {
         var retVal = ValidationResult.valid();
         try {
-            int ns = getStrokCount();
+            int ns = getStrokeCount();
             retVal = retVal.validateNonZero(ns, STROKE_COUNT_TEXT);
             retVal = retVal.validatePositive(ns, STROKE_COUNT_TEXT);
         } catch (NumberFormatException e) {
@@ -154,7 +148,7 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         toolsParam.saveStateTo(preset);
         strokeDirection.saveStateTo(preset);
 
-        preset.putInt(STROKE_COUNT_TEXT, getStrokCount());
+        preset.putInt(STROKE_COUNT_TEXT, getStrokeCount());
         preset.putInt(STROKE_LENGTH_TEXT, getStrokeLength());
 
         lengthVariation.saveStateTo(preset);

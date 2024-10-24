@@ -843,7 +843,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         boolean changed = toCanvasSize();
         if (!changed) {
-            Messages.showInStatusBar("The layer <b>\"%s\"</b> was already the same size (%dx%d) as the canvas."
+            Messages.showStatusMessage("The layer <b>\"%s\"</b> was already the same size (%dx%d) as the canvas."
                 .formatted(getName(), comp.getCanvasWidth(), comp.getCanvasHeight()));
             return;
         }
@@ -866,7 +866,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         History.add(new MultiEdit(editName, comp, translationEdit, imageEdit));
 
-        Messages.showInStatusBar("The layer <b>\"%s\"</b> was cropped to %dx%d from %dx%d."
+        Messages.showStatusMessage("The layer <b>\"%s\"</b> was cropped to %dx%d from %dx%d."
             .formatted(getName(), comp.getCanvasWidth(), comp.getCanvasHeight(), backupImage.getWidth(), backupImage.getHeight()));
     }
 

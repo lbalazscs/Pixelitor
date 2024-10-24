@@ -32,7 +32,7 @@ import java.awt.GridBagLayout;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
-import static pixelitor.utils.Utils.NUM_BYTES_IN_MEGABYTE;
+import static pixelitor.utils.MemoryInfo.NUM_BYTES_IN_MEGABYTE;
 
 /**
  * The GUI of the "New Image" dialog

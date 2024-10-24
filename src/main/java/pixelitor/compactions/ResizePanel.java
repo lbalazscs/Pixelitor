@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -130,7 +130,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (s.isEmpty()) {
             return 0;
         }
-        return Utils.parseDouble(s);
+        return Utils.parseLocalizedDouble(s);
     }
 
     // a combo box or a checkbox was used

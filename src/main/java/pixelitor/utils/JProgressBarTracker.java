@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,55 +19,70 @@ package pixelitor.utils;
 
 import pixelitor.gui.utils.GUIUtils;
 
-import javax.swing.*;
 import java.awt.Container;
+import java.awt.Cursor;
 
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * A {@link ProgressTracker} that tracks the progress by using an
- * arbitrary {@link JProgressBar}.
- * <p>
- * Not to be confused with the {@link StatusBarProgressTracker},
+ * A {@link ThresholdProgressTracker} that tracks the progress
+ * by using an arbitrary JProgressBar. Not to be confused
+ * with the {@link StatusBarProgressTracker},
  * which uses a specific progress bar in the status bar.
+ * <p>
+ * The progress bar is only shown after the threshold is exceeded
+ * and is automatically hidden when the operation completes.
  */
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
 
     private final Container topContainer;
+    private Cursor originalCursor;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
-        super(100, null);
+        super(null, 100);
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
 
-        // Can be a window, but if progressPanel is not
+        // Find the top-level container for cursor management.
+        // It can be a window, but if progressPanel is not
         // added yet to a window, the broadest available
         // GUI area will do.
         topContainer = GUIUtils.getTopContainer(progressPanel);
     }
 
     @Override
-    void startProgressTracking() {
+    protected void onProgressStart() {
         assert calledOnEDT() : threadInfo();
 
+        originalCursor = topContainer.getCursor();
         topContainer.setCursor(Cursors.BUSY);
+
         progressPanel.showProgressBar();
     }
 
     @Override
-    void updateProgressTracking(int percent) {
+    protected void onProgressUpdate(int percentComplete) {
         assert calledOnEDT() : threadInfo();
 
-        progressPanel.setProgress(percent);
+        progressPanel.setProgress(percentComplete);
         progressPanel.paintImmediately();
     }
 
     @Override
-    void finishProgressTracking() {
+    protected void onProgressComplete() {
         progressPanel.setProgress(100);
         progressPanel.hideProgressBar();
-        topContainer.setCursor(Cursors.DEFAULT);
+
+        restoreOriginalCursor();
+    }
+
+    private void restoreOriginalCursor() {
+        if (originalCursor != null) {
+            topContainer.setCursor(originalCursor);
+        } else {
+            topContainer.setCursor(Cursors.DEFAULT);
+        }
     }
 }

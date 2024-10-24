@@ -52,12 +52,20 @@ import java.util.concurrent.CompletableFuture;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.*;
-import static java.awt.image.BufferedImage.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.image.BufferedImage.TRANSLUCENT;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
 import static pixelitor.Views.thumbSize;
-import static pixelitor.colors.Colors.packedIntToString;
 import static pixelitor.colors.Colors.toPackedARGB;
 import static pixelitor.utils.Threads.onPool;
 
@@ -412,24 +420,24 @@ public class ImageUtils {
         return image;
     }
 
-    public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {
+    public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushSrc) {
         assert src != null;
 
         BufferedImage dest = copyTo(TYPE_INT_ARGB_PRE, src);
 
-        if (flushOld) {
+        if (flushSrc) {
             src.flush();
         }
 
         return dest;
     }
 
-    public static BufferedImage convertToARGB(BufferedImage src, boolean flushOld) {
+    public static BufferedImage convertToARGB(BufferedImage src, boolean flushSrc) {
         assert src != null;
 
         BufferedImage dest = copyTo(TYPE_INT_ARGB, src);
 
-        if (flushOld) {
+        if (flushSrc) {
             src.flush();
         }
 
@@ -472,12 +480,12 @@ public class ImageUtils {
         return convertToRGB(src, false);
     }
 
-    public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
+    public static BufferedImage convertToRGB(BufferedImage src, boolean flushSrc) {
         assert src != null;
 
         BufferedImage dest = copyTo(TYPE_INT_RGB, src);
 
-        if (flushOld) {
+        if (flushSrc) {
             src.flush();
         }
 
@@ -488,7 +496,7 @@ public class ImageUtils {
         return convertToIndexed(src, false);
     }
 
-    public static BufferedImage convertToIndexed(BufferedImage src, boolean flushOld) {
+    public static BufferedImage convertToIndexed(BufferedImage src, boolean flushSrc) {
         assert src != null;
 
         if (src.getColorModel() instanceof IndexColorModel) {
@@ -499,15 +507,15 @@ public class ImageUtils {
         if (src.isAlphaPremultiplied()) {
             // otherwise transparent parts will be black when
             // this is drawn on the transparent image
-            src = convertToARGB(src, flushOld);
-            flushOld = true;
+            src = convertToARGB(src, flushSrc);
+            flushSrc = true;
         }
 
         BufferedImage dest = ImageUtil.createIndexed(src, 256,
             BLACK,
             ImageUtil.COLOR_SELECTION_QUALITY + ImageUtil.TRANSPARENCY_BITMASK);
 
-        if (flushOld) {
+        if (flushSrc) {
             src.flush();
         }
 
@@ -1031,48 +1039,6 @@ public class ImageUtils {
 
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
         return copyTo(TYPE_BYTE_GRAY, src);
-    }
-
-    public static boolean compareSmallImages(BufferedImage img1, BufferedImage img2) {
-        assert img1.getWidth() == img2.getWidth();
-        assert img1.getHeight() == img2.getHeight();
-
-        int width = img1.getWidth();
-        int height = img1.getHeight();
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int rgb1 = img1.getRGB(x, y);
-                int rgb2 = img2.getRGB(x, y);
-                if (rgb1 != rgb2) {
-                    String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                        x, y, packedIntToString(rgb1), packedIntToString(rgb2));
-                    System.out.println("ImageUtils::compareSmallImages: " + msg);
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    public static String debugSmallImage(BufferedImage im) {
-        int width = im.getWidth();
-        int height = im.getHeight();
-        StringBuilder s = new StringBuilder(100);
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int rgb = im.getRGB(x, y);
-                String asString = packedIntToString(rgb);
-                s.append(asString);
-                if (x == width - 1) {
-                    s.append("\n");
-                } else {
-                    s.append(" ");
-                }
-            }
-        }
-        return s.toString();
     }
 
     public static BufferedImage create1x1Image(Color c) {

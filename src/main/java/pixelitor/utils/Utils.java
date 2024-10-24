@@ -38,7 +38,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -53,105 +52,18 @@ import static java.lang.String.format;
 public final class Utils {
     public static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
     private static final String ENCODED_NEWLINE = "#NL#";
-    private static final int NUM_BYTES_IN_KILOBYTE = 1_024;
-    public static final int NUM_BYTES_IN_MEGABYTE = 1_048_576;
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
 
     private static String[] fontNames;
-    private static final CountDownLatch fontNamesLoaded = new CountDownLatch(1);
+    private static final CountDownLatch fontLoadingLatch = new CountDownLatch(1);
 
     private Utils() {
     }
 
-    public static String floatToString(float f) {
-        if (f == 0.0f) {
-            return "";
-        }
-        return format("%.3f", f);
-    }
-
-    public static float stringToFloat(String s) throws NotANumberException {
-        String trimmed = s.trim();
-        if (trimmed.isEmpty()) {
-            return 0.0f;
-        }
-
-        NumberFormat nf = NumberFormat.getInstance();
-        Number number;
-        try {
-            // try locale-specific parsing
-            number = nf.parse(trimmed);
-        } catch (ParseException e) {
-            NumberFormat englishFormat = NumberFormat.getInstance(Locale.ENGLISH);
-            try {
-                // second chance: English
-                number = englishFormat.parse(trimmed);
-            } catch (ParseException e1) {
-                throw new NotANumberException(s);
-            }
-        }
-        return number.floatValue();
-    }
-
-    public static String bytesToString(int bytes) {
-        if (bytes < NUM_BYTES_IN_KILOBYTE) {
-            return bytes + " bytes";
-        } else if (bytes < NUM_BYTES_IN_MEGABYTE) {
-            float kiloBytes = ((float) bytes) / NUM_BYTES_IN_KILOBYTE;
-            return format("%.2f kilobytes", kiloBytes);
-        } else {
-            float megaBytes = ((float) bytes) / NUM_BYTES_IN_MEGABYTE;
-            return format("%.2f megabytes", megaBytes);
-        }
-    }
-
-    public static int getMaxHeapMb() {
-        long heapMaxSize = Runtime.getRuntime().maxMemory();
-        return (int) (heapMaxSize / NUM_BYTES_IN_MEGABYTE);
-    }
-
-    public static int getUsedMemoryMb() {
-        long usedMemory = Runtime.getRuntime().totalMemory();
-        return (int) (usedMemory / NUM_BYTES_IN_MEGABYTE);
-    }
-
-    public static void copyStringToClipboard(String text) {
-        Toolkit.getDefaultToolkit()
-            .getSystemClipboard()
-            .setContents(new StringSelection(text), null);
-    }
-
-    public static double clampTo01(double d) {
-        if (d < 0) {
-            return 0;
-        }
-        if (d > 1) {
-            return 1;
-        }
-        return d;
-    }
-
-    public static double parseDouble(String s) throws ParseException {
-        return NumberFormat.getInstance().parse(s).doubleValue();
-    }
-
-    public static float parseFloat(String input, float defaultValue) {
-        if ((input != null) && !input.isEmpty()) {
-            return Float.parseFloat(input);
-        }
-        return defaultValue;
-    }
-
-    public static int parseInt(String input, int defaultValue) {
-        if (input != null) {
-            input = input.trim();
-            if (!input.isEmpty()) {
-                return Integer.parseInt(input);
-            }
-        }
-        return defaultValue;
-    }
-
+    /**
+     * Ensures that assertions are enabled for the JVM running this code.
+     * Called in developer mode and in the tests.
+     */
     public static void ensureAssertionsEnabled() {
         boolean assertsEnabled = false;
         //noinspection AssertWithSideEffects
@@ -170,21 +82,59 @@ public final class Utils {
         }
     }
 
+    public static void copyStringToClipboard(String text) {
+        Toolkit.getDefaultToolkit()
+            .getSystemClipboard()
+            .setContents(new StringSelection(text), null);
+    }
+
+    public static double clampToUnitInterval(double value) {
+        return Math.min(1.0, Math.max(0.0, value));
+    }
+
+    public static double parseLocalizedDouble(String s) throws ParseException {
+        return NumberFormat.getInstance().parse(s).doubleValue();
+    }
+
+    public static float parseFloat(String input, float defaultValue) {
+        if (input == null) {
+            return defaultValue;
+        }
+        try {
+            return Float.parseFloat(input.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public static int parseInt(String input, int defaultValue) {
+        if (input == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(input.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     public static String keystrokeToText(KeyStroke keyStroke) {
-        String s = "";
+        StringBuilder sb = new StringBuilder();
+
         int modifiers = keyStroke.getModifiers();
         if (modifiers > 0) {
-            s = InputEvent.getModifiersExText(modifiers);
-            s += " ";
-        }
-        int keyCode = keyStroke.getKeyCode();
-        if (keyCode != 0) {
-            s += KeyEvent.getKeyText(keyCode);
-        } else {
-            s += keyStroke.getKeyChar();
+            sb.append(InputEvent.getModifiersExText(modifiers))
+                .append(" ");
         }
 
-        return s;
+        int keyCode = keyStroke.getKeyCode();
+        if (keyCode != 0) {
+            sb.append(KeyEvent.getKeyText(keyCode));
+        } else {
+            sb.append(keyStroke.getKeyChar());
+        }
+
+        return sb.toString();
     }
 
     public static String keyEventToText(KeyEvent e) {
@@ -200,7 +150,7 @@ public final class Utils {
         return keyText;
     }
 
-    public static String formatMillis(long millis) {
+    public static String formatDuration(long millis) {
         long seconds = millis / 1000;
         long s = seconds % 60;
         long m = (seconds / 60) % 60;
@@ -210,7 +160,8 @@ public final class Utils {
     }
 
     /**
-     * Creates names of type "something copy", "something copy 2"
+     * Creates a copy name for the given string by appending
+     * " copy" or incrementing an existing copy number.
      */
     public static String createCopyName(String input) {
         String copyString = "copy";
@@ -247,7 +198,7 @@ public final class Utils {
         return Runtime.Version.parse(System.getProperty("java.version")).feature();
     }
 
-    public static Point2D constrainEndPoint(double relX, double relY, double mouseX, double mouseY) {
+    public static Point2D constrainToNearestAngle(double relX, double relY, double mouseX, double mouseY) {
         double dx = mouseX - relX;
         double dy = mouseY - relY;
 
@@ -288,7 +239,7 @@ public final class Utils {
      * Transforms a Callable into a Supplier by wrapping
      * the checked exceptions in runtime exceptions
      */
-    public static <T> Supplier<T> toSupplier(Callable<T> callable) {
+    public static <T> Supplier<T> uncheck(Callable<T> callable) {
         return () -> {
             try {
                 return callable.call();
@@ -303,7 +254,7 @@ public final class Utils {
     }
 
     public static void preloadFontNames() {
-        assert fontNamesLoaded.getCount() == 1;
+        assert fontLoadingLatch.getCount() == 1;
         fontNames = GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
@@ -311,20 +262,20 @@ public final class Utils {
         // It's almost sorted already, but not completely.
         Arrays.sort(fontNames);
 
-        fontNamesLoaded.countDown();
+        fontLoadingLatch.countDown();
     }
 
     public static void preloadUnitTestFontNames() {
-        assert fontNamesLoaded.getCount() == 1;
+        assert fontLoadingLatch.getCount() == 1;
         fontNames = new String[]{Font.DIALOG, Font.DIALOG_INPUT,
             Font.MONOSPACED, Font.SANS_SERIF, Font.SERIF};
-        fontNamesLoaded.countDown();
+        fontLoadingLatch.countDown();
     }
 
     public static String[] getAvailableFontNames() {
         // wait until all font names are loaded
         try {
-            boolean ok = fontNamesLoaded.await(5, TimeUnit.MINUTES);
+            boolean ok = fontLoadingLatch.await(5, TimeUnit.MINUTES);
             if (!ok) {
                 throw new RuntimeException("Timeout: the font names could not be loaded");
             }
@@ -355,12 +306,12 @@ public final class Utils {
     }
 
     // adds an "a" or "an" before the given word
-    public static String addArticle(String s) {
-        String article = switch (s.charAt(0)) {
+    public static String addArticle(String word) {
+        String article = switch (word.charAt(0)) {
             case 'a', 'e', 'i', 'o', 'u', 'h' -> "an ";
             default -> "a ";
         };
-        return article + s;
+        return article + word;
     }
 
     // maps the interval [inStart,inEnd] onto the interval [outStart,outEnd]

@@ -961,7 +961,7 @@ public abstract class Layer implements Serializable, Debuggable {
         holder.replaceLayer(this, so);
         History.add(new ReplaceLayerEdit(this, so, "Convert to Smart Object"));
 
-        Messages.showInStatusBar(format(
+        Messages.showStatusMessage(format(
             "The layer <b>\"%s\"</b> was converted to a smart object.", getName()));
     }
 
@@ -1013,7 +1013,7 @@ public abstract class Layer implements Serializable, Debuggable {
         newImageLayer.copyLayerLevelPropertiesFrom(this);
         holder.replaceLayer(this, newImageLayer);
         History.add(new ReplaceLayerEdit(this, newImageLayer, "Rasterize " + getTypeString()));
-        Messages.showInStatusBar(format(
+        Messages.showStatusMessage(format(
             "The %s <b>\"%s\"</b> was rasterized.", getTypeStringLC(), getName()));
 
         return newImageLayer;

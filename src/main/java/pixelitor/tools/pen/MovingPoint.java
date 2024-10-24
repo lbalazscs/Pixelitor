@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class MovingPoint extends DraggablePoint {
     @Override
     public void setConstrainedLocation(double mouseX, double mouseY) {
         // constrain it relative to the previous anchor
-        Point2D p = Utils.constrainEndPoint(prevAnchor.x, prevAnchor.y, mouseX, mouseY);
+        Point2D p = Utils.constrainToNearestAngle(prevAnchor.x, prevAnchor.y, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 

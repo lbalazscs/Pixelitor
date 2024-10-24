@@ -207,16 +207,16 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     }
 
     private void paintFill(Graphics2D g) {
-        fillPaint.prepare(g, transformedDrag, fgColor, bgColor);
+        fillPaint.prepareGraphics(g, transformedDrag, fgColor, bgColor);
         g.fill(shape);
-        fillPaint.finish(g);
+        fillPaint.cleanupGraphics(g);
     }
 
     private void paintStroke(Graphics2D g) {
         g.setStroke(stroke);
-        strokePaint.prepare(g, transformedDrag, fgColor, bgColor);
+        strokePaint.prepareGraphics(g, transformedDrag, fgColor, bgColor);
         g.draw(shape);
-        strokePaint.finish(g);
+        strokePaint.cleanupGraphics(g);
     }
 
     private void paintEffects(Graphics2D g) {
@@ -277,13 +277,13 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
             return;
         }
 
-        drag.setStartFromCenter(altDown);
+        drag.setExpandFromCenter(altDown);
         if (shapeType.isDirectional()) {
             // For directional shapes it's useful to have the
             // ability to drag exactly horizontally or vertically.
-            drag.setConstrained(shiftDown);
+            drag.setAngleConstrained(shiftDown);
         } else {
-            drag.setEquallySized(shiftDown);
+            drag.setEnforceEqualDimensions(shiftDown);
         }
 
         origDrag = drag;

@@ -168,17 +168,39 @@ public class ShapesTool extends DragTool {
         updateStrokeEnabledState();
     }
 
+    private void strokeUIChanged() {
+        recreateStroke();
+        uiChanged(CHANGE_SHAPE_STROKE_SETTINGS);
+    }
+
+    private void effectsUIChanged() {
+        updateEffects();
+        uiChanged(CHANGE_SHAPE_EFFECTS);
+    }
+
+    private void uiChanged(String editName) {
+        if (regenerateShape) {
+            regenerateShape(editName);
+        }
+
+        updateStrokeEnabledState();
+        if (editName.equals(CHANGE_SHAPE_TYPE)) {
+            shapeSettingsAction.setEnabled(getSelectedType().hasSettings());
+            closeShapeSettingsDialog();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private JComboBox<ShapeType> createShapeTypeCombo() {
+        return GUIUtils.createComboBox(typeModel, e -> shapeTypeChanged());
+    }
+
     public AreaEffects getEffects() {
         return effects;
     }
 
     private void updateEffects() {
         effects = effectsParam.getEffects();
-    }
-
-    private void effectsUIChanged() {
-        updateEffects();
-        uiChanged(CHANGE_SHAPE_EFFECTS);
     }
 
     public Stroke getStroke() {
@@ -200,38 +222,23 @@ public class ShapesTool extends DragTool {
         }
     }
 
-    private void strokeUIChanged() {
-        recreateStroke();
-        uiChanged(CHANGE_SHAPE_STROKE_SETTINGS);
-    }
-
-    private void uiChanged(String editName) {
-        if (regenerateShape) {
-            regenerateShape(editName);
-        }
-
-        updateStrokeEnabledState();
-        if (editName.equals(CHANGE_SHAPE_TYPE)) {
-            shapeSettingsAction.setEnabled(getSelectedType().hasSettings());
-            closeShapeSettingsDialog();
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createFillPaintCombo() {
         return GUIUtils.createComboBox(fillPaintModel,
             e -> fillChanged());
     }
 
+    private void fillChanged() {
+        uiChanged(CHANGE_SHAPE_FILL);
+        if (isEditingShapesLayer()) {
+            shapesLayer.updateIconImage();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createStrokePaintCombo() {
         return GUIUtils.createComboBox(strokePaintModel,
             e -> uiChanged(CHANGE_SHAPE_STROKE));
-    }
-
-    @SuppressWarnings("unchecked")
-    private JComboBox<ShapeType> createShapeTypeCombo() {
-        return GUIUtils.createComboBox(typeModel, e -> shapeTypeChanged());
     }
 
     public ShapeType getSelectedType() {
@@ -419,7 +426,7 @@ public class ShapesTool extends DragTool {
     @Override
     public void altReleased() {
         if (state == INITIAL_DRAG && drag.isDragging() && !drag.isClick()) {
-            drag.setStartFromCenter(false);
+            drag.setExpandFromCenter(false);
 
             assert hasStyledShape();
             styledShape.updateFromDrag(drag, false, false);
@@ -564,13 +571,6 @@ public class ShapesTool extends DragTool {
 
         resetInitialState();
         Tools.SELECTION.activate();
-    }
-
-    private void fillChanged() {
-        uiChanged(CHANGE_SHAPE_FILL);
-        if (isEditingShapesLayer()) {
-            shapesLayer.updateIconImage();
-        }
     }
 
     @Override

@@ -200,7 +200,7 @@ public class DraggablePoint extends Point2D.Double {
      * Subclasses can choose a different pivot point by overriding this method.
      */
     public void setConstrainedLocation(double mouseX, double mouseY) {
-        Point2D p = Utils.constrainEndPoint(dragStartX, dragStartY, mouseX, mouseY);
+        Point2D p = Utils.constrainToNearestAngle(dragStartX, dragStartY, mouseX, mouseY);
         setLocation(p.getX(), p.getY());
     }
 

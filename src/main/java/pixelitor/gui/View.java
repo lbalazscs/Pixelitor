@@ -184,7 +184,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         String msg = format("The image <b>%s</b> was reloaded from the file <b>%s</b>.",
             newComp.getName(), newComp.getFile().getAbsolutePath());
-        Messages.showInStatusBar(msg);
+        Messages.showStatusMessage(msg);
 
         return newComp;
     }

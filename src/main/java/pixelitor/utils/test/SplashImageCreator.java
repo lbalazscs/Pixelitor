@@ -229,7 +229,7 @@ public class SplashImageCreator {
     private static void cleanupAfterManySplashes(int numCreatedImages,
                                                  ProgressHandler progressHandler) {
         progressHandler.stopProgress();
-        Messages.showPlainInStatusBar(format("Finished saving %d splash images to %s",
+        Messages.showPlainStatusMessage(format("Finished saving %d splash images to %s",
             numCreatedImages, Dirs.getLastSave()));
     }
 }

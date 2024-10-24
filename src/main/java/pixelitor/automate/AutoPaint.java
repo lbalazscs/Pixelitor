@@ -93,7 +93,7 @@ public class AutoPaint {
                 dr, backupImage, false));
 
             progressHandler.stopProgress();
-            Messages.showPlainInStatusBar(statusBarMessage + "finished.");
+            Messages.showPlainStatusMessage(statusBarMessage + "finished.");
 
             restoreOriginalColors(settings);
         }
@@ -124,7 +124,7 @@ public class AutoPaint {
 
         setColors(settings, rand);
         PPoint start = comp.getRandomPointInCanvas();
-        PPoint end = settings.calcRandomEndPoint(start, comp, rand);
+        PPoint end = settings.genRandomEndPoint(start, comp, rand);
 
         Tool tool = settings.getTool();
         if (tool instanceof AbstractBrushTool abt) {

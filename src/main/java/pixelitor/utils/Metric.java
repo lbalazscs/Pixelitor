@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,26 +18,33 @@
 package pixelitor.utils;
 
 /**
- * Different ways to define the distance between two points.
- *
- * https://en.wikipedia.org/wiki/Metric_%28mathematics%29
+ * Different distance metrics for calculating distances between two points.
  */
 public enum Metric {
+    /**
+     * Squared Euclidean distance: (x₁-x₂)² + (y₁-y₂)².
+     * Without the square root for better performance.
+     */
     EUCLIDEAN_SQUARED("Euclidean") {
         @Override
         public double distanceInt(int x1, int y1, int x2, int y2) {
             int dx = x1 - x2;
             int dy = y1 - y2;
-            return dx * dx + dy * dy; // much faster without square root
+            return dx * dx + dy * dy;
         }
 
         @Override
         public double distanceDouble(double x1, double y1, double x2, double y2) {
             double dx = x1 - x2;
             double dy = y1 - y2;
-            return dx * dx + dy * dy; // much faster without square root
+            return dx * dx + dy * dy;
         }
-    }, TAXICAB("Taxicab (Manhattan)") {
+    },
+    /**
+     * Manhattan (Taxicab) distance: |x₁-x₂| + |y₁-y₂|.
+     * Represents the distance a taxi would drive in a city laid out in a grid-like pattern.
+     */
+    MANHATTAN("Taxicab (Manhattan)") {
         @Override
         public double distanceInt(int x1, int y1, int x2, int y2) {
             return Math.abs(x1 - x2) + Math.abs(y1 - y2);
@@ -47,7 +54,12 @@ public enum Metric {
         public double distanceDouble(double x1, double y1, double x2, double y2) {
             return Math.abs(x1 - x2) + Math.abs(y1 - y2);
         }
-    }, MAX("Chessboard (Chebyshev)") {
+    },
+    /**
+     * Chebyshev (Chessboard) distance: max(|x₁-x₂|, |y₁-y₂|).
+     * Represents the minimum number of moves a king would need to make on a chessboard.
+     */
+    CHEBYSHEV("Chessboard (Chebyshev)") {
         @Override
         public double distanceInt(int x1, int y1, int x2, int y2) {
             return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
@@ -70,9 +82,14 @@ public enum Metric {
         return guiName;
     }
 
+    /**
+     * The distance with int precision.
+     */
     public abstract double distanceInt(int x1, int y1, int x2, int y2);
 
-    // a slower version with double arguments
+    /**
+     * The distance with double precision (slower).
+     */
     public abstract double distanceDouble(double x1, double y1, double x2, double y2);
 
     public DistanceFunction asIntPrecisionDistance() {
@@ -83,6 +100,9 @@ public enum Metric {
         return this::distanceDouble;
     }
 
+    /**
+     * Abstracts away the precision of the calculations.
+     */
     public interface DistanceFunction {
         double apply(double x1, double y1, double x2, double y2);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.layers.Layer;
 import pixelitor.utils.MessageHandler;
 import pixelitor.utils.ProgressHandler;
 
@@ -29,7 +28,8 @@ import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * The MessageHandler that is normally used (except in unit-testing code)
+ * GUI-based implementation of MessageHandler.
+ * This is used normally (except in unit-testing code).
  */
 public class GUIMessageHandler implements MessageHandler {
     public GUIMessageHandler() {
@@ -43,10 +43,10 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public ProgressHandler startProgress(String msg, int max) {
+    public ProgressHandler startProgress(String msg, int maxValue) {
         assert calledOnEDT() : threadInfo();
 
-        return StatusBar.get().startProgress(msg, max);
+        return StatusBar.get().startProgress(msg, maxValue);
     }
 
     @Override
@@ -65,28 +65,18 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showNotImageLayerError(Layer layer) {
-        Dialogs.showNotImageLayerDialog(layer);
+    public void showException(Throwable exception) {
+        Dialogs.showExceptionDialog(exception);
     }
 
     @Override
-    public void showNotDrawableError(Layer layer) {
-        Dialogs.showNotDrawableDialog(layer);
+    public void showExceptionOnEDT(Throwable exception) {
+        EventQueue.invokeLater(() -> showException(exception));
     }
 
     @Override
-    public void showException(Throwable e) {
-        Dialogs.showExceptionDialog(e);
-    }
-
-    @Override
-    public void showExceptionOnEDT(Throwable e) {
-        EventQueue.invokeLater(() -> showException(e));
-    }
-
-    @Override
-    public void showException(Throwable e, Thread srcThread) {
-        Dialogs.showExceptionDialog(e, srcThread);
+    public void showException(Throwable exception, Thread srcThread) {
+        Dialogs.showExceptionDialog(exception, srcThread);
     }
 
     @Override

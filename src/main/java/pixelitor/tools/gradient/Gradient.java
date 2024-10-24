@@ -217,11 +217,11 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public void crop(Rectangle2D cropRect) {
-        drag = drag.translatedCopy(-cropRect.getX(), -cropRect.getY());
+        drag = drag.imTranslatedCopy(-cropRect.getX(), -cropRect.getY());
     }
 
     public void enlargeCanvas(int north, int west) {
-        drag = drag.translatedCopy(west, north);
+        drag = drag.imTranslatedCopy(west, north);
     }
 
     public void imTransform(AffineTransform at) {
@@ -233,7 +233,7 @@ public class Gradient implements Serializable, Debuggable {
     }
 
     public void moveWhileDragging(double x, double y) {
-        drag = moveStartDrag.translatedCopy(x, y);
+        drag = moveStartDrag.imTranslatedCopy(x, y);
     }
 
     public void endMovement() {

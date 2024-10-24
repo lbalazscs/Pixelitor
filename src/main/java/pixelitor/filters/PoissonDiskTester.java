@@ -79,11 +79,11 @@ public class PoissonDiskTester extends ParametrizedFilter {
 
         Color[] dotColors = colors.getColors();
         g2.setColor(Color.RED);
-        sampling.showSamples(g2, dist / 2, dotColors);
+        sampling.renderPoints(g2, dist / 2, dotColors);
 
         if (debugGrid.isChecked()) {
             g2.setColor(Color.BLACK);
-            sampling.showGrid(g2);
+            sampling.renderGrid(g2);
         }
 
         return dest;

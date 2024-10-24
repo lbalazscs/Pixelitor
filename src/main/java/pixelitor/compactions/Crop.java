@@ -70,7 +70,7 @@ public class Crop implements CompAction {
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
         if (oldComp.containsLayerWithClass(SmartObject.class)) {
-            Messages.showNotImplementedForSmartObjects("Cropping");
+            Messages.showSmartObjectUnsupportedWarning("Cropping");
             return CompletableFuture.completedFuture(oldComp);
         }
 
@@ -146,7 +146,7 @@ public class Crop implements CompAction {
 
         newComp.update(true, true);
 
-        Messages.showInStatusBar(format(
+        Messages.showStatusMessage(format(
             "<b>%s</b> was cropped to %d x %d pixels.",
             newComp.getName(), cropRect.width, cropRect.height));
 

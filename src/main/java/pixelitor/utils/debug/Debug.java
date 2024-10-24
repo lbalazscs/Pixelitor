@@ -345,7 +345,7 @@ public class Debug {
     public static void copyInternalState() {
         AppNode node = new AppNode();
         Utils.copyStringToClipboard(node.toJSON());
-        Messages.showInStatusBar("Internal state copied to the clipboard.");
+        Messages.showStatusMessage("Internal state copied to the clipboard.");
     }
 
     public static void showInternalState() {

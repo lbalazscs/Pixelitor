@@ -196,7 +196,7 @@ public class PenTool extends Tool {
         rubberBandLabel.setEnabled(mode == BUILD);
         rubberBandCB.setEnabled(mode == BUILD);
 
-        Messages.showInStatusBar(mode.getToolMessage());
+        Messages.showStatusMessage(mode.getToolMessage());
         enableActions(hasPath());
         Views.repaintActive();
 

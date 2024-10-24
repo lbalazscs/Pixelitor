@@ -19,7 +19,7 @@ package pixelitor.utils.debug;
 
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.AngleUnit;
-import pixelitor.utils.Utils;
+import pixelitor.utils.MemoryInfo;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -58,8 +58,8 @@ public class DebugNodes {
         node.addInt("app window width", pw.getWidth());
         node.addInt("app window height", pw.getHeight());
 
-        node.addQuotedString("max memory", Utils.getMaxHeapMb() + " Mb");
-        node.addQuotedString("used memory", Utils.getUsedMemoryMb() + " Mb");
+        node.addQuotedString("max memory", MemoryInfo.getMaxHeapMb() + " Mb");
+        node.addQuotedString("used memory", MemoryInfo.getTotalMemoryMb() + " Mb");
 
         node.add(createColorModelNode("default color model",
             device.getDefaultConfiguration().getColorModel()));

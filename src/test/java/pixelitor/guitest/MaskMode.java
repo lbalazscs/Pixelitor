@@ -56,6 +56,11 @@ enum MaskMode {
         public void setMaskViewMode(Keyboard keyboard) {
             // do nothing
         }
+
+        @Override
+        public boolean isMaskEditing() {
+            return false;
+        }
     },
     /**
      * The active layer has a mask and it's in NORMAL mask view mode

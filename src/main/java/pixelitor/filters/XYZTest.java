@@ -98,9 +98,9 @@ public class XYZTest extends ParametrizedFilter {
             xyz[1] += yVal;
             xyz[2] += zVal;
 
-            xyz[0] = Utils.clampTo01(xyz[0]);
-            xyz[1] = Utils.clampTo01(xyz[1]);
-            xyz[2] = Utils.clampTo01(xyz[2]);
+            xyz[0] = Utils.clampToUnitInterval(xyz[0]);
+            xyz[1] = Utils.clampToUnitInterval(xyz[1]);
+            xyz[2] = Utils.clampToUnitInterval(xyz[2]);
 
 //            rgb = XYZ_CS.toRGB(xyz);
             xyz2rgb(xyz, rgb);

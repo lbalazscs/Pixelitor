@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,14 +20,24 @@ package pixelitor.utils;
 import java.awt.EventQueue;
 
 /**
- * An object that can be used to update and stop
- * the displayed progress value in a UI progress indicator.
+ * Manages the lifecycle and updates of a UI progress bar.
+ * This is a lower-level interface than {@link ProgressTracker}.
  */
 public interface ProgressHandler {
-    void updateProgress(int value);
+    /**
+     * Updates the current progress value in the UI.
+     */
+    void updateProgress(int currentValue);
 
+    /**
+     * Terminates the progress bar.
+     * Should be called when the operation is complete or cancelled.
+     */
     void stopProgress();
 
+    /**
+     * Safely stops the progress bar on the EDT.
+     */
     default void stopProgressOnEDT() {
         if (Threads.calledOnEDT()) {
             stopProgress();
@@ -35,16 +45,4 @@ public interface ProgressHandler {
             EventQueue.invokeLater(this::stopProgress);
         }
     }
-
-    ProgressHandler EMPTY = new ProgressHandler() {
-        @Override
-        public void updateProgress(int value) {
-            // do nothing
-        }
-
-        @Override
-        public void stopProgress() {
-            // do nothing
-        }
-    };
 }

@@ -154,7 +154,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         optimized.refreshImage(newPreview);
 
         int numBytes = imageWithSize.size();
-        sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
+        sizeLabel.setText("  Size: " + MemoryInfo.bytesToString(numBytes));
     }
 
     private float getQuality() {

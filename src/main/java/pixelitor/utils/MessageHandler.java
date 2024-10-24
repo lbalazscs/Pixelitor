@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.layers.Layer;
-
 import java.awt.Component;
 
 /**
@@ -30,7 +28,7 @@ public interface MessageHandler {
 
     void showInStatusBar(String msg);
 
-    ProgressHandler startProgress(String msg, int max);
+    ProgressHandler startProgress(String msg, int maxValue);
 
     // *** dialog messages ***
 
@@ -40,15 +38,12 @@ public interface MessageHandler {
 
     void showError(String title, String msg, Component parent);
 
-    void showNotImageLayerError(Layer layer);
-
-    void showNotDrawableError(Layer layer);
-
-    void showException(Throwable e);
-
-    void showException(Throwable e, Thread srcThread);
-
-    void showExceptionOnEDT(Throwable e);
-
     boolean showYesNoQuestion(String title, String msg);
+
+    void showException(Throwable exception);
+
+    // Shows an exception dialog with information about the source thread.
+    void showException(Throwable exception, Thread srcThread);
+
+    void showExceptionOnEDT(Throwable exception);
 }

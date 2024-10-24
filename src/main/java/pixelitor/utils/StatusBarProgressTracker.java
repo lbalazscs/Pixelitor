@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,23 +24,24 @@ package pixelitor.utils;
 public class StatusBarProgressTracker extends ThresholdProgressTracker {
     private ProgressHandler progressHandler;
 
-    public StatusBarProgressTracker(String name, int numComputationUnits) {
-        super(numComputationUnits, name);
-        assert name != null;
+    public StatusBarProgressTracker(String opName, int numTotalUnits) {
+        super(opName, numTotalUnits);
+        assert opName != null;
     }
 
     @Override
-    void startProgressTracking() {
-        progressHandler = Messages.startProgress(name, 100);
+    protected void onProgressStart() {
+        progressHandler = Messages.startProgress(opName, 100);
     }
 
     @Override
-    void updateProgressTracking(int percent) {
-        progressHandler.updateProgress(percent);
+    protected void onProgressUpdate(int percentComplete) {
+        progressHandler.updateProgress(percentComplete);
     }
 
     @Override
-    void finishProgressTracking() {
+    protected void onProgressComplete() {
         progressHandler.stopProgress();
+        progressHandler = null;
     }
 }

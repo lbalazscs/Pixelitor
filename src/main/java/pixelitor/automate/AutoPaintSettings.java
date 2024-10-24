@@ -45,9 +45,9 @@ public class AutoPaintSettings {
     private final boolean useRandomColors;
     private final boolean useInterpolatedColors;
 
-    AutoPaintSettings(Tool tool, int numStrokes, int baseStrokeLength,
-                      boolean useRandomColors, double lengthVariation,
-                      double maxCurvature, boolean useInterpolatedColors, int strokeDirection) {
+    AutoPaintSettings(Tool tool, int numStrokes, int baseStrokeLength, int strokeDirection,
+                      boolean useRandomColors, boolean useInterpolatedColors,
+                      double lengthVariation, double maxCurvature) {
         this.tool = tool;
         this.numStrokes = numStrokes;
         this.maxCurvature = maxCurvature;
@@ -66,7 +66,7 @@ public class AutoPaintSettings {
         this.useInterpolatedColors = useInterpolatedColors;
     }
 
-    public PPoint calcRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
+    public PPoint genRandomEndPoint(PPoint start, Composition comp, SplittableRandom rand) {
         Canvas canvas = comp.getCanvas();
         double angle = switch (strokeDirection) {
             case DIRECTION_RANDOM -> rand.nextDouble() * 2 * Math.PI;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,9 @@ import java.util.StringJoiner;
 
 import static net.jafama.FastMath.hypot;
 
+/**
+ * Represents a mutable 2D vector.
+ */
 public class Vector2D {
     public double x;
     public double y;
@@ -31,12 +34,12 @@ public class Vector2D {
     public Vector2D() {
     }
 
-    public Vector2D(Vector2D v) {
-        this(v.x, v.y);
+    public Vector2D(Vector2D source) {
+        this(source.x, source.y);
     }
 
-    public Vector2D(Point2D p) {
-        this(p.getX(), p.getY());
+    public Vector2D(Point2D point) {
+        this(point.getX(), point.getY());
     }
 
     public Vector2D(double x, double y) {
@@ -57,9 +60,9 @@ public class Vector2D {
         this.y = y;
     }
 
-    public void set(Vector2D v) {
-        this.x = v.x;
-        this.y = v.y;
+    public void set(Vector2D source) {
+        this.x = source.x;
+        this.y = source.y;
     }
 
     public void add(Vector2D other) {
@@ -67,9 +70,9 @@ public class Vector2D {
         y += other.y;
     }
 
-    public void add(float v) {
-        this.x += v;
-        this.y += v;
+    public void add(float scalar) {
+        this.x += scalar;
+        this.y += scalar;
     }
 
     public void add(Point2D point) {
@@ -77,29 +80,29 @@ public class Vector2D {
         y += point.getY();
     }
 
-    public void subtract(Vector2D v) {
-        this.x -= v.x;
-        this.y -= v.y;
+    public void subtract(Vector2D other) {
+        this.x -= other.x;
+        this.y -= other.y;
     }
 
-    public void subtract(double v) {
-        this.x -= v;
-        this.y -= v;
+    public void subtract(double scalar) {
+        this.x -= scalar;
+        this.y -= scalar;
     }
 
-    public void multiply(Vector2D v) {
-        this.x *= v.x;
-        this.y *= v.y;
+    public void multiply(Vector2D other) {
+        this.x *= other.x;
+        this.y *= other.y;
     }
 
-    public void multiply(double v) {
-        this.x *= v;
-        this.y *= v;
+    public void multiply(double scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
     }
 
-    public void divide(double v) {
-        this.x /= v;
-        this.y /= v;
+    public void divide(double scalar) {
+        this.x /= scalar;
+        this.y /= scalar;
     }
 
     public void setMagnitude(double magnitude) {
@@ -146,7 +149,7 @@ public class Vector2D {
         return hypot(x, y);
     }
 
-    public double distance(Point2D point) {
+    public double distanceTo(Point2D point) {
         return hypot(point.getX() - x, point.getY() - y);
     }
 
@@ -156,7 +159,7 @@ public class Vector2D {
         x = -tmp;
     }
 
-    public Point2D asPoint() {
+    public Point2D toPoint() {
         return new Point2D.Double(x, y);
     }
 

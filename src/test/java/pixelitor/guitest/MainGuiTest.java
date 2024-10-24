@@ -203,7 +203,7 @@ public class MainGuiTest {
 
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("MainGuiTest: finished at %s after %s, exiting in ",
-            getCurrentTimeHM(), Utils.formatMillis(totalTimeMillis));
+            getCurrentTimeHM(), Utils.formatDuration(totalTimeMillis));
 
         app.exit();
     }
