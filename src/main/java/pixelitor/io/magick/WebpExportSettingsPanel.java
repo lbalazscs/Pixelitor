@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.GridBagLayout;
 import java.util.List;
 import java.util.Locale;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition;
 
 class WebpExportSettingsPanel extends JPanel implements ExportSettings {
     public static final ExportSettings INSTANCE = new WebpExportSettingsPanel();
@@ -39,7 +39,7 @@ class WebpExportSettingsPanel extends JPanel implements ExportSettings {
     private static final int HINT_GRAPH = 3;
 
     private final RangeParam quality = new RangeParam("Quality (Size)",
-        1, 50, 100, false, TextPosition.NONE);
+        1, 50, 100, false, LabelPosition.NONE);
     private final BooleanParam lossless = new BooleanParam("Lossless", false);
     private final IntChoiceParam imageHint = new IntChoiceParam(
         "Image Hint", new IntChoiceParam.Item[]{

@@ -58,9 +58,9 @@ public interface Filterable {
 
     void setShowOriginal(boolean b);
 
-    // if "first" is true, then the settings haven't really changed,
+    // if "firstPreview" is true, then the settings haven't yet changed,
     // this is called only to trigger the first preview run of the filter
-    void startPreview(Filter filter, boolean first, Component busyCursorParent);
+    void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget);
 
     void onFilterDialogAccepted(String filterName);
 
@@ -72,11 +72,11 @@ public interface Filterable {
         startFilter(filter, context, PixelitorWindow.get());
     }
 
-    default void startFilter(Filter filter, FilterContext context, Component busyCursorParent) {
+    default void startFilter(Filter filter, FilterContext context, Component busyCursorTarget) {
         long startTime = System.nanoTime();
 
         Runnable task = () -> runFilter(filter, context);
-        GUIUtils.runWithBusyCursor(task, busyCursorParent);
+        GUIUtils.runWithBusyCursor(task, busyCursorTarget);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
         Messages.showPerformanceMessage(filter.getName(), totalTime);

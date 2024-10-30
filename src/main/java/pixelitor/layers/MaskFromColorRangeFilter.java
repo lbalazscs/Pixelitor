@@ -42,7 +42,7 @@ class MaskFromColorRangeFilter extends PointFilter {
     private int refR, refG, refB; // the reference color in RGB
     private float refHue, refSat, refBri; // the reference color in HSB
 
-    private boolean isInverted;
+    private boolean inverted;
 
     protected MaskFromColorRangeFilter(String filterName) {
         super(filterName);
@@ -87,7 +87,7 @@ class MaskFromColorRangeFilter extends PointFilter {
      * (exclude matching colors instead of including them).
      */
     public void setInvertMask(boolean inverted) {
-        this.isInverted = inverted;
+        this.inverted = inverted;
     }
 
     @Override
@@ -95,13 +95,13 @@ class MaskFromColorRangeFilter extends PointFilter {
         double dist = calcDistance(rgb);
 
         if (dist > minTolerance) {
-            if (isInverted) {
+            if (inverted) {
                 return WHITE_PIXEL;
             } else {
                 return BLACK_PIXEL;
             }
         } else if (dist < maxTolerance) {
-            if (isInverted) {
+            if (inverted) {
                 return BLACK_PIXEL;
             } else {
                 return WHITE_PIXEL;
@@ -109,7 +109,7 @@ class MaskFromColorRangeFilter extends PointFilter {
         } else {
             // linear interpolation
             int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
-            if (isInverted) {
+            if (inverted) {
                 v = 255 - v;
             }
             return 0xFF_00_00_00 | v << 16 | v << 8 | v;

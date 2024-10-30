@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.gui.utils.SliderSpinner.TextPosition;
+import pixelitor.gui.utils.SliderSpinner.LabelPosition;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -42,7 +42,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
 
         this.model = model;
 
-        slider = new SliderSpinner(model, TextPosition.NONE, true);
+        slider = new SliderSpinner(model, LabelPosition.NONE, true);
         slider.addChangeListener(e -> sliderChanged());
 
         gbh.addLabelAndControl("Log:", slider);

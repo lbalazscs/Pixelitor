@@ -38,7 +38,7 @@ import java.util.ResourceBundle;
 
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 
 /**
  * The smudge tool.

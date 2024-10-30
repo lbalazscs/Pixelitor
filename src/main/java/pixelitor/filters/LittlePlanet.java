@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static pixelitor.gui.GUIText.ZOOM;
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -37,7 +37,7 @@ public class LittlePlanet extends ParametrizedFilter {
     private static final long serialVersionUID = 3658391628537896082L;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final AngleParam rotateResult = new AngleParam("Rotate Result", 90, CCW_DEGREES);
+    private final AngleParam rotateResult = new AngleParam("Rotate Result", 90, INTUITIVE_DEGREES);
     private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 170);
     private final BooleanParam invert = new BooleanParam("Invert", false);

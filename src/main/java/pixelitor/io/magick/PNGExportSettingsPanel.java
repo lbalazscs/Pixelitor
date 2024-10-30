@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ class PNGExportSettingsPanel extends JPanel implements ExportSettings {
         gbh.addLabelAndControl("Interlaced:", interlacedCB);
 
         compression = new RangeParam("Compression Level",
-            0, 7, 9, true, SliderSpinner.TextPosition.NONE);
+            0, 7, 9, true, SliderSpinner.LabelPosition.NONE);
         gbh.addLabelAndControl(compression);
     }
 

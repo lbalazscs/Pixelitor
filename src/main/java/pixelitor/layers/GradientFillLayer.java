@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.history.GradientFillLayerChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -164,9 +165,9 @@ public class GradientFillLayer extends ContentLayer {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
+    public void enlargeCanvas(Outsets out) {
         if (gradient != null) {
-            gradient.enlargeCanvas(north, west);
+            gradient.enlargeCanvas(out);
             cachedImage = null;
         }
     }

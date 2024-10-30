@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,15 +25,16 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 
 import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
 import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
 import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
 /**
- * An abstract superclass for angle selectors ({@link AngleUI})
+ * Abstract base class for angle selectors ({@link AngleUI})
  * and elevation angle selectors ({@link ElevationAngleUI})
  */
 public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
-    protected static final int SIZE = 50;
+    protected static final int SELECTOR_SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
     private static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
@@ -43,16 +44,16 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
     protected final AngleParam model;
     private boolean enabled = true;
 
-    protected int cx;
-    protected int cy;
+    protected int centerX;
+    protected int centerY;
 
-    AbstractAngleUI(AngleParam angleParam) {
-        model = angleParam;
+    AbstractAngleUI(AngleParam model) {
+        this.model = model;
 
-        var size2D = new Dimension(SIZE + 1, SIZE + 1);
-        setSize(size2D);
-        setMinimumSize(size2D);
-        setPreferredSize(size2D);
+        var size = new Dimension(SELECTOR_SIZE + 1, SELECTOR_SIZE + 1);
+        setSize(size);
+        setMinimumSize(size);
+        setPreferredSize(size);
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -60,33 +61,25 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
 
     void setupOuterColor(Graphics2D g, boolean darkTheme) {
         if (enabled) {
-            if (darkTheme) {
-                g.setColor(ENABLED_ARROW_DARK_COLOR);
-            } else {
-                g.setColor(BLACK);
-            }
+            g.setColor(darkTheme
+                ? ENABLED_ARROW_DARK_COLOR
+                : BLACK);
         } else {
-            if (darkTheme) {
-                g.setColor(DISABLED_ARROW_DARK_COLOR);
-            } else {
-                g.setColor(Color.GRAY);
-            }
+            g.setColor(darkTheme
+                ? DISABLED_ARROW_DARK_COLOR
+                : GRAY);
         }
     }
 
-    protected void setupArrowColor(Graphics2D g, boolean darkTheme) {
+    void setupArrowColor(Graphics2D g, boolean darkTheme) {
         if (enabled) {
-            if (darkTheme) {
-                g.setColor(ENABLED_ARROW_DARK_COLOR);
-            } else {
-                g.setColor(ENABLED_ARROW_COLOR);
-            }
+            g.setColor(darkTheme
+                ? ENABLED_ARROW_DARK_COLOR
+                : ENABLED_ARROW_COLOR);
         } else {
-            if (darkTheme) {
-                g.setColor(DISABLED_ARROW_DARK_COLOR);
-            } else {
-                g.setColor(DISABLED_ARROW_COLOR);
-            }
+            g.setColor(darkTheme
+                ? DISABLED_ARROW_DARK_COLOR
+                : DISABLED_ARROW_COLOR);
         }
     }
 
@@ -94,16 +87,20 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         g2.setStroke(ARROW_STROKE);
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
 
+        // Draw main arrow line
         g2.draw(new Line2D.Float(startX, startY, endX, endY));
 
+        // The arrowhead angles are calculated relative to the main arrow's angle.
         double backAngle1 = 2.8797926 + angle;
         double backAngle2 = 3.4033926 + angle;
         int arrowRadius = 10;
 
+        // Draw the first line of the arrow head
         float arrowEnd1X = (float) (endX + arrowRadius * Math.cos(backAngle1));
         float arrowEnd1Y = (float) (endY + arrowRadius * Math.sin(backAngle1));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd1X, arrowEnd1Y));
 
+        // Draw the second line of the arrow head
         float arrowEnd2X = (float) (endX + arrowRadius * Math.cos(backAngle2));
         float arrowEnd2Y = (float) (endY + arrowRadius * Math.sin(backAngle2));
         g2.draw(new Line2D.Float(endX, endY, arrowEnd2X, arrowEnd2Y));
@@ -116,12 +113,16 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         repaint();
     }
 
-    private void updateAngle(int x, int y, boolean trigger) {
+    private void updateAngle(int mouseX, int mouseY, boolean trigger) {
         if (!enabled) {
             return;
         }
-        double angle = Math.atan2(y - cy, x - cx);
+        double angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+
+        // try to update the selector UI before a potential
+        // execution of the filter
         repaint();
+
         model.setValue(angle, trigger);
     }
 

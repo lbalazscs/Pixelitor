@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,10 +33,10 @@ import static java.awt.BorderLayout.SOUTH;
 
 
 /**
- * An automatically built GUI for {@link ParametrizedFilter} filters.
+ * An automatically generated GUI for {@link ParametrizedFilter} filters.
  */
 public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
-    private ShowOriginalCB showOriginalCB;
+    private ShowOriginalCheckbox showOriginalCB;
 
     public ParametrizedFilterGUI(ParametrizedFilter filter, Filterable layer,
                                  boolean addShowOriginal, boolean reset) {
@@ -60,7 +60,6 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         }
 
         paramSet.setAdjustmentListener(this);
-
         setupGUI(paramSet, addShowOriginal, presets);
     }
 
@@ -89,19 +88,21 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         int numControls = actionList.size();
         if (addShowOriginal) {
             numControls++;
-            showOriginalCB = new ShowOriginalCB("Show Original");
+            showOriginalCB = new ShowOriginalCheckbox("Show Original");
         }
-        JPanel actionsPanel;
 
+        JPanel actionsPanel;
         if (numControls <= maxControlsInRow) {
             actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         } else {
             int cols = (numControls + 1) / 2;
             actionsPanel = new JPanel(new GridLayout(2, cols));
         }
+
         if (addShowOriginal) {
             actionsPanel.add(showOriginalCB);
         }
+
         for (FilterButtonModel action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
@@ -111,11 +112,13 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         return actionsPanel;
     }
 
+    /**
+     * Handles parameter adjustment events by restarting the preview.
+     */
     @Override
     public void paramAdjusted() {
         if (hasShowOriginal()) {
-            // if any parameter was changed, the "show original"
-            // mode should be automatically stopped
+            // Stops "Show Original" mode if any parameter changes.
             showOriginalCB.deselectWithoutTriggering();
         }
         startPreview(false);
@@ -125,10 +128,13 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         return showOriginalCB != null;
     }
 
-    private static class ShowOriginalCB extends JCheckBox {
+    /**
+     * The checkbox that toggles displaying the original image.
+     */
+    private static class ShowOriginalCheckbox extends JCheckBox {
         private boolean trigger = true;
 
-        public ShowOriginalCB(String text) {
+        public ShowOriginalCheckbox(String text) {
             super(text);
             addActionListener(e -> {
                 if (trigger) {

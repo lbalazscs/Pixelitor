@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
     public static final ShapeType DEFAULT_SHAPE = ShapeType.ARROW;

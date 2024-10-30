@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,15 +25,16 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A GUI component that can be used to select
- * an elevation (altitude) angle with the mouse
+ * A GUI component for selecting elevation (altitude)
+ * angles between 0 and 90 degrees with the mouse.
  */
 public class ElevationAngleUI extends AbstractAngleUI {
     public ElevationAngleUI(ElevationAngleParam param) {
         super(param);
 
-        cx = 0;
-        cy = SIZE;
+        // The rotation center is at the bottom-left corner.
+        centerX = 0;
+        centerY = SELECTOR_SIZE;
     }
 
     @Override
@@ -44,18 +45,20 @@ public class ElevationAngleUI extends AbstractAngleUI {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         boolean darkTheme = Themes.getCurrent().isDark();
+
+        // draw lines representing 0 degrees (horizon) and 90 degrees (zenith)
         setupOuterColor(g2, darkTheme);
+        g2.drawLine(0, 0, 0, SELECTOR_SIZE);
+        g2.drawLine(0, SELECTOR_SIZE, SELECTOR_SIZE, SELECTOR_SIZE);
 
-        g2.drawLine(0, 0, 0, SIZE);
-        g2.drawLine(0, SIZE, SIZE, SIZE);
-
-        double angle = model.getValueInRadians();
-
-        float radius = SIZE;
-        float endX = (float) (cx + radius * Math.cos(angle));
-        float endY = (float) (cy + radius * Math.sin(angle));
-
+        // Draw the elevation indicator arrow
         setupArrowColor(g2, darkTheme);
-        drawArrow(g2, Math.PI + angle, endX, endY, cx, cy);
+        double angle = model.getValueInRadians();
+        float radius = SELECTOR_SIZE;
+        float endX = (float) (centerX + radius * Math.cos(angle));
+        float endY = (float) (centerY + radius * Math.sin(angle));
+        // The arrow is drawn from the direction of the mouse back
+        // to the rotation center, representing the incoming light.
+        drawArrow(g2, Math.PI + angle, endX, endY, centerX, centerY);
     }
 }

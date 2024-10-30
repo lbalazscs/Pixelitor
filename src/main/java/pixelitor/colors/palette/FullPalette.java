@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,49 +27,49 @@ import java.awt.Color;
 public class FullPalette extends Palette {
     // static palette-specific variables so that they
     // are remembered between dialog sessions
-    private static int lastRows = 11;
-    private static int lastCols = 7;
+    private static int lastRowCount = 11;
+    private static int lastColumnCount = 7;
 
-    private int numHueLevels;
+    private int hueSteps;
 
     public FullPalette() {
-        super(lastRows, lastCols);
+        super(lastRowCount, lastColumnCount);
 
         config = new HueSatPaletteConfig(0, 0.9f); // default saturation is 90%
     }
 
     @Override
-    public void setSize(int numRows, int numCols) {
-        super.setSize(numRows, numCols);
-        numHueLevels = numRows - 1;
-        lastCols = numCols;
-        lastRows = numRows;
+    public void setDimensions(int rows, int columns) {
+        super.setDimensions(rows, columns);
+        hueSteps = rows - 1;
+        lastColumnCount = columns;
+        lastRowCount = rows;
     }
 
     @Override
     public void addButtons(PalettePanel panel) {
         var hsConfig = (HueSatPaletteConfig) config;
-        float hueShift = hsConfig.getHueShift();
+        float hueOffset = hsConfig.getHueOffset();
         float saturation = hsConfig.getSaturation();
 
-        for (int y = 0; y < numRows; y++) {
-            float hue = calcHue(y, hueShift);
-            for (int x = 0; x < numCols; x++) {
-                Color c;
-                if (y == 0) { // first, gray row
-                    float bri = (x + 1) / (float) numCols;
-                    c = Color.getHSBColor(0, 0, bri);
+        for (int row = 0; row < rowCount; row++) {
+            float hue = calcHue(row, hueOffset);
+            for (int col = 0; col < columnCount; col++) {
+                Color color;
+                if (row == 0) { // first, grayscale row
+                    float bri = (col + 1) / (float) columnCount;
+                    color = Color.getHSBColor(0, 0, bri);
                 } else { // color rows
-                    float bri = (x + 1) / (float) numCols;
-                    c = Color.getHSBColor(hue, saturation, bri);
+                    float bri = (col + 1) / (float) columnCount;
+                    color = Color.getHSBColor(hue, saturation, bri);
                 }
-                panel.addButton(x, y, c);
+                panel.addButton(col, row, color);
             }
         }
     }
 
-    private float calcHue(int y, float hueShift) {
-        float hue = hueShift + (y - 1) / (float) numHueLevels;
+    private float calcHue(int row, float hueOffset) {
+        float hue = hueOffset + (row - 1) / (float) hueSteps;
         if (hue > 1.0f) {
             hue = hue - 1.0f;
         }

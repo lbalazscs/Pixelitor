@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -94,7 +94,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         float oldValue = cyanRed;
         cyanRed = crSlider.getValue() / 100.0f;
         if (oldValue != cyanRed) {
-            panel.configChanged();
+            panel.onConfigChanged();
         }
     }
 
@@ -102,7 +102,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         float oldValue = magentaGreen;
         magentaGreen = mgSlider.getValue() / 100.0f;
         if (oldValue != magentaGreen) {
-            panel.configChanged();
+            panel.onConfigChanged();
         }
     }
 
@@ -110,7 +110,7 @@ public class RGBPaletteConfig implements PaletteConfig {
         float oldValue = yellowBlue;
         yellowBlue = ybSlider.getValue() / 100.0f;
         if (oldValue != yellowBlue) {
-            panel.configChanged();
+            panel.onConfigChanged();
         }
     }
 }

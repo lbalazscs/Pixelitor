@@ -384,14 +384,14 @@ public final class GUIUtils {
     }
 
     public static JButton createResetAllButton(ActionListener action) {
-        JButton button = new JButton("Reset All", Icons.getWestArrowIcon());
+        JButton button = new JButton("Reset All", Icons.getResetIcon());
         button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
         button.addActionListener(action);
         return button;
     }
 
     public static JButton createResetChannelButton(ActionListener action) {
-        JButton resetChannel = new JButton("Reset Channel", Icons.getWestArrowIcon());
+        JButton resetChannel = new JButton("Reset Channel", Icons.getResetIcon());
         resetChannel.addActionListener(action);
         return resetChannel;
     }

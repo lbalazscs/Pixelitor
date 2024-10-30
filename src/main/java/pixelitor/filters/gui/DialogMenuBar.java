@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,11 +26,11 @@ import javax.swing.*;
 import java.awt.Component;
 import java.util.List;
 
-import static pixelitor.filters.gui.UserPreset.loadPresets;
+import static pixelitor.filters.gui.UserPreset.detectPresetNames;
 
 /**
- * The menu bar of the filters that have one.
- * It is also used for the text layer dialog.
+ * A menu bar for dialogs that support presets or help.
+ * Can be used by any component that implements {@link DialogMenuOwner}.
  */
 public class DialogMenuBar extends JMenuBar {
     public static final String PRESETS = Texts.i18n("presets");
@@ -38,7 +38,7 @@ public class DialogMenuBar extends JMenuBar {
 
     private final DialogMenuOwner owner;
     private JMenu presetsMenu;
-    private int numUserPresets = 0;
+    private int userPresetCount = 0;
 
     public DialogMenuBar(DialogMenuOwner owner) {
         this(owner, true);
@@ -52,48 +52,67 @@ public class DialogMenuBar extends JMenuBar {
         }
 
         if (OpenInBrowserAction.CAN_BROWSE && owner.hasHelp()) {
-            JMenu helpMenu = new JMenu(GUIText.HELP);
-            helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
-            add(helpMenu);
+            addHelpMenu(owner);
         }
+    }
+
+    private void addHelpMenu(DialogMenuOwner owner) {
+        JMenu helpMenu = new JMenu(GUIText.HELP);
+        helpMenu.add(new OpenInBrowserAction("Wikipedia", owner.getHelpURL()));
+        add(helpMenu);
     }
 
     private void addPresetsMenu() {
         presetsMenu = new JMenu(PRESETS);
 
         if (owner.hasBuiltinPresets()) {
-            JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
-            Preset[] presets = owner.getBuiltinPresets();
-
-            for (Preset preset : presets) {
-                builtinPresets.add(preset.asAction(owner));
-            }
-            presetsMenu.add(builtinPresets);
+            addBuiltInPresets();
         }
 
         if (owner.canHaveUserPresets()) {
-            if (owner.hasBuiltinPresets()) {
-                presetsMenu.addSeparator();
-            }
-            Action savePresetAction = owner.createSavePresetAction(presetsMenu,
-                preset -> addNewUserPreset(preset, owner),
-                this::removeOldPreset);
-            JMenuItem savePresetMI = new JMenuItem(savePresetAction);
-            savePresetMI.setName("savePreset");
-            presetsMenu.add(savePresetMI);
-            List<UserPreset> userPresets = loadPresets(owner.getPresetDirName());
-            numUserPresets = userPresets.size();
-            if (numUserPresets > 0) {
-                addManagePresetsMenu();
-                presetsMenu.addSeparator();
-
-                for (UserPreset preset : userPresets) {
-                    presetsMenu.add(preset.asAction(owner));
-                }
-            }
-
-            add(presetsMenu);
+            addUserPresets();
         }
+
+        assert presetsMenu.getMenuComponentCount() > 0;
+        add(presetsMenu);
+    }
+
+    private void addUserPresets() {
+        // Add separator if we already have built-in presets
+        if (owner.hasBuiltinPresets()) {
+            presetsMenu.addSeparator();
+        }
+
+        addSavePresetMenuItem();
+
+        // add detected, but unloaded user presets
+        List<UserPreset> userPresets = detectPresetNames(owner.getPresetDirName());
+        userPresetCount = userPresets.size();
+        if (userPresetCount > 0) {
+            addManagePresetsMenu();
+            presetsMenu.addSeparator();
+
+            for (UserPreset preset : userPresets) {
+                presetsMenu.add(preset.createAction(owner));
+            }
+        }
+    }
+
+    private void addSavePresetMenuItem() {
+        Action savePresetAction = owner.createSavePresetAction(presetsMenu,
+            preset -> addNewUserPreset(preset, owner),
+            this::removeUserPreset);
+        addPresetMenuItem(savePresetAction, "savePreset");
+    }
+
+    private void addBuiltInPresets() {
+        JMenu builtinPresets = new JMenu(BUILT_IN_PRESETS);
+        Preset[] presets = owner.getBuiltinPresets();
+
+        for (Preset preset : presets) {
+            builtinPresets.add(preset.createAction(owner));
+        }
+        presetsMenu.add(builtinPresets);
     }
 
     private void addManagePresetsMenu() {
@@ -104,23 +123,34 @@ public class DialogMenuBar extends JMenuBar {
     }
 
     private void addNewUserPreset(UserPreset preset, PresetOwner owner) {
-        if (numUserPresets == 0) {
+        // If this is the first user preset, also adds the
+        // "Manage Presets" menu item and a separator.
+        if (userPresetCount == 0) {
             addManagePresetsMenu();
             presetsMenu.addSeparator();
         }
-        JMenuItem presetMI = new JMenuItem(preset.asAction(owner));
-        presetMI.setName(preset.getName());
-        presetsMenu.add(presetMI);
-        numUserPresets++;
+        addPresetMenuItem(preset.createAction(owner), preset.getName());
+
+        userPresetCount++;
     }
 
-    private void removeOldPreset(UserPreset preset) {
+    private void addPresetMenuItem(Action action, String name) {
+        JMenuItem presetMI = new JMenuItem(action);
+        presetMI.setName(name);
+        presetsMenu.add(presetMI);
+    }
+
+    /**
+     * Removes a user preset from the presets menu.
+     * Called when a preset is about to be overwritten.
+     */
+    private void removeUserPreset(UserPreset preset) {
         Component[] menuComponents = presetsMenu.getMenuComponents();
         for (Component item : menuComponents) {
             if (item instanceof JMenuItem menuItem) {
                 if (menuItem.getText().equals(preset.getName())) {
                     presetsMenu.remove(menuItem);
-                    numUserPresets--;
+                    userPresetCount--;
                     break;
                 }
             }

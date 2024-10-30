@@ -52,15 +52,15 @@ public final class Icons {
         // should not be instantiated
     }
 
-    public static Icon getWestArrowIcon() {
+    public static Icon getResetIcon() {
         return westArrowIcon;
     }
 
-    public static Icon getDiceIcon() {
+    public static Icon getRandomizeIcon() {
         return diceIcon;
     }
 
-    public static Icon getTwoDicesIcon() {
+    public static Icon getReseedIcon() {
         return dice2Icon;
     }
 

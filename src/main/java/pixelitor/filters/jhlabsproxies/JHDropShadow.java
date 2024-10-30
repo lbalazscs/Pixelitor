@@ -36,7 +36,7 @@ import java.io.Serial;
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
  * Drop Shadow filter based on the JHLabs ShadowFilter
@@ -47,7 +47,7 @@ public class JHDropShadow extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -3914785189683755908L;
 
-    private final AngleParam angle = new AngleParam("Angle", 315, CCW_DEGREES);
+    private final AngleParam angle = new AngleParam("Angle", 315, INTUITIVE_DEGREES);
     private final RangeParam distance = new RangeParam("Distance", 0, 10, 100);
     private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 90, 100);
     private final RangeParam softness = new RangeParam("Softness", 0, 10, 25);

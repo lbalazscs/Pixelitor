@@ -42,7 +42,7 @@ import static java.lang.Math.PI;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.NO;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
  * https://en.wikipedia.org/wiki/Chaos_game

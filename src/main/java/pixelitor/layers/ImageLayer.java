@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.*;
 import pixelitor.colors.Colors;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
@@ -890,21 +891,21 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
+    public void enlargeCanvas(Outsets out) {
         // all coordinates in this method are
         // relative to the previous state of the canvas
         Rectangle imageBounds = getContentBounds();
         Rectangle canvasBounds = comp.getCanvasBounds();
 
-        int newX = canvasBounds.x - west;
-        int newY = canvasBounds.y - north;
-        int newWidth = canvasBounds.width + west + east;
-        int newHeight = canvasBounds.height + north + south;
+        int newX = canvasBounds.x - out.left;
+        int newY = canvasBounds.y - out.top;
+        int newWidth = canvasBounds.width + out.left + out.right;
+        int newHeight = canvasBounds.height + out.top + out.bottom;
         var newCanvasBounds = new Rectangle(newX, newY, newWidth, newHeight);
 
         if (imageBounds.contains(newCanvasBounds)) {
             // even after the canvas enlargement, the image does not need to be enlarged
-            setTranslation(getTx() + west, getTy() + north);
+            setTranslation(getTx() + out.left, getTy() + out.top);
         } else {
             enlargeImage(newCanvasBounds);
         }

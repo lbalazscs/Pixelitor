@@ -37,8 +37,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     private String presetKey;
 
     // If this is not null, it's the model of an additional action button
-    // to the right of the normal GUI. Typically used for randomization, it
-    // will be enabled only for specific values of this filter parameter.
+    // to the right of the normal GUI. Typically it's used for randomization,
+    // and it's enabled only for specific values of this filter parameter.
     protected FilterButtonModel action;
 
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
@@ -130,7 +130,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     /**
-     * Randomizes the settings without permission checking,
+     * Randomizes the parameter without checking for permission,
      * and without triggering the filter.
      */
     protected abstract void doRandomize();
@@ -145,7 +145,7 @@ public abstract class AbstractFilterParam implements FilterParam {
         if (paramGUI != null) {
             paramGUI.setToolTip(tip);
         } else {
-            // in the filters the GUI is not created yet, so store it for later
+            // Store for later if the GUI is not created yet
             toolTip = tip;
         }
     }

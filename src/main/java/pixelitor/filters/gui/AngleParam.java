@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 public class AngleParam extends AbstractFilterParam {
     // as returned form Math.atan2, this is between -PI and PI
     private double angle;
-    private final double defaultVal;
+    private final double defaultAngle;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
@@ -48,10 +48,8 @@ public class AngleParam extends AbstractFilterParam {
 
     public AngleParam(String name, double def) {
         super(name, ALLOW_RANDOMIZE);
-
-        this.defaultVal = def;
-
-        setValue(this.defaultVal, false);
+        this.defaultAngle = def;
+        setValue(this.defaultAngle, false);
     }
 
     @Override
@@ -62,12 +60,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public void setValueInDegrees(double degrees, boolean trigger) {
-        if (degrees <= 0) {
-            degrees = -degrees;
-        } else {
-            degrees = 360 - degrees;
-        }
-        double r = Math.toRadians(degrees);
+        double r = AngleUnit.INTUITIVE_DEGREES.toRadians(degrees);
         setValue(r, trigger);
     }
 
@@ -76,23 +69,21 @@ public class AngleParam extends AbstractFilterParam {
             angle = r;
             fireStateChanged();
         }
-        if (trigger) {
+        if (trigger && adjustmentListener != null) {
             // Trigger even if the angle didn't change, because
             // after the non-triggering drag events, we can have a
             // triggering mouse up that didn't change the angle.
-            if (adjustmentListener != null) { // can be null when used in tools
-                adjustmentListener.paramAdjusted();
-            }
+            adjustmentListener.paramAdjusted();
         }
     }
 
-    @SuppressWarnings("unused")
     public int getValueInNonIntuitiveDegrees() {
         return (int) Math.toDegrees(angle);
     }
 
     public double getValueInDegrees() {
-        return Geometry.toIntuitiveDegrees(angle);
+        return AngleUnit.RADIANS.toIntuitiveDegrees(angle);
+//        return Geometry.toIntuitiveDegrees(angle);
     }
 
     /**
@@ -111,7 +102,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public boolean hasDefault() {
-        return angle == defaultVal;
+        return angle == defaultAngle;
     }
 
     private void fireStateChanged() {
@@ -137,19 +128,26 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        setValue(defaultVal, trigger);
+        setValue(defaultAngle, trigger);
     }
 
     @Override
     protected void doRandomize() {
-        double random = Rnd.nextDouble();
-        setValue(random * 2 * Math.PI - Math.PI, false);
+        // Generate random angle in range [-PI, PI]
+        double randomAngle = Rnd.nextDouble() * 2 * Math.PI - Math.PI;
+        setValue(randomAngle, false);
     }
 
+    /**
+     * A hook for subclasses to specify their angle selector UI.
+     */
     public AbstractAngleUI getAngleSelectorUI() {
         return new AngleUI(this);
     }
 
+    /**
+     * A hook for subclasses to specify a different max angle.
+     */
     public int getMaxAngleInDegrees() {
         return 360;
     }
@@ -157,7 +155,7 @@ public class AngleParam extends AbstractFilterParam {
     public RangeParam asRangeParam() {
         // At this point, the actual value can already differ from the
         // default one => ensure the returned param has the same default.
-        double defaultInDegrees = Geometry.toIntuitiveDegrees(defaultVal);
+        double defaultInDegrees = Geometry.toIntuitiveDegrees(defaultAngle);
         RangeParam rangeParam = new RangeParam(getName(),
             0, defaultInDegrees, getMaxAngleInDegrees());
         rangeParam.setValueNoTrigger(getValueInDegrees());
@@ -196,6 +194,9 @@ public class AngleParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), angle);
     }
 
+    /**
+     * Encapsulates the state of an {@link AngleParam} as a memento object.
+     */
     public record AngleParamState(double angle) implements ParamState<AngleParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

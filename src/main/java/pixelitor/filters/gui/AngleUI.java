@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,34 +27,38 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * A GUI component that can be used to select
- * an angle with the mouse
+ * A GUI component for selecting angles through a full 360-degree range.
+ * Displays a circle with an arrow that can be rotated to any angle
+ * by dragging with the mouse.
  */
 public class AngleUI extends AbstractAngleUI {
     public AngleUI(AngleParam angleParam) {
         super(angleParam);
 
-        cx = SIZE / 2;
-        cy = SIZE / 2;
+        // the center is at the middle of the component
+        centerX = SELECTOR_SIZE / 2;
+        centerY = SELECTOR_SIZE / 2;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        boolean darkTheme = Themes.getCurrent().isDark();
         Graphics2D g2 = (Graphics2D) g;
-        setupOuterColor(g2, darkTheme);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2.draw(new Ellipse2D.Float(0, 0, SIZE, SIZE));
 
-        double angle = model.getValueInRadians();
+        boolean darkTheme = Themes.getCurrent().isDark();
 
-        int radius = SIZE / 2;
-        float endX = (float) (cx + radius * Math.cos(angle));
-        float endY = (float) (cy + radius * Math.sin(angle));
+        // Draw the outer circle
+        setupOuterColor(g2, darkTheme);
+        g2.draw(new Ellipse2D.Float(0, 0, SELECTOR_SIZE, SELECTOR_SIZE));
 
+        // Draw the direction arrow
         setupArrowColor(g2, darkTheme);
-        drawArrow(g2, angle, cx, cy, endX, endY);
+        double angle = model.getValueInRadians();
+        float radius = SELECTOR_SIZE / 2.0f;
+        float endX = (float) (centerX + radius * Math.cos(angle));
+        float endY = (float) (centerY + radius * Math.sin(angle));
+        drawArrow(g2, angle, centerX, centerY, endX, endY);
     }
 }

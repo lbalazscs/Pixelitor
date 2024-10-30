@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,15 +30,15 @@ import static pixelitor.colors.FgBgColors.getFGColor;
 public class RGBColorMixPalette extends Palette {
     // static palette-specific variables so that they
     // are remembered between dialog sessions
-    private static int lastRows = 7;
-    private static int lastCols = 10;
+    private static int lastRowCount = 7;
+    private static int lastColumnCount = 10;
 
     private final int rgbA;
     private final int rgbB;
     private final boolean startWithFg;
 
     public RGBColorMixPalette(boolean startWithFg) {
-        super(lastRows, lastCols);
+        super(lastRowCount, lastColumnCount);
         this.startWithFg = startWithFg;
 
         Color colorA, colorB;
@@ -58,26 +58,26 @@ public class RGBColorMixPalette extends Palette {
 
     @Override
     public void addButtons(PalettePanel panel) {
-        for (int y = 0; y < numRows; y++) {
-            for (int x = 0; x < numCols; x++) {
-                Color c;
-                if (numRows == 1) {
-                    int mixed = getMixed(x);
+        for (int row = 0; row < rowCount; row++) {
+            for (int col = 0; col < columnCount; col++) {
+                Color color;
+                if (rowCount == 1) {
+                    int mixed = getMixed(col);
 
-                    c = new Color(mixed);
+                    color = new Color(mixed);
                 } else {
-                    int mixed = getMixed(x);
-                    int rowsMiddle = numRows / 2;
-                    if (y < rowsMiddle) {
-                        float mixFactor = (rowsMiddle - y) / (rowsMiddle + 1.0f);
+                    int mixed = getMixed(col);
+                    int rowsMiddle = rowCount / 2;
+                    if (row < rowsMiddle) {
+                        float mixFactor = (rowsMiddle - row) / (rowsMiddle + 1.0f);
                         mixed = mixColors(mixFactor, mixed, 0xFF_00_00_00);
-                    } else if (y > rowsMiddle) {
-                        float mixFactor = (y - rowsMiddle) / (rowsMiddle + 1.0f);
+                    } else if (row > rowsMiddle) {
+                        float mixFactor = (row - rowsMiddle) / (rowsMiddle + 1.0f);
                         mixed = mixColors(mixFactor, mixed, 0xFF_FF_FF_FF);
                     }
-                    c = new Color(mixed);
+                    color = new Color(mixed);
                 }
-                panel.addButton(x, y, c);
+                panel.addButton(col, row, color);
             }
         }
     }
@@ -113,14 +113,14 @@ public class RGBColorMixPalette extends Palette {
     }
 
     private float calcMixFactor(int x) {
-        return (x * (numCols + 1) / (float) numCols) / numCols;
+        return (x * (columnCount + 1) / (float) columnCount) / columnCount;
     }
 
     @Override
-    public void setSize(int numRows, int numCols) {
-        super.setSize(numRows, numCols);
-        lastCols = numCols;
-        lastRows = numRows;
+    public void setDimensions(int rows, int columns) {
+        super.setDimensions(rows, columns);
+        lastColumnCount = columns;
+        lastRowCount = rows;
     }
 
     @Override

@@ -41,11 +41,18 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-import static net.jafama.FastMath.*;
+import static net.jafama.FastMath.abs;
+import static net.jafama.FastMath.ceilToInt;
+import static net.jafama.FastMath.cos;
+import static net.jafama.FastMath.exp;
+import static net.jafama.FastMath.min;
+import static net.jafama.FastMath.pow;
+import static net.jafama.FastMath.sin;
+import static net.jafama.FastMath.toRange;
 import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 public class FlowField extends ParametrizedFilter {
     @Serial
@@ -683,7 +690,7 @@ public class FlowField extends ParametrizedFilter {
         @Override
         public void addPoint(Point2D point) {
             lastPos.setLocation(point);
-            super.addPoint(Geometry.deScale(Geometry.newFrom(point), meta.fieldDensity));
+            super.addPoint(Geometry.deScale(Geometry.copyPoint(point), meta.fieldDensity));
         }
 
         @Override
@@ -722,7 +729,7 @@ public class FlowField extends ParametrizedFilter {
             }
 
             if (positionChangedEnough()) {
-                addPoint(Geometry.newFrom(pos));
+                addPoint(Geometry.copyPoint(pos));
             }
         }
 

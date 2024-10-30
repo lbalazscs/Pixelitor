@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.*;
+import pixelitor.compactions.Outsets;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
@@ -503,7 +504,7 @@ public class ImageLayerTest {
 
     @Test
     public void enlargeCanvas() {
-        layer.enlargeCanvas(5, 5, 5, 10);
+        layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
 
         iconUpdates.check(0, 0);
     }

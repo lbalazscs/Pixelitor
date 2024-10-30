@@ -26,7 +26,7 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
  * A panel that can be customized for configuring various brushes.
@@ -52,7 +52,7 @@ public class BrushSettingsPanel extends JPanel {
     public void addOnlyButton(String text, ActionListener action, String name) {
         JButton button = new JButton(text);
         button.setName(name);
-        gbh.addRow(button);
+        gbh.addFullRow(button);
         button.addActionListener(action);
     }
 }

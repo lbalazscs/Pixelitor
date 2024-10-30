@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,6 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 public class ColorParam extends AbstractFilterParam {
     private final Color defaultColor;
     private Color color;
-
     private final TransparencyPolicy transparencyPolicy;
 
     public ColorParam(String name, Color defaultColor) {
@@ -66,7 +65,7 @@ public class ColorParam extends AbstractFilterParam {
     public ColorParam withRandomizeAction() {
         String toolTip = "<html>Randomize the color of <b>" + getName() + "</b>";
         action = new FilterButtonModel("",
-            this::randomize, Icons.getDiceIcon(),
+            this::randomize, Icons.getRandomizeIcon(),
             toolTip, null);
 
         return this;
@@ -102,25 +101,22 @@ public class ColorParam extends AbstractFilterParam {
             return;
         }
         color = newColor;
-
         ColorHistory.remember(newColor);
 
         if (paramGUI != null) {
             paramGUI.updateGUI();
         }
 
-        if (trigger) {
-            if (adjustmentListener != null) {  // when called from randomize, this is null
-                adjustmentListener.paramAdjusted();
-            }
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
-    public void darker() {
+    public void darken() {
         setColor(color.darker(), false);
     }
 
-    public void brighter() {
+    public void brighten() {
         setColor(color.brighter(), false);
     }
 
@@ -169,6 +165,9 @@ public class ColorParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), color);
     }
 
+    /**
+     * Encapsulates the state of a {@link ColorParam} as a memento object.
+     */
     public record ColorParamState(Color color) implements ParamState<ColorParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

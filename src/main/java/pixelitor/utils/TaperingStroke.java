@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,11 @@ import java.util.List;
 
 import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static pixelitor.utils.Geometry.*;
+import static pixelitor.utils.Geometry.add;
+import static pixelitor.utils.Geometry.calcPerpendicularPoints;
+import static pixelitor.utils.Geometry.normalize;
+import static pixelitor.utils.Geometry.scale;
+import static pixelitor.utils.Geometry.subtract;
 
 /**
  * A {@link Stroke} implementation that creates a tapered stroke effect.
@@ -103,7 +107,7 @@ public class TaperingStroke implements Stroke {
         // second quad point
         Point2D Q2 = new Point2D.Float();
 
-        perpendiculars(P1, P2, thickness / 2, Q1, Q2);
+        calcPerpendicularPoints(P1, P2, thickness / 2, Q1, Q2);
 
         taperedOutline.moveTo(Q1.getX(), Q1.getY());
 
@@ -135,12 +139,12 @@ public class TaperingStroke implements Stroke {
             var firstPerpendicularToP2P1 = new Point2D.Float();
             var secondPerpendicularToP2P1 = new Point2D.Float();
 
-            perpendiculars(P2, P1, firstPerpendicularToP2P1, secondPerpendicularToP2P1);
+            calcPerpendicularPoints(P2, P1, firstPerpendicularToP2P1, secondPerpendicularToP2P1);
 
             var firstPerpendicularToP2P3 = new Point2D.Float();
             var secondPerpendicularToP2P3 = new Point2D.Float();
 
-            perpendiculars(P2, P3, firstPerpendicularToP2P3, secondPerpendicularToP2P3);
+            calcPerpendicularPoints(P2, P3, firstPerpendicularToP2P3, secondPerpendicularToP2P3);
 
             // third quad point
             Point2D Q3 = new Point2D.Float((firstPerpendicularToP2P1.x + secondPerpendicularToP2P3.x) / 2, (firstPerpendicularToP2P1.y + secondPerpendicularToP2P3.y) / 2);

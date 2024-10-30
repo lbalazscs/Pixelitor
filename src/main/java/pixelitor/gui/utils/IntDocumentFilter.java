@@ -26,12 +26,12 @@ import javax.swing.text.*;
 public class IntDocumentFilter extends DocumentFilter {
     private final int min;
     private final int max;
-    private final boolean isRangeConstrained;
+    private final boolean rangeConstrained;
 
     public IntDocumentFilter() {
         this.min = -1;
         this.max = -1;
-        this.isRangeConstrained = false;
+        this.rangeConstrained = false;
     }
 
     public IntDocumentFilter(int min, int max) {
@@ -40,7 +40,7 @@ public class IntDocumentFilter extends DocumentFilter {
         }
         this.min = min;
         this.max = max;
-        isRangeConstrained = true;
+        rangeConstrained = true;
     }
 
     public void applyOn(JTextField tf) {
@@ -67,7 +67,7 @@ public class IntDocumentFilter extends DocumentFilter {
             throw new BadLocationException(newString, offset);
         }
 
-        if (isRangeConstrained && (newInt < min || newInt > max)) {
+        if (rangeConstrained && (newInt < min || newInt > max)) {
             throw new BadLocationException(newString, offset);
         }
     }

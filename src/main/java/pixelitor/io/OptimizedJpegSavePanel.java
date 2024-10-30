@@ -39,7 +39,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onPool;

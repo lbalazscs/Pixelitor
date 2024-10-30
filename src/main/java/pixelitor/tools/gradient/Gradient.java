@@ -18,6 +18,7 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.Canvas;
+import pixelitor.compactions.Outsets;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
@@ -220,8 +221,8 @@ public class Gradient implements Serializable, Debuggable {
         drag = drag.imTranslatedCopy(-cropRect.getX(), -cropRect.getY());
     }
 
-    public void enlargeCanvas(int north, int west) {
-        drag = drag.imTranslatedCopy(west, north);
+    public void enlargeCanvas(Outsets enlargement) {
+        drag = drag.imTranslatedCopy(enlargement.left, enlargement.top);
     }
 
     public void imTransform(AffineTransform at) {

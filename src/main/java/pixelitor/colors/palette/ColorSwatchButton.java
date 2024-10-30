@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,27 +27,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * A button in a {@link PalettePanel}, representing a single color
+ * A button representing a color swatch in a {@link PalettePanel}.
  */
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
 
     // Grid positions.
-    private final int xPos;
-    private final int yPos;
+    private final int gridX;
+    private final int gridY;
 
-    private boolean marked = false;
-    public static ColorSwatchButton last = null;
+    private boolean isMarked = false;
+    public static ColorSwatchButton lastClickedSwatch = null;
 
     private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
-    private boolean raised = true;
+    private boolean isRaised = true;
 
-    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int xPos, int yPos) {
+    public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int gridX, int gridY) {
         assert clickHandler != null;
 
-        this.xPos = xPos;
-        this.yPos = yPos;
+        this.gridX = gridX;
+        this.gridY = gridY;
         setColor(color);
 
         setPreferredSize(size);
@@ -56,20 +56,19 @@ public class ColorSwatchButton extends JComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                boolean ctrlClick = e.isControlDown();
-                if (ctrlClick) {
-                    marked = false;
+                if (e.isControlDown()) {
+                    isMarked = false;
                 } else {
-                    marked = true;
+                    isMarked = true;
                     regularClick(e);
                 }
-                raised = false;
+                isRaised = false;
                 repaint();
             }
 
             private void regularClick(MouseEvent e) {
-                ColorSwatchButton prev = last;
-                last = ColorSwatchButton.this;
+                ColorSwatchButton prev = lastClickedSwatch;
+                lastClickedSwatch = ColorSwatchButton.this;
                 if (prev != null) {
                     prev.repaint();
                 }
@@ -80,7 +79,7 @@ public class ColorSwatchButton extends JComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                raised = true;
+                isRaised = true;
                 repaint();
             }
         });
@@ -90,30 +89,38 @@ public class ColorSwatchButton extends JComponent {
         this.color = color;
         setBackground(color);
         setForeground(color);
-        marked = false;
+        isMarked = false;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         g.setColor(color);
-        g.fill3DRect(0, 0, SIZE, SIZE, raised);
-        if (this == last) {
-            g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, raised);
-            g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, raised);
+        g.fill3DRect(0, 0, SIZE, SIZE, isRaised);
+        if (this == lastClickedSwatch) {
+            paintSelectionBorder(g);
         }
-        if (marked) {
-            g.setColor(LayerGUI.SELECTED_COLOR);
-            g.fillRect(1, 1, 7, 7);
-            g.setColor(LayerGUI.UNSELECTED_COLOR);
-            g.fillRect(3, 3, 3, 3);
+        if (isMarked) {
+            paintMark(g);
         }
     }
 
-    public int getXPos() {
-        return xPos;
+    private void paintSelectionBorder(Graphics g) {
+        g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, isRaised);
+        g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, isRaised);
     }
 
-    public int getYPos() {
-        return yPos;
+    private static void paintMark(Graphics g) {
+        g.setColor(LayerGUI.SELECTED_COLOR);
+        g.fillRect(1, 1, 7, 7);
+        g.setColor(LayerGUI.UNSELECTED_COLOR);
+        g.fillRect(3, 3, 3, 3);
+    }
+
+    public int getGridX() {
+        return gridX;
+    }
+
+    public int getGridY() {
+        return gridY;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,122 +18,123 @@
 package pixelitor.utils;
 
 /**
- * Units of angle, following a pattern similar to the JDK class TimeUnit.
+ * Units of angle measurement, with conversion functions between
+ * different representations. It's similar to the JDK class TimeUnit.
  */
 public enum AngleUnit {
     /**
-     * Radians between -PI and PI, as returned form Math.atan2
+     * Clockwise radians between -π and π, as returned from Math.atan2()
      */
     RADIANS {
         @Override
-        public double toRadians(double a) {
-            return a;
+        public double toRadians(double angle) {
+            return angle;
         }
 
         @Override
-        public double toIntuitiveRadians(double a) {
-            return Geometry.atan2ToIntuitive(a);
+        public double toIntuitiveRadians(double angle) {
+            return Geometry.atan2ToIntuitive(angle);
         }
 
         @Override
-        public double toDegrees(double a) {
-            return Math.toDegrees(a);
+        public double toDegrees(double angle) {
+            return Math.toDegrees(angle);
         }
 
         @Override
-        public double toIntuitiveDegrees(double a) {
-            return Math.toDegrees(Geometry.atan2ToIntuitive(a));
+        public double toIntuitiveDegrees(double angle) {
+            return Geometry.toIntuitiveDegrees(angle);
         }
     },
     /**
-     * Radians between 0 and 2*PI, and in the intuitive (counter-clockwise) direction
+     * Counter-clockwise radians between 0 and 2π
      */
-    CCW_RADIANS {
+    INTUITIVE_RADIANS {
         @Override
-        public double toRadians(double a) {
-            return Geometry.intuitiveToAtan2(a);
+        public double toRadians(double angle) {
+            return Geometry.intuitiveToAtan2(angle);
         }
 
         @Override
-        public double toIntuitiveRadians(double a) {
-            return a;
+        public double toIntuitiveRadians(double angle) {
+            return angle;
         }
 
         @Override
-        public double toDegrees(double a) {
-            return Math.toDegrees(Geometry.intuitiveToAtan2(a));
+        public double toDegrees(double angle) {
+            return Math.toDegrees(Geometry.intuitiveToAtan2(angle));
         }
 
         @Override
-        public double toIntuitiveDegrees(double a) {
-            return Math.toDegrees(a);
+        public double toIntuitiveDegrees(double angle) {
+            return Math.toDegrees(angle);
         }
     },
     /**
-     * Degrees between -180 and 180, in the clockwise direction
+     * Clockwise degrees between -180 and 180
      */
     DEGREES {
         @Override
-        public double toRadians(double a) {
-            return Math.toRadians(a);
+        public double toRadians(double angle) {
+            return Math.toRadians(angle);
         }
 
         @Override
-        public double toIntuitiveRadians(double a) {
-            return Math.toRadians(Geometry.atan2ToIntuitive(a));
+        public double toIntuitiveRadians(double angle) {
+            return Math.toRadians(Geometry.atan2ToIntuitive(angle));
         }
 
         @Override
-        public double toDegrees(double a) {
-            return a;
+        public double toDegrees(double angle) {
+            return angle;
         }
 
         @Override
-        public double toIntuitiveDegrees(double a) {
-            if (a <= 0) {
-                a = -a;
+        public double toIntuitiveDegrees(double angle) {
+            if (angle <= 0) {
+                angle = -angle;
             } else {
-                a = 360 - a;
+                angle = 360 - angle;
             }
-            return a;
+            return angle;
         }
     },
     /**
      * Degrees between 0 and 360, and in the intuitive (counter-clockwise) direction
      */
-    CCW_DEGREES {
+    INTUITIVE_DEGREES {
         @Override
-        public double toRadians(double a) {
-            assert a >= 0 && a <= 360 : "a = " + a;
-            return Math.toRadians(360 - a);
+        public double toRadians(double angle) {
+            assert angle >= 0 && angle <= 360 : "a = " + angle;
+            return Math.toRadians(360 - angle);
         }
 
         @Override
-        public double toIntuitiveRadians(double a) {
-            return Math.toRadians(a);
+        public double toIntuitiveRadians(double angle) {
+            return Math.toRadians(angle);
         }
 
         @Override
-        public double toDegrees(double a) {
-            if (a > 180) {
-                return 360 - a;
+        public double toDegrees(double angle) {
+            if (angle > 180) {
+                return 360 - angle;
             } else {
-                return -a;
+                return -angle;
             }
         }
 
         @Override
-        public double toIntuitiveDegrees(double a) {
-            return a;
+        public double toIntuitiveDegrees(double angle) {
+            return angle;
         }
     };
 
-    public abstract double toRadians(double a);
+    public abstract double toRadians(double angle);
 
-    public abstract double toIntuitiveRadians(double a);
+    public abstract double toIntuitiveRadians(double angle);
 
-    public abstract double toDegrees(double a);
+    public abstract double toDegrees(double angle);
 
-    public abstract double toIntuitiveDegrees(double a);
+    public abstract double toIntuitiveDegrees(double angle);
 }
 

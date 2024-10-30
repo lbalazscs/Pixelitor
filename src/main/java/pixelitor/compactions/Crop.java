@@ -46,39 +46,40 @@ import java.util.concurrent.CompletableFuture;
 import static java.lang.String.format;
 
 /**
- * A cropping action on all layers of a {@link Composition}.
+ * Crops all layers of a {@link Composition}.
  */
 public class Crop implements CompAction {
     // the crop rectangle in image space (relative to the canvas)
     private final Rectangle2D imCropRect;
 
-    private final boolean selectionCrop;
+    private final boolean fromSelection;
     private final boolean allowGrowing;
     private final boolean deleteCroppedPixels;
-    private final boolean addHidingMask;
+    private final boolean addMaskForHiding;
 
     public Crop(Rectangle2D imCropRect,
-                boolean selectionCrop, boolean allowGrowing,
-                boolean deleteCroppedPixels, boolean addHidingMask) {
+                boolean fromSelection, boolean allowGrowing,
+                boolean deleteCroppedPixels, boolean addMaskForHiding) {
         this.imCropRect = imCropRect;
-        this.selectionCrop = selectionCrop;
+        this.fromSelection = fromSelection;
         this.allowGrowing = allowGrowing;
         this.deleteCroppedPixels = deleteCroppedPixels;
-        this.addHidingMask = addHidingMask;
+        this.addMaskForHiding = addMaskForHiding;
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.containsLayerWithClass(SmartObject.class)) {
+    public CompletableFuture<Composition> process(Composition srcComp) {
+        if (srcComp.containsLayerWithClass(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedWarning("Cropping");
-            return CompletableFuture.completedFuture(oldComp);
+            return CompletableFuture.completedFuture(srcComp);
         }
 
         Rectangle roundedImCropRect = Shapes.roundCropRect(imCropRect);
-        Canvas oldCanvas = oldComp.getCanvas();
+        Canvas srcCanvas = srcComp.getCanvas();
 
         if (!allowGrowing) {
-            Rectangle canvasBounds = oldCanvas.getBounds();
+            // Constrain crop rectangle to current canvas bounds
+            Rectangle canvasBounds = srcCanvas.getBounds();
             roundedImCropRect = roundedImCropRect.intersection(canvasBounds);
         }
 
@@ -88,46 +89,45 @@ public class Crop implements CompAction {
         if (cropRect.isEmpty()) {
             // we get here if the crop rectangle is
             // outside the canvas bounds in the crop tool
-            return CompletableFuture.completedFuture(oldComp);
+            return CompletableFuture.completedFuture(srcComp);
         }
 
         var canvasTransform = createCanvasTransform(cropRect);
 
-        View view = oldComp.getView();
-        Composition newComp = oldComp.copy(CopyType.UNDO, !selectionCrop);
-        Canvas newCanvas = newComp.getCanvas();
+        View view = srcComp.getView();
+        Composition croppedComp = srcComp.copy(CopyType.UNDO, !fromSelection);
 
-        Guides guides = oldComp.getGuides();
+        Guides guides = srcComp.getGuides();
         if (guides != null) {
             Guides newGuides = guides.copyForCrop(cropRect, view);
-            newComp.setGuides(newGuides);
+            croppedComp.setGuides(newGuides);
         }
 
-        if (!selectionCrop) {
+        if (!fromSelection) {
             // If the cropping was started from the crop tool, there
             // could still be a selection that needs to be cropped.
-            newComp.intersectSelection(cropRect);
+            croppedComp.intersectSelection(cropRect);
         }
 
-        newComp.forEachNestedLayerAndMask(layer ->
+        croppedComp.forEachNestedLayerAndMask(layer ->
             layer.crop(cropRect, deleteCroppedPixels, allowGrowing));
 
-        newCanvas.resize(cropRect.width, cropRect.height, view, false);
+        croppedComp.getCanvas().resize(cropRect.width, cropRect.height, view, false);
 
         // Move the intersected selection, tool widgets, etc.,
         // into the coordinate system of the new, cropped image.
         // It's important to call this only AFTER the actual canvas size
         // has been changed, ensuring that the new component coordinates
         // are calculated correctly from the new image coordinates.
-        newComp.imCoordsChanged(canvasTransform, false, view);
+        croppedComp.imCoordsChanged(canvasTransform, false, view);
 
-        if (addHidingMask) {
-            assert selectionCrop;
-            assert oldComp.hasSelection();
+        if (addMaskForHiding) {
+            assert fromSelection;
+            assert srcComp.hasSelection();
 
-            Shape hidingShape = oldComp.getSelectionShape();
+            Shape hidingShape = srcComp.getSelectionShape();
             hidingShape = canvasTransform.createTransformedShape(hidingShape);
-            addHidingMask(newComp, hidingShape, false);
+            addHidingMask(croppedComp, hidingShape, false);
         }
 
         // If before the crop the internal frame started
@@ -135,22 +135,22 @@ public class Crop implements CompAction {
         // unreachable after the crop, so move it.
         view.ensurePositiveLocation();
 
-        assert oldComp != newComp;
-        String editName = addHidingMask ? "Crop and Hide" : "Crop";
+        assert srcComp != croppedComp;
+        String editName = addMaskForHiding ? "Crop and Hide" : "Crop";
         History.add(new CompositionReplacedEdit(
-            editName, view, oldComp, newComp, canvasTransform, false));
-        view.replaceComp(newComp);
+            editName, view, srcComp, croppedComp, canvasTransform, false));
+        view.replaceComp(croppedComp);
 
-        newComp.updateAllIconImages();
-        SelectionActions.update(newComp);
+        croppedComp.updateAllIconImages();
+        SelectionActions.update(croppedComp);
 
-        newComp.update(true, true);
+        croppedComp.update(true, true);
 
         Messages.showStatusMessage(format(
             "<b>%s</b> was cropped to %d x %d pixels.",
-            newComp.getName(), cropRect.width, cropRect.height));
+            croppedComp.getName(), cropRect.width, cropRect.height));
 
-        return CompletableFuture.completedFuture(newComp);
+        return CompletableFuture.completedFuture(croppedComp);
     }
 
     /**

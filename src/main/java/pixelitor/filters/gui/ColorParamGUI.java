@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,13 +28,13 @@ import java.awt.FlowLayout;
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * The GUI for a {@link ColorParam}
+ * GUI component for interacting with a {@link ColorParam}.
  */
 public class ColorParamGUI extends JPanel implements ParamGUI {
     public static final int BUTTON_SIZE = 30;
     private final ColorParam model;
     private final ColorSwatch colorSwatch;
-    private final ResetButton resetButton;
+    private ResetButton resetButton;
 
     public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addResetButton) {
         super(new FlowLayout(LEFT));
@@ -48,7 +48,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
 
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
-            model::getColor, this::updateColor);
+            model::getColor, this::applySelectedColor);
 
         if (action != null) {
             add(action.createGUI());
@@ -57,17 +57,16 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         if (addResetButton) {
             resetButton = new ResetButton(model);
             add(resetButton);
-        } else {
-            resetButton = null;
         }
     }
 
     private void showColorDialog() {
         Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(), model.allowTransparency(), this::updateColor);
+            model.getColor(), model.allowTransparency(), this::applySelectedColor);
     }
 
-    private void updateColor(Color color) {
+    // updates the swatch and the model with the new selected color
+    private void applySelectedColor(Color color) {
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 

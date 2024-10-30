@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 /**
- * Geometry-related static utility methods.
+ * Static utility methods for 2D geometry calculations.
  */
 public class Geometry {
     public static final double GOLDEN_RATIO = 1.618033988749895;
-
     private static final double EPSILON = 0.0001;
 
     private Geometry() {
@@ -36,131 +35,92 @@ public class Geometry {
     }
 
     /**
-     * <P>For two points A and B this function will set the value of outA and outB such that:</P>
-     * <OL>
-     * <LI>
-     * outA and outB are equidistant to A. The distance is dist.
-     * </LI>
-     * <LI>
-     * The line through outA and outB passes through A.
-     * </LI>
-     * <LI>
-     * The line through outA and outB is perpendicular to the line joining A and B.
-     * </LI>
-     * </OL>
-     * <p>
-     * <P>With A as center, starting from B, moving clockwise will give outB and moving counter clock wise will give outA.</P>
+     * Calculates two points that form a perpendicular line through the center,
+     * maintaining a specified distance from the center.
      *
-     * @param a    A 2 valued array representing the abscissa X and ordinate Y of point A.
-     * @param b    A 2 valued array representing the abscissa X and ordinate Y of point B.
-     * @param dist The distance to be maintained between any one of the perpendicular point and the point A.
-     * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
-     * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
+     * @param center    The point through which the perpendicular line passes
+     * @param reference The reference point used to determine the perpendicular direction
+     * @param distance  The distance from center to each output point
+     * @param leftOut   Output parameter for the counter-clockwise perpendicular point
+     * @param rightOut  Output parameter for the clockwise perpendicular point
      */
-    public static void perpendiculars(Point2D a, Point2D b, double dist, Point2D outA, Point2D outB) {
+    public static void calcPerpendicularPoints(Point2D center,
+                                               Point2D reference,
+                                               double distance,
+                                               Point2D leftOut,
+                                               Point2D rightOut) {
+        // Calculate direction vector from center to reference
         Point2D direction = new Point2D.Double();
-
-        // direction with magnitude = B - A
-        subtract(b, a, direction);
-        // unit vector
+        subtract(reference, center, direction);
         normalize(direction);
-        // to scale to fit distance
-        scale(direction, dist);
+        scale(direction, distance);
 
-        // outA, outB = direction rotated 90 degrees either way
-        perpendiculars(direction, outA, outB);
+        // Calculate perpendicular points
+        // leftOut, rightOut = direction rotated 90 degrees either way
+        calculatePerpendicularVectors(direction, leftOut, rightOut);
 
-        // translating the results at A
-        add(outA, a, outA);
-        add(outB, a, outB);
+        // Translate points to center position
+        add(leftOut, center, leftOut);
+        add(rightOut, center, rightOut);
     }
 
     /**
-     * <P>For two points A and B this function will set the value of outA and outB such that:</P>
-     * <OL>
-     * <LI>
-     * outA and outB are equidistant to A. The distance is 1 unit.
-     * </LI>
-     * <LI>
-     * The line through outA and outB passes through A.
-     * </LI>
-     * <LI>
-     * The line through outA and outB is perpendicular to the line joining A and B.
-     * </LI>
-     * </OL>
-     * <p>
-     * <P>With A as center, starting from B, moving clockwise will give outB and moving counter clock wise will give outA.</P>
-     *
-     * @param a    A 2 valued array representing the abscissa X and ordinate Y of point A.
-     * @param b    A 2 valued array representing the abscissa X and ordinate Y of point B.
-     * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
-     * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
+     * The same as the previous one, but here the distance is 1.
      */
-    public static void perpendiculars(Point2D a, Point2D b, Point2D outA, Point2D outB) {
+    public static void calcPerpendicularPoints(Point2D center,
+                                               Point2D reference,
+                                               Point2D leftOut,
+                                               Point2D rightOut) {
+        // Calculate direction vector from center to reference
         Point2D direction = new Point2D.Double();
-
-        // direction with magnitude = B - A
-        subtract(b, a, direction);
-        // unit vector
+        subtract(reference, center, direction);
         normalize(direction);
 
-        // outA, outB = direction rotated 90 degrees either way
-        perpendiculars(direction, outA, outB);
+        // Calculate perpendicular points
+        // leftOut, rightOut = direction rotated 90 degrees either way
+        calculatePerpendicularVectors(direction, leftOut, rightOut);
 
-        // translating the results at A
-        add(outA, a, outA);
-        add(outB, a, outB);
+        // Translate points to center position
+        add(leftOut, center, leftOut);
+        add(rightOut, center, rightOut);
     }
 
     /**
-     * For a point A, this function will set the values of outA and outB such that
-     * <OL>
-     * <LI>
-     * outA is the resulting point vector when A is rotated counter clock wise about origin.
-     * </LI>
-     * <LI>
-     * outB is the resulting point vector when A is rotated clock wise about origin.
-     * </LI>
-     * </OL>
+     * Calculates two unit vectors perpendicular to the input vector.
      *
-     * @param a    A 2 valued array representing the abscissa X and ordinate Y of point A.
-     * @param outA A 2 valued empty array which will represent one of the two perpendicular points.
-     * @param outB A 2 valued empty array which will represent one of the two perpendicular points.
+     * @param input The input vector
+     * @param leftOut Output parameter for counter-clockwise perpendicular vector
+     * @param rightOut Output parameter for clockwise perpendicular vector
      */
-    public static void perpendiculars(Point2D a, Point2D outA, Point2D outB) {
-        // first quad point: [Ay, -Ax]
-        outA.setLocation(-a.getY(), a.getX());
-        // second quad point: [-Ay, Ax]
-        outB.setLocation(a.getY(), -a.getX());
+    public static void calculatePerpendicularVectors(Point2D input,
+                                                     Point2D leftOut,
+                                                     Point2D rightOut) {
+        leftOut.setLocation(-input.getY(), input.getX());
+        rightOut.setLocation(input.getY(), -input.getX());
     }
 
     /**
-     * <P>For two points A and B, this function will set the values of R such that:</P>
-     * <OL>
-     * <LI>
-     * R lies on the line segment joining A and B.
-     * </LI>
-     * <LI>
-     * R divides AB in the ratio m:n.
-     * </LI>
-     * <LI>
-     * AR / RB == m / n.
-     * </LI>
-     * </OL>
-     * <p>
+     * Calculates a point that divides a line segment in a given m:n ratio.
      *
-     * @param a A 2 valued array representing the abscissa X and ordinate Y of point A.
-     * @param b A 2 valued array representing the abscissa X and ordinate Y of point B.
-     * @param m Former part of the ratio of division.
-     * @param n Later part of the ratio of division.
-     * @param r A 2 valued empty array which will represent a point dividing AB.
+     * @param start First endpoint of the line segment
+     * @param end Second endpoint of the line segment
+     * @param m First part of the division ratio
+     * @param n Second part of the division ratio
+     * @param result Output parameter for the calculated point
      */
-    public static void sectionFormula(Point2D a, Point2D b, double m, double n, Point2D r) {
-        add(scale(a, n, new Point2D.Double()), scale(b, m, new Point2D.Double()), r);
-        deScale(r, (m + n));
+    public static void calcDivisionPoint(Point2D start,
+                                         Point2D end,
+                                         double m,
+                                         double n,
+                                         Point2D resultOut) {
+        // https://en.wikipedia.org/wiki/Section_formula
+        Point2D scaledStart = scale(start, n, new Point2D.Double());
+        Point2D scaledEnd = scale(end, m, new Point2D.Double());
+        add(scaledStart, scaledEnd, resultOut);
+        deScale(resultOut, (m + n));
     }
 
-    public static Point2D newFrom(Point2D source) {
+    public static Point2D copyPoint(Point2D source) {
         Point2D.Double b = new Point2D.Double();
         b.setLocation(source);
         return b;
@@ -259,34 +219,34 @@ public class Geometry {
     }
 
     /**
-     * Calculate the projected point of the given point on the given line
-     *
-     * @return projected point p.
+     * Projects a point onto a line and returns the projected point.
      */
     public static Point2D.Double projectPointToLine(Line2D line, Point2D.Double p) {
-        Point2D.Double l1 = (Point2D.Double) line.getP1();
-        Point2D.Double l2 = (Point2D.Double) line.getP2();
+        Point2D.Double lineStart = (Point2D.Double) line.getP1();
+        Point2D.Double lineEnd = (Point2D.Double) line.getP2();
 
-        // dot product of vectors v1, v2
-        Point2D.Double v1 = new Point2D.Double(l2.x - l1.x, l2.y - l1.y);
-        Point2D.Double v2 = new Point2D.Double(p.x - l1.x, p.y - l1.y);
-        double d = v1.x * v2.x + v1.y * v2.y;
+        Point2D.Double lineVector = new Point2D.Double(
+            lineEnd.x - lineStart.x,
+            lineEnd.y - lineStart.y);
+        Point2D.Double pointVector = new Point2D.Double(
+            p.x - lineStart.x,
+            p.y - lineStart.y);
+        double dotProduct = lineVector.x * pointVector.x + lineVector.y * pointVector.y;
 
-        // squared length of vector v1
-        double v1Length = v1.x * v1.x + v1.y * v1.y;
-        if (v1Length == 0) {
-            return l1;
+        double lineVectorLengthSq = lineVector.x * lineVector.x + lineVector.y * lineVector.y;
+        if (lineVectorLengthSq == 0) {
+            return lineStart;
         }
 
+        double t = dotProduct / lineVectorLengthSq;
         return new Point2D.Double(
-            (int) (l1.x + (d * v1.x) / v1Length),
-            (int) (l1.y + (d * v1.y) / v1Length));
+            lineStart.x + t * lineVector.x,
+            lineStart.y + t * lineVector.y
+        );
     }
 
     /**
-     * Calculate the line orthogonal to the given line that passes through the point P
-     *
-     * @return orthogonal line
+     * Returns the line orthogonal to the given line that passes through the point P
      */
     public static Line2D orthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, projectPointToLine(line, p));
@@ -306,37 +266,33 @@ public class Geometry {
     }
 
     /**
-     * Converts from polar coordinates to the corresponding Cartesian coordinates.
+     * Converts polar coordinates to Cartesian coordinates.
      */
-    public static Point2D polarToCartesian(double distance, double angle) {
-        double x = distance * FastMath.cos(angle);
-        double y = distance * FastMath.sin(angle);
+    public static Point2D polarToCartesian(double radius, double angle) {
+        double x = radius * FastMath.cos(angle);
+        double y = radius * FastMath.sin(angle);
 
         return new Point2D.Double(x, y);
     }
 
     /**
-     * Converts an angle between -PI and PI, as returned form Math.atan2,
-     * to an angle between 0 and 2*PI in the counter-clockwise direction.
+     * Converts an angle from the [-π, π] range (as returned by Math.atan2)
+     * to the [0, 2π] range in counter-clockwise direction.
      */
-    public static double atan2ToIntuitive(double angleInRadians) {
-        double angle;
-        if (angleInRadians <= 0) {
-            angle = -angleInRadians;
-        } else {
-            angle = Math.PI * 2 - angleInRadians;
-        }
-        return angle;
+    public static double atan2ToIntuitive(double angleRadians) {
+        return angleRadians <= 0
+            ? -angleRadians
+            : Math.PI * 2 - angleRadians;
     }
 
     /**
      * The inverse function of atan2ToIntuitive
      */
-    public static double intuitiveToAtan2(double radians) {
-        if (radians > Math.PI) {
-            return 2 * Math.PI - radians;
+    public static double intuitiveToAtan2(double angleRadians) {
+        if (angleRadians > Math.PI) {
+            return 2 * Math.PI - angleRadians;
         } else {
-            return -radians;
+            return -angleRadians;
         }
     }
 

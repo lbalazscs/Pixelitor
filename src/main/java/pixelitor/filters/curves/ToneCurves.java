@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Represents set of [RGB,R,G,B] curves
+ * Manages RGB and individual color channel curves (Red, Green, Blue)
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
@@ -42,17 +42,19 @@ public class ToneCurves {
     private final EnumMap<Channel, ToneCurve> curvesByChannel
         = new EnumMap<>(Channel.class);
     private Channel activeChannel;
-    private static final BasicStroke gridStroke = new BasicStroke(1);
-    private int width = 295;
-    private int height = 295;
+
+    private int panelWidth = 295;
+    private int panelHeight = 295;
     private int curveWidth = 255;
     private int curveHeight = 255;
     private static final int CURVE_PADDING = 10;
     private static final int AXIS_PADDING = 20;
     private static final int AXIS_SIZE = 10;
     private static final int GRID_DENSITY = 4;
+    private static final BasicStroke GRID_STROKE = new BasicStroke(1);
 
     public ToneCurves() {
+        // Initializes curves for each channel, setting RGB as the default active channel
         curvesByChannel.put(Channel.RGB, new ToneCurve(Channel.RGB));
         curvesByChannel.put(Channel.RED, new ToneCurve(Channel.RED));
         curvesByChannel.put(Channel.GREEN, new ToneCurve(Channel.GREEN));
@@ -82,11 +84,14 @@ public class ToneCurves {
         return activeChannel;
     }
 
-    public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-        curveWidth = width - 2 * CURVE_PADDING - AXIS_PADDING;
-        curveHeight = height - 2 * CURVE_PADDING - AXIS_PADDING;
+    /**
+     * Resizes the tone curve area according to the given new panel width and height
+     */
+    public void setSize(int newPanelWidth, int newPanelHeight) {
+        this.panelWidth = newPanelWidth;
+        this.panelHeight = newPanelHeight;
+        curveWidth = newPanelWidth - 2 * CURVE_PADDING - AXIS_PADDING;
+        curveHeight = newPanelHeight - 2 * CURVE_PADDING - AXIS_PADDING;
         for (var entry : curvesByChannel.entrySet()) {
             entry.getValue().setSize(curveWidth, curveHeight);
         }
@@ -98,6 +103,10 @@ public class ToneCurves {
         }
     }
 
+    /**
+     * Converts a point from user input coordinates
+     * to normalized curve coordinates.
+     */
     public void normalizePoint(Point2D.Float p) {
         p.x -= CURVE_PADDING + AXIS_PADDING;
         p.y -= CURVE_PADDING;
@@ -107,15 +116,19 @@ public class ToneCurves {
         p.y /= curveHeight;
     }
 
+    /**
+     * Draws the tone curve grid, scales, and curves for all channels
+     * onto the given Graphics2D.
+     */
     public void draw(Graphics2D g) {
         boolean darkTheme = Themes.getCurrent().isDark();
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         // clear background
-        Colors.fillWith(darkTheme ? Color.BLACK : Color.WHITE, g, width, height);
+        Colors.fillWith(darkTheme ? Color.BLACK : Color.WHITE, g, panelWidth, panelHeight);
 
-        // apply CURVE_PADDING, and prepare for y-axis up drawing
+        // Apply padding, adjust for y-axis inversion
         var origTransform = g.getTransform();
         g.translate(CURVE_PADDING + AXIS_PADDING, CURVE_PADDING);
         g.translate(0, curveHeight);
@@ -129,6 +142,9 @@ public class ToneCurves {
         g.setTransform(origTransform);
     }
 
+    /**
+     * Draws the tone curve grid lines in alternating light and dark colors.
+     */
     private void drawGrid(Graphics2D g) {
         Path2D lightPath2D = new Path2D.Float();
         Path2D darkPath2D = new Path2D.Float();
@@ -146,7 +162,7 @@ public class ToneCurves {
             path2D.lineTo(i * gridWidth, curveHeight);
         }
 
-        g.setStroke(gridStroke);
+        g.setStroke(GRID_STROKE);
 
         g.setColor(Color.LIGHT_GRAY);
         g.draw(lightPath2D);
@@ -155,46 +171,54 @@ public class ToneCurves {
         g.draw(darkPath2D);
     }
 
-    private void drawScales(Graphics2D g) {
-        Color gradientEndColor;
-        if (activeChannel == Channel.RGB) {
-            gradientEndColor = Color.WHITE;
-        } else {
-            gradientEndColor = activeChannel.getDrawColor(true, false);
-        }
-
-        // draw horizontal gradient
-        var rectH = new Rectangle2D.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
-        var gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, gradientEndColor);
-        g.setPaint(gradientH);
-        g.fill(rectH);
-        g.setColor(Color.LIGHT_GRAY);
-        g.draw(rectH);
-
-        // draw vertical gradient
-        var rectV = new Rectangle2D.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
-        gradientH = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, gradientEndColor);
-        g.setPaint(gradientH);
-        g.fill(rectV);
-        g.setColor(Color.LIGHT_GRAY);
-        g.draw(rectV);
-    }
-
+    /**
+     * Draws the diagonal line for reference from the
+     * bottom-left to the top-right of the curve area.
+     */
     private void drawDiagonal(Graphics2D g) {
         g.setColor(Color.GRAY);
-        g.setStroke(gridStroke);
+        g.setStroke(GRID_STROKE);
         g.drawLine(0, 0, curveWidth, curveHeight);
     }
 
+    /**
+     * Draws the gradient scales along the horizontal and
+     * vertical axes based on the active channel.
+     */
+    private void drawScales(Graphics2D g) {
+        Color gradientEndColor = (activeChannel == Channel.RGB)
+            ? Color.WHITE
+            : activeChannel.getDrawColor(true, false);
+
+        // Horizontal gradient
+        var rectHor = new Rectangle2D.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
+        var gradientHor = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, gradientEndColor);
+        g.setPaint(gradientHor);
+        g.fill(rectHor);
+        g.setColor(Color.LIGHT_GRAY);
+        g.draw(rectHor);
+
+        // Vertical gradient
+        var rectVer = new Rectangle2D.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
+        var gradientVer = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, gradientEndColor);
+        g.setPaint(gradientVer);
+        g.fill(rectVer);
+        g.setColor(Color.LIGHT_GRAY);
+        g.draw(rectVer);
+    }
+
+    /**
+     * Draws the curves for each channel.
+     */
     private void drawCurves(Graphics2D g, boolean darkTheme) {
-        // on back draw inactive curves
+        // draw the inactive curves first...
         for (var entry : curvesByChannel.entrySet()) {
             if (entry.getKey() != activeChannel) {
                 entry.getValue().draw(g, darkTheme);
             }
         }
 
-        // on top draw active curve
+        // ...then the active curve on top.
         curvesByChannel.get(activeChannel).draw(g, darkTheme);
     }
 }

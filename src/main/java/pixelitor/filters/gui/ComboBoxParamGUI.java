@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,14 +20,13 @@ package pixelitor.filters.gui;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BoxLayout.X_AXIS;
 
 /**
- * Displays a JComboBox as the GUI for an
- * {@link IntChoiceParam} or an {@link EnumParam}
+ * Displays a JComboBox as the GUI for subclasses of {@link ListParam}.
  */
 public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;

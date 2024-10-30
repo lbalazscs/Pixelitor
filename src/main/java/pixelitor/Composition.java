@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.compactions.EnlargeCanvas;
+import pixelitor.compactions.Outsets;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
@@ -1505,21 +1506,21 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void fitCanvasToLayers() {
-        EnlargeCanvas enlargeCanvas = new EnlargeCanvas(0, 0, 0, 0);
+        Outsets outsets = Outsets.createZero();
 
         for (Layer layer : layerList) {
             if (layer instanceof ContentLayer contentLayer) {
-                enlargeCanvas.ensureFitsContentOf(contentLayer);
+                outsets.ensureFitsContentOf(contentLayer);
             }
         }
 
-        if (enlargeCanvas.doesNothing()) {
+        if (outsets.isZero()) {
             Dialogs.showInfoDialog(getDialogParent(), "Nothing to be done",
                 "The canvas is already large enough to show all layer content.");
             return;
         }
 
-        enlargeCanvas.process(this);
+        new EnlargeCanvas(outsets).process(this);
     }
 
     public boolean contains(Layer searched) {

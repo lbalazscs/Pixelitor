@@ -19,7 +19,6 @@
 package pixelitor.filters.curves;
 
 import com.jhlabs.image.CurvesFilter;
-import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.levels.Channel;
@@ -31,7 +30,7 @@ import java.io.Serial;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Tone ToneCurvesFilter filter
+ * Filter that applies tone curves adjustments for RGB and individual color channels.
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
@@ -41,19 +40,19 @@ public class ToneCurvesFilter extends FilterWithGUI {
     @Serial
     private static final long serialVersionUID = 3679501445608294764L;
 
-    private CurvesFilter filter;
-    private final ToneCurves curves;
+    private CurvesFilter filter; // jhlabs curves filter
+    private final ToneCurves curves;  // the curve adjustments
 
+    // Reference to the last-used GUI instance for this filter
     private ToneCurvesGUI lastGUI;
 
     public ToneCurvesFilter() {
         helpURL = "https://en.wikipedia.org/wiki/Curve_(tonality)";
-
         curves = new ToneCurves();
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean reset) {
+    public ToneCurvesGUI createGUI(Filterable layer, boolean reset) {
         if (reset) {
             curves.reset();
             curves.setActiveChannel(Channel.RGB);
@@ -76,10 +75,10 @@ public class ToneCurvesFilter extends FilterWithGUI {
         }
 
         filter.setCurves(
-            curves.getCurve(Channel.RGB).curve,
-            curves.getCurve(Channel.RED).curve,
-            curves.getCurve(Channel.GREEN).curve,
-            curves.getCurve(Channel.BLUE).curve
+            curves.getCurve(Channel.RGB).curveData,
+            curves.getCurve(Channel.RED).curveData,
+            curves.getCurve(Channel.GREEN).curveData,
+            curves.getCurve(Channel.BLUE).curveData
         );
 
         return filter.filter(src, dest);

@@ -1794,7 +1794,7 @@ public class MainGuiTest {
         testFilterWithDialog("Custom 5x5 Convolution", Randomize.NO,
             Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur",
             "Find Horizontal Edges", "Find Vertical Edges",
-            "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
+            "Find / Edges", "Find \\ Edges", "Sharpen",
             "Reset", "Randomize");
     }
 

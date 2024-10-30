@@ -32,133 +32,140 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.WEST;
 import static java.awt.Color.GRAY;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
- * A GUI Component that allows users to select a value within a range.
+ * A GUI Component for selecting a value within a range.
  * It consists of a JSlider and a JSpinner synchronized with each other,
- * so changing the value in one component will also update the other.
- * It optionally includes a {@link ResetButton} for resetting the value to its default.
+ * allowing users to select values either by sliding or direct numeric
+ * input.
+ * It optionally includes a {@link ResetButton} for restoring the default value.
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
-    private final TextPosition textPosition;
-    private final int orientation;
-    private final JPanel spinnerPanel;
+    private final LabelPosition labelPosition;
+    private final JPanel controlPanel;
 
     /**
      * The possible positions of the label of a SliderSpinner.
      */
-    public enum TextPosition {
+    public enum LabelPosition {
         BORDER(true),
         WEST(false),
         NORTH(false),
         NONE(false),
-        NONE_TICKS(true);
+        NONE_WITH_TICKS(true);
 
-        private final boolean ticks;
+        private final boolean showTicks;
 
-        TextPosition(boolean ticks) {
-            this.ticks = ticks;
+        LabelPosition(boolean showTicks) {
+            this.showTicks = showTicks;
         }
 
-        boolean addTicks() {
-            return ticks;
+        boolean shouldShowTicks() {
+            return showTicks;
         }
     }
 
     public static final int HORIZONTAL = JSlider.HORIZONTAL;
     public static final int VERTICAL = JSlider.VERTICAL;
+    private final int orientation;
 
     private final JSlider slider;
     private final JSpinner spinner;
     private ResetButton resetButton;
     private final RangeParam model;
 
-    private Color leftColor;
-    private Color rightColor;
-    private final boolean colorsUsed;
+    private Color startColor;
+    private Color endColor;
+    private final boolean hasGradient;
 
-    private boolean sliderMoved = false;
-    private boolean spinnerMoved = false;
+    private boolean isSliderAdjusting = false;
+    private boolean isSpinnerAdjusting = false;
 
-    public SliderSpinner(RangeParam model, TextPosition position, boolean addResetButton) {
+    public SliderSpinner(RangeParam model, LabelPosition position, boolean addResetButton) {
         this(model, position, addResetButton, HORIZONTAL);
     }
 
-    public SliderSpinner(RangeParam model, TextPosition position, boolean addResetButton, int orientation) {
+    public SliderSpinner(RangeParam model, LabelPosition position, boolean addResetButton, int orientation) {
         this(model, null, null, position, addResetButton, orientation);
     }
 
-    public SliderSpinner(RangeParam model, Color leftColor, Color rightColor, int orientation) {
-        this(model, leftColor, rightColor, TextPosition.BORDER, true, orientation);
+    public SliderSpinner(RangeParam model, Color startColor, Color endColor, int orientation) {
+        this(model, startColor, endColor, LabelPosition.BORDER, true, orientation);
     }
 
-    public SliderSpinner(RangeParam model, Color leftColor, Color rightColor) {
-        this(model, leftColor, rightColor, TextPosition.BORDER, true, HORIZONTAL);
+    public SliderSpinner(RangeParam model, Color startColor, Color endColor) {
+        this(model, startColor, endColor, LabelPosition.BORDER, true, HORIZONTAL);
     }
 
     private SliderSpinner(RangeParam model,
-                          Color leftColor, Color rightColor,
-                          TextPosition textPosition,
+                          Color startColor, Color endColor,
+                          LabelPosition labelPosition,
                           boolean addResetButton,
                           int orientation) {
         super(new BorderLayout());
 
-        this.textPosition = textPosition;
-        this.orientation = orientation;
         this.model = model;
+        this.labelPosition = labelPosition;
+        this.orientation = orientation;
 
-        this.leftColor = leftColor;
-        this.rightColor = rightColor;
-        colorsUsed = leftColor != null;
+        this.startColor = startColor;
+        this.endColor = endColor;
+        assert (startColor == null) == (endColor == null);
+        hasGradient = startColor != null;
 
-        if (textPosition == TextPosition.BORDER) {
-            if (leftColor != null && rightColor != null) {
-                Border gradientBorder = new GradientBorder(leftColor, rightColor);
+        if (labelPosition == LabelPosition.BORDER) {
+            if (hasGradient) {
+                Border gradientBorder = new GradientBorder(startColor, endColor);
                 setBorder(createTitledBorder(gradientBorder, model.getName()));
             } else {
                 setBorder(createTitledBorder(model.getName()));
-                this.leftColor = GRAY;
-                this.rightColor = GRAY;
+                this.startColor = GRAY;
+                this.endColor = GRAY;
             }
         }
 
-        slider = createSlider(model);
-        if (textPosition.addTicks()) {
-            setupTicks();
-        }
-
-        spinner = createSpinner(model);
-
-        if (textPosition == TextPosition.WEST) {
+        if (labelPosition == LabelPosition.WEST) {
             label = new JLabel(model.getName() + ": ");
             add(label, WEST);
-        } else if (textPosition == TextPosition.NORTH) {
+        } else if (labelPosition == LabelPosition.NORTH) {
             label = new JLabel(model.getName() + ": ");
             add(label, NORTH);
         } else {
             label = null;
         }
 
-        spinnerPanel = new JPanel(new FlowLayout(LEFT));
+        slider = createSlider(model);
+        if (labelPosition.shouldShowTicks()) {
+            setupTicks();
+        }
         add(slider, CENTER);
-        spinnerPanel.add(spinner);
+
+        spinner = createSpinner(model);
+        controlPanel = new JPanel(new FlowLayout(LEFT));
+        controlPanel.add(spinner);
 
         if (addResetButton) {
             createResetButton(model);
-            spinnerPanel.add(resetButton);
+            controlPanel.add(resetButton);
         }
-        add(spinnerPanel, orientation == HORIZONTAL ? EAST : SOUTH);
+        add(controlPanel, orientation == HORIZONTAL
+            ? EAST
+            : SOUTH);
 
 //        showTicksAsFloat();
     }
 
     public static SliderSpinner from(RangeParam model) {
-        return new SliderSpinner(model, TextPosition.NONE, false);
+        return new SliderSpinner(model, LabelPosition.NONE, false);
     }
 
     private JSlider createSlider(RangeParam model) {
@@ -171,52 +178,61 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private JSpinner createSpinner(RangeParam model) {
         assert model.checkInvariants();
 
-        SpinnerNumberModel spinnerModel;
         int decimalPlaces = model.getDecimalPlaces();
-        if (decimalPlaces > 0) {
-            double stepSize = switch (decimalPlaces) {
-                case 1 -> 0.1;
-                case 2 -> 0.01;
-                default -> throw new IllegalStateException();
-            };
-            spinnerModel = new SpinnerNumberModel(
-                model.getValueAsDouble(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                stepSize);
-        } else {
-            spinnerModel = new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1);
-        }
-        JSpinner s = new JSpinner(spinnerModel);
+        JSpinner s = new JSpinner(createSpinnerModel(model, decimalPlaces));
 
         if (decimalPlaces > 0) {
-            var editor = (JSpinner.NumberEditor) s.getEditor();
-            DecimalFormat format = editor.getFormat();
-            format.setMinimumFractionDigits(decimalPlaces);
-            format.setMaximumFractionDigits(decimalPlaces);
-
-            // make sure that the fractional form is displayed
-            editor.getTextField().setValue(model.getValueAsDouble());
+            configureDecimalFormat(model, s, decimalPlaces);
         }
 
         s.addChangeListener(this);
         return s;
     }
 
+    private static SpinnerNumberModel createSpinnerModel(RangeParam model, int decimalPlaces) {
+        SpinnerNumberModel spinnerModel;
+        if (decimalPlaces > 0) {
+            //double stepSize = Math.pow(10, -decimalPlaces);
+            double stepSize = switch (decimalPlaces) {
+                case 1 -> 0.1;
+                case 2 -> 0.01;
+                default -> throw new IllegalStateException();
+            };
+            spinnerModel = new SpinnerNumberModel( // constructor using doubles
+                model.getValueAsDouble(),
+                model.getMinimum(),
+                model.getMaximum(),
+                stepSize);
+        } else {
+            spinnerModel = new SpinnerNumberModel( // constructor using ints
+                model.getValue(),
+                model.getMinimum(),
+                model.getMaximum(),
+                1);
+        }
+        return spinnerModel;
+    }
+
+    private static void configureDecimalFormat(RangeParam model, JSpinner s, int decimalPlaces) {
+        var editor = (JSpinner.NumberEditor) s.getEditor();
+        DecimalFormat format = editor.getFormat();
+        format.setMinimumFractionDigits(decimalPlaces);
+        format.setMaximumFractionDigits(decimalPlaces);
+
+        // make sure that the fractional form is displayed
+        editor.getTextField().setValue(model.getValueAsDouble());
+    }
+
     private void createResetButton(RangeParam model) {
         resetButton = new ResetButton(model);
-        if (colorsUsed) {
+        if (hasGradient) {
             resetButton.setBackground(GRAY);
         }
     }
 
     public void addExplicitResetButton(ResetButton resetButton) {
         this.resetButton = resetButton;
-        spinnerPanel.add(resetButton);
+        controlPanel.add(resetButton);
     }
 
     public void setupTicks() {
@@ -294,57 +310,63 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
-        Object o = e.getSource();
-        if (o == slider) {
-            if (spinnerMoved) {
+    public void stateChanged(ChangeEvent event) {
+        Object eventSource = event.getSource();
+        if (eventSource == slider) {
+            if (isSpinnerAdjusting) {
+                // the change originally came from the spinner
                 return;
             }
-            int currentValue = slider.getValue();
-            sliderMoved = true;
-            spinner.setValue(currentValue);
-            sliderMoved = false;
-        } else if (o == spinner) {
-            if (sliderMoved) {
+            // synchronize the spinner with the slider value
+            isSliderAdjusting = true;
+            spinner.setValue(slider.getValue());
+            isSliderAdjusting = false;
+        } else if (eventSource == spinner) {
+            if (isSliderAdjusting) {
+                // the change originally came from the slider
                 return;
             }
-            // this gets called even if the slider is modified by the user
-            spinnerMoved = true;
+            // synchronize the slider with the spinner value
+            isSpinnerAdjusting = true;
             if (model.getDecimalPlaces() > 0) {
-                double value = (double) spinner.getValue();
-                model.setValue(value, true);
+                // the spinner returns a Double
+                model.setValue((Double) spinner.getValue(), true);
             } else {
-                int currentValue = (Integer) spinner.getValue();
-                model.setValue(currentValue);
+                // the spinner returns an Integer
+                model.setValue((Integer) spinner.getValue());
             }
-            spinnerMoved = false;
+            isSpinnerAdjusting = false;
         }
 
+        updateResetButton();
+    }
+
+    private void updateResetButton() {
         if (resetButton != null) {
-            if (colorsUsed) {
-                setResetButtonBgColor();
+            if (hasGradient) {
+                updateResetButtonColor();
             }
             resetButton.updateIcon();
         }
     }
 
-    private void setResetButtonBgColor() {
+    private void updateResetButtonColor() {
         if (model.hasDefault()) {
             resetButton.setBackground(GRAY);
         } else {
             if (model.getValue() > model.getDefaultValue()) {
-                resetButton.setBackground(rightColor);
+                resetButton.setBackground(endColor);
             } else {
-                resetButton.setBackground(leftColor);
+                resetButton.setBackground(startColor);
             }
         }
     }
 
     public void forceSpinnerValueOnly(int value) {
-        boolean oldSliderMoved = sliderMoved;
-        sliderMoved = true;
+        boolean oldSliderMoved = isSliderAdjusting;
+        isSliderAdjusting = true;
         spinner.setValue(value);
-        sliderMoved = oldSliderMoved;
+        isSliderAdjusting = oldSliderMoved;
     }
 
     @Override
@@ -355,10 +377,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             double value = model.getValueAsDouble();
             boolean hasFractionalPart = value - (int) value > 0.0001;
             if (hasFractionalPart) {
-                sliderMoved = true; // avoid updating the slider
+                isSliderAdjusting = true; // avoid updating the slider
                 var editor = (JSpinner.NumberEditor) spinner.getEditor();
                 editor.getTextField().setValue(value);
-                sliderMoved = false;
+                isSliderAdjusting = false;
             }
         }
     }
@@ -367,7 +389,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     public Dimension getMaximumSize() {
         return getPreferredSize();
     }
-
 
     public RangeParam getModel() {
         return model;
@@ -407,7 +428,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     @Override
     public int getNumLayoutColumns() {
-        if (textPosition == TextPosition.NONE) {
+        if (labelPosition == LabelPosition.NONE) {
             return 2;
         }
         return 1;

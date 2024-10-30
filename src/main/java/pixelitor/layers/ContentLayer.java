@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
@@ -162,7 +163,7 @@ public abstract class ContentLayer extends Layer {
 
     public abstract void rotate(QuadrantAngle angle);
 
-    public abstract void enlargeCanvas(int north, int east, int south, int west);
+    public abstract void enlargeCanvas(Outsets out);
 
     @Override
     public DebugNode createDebugNode(String key) {

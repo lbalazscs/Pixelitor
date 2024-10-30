@@ -26,7 +26,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ListParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
-import pixelitor.gui.utils.SliderSpinner.TextPosition;
+import pixelitor.gui.utils.SliderSpinner.LabelPosition;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
@@ -167,7 +167,7 @@ public class PreferencesPanel extends JTabbedPane {
         int minSize = Math.min(10, currentSize);
         int maxSize = Math.max(30, currentSize);
 
-        RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, TextPosition.NONE);
+        RangeParam fontSize = new RangeParam("Font Size", minSize, currentSize, maxSize, true, LabelPosition.NONE);
         gbh.addParam(fontSize);
 
         ListParam<String> fontType = new ListParam<>("Font Type", Utils.getAvailableFontNames(), font.getName());

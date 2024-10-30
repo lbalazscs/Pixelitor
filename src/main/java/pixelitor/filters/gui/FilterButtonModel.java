@@ -24,15 +24,16 @@ import javax.swing.*;
 import static java.lang.String.format;
 
 /**
- * A model for a button on a filter GUI that runs an action
- * when clicked, and then triggers the filter preview.
+ * A model representing a button in a filter GUI.
+ * When clicked, it performs an action and can optionally
+ * trigger a filter preview update.
  */
 public class FilterButtonModel implements FilterSetting {
     private final Runnable action;
     private final Icon icon;
     private final String toolTipText;
     private final String lookupName; // for AssertJSwing tests
-    private final String text;
+    private final String buttonText;
     private ParamAdjustmentListener adjustmentListener;
     private JButton button;
 
@@ -42,26 +43,26 @@ public class FilterButtonModel implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    private final boolean triggerFilter;
+    private final boolean shouldTriggerFilter;
 
-    public FilterButtonModel(String text, Runnable action, String toolTipText) {
-        this(text, action, null, toolTipText, null, true);
+    public FilterButtonModel(String buttonText, Runnable action, String toolTipText) {
+        this(buttonText, action, null, toolTipText, null, true);
     }
 
-    public FilterButtonModel(String text, Runnable action, Icon icon,
+    public FilterButtonModel(String buttonText, Runnable action, Icon icon,
                              String toolTipText, String lookupName) {
-        this(text, action, icon, toolTipText, lookupName, true);
+        this(buttonText, action, icon, toolTipText, lookupName, true);
     }
 
-    public FilterButtonModel(String text, Runnable action, Icon icon,
+    public FilterButtonModel(String buttonText, Runnable action, Icon icon,
                              String toolTipText, String lookupName,
-                             boolean triggerFilter) {
-        this.text = text;
+                             boolean shouldTriggerFilter) {
+        this.buttonText = buttonText;
         this.action = action;
         this.icon = icon;
         this.toolTipText = toolTipText;
         this.lookupName = lookupName;
-        this.triggerFilter = triggerFilter;
+        this.shouldTriggerFilter = shouldTriggerFilter;
     }
 
     public static FilterButtonModel createReseed(Runnable reseedTask) {
@@ -69,16 +70,21 @@ public class FilterButtonModel implements FilterSetting {
             "Reinitialize the randomness");
     }
 
+    /**
+     * Creates a custom filter button model for re-seeding
+     * with given label and tooltip.
+     */
     public static FilterButtonModel createReseed(Runnable reseedTask,
-                                                 String text, String toolTip) {
+                                                 String text,
+                                                 String toolTip) {
         var filterAction = new FilterButtonModel(text, reseedTask,
-            Icons.getTwoDicesIcon(), toolTip, "reseed");
+            Icons.getReseedIcon(), toolTip, "reseed");
         filterAction.setIgnoreFinalAnimationSettingMode(false);
         return filterAction;
     }
 
     /**
-     * Creates a filter button model that only re-runs the filter
+     * Creates a filter button model that only triggers the filter update
      * (can be useful when using ThreadLocalRandom).
      */
     public static FilterButtonModel createNoOpReseed() {
@@ -87,8 +93,8 @@ public class FilterButtonModel implements FilterSetting {
 
     @Override
     public JComponent createGUI() {
-        button = new JButton(text, icon);
-        if (triggerFilter) {
+        button = new JButton(buttonText, icon);
+        if (shouldTriggerFilter) {
             button.addActionListener(e -> {
                 // first perform the action...
                 action.run();
@@ -99,13 +105,16 @@ public class FilterButtonModel implements FilterSetting {
             // just perform the action
             button.addActionListener(e -> action.run());
         }
+
         if (toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
         button.setEnabled(shouldBeEnabled());
+
         if (lookupName != null) {
             button.setName(lookupName);
         }
+
         return button;
     }
 
@@ -140,7 +149,7 @@ public class FilterButtonModel implements FilterSetting {
 
     @Override
     public String getName() {
-        return text;
+        return buttonText;
     }
 
     @Override

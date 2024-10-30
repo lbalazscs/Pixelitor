@@ -32,7 +32,7 @@ import java.util.List;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
  * The GUI for a {@link ColorParam}

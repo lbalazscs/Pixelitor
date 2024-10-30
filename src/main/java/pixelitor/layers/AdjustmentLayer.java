@@ -156,8 +156,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public void startPreview(Filter filter, boolean first, Component busyCursorParent) {
-        if (!first) {
+    public void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
+        if (!firstPreview) {
             holder.update();
         }
     }

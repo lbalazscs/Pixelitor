@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,9 @@ import javax.swing.*;
 import java.awt.Component;
 
 /**
- * The superclass of all filter configuration panels.
- * Instances must not be cached (since they store a {@link Filterable} reference).
+ * Abstract base class for all filter configuration panels.
+ * Instances of FilterGUI should not be cached, as they store
+ * a reference to the {@link Filterable} layer being filtered.
  */
 public abstract class FilterGUI extends JPanel {
     protected Filter filter;
@@ -37,10 +38,10 @@ public abstract class FilterGUI extends JPanel {
         this.layer = layer;
     }
 
-    public void startPreview(boolean first) {
-        Component busyCursorParent = first ? GUIUtils.getTopContainer(this) : this;
-//        Component busyCursorParent = SwingUtilities.getRoot(this);
-
-        layer.startPreview(filter, first, busyCursorParent);
+    public void startPreview(boolean firstPreview) {
+        Component busyCursorTarget = firstPreview
+            ? GUIUtils.getTopContainer(this)
+            : this;
+        layer.startPreview(filter, firstPreview, busyCursorTarget);
     }
 }

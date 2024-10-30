@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -139,7 +139,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     }
 
     private BufferedImage renderFrame(ParametrizedFilter filter, double time) {
-        long runCountBefore = Filter.runCount;
+        long executionsBefore = Filter.executionCount;
 
         // all sorts of problems can happen
         // if filters run outside of EDT
@@ -150,7 +150,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         };
         GUIUtils.invokeAndWait(filterRunTask);
 
-        assert Filter.runCount == runCountBefore + 1;
+        assert Filter.executionCount == executionsBefore + 1;
 
         var comp = dr.getComp();
         comp.repaint();

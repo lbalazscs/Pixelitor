@@ -28,7 +28,10 @@ import pixelitor.tools.Tools;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ItemEvent;
 import java.util.List;
 
@@ -47,7 +50,7 @@ public class ToolButton extends JToggleButton {
     private int numPresets;
     private JPopupMenu popup;
 
-    public ToolButton(Tool tool, Dimension preferredSize) {
+    public ToolButton(Tool tool) {
         this.tool = tool;
         tool.setButton(this);
 
@@ -73,7 +76,7 @@ public class ToolButton extends JToggleButton {
             createPresetsPopup(tool);
         }
 
-        setPreferredSize(preferredSize);
+//        setPreferredSize(preferredSize);
     }
 
     @Override
@@ -98,7 +101,7 @@ public class ToolButton extends JToggleButton {
     }
 
     private void createPresetsPopup(Tool tool) {
-        List<UserPreset> startupPresets = UserPreset.loadPresets(tool.getPresetDirName());
+        List<UserPreset> startupPresets = UserPreset.detectPresetNames(tool.getPresetDirName());
         numPresets = startupPresets.size();
 
         popup = new JPopupMenu();
@@ -117,7 +120,7 @@ public class ToolButton extends JToggleButton {
             }
             popup.addSeparator();
             for (UserPreset preset : startupPresets) {
-                popup.add(preset.asAction(tool));
+                popup.add(preset.createAction(tool));
             }
         }
 
@@ -131,7 +134,7 @@ public class ToolButton extends JToggleButton {
             }
             popup.addSeparator();
         }
-        popup.add(preset.asAction(tool));
+        popup.add(preset.createAction(tool));
         numPresets++;
     }
 

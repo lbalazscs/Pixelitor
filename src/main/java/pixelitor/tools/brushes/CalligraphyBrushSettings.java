@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.util.function.Consumer;
 
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
  * The settings of a {@link CalligraphyBrush}
@@ -37,7 +37,7 @@ public class CalligraphyBrushSettings extends BrushSettings {
     @Override
     protected JPanel createConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
-        angleParam = new AngleParam("Angle", 45, CCW_DEGREES);
+        angleParam = new AngleParam("Angle", 45, INTUITIVE_DEGREES);
         p.add(angleParam.createGUI("angle"));
 
         return p;

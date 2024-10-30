@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,26 +32,28 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * A filter parameter for selecting a boolean value.
+ * A filter parameter for managing a boolean value.
+ * It's represented by a checkbox in the GUI.
  */
 public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean addResetButton;
-    private List<ItemListener> itemListeners;
+    private List<ItemListener> pendingItemListeners;
 
-    public BooleanParam(String name, boolean defaultV) {
-        this(name, defaultV, ALLOW_RANDOMIZE);
+    public BooleanParam(String name, boolean defaultValue) {
+        this(name, defaultValue, ALLOW_RANDOMIZE);
     }
 
-    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy) {
-        this(name, defaultV, randomizePolicy, false);
+    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy) {
+        this(name, defaultValue, randomizePolicy, false);
     }
 
-    public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy, boolean addResetButton) {
+    public BooleanParam(String name, boolean defaultValue, RandomizePolicy randomizePolicy, boolean addResetButton) {
         super(name, randomizePolicy);
-        defaultValue = defaultV;
-        currentValue = defaultV;
+
+        this.defaultValue = defaultValue;
+        this.currentValue = defaultValue;
         this.addResetButton = addResetButton;
     }
 
@@ -61,11 +63,12 @@ public class BooleanParam extends AbstractFilterParam {
         paramGUI = gui;
         guiCreated();
 
-        if (itemListeners != null) {
+        if (pendingItemListeners != null) {
             // The item listeners for the GUI were temporarily stored here.
-            for (ItemListener listener : itemListeners) {
+            for (ItemListener listener : pendingItemListeners) {
                 gui.addItemListener(listener);
             }
+            pendingItemListeners = null; 
         }
 
         return gui;
@@ -77,30 +80,34 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     /**
-     * Sets up the automatic enabling of another {@link FilterSetting}
-     * whenever this one is checked.
+     * Configures another  {@link FilterSetting} to be enabled
+     * when this one is checked.
      */
     public void setupEnableOtherIfChecked(FilterSetting other) {
-        setupOther(other, true);
+        setupDependentOther(other, true);
     }
 
     /**
-     * Sets up the automatic disabling of another {@link FilterSetting}
-     * whenever this one is checked.
+     * Configures another  {@link FilterSetting} to be disabled
+     * when this one is checked.
      */
     public void setupDisableOtherIfChecked(FilterSetting other) {
-        setupOther(other, false);
+        setupDependentOther(other, false);
     }
 
-    private void setupOther(FilterSetting other, boolean enable) {
-        other.setEnabled(enable ? isChecked() : !isChecked());
+    private void setupDependentOther(FilterSetting other, boolean enableWhenChecked) {
+        other.setEnabled(enableWhenChecked
+            ? isChecked()
+            : !isChecked());
 
-        // an item listener because a change listener fires too much, even for
-        // rollover, and an action listener ignores changes caused by randomize
+        // Uses an ItemListener because a ChangeListener fires too much, even for
+        // rollover, and an ActionListener ignores changes caused by randomize
         addItemListener(e -> {
             // isChecked() isn't returning the correct new value yet
             boolean checked = e.getStateChange() == ItemEvent.SELECTED;
-            other.setEnabled(enable ? checked : !checked);
+            other.setEnabled(enableWhenChecked
+                ? checked
+                : !checked);
         });
     }
 
@@ -116,8 +123,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
-        boolean randomValue = Rnd.nextBoolean();
-        setValue(randomValue, true, false);
+        setValue(Rnd.nextBoolean(), true, false);
     }
 
     public boolean isChecked() {
@@ -129,11 +135,13 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     public void setValue(boolean newValue, boolean updateGUI, boolean trigger) {
-        if (currentValue != newValue) {
-            currentValue = newValue;
-            if (trigger && adjustmentListener != null) {
-                adjustmentListener.paramAdjusted();
-            }
+        if (currentValue == newValue) {
+            return;
+        }
+
+        currentValue = newValue;
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
@@ -169,7 +177,6 @@ public class BooleanParam extends AbstractFilterParam {
         setValue(newValue, true, false);
     }
 
-    // actionListener doesn't react to programmatic setSelected calls
     private void addItemListener(ItemListener itemListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
@@ -179,10 +186,10 @@ public class BooleanParam extends AbstractFilterParam {
 
         // If there is no GUI, store the listener so that
         // it can be added to the GUI as soon as the GUI is created.
-        if (itemListeners == null) {
-            itemListeners = new ArrayList<>(2);
+        if (pendingItemListeners == null) {
+            pendingItemListeners = new ArrayList<>(2);
         }
-        itemListeners.add(itemListener);
+        pendingItemListeners.add(itemListener);
     }
 
     @Override
@@ -196,6 +203,9 @@ public class BooleanParam extends AbstractFilterParam {
             getClass().getSimpleName(), getName(), currentValue);
     }
 
+    /**
+     * Represents the possible states of a {@link BooleanParam}.
+     */
     public enum BooleanParamState implements ParamState<BooleanParamState> {
         YES, NO;
 

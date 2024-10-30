@@ -102,10 +102,10 @@ public class GMICFilterCreator {
 
         gbh.addLabelAndControl("Filter Name:", filterNameTF);
         gbh.addLabelAndControl("G'MIC Command:", commandNameTF);
-        gbh.addLabelAndControlVerticalStretch("G'MIC UI:", addScrollBars(gmicDescrTA), 100);
+        gbh.addVerticallyStretchable("G'MIC UI:", addScrollBars(gmicDescrTA), 100);
         gbh.addLabelAndControlNoStretch("Reseed:", reseedCB);
         gbh.addLabelAndControlNoStretch("", regenerateButton);
-        gbh.addLabelAndControlVerticalStretch("Filter:", addScrollBars(filterTA), 200);
+        gbh.addVerticallyStretchable("Filter:", addScrollBars(filterTA), 200);
 
         GUIUtils.showCopyTextToClipboardDialog(p, filterTA::getText, TITLE);
     }

@@ -25,6 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixelitor.Composition;
 import pixelitor.ImageMode;
+import pixelitor.compactions.Outsets;
 import pixelitor.layers.*;
 import pixelitor.utils.*;
 
@@ -261,7 +262,7 @@ public class OpenRaster {
         // therefore the image must be enlarged
         // Also, Krita can export 1x1 pngs for untouched paint layers (without translation)
         layer.forceTranslation(tx, ty);
-        layer.enlargeCanvas(0, 0, 0, 0);
+        layer.enlargeCanvas(Outsets.createZero());
 
         readBasicAttributes(element, layer);
 

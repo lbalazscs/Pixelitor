@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,12 +33,12 @@ import java.util.function.IntPredicate;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
- * Represents an integer value with a minimum, a maximum and a default.
- * Suitable as the model of a JSlider (but usually used as a model of
- * an entire SliderSpinner)
+ * A numeric parameter with minimum, maximum, and default values.
+ * Primarily used as the model for a {@link SliderSpinner}, but it
+ * can also be used as a model of a simple JSlider.
  */
 public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
     private int minValue;
@@ -46,29 +46,31 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double defaultValue;
     private int decimalPlaces = 0;
 
-    // Not stored as an int in order to enable animation interpolations
+    // Stored as double to support animation interpolation
     private double value;
 
     private boolean adjusting;
     private final boolean addResetButton;
-    private final SliderSpinner.TextPosition textPosition;
+    private final SliderSpinner.LabelPosition labelPosition;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
-    private boolean adjustMaxAccordingToImage = false;
-    private double maxToImageSizeRatio;
+
+    // Image-size dependent range adjustment
+    private boolean adjustRangeToCanvasSize = false;
+    private double maxToCanvasSizeRatio;
 
     public RangeParam(String name, int min, double def, int max) {
         this(name, min, def, max, true, BORDER);
     }
 
     public RangeParam(String name, int min, double def, int max, boolean addResetButton,
-                      SliderSpinner.TextPosition position) {
+                      SliderSpinner.LabelPosition position) {
         this(name, min, def, max, addResetButton, position, ALLOW_RANDOMIZE);
     }
 
     public RangeParam(String name, int min, double def, int max, boolean addResetButton,
-                      SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+                      SliderSpinner.LabelPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         minValue = min;
@@ -78,25 +80,23 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         assert checkInvariants();
 
         this.addResetButton = addResetButton;
-        textPosition = position;
+        labelPosition = position;
     }
 
     @Override
     public JComponent createGUI() {
-        var sliderSpinner = new SliderSpinner(this, textPosition, addResetButton);
+        var sliderSpinner = new SliderSpinner(this, labelPosition, addResetButton);
         paramGUI = sliderSpinner;
         guiCreated();
 
-        if (action != null) {
-            return new ParamGUIWithAction(sliderSpinner, action);
-        }
-
-        return sliderSpinner;
+        return action == null
+            ? sliderSpinner
+            : new ParamGUIWithAction(sliderSpinner, action);
     }
 
     /**
      * Sets up the automatic enabling of another {@link FilterSetting}
-     * when the value of this one is not zero.
+     * when this parameter's value is non-zero.
      * Typically used when this is a randomness slider, and the other
      * is a "reseed randomness" button.
      */
@@ -106,6 +106,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             other.setEnabled(getValue() != 0));
     }
 
+    /**
+     * Sets up the automatic disabling of another {@link FilterSetting}
+     * when this parameter's value matches a condition.
+     */
     public void setupDisableOtherIf(FilterSetting other, IntPredicate condition) {
         other.setEnabled(true);
         addChangeListener(e ->
@@ -113,30 +117,18 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * Makes sure that this {@link RangeParam} always has a higher
-     * or equal value than the given other {@link RangeParam}
+     * Ensures that this {@link RangeParam}'s value stays
+     * greater than or equal to another {@link RangeParam}'s value.
      */
     public void ensureHigherValueThan(RangeParam other) {
         // if the value is not higher, then make it equal
         linkWith(other, () -> other.getValue() > getValue());
     }
 
-    public int getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(int dp) {
-        decimalPlaces = dp;
-    }
-
-    public RangeParam withDecimalPlaces(int dp) {
-        setDecimalPlaces(dp);
-        return this;
-    }
-
     /**
-     * Synchronizes the value of this object with the value of another
-     * {@link RangeParam} if the given condition evaluates to true.
+     * Links this parameter's value with another {@link RangeParam}
+     * based on a condition. When the condition is true,
+     * the parameters will synchronize their values.
      */
     public void linkWith(RangeParam other, BooleanSupplier condition) {
         addChangeListener(e -> {
@@ -152,14 +144,29 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * Synchronizes the value of this object with the value of another
-     * {@link RangeParam} so that there is a constant multiplier between the values.
+     * Links this parameter's value with another {@link RangeParam}
+     * using a constant multiplier. Changes to either parameter will
+     * update the other maintaining the multiplier relationship.
      */
     public void scaledLinkWith(RangeParam other, double multiplier) {
         addChangeListener(e -> other.setValueNoTrigger(
             getValueAsDouble() * multiplier));
         other.addChangeListener(e -> setValueNoTrigger(
             other.getValueAsDouble() / multiplier));
+    }
+
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(int dp) {
+        assert dp >= 0 && dp <= 2 : "dp = " + dp;
+        decimalPlaces = dp;
+    }
+
+    public RangeParam withDecimalPlaces(int dp) {
+        setDecimalPlaces(dp);
+        return this;
     }
 
     @Override
@@ -363,40 +370,44 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
+    /**
+     * Updates the parameter's range based on the size
+     * of the canvas if range adjustment is enabled.
+     */
     @Override
-    public void updateOptions(Filterable layer, boolean changeValue) {
-        if (adjustMaxAccordingToImage) {
-            Dimension size = layer.getComp().getCanvas().getSize();
-            double defaultToMaxRatio = defaultValue / maxValue;
-            maxValue = (int) (maxToImageSizeRatio * Math.max(size.width, size.height));
-            if (maxValue <= minValue) { // can happen with very small images
-                maxValue = minValue + 1;
-            }
-
-            // make sure that the tic/label for max value is painted, see issue #91
-            maxValue += (4 - (maxValue - minValue) % 4);
-
-            changeDefaultValue((int) (defaultToMaxRatio * maxValue));
-            if (changeValue) {
-                value = defaultValue;
-            }
+    public void adaptToContext(Filterable layer, boolean changeValue) {
+        if (!adjustRangeToCanvasSize) {
+            return;
         }
-    }
+        Dimension size = layer.getComp().getCanvas().getSize();
+        double defaultToMaxRatio = defaultValue / maxValue;
 
-    public void changeDefaultValue(double newDefault) {
-        defaultValue = newDefault;
-        if (defaultValue > maxValue) {
-            defaultValue = maxValue;
+        // The maximum value is calculated proportionally to the
+        // largest dimension of the canvas while preserving
+        // the ratio between default and maximum values.
+        maxValue = (int) (maxToCanvasSizeRatio * Math.max(size.width, size.height));
+        if (maxValue <= minValue) { // can happen with very small images
+            maxValue = minValue + 1;
         }
-        if (defaultValue < minValue) {
-            defaultValue = minValue;
+
+        // make sure that the tic/label for max value is painted, see issue #91
+        maxValue += (4 - (maxValue - minValue) % 4);
+
+        changeDefaultValue((int) (defaultToMaxRatio * maxValue));
+        if (changeValue) {
+            // resets the current value to the new default
+            value = defaultValue;
         }
     }
 
     public RangeParam withAdjustedRange(double ratio) {
-        maxToImageSizeRatio = ratio;
-        adjustMaxAccordingToImage = true;
+        maxToCanvasSizeRatio = ratio;
+        adjustRangeToCanvasSize = true;
         return this;
+    }
+
+    public void changeDefaultValue(double newDefault) {
+        defaultValue = Math.clamp(newDefault, minValue, maxValue);
     }
 
     @Override
@@ -474,7 +485,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         private int max;
         private boolean addResetButton = true;
         private int decimalPlaces = 0;
-        private SliderSpinner.TextPosition textPosition = BORDER;
+        private SliderSpinner.LabelPosition labelPosition = BORDER;
         private RandomizePolicy randomizePolicy = ALLOW_RANDOMIZE;
 
         public Builder(String name) {
@@ -506,8 +517,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             return this;
         }
 
-        public Builder textPosition(SliderSpinner.TextPosition textPosition) {
-            this.textPosition = textPosition;
+        public Builder textPosition(SliderSpinner.LabelPosition labelPosition) {
+            this.labelPosition = labelPosition;
             return this;
         }
 
@@ -518,12 +529,16 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         public RangeParam build() {
             RangeParam rp = new RangeParam(name, min, def, max,
-                addResetButton, textPosition, randomizePolicy);
+                addResetButton, labelPosition, randomizePolicy);
             rp.setDecimalPlaces(decimalPlaces);
             return rp;
         }
     }
 
+    /**
+     * The state of a {@link RangeParam} (with double precision) that
+     * can be saved, restored, and interpolated.
+     */
     public static class RangeParamState implements ParamState<RangeParamState> {
         @Serial
         private static final long serialVersionUID = 1L;

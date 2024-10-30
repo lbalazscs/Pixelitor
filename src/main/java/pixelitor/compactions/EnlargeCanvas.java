@@ -27,68 +27,35 @@ import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
-import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 
 /**
- * Enlarges the canvas for all layers of a composition. It's the opposite of cropping:
- * it adds empty space around a layer or makes the hidden part of the layer visible.
+ * Enlarges the canvas for all layers of a composition
+ * by adding empty space around the existing content
+ * or by revealing previously hidden parts of layers.
+ * Conceptually it's the opposite of cropping.
  */
 public class EnlargeCanvas extends SimpleCompAction {
     private static final String NAME = "Enlarge Canvas";
-    private int north;
-    private int east;
-    private int south;
-    private int west;
-    private int newCanvasWidth;
-    private int newCanvasHeight;
+
+    private final Outsets enlargement;
+    private Dimension newCanvasSize;
 
     public EnlargeCanvas(int north, int east, int south, int west) {
+        this(new Outsets(north, west, south, east));
+    }
+
+    public EnlargeCanvas(Outsets outsets) {
         super(NAME, true);
 
-        this.north = north;
-        this.east = east;
-        this.south = south;
-        this.west = west;
-    }
-
-    public void ensureFitsContentOf(ContentLayer contentLayer) {
-        Rectangle contentBounds = contentLayer.getContentBounds();
-        if (contentBounds == null) {
-            // can happen for gradient layers and for uninitialized shape layers
-            return;
-        }
-
-        Canvas canvas = contentLayer.getComp().getCanvas();
-
-        if (contentBounds.x < -west) {
-            west = -contentBounds.x;
-        }
-
-        if (contentBounds.y < -north) {
-            north = -contentBounds.y;
-        }
-
-        int contentMaxX = contentBounds.x + contentBounds.width;
-        if (contentMaxX > canvas.getWidth() + east) {
-            east = contentMaxX - canvas.getWidth();
-        }
-
-        int contentMaxY = contentBounds.y + contentBounds.height;
-        if (contentMaxY > canvas.getHeight() + south) {
-            south = contentMaxY - canvas.getHeight();
-        }
-    }
-
-    public boolean doesNothing() {
-        return north == 0 && east == 0 && south == 0 && west == 0;
+        this.enlargement = outsets;
     }
 
     @Override
-    protected void resizeNewCanvas(Canvas newCanvas, View view) {
-        newCanvasWidth = newCanvas.getWidth() + east + west;
-        newCanvasHeight = newCanvas.getHeight() + north + south;
-        newCanvas.resize(newCanvasWidth, newCanvasHeight, view, false);
+    protected void updateCanvasSize(Canvas canvas, View view) {
+        enlargement.resizeCanvas(canvas, view);
+        newCanvasSize = canvas.getSize();
     }
 
     @Override
@@ -98,37 +65,40 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     @Override
     protected void transform(ContentLayer contentLayer) {
-        contentLayer.enlargeCanvas(north, east, south, west);
+        contentLayer.enlargeCanvas(enlargement);
     }
 
     @Override
     protected AffineTransform createCanvasTransform(Canvas canvas) {
-        return AffineTransform.getTranslateInstance(west, north);
+        return AffineTransform.getTranslateInstance(enlargement.left, enlargement.top);
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides orig, View view, Canvas oldCanvas) {
-        return orig.copyForEnlargedCanvas(north, east, south, west, view, oldCanvas);
+    protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
+        return srcGuides.copyForEnlargedCanvas(enlargement.top, enlargement.right, enlargement.bottom, enlargement.left, view, srcCanvas);
     }
 
     @Override
     protected String getStatusBarMessage() {
         return "The canvas was enlarged to "
-            + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
+            + newCanvasSize.width + " x " + newCanvasSize.height + " pixels.";
     }
 
-    public static Action getAction(String name) {
+    /**
+     * Creates an action that shows the canvas enlargement dialog.
+     */
+    public static Action createDialogAction(String name) {
         return new OpenViewEnabledAction(name + "...",
             EnlargeCanvas::showInDialog);
     }
 
     private static void showInDialog(Composition comp) {
-        var p = new EnlargeCanvasPanel();
+        EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
         new DialogBuilder()
             .title(NAME)
-            .menuBar(new DialogMenuBar(p))
-            .content(p)
-            .okAction(() -> p.getCompAction(comp.getCanvas()).process(comp))
+            .menuBar(new DialogMenuBar(panel))
+            .content(panel)
+            .okAction(() -> panel.getCompAction(comp.getCanvas()).process(comp))
             .show();
     }
 }

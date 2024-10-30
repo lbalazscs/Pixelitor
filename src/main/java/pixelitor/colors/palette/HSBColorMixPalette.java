@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ import static pixelitor.colors.FgBgColors.getFGColor;
 public class HSBColorMixPalette extends Palette {
     // static palette-specific variables so that they
     // are remembered between dialog sessions
-    private static int lastRows = 7;
-    private static int lastCols = 10;
+    private static int lastRowCount = 7;
+    private static int lastColumnCount = 10;
 
     private final boolean startWithFg;
 
@@ -45,7 +45,7 @@ public class HSBColorMixPalette extends Palette {
     private static final float MAX_BRI_DEVIATION = 0.5f;
 
     public HSBColorMixPalette(boolean startWithFg) {
-        super(lastRows, lastCols);
+        super(lastRowCount, lastColumnCount);
         this.startWithFg = startWithFg;
 
         Color colorA, colorB;
@@ -81,40 +81,40 @@ public class HSBColorMixPalette extends Palette {
     }
 
     @Override
-    public void configChanged() {
+    public void onConfigChanged() {
         float configSat = ((HueSatPaletteConfig) config).getSaturation();
         extraSat = configSat - averageSat;
     }
 
     @Override
     public void addButtons(PalettePanel panel) {
-        for (int y = 0; y < numRows; y++) {
+        for (int row = 0; row < rowCount; row++) {
             float briStep = calcBriStep();
-            for (int x = 0; x < numCols; x++) {
-                Color c;
-                if (numRows == 1) {
-                    float mixFactor = calcMixFactor(x);
+            for (int col = 0; col < columnCount; col++) {
+                Color color;
+                if (rowCount == 1) {
+                    float mixFactor = calcMixFactor(col);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
                     float b = lerp(mixFactor, briA, briB);
-                    c = new Color(Color.HSBtoRGB(h, s, b));
+                    color = new Color(Color.HSBtoRGB(h, s, b));
                 } else {
-                    float mixFactor = calcMixFactor(x);
+                    float mixFactor = calcMixFactor(col);
                     float h = calcHue(mixFactor);
                     float s = calcSat(mixFactor);
                     float b = lerp(mixFactor, briA, briB);
 
                     float startBri = b - MAX_BRI_DEVIATION;
-                    b = startBri + y * briStep;
+                    b = startBri + row * briStep;
                     if (b > 1.0f) {
                         b = 1.0f;
                     } else if (b < 0.0f) {
                         b = 0.0f;
                     }
 
-                    c = new Color(Color.HSBtoRGB(h, s, b));
+                    color = new Color(Color.HSBtoRGB(h, s, b));
                 }
-                panel.addButton(x, y, c);
+                panel.addButton(col, row, color);
             }
         }
     }
@@ -122,11 +122,11 @@ public class HSBColorMixPalette extends Palette {
     private float calcBriStep() {
         // the total bri range (2 * MAX_BRI_DEVIATION) is
         // divided into numRows - 1 equal parts
-        return 2 * MAX_BRI_DEVIATION / (numRows - 1);
+        return 2 * MAX_BRI_DEVIATION / (rowCount - 1);
     }
 
-    private float calcMixFactor(int x) {
-        return (x * (numCols + 1) / (float) numCols) / numCols;
+    private float calcMixFactor(int col) {
+        return (col * (columnCount + 1) / (float) columnCount) / columnCount;
     }
 
     private float calcSat(float mixFactor) {
@@ -141,8 +141,8 @@ public class HSBColorMixPalette extends Palette {
     }
 
     private float calcHue(float mixFactor) {
-        float hueShift = ((HueSatPaletteConfig) config).getHueShift();
-        float h = hueShift + Colors.lerpHue(mixFactor, hueA, hueB);
+        float hueOffset = ((HueSatPaletteConfig) config).getHueOffset();
+        float h = hueOffset + Colors.lerpHue(mixFactor, hueA, hueB);
         if (h > 1.0f) {
             h = h - 1.0f;
         }
@@ -150,10 +150,10 @@ public class HSBColorMixPalette extends Palette {
     }
 
     @Override
-    public void setSize(int numRows, int numCols) {
-        super.setSize(numRows, numCols);
-        lastCols = numCols;
-        lastRows = numRows;
+    public void setDimensions(int rows, int columns) {
+        super.setDimensions(rows, columns);
+        lastColumnCount = columns;
+        lastRowCount = rows;
     }
 
     @Override

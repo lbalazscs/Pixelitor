@@ -41,43 +41,45 @@ import static pixelitor.utils.Threads.onPool;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * A resizing action on all layers of a {@link Composition}.
+ * Resizes all layers of a {@link Composition} to the given dimensions.
+ * It can either stretch the content to exactly match the target
+ * dimensions or maintain the aspect ratio while fitting within them.
  */
 public class Resize implements CompAction {
     private final int targetWidth;
     private final int targetHeight;
-
-    // if true, resizes an image so that the proportions
-    // are kept and the result fits into the given dimensions
-    private final boolean resizeInBox;
+    private final boolean preserveAspectRatio;
 
     public Resize(int targetWidth, int targetHeight) {
         this(targetWidth, targetHeight, false);
     }
 
-    public Resize(int targetWidth, int targetHeight, boolean resizeInBox) {
+    public Resize(int targetWidth, int targetHeight, boolean preserveAspectRatio) {
+        assert targetWidth > 0 : "targetWidth = " + targetWidth;
+        assert targetHeight > 0 : "targetHeight = " + targetHeight;
+
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
-        this.resizeInBox = resizeInBox;
+        this.preserveAspectRatio = preserveAspectRatio;
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition oldComp) {
-        Canvas oldCanvas = oldComp.getCanvas();
-        if (oldCanvas.hasImSize(targetWidth, targetHeight)) {
-            // nothing to do
-            return CompletableFuture.completedFuture(oldComp);
+    public CompletableFuture<Composition> process(Composition srcComp) {
+        Canvas srcCanvas = srcComp.getCanvas();
+        if (srcCanvas.hasImSize(targetWidth, targetHeight)) {
+            // no resize needed
+            return CompletableFuture.completedFuture(srcComp);
         }
 
-        var targetSize = calcTargetSize(oldCanvas);
+        var targetSize = calcTargetSize(srcCanvas);
 
         // The resizing runs outside the EDT to allow the progress bar animation
         // to update, and to enable the parallel resizing of multiple layers.
         var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
-            .supplyAsync(() -> oldComp.copy(CopyType.UNDO, true), onPool)
-            .thenCompose(newComp -> resizeLayers(newComp, targetSize))
-            .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler), onEDT)
+            .supplyAsync(() -> srcComp.copy(CopyType.UNDO, true), onPool)
+            .thenCompose(newComp -> resizeLayersInParallel(newComp, targetSize))
+            .thenApplyAsync(newComp -> afterResizeActions(srcComp, newComp, targetSize, progressHandler), onEDT)
             .handle((newComp, ex) -> {
                 if (ex != null) {
                     Messages.showExceptionOnEDT(ex);
@@ -86,44 +88,40 @@ public class Resize implements CompAction {
             });
     }
 
-    private Dimension calcTargetSize(Canvas oldCanvas) {
-        int canvasCurrHeight = oldCanvas.getWidth();
-        int canvasCurrWidth = oldCanvas.getHeight();
-
-        // it's important to use local copies of the final global
-        // variables, otherwise batch resize in box gets different
-        // values for each input image, see issue #74
-        int canvasTargetWidth = targetWidth;
-        int canvasTargetHeight = targetHeight;
-
-        if (resizeInBox) {
-            double heightScale = canvasTargetHeight / (double) canvasCurrHeight;
-            double widthScale = canvasTargetWidth / (double) canvasCurrWidth;
-            double scale = Math.min(heightScale, widthScale);
-
-            canvasTargetWidth = (int) (scale * canvasCurrWidth);
-            canvasTargetHeight = (int) (scale * canvasCurrHeight);
+    private Dimension calcTargetSize(Canvas srcCanvas) {
+        if (!preserveAspectRatio) {
+            return new Dimension(targetWidth, targetHeight);
         }
-        return new Dimension(canvasTargetWidth, canvasTargetHeight);
+
+        int srcWidth = srcCanvas.getWidth();
+        int srcHeight = srcCanvas.getHeight();
+
+        double heightScale = targetHeight / (double) srcHeight;
+        double widthScale = targetWidth / (double) srcWidth;
+        double scale = Math.min(heightScale, widthScale);
+
+        return new Dimension(
+            (int) (scale * srcWidth),
+            (int) (scale * srcHeight)
+        );
     }
 
-    private static Composition afterResizeActions(Composition oldComp,
+    private static Composition afterResizeActions(Composition srcComp,
                                                   Composition newComp,
                                                   Dimension newCanvasSize,
                                                   ProgressHandler progressHandler) {
         assert calledOnEDT() : threadInfo();
 
-        View view = oldComp.getView();
+        View view = srcComp.getView();
         assert view != null;
 
         Canvas newCanvas = newComp.getCanvas();
         var canvasTransform = newCanvas.createImTransformToSize(newCanvasSize);
         newComp.imCoordsChanged(canvasTransform, false, view);
-
         newCanvas.resize(newCanvasSize.width, newCanvasSize.height, view, false);
 
         History.add(new CompositionReplacedEdit("Resize",
-            view, oldComp, newComp, canvasTransform, false));
+            view, srcComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
 
         // The view was active when the resizing started, but since the
@@ -132,11 +130,11 @@ public class Resize implements CompAction {
             SelectionActions.update(newComp);
         }
 
-        Guides oldGuides = oldComp.getGuides();
-        if (oldGuides != null) {
+        Guides srcGuides = srcComp.getGuides();
+        if (srcGuides != null) {
             // the guides don't need transforming,
             // just a correct canvas size
-            Guides newGuides = oldGuides.copyForNewComp(view);
+            Guides newGuides = srcGuides.copyForNewComp(view);
             newComp.setGuides(newGuides);
         }
 
@@ -155,12 +153,12 @@ public class Resize implements CompAction {
         return newComp;
     }
 
-    private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {
+    private static CompletableFuture<Composition> resizeLayersInParallel(Composition comp, Dimension newSize) {
         // This could be called on the EDT or on another thread. The layers
         // themselves are resized in parallel using the thread pool's threads.
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<CompletableFuture<Void>> layerResizeFutures = new ArrayList<>();
         comp.forEachNestedLayerAndMask(layer ->
-            futures.add(layer.resize(newSize)));
-        return Utils.allOf(futures).thenApply(v -> comp);
+            layerResizeFutures.add(layer.resize(newSize)));
+        return Utils.allOf(layerResizeFutures).thenApply(v -> comp);
     }
 }

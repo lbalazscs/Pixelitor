@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,43 +18,46 @@
 package pixelitor.colors.palette;
 
 /**
- * The abstract superclass for a number of classes
- * that generate colors for a 2D color palette
+ * Base class for color palette generators.
+ * A {@link Palette} is the data model for a {@link PalettePanel}.
  */
 public abstract class Palette {
-    protected int numRows;
-    protected int numCols;
+    protected int rowCount;
+    protected int columnCount;
     protected PaletteConfig config;
 
-    protected Palette(int numRows, int numCols) {
-        setSize(numRows, numCols);
+    protected Palette(int rowCount, int columnCount) {
+        setDimensions(rowCount, columnCount);
     }
 
+    /**
+     * Populates the given panel with color swatches arranged in a grid.
+     */
     public abstract void addButtons(PalettePanel panel);
 
-    public void configChanged() {
+    public void onConfigChanged() {
     }
 
     public PaletteConfig getConfig() {
         return config;
     }
 
-    public void setSize(int numRows, int numCols) {
-        this.numCols = numCols;
-        this.numRows = numRows;
+    public void setDimensions(int rows, int columns) {
+        this.columnCount = columns;
+        this.rowCount = rows;
     }
 
-    public int getNumCols() {
-        return numCols;
+    public int getColumnCount() {
+        return columnCount;
     }
 
-    public int getNumRows() {
-        return numRows;
+    public int getRowCount() {
+        return rowCount;
     }
 
     public abstract String getDialogTitle();
 
-    public String getStatusHelp() {
+    public String getHelpText() {
         return getDialogTitle() + ": enlarge for more colors, "
             + ColorSwatchClickHandler.STANDARD_HTML_HELP;
     }

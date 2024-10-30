@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.DialogMenuOwner;
 import pixelitor.filters.gui.UserPreset;
@@ -303,22 +304,22 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
+    public void enlargeCanvas(Outsets out) {
         BoxAlignment alignment = settings.getAlignment();
         if (alignment == BoxAlignment.PATH) {
             return;
         }
 
         int newTx = getTx() + switch (alignment.getHorizontal()) {
-            case LEFT -> west;
-            case CENTER -> (west - east) / 2;
-            case RIGHT -> -east;
+            case LEFT -> out.left;
+            case CENTER -> (out.left - out.right) / 2;
+            case RIGHT -> -out.right;
         };
 
         int newTy = getTy() + switch (alignment.getVertical()) {
-            case TOP -> north;
-            case CENTER -> (north - south) / 2;
-            case BOTTOM -> -south;
+            case TOP -> out.top;
+            case CENTER -> (out.top - out.bottom) / 2;
+            case BOTTOM -> -out.bottom;
         };
 
         setTranslation(newTx, newTy);
@@ -356,7 +357,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         int eastMargin = (int) (comp.getCanvasWidth() - cropRect.getWidth() - cropRect.getX());
 
         // ...and do a negative enlargement
-        enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);
+        enlargeCanvas(new Outsets(
+            -northMargin, -eastMargin, -southMargin, -westMargin));
     }
 
     @Override

@@ -410,25 +410,25 @@ public class DialogBuilder {
     }
 
     private static class BuiltDialog extends JDialog {
-        private final boolean isModal;
+        private final boolean modal;
         private final boolean rootDialog; // true if the owner is the main window
 
-        public BuiltDialog(Frame owner, boolean isModal) {
+        public BuiltDialog(Frame owner, boolean modal) {
             super(owner);
-            this.isModal = isModal;
+            this.modal = modal;
             rootDialog = true; // the main window is the only frame
         }
 
-        public BuiltDialog(Window owner, boolean isModal) {
+        public BuiltDialog(Window owner, boolean modal) {
             super(owner);
-            this.isModal = isModal;
+            this.modal = modal;
             rootDialog = false;
         }
 
         @Override
         public void setVisible(boolean b) {
-            assert isModal == isModal();
-            if (isModal) {
+            assert modal == isModal();
+            if (modal) {
                 if (b) {
                     GlobalEvents.dialogOpened(getTitle());
                     assert !rootDialog || GlobalEvents.getModalDialogCount() == 1;

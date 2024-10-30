@@ -53,34 +53,34 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition oldComp) {
-        if (oldComp.containsLayerWithClass(SmartObject.class)) {
+    public CompletableFuture<Composition> process(Composition srcComp) {
+        if (srcComp.containsLayerWithClass(SmartObject.class)) {
             Messages.showSmartObjectUnsupportedWarning(getText());
-            return CompletableFuture.completedFuture(oldComp);
+            return CompletableFuture.completedFuture(srcComp);
         }
 
-        View view = oldComp.getView();
-        Composition newComp = oldComp.copy(CopyType.UNDO, true);
+        View view = srcComp.getView();
+        Composition newComp = srcComp.copy(CopyType.UNDO, true);
         Canvas newCanvas = newComp.getCanvas();
-        Canvas oldCanvas = oldComp.getCanvas();
+        Canvas srcCanvas = srcComp.getCanvas();
 
-        var canvasAT = createCanvasTransform(newCanvas);
-        newComp.imCoordsChanged(canvasAT, false, view);
+        var canvasTransform = createCanvasTransform(newCanvas);
+        newComp.imCoordsChanged(canvasTransform, false, view);
 
         newComp.forEachNestedLayerAndMask(this::processLayer);
 
         if (affectsCanvasSize) {
-            resizeNewCanvas(newCanvas, view);
+            updateCanvasSize(newCanvas, view);
         }
 
         History.add(new CompositionReplacedEdit(
-            getEditName(), view, oldComp, newComp, canvasAT, false));
+            getEditName(), view, srcComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
         SelectionActions.update(newComp);
 
-        Guides guides = oldComp.getGuides();
+        Guides guides = srcComp.getGuides();
         if (guides != null) {
-            Guides newGuides = createGuidesCopy(guides, view, oldCanvas);
+            Guides newGuides = createTransformedGuides(guides, view, srcCanvas);
             newComp.setGuides(newGuides);
         }
 
@@ -104,7 +104,7 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
         }
     }
 
-    protected abstract void resizeNewCanvas(Canvas newCanvas, View view);
+    protected abstract void updateCanvasSize(Canvas newCanvas, View view);
 
     protected abstract String getEditName();
 
@@ -119,9 +119,9 @@ public abstract class SimpleCompAction extends OpenViewEnabledAction.Checked imp
      */
     protected abstract AffineTransform createCanvasTransform(Canvas canvas);
 
-    // the oldCanvas is used by "Enlarge Canvas"
-    protected abstract Guides createGuidesCopy(
-        Guides oldGuides, View view, Canvas oldCanvas);
+    // the srcCanvas is used by "Enlarge Canvas"
+    protected abstract Guides createTransformedGuides(
+        Guides srcGuides, View view, Canvas srcCanvas);
 
     protected abstract String getStatusBarMessage();
 }

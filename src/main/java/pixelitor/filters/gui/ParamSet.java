@@ -110,7 +110,7 @@ public class ParamSet implements Debuggable {
     private void addRandomizeAction() {
         var randomizeAction = new FilterButtonModel("Randomize Settings",
             this::randomize,
-            Icons.getDiceIcon(),
+            Icons.getRandomizeIcon(),
             "Randomize the settings for this filter.",
             "randomize");
         actionList.add(randomizeAction);
@@ -119,7 +119,7 @@ public class ParamSet implements Debuggable {
     private void addResetAllAction() {
         var resetAllAction = new FilterButtonModel("Reset All",
             this::reset,
-            Icons.getWestArrowIcon(),
+            Icons.getResetIcon(),
             Resettable.RESET_ALL_TOOLTIP,
             "resetAll");
         actionList.add(resetAllAction);
@@ -145,12 +145,12 @@ public class ParamSet implements Debuggable {
     }
 
     public void randomize() {
-        long before = Filter.runCount;
+        long before = Filter.executionCount;
 
         paramList.forEach(FilterParam::randomize);
 
         // the filter is not supposed to be triggered
-        long after = Filter.runCount;
+        long after = Filter.executionCount;
         assert before == after : "before = " + before + ", after = " + after;
     }
 
@@ -173,7 +173,7 @@ public class ParamSet implements Debuggable {
 
     public void updateOptions(Filterable layer, boolean changeValue) {
         for (FilterParam param : paramList) {
-            param.updateOptions(layer, changeValue);
+            param.adaptToContext(layer, changeValue);
         }
     }
 
@@ -246,7 +246,8 @@ public class ParamSet implements Debuggable {
     }
 
     public void loadUserPreset(UserPreset preset) {
-        long runCountBefore = Filter.runCount;
+        long executionsBefore = Filter.executionCount;
+
         for (FilterParam param : paramList) {
             param.loadStateFrom(preset);
         }
@@ -259,8 +260,8 @@ public class ParamSet implements Debuggable {
         }
 
         // check that the loading didn't trigger the filter
-        assert Filter.runCount == runCountBefore :
-            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
+        assert Filter.executionCount == executionsBefore :
+            "before = " + executionsBefore + ", after = " + Filter.executionCount;
 
         runFilter();
     }

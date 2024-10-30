@@ -22,6 +22,7 @@ import pixelitor.CopyType;
 import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.gui.View;
@@ -1127,7 +1128,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
+    public void enlargeCanvas(Outsets out) {
         throw new UnsupportedOperationException();
     }
 

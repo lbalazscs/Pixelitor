@@ -459,7 +459,7 @@ public class RandomGUITest {
         String filterName = filter.getName();
         log("filter: " + filterName);
 
-        long runCountBefore = Filter.runCount;
+        long executionsBefore = Filter.executionCount;
 
         if (filter instanceof FilterWithGUI guiFilter) {
             guiFilter.randomize();
@@ -500,11 +500,10 @@ public class RandomGUITest {
                 throw e;
             }
         }
-        long runCountAfter = Filter.runCount;
-        if (runCountAfter != runCountBefore + 1) {
+        if (Filter.executionCount != executionsBefore + 1) {
             throw new IllegalStateException(
-                "runCountBefore = " + runCountBefore
-                    + ", runCountAfter = " + runCountAfter);
+                "before = " + executionsBefore
+                    + ", after = " + Filter.executionCount);
         }
     }
 
@@ -514,7 +513,7 @@ public class RandomGUITest {
             return;
         }
 
-        long runCountBefore = Filter.runCount;
+        long executionsBefore = Filter.executionCount;
 
         ParametrizedFilter filter = getRandomTweenFilter();
         String filterName = filter.getName();
@@ -554,11 +553,10 @@ public class RandomGUITest {
 
         dr.endTweening();
 
-        long runCountAfter = Filter.runCount;
-        if (runCountAfter != runCountBefore + 1) {
+        if (Filter.executionCount != executionsBefore + 1) {
             throw new IllegalStateException(
-                "filter = %s, runCountBefore = %d, runCountAfter = %d".formatted(
-                    filterName, runCountBefore, runCountAfter));
+                "filter = %s, before = %d, after = %d".formatted(
+                    filterName, executionsBefore, Filter.executionCount));
         }
     }
 

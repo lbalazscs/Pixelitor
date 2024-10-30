@@ -95,15 +95,15 @@ public class StatusBar extends JPanel {
         private final JLabel msgLabel;
         private final JPanel container;
         private final JProgressBar progressBar;
-        private final boolean isDeterminate;
+        private final boolean determinate;
 
         public StatusBarProgressHandler(JPanel container, String msg, int max) {
             assert calledOnEDT() : threadInfo();
 
             this.container = container;
-            isDeterminate = max > 0;
+            determinate = max > 0;
 
-            if (isDeterminate) {
+            if (determinate) {
                 progressBar = new JProgressBar(0, max);
             } else {
                 progressBar = new JProgressBar(0, 100);
@@ -123,7 +123,7 @@ public class StatusBar extends JPanel {
         @Override
         public void updateProgress(int currentValue) {
             assert calledOnEDT() : threadInfo();
-            assert isDeterminate;
+            assert determinate;
 
             progressBar.setValue(currentValue);
             container.paintImmediately(progressBar.getBounds());
@@ -133,7 +133,7 @@ public class StatusBar extends JPanel {
         public void stopProgress() {
             assert calledOnEDT() : threadInfo();
 
-            if (!isDeterminate) {
+            if (!determinate) {
                 // probably this is not necessary to stop
                 // the indeterminate animation, but can't be bad
                 progressBar.setValue(100);

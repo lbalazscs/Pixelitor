@@ -128,7 +128,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
         fileNameTF = browseFilesSupport.getPathTextField();
         filePanel.add(createValidatedTF(fileNameTF, fileNameValidator));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        gbh.addRow(filePanel);
+        gbh.addFullRow(filePanel);
     }
 
     private void outputTypeChanged() {

@@ -34,18 +34,18 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.X_AXIS;
 
 /**
- * An adjustment panel for customizable convolutions
+ * An adjustment panel for customizable convolution filters.
  */
 public class ConvolveGUI extends FilterGUI {
-    private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
+    private static final int PREFERRED_TEXTFIELD_WIDTH = 70;
 
-    private JTextField[] textFields;
-    private JPanel matrixPanel;
+    private JTextField[] kernelTextFields;
+    private JPanel kernelPanel;
     private JButton normalizeButton;
     private Box presetsBox;
     private final int matrixOrder;
 
-    private Object eventSource;
+    private Object lastEventSource;
 
     public ConvolveGUI(Convolve filter, Filterable layer, boolean reset) {
         super(filter, layer);
@@ -53,23 +53,23 @@ public class ConvolveGUI extends FilterGUI {
 
         matrixOrder = filter.getMatrixOrder();
 
-        initLeftVerticalBox();
-        initPresetBox();
+        initLeftPanel();
+        initPresetPanel();
 
         if (reset) {
-            reset(matrixOrder);
+            resetKernel(matrixOrder);
         } else {
             // use the last values
-            float[] kernelMatrix = filter.getKernelMatrix();
-            if (kernelMatrix == null) {
-                reset(matrixOrder);
+            float[] matrix = filter.getKernelMatrix();
+            if (matrix == null) {
+                resetKernel(matrixOrder);
             } else {
-                setMatrix(kernelMatrix);
+                loadKernel(matrix);
             }
         }
     }
 
-    private static float userInputToFloat(String s) throws NumberFormatException {
+    private static float parseUserInput(String s) throws NumberFormatException {
         String trimmed = s.trim();
         if (trimmed.isEmpty()) {
             return 0.0f;
@@ -92,55 +92,55 @@ public class ConvolveGUI extends FilterGUI {
         return number.floatValue();
     }
 
-    private void initLeftVerticalBox() {
-        Box box = Box.createVerticalBox();
+    private void initLeftPanel() {
+        Box leftPanel = Box.createVerticalBox();
 
-        addTextFieldsPanel(box);
-        addNormalizeButton(box);
-        addRunButton(box);
+        setupKernelPanel(leftPanel);
+        addNormalizeButton(leftPanel);
+        addExecuteButton(leftPanel);
 
-        box.add(Box.createVerticalStrut(20));
+        leftPanel.add(Box.createVerticalStrut(20));
+        leftPanel.setMaximumSize(leftPanel.getPreferredSize());
+        leftPanel.setAlignmentY(TOP_ALIGNMENT);
 
-        box.setMaximumSize(box.getPreferredSize());
-        box.setAlignmentY(TOP_ALIGNMENT);
-
-        add(box);
+        add(leftPanel);
     }
 
-    private void addTextFieldsPanel(Box leftVerticalBox) {
-        matrixPanel = new JPanel(new GridLayout(matrixOrder, matrixOrder));
-        textFields = new JTextField[matrixOrder * matrixOrder];
-        for (int i = 0; i < textFields.length; i++) {
-            textFields[i] = new JTextField();
+    private void setupKernelPanel(Box parentBox) {
+        kernelPanel = new JPanel(new GridLayout(matrixOrder, matrixOrder));
+        kernelTextFields = new JTextField[matrixOrder * matrixOrder];
+        for (int i = 0; i < kernelTextFields.length; i++) {
+            kernelTextFields[i] = new JTextField();
         }
-        for (var textField : textFields) {
-            setupTextField(textField);
+        for (var textField : kernelTextFields) {
+            setupKernelTextField(textField);
         }
-        matrixPanel.setBorder(createTitledBorder("Kernel"));
-        matrixPanel.setAlignmentX(LEFT_ALIGNMENT);
-        leftVerticalBox.add(matrixPanel);
+        kernelPanel.setBorder(createTitledBorder("Kernel"));
+        kernelPanel.setAlignmentX(LEFT_ALIGNMENT);
+        parentBox.add(kernelPanel);
 
-        // this must come after adding the textFieldsP to the box
-        var minimumSize = matrixPanel.getMinimumSize();
-        matrixPanel.setPreferredSize(new Dimension(
-            matrixOrder * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+        // this must come after adding the textFields to the box
+        var minimumSize = kernelPanel.getMinimumSize();
+        kernelPanel.setPreferredSize(new Dimension(
+            matrixOrder * PREFERRED_TEXTFIELD_WIDTH,
+            minimumSize.height));
     }
 
-    private void addNormalizeButton(Box leftVerticalBox) {
+    private void addNormalizeButton(Box parentBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(this::guiChanged);
+        normalizeButton.addActionListener(this::onUserAction);
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
-        leftVerticalBox.add(normalizeButton);
+        parentBox.add(normalizeButton);
     }
 
-    private void addRunButton(Box leftVerticalBox) {
-        JButton runButton = new JButton("Run");
-        runButton.setToolTipText("Run the filter with the current values.");
-        runButton.addActionListener(this::guiChanged);
-        leftVerticalBox.add(runButton);
+    private void addExecuteButton(Box parentBox) {
+        JButton runButton = new JButton("Apply Filter");
+        runButton.setToolTipText("Applies the filter with the current kernel values.");
+        runButton.addActionListener(this::onUserAction);
+        parentBox.add(runButton);
     }
 
-    private void initPresetBox() {
+    private void initPresetPanel() {
         presetsBox = Box.createVerticalBox();
         presetsBox.setBorder(createTitledBorder(DialogMenuBar.PRESETS));
 
@@ -156,34 +156,96 @@ public class ConvolveGUI extends FilterGUI {
 
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
-            setMatrix(Convolve.createRandomKernelMatrix(matrixOrder));
-            guiChanged(e);
+            loadKernel(Convolve.createRandomKernel(matrixOrder));
+            onUserAction(e);
         });
         presetsBox.add(randomizeButton);
 
-        JButton doNothingButton = new JButton("Reset");
-        doNothingButton.addActionListener(e -> {
-            reset(matrixOrder);
-            guiChanged(e);
+        JButton resetButton = new JButton("Reset");
+        resetButton.addActionListener(e -> {
+            resetKernel(matrixOrder);
+            onUserAction(e);
         });
-        presetsBox.add(doNothingButton);
+        presetsBox.add(resetButton);
 
         presetsBox.setMaximumSize(presetsBox.getPreferredSize());
         presetsBox.setAlignmentY(TOP_ALIGNMENT);
         add(presetsBox);
     }
 
-    private void initPreset(String name, float[] kernel) {
+    private void createPresetButton(String name, float[] kernel) {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
-            setMatrix(kernel);
-            guiChanged(e);
+            loadKernel(kernel);
+            onUserAction(e);
         });
         presetsBox.add(button);
     }
 
+    private void init3x3Presets() {
+        createPresetButton("Corner Blur", new float[]{
+            0.25f, 0.0f, 0.25f,
+            0.0f, 0.0f, 0.0f,
+            0.25f, 0.0f, 0.25f});
+
+        createPresetButton("\"Gaussian\" Blur", new float[]{
+            1 / 16.0f, 2 / 16.0f, 1 / 16.0f,
+            2 / 16.0f, 4 / 16.0f, 2 / 16.0f,
+            1 / 16.0f, 2 / 16.0f, 1 / 16.0f});
+
+        createPresetButton("Mean Blur", new float[]{
+            0.1115f, 0.1115f, 0.1115f,
+            0.1115f, 0.1115f, 0.1115f,
+            0.1115f, 0.1115f, 0.1115f});
+
+        createPresetButton("Sharpen", new float[]{
+            0, -1, 0,
+            -1, 5, -1,
+            0, -1, 0});
+
+        createPresetButton("Sharpen 2", new float[]{
+            -1, -1, -1,
+            -1, 9, -1,
+            -1, -1, -1});
+
+        createPresetButton("Edge Detection", new float[]{
+            0, -1, 0,
+            -1, 4, -1,
+            0, -1, 0});
+
+        createPresetButton("Edge Detection 2", new float[]{
+            -1, -1, -1,
+            -1, 8, -1,
+            -1, -1, -1});
+
+        createPresetButton("Horizontal Edge Detection", new float[]{
+            -1, -1, -1,
+            0, 0, 0,
+            1, 1, 1});
+
+        createPresetButton("Vertical Edge Detection", new float[]{
+            -1, 0, 1,
+            -1, 0, 1,
+            -1, 0, 1});
+
+        createPresetButton("Emboss", new float[]{
+            -2, -2, 0,
+            -2, 6, 0,
+            0, 0, 0});
+
+        createPresetButton("Emboss 2", new float[]{
+            -2, 0, 0,
+            0, 0, 0,
+            0, 0, 2});
+
+        createPresetButton("Color Emboss", new float[]{
+            -1, -1, 0,
+            -1, 1, 1,
+            0, 1, 1});
+    }
+
     private void init5x5Presets() {
-        initPreset("Diamond Blur", new float[]{
+        createPresetButton("Diamond Blur", new float[]{
             0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
             0.0f, 0.077f, 0.077f, 0.077f, 0.0f,
             0.077f, 0.077f, 0.077f, 0.077f, 0.077f,
@@ -191,7 +253,7 @@ public class ConvolveGUI extends FilterGUI {
             0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
         });
 
-        initPreset("Motion Blur", new float[]{
+        createPresetButton("Motion Blur", new float[]{
             0.0f, 0.0f, 0.0f, 0.0f, 0.2f,
             0.0f, 0.0f, 0.0f, 0.2f, 0.0f,
             0.0f, 0.0f, 0.2f, 0.0f, 0.0f,
@@ -199,7 +261,7 @@ public class ConvolveGUI extends FilterGUI {
             0.2f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
-        initPreset("Find Horizontal Edges", new float[]{
+        createPresetButton("Find Horizontal Edges", new float[]{
             0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, -2.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
@@ -207,7 +269,7 @@ public class ConvolveGUI extends FilterGUI {
             0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
         });
 
-        initPreset("Find Vertical Edges", new float[]{
+        createPresetButton("Find Vertical Edges", new float[]{
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             -1.0f, -2.0f, 6.0f, -2.0f, -1.0f,
@@ -215,7 +277,7 @@ public class ConvolveGUI extends FilterGUI {
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
-        initPreset("Find Diagonal Edges", new float[]{
+        createPresetButton("Find \\ Edges", new float[]{
             0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
             0.0f, 0.0f, 0.0f, -2.0f, 0.0f,
             0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
@@ -223,7 +285,7 @@ public class ConvolveGUI extends FilterGUI {
             -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
-        initPreset("Find Diagonal Edges 2", new float[]{
+        createPresetButton("Find / Edges", new float[]{
             -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             0.0f, -2.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
@@ -231,7 +293,7 @@ public class ConvolveGUI extends FilterGUI {
             0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
         });
 
-        initPreset("Sharpen", new float[]{
+        createPresetButton("Sharpen", new float[]{
             -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,
             -0.125f, 0.25f, 0.25f, 0.25f, -0.125f,
             -0.125f, 0.25f, 1.0f, 0.25f, -0.125f,
@@ -240,136 +302,75 @@ public class ConvolveGUI extends FilterGUI {
         });
     }
 
-    private void init3x3Presets() {
-        initPreset("Corner Blur", new float[]{
-            0.25f, 0.0f, 0.25f,
-            0.0f, 0.0f, 0.0f,
-            0.25f, 0.0f, 0.25f});
-
-        initPreset("\"Gaussian\" Blur", new float[]{
-            1 / 16.0f, 2 / 16.0f, 1 / 16.0f,
-            2 / 16.0f, 4 / 16.0f, 2 / 16.0f,
-            1 / 16.0f, 2 / 16.0f, 1 / 16.0f});
-
-        initPreset("Mean Blur", new float[]{
-            0.1115f, 0.1115f, 0.1115f,
-            0.1115f, 0.1115f, 0.1115f,
-            0.1115f, 0.1115f, 0.1115f});
-
-        initPreset("Sharpen", new float[]{
-            0, -1, 0,
-            -1, 5, -1,
-            0, -1, 0});
-
-        initPreset("Sharpen 2", new float[]{
-            -1, -1, -1,
-            -1, 9, -1,
-            -1, -1, -1});
-
-        initPreset("Edge Detection", new float[]{
-            0, -1, 0,
-            -1, 4, -1,
-            0, -1, 0});
-
-        initPreset("Edge Detection 2", new float[]{
-            -1, -1, -1,
-            -1, 8, -1,
-            -1, -1, -1});
-
-        initPreset("Horizontal Edge Detection", new float[]{
-            -1, -1, -1,
-            0, 0, 0,
-            1, 1, 1});
-
-        initPreset("Vertical Edge Detection", new float[]{
-            -1, 0, 1,
-            -1, 0, 1,
-            -1, 0, 1});
-
-        initPreset("Emboss", new float[]{
-            -2, -2, 0,
-            -2, 6, 0,
-            0, 0, 0});
-
-        initPreset("Emboss 2", new float[]{
-            -2, 0, 0,
-            0, 0, 0,
-            0, 0, 2});
-
-        initPreset("Color Emboss", new float[]{
-            -1, -1, 0,
-            -1, 1, 1,
-            0, 1, 1});
-    }
-
-    private void reset(int size) {
+    private void resetKernel(int size) {
         float[] defaultValues = new float[size * size];
         defaultValues[defaultValues.length / 2] = 1.0f;
 
-        setMatrix(defaultValues);
+        loadKernel(defaultValues);
     }
 
-    private void setupTextField(JTextField textField) {
-        matrixPanel.add(textField);
-        textField.addActionListener(this::guiChanged);
+    private void setupKernelTextField(JTextField textField) {
+        kernelPanel.add(textField);
+        textField.addActionListener(this::onUserAction);
     }
 
-    private void collectValues() {
+    private void collectKernelValues() {
         float sum = 0;
         float[] values = new float[matrixOrder * matrixOrder];
         for (int i = 0; i < values.length; i++) {
-            String s = textFields[i].getText();
+            String s = kernelTextFields[i].getText();
             try {
-                values[i] = userInputToFloat(s);
+                values[i] = parseUserInput(s);
             } catch (NumberFormatException ex) {
-                Messages.showError("Wrong Number Format", ex.getMessage(), this);
+                Messages.showError("Invalid Input", ex.getMessage(), this);
                 return;
             }
             sum += values[i];
         }
-        enableNormalizeButton(sum);
+        toggleNormalizeButton(sum);
 
-        if (eventSource == normalizeButton && sum != 0.0f) {
+        if (lastEventSource == normalizeButton && sum != 0.0f) {
             for (int i = 0; i < values.length; i++) {
                 values[i] /= sum;
             }
-
-            setMatrix(values);
+            loadKernel(values);
         }
 
-        Convolve convolve = (Convolve) this.filter;
-        convolve.setKernelMatrix(values);
+        ((Convolve) this.filter).setKernelMatrix(values);
     }
 
-    private void guiChanged(ActionEvent e) {
-        eventSource = e.getSource();
+    private void onUserAction(ActionEvent event) {
+        lastEventSource = event.getSource();
         startPreview(false);
     }
 
     @Override
-    public void startPreview(boolean first) {
-        collectValues();
-        super.startPreview(first);
+    public void startPreview(boolean firstPreview) {
+        collectKernelValues();
+        super.startPreview(firstPreview);
     }
 
-    private void setMatrix(float[] values) {
+    private void loadKernel(float[] values) {
         assert values.length == matrixOrder * matrixOrder;
 
         float sum = 0;
-        for (int i = 0; i < textFields.length; i++) {
+        for (int i = 0; i < kernelTextFields.length; i++) {
             String valueAsString = "";
             if (values[i] != 0.0f) {
                 valueAsString = String.format("%.3f", values[i]);
             }
 
-            textFields[i].setText(valueAsString);
+            kernelTextFields[i].setText(valueAsString);
             sum += values[i];
         }
 
-        enableNormalizeButton(sum);
+        toggleNormalizeButton(sum);
     }
 
-    private void enableNormalizeButton(float sum) {
+    /**
+     * Enables or disables the normalize button based on the kernel sum.
+     */
+    private void toggleNormalizeButton(float sum) {
         boolean notZero = sum < -0.003f || sum > 0.003f;
         boolean notOne = sum < 0.997f || sum > 1.003f;
 

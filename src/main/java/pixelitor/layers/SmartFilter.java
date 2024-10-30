@@ -318,8 +318,8 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     @Override
-    public void startPreview(Filter filter, boolean first, Component busyCursorParent) {
-        if (!first) {
+    public void startPreview(Filter filter, boolean firstPreview, Component busyCursorTarget) {
+        if (!firstPreview) {
             invalidateAll();
         }
         if (cachedImage != null) {
@@ -329,7 +329,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 //        if (!first) { // prevent the filter from running twice
             GUIUtils.runWithBusyCursor(() ->
                     createCachedImage(imageSource.getImage()),
-                busyCursorParent);
+                busyCursorTarget);
             holder.update();
 //        }
     }

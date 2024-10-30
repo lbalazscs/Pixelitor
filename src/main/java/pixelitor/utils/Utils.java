@@ -33,7 +33,6 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.FileSystems;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -50,7 +49,6 @@ import static java.lang.String.format;
  * Utility class with static methods
  */
 public final class Utils {
-    public static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
     private static final String ENCODED_NEWLINE = "#NL#";
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
 

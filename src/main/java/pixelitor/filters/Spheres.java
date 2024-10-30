@@ -30,7 +30,7 @@ import java.util.Random;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
  * Fills the image with 3D-like circles
@@ -71,7 +71,7 @@ public class Spheres extends ParametrizedFilter {
     private final AngleParam highlightAngleSelector = new AngleParam(
         "Light Direction (Azimuth)", 0);
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
-        "Highlight Elevation", 45, CCW_DEGREES);
+        "Highlight Elevation", 45, INTUITIVE_DEGREES);
 
     private final RangeParam opacity = new RangeParam(GUIText.OPACITY, 0, 100, 100);
 

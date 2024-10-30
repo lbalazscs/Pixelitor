@@ -47,7 +47,7 @@ import java.util.ResourceBundle;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.tools.CloneTool.State.CLONING;
 import static pixelitor.tools.CloneTool.State.NO_SOURCE;
 import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;

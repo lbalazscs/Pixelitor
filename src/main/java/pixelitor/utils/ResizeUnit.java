@@ -14,16 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.filters.gui;
 
-/**
- * A listener for events in the GUI of a {@link FilterSetting}
- */
-public interface ParamAdjustmentListener {
-    /**
-     * Called when a parameter was adjusted in the GUI.
-     * Implementations should handle any necessary updates,
-     * such as recalculating a filter preview.
-     */
-    void paramAdjusted();
+package pixelitor.utils;
+
+public enum ResizeUnit {
+    PIXELS("pixels"),
+    PERCENT("percent");
+
+    private final String displayName;
+
+    ResizeUnit(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }

@@ -29,7 +29,7 @@ import java.io.Serial;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.gui.GUIText.ZOOM;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
 
 /**
  * Renders caustics based on the JHLabs CausticsFilter

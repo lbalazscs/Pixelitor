@@ -685,7 +685,7 @@ public class MenuBar extends JMenuBar {
 
         imageMenu.addSeparator();
 
-        imageMenu.add(EnlargeCanvas.getAction(texts.getString("enlarge_canvas")));
+        imageMenu.add(EnlargeCanvas.createDialogAction(texts.getString("enlarge_canvas")));
 
         var fitCanvasToLayers = new OpenViewEnabledAction(
             texts.getString("fit_canvas_to_layers"),

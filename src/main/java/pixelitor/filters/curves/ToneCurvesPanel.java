@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,23 +30,27 @@ import java.awt.geom.Point2D;
 import java.util.EventListener;
 
 /**
- * ToneCurvesFilter Panel container for [RGB,R,G,B] curves
- * responsible for handling all user input and repainting curves
+ * Panel for displaying and interacting with tone curves for [RGB, R ,G, B] channels.
+ * It's responsible for handling all user input and for the repainting of the curves.
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesPanel extends JPanel implements MouseMotionListener, MouseListener {
+    // The ToneCurves instance this panel represents
     public final ToneCurves toneCurves;
-    private int mouseKnotIndex = -1;
-    private int mouseKnotIndexDeleted = -1;
+
+    private int mouseKnotIndex = -1; // the index of the dragged knot
+    private int deletedKnotIndex = -1; // the index of the recently deleted knot
     private final EventListenerList actionListenerList = new EventListenerList();
-    private final Dimension size;
+    private final Dimension panelSize;
 
     public ToneCurvesPanel(ToneCurves toneCurves) {
         this.toneCurves = toneCurves;
+
         //size: grid(255px) + curvePadding(2*10px) + scales(20px)
-        size = new Dimension(295, 295);
-        setPreferredSize(size);
+        panelSize = new Dimension(295, 295);
+
+        setPreferredSize(panelSize);
         addMouseMotionListener(this);
         addMouseListener(this);
     }
@@ -70,17 +74,18 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     public void paint(Graphics g) {
         super.paint(g);
 
-        toneCurves.setSize(size.width, size.height);
+        toneCurves.setSize(panelSize.width, panelSize.height);
         toneCurves.draw((Graphics2D) g);
     }
 
     public void stateChanged() {
         repaint();
 
+        // notifies the actions listeners that the curve state has changed
         fireActionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
     }
 
-    private Point2D.Float getNormalizedMousePos(MouseEvent e) {
+    private Point2D.Float normalizeMousePos(MouseEvent e) {
         var mousePos = new Point2D.Float(e.getX(), e.getY());
         toneCurves.normalizePoint(mousePos);
         return mousePos;
@@ -96,29 +101,32 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         stateChanged();
     }
 
-    public void reset() {
+    public void resetAllCurves() {
         toneCurves.reset();
         stateChanged();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (mouseKnotIndex >= 0) {
-            Point2D.Float mousePos = getNormalizedMousePos(e);
-            if (toneCurves.getActiveCurve().isDraggedOff(mouseKnotIndex, mousePos)) {
+        if (mouseKnotIndex >= 0) {  // we are dragging a knot
+            Point2D.Float mousePos = normalizeMousePos(e);
+            if (toneCurves.getActiveCurve().isDraggedOutOfRange(mouseKnotIndex, mousePos)) {
+                // delete the dragged knot
                 toneCurves.getActiveCurve().deleteKnot(mouseKnotIndex);
-                mouseKnotIndexDeleted = mouseKnotIndex;
+                deletedKnotIndex = mouseKnotIndex;
                 mouseKnotIndex = -1;
             } else {
+                // move the dragged knot
                 toneCurves.getActiveCurve().setKnotPosition(mouseKnotIndex, mousePos);
             }
 
             stateChanged();
-        } else if (mouseKnotIndexDeleted >= 0) {
-            Point2D.Float mousePos = getNormalizedMousePos(e);
-            if (toneCurves.getActiveCurve().isDraggedIn(mouseKnotIndexDeleted, mousePos)) {
+        } else if (deletedKnotIndex >= 0) { // we used to drag a now deleted knot
+            Point2D.Float mousePos = normalizeMousePos(e);
+            if (toneCurves.getActiveCurve().isDraggedIn(deletedKnotIndex, mousePos)) {
+                // add the recently deleted knot back
                 mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, false);
-                mouseKnotIndexDeleted = -1;
+                deletedKnotIndex = -1;
                 stateChanged();
             }
         }
@@ -126,7 +134,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Point2D.Float mousePos = getNormalizedMousePos(e);
+        Point2D.Float mousePos = normalizeMousePos(e);
         ToneCurve activeCurve = toneCurves.getActiveCurve();
         if (activeCurve.isOverKnot(mousePos)) {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -143,11 +151,13 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
             return;
         }
 
-        Point2D.Float mousePos = getNormalizedMousePos(e);
+        // pressing the mouse either selects an existing know for dragging...
+        Point2D.Float mousePos = normalizeMousePos(e);
         mouseKnotIndex = toneCurves.getActiveCurve().getKnotIndexAt(mousePos);
 
         if (mouseKnotIndex < 0) {
             e.consume();
+            // ...or adds a new knot
             mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, true);
             stateChanged();
         }
@@ -165,18 +175,19 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        // nothing
+        // do nothing
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        // nothing
+        // do nothing
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2 && !e.isConsumed() && mouseKnotIndex >= 0) {
             e.consume();
+            // double-clicking on a knot deletes it
             toneCurves.getActiveCurve().deleteKnot(mouseKnotIndex);
             stateChanged();
         }

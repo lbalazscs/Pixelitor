@@ -68,17 +68,17 @@ public class JHFourColorGradient extends ParametrizedFilter {
     }
 
     private void darkenColors() {
-        northWestParam.darker();
-        northEastParam.darker();
-        southWestParam.darker();
-        southEastParam.darker();
+        northWestParam.darken();
+        northEastParam.darken();
+        southWestParam.darken();
+        southEastParam.darken();
     }
 
     private void brightenColors() {
-        northWestParam.brighter();
-        northEastParam.brighter();
-        southWestParam.brighter();
-        southEastParam.brighter();
+        northWestParam.brighten();
+        northEastParam.brighten();
+        southWestParam.brighten();
+        southEastParam.brighten();
     }
 
     @Override

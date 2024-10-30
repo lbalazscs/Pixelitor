@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import javax.swing.*;
 import java.io.Serial;
 
 /**
- * A filter that has a GUI for customization.
+ * Abstract base class for filters with customizable GUI.
  *
  * Note that filters without a GUI can still use dialogs if
  * they are started from places like "Random Filter".
@@ -39,17 +39,22 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     }
 
     /**
-     * Creates a new {@link FilterGUI} for this GUI filter.
-     * The panel must be created at the moment of this call (can't be cached).
-     * Creating a {@link FilterGUI} should also automatically calculate
-     * the first preview of this filter based on the default settings.
-     * If the reset argument is false, then the GUI must be initialized
-     * with the settings stored in this filter.
+     * Creates a new {@link FilterGUI} panel for this GUI filter.
+     * Panel creation should trigger the initial preview based on default settings.
+     * @param layer the layer to which this filter is applied
+     * @param reset if true, resets the GUI to default settings
+     * @return a newly created FilterGUI instance configured with this filter
      */
     public abstract FilterGUI createGUI(Filterable layer, boolean reset);
 
+    /**
+     * Randomizes filter parameters.
+     */
     public abstract void randomize();
 
+    /**
+     * Returns a menu bar if help or presets are available; null otherwise.
+     */
     public JMenuBar getMenuBar() {
         boolean addPresets = canHaveUserPresets() || hasBuiltinPresets();
         if (!hasHelp() && !addPresets) {

@@ -30,7 +30,7 @@ import java.io.Serial;
 import java.util.function.BooleanSupplier;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.utils.Texts.i18n;
 
 /**

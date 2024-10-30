@@ -40,7 +40,7 @@ import static java.awt.BorderLayout.SOUTH;
 import static java.awt.BorderLayout.WEST;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
 import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;

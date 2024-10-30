@@ -27,9 +27,9 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 
-import static javax.swing.BoxLayout.Y_AXIS;
 import static pixelitor.tools.gui.ToolButton.TOOL_ICON_SIZE;
 
 /**
@@ -37,23 +37,25 @@ import static pixelitor.tools.gui.ToolButton.TOOL_ICON_SIZE;
  */
 public class ToolsPanel extends JPanel {
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
-        setLayout(new BoxLayout(this, Y_AXIS));
+        Dimension buttonSize = calcToolButtonSize(screenSize, pw);
 
-        addToolButtons(screenSize, pw);
-        add(Box.createVerticalGlue());
+        JPanel toolsPanel = new JPanel(new ToolButtonsLayout(buttonSize.width, buttonSize.height, 0));
+        addToolButtons(toolsPanel);
+
+        setLayout(new BorderLayout());
+        add(toolsPanel, BorderLayout.CENTER);
         addColorSelector(pw);
 
         setupTShortCut();
     }
 
-    private void addToolButtons(Dimension screenSize, PixelitorWindow pw) {
+    private static void addToolButtons(JPanel toolsPanel) {
         ButtonGroup group = new ButtonGroup();
-        Dimension buttonSize = calcToolButtonSize(screenSize, pw);
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
-            ToolButton toolButton = new ToolButton(tool, buttonSize);
-            toolButton.setAlignmentX(CENTER_ALIGNMENT);
-            add(toolButton);
+            ToolButton toolButton = new ToolButton(tool);
+//            toolButton.setAlignmentX(CENTER_ALIGNMENT);
+            toolsPanel.add(toolButton);
             group.add(toolButton);
             setupKeyboardShortcut(tool);
         }
@@ -63,7 +65,7 @@ public class ToolsPanel extends JPanel {
         FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
         FgBgColors.setUI(colorSelector);
         colorSelector.setAlignmentX(CENTER_ALIGNMENT);
-        add(colorSelector);
+        add(colorSelector, BorderLayout.SOUTH);
     }
 
     private static void setupTShortCut() {

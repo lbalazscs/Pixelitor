@@ -21,6 +21,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.*;
 import pixelitor.utils.ImageUtils;
@@ -251,7 +252,7 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
+    public void enlargeCanvas(Outsets out) {
         // Do nothing for the group itself.
     }
 

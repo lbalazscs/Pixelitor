@@ -44,7 +44,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 import static pixelitor.filters.gui.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
  * The "Photo Collage" filter.
@@ -64,7 +64,7 @@ public class PhotoCollage extends ParametrizedFilter {
     private final ColorParam bgColor = new ColorParam(GUIText.BG_COLOR, BLACK, USER_ONLY_TRANSPARENCY);
     private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_TRANSPARENCY);
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
-    private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 315, CCW_DEGREES);
+    private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 315, INTUITIVE_DEGREES);
     private final RangeParam shadowDistance = new RangeParam("Shadow Distance", 0, 5, 20);
     private final RangeParam shadowSoftnessParam = new RangeParam("Shadow Softness", 0, 3, 10);
 

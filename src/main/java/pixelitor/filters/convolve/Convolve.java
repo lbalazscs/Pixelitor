@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,12 +31,12 @@ import java.awt.image.Kernel;
 import java.util.Random;
 
 /**
- * A customizable convolution
+ * A customizable convolution filter.
  */
 public class Convolve extends FilterWithGUI {
     private final String filterName;
 
-    private float[] kernelMatrix;
+    private float[] kernelMatrix; // the matrix as a flat array
     private final int matrixOrder;
 
     private Convolve(int matrixOrder, String filterName) {
@@ -46,7 +46,7 @@ public class Convolve extends FilterWithGUI {
 
     public void setKernelMatrix(float[] kernelMatrix) {
         if (kernelMatrix.length != matrixOrder * matrixOrder) {
-            throw new IllegalArgumentException("kernelMatrix.length = " + kernelMatrix.length + ", size = " + matrixOrder);
+            throw new IllegalArgumentException("array length = " + kernelMatrix.length + ", matrix order = " + matrixOrder);
         }
         this.kernelMatrix = kernelMatrix;
     }
@@ -59,6 +59,7 @@ public class Convolve extends FilterWithGUI {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         Kernel kernel = new Kernel(matrixOrder, matrixOrder, kernelMatrix);
         BufferedImageOp convolveOp = createConvolveOp(kernel);
+
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {
@@ -75,7 +76,7 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        kernelMatrix = createRandomKernelMatrix(matrixOrder);
+        kernelMatrix = createRandomKernel(matrixOrder);
     }
 
     private BufferedImageOp createConvolveOp(Kernel kernel) {
@@ -88,15 +89,15 @@ public class Convolve extends FilterWithGUI {
     /**
      * Returns a randomized array that is on average close to being normalized
      */
-    public static float[] createRandomKernelMatrix(int size) {
+    public static float[] createRandomKernel(int size) {
         Random rand = new Random();
-        float[] retVal = new float[size * size];
-        for (int i = 0; i < retVal.length; i++) {
+        float[] kernelValues = new float[size * size];
+        for (int i = 0; i < kernelValues.length; i++) {
             int randomInt = rand.nextInt(10000);
-            retVal[i] = (4 * randomInt / (10000.0f * retVal.length)) - (1.0f / retVal.length);
+            kernelValues[i] = (4 * randomInt / (10000.0f * kernelValues.length)) - (1.0f / kernelValues.length);
         }
 
-        return retVal;
+        return kernelValues;
     }
 
     public int getMatrixOrder() {
@@ -104,11 +105,11 @@ public class Convolve extends FilterWithGUI {
     }
 
     public static FilterAction createFilterAction(int size) {
-        String name = getFilterName(size, size);
+        String name = generateFilterName(size, size);
         return new FilterAction(name, () -> new Convolve(size, name));
     }
 
-    private static String getFilterName(int width, int height) {
+    private static String generateFilterName(int width, int height) {
         return "Custom " + width + 'x' + height + " Convolution";
     }
 

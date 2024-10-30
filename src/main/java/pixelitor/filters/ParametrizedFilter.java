@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A filter that keeps its settings in a ParamSet object
- * The advantage is that subclasses don't need to create their own adjustment GUIs,
- * they only specify their ParamSet, and the GUI is built automatically
+ * Abstract filter class that uses a {@link ParamSet} to manage
+ * its settings. Subclasses only need to define a ParamSet,
+ * and the GUI will be built automatically.
  */
 public abstract class ParametrizedFilter extends FilterWithGUI {
     @Serial
@@ -36,6 +36,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     protected final transient ParamSet paramSet;
 
+    // true if a "Show Original" checkbox should be available.
     private final transient boolean addShowOriginal;
 
     protected ParametrizedFilter(boolean addShowOriginal) {
@@ -53,16 +54,44 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         return new ParametrizedFilterGUI(this, layer, addShowOriginal, reset);
     }
 
+    /**
+     * Sets the filter parameters from a single {@link FilterParam}.
+     */
     public ParamSet setParams(FilterParam param) {
         paramSet.addParam(param);
-        paramSet.addCommonActions(isNonTrivial());
+        paramSet.addCommonActions(isComplex());
         return paramSet;
     }
 
+    /**
+     * Sets the filter parameters from multiple {@link FilterParam}s.
+     */
     public ParamSet setParams(FilterParam... params) {
         paramSet.addParams(params);
-        paramSet.addCommonActions(isNonTrivial());
+        paramSet.addCommonActions(isComplex());
         return paramSet;
+    }
+
+    /**
+     * Adds multiple parameters to the filter's ParamSet.
+     */
+    public void addParams(FilterParam... params) {
+        paramSet.addParams(params);
+    }
+
+    /**
+     * Adds multiple parameters to the beginning of the filter's ParamSet.
+     * They will appear above the existing controls in the generated GUI.
+     */
+    public void addParamsToFront(FilterParam... params) {
+        paramSet.addParamsToFront(params);
+    }
+
+    /**
+     * Inserts a parameter at a specified index in the filter's ParamSet.
+     */
+    public void insertParam(FilterParam param, int index) {
+        paramSet.insertParam(param, index);
     }
 
     public ParamSet getParamSet() {
@@ -70,23 +99,10 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Returns true if this filter should be included
-     * into the list of tween animation filters.
+     * Returns true if this filter supports tween animations.
      */
     public boolean supportsTweenAnimation() {
         return true;
-    }
-
-    public void addParams(FilterParam... params) {
-        paramSet.addParams(params);
-    }
-
-    public void addParamsToFront(FilterParam... params) {
-        paramSet.addParamsToFront(params);
-    }
-
-    public void insertParam(FilterParam param, int index) {
-        paramSet.insertParam(param, index);
     }
 
     @Override
@@ -130,7 +146,10 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         paramSet.set(paramName, value);
     }
 
-    public boolean isNonTrivial() {
+    /**
+     * Checks if this filter has multiple parameters or a single complex one.
+     */
+    public boolean isComplex() {
         List<FilterParam> params = paramSet.getParams();
         if (params.size() > 1) {
             return true;
@@ -160,9 +179,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
-
         node.add(paramSet.createDebugNode("paramSet"));
-
         return node;
     }
 }

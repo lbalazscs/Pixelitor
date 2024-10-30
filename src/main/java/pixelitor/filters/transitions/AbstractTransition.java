@@ -58,7 +58,7 @@ public abstract class AbstractTransition extends ParametrizedFilter {
     }
 
     @Override
-    public boolean isNonTrivial() {
+    public boolean isComplex() {
         // this class adds only one simple parameter,
         // but subclasses are expected to add more
         return true;

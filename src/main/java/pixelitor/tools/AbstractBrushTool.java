@@ -50,7 +50,7 @@ import static java.awt.geom.PathIterator.SEG_LINETO;
 import static java.awt.geom.PathIterator.SEG_MOVETO;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 
 /**
  * Abstract base class for the tools working with {@link Brush} objects.

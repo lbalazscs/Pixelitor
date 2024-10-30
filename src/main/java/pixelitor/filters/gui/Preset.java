@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,21 @@ package pixelitor.filters.gui;
 
 import javax.swing.*;
 
+/**
+ * Represents a collection of widget states that can be loaded
+ * to configure a {@link PresetOwner}.
+ * Built-in presets are predefined configurations that are hardcoded,
+ * as opposed to user-created presets that can be saved to disk in
+ * the preset directory at runtime. While user-created presets are
+ * always implemented as a {@link UserPreset}, the built-in presets
+ * can be implemented either as a {@link UserPreset}
+ * or as a {@link FilterState}.
+ */
 public interface Preset {
-    Action asAction(PresetOwner owner);
+    /**
+     * Converts this preset into an {@link Action} that can be added
+     * to menus. When triggered, the action applies this
+     * preset's settings to the given {@link PresetOwner}.
+     */
+    Action createAction(PresetOwner owner);
 }

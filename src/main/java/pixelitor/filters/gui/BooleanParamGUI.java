@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,32 +18,34 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * The GUI for a {@link BooleanParam}.
+ * The GUI component for a {@link BooleanParam}.
  */
 public class BooleanParamGUI extends JPanel implements ParamGUI {
+    private static final int BUTTON_SPACING = 50;
+    
     private final BooleanParam model;
     private final JCheckBox checkBox;
     private ResetButton resetButton;
+    private FilterButtonModel extraAction;
 
     public BooleanParamGUI(BooleanParam model, boolean addResetButton, FilterButtonModel extraAction) {
         super(new FlowLayout(LEFT));
         this.model = model;
+
         checkBox = new JCheckBox();
         checkBox.setSelected(model.isChecked());
+        checkBox.addActionListener(e ->
+            model.setValue(checkBox.isSelected(), false, true));
         add(checkBox);
 
-        checkBox.addActionListener(e -> model.setValue(checkBox.isSelected(), false, true));
-
         if (addResetButton) {
-            add(Box.createHorizontalStrut(50));
+            add(Box.createHorizontalStrut(BUTTON_SPACING));
             resetButton = new ResetButton(model);
             add(resetButton);
 
@@ -57,7 +59,8 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
         }
 
         if (extraAction != null) {
-            add(Box.createHorizontalStrut(50));
+            this.extraAction = extraAction;
+            add(Box.createHorizontalStrut(BUTTON_SPACING));
             add(extraAction.createGUI());
         }
     }
@@ -65,6 +68,12 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     @Override
     public void setEnabled(boolean enabled) {
         checkBox.setEnabled(enabled);
+        if (resetButton != null) {
+            resetButton.setEnabled(enabled);
+        }
+        if (extraAction != null) {
+            extraAction.setEnabled(enabled);
+        }
         super.setEnabled(enabled);
     }
 
@@ -74,6 +83,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
 
         // help assertj-swing to find the checkBox
         checkBox.setName(name);
+//        checkBox.setName(name + ".checkbox");
     }
 
     @Override
@@ -86,16 +96,8 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
         checkBox.setToolTipText(tip);
     }
 
-    public void addChangeListener(ChangeListener changeListener) {
-        checkBox.addChangeListener(changeListener);
-    }
-
     public void addItemListener(ItemListener itemListener) {
         checkBox.addItemListener(itemListener);
-    }
-
-    public void addActionListener(ActionListener listener) {
-        checkBox.addActionListener(listener);
     }
 
     @Override

@@ -27,18 +27,19 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
- * Flips all content layers of a composition horizontally or vertically
+ * Flips (mirrors) all content layers of a composition
+ * either horizontally or vertically.
  */
 public class Flip extends SimpleCompAction {
     private final Flip.Direction direction;
 
-    public Flip(Direction dir) {
-        super(dir.getGUIName(), false);
-        direction = dir;
+    public Flip(Direction direction) {
+        super(direction.getGUIName(), false);
+        this.direction = direction;
     }
 
     @Override
-    protected void resizeNewCanvas(Canvas newCanvas, View view) {
+    protected void updateCanvasSize(Canvas newCanvas, View view) {
         // a flip doesn't change the canvas size
         throw new IllegalStateException("should not be called");
     }
@@ -59,8 +60,8 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
-        return oldGuides.copyForFlip(direction, view);
+    protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
+        return srcGuides.copyForFlip(direction, view);
     }
 
     @Override
@@ -75,26 +76,26 @@ public class Flip extends SimpleCompAction {
         HORIZONTAL("flip_horizontal") {
             @Override
             public String getStatusBarMessage() {
-                return "The image was flipped horizontally";
+                return "Image flipped horizontally";
             }
 
             @Override
             public AffineTransform createTransform(int width, int height) {
                 var at = new AffineTransform();
-                at.translate(width, 0);
+                at.translate(width, 0); // keeps the content visible
                 at.scale(-1, 1);
                 return at;
             }
         }, VERTICAL("flip_vertical") {
             @Override
             public String getStatusBarMessage() {
-                return "The image was flipped vertically";
+                return "Image flipped vertically";
             }
 
             @Override
             public AffineTransform createTransform(int width, int height) {
                 var at = new AffineTransform();
-                at.translate(0, height);
+                at.translate(0, height); // keeps the content visible
                 at.scale(1, -1);
                 return at;
             }

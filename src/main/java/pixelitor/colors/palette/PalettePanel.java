@@ -37,10 +37,10 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * The panel containing the color swatch buttons in rows and columns
+ * The panel containing the color swatch buttons in a grid.
  */
 public class PalettePanel extends JPanel {
-    private static final int LAYOUT_GAP = 2;
+    private static final int GAP = 2; // Spacing between swatches
     private final Palette palette;
     private final ColorSwatchClickHandler clickHandler;
 
@@ -48,20 +48,20 @@ public class PalettePanel extends JPanel {
     private int numRows;
 
     // vertical lists in a horizontal list
-    private final List<List<ColorSwatchButton>> buttons;
+    private final List<List<ColorSwatchButton>> grid;
 
     private PalettePanel(Palette palette, ColorSwatchClickHandler clickHandler) {
         this.palette = palette;
         this.clickHandler = clickHandler;
 
-        numCols = palette.getNumCols();
-        numRows = palette.getNumRows();
+        numCols = palette.getColumnCount();
+        numRows = palette.getRowCount();
 
-        setLayout(null);
+        setLayout(null); // manual button positioning
 
-        buttons = new ArrayList<>();
+        grid = new ArrayList<>();
         for (int i = 0; i < numCols; i++) {
-            buttons.add(new ArrayList<>());
+            grid.add(new ArrayList<>());
         }
 
         regenerate(numRows, numCols);
@@ -69,73 +69,91 @@ public class PalettePanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                int newNumRows = (getHeight() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
-                int newNumCols = (getWidth() - LAYOUT_GAP) / (ColorSwatchButton.SIZE + LAYOUT_GAP);
+                // Calculate new dimensions based on available space and button size
+                int newNumRows = (getHeight() - GAP) / (ColorSwatchButton.SIZE + GAP);
+                int newNumCols = (getWidth() - GAP) / (ColorSwatchButton.SIZE + GAP);
                 setNewSizes(newNumRows, newNumCols);
             }
         });
     }
 
     private void setNewSizes(int newNumRows, int newNumCols) {
-        if (newNumRows != numRows
-            || newNumCols != numCols) {
-            palette.setSize(newNumRows, newNumCols);
+        if (newNumRows != numRows || newNumCols != numCols) {
+            palette.setDimensions(newNumRows, newNumCols);
             regenerate(newNumRows, newNumCols);
         }
     }
 
-    public void configChanged() {
-        palette.configChanged();
+    public void onConfigChanged() {
+        palette.onConfigChanged();
         regenerate(numRows, numCols);
         repaint();
     }
 
     private void regenerate(int newNumRows, int newNumCols) {
-        ColorSwatchButton.last = null;
+        ColorSwatchButton.lastClickedSwatch = null;
+
+        // If shrinking the palette, remove only the buttons
+        // that are outside the new dimensions.
         if (newNumRows < numRows || newNumCols < numCols) {
-            // remove only the unnecessary
             int count = getComponentCount();
             for (int i = count - 1; i >= 0; i--) {
                 var swatch = (ColorSwatchButton) getComponent(i);
-                if (swatch.getXPos() >= newNumCols || swatch.getYPos() >= newNumRows) {
+                if (swatch.getGridX() >= newNumCols || swatch.getGridY() >= newNumRows) {
                     remove(i);
                 }
             }
         }
+
+        // update dimensions
         numRows = newNumRows;
         numCols = newNumCols;
 
+        // add new buttons or change the color of the existing ones
+        // according to the palette's rules
         palette.addButtons(this);
     }
 
-    private ColorSwatchButton getButton(int x, int y) {
-        if (x < buttons.size()) {
-            List<ColorSwatchButton> verticalSwatches = buttons.get(x);
-            if (y < verticalSwatches.size()) {
-                return verticalSwatches.get(y);
+    /**
+     * Returns the swatch at the given grid position or null if not found.
+     */
+    private ColorSwatchButton getButton(int col, int row) {
+        if (col < grid.size()) { // check if the column exists
+            List<ColorSwatchButton> verticalSwatches = grid.get(col);
+            if (row < verticalSwatches.size()) { // check if the row exists
+                return verticalSwatches.get(row);
             }
         }
         return null;
     }
 
-    private void addNewButtonToList(ColorSwatchButton button, int x, int y) {
-        List<ColorSwatchButton> verticalList;
-        if (x < buttons.size()) {
-            verticalList = buttons.get(x);
-            assert y >= verticalList.size();
-        } else {
-            verticalList = new ArrayList<>();
-            buttons.add(verticalList);
-        }
-        verticalList.add(button);
+    private void addNewButtonToGrid(ColorSwatchButton button, int col, int row) {
+        List<ColorSwatchButton> column;
+        if (col < grid.size()) {
+            // get the already existing column
+            column = grid.get(col);
 
+            // ensure we're adding at the end
+            assert row >= column.size();
+        } else {
+            // start a new column
+            column = new ArrayList<>();
+            grid.add(column);
+        }
+        column.add(button);
     }
 
-    public void addButton(int hor, int ver, Color c) {
-        ColorSwatchButton button = getButton(hor, ver);
+    // adds a new button or changes the color of an existing button
+    public void addButton(int col, int row, Color c) {
+        ColorSwatchButton button = getButton(col, row);
         if (button == null) {
-            button = new ColorSwatchButton(c, clickHandler, hor, ver);
-            addNewButtonToList(button, hor, ver);
+            button = new ColorSwatchButton(c, clickHandler, col, row);
+            addNewButtonToGrid(button, col, row);
+
+            int x = GAP + col * (ColorSwatchButton.SIZE + GAP);
+            int y = GAP + row * (ColorSwatchButton.SIZE + GAP);
+            button.setLocation(x, y);
+            button.setSize(button.getPreferredSize());
         } else {
             button.setColor(c);
         }
@@ -143,30 +161,23 @@ public class PalettePanel extends JPanel {
         if (button.getParent() == null) {
             add(button);
         }
-
-        int x = LAYOUT_GAP + hor * (ColorSwatchButton.SIZE + LAYOUT_GAP);
-        int y = LAYOUT_GAP + ver * (ColorSwatchButton.SIZE + LAYOUT_GAP);
-        button.setLocation(x, y);
-        button.setSize(button.getPreferredSize());
     }
 
     @Override
     public Dimension getPreferredSize() {
-        int width = LAYOUT_GAP + numCols * (ColorSwatchButton.SIZE + LAYOUT_GAP);
-        int height = LAYOUT_GAP + numRows * (ColorSwatchButton.SIZE + LAYOUT_GAP);
+        int width = GAP + numCols * (ColorSwatchButton.SIZE + GAP);
+        int height = GAP + numRows * (ColorSwatchButton.SIZE + GAP);
         return new Dimension(width, height);
     }
 
     public static void showFGVariationsDialog(PixelitorWindow pw) {
-        Color refColor = getFGColor();
-        var palette = new VariationsPalette(refColor,
+        var palette = new VariationsPalette(getFGColor(),
             "Foreground Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showBGVariationsDialog(PixelitorWindow pw) {
-        Color refColor = getBGColor();
-        var palette = new VariationsPalette(refColor,
+        var palette = new VariationsPalette(getBGColor(),
             "Background Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
@@ -209,6 +220,6 @@ public class PalettePanel extends JPanel {
             .noCancelButton()
             .show();
 
-        Messages.showStatusMessage(palette.getStatusHelp());
+        Messages.showStatusMessage(palette.getHelpText());
     }
 }

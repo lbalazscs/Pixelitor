@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,9 @@ import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Rnd;
 
 /**
- * A filter parameter for selecting the
- * elevation (altitude) angle of a light source
+ * A specialized angle parameter for selecting elevation (altitude)
+ * angles. Unlike the regular AngleParam which allows full 360-degree
+ * rotation, this is constrained to angles between 0 and 90 degrees.
  */
 public class ElevationAngleParam extends AngleParam {
     public ElevationAngleParam(String name, double def) {
@@ -49,9 +50,9 @@ public class ElevationAngleParam extends AngleParam {
             // values between 1.5*PI and 2*PI are coming
             // when the user drags the slider, they are OK
         } else if (r > 0) {
-            r = 0;
+            r = 0; // clamp to horizontal
         } else if (r < -Math.PI / 2) {
-            r = -Math.PI / 2;
+            r = -Math.PI / 2; // clamp to vertical
         }
 
         super.setValue(r, trigger);
@@ -59,7 +60,7 @@ public class ElevationAngleParam extends AngleParam {
 
     @Override
     protected void doRandomize() {
-        int val = Rnd.nextInt(90);
+        int val = Rnd.nextInt(91);
         setValueInDegrees(val, false);
     }
 }

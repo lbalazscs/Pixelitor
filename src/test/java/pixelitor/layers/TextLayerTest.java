@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.compactions.Outsets;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
@@ -136,7 +137,7 @@ public class TextLayerTest {
 
     @Test
     public void enlargeCanvas() {
-        layer.enlargeCanvas(5, 5, 5, 10);
+        layer.enlargeCanvas(new Outsets(5, 5, 5, 10));
 
         iconUpdates.check(0, 0);
     }

@@ -65,11 +65,11 @@ class TransformedRectangleTester extends JPanel {
         p.add(testPanel, CENTER);
 
         var angleParam = new AngleParam("Angle", 0);
-        var sxParam = new RangeParam("Sx", -200, 100, 200, true, SliderSpinner.TextPosition.NONE_TICKS);
-        var syParam = new RangeParam("Sy", -200, 100, 200, true, SliderSpinner.TextPosition.NONE_TICKS);
-        var shxParam = new RangeParam("Shx", -100, 0, 100, true, SliderSpinner.TextPosition.NONE_TICKS);
-        var shyParam = new RangeParam("Shy", -100, 0, 100, true, SliderSpinner.TextPosition.NONE_TICKS);
-        var growParam = new RangeParam("Grow", 0, 0, 100, true, SliderSpinner.TextPosition.NONE_TICKS);
+        var sxParam = new RangeParam("Sx", -200, 100, 200, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+        var syParam = new RangeParam("Sy", -200, 100, 200, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+        var shxParam = new RangeParam("Shx", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+        var shyParam = new RangeParam("Shy", -100, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
+        var growParam = new RangeParam("Grow", 0, 0, 100, true, SliderSpinner.LabelPosition.NONE_WITH_TICKS);
         ParamAdjustmentListener adjustmentListener = () ->
             testPanel.updateTransfrom(
                 angleParam.getValueInRadians(), growParam.getValueAsDouble(),

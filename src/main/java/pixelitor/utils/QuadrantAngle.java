@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,16 +24,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
- * Represents rotation angles by a specific number of quadrants.
+ * Represents rotation angles by a specific number of quadrants (90-degree increments).
  */
 public enum QuadrantAngle {
     ANGLE_90(90, "rotate_90") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
-            // swap the width and height
-            int newWidth = canvas.getHeight();
-            int newHeight = canvas.getWidth();
-            canvas.resize(newWidth, newHeight, view, false);
+            swapCanvasDimensions(canvas, view);
         }
 
         @Override
@@ -45,16 +42,12 @@ public enum QuadrantAngle {
 
         @Override
         public BufferedImage createDestImage(BufferedImage img) {
-            // swap the width and height
-            int newWidth = img.getHeight();
-            int newHeight = img.getWidth();
-
-            return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
+            return createSwappedDimensionsImage(img);
         }
     }, ANGLE_180(180, "rotate_180") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
-            // do nothing
+            // no resize needed
         }
 
         @Override
@@ -66,17 +59,12 @@ public enum QuadrantAngle {
 
         @Override
         public BufferedImage createDestImage(BufferedImage img) {
-            // no change in width and height
-            int newWidth = img.getWidth();
-            int newHeight = img.getHeight();
-
-            return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
+            return createSameDimensionsImage(img);
         }
     }, ANGLE_270(270, "rotate_270") {
         @Override
         public void resizeNewCanvas(Canvas canvas, View view) {
-            // same as for 90 degrees
-            ANGLE_90.resizeNewCanvas(canvas, view);
+            swapCanvasDimensions(canvas, view);
         }
 
         @Override
@@ -88,11 +76,7 @@ public enum QuadrantAngle {
 
         @Override
         public BufferedImage createDestImage(BufferedImage img) {
-            // swap the width and height
-            int newWidth = img.getHeight();
-            int newHeight = img.getWidth();
-
-            return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
+            return createSwappedDimensionsImage(img);
         }
     };
 
@@ -108,6 +92,9 @@ public enum QuadrantAngle {
         return guiName;
     }
 
+    /**
+     * Adjusts the canvas size for the rotation if necessary.
+     */
     public abstract void resizeNewCanvas(Canvas canvas, View view);
 
     /**
@@ -132,12 +119,38 @@ public enum QuadrantAngle {
         return angleDegree;
     }
 
+    /**
+     * Creates a new image with dimensions appropriate for this rotation.
+     */
+    public abstract BufferedImage createDestImage(BufferedImage img);
+
     public String asString() {
         return angleDegree + "°";
     }
 
     /**
-     * Creates a new image with the appropriate size.
+     * Swaps the width and height of a Canvas.
      */
-    public abstract BufferedImage createDestImage(BufferedImage img);
+    private static void swapCanvasDimensions(Canvas canvas, View view) {
+        // swap the width and height
+        int newWidth = canvas.getHeight();
+        int newHeight = canvas.getWidth();
+        canvas.resize(newWidth, newHeight, view, false);
+    }
+
+    /**
+     * Creates a new image with swapped width and height, preserving color model.
+     */
+    private static BufferedImage createSwappedDimensionsImage(BufferedImage src) {
+        return ImageUtils.createImageWithSameCM(
+            src, src.getHeight(), src.getWidth());
+    }
+
+    /**
+     * Creates a new image with the same dimensions, preserving color model.
+     */
+    private static BufferedImage createSameDimensionsImage(BufferedImage src) {
+        return ImageUtils.createImageWithSameCM(
+            src, src.getWidth(), src.getHeight());
+    }
 }

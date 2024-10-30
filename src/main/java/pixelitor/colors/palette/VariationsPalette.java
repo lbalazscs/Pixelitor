@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,15 +27,15 @@ import java.awt.Color;
 public class VariationsPalette extends Palette {
     // static palette-specific variables so that they
     // are remembered between dialog sessions
-    private static int lastRows = 7;
-    private static int lastCols = 10;
+    private static int lastRowCount = 7;
+    private static int lastColumnCount = 10;
 
     private final float refHue;
     private static final float MAX_HUE_DEVIATION = 0.1f;
     private final String dialogTitle;
 
     public VariationsPalette(Color refColor, String dialogTitle) {
-        super(lastRows, lastCols);
+        super(lastRowCount, lastColumnCount);
         this.dialogTitle = dialogTitle;
         assert refColor != null;
         float[] hsb = Colors.toHSB(refColor);
@@ -46,32 +46,32 @@ public class VariationsPalette extends Palette {
     @Override
     public void addButtons(PalettePanel panel) {
         var hsConfig = (HueSatPaletteConfig) config;
-        float hueShift = hsConfig.getHueShift();
+        float hueOffset = hsConfig.getHueOffset();
         float saturation = hsConfig.getSaturation();
 
-        for (int y = 0; y < numRows; y++) {
-            float hue = calcHue(y, hueShift);
+        for (int row = 0; row < rowCount; row++) {
+            float hue = calcHue(row, hueOffset);
 
-            for (int x = 0; x < numCols; x++) {
-                Color c;
-                float bri = (x + 1) / (float) numCols;
-                if (numRows == 1) {
-                    c = Color.getHSBColor(hueShift + refHue, saturation, bri);
+            for (int col = 0; col < columnCount; col++) {
+                Color color;
+                float bri = (col + 1) / (float) columnCount;
+                if (rowCount == 1) {
+                    color = Color.getHSBColor(hueOffset + refHue, saturation, bri);
                 } else {
-                    c = Color.getHSBColor(hue, saturation, bri);
+                    color = Color.getHSBColor(hue, saturation, bri);
                 }
-                panel.addButton(x, y, c);
+                panel.addButton(col, row, color);
             }
         }
     }
 
-    private float calcHue(int y, float hueShift) {
+    private float calcHue(int y, float hueOffset) {
         float startHue = refHue - MAX_HUE_DEVIATION;
         if (startHue < 0) {
             startHue += 1.0f;
         }
         float hueStep = calcHueStep();
-        float hue = hueShift + startHue + y * hueStep;
+        float hue = hueOffset + startHue + y * hueStep;
         if (hue > 1.0f) {
             hue = hue - 1.0f;
         }
@@ -81,14 +81,14 @@ public class VariationsPalette extends Palette {
     private float calcHueStep() {
         // the total hue range (2 * MAX_HUE_DEVIATION) is
         // divided into numRows - 1 equal parts
-        return 2 * MAX_HUE_DEVIATION / (numRows - 1);
+        return 2 * MAX_HUE_DEVIATION / (rowCount - 1);
     }
 
     @Override
-    public void setSize(int numRows, int numCols) {
-        super.setSize(numRows, numCols);
-        lastCols = numCols;
-        lastRows = numRows;
+    public void setDimensions(int rows, int columns) {
+        super.setDimensions(rows, columns);
+        lastColumnCount = columns;
+        lastRowCount = rows;
     }
 
     @Override

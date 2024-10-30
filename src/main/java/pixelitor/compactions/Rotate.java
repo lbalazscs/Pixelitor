@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,18 +26,18 @@ import pixelitor.utils.QuadrantAngle;
 import java.awt.geom.AffineTransform;
 
 /**
- * Rotates all content layers of a composition by 90, 180 or 270 degrees
+ * Rotates all content layers of a composition by 90, 180 or 270 degrees.
  */
 public class Rotate extends SimpleCompAction {
     private final QuadrantAngle angle;
 
     public Rotate(QuadrantAngle angle) {
-        super(angle.getGUIName(), true);
+        super(angle.getGUIName(), angle != QuadrantAngle.ANGLE_180);
         this.angle = angle;
     }
 
     @Override
-    protected void resizeNewCanvas(Canvas newCanvas, View view) {
+    protected void updateCanvasSize(Canvas newCanvas, View view) {
         angle.resizeNewCanvas(newCanvas, view);
     }
 
@@ -57,12 +57,12 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
-        return oldGuides.copyForRotate(angle, view);
+    protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
+        return srcGuides.copyForRotate(angle, view);
     }
 
     @Override
     protected String getStatusBarMessage() {
-        return "The image was rotated by " + angle.asString();
+        return "Image rotated by " + angle.asString();
     }
 }

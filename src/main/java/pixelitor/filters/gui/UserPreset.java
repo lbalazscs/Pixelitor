@@ -31,12 +31,13 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static pixelitor.utils.Utils.FILE_SEPARATOR;
-
 /**
- * Represents a user-created preset.
- * It is similar to but different from {@link FilterState} because
- * its internal structure is more suitable for saving as a flat text file.
+ * Usually represents a user-created preset that stores configuration
+ * settings in a flat text file. In some cases it can also represent
+ * a built-in (hardcoded) preset.
+ * <p>
+ * Unlike {@link FilterState}, {@link UserPreset} is optimized
+ * for saving to and loading from text files.
  */
 public class UserPreset implements Preset {
     private final String name;
@@ -45,16 +46,13 @@ public class UserPreset implements Preset {
     private boolean loaded; // whether the preset is in the memory
     private final Map<String, String> content = new LinkedHashMap<>();
 
-    public static final String PRESETS_DIR;
+    public static final String PRESETS_DIR = initPresetsDirectory();
 
-    static {
-        if (JVM.isWindows) {
-            PRESETS_DIR = System.getenv("APPDATA") +
-                FILE_SEPARATOR + "Pixelitor" + FILE_SEPARATOR + "presets";
-        } else {
-            PRESETS_DIR = System.getProperty("user.home") +
-                FILE_SEPARATOR + ".pixelitor" + FILE_SEPARATOR + "presets";
-        }
+    private static String initPresetsDirectory() {
+        String baseDir = JVM.isWindows
+            ? System.getenv("APPDATA") + File.separator + "Pixelitor"
+            : System.getProperty("user.home") + File.separator + ".pixelitor";
+        return baseDir + File.separator + "presets";
     }
 
     /**
@@ -87,9 +85,13 @@ public class UserPreset implements Preset {
         return name;
     }
 
+    /**
+     * Returns a setting value by key.
+     */
     public String get(String key) {
         String value = content.get(key);
         if (value == null) {
+            // legacy migration support
             if ("Ray Colors".equals(key)) {
                 // oct 2021: temporary hack for compatible color list upgrade of starburst
                 value = content.get("Ray Color");
@@ -113,6 +115,9 @@ public class UserPreset implements Preset {
         return value;
     }
 
+    /**
+     * Stores a setting with the given key and value.
+     */
     public void put(String key, String value) {
         assert !key.isBlank();
 
@@ -206,16 +211,21 @@ public class UserPreset implements Preset {
     }
 
     /**
-     * A way to get an enum constant if its toString is overwritten.
+     * Finds an enum constant by matching its toString() value.
      */
     public <T extends Enum<T>> T getEnum(String key, Class<T> clazz) {
-        String presetValue = get(key);
+        String storedValue = get(key);
         T[] enumConstants = clazz.getEnumConstants();
-        for (T constant : enumConstants) {
-            if (constant.toString().equals(presetValue)) {
-                return constant;
+
+        if (storedValue != null) {
+            for (T constant : enumConstants) {
+                if (constant.toString().equals(storedValue)) {
+                    return constant;
+                }
             }
         }
+
+        // Default to first value
         return enumConstants[0];
     }
 
@@ -250,6 +260,10 @@ public class UserPreset implements Preset {
         }
     }
 
+    /**
+     * Saves the preset settings to disk in the appropriate directory.
+     * Creates the directory if it doesn't exist.
+     */
     public void save() {
         assert file == null;
         assert loaded;
@@ -279,7 +293,7 @@ public class UserPreset implements Preset {
     }
 
     @Override
-    public Action asAction(PresetOwner owner) {
+    public Action createAction(PresetOwner owner) {
         return new PAction(name, () -> {
             if (!loaded) {
                 try {
@@ -292,7 +306,11 @@ public class UserPreset implements Preset {
         });
     }
 
-    public static List<UserPreset> loadPresets(String presetDirName) {
+    /**
+     * Detects all presets in the given directory, based on the
+     * names of the files found. They are not loaded.
+     */
+    public static List<UserPreset> detectPresetNames(String presetDirName) {
         File presetsDir = getSaveDir(presetDirName);
         if (!presetsDir.exists()) {
             return List.of();
@@ -324,7 +342,7 @@ public class UserPreset implements Preset {
     }
 
     private static File getSaveDir(String presetDirName) {
-        return new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
+        return new File(PRESETS_DIR + File.separator + presetDirName);
     }
 
     @Override

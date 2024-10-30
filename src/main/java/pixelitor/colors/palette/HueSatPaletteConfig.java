@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,16 +32,16 @@ public class HueSatPaletteConfig implements PaletteConfig {
     private float saturation;
     private JSlider satSlider;
 
-    private float hueShift;
+    private float hueOffset;
     private JSlider hueSlider;
 
-    public HueSatPaletteConfig(float hueShift, float saturation) {
-        this.hueShift = hueShift;
+    public HueSatPaletteConfig(float hueOffset, float saturation) {
+        this.hueOffset = hueOffset;
         this.saturation = saturation;
     }
 
-    public float getHueShift() {
-        return hueShift;
+    public float getHueOffset() {
+        return hueOffset;
     }
 
     public float getSaturation() {
@@ -55,7 +55,7 @@ public class HueSatPaletteConfig implements PaletteConfig {
         satSlider = createSlider(saturation, "Saturation of the colors");
         satSlider.addChangeListener(e -> satChanged(palettePanel));
 
-        hueSlider = createSlider(hueShift, "Rotate the hue of the colors");
+        hueSlider = createSlider(hueOffset, "Rotate the hue of the colors");
         hueSlider.addChangeListener(e -> hueChanged(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
@@ -79,15 +79,15 @@ public class HueSatPaletteConfig implements PaletteConfig {
         float oldSat = saturation;
         saturation = satSlider.getValue() / 100.0f;
         if (oldSat != saturation) {
-            palettePanel.configChanged();
+            palettePanel.onConfigChanged();
         }
     }
 
     private void hueChanged(PalettePanel palettePanel) {
-        float oldHueShift = hueShift;
-        hueShift = hueSlider.getValue() / 100.0f;
-        if (oldHueShift != hueShift) {
-            palettePanel.configChanged();
+        float oldHueOffset = hueOffset;
+        hueOffset = hueSlider.getValue() / 100.0f;
+        if (oldHueOffset != hueOffset) {
+            palettePanel.onConfigChanged();
         }
     }
 }

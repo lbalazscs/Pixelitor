@@ -40,7 +40,7 @@ import javax.swing.*;
 import java.awt.Graphics2D;
 import java.util.ResourceBundle;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.selection.ShapeCombinator.ADD;
 import static pixelitor.selection.ShapeCombinator.INTERSECT;
 import static pixelitor.selection.ShapeCombinator.SUBTRACT;

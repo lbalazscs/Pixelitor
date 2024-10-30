@@ -25,7 +25,7 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static pixelitor.utils.AngleUnit.CCW_DEGREES;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 /**
  * Color Halftone filter based on the JHLabs ColorHalftoneFilter
@@ -39,11 +39,11 @@ public class JHColorHalftone extends ParametrizedFilter {
     private final RangeParam dotRadius = new RangeParam(
         "Dot Radius (pixel %)", 10, 100, 1000);
     private final AngleParam cyanScreenAngle = new AngleParam(
-        "Cyan Screen Angle", 252, CCW_DEGREES);
+        "Cyan Screen Angle", 252, INTUITIVE_DEGREES);
     private final AngleParam magentaScreenAngle = new AngleParam(
-        "Magenta Screen Angle", 298, CCW_DEGREES);
+        "Magenta Screen Angle", 298, INTUITIVE_DEGREES);
     private final AngleParam yellowScreenAngle = new AngleParam(
-        "Yellow Screen Angle", 270, CCW_DEGREES);
+        "Yellow Screen Angle", 270, INTUITIVE_DEGREES);
 
     private ColorHalftoneFilter filter;
 

@@ -30,11 +30,11 @@ import java.awt.image.BufferedImage;
  */
 public class ImagePanel extends JPanel {
     protected BufferedImage image;
-    private final boolean isCheckerboardEnabled;
+    private final boolean checkerboardEnabled;
     private CheckerboardPainter checkerboardPainter;
 
     public ImagePanel(boolean useCheckerBoard) {
-        isCheckerboardEnabled = useCheckerBoard;
+        checkerboardEnabled = useCheckerBoard;
         if (useCheckerBoard) {
             checkerboardPainter = ImageUtils.createCheckerboardPainter();
         }
@@ -77,7 +77,7 @@ public class ImagePanel extends JPanel {
     }
 
     private void renderImage(Graphics g) {
-        if (isCheckerboardEnabled) {
+        if (checkerboardEnabled) {
             Graphics2D g2 = (Graphics2D) g;
             checkerboardPainter.paint(g2, null, image.getWidth(), image.getHeight());
         }

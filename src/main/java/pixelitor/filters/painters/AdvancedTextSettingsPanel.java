@@ -25,7 +25,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition;
 
 /**
  * GUI for the advanced text settings.
@@ -78,7 +78,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
 
     private void addTrackingGUI(FontInfo font) {
         trackingParam = new RangeParam("Tracking (Letter-spacing)",
-            -20, 0, 70, true, TextPosition.NONE_TICKS);
+            -20, 0, 70, true, LabelPosition.NONE_WITH_TICKS);
         trackingParam.setValue(font.getTracking());
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
         gbh.addParam(trackingParam, "trackingGUI");
@@ -86,7 +86,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
 
     private void addLineHeightGUI(double relLineHeight) {
         lineHeightParam = new RangeParam("Line Height (%)",
-            0, 100 * relLineHeight, 200, true, TextPosition.NONE_TICKS);
+            0, 100 * relLineHeight, 200, true, LabelPosition.NONE_WITH_TICKS);
         lineHeightParam.addChangeListener(e -> actionListener.actionPerformed(null));
         gbh.addParam(lineHeightParam);
     }
@@ -95,22 +95,22 @@ public class AdvancedTextSettingsPanel extends JPanel {
         ChangeListener changeListener = e -> actionListener.actionPerformed(null);
 
         scaleXParam = new RangeParam("Horizontal Scaling (%)",
-            -300, 100 * sx, 300, true, TextPosition.NONE_TICKS);
+            -300, 100 * sx, 300, true, LabelPosition.NONE_WITH_TICKS);
         scaleXParam.addChangeListener(changeListener);
         gbh.addParam(scaleXParam);
 
         scaleYParam = new RangeParam("Vertical Scaling (%)",
-            -300, 100 * sy, 300, true, TextPosition.NONE_TICKS);
+            -300, 100 * sy, 300, true, LabelPosition.NONE_WITH_TICKS);
         scaleYParam.addChangeListener(changeListener);
         gbh.addParam(scaleYParam);
 
         shearXParam = new RangeParam("Horizontal Shearing (%)",
-            -100, 100 * shx, 100, true, TextPosition.NONE_TICKS);
+            -100, 100 * shx, 100, true, LabelPosition.NONE_WITH_TICKS);
         shearXParam.addChangeListener(changeListener);
         gbh.addParam(shearXParam);
 
         shearYParam = new RangeParam("Vertical Shearing (%)",
-            -100, 100 * shy, 100, true, TextPosition.NONE_TICKS);
+            -100, 100 * shy, 100, true, LabelPosition.NONE_WITH_TICKS);
         shearYParam.addChangeListener(changeListener);
         gbh.addParam(shearYParam);
     }
@@ -133,6 +133,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
         underlineCB.setSelected(font.hasUnderline());
         trackingParam.setValue(font.getTracking());
         lineHeightParam.setValueNoTrigger(100 * relLineHeight);
+
         scaleXParam.setValueNoTrigger(100 * sx);
         scaleYParam.setValueNoTrigger(100 * sy);
         shearXParam.setValueNoTrigger(100 * shx);

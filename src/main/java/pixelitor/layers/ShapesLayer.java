@@ -22,6 +22,7 @@ import pixelitor.CopyType;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.compactions.Flip;
+import pixelitor.compactions.Outsets;
 import pixelitor.gui.View;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.TranslatedImage;
@@ -163,8 +164,8 @@ public class ShapesLayer extends ContentLayer {
     }
 
     @Override
-    public void enlargeCanvas(int north, int east, int south, int west) {
-        transform(AffineTransform.getTranslateInstance(west, north));
+    public void enlargeCanvas(Outsets out) {
+        transform(AffineTransform.getTranslateInstance(out.left, out.top));
     }
 
     private void transform(AffineTransform at) {

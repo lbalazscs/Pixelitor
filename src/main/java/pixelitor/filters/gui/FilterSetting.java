@@ -20,24 +20,28 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * The model of something that appears in a filter GUI.
- * If that something is a button, then the {@link FilterButtonModel}
- * sub-interface is used, otherwise the {@link FilterParam}.
+ * The model of a widget that appears in a filter GUI.
+ * Can be either a {@link FilterButtonModel} for buttons
+ * or a {@link FilterParam} for adjustable parameters.
  */
 public interface FilterSetting {
+    /**
+     * Returns the display name of this filter setting.
+     */
     String getName();
 
     /**
      * Creates the GUI component that corresponds to this model.
      *
-     * If this is an instance of {@link FilterParam},
-     * then the returned JComponent must also be
-     * an implementation of {@link ParamGUI}
+     * Note: If this is an instance of {@link FilterParam},
+     * the returned component should also implement {@link ParamGUI}.
      */
     JComponent createGUI();
 
     /**
-     * A convenience method that also sets a name of the created GUI.
+     * Creates and names the GUI component for this filter setting.
+     * The GUI component's name is used for lookup during automatic
+     * GUI testing and it's not the same as the display name.
      */
     default JComponent createGUI(String name) {
         JComponent gui = createGUI();
@@ -46,7 +50,7 @@ public interface FilterSetting {
     }
 
     /**
-     * Sets the listener that will be notified when the filter setting is adjusted.
+     * Sets the listener that will be notified when this filter setting is adjusted.
      */
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
@@ -62,7 +66,7 @@ public interface FilterSetting {
     }
 
     /**
-     * The possible reasons for enabling or disabling a filter.
+     * The possible reasons for enabling or disabling a filter setting.
      */
     enum EnabledReason {
         APP_LOGIC, ANIMATION_ENDING_STATE

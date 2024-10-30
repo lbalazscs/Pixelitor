@@ -30,33 +30,60 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static pixelitor.filters.gui.UserPreset.PRESETS_DIR;
-import static pixelitor.utils.Utils.FILE_SEPARATOR;
 
+/**
+ * Represents a component (such as a filter or tool) that can
+ * load (and possibly save) its current state as {@link Preset} objects.
+ */
 public interface PresetOwner {
+    /**
+     * Determines if this component supports {@link UserPreset}s.
+     */
     boolean canHaveUserPresets();
 
-    // should be final, but Java doesn't allow both default and final
+    /**
+     * Returns the directory name where this component's
+     * {@link UserPreset}s are stored. The directory will be created as
+     * a subdirectory of the application's preset root directory.
+     */
+    String getPresetDirName();
+
+    /**
+     * Creates a new user preset with the current state of this component.
+     * Should not be called if {@link #canHaveUserPresets()} returns false.
+     */
     default UserPreset createUserPreset(String presetName) {
         UserPreset preset = new UserPreset(presetName, getPresetDirName());
         saveStateTo(preset);
         return preset;
     }
 
+    /**
+     * Saves the current state of this component to the given {@link UserPreset}.
+     */
     void saveStateTo(UserPreset preset);
 
+    /**
+     * Loads the state stored in the given {@link UserPreset}.
+     */
     void loadUserPreset(UserPreset preset);
 
+    /**
+     * Loads a {@link FilterState} into this component.
+     */
     default void loadFilterState(FilterState filterState, boolean reset) {
         // used only for parametrized filters
         throw new UnsupportedOperationException();
     }
 
-    String getPresetDirName();
-
+    /**
+     * Creates an action that opens the {@link UserPreset} directory
+     * in the system's file manager.
+     */
     default PAction createManagePresetsAction() {
         return new PAction("Manage Presets...", () -> {
             try {
-                String dirPath = PRESETS_DIR + FILE_SEPARATOR + getPresetDirName();
+                String dirPath = PRESETS_DIR + File.separator + getPresetDirName();
                 Desktop.getDesktop().open(new File(dirPath));
             } catch (IOException ex) {
                 Messages.showException(ex);
@@ -64,6 +91,10 @@ public interface PresetOwner {
         });
     }
 
+    /**
+     * Creates an {@link Action} that prompts the user to save
+     * the current state as a new {@link UserPreset}.
+     */
     default Action createSavePresetAction(Component parent,
                                           Consumer<UserPreset> menuAdder,
                                           Consumer<UserPreset> menuRemover) {
@@ -82,18 +113,22 @@ public interface PresetOwner {
         UserPreset preset = createUserPreset(presetName);
 
         if (preset.fileExists()) {
-            String title = "Preset exists";
-            String msg = String.format("The preset \"%s\" already exists. Overwrite?",
-                preset.getName());
-            int msgType = JOptionPane.WARNING_MESSAGE;
-            if (!Dialogs.showYesNoDialog(parent, title, msg, msgType)) {
+            boolean overwrite = confirmOverwrite(parent, preset.getName());
+            if (!overwrite) {
                 return;
             }
-            // remove the old preset from the menus
+            // remove the overwritten preset from the menus
             menuRemover.accept(preset);
         }
         preset.save();
-
         menuAdder.accept(preset);
+    }
+
+    private static boolean confirmOverwrite(Component parent, String presetName) {
+        String title = "Preset exists";
+        String msg = String.format("The preset \"%s\" already exists. Overwrite?",
+            presetName);
+        int msgType = JOptionPane.WARNING_MESSAGE;
+        return Dialogs.showYesNoDialog(parent, title, msg, msgType);
     }
 }

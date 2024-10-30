@@ -315,9 +315,9 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public void updateOptions(Filterable layer, boolean changeValue) {
+    public void adaptToContext(Filterable layer, boolean changeValue) {
         for (RangeParam child : children) {
-            child.updateOptions(layer, changeValue);
+            child.adaptToContext(layer, changeValue);
         }
     }
 

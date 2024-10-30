@@ -65,7 +65,9 @@ public class Shapes {
      * in image coordinates, to a {@link Path}.
      */
     public static Path shapeToPath(Shape shape, View view) {
-        Composition comp = view == null ? null : view.getComp();
+        Composition comp = view == null
+            ? null
+            : view.getComp();
         Path path = new Path(comp, comp != null);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
 
@@ -146,6 +148,52 @@ public class Shapes {
         g.setColor(c);
         g.draw(shape);
         g.setColor(prevColor);
+    }
+
+    /**
+     * Creates an arrow shape that can be either horizontal or vertical.
+     * The width of the shaft and the size of the arrowhead don't depend
+     * on the arrow's length.
+     */
+    public static Shape createFixWidthArrow(double startX, double startY, double endX, double endY) {
+        // Configurable properties
+        double arrowWidth = 10.0;  // Width of the arrow shaft
+        double arrowheadSize = 20.0;  // Size of the arrowhead
+
+        Path2D.Double path = new Path2D.Double();
+
+        // Calculate direction and length
+        double dx = endX - startX;
+        double dy = endY - startY;
+        boolean isVertical = Math.abs(dy) > Math.abs(dx);
+
+        if (isVertical) { // Vertical arrow (pointing up or down)
+            double halfWidth = arrowWidth / 2.0;
+            double arrowheadBase = endY + (dy > 0 ? -1 : 1) * arrowheadSize;
+
+            path.moveTo(startX - halfWidth, startY);
+            path.lineTo(startX - halfWidth, arrowheadBase);
+            path.lineTo(startX - arrowheadSize, arrowheadBase);
+            path.lineTo(endX, endY);
+            path.lineTo(startX + arrowheadSize, arrowheadBase);
+            path.lineTo(startX + halfWidth, arrowheadBase);
+            path.lineTo(startX + halfWidth, startY);
+            path.closePath();
+        } else { // Horizontal arrow (pointing left or right)
+            double halfWidth = arrowWidth / 2.0;
+            double arrowheadBase = endX + (dx > 0 ? -1 : 1) * arrowheadSize;
+
+            path.moveTo(startX, startY + halfWidth);
+            path.lineTo(arrowheadBase, startY + halfWidth);
+            path.lineTo(arrowheadBase, startY + arrowheadSize);
+            path.lineTo(endX, endY);
+            path.lineTo(arrowheadBase, startY - arrowheadSize);
+            path.lineTo(arrowheadBase, startY - halfWidth);
+            path.lineTo(startX, startY - halfWidth);
+            path.closePath();
+        }
+
+        return path;
     }
 
     public static void drawDirectionArrow(Graphics2D g,
@@ -1935,7 +1983,7 @@ public class Shapes {
         //
         var T = new Point2D.Double();
 
-        Geometry.sectionFormula(P, Q, AB, BC, T);
+        Geometry.calcDivisionPoint(P, Q, AB, BC, T);
 
         // Converting point vectors P and Q to show relative displacement from T
         // P = P - T, Q = Q - T

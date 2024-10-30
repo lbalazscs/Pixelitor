@@ -21,7 +21,7 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SliderSpinner.TextPosition;
+import pixelitor.gui.utils.SliderSpinner.LabelPosition;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.tools.Tool;
@@ -54,9 +54,9 @@ public class AutoPaintPanel extends ValidatedPanel implements DialogMenuOwner {
         "Random Colors", COLOR_MODES);
 
     private final RangeParam lengthVariation = new RangeParam(
-        "Stroke Length Variation (%)", 0, 50, 100, true, TextPosition.NONE);
+        "Stroke Length Variation (%)", 0, 50, 100, true, LabelPosition.NONE);
     private final RangeParam curvature = new RangeParam(
-        "Stroke Curvature (%)", 0, 100, 300, true, TextPosition.NONE);
+        "Stroke Curvature (%)", 0, 100, 300, true, LabelPosition.NONE);
 
     private final IntChoiceParam strokeDirection = new IntChoiceParam("Direction", new Item[]{
         new Item("Random", AutoPaintSettings.DIRECTION_RANDOM),

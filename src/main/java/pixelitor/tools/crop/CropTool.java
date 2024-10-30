@@ -52,7 +52,7 @@ import java.util.ResourceBundle;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 import static pixelitor.tools.DragToolState.INITIAL_DRAG;
 import static pixelitor.tools.DragToolState.NO_INTERACTION;
 import static pixelitor.tools.DragToolState.TRANSFORM;
