@@ -60,7 +60,7 @@ import static pixelitor.utils.Texts.i18n;
 public class PixelitorWindow extends JFrame {
     private static final String FIX_TITLE = calcFixTitle();
 
-    private Box eastPanel;
+    private JPanel eastPanel;
     private ToolsPanel toolsPanel;
 
     // normal bounds: the window bounds when it is not maximized
@@ -146,15 +146,15 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void addLayersAndHistograms() {
-        eastPanel = Box.createVerticalBox();
-        HistogramsPanel histogramsPanel = HistogramsPanel.get();
+        eastPanel = new JPanel(new BorderLayout());
+        HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         Views.addActivationListener(histogramsPanel);
 
         if (WorkSpace.getHistogramsVisibility()) {
-            eastPanel.add(histogramsPanel);
+            eastPanel.add(histogramsPanel, NORTH);
         }
         if (WorkSpace.getLayersVisibility()) {
-            eastPanel.add(LayersContainer.get());
+            eastPanel.add(LayersContainer.get(), CENTER);
         }
 
         add(eastPanel, EAST);
@@ -228,10 +228,10 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void setHistogramsVisibility(boolean visible, boolean revalidate) {
-        HistogramsPanel histogramsPanel = HistogramsPanel.get();
+        HistogramsPanel histogramsPanel = HistogramsPanel.getInstance();
         if (visible) {
             assert !HistogramsPanel.isShown();
-            eastPanel.add(histogramsPanel);
+            eastPanel.add(histogramsPanel, NORTH);
             HistogramsPanel.updateFromActiveComp();
         } else {
             assert histogramsPanel.getParent() == eastPanel;
@@ -246,7 +246,7 @@ public class PixelitorWindow extends JFrame {
     public void setLayersVisibility(boolean visible, boolean revalidate) {
         if (visible) {
             assert LayersContainer.parentIs(null);
-            eastPanel.add(LayersContainer.get());
+            eastPanel.add(LayersContainer.get(), CENTER);
         } else {
             assert LayersContainer.parentIs(eastPanel);
             eastPanel.remove(LayersContainer.get());

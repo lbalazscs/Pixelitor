@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,28 +17,32 @@
 
 package pixelitor.gui;
 
+import pixelitor.gui.utils.Themes;
+
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
 import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
 
 /**
- * This component calculates and paints a histogram.
+ * Renders a histogram for a specific color channel.
  */
 public class HistogramPainter extends JComponent {
-    private static final int MAX_LINE_HEIGHT = 100;
+    private static final int MAX_BAR_HEIGHT = 100;
     private static final int PREFERRED_WIDTH = HistogramsPanel.NUM_BINS + 1;
-    public static final int PREFERRED_HEIGHT = MAX_LINE_HEIGHT + 2;
+    public static final int PREFERRED_HEIGHT = MAX_BAR_HEIGHT + 2;
 
     private int[] frequencies = null;
     private int maxFrequency = 0;
-    private final Color color;
+    private final Color channelColor;
+    private final boolean isLuminance;
 
-    public HistogramPainter(Color color) {
-        this.color = color;
-
+    public HistogramPainter(Color channelColor, boolean isLuminance) {
+        this.channelColor = channelColor;
+        this.isLuminance = isLuminance;
         setPreferredSize(new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT));
     }
 
@@ -52,7 +56,7 @@ public class HistogramPainter extends JComponent {
         }
     }
 
-    public void allViewsClosed() {
+    public void clearData() {
         maxFrequency = 0;
     }
 
@@ -60,28 +64,37 @@ public class HistogramPainter extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // the start of the actual histogram
+        int offsetX = (getWidth() - PREFERRED_WIDTH) / 2;
+        int offsetY = (getHeight() - PREFERRED_HEIGHT) / 2;
+        assert offsetY == 0; // it should always be tighly packed vertically
+
+        // draw background
+        if (isLuminance) {
+            if (!Themes.getCurrent().isDark()) {
+                g.setColor(GRAY);
+                g.fillRect(offsetX, offsetY, PREFERRED_WIDTH, PREFERRED_HEIGHT);
+            }
+        }
+
+        // draw border
         g.setColor(BLACK);
+        g.drawRect(offsetX, offsetY, PREFERRED_WIDTH, PREFERRED_HEIGHT);
 
-        int rectX = (getWidth() - PREFERRED_WIDTH) / 2;
-        int rectY = (getHeight() - PREFERRED_HEIGHT) / 2;
-        g.drawRect(rectX, rectY, PREFERRED_WIDTH, PREFERRED_HEIGHT);
-
-        if (maxFrequency == 0) { // no image
-            return;
-        }
-        if (frequencies == null) {
-            return;
+        if (maxFrequency == 0 || frequencies == null) {
+            return; // no image
         }
 
-        int maxY = 1 + MAX_LINE_HEIGHT + rectY;
-        int x = rectX;
-        g.setColor(color);
+        int baseY = 1 + MAX_BAR_HEIGHT + offsetY;
+        int x = offsetX;
+        g.setColor(channelColor);
+        
         for (int i = 0; i < HistogramsPanel.NUM_BINS; i++) {
             x++;
             int frequency = frequencies[i];
             if (frequency > 0) {
-                int lineHeight = (int) (MAX_LINE_HEIGHT * ((double) frequency / maxFrequency));
-                g.drawLine(x, maxY - lineHeight, x, maxY);
+                int barHeight = (int) (MAX_BAR_HEIGHT * ((double) frequency / maxFrequency));
+                g.drawLine(x, baseY - barHeight, x, baseY);
             }
         }
     }
