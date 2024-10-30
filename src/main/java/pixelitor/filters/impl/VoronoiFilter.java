@@ -21,6 +21,7 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.AppMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
+import pixelitor.utils.Metric.DistanceFunction;
 import pixelitor.utils.PoissonDiskSampling;
 
 import java.awt.Color;
@@ -49,6 +50,8 @@ public class VoronoiFilter extends PointFilter {
     private int[] colors;
 
     private RandomGenerator rand;
+    private DistanceFunction intPrecisionDistance;
+    private DistanceFunction doublePrecisionDistance;
 
     public VoronoiFilter(String filterName) {
         super(filterName);
@@ -62,8 +65,10 @@ public class VoronoiFilter extends PointFilter {
         this.distanceBetweenPoints = distanceBetweenPoints;
     }
 
-    public void setMetric(Metric metric) {
+    public void setMetric(Metric metric, int cx, int cy) {
         this.metric = metric;
+        intPrecisionDistance = metric.asIntPrecisionDistance(cx, cy);
+        doublePrecisionDistance = metric.asDoublePrecisionDistance(cx, cy);
     }
 
     public void setUseImageColors(boolean useImageColors) {
@@ -106,7 +111,7 @@ public class VoronoiFilter extends PointFilter {
     public int processPixel(int x, int y, int rgb) {
         // find the closest sampled point to the current pixel
         int closestIndex = sampling.findClosestPointIndex(x, y,
-            metric.asIntPrecisionDistance());
+            intPrecisionDistance);
         if (closestIndex == -1) {
             // there wasn't a point in the cell or in its neighbours
             if (AppMode.isDevelopment()) {
@@ -159,7 +164,7 @@ public class VoronoiFilter extends PointFilter {
             for (int j = 0; j < aaRes; j++) {
                 double sx = x + 1.0 / aaRes * j - 0.5;
                 // sx and sy are the supersampling coordinates
-                int closestIndex = sampling.findClosestPointIndex(sx, sy, metric.asDoublePrecisionDistance());
+                int closestIndex = sampling.findClosestPointIndex(sx, sy, doublePrecisionDistance);
                 int color = colors[closestIndex];
                 r += (color >>> 16) & 0xFF;
                 g += (color >>> 8) & 0xFF;
