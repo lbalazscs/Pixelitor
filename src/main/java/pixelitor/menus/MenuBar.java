@@ -129,7 +129,7 @@ public class MenuBar extends JMenuBar {
         add(createFilterMenu(texts));
         add(createViewMenu(pw, texts));
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
@@ -1288,8 +1288,7 @@ public class MenuBar extends JMenuBar {
         developMenu.add(new ActiveSmartObjectAction("Print Smart Filters") {
             @Override
             protected void onActiveSO(SmartObject so) {
-                String s = so.debugSmartFilters();
-                System.out.printf("%s%n", s);
+                System.out.printf("%s%n", so.debugSmartFilters());
             }
         });
 

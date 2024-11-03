@@ -281,7 +281,7 @@ public enum ShapeType {
     public static final String PRESET_KEY = "ShapeType";
 
     private static final String NAME = "Shape";
-    private final String guiName;
+    private final String displayName;
 
     private final boolean hasSettings;
     private final boolean areaProblem;
@@ -290,8 +290,8 @@ public enum ShapeType {
     // transform box is initialized at the angle of the shape
     private final boolean directional;
 
-    ShapeType(String guiName, boolean directional, boolean hasSettings, boolean areaProblem) {
-        this.guiName = guiName;
+    ShapeType(String displayName, boolean directional, boolean hasSettings, boolean areaProblem) {
+        this.displayName = displayName;
         this.directional = directional;
         this.hasSettings = hasSettings;
         this.areaProblem = areaProblem;
@@ -344,6 +344,6 @@ public enum ShapeType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

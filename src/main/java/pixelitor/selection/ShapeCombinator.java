@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,58 +20,59 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 
 /**
- * Describes how a new selection is combined with an existing selection.
- * Corresponds to the "New Selection" combo box in the Selection Tool.
+ * Defines the available operations for combining
+ * a new selection shape with an existing one.
  */
 public enum ShapeCombinator {
     REPLACE("Replace") {
         @Override
-        public Shape combine(Shape oldShape, Shape newShape) {
+        public Shape combine(Shape existingShape, Shape newShape) {
+            // discard the previously selected area
             return newShape;
         }
     }, ADD("Add") {
         @Override
-        public Shape combine(Shape oldShape, Shape newShape) {
-            Area oldArea = new Area(oldShape);
-            Area newArea = new Area(newShape);
-            oldArea.add(newArea);
-            return oldArea;
+        public Shape combine(Shape existingShape, Shape newShape) {
+            // adds the new selection area to the existing one
+            Area combinedArea = new Area(existingShape);
+            combinedArea.add(new Area(newShape));
+            return combinedArea;
         }
     }, SUBTRACT("Subtract") {
         @Override
-        public Shape combine(Shape oldShape, Shape newShape) {
-            Area oldArea = new Area(oldShape);
-            Area newArea = new Area(newShape);
-            oldArea.subtract(newArea);
-            return oldArea;
+        public Shape combine(Shape existingShape, Shape newShape) {
+            // removes the new selection area from the existing one
+            Area remainingArea = new Area(existingShape);
+            remainingArea.subtract(new Area(newShape));
+            return remainingArea;
         }
     }, INTERSECT("Intersect") {
         @Override
-        public Shape combine(Shape oldShape, Shape newShape) {
-            Area oldArea = new Area(oldShape);
-            Area newArea = new Area(newShape);
-            oldArea.intersect(newArea);
-            return oldArea;
+        public Shape combine(Shape existingShape, Shape newShape) {
+            // keeps only the areas that are common to both selections
+            Area commonArea = new Area(existingShape);
+            commonArea.intersect(new Area(newShape));
+            return commonArea;
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
-    ShapeCombinator(String guiName) {
-        this.guiName = guiName;
+    ShapeCombinator(String displayName) {
+        this.displayName = displayName;
     }
 
     /**
-     * Calculates the combined shape from the existing shape and the new one
+     * Combines two shapes according to this combination mode.
      */
-    public abstract Shape combine(Shape oldShape, Shape newShape);
+    public abstract Shape combine(Shape existingShape, Shape newShape);
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
-    public String getNameForUndo() {
+    public String getHistoryName() {
         return this + " Selection";
     }
 }

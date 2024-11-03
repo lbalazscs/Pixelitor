@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -126,10 +126,10 @@ public final class ConsistencyChecks {
         } else {
             msg += "(no selection) ";
         }
-        if (comp.hasInProgressSelection()) {
-            msg += "(has in-progress selection) ";
+        if (comp.hasDraftSelection()) {
+            msg += "(has draft selection) ";
         } else {
-            msg += "(no in-progress selection) ";
+            msg += "(no draft selection) ";
         }
 
         throw new IllegalStateException(msg + " on " + Threads.threadName());

@@ -123,7 +123,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         return (ResizeUnit) unitSelectorModel.getSelectedItem();
     }
 
-    private boolean isPixelUnit() {
+    private boolean usePixelUnit() {
         return unitSelectorModel.getSelectedItem() == ResizeUnit.PIXELS;
     }
 
@@ -184,7 +184,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private void keyReleasedInWidthTF() {
-        if (isPixelUnit()) {
+        if (usePixelUnit()) {
             try {
                 targetWidth = parseInt(getWidthText());
                 targetWidthPercent = ((double) targetWidth) * 100 / origWidth;
@@ -199,17 +199,17 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
             } catch (NumberFormatException ex) {
                 resetWidth(ResizeUnit.PIXELS);
             }
-        } else { // unit is percent
+        } else { // unit is percentage
             try {
                 targetWidthPercent = parseDouble(getWidthText());
                 targetWidth = (int) (origWidth * targetWidthPercent / 100);
                 if (keepProportions()) {
                     targetHeight = (int) (targetWidth / origAspectRatio);
                     targetHeightPercent = targetWidthPercent;
-                    updateHeightText(ResizeUnit.PERCENT);
+                    updateHeightText(ResizeUnit.PERCENTAGE);
                 }
             } catch (ParseException e) {
-                resetWidth(ResizeUnit.PERCENT);
+                resetWidth(ResizeUnit.PERCENTAGE);
             }
         }
     }
@@ -223,7 +223,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private void keyReleasedInHeightTF() {
-        if (isPixelUnit()) {
+        if (usePixelUnit()) {
             try {
                 targetHeight = parseInt(getHeightText());
                 targetHeightPercent = ((double) targetHeight) * 100 / origHeight;
@@ -245,10 +245,10 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 if (keepProportions()) {
                     targetWidth = (int) (targetHeight * origAspectRatio);
                     targetWidthPercent = targetHeightPercent;
-                    updateWidthText(ResizeUnit.PERCENT);
+                    updateWidthText(ResizeUnit.PERCENTAGE);
                 }
             } catch (ParseException e) {
-                resetHeight(ResizeUnit.PERCENT);
+                resetHeight(ResizeUnit.PERCENTAGE);
             }
         }
     }
@@ -264,23 +264,23 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private void updateWidthText(ResizeUnit unit) {
         widthTF.setText(switch (unit) {
             case PIXELS -> String.valueOf(targetWidth);
-            case PERCENT -> PERCENT_FORMAT.format(targetWidthPercent);
+            case PERCENTAGE -> PERCENT_FORMAT.format(targetWidthPercent);
         });
     }
 
     private void updateHeightText(ResizeUnit unit) {
         heightTF.setText(switch (unit) {
             case PIXELS -> String.valueOf(targetHeight);
-            case PERCENT -> PERCENT_FORMAT.format(targetHeightPercent);
+            case PERCENTAGE -> PERCENT_FORMAT.format(targetHeightPercent);
         });
     }
 
     private void updateBorderText() {
-        String srcSize = origWidth + "x" + origHeight + " to ";
+        String origSize = origWidth + "x" + origHeight + " to ";
         if (targetWidth > 0 && targetHeight > 0) {
-            border.setTitle(srcSize + targetWidth + "x" + targetHeight);
+            border.setTitle(origSize + targetWidth + "x" + targetHeight);
         } else {
-            border.setTitle(srcSize + "??");
+            border.setTitle(origSize + "??");
         }
 
         repaint();
@@ -333,7 +333,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
     @Override
     public void saveStateTo(UserPreset preset) {
-        preset.putBoolean("Pixels", isPixelUnit());
+        preset.putBoolean("Pixels", usePixelUnit());
         preset.putBoolean("Constrain", keepProportions());
         preset.put("Width", getWidthText());
         preset.put("Height", getHeightText());
@@ -344,7 +344,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         boolean pixels = preset.getBoolean("Pixels");
         unitSelectorModel.setSelectedItem(pixels
             ? ResizeUnit.PIXELS
-            : ResizeUnit.PERCENT);
+            : ResizeUnit.PERCENTAGE);
 
         boolean keep = preset.getBoolean("Constrain");
         keepProportionsCB.setSelected(keep);

@@ -440,7 +440,7 @@ public class Views {
 
             View view = new View(comp);
             comp.addLayersToUI();
-            view.setCursor(Tools.getCurrent().getStartingCursor());
+            view.setCursor(Tools.getActive().getStartingCursor());
             views.add(view);
             MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addView(view);

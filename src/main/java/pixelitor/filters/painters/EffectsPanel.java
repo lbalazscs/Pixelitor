@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,10 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.effects.*;
+import org.jdesktop.swingx.painter.effects.GlowPathEffect;
+import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
+import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
+import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.filters.gui.*;
 
 import javax.swing.*;
@@ -27,12 +30,15 @@ import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 
 import static java.awt.BorderLayout.CENTER;
-import static java.awt.Color.*;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.RED;
+import static java.awt.Color.WHITE;
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * Configuration panel for SwingX {@link AreaEffect}s.
- * it can be the {@link ParamGUI} for an {@link EffectsParam}
+ * A GUI panel for configuring the effects in an {@link AreaEffects}.
+ * This class acts as the {@link ParamGUI} for an {@link EffectsParam}.
  */
 public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     public static final String GLOW_TAB_NAME = "Glow               ";
@@ -48,10 +54,10 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
 
     private final JTabbedPane tabs;
 
-    public EffectsPanel(AreaEffects givenEffects) {
+    public EffectsPanel(AreaEffects initialEffects) {
         setLayout(new BorderLayout());
 
-        setEffects(givenEffects);
+        setEffects(initialEffects);
         panels[0] = glowPanel;
         panels[1] = innerGlowPanel;
         panels[2] = neonBorderPanel;
@@ -117,8 +123,8 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             glowPanel = new EffectWithWidthPanel(
                 "Glow", enable, color, width, opacity);
         } else {
-            glowPanel.setTabEnabled(enable);
-            glowPanel.setBrushWidth(width);
+            glowPanel.setEffectEnabled(enable);
+            glowPanel.setEffectWidth(width);
             glowPanel.setColor(color, false);
             glowPanel.setOpacity(opacity);
         }
@@ -142,8 +148,8 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             innerGlowPanel = new EffectWithWidthPanel(
                 "Inner Glow", enable, color, width, opacity);
         } else {
-            innerGlowPanel.setTabEnabled(enable);
-            innerGlowPanel.setBrushWidth(width);
+            innerGlowPanel.setEffectEnabled(enable);
+            innerGlowPanel.setEffectWidth(width);
             innerGlowPanel.setColor(color, false);
             innerGlowPanel.setOpacity(opacity);
         }
@@ -169,8 +175,8 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             neonBorderPanel = new NeonBorderPanel(
                 enable, color, innerColor, width, opacity);
         } else {
-            neonBorderPanel.setTabEnabled(enable);
-            neonBorderPanel.setBrushWidth(width);
+            neonBorderPanel.setEffectEnabled(enable);
+            neonBorderPanel.setEffectWidth(width);
             neonBorderPanel.setColor(color, false);
             neonBorderPanel.setOpacity(opacity);
             neonBorderPanel.setInnerColor(innerColor, false);
@@ -204,8 +210,8 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             dropShadowPanel = new DropShadowPanel(
                 enable, color, distance, angle, spread, opacity);
         } else {
-            dropShadowPanel.setTabEnabled(enable);
-            dropShadowPanel.setBrushWidth(spread);
+            dropShadowPanel.setEffectEnabled(enable);
+            dropShadowPanel.setEffectWidth(spread);
             dropShadowPanel.setColor(color, false);
             dropShadowPanel.setOpacity(opacity);
             dropShadowPanel.setAngle(angle);
@@ -213,6 +219,9 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         }
     }
 
+    /**
+     * Updates the AreaEffects instance with the current GUI settings.
+     */
     private void updateEffectsFromGUI(AreaEffects effects) {
         updateGlowFromGUI(effects);
         updateInnerGlowFromGUI(effects);
@@ -224,7 +233,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         GlowPathEffect glowEffect = null;
         if (glowPanel.isEffectEnabled()) {
             glowEffect = new GlowPathEffect(glowPanel.getOpacity());
-            glowPanel.updateEffectColorAndBrush(glowEffect);
+            glowPanel.updateEffectColorAndWidth(glowEffect);
         }
         effects.setGlow(glowEffect);
     }
@@ -233,7 +242,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         InnerGlowPathEffect innerGlowEffect = null;
         if (innerGlowPanel.isEffectEnabled()) {
             innerGlowEffect = new InnerGlowPathEffect(innerGlowPanel.getOpacity());
-            innerGlowPanel.updateEffectColorAndBrush(innerGlowEffect);
+            innerGlowPanel.updateEffectColorAndWidth(innerGlowEffect);
         }
         effects.setInnerGlow(innerGlowEffect);
     }
@@ -243,7 +252,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         if (neonBorderPanel.isEffectEnabled()) {
             Color edgeColor = neonBorderPanel.getColor();
             Color centerColor = neonBorderPanel.getInnerColor();
-            double effectWidth = neonBorderPanel.getBrushWidth();
+            double effectWidth = neonBorderPanel.getEffectWidth();
 
             neonBorderEffect = new NeonBorderEffect(edgeColor, centerColor, effectWidth,
                 neonBorderPanel.getOpacity());
@@ -255,7 +264,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         ShadowPathEffect dropShadowEffect = null;
         if (dropShadowPanel.isEffectEnabled()) {
             dropShadowEffect = new ShadowPathEffect(dropShadowPanel.getOpacity());
-            dropShadowPanel.updateEffectColorAndBrush(dropShadowEffect);
+            dropShadowPanel.updateEffectColorAndWidth(dropShadowEffect);
             dropShadowEffect.setOffset(dropShadowPanel.getOffset());
         }
         effects.setDropShadow(dropShadowEffect);
@@ -313,7 +322,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         glowPanel.reset(false);
         innerGlowPanel.reset(false);
         neonBorderPanel.reset(false);
-        dropShadowPanel.reset(trigger); // trigger at most one of them
+        dropShadowPanel.reset(trigger); // trigger only once
     }
 
     public void randomize() {

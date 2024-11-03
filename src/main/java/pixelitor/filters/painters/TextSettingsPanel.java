@@ -46,18 +46,23 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
  */
 public class TextSettingsPanel extends FilterGUI
     implements ParamAdjustmentListener, ActionListener, Consumer<TextSettings> {
-    private TextLayer textLayer;
+
+    private static final int DEFAULT_TEXT_AREA_ROWS = 3;
+    private static final int DEFAULT_TEXT_AREA_COLS = 20;
+    private static final int DEFAULT_MAX_FONT_SIZE = 1000;
+
+    private TextLayer textLayer; // null when used as a filter
     private FontInfo fontInfo;
 
     // stored here as long as the advanced dialog isn't created
     private double relLineHeight;
-    private double sx;
-    private double sy;
-    private double shx;
-    private double shy;
+    private double scaleX;
+    private double scaleY;
+    private double shearX;
+    private double shearY;
 
-    private JTextArea textTF;
-    private JComboBox<String> fontFamilyChooserCB;
+    private JTextArea textArea;
+    private JComboBox<String> fontFamilyCB;
     private SliderSpinner fontSizeSlider;
     private AngleParam rotationParam;
     private JCheckBox boldCB;
@@ -70,7 +75,7 @@ public class TextSettingsPanel extends FilterGUI
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
-    private boolean ignoreGUIChanges = false;
+    private boolean suppressGuiUpdates = false;
     private BoxAlignment lastAlignment;
 
     /**
@@ -90,20 +95,20 @@ public class TextSettingsPanel extends FilterGUI
         TextSettings settings = textLayer.getSettings();
         init(settings, textLayer.getComp());
 
-        if (textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
-            textTF.selectAll();
+        if (textArea.getText().equals(TextSettings.DEFAULT_TEXT)) {
+            textArea.selectAll();
         }
     }
 
     private void init(TextSettings settings, Composition comp) {
-        settings.setGuiUpdater(this);
+        settings.setGuiUpdateCallback(this);
         createGUI(settings, comp);
 
         this.relLineHeight = settings.getRelLineHeight();
-        this.sx = settings.getSx();
-        this.sy = settings.getSy();
-        this.shx = settings.getShx();
-        this.shy = settings.getShy();
+        this.scaleX = settings.getSx();
+        this.scaleY = settings.getSy();
+        this.shearX = settings.getShx();
+        this.shearY = settings.getShy();
     }
 
     private void createGUI(TextSettings settings, Composition comp) {
@@ -124,8 +129,8 @@ public class TextSettingsPanel extends FilterGUI
         var gbh = new GridBagHelper(textPanel);
 
         gbh.addLabel("Text:", 0, 0);
-        createTextTF(settings);
-        gbh.addLastControl(textTF);
+        createTextArea(settings);
+        gbh.addLastControl(textArea);
 
         gbh.addLabel("Color:", 0, 1);
         color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
@@ -161,11 +166,11 @@ public class TextSettingsPanel extends FilterGUI
         return textPanel;
     }
 
-    private void createTextTF(TextSettings settings) {
-        textTF = new JTextArea(settings.getText(), 3, 20);
-        textTF.setName("textTF");
+    private void createTextArea(TextSettings settings) {
+        textArea = new JTextArea(settings.getText(), DEFAULT_TEXT_AREA_ROWS, DEFAULT_TEXT_AREA_COLS);
+        textArea.setName("textArea");
 
-        textTF.getDocument().addDocumentListener(new DocumentListener() {
+        textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 paramAdjusted();
@@ -189,7 +194,7 @@ public class TextSettingsPanel extends FilterGUI
 
         var gbh = new GridBagHelper(fontPanel);
 
-        int maxFontSize = 1000;
+        int maxFontSize = DEFAULT_MAX_FONT_SIZE;
         Font font = settings.getFont();
         int defaultFontSize = font.getSize();
         if (maxFontSize < defaultFontSize) {
@@ -208,15 +213,15 @@ public class TextSettingsPanel extends FilterGUI
 
         gbh.addLabel("Font Type:", 0, 1);
         String[] availableFonts = Utils.getAvailableFontNames();
-        fontFamilyChooserCB = new JComboBox<>(availableFonts);
+        fontFamilyCB = new JComboBox<>(availableFonts);
 
         // it's important to use Font.getName(), and not Font.getFontName(),
         // otherwise it might not be in the combo box
         String fontName = font.getName();
-        fontFamilyChooserCB.setSelectedItem(fontName);
+        fontFamilyCB.setSelectedItem(fontName);
 
-        fontFamilyChooserCB.addActionListener(this);
-        gbh.addLastControl(fontFamilyChooserCB);
+        fontFamilyCB.addActionListener(this);
+        gbh.addLastControl(fontFamilyCB);
 
         boolean defaultBold = font.isBold();
         boolean defaultItalic = font.isItalic();
@@ -240,7 +245,7 @@ public class TextSettingsPanel extends FilterGUI
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
-                this, fontInfo, relLineHeight, sx, sy, shx, shy);
+                this, fontInfo, relLineHeight, scaleX, scaleY, shearX, shearY);
             JDialog owner = GUIUtils.getDialogAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
                 .owner(owner)
@@ -262,7 +267,7 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private Font getSelectedFont() {
-        String fontFamily = (String) fontFamilyChooserCB.getSelectedItem();
+        String fontFamily = (String) fontFamilyCB.getSelectedItem();
         int size = fontSizeSlider.getCurrentValue();
         boolean bold = boldCB.isSelected();
         boolean italic = italicCB.isSelected();
@@ -272,7 +277,7 @@ public class TextSettingsPanel extends FilterGUI
             advancedSettingsPanel.saveStateTo(fontInfo);
         }
 
-        return fontInfo.createStyledFont();
+        return fontInfo.createFont();
     }
 
     private double getRelLineHeight() {
@@ -282,32 +287,32 @@ public class TextSettingsPanel extends FilterGUI
         return relLineHeight;
     }
 
-    private double getSx() {
+    private double getScaleX() {
         if (advancedSettingsDialog != null) {
-            return advancedSettingsPanel.getSx();
+            return advancedSettingsPanel.getScaleX();
         }
-        return sx;
+        return scaleX;
     }
 
-    private double getSy() {
+    private double getScaleY() {
         if (advancedSettingsDialog != null) {
-            return advancedSettingsPanel.getSy();
+            return advancedSettingsPanel.getScaleY();
         }
-        return sy;
+        return scaleY;
     }
 
-    private double getShx() {
+    private double getShearX() {
         if (advancedSettingsDialog != null) {
-            return advancedSettingsPanel.getShx();
+            return advancedSettingsPanel.getShearX();
         }
-        return shx;
+        return shearX;
     }
 
-    private double getShy() {
+    private double getShearY() {
         if (advancedSettingsDialog != null) {
-            return advancedSettingsPanel.getShy();
+            return advancedSettingsPanel.getShearY();
         }
-        return shy;
+        return shearY;
     }
 
     private void createEffectsPanel(TextSettings settings) {
@@ -334,29 +339,33 @@ public class TextSettingsPanel extends FilterGUI
 
     @Override
     public void paramAdjusted() {
-        if (ignoreGUIChanges) {
+        if (suppressGuiUpdates) {
             return;
         }
 
-        String text = textTF.getText();
+        updateApp(createSettingsFromGui());
+    }
 
+    private TextSettings createSettingsFromGui() {
         AreaEffects effects = null;
-        double textRotationAngle = rotationParam.getValueInRadians();
         if (effectsPanel != null) {
             effects = effectsPanel.getEffects();
         }
 
-        Font selectedFont = getSelectedFont();
-
         BoxAlignment alignment = getSelectedAlignment();
-        var settings = new TextSettings(
-            text, selectedFont, color.getColor(), effects,
+
+        return new TextSettings(
+            textArea.getText(),
+            getSelectedFont(),
+            color.getColor(),
+            effects,
             alignment.getHorizontal(),
             alignment.getVertical(),
-            watermarkCB.isSelected(), textRotationAngle,
-            getRelLineHeight(), getSx(), getSy(), getShx(), getShy(), this);
-
-        updateApp(settings);
+            watermarkCB.isSelected(),
+            rotationParam.getValueInRadians(),
+            getRelLineHeight(),
+            getScaleX(), getScaleY(),
+            getShearX(), getShearY(), this);
     }
 
     private BoxAlignment getSelectedAlignment() {
@@ -381,24 +390,24 @@ public class TextSettingsPanel extends FilterGUI
     @Override
     public void accept(TextSettings settings) {
         try {
-            ignoreGUIChanges = true;
+            suppressGuiUpdates = true;
             updateGUI(settings);
         } finally {
-            ignoreGUIChanges = false;
+            suppressGuiUpdates = false;
         }
 
         updateApp(settings);
     }
 
     private void updateGUI(TextSettings settings) {
-        textTF.setText(settings.getText());
+        textArea.setText(settings.getText());
         color.setColor(settings.getColor(), false);
         rotationParam.setValue(settings.getRotation(), false);
         alignmentCB.setSelectedItem(settings.getAlignment());
 
         Font font = settings.getFont();
         fontSizeSlider.setValue(font.getSize());
-        fontFamilyChooserCB.setSelectedItem(font.getName());
+        fontFamilyCB.setSelectedItem(font.getName());
         boldCB.setSelected(font.isBold());
         italicCB.setSelected(font.isItalic());
 

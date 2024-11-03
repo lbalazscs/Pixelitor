@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,14 +25,15 @@ import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
-import java.util.*;
+import java.util.Stack;
 
 /**
  * The type of a new selection created interactively by the user.
@@ -249,13 +250,13 @@ public enum SelectionType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
     // whether this selection type should display width and height info
     private final boolean displayWH;
 
-    SelectionType(String guiName, boolean displayWH) {
-        this.guiName = guiName;
+    SelectionType(String displayName, boolean displayWH) {
+        this.displayName = displayName;
         this.displayWH = displayWH;
     }
 
@@ -279,6 +280,6 @@ public enum SelectionType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

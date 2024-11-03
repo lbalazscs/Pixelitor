@@ -92,7 +92,7 @@ public class PathEdit extends PixelitorEdit {
                 Tools.PEN.removePath();
             } else {
                 Tools.PEN.setPath(newPath);
-                if (Tools.PEN.getMode() != modeBefore) {
+                if (Tools.PEN.modeIsNot(modeBefore)) {
                     // if the new path is not null, return
                     // to the mode before the edit
                     modeBefore.start();

@@ -57,11 +57,11 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      * conversion for grayscale images if needed.
      */
     public BufferedImage transformImage(BufferedImage src) {
-        boolean requiresGrayConversion = false;
+        boolean grayConversion = false;
         if (src.getType() == TYPE_BYTE_GRAY && !supportsGray()) {
             // converting the image to RGB, because the filter
             // doesn't support the grayscale image of a layer mask
-            requiresGrayConversion = true;
+            grayConversion = true;
             src = ImageUtils.toSysCompatibleImage(src);
         }
 
@@ -70,7 +70,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
         dest = transform(src, dest);
 
-        if (requiresGrayConversion) { // convert the result back
+        if (grayConversion) { // convert the result back
             dest = ImageUtils.convertToGrayScaleImage(dest);
         }
 

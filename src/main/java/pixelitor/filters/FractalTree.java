@@ -149,7 +149,7 @@ public class FractalTree extends ParametrizedFilter {
             strokeLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
             // colors
             float where = ((float) depth) / iterations.getValue();
-            int rgb = colors.getValue().getColor(1.0f - where);
+            int rgb = colors.getColorMap().getColor(1.0f - where);
             colorLookup[depth] = new Color(rgb);
 
             if (doPhysics) {

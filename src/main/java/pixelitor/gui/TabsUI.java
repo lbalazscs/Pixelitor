@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static pixelitor.utils.Keys.CTRL_TAB;
  * An {@link ImageAreaUI} implementation
  * where the edited images are in tabs
  */
-public class TabsUI extends JTabbedPane implements ImageAreaUI {
+public final class TabsUI extends JTabbedPane implements ImageAreaUI {
     private final Lazy<JMenu> cachedPlacementMenu = Lazy.of(this::createTabPlacementMenu);
     private boolean userInitiated = true;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,24 +18,20 @@
 package pixelitor.filters.animation;
 
 /**
- * Different ways to interpolate between two values
- * as the time passes
- *
- * The four curves can be viewed here:
- * http://www.wolframalpha.com/input/?i=Plot[{x%2C+x*x%2C+-x*%28x+-+2%29%2C++x*x*%283+-+2*x%29}%2C+{x%2C+0%2C+1}]
+ * Different interpolation methods for tweening animations.
  */
 public enum TimeInterpolation {
-    LINEAR("Linear (uniform)") {
+    LINEAR("Linear (Uniform)") {
         @Override
         double time2progress(double time) {
             return time;
         }
-    }, QUAD_EASE_IN("Ease In (slow start)") {
+    }, EASE_IN("Ease In (Slow Start)") {
         @Override
         double time2progress(double time) {
             return time * time;
         }
-    }, QUAD_EASE_OUT("Ease Out (slow stop)") {
+    }, EASE_OUT("Ease Out (Slow Stop)") {
         @Override
         double time2progress(double time) {
             return -time * (time - 2);
@@ -47,14 +43,15 @@ public enum TimeInterpolation {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
-    TimeInterpolation(String guiName) {
-        this.guiName = guiName;
+    TimeInterpolation(String displayName) {
+        this.displayName = displayName;
     }
 
     /**
-     * Transforms the normalized time into the normalized animation progress
+     * Transforms a linear time value (0.0 to 1.0) into a progress
+     * value that determines the actual interpolation between states.
      *
      * @param time a value between 0 and 1
      * @return a value between 0 and 1
@@ -63,6 +60,6 @@ public enum TimeInterpolation {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

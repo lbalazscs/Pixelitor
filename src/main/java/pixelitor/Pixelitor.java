@@ -67,7 +67,7 @@ public class Pixelitor {
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.ensureAssertionsEnabled();
-            GUIMode.CURRENT = GUIMode.DEVELOPMENT_GUI;
+            AppMode.CURRENT = AppMode.DEVELOPMENT_GUI;
         }
 
         // Force using English locale, because using the default system
@@ -259,7 +259,7 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions() {
-        if (GUIMode.isFinal()) {
+        if (AppMode.isFinal()) {
             // in the final builds nothing should run
             return;
         }

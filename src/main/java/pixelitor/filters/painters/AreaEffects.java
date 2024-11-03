@@ -34,22 +34,82 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A collection of 4 area effects, which can be enabled or disabled.
- * It also functions as the {@link ParamState} of {@link EffectsParam}
+ * A collection of effects that can be applied to a shape.
+ * Each effect can be independently enabled or disabled.
+ * This class also functions as the {@link ParamState} of {@link EffectsParam}
  */
 public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final AreaEffect[] EMPTY_ARRAY = new AreaEffect[0];
+    private static final AreaEffect[] EMPTY_EFFECTS_ARRAY = new AreaEffect[0];
 
-    // must not be renamed (serialized fields)
+    // These fields must not be renamed (serialized fields)
     private GlowPathEffect glowEffect;
     private InnerGlowPathEffect innerGlowEffect;
     private NeonBorderEffect neonBorderEffect;
     private ShadowPathEffect dropShadowEffect;
 
     public AreaEffects() {
+        // creates an instance with all effects disabled
+    }
+
+    /**
+     * Returns all enabled effects in the correct rendering order.
+     */
+    public AreaEffect[] getEnabledEffects() {
+        List<AreaEffect> enabledEffects = new ArrayList<>(2);
+
+        // Drop shadow must be first to render behind other effects
+        if (dropShadowEffect != null) {
+            enabledEffects.add(dropShadowEffect);
+        }
+        if (glowEffect != null) {
+            enabledEffects.add(glowEffect);
+        }
+        if (innerGlowEffect != null) {
+            enabledEffects.add(innerGlowEffect);
+        }
+        if (neonBorderEffect != null) {
+            enabledEffects.add(neonBorderEffect);
+        }
+        return enabledEffects.toArray(EMPTY_EFFECTS_ARRAY);
+    }
+
+    public void apply(Graphics2D g2, Shape shape) {
+        AreaEffect[] areaEffects = getEnabledEffects();
+        for (AreaEffect effect : areaEffects) {
+            effect.apply(g2, shape, 0, 0);
+        }
+    }
+
+    /**
+     * Calculates the maximum additional space needed around
+     * the shape to accommodate all effects.
+     */
+    public double calcMaxEffectThickness() {
+        // Inner glow is not considered here as it doesn't
+        // extend beyond the shape's bounds.
+        double maxThickness = 0;
+        
+        if (glowEffect != null) {
+            maxThickness = Math.max(maxThickness,
+                glowEffect.getEffectWidth() / 2.0);
+        }
+        if (neonBorderEffect != null) {
+            maxThickness = Math.max(maxThickness,
+                neonBorderEffect.getEffectWidth() / 2.0);
+        }
+        if (dropShadowEffect != null) {
+            double thickness = dropShadowEffect.getEffectWidth() / 2.0;
+            Point2D offset = dropShadowEffect.getOffset();
+
+            maxThickness = Math.max(maxThickness,
+                thickness + Math.abs(offset.getX()));
+            maxThickness = Math.max(maxThickness,
+                thickness + Math.abs(offset.getY()));
+        }
+        return maxThickness;
     }
 
     public void setDropShadow(ShadowPathEffect dropShadow) {
@@ -68,68 +128,6 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         this.neonBorderEffect = neonBorder;
     }
 
-    public AreaEffect[] asArray() {
-        List<AreaEffect> effects = new ArrayList<>(2);
-        // draw the drop shadow first so that
-        // it gets painted behind the other effects
-        if (dropShadowEffect != null) {
-            effects.add(dropShadowEffect);
-        }
-        if (glowEffect != null) {
-            effects.add(glowEffect);
-        }
-        if (innerGlowEffect != null) {
-            effects.add(innerGlowEffect);
-        }
-        if (neonBorderEffect != null) {
-            effects.add(neonBorderEffect);
-        }
-        return effects.toArray(EMPTY_ARRAY);
-    }
-
-    public void drawOn(Graphics2D g2, Shape shape) {
-        AreaEffect[] areaEffects = asArray();
-        for (AreaEffect effect : areaEffects) {
-            effect.apply(g2, shape, 0, 0);
-        }
-    }
-
-    /**
-     * Returns the extra thickness caused by the effect
-     */
-    public double getMaxEffectThickness() {
-        // the inner glow is not considered here,
-        // because it doesn't add extra thickness
-        double max = 0;
-        if (glowEffect != null) {
-            double thickness = glowEffect.getEffectWidth() / 2.0;
-            if (thickness > max) {
-                max = thickness;
-            }
-        }
-        if (neonBorderEffect != null) {
-            double thickness = neonBorderEffect.getEffectWidth() / 2.0;
-            if (thickness > max) {
-                max = thickness;
-            }
-        }
-        if (dropShadowEffect != null) {
-            double thickness = dropShadowEffect.getEffectWidth() / 2.0;
-
-            Point2D offset = dropShadowEffect.getOffset();
-
-            double xGap = thickness + Math.abs(offset.getX());
-            if (xGap > max) {
-                max = xGap;
-            }
-            double yGap = thickness + Math.abs(offset.getY());
-            if (yGap > max) {
-                max = yGap;
-            }
-        }
-        return max;
-    }
-
     public GlowPathEffect getGlow() {
         return glowEffect;
     }
@@ -146,51 +144,46 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
         return neonBorderEffect;
     }
 
-    public boolean isEmpty() {
-        return glowEffect == null && innerGlowEffect == null
-            && neonBorderEffect == null && dropShadowEffect == null;
-    }
-
-    public boolean isNotEmpty() {
+    public boolean hasEnabledEffects() {
         return glowEffect != null || innerGlowEffect != null
             || neonBorderEffect != null || dropShadowEffect != null;
     }
 
     @Override
     public AreaEffects interpolate(AreaEffects endState, double progress) {
-        float progressF = (float) progress;
-        AreaEffects retVal = new AreaEffects();
+        float progressFloat = (float) progress;
+        AreaEffects interpolatedEffects = new AreaEffects();
 
         if (dropShadowEffect != null) {
             var endEffect = endState.getDropShadow();
             float newOpacity = dropShadowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressF);
+                endEffect.getOpacity(), progressFloat);
             var newDropShadow = new ShadowPathEffect(newOpacity);
             Color newBrushColor = dropShadowEffect.interpolateBrushColor(
                 endEffect.getBrushColor(), progress);
             newDropShadow.setBrushColor(newBrushColor);
-            retVal.setDropShadow(newDropShadow);
+            interpolatedEffects.setDropShadow(newDropShadow);
         }
         if (glowEffect != null) {
             var endEffect = endState.getGlow();
             float newOpacity = glowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressF);
+                endEffect.getOpacity(), progressFloat);
             var newGlowEffect = new GlowPathEffect(newOpacity);
             Color newBrushColor = glowEffect.interpolateBrushColor(
                 endEffect.getBrushColor(), progress);
             glowEffect.setBrushColor(newBrushColor);
 
-            retVal.setGlow(newGlowEffect);
+            interpolatedEffects.setGlow(newGlowEffect);
         }
         if (innerGlowEffect != null) {
             var endEffect = endState.getInnerGlow();
             float newOpacity = innerGlowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressF);
+                endEffect.getOpacity(), progressFloat);
             var newInnerGlow = new InnerGlowPathEffect(newOpacity);
             Color newBrushColor = innerGlowEffect.interpolateBrushColor(
                 endEffect.getBrushColor(), progress);
             newInnerGlow.setBrushColor(newBrushColor);
-            retVal.setInnerGlow(newInnerGlow);
+            interpolatedEffects.setInnerGlow(newInnerGlow);
         }
         if (neonBorderEffect != null) {
             var endEffect = endState.getNeonBorder();
@@ -199,14 +192,14 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
             Color newCenterColor = neonBorderEffect.interpolateCenterColor(
                 endEffect.getCenterColor(), progress);
             float newOpacity = neonBorderEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressF);
+                endEffect.getOpacity(), progressFloat);
             double newWidth = neonBorderEffect.interpolateEffectWidth(
                 endEffect.getEffectWidth(), progress);
             var newNeonBorder = new NeonBorderEffect(newEdgeColor, newCenterColor,
                 newWidth, newOpacity);
-            retVal.setNeonBorder(newNeonBorder);
+            interpolatedEffects.setNeonBorder(newNeonBorder);
         }
-        return retVal;
+        return interpolatedEffects;
     }
 
     @Override

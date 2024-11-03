@@ -71,15 +71,15 @@ public enum Metric {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
-    Metric(String guiName) {
-        this.guiName = guiName;
+    Metric(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     /**

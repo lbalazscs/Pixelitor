@@ -48,7 +48,7 @@ class PenToolTest {
 
     @BeforeEach
     void beforeEachTest() {
-        Tools.setCurrentTool(Tools.PEN);
+        Tools.setActiveTool(Tools.PEN);
 
         // A real composition that can store paths.
         // The layer type doesn't matter.
@@ -119,7 +119,7 @@ class PenToolTest {
     @Test
     @DisplayName("convert selection to path")
     void convertSelectionToPath() {
-        Tools.setCurrentTool(Tools.SELECTION);
+        Tools.setActiveTool(Tools.SELECTION);
         assertThat(Tools.SELECTION)
             .isActive()
             .selectionTypeIs(RECTANGLE)

@@ -18,8 +18,8 @@
 package pixelitor.gui;
 
 import com.bric.util.JVM;
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Pixelitor;
 import pixelitor.Views;
 import pixelitor.gui.utils.Dialogs;
@@ -43,7 +43,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.WEST;
 import static java.awt.Desktop.Action.APP_ABOUT;
 import static java.awt.Desktop.Action.APP_PREFERENCES;
 import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
@@ -71,7 +75,7 @@ public class PixelitorWindow extends JFrame {
         setupWindowEvents();
 
         addMenus();
-        addImagesArea();
+        addImageArea();
         addLayersAndHistograms();
         addToolsPanel(screenSize);
         Tools.setDefaultTool();
@@ -133,11 +137,11 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    public void addImagesArea() {
+    public void addImageArea() {
         add(ImageArea.getUI(), CENTER);
     }
 
-    public void removeImagesArea(JComponent c) {
+    public void removeImageArea(JComponent c) {
         remove(c);
     }
 
@@ -277,11 +281,11 @@ public class PixelitorWindow extends JFrame {
     }
 
     private static String calcFixTitle() {
-        String s = "Pixelitor " + Pixelitor.VERSION_NUMBER;
-        if (GUIMode.CURRENT != GUIMode.FINAL_GUI) {
-            s += " DEVELOPMENT " + System.getProperty("java.version");
+        String fixTitle = "Pixelitor " + Pixelitor.VERSION_NUMBER;
+        if (AppMode.isDevelopment()) {
+            fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
         }
-        return s;
+        return fixTitle;
     }
 
     /**
@@ -328,8 +332,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public boolean isMaximized() {
-        int extState = getExtendedState();
-        return stateMaximized(extState);
+        return stateMaximized(getExtendedState());
     }
 
     private static boolean stateMaximized(int extState) {

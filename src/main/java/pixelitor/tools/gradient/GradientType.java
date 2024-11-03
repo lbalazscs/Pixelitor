@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,16 +78,16 @@ public enum GradientType {
     private static final float[] FRACTIONS = {0.0f, 1.0f};
     private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();
 
-    private final String guiName;
+    private final String displayName;
 
-    GradientType(String guiName) {
-        this.guiName = guiName;
+    GradientType(String displayName) {
+        this.displayName = displayName;
     }
 
     public abstract Paint createPaint(Drag drag, Color[] colors, CycleMethod cycle);
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

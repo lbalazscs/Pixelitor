@@ -39,8 +39,8 @@ public class FullPalette extends Palette {
     }
 
     @Override
-    public void setDimensions(int rows, int columns) {
-        super.setDimensions(rows, columns);
+    public void setGridSize(int rows, int columns) {
+        super.setGridSize(rows, columns);
         hueSteps = rows - 1;
         lastColumnCount = columns;
         lastRowCount = rows;

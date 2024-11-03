@@ -41,17 +41,29 @@ import static pixelitor.io.DropListener.DropAction.OPEN_AS_NEW_IMAGES;
  */
 public class ImageArea {
     public enum Mode {
-        TABS("Tabs"), FRAMES("Internal Windows");
+        TABS("Tabs") {
+            @Override
+            ImageAreaUI createUI() {
+                return new TabsUI();
+            }
+        }, FRAMES("Internal Windows") {
+            @Override
+            ImageAreaUI createUI() {
+                return new FramesUI();
+            }
+        };
 
-        private final String guiName;
+        private final String displayName;
 
-        Mode(String guiName) {
-            this.guiName = guiName;
+        Mode(String displayName) {
+            this.displayName = displayName;
         }
+
+        abstract ImageAreaUI createUI();
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 
@@ -66,25 +78,20 @@ public class ImageArea {
         mode = config.mode();
         tabPlacement = config.tabPlacement();
 
-        setUI();
-        setupKeysAndDnD();
+        updateUI();
+        setupDnD();
     }
 
     private ImageArea() {
         // static utility methods, do not instantiate
     }
 
-    private static void setUI() {
-        if (mode == FRAMES) {
-            ui = new FramesUI();
-        } else {
-            ui = new TabsUI();
-        }
+    private static void updateUI() {
+        ui = mode.createUI();
     }
 
-    private static void setupKeysAndDnD() {
-        JComponent component = (JComponent) ui;
-        new DropTarget(component, new DropListener(OPEN_AS_NEW_IMAGES));
+    private static void setupDnD() {
+        new DropTarget(getUI(), new DropListener(OPEN_AS_NEW_IMAGES));
     }
 
     public static JComponent getUI() {
@@ -100,11 +107,7 @@ public class ImageArea {
     }
 
     public static void changeUI() {
-        if (mode == TABS) {
-            changeUI(FRAMES);
-        } else {
-            changeUI(TABS);
-        }
+        changeUI(mode == TABS ? FRAMES : TABS);
     }
 
     public static void changeUI(Mode mode) {
@@ -114,15 +117,15 @@ public class ImageArea {
         ImageArea.mode = mode;
 
         var pw = PixelitorWindow.get();
-        pw.removeImagesArea(getUI());
-        setUI();
-        pw.addImagesArea();
+        pw.removeImageArea(getUI());
+        updateUI();
+        pw.addImageArea();
 
         // this is necessary so that the size of the image area
         // is set correctly => the size of the internal frames can be set
         pw.revalidate();
 
-        setupKeysAndDnD();
+        setupDnD();
         if (mode == FRAMES) {
             // make sure that the internal frames start
             // in the top-left corner when they are re-added
@@ -151,8 +154,7 @@ public class ImageArea {
 
     public static void cascadeWindows() {
         if (mode == FRAMES) {
-            FramesUI framesUI = (FramesUI) ui;
-            framesUI.cascadeWindows();
+            ((FramesUI) ui).cascadeWindows();
         } else {
             // the "Cascade Windows" menu should be disabled
             throw new IllegalStateException("mode = " + mode);
@@ -161,8 +163,7 @@ public class ImageArea {
 
     public static void tileWindows() {
         if (mode == FRAMES) {
-            FramesUI framesUI = (FramesUI) ui;
-            framesUI.tileWindows();
+            ((FramesUI) ui).tileWindows();
         } else {
             // the "Tile Windows" menu should be disabled
             throw new IllegalStateException("mode = " + mode);

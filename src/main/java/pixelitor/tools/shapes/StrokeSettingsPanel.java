@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.StrokeParam;
@@ -34,10 +33,11 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
- * Stroke configuration used by the shapes tool and by
- * shape filters
+ * A GUI for configuring stroke settings.
  */
 public class StrokeSettingsPanel extends JPanel {
+    private static final int PREVIEW_SIZE = 120;
+
     public StrokeSettingsPanel(StrokeParam sp) {
         super(new GridBagLayout());
 
@@ -71,10 +71,10 @@ public class StrokeSettingsPanel extends JPanel {
         EnumParam<StrokeCap> capParam = sp.getStrokeCapParam();
         EnumParam<StrokeJoin> joinParam = sp.getStrokeJoinParam();
 
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBorder(createTitledBorder("Line Endpoints"));
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(createTitledBorder("Line Endpoints"));
 
-        var gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(panel);
 
         JComponent capSelector = capParam.createGUI("cap");
 
@@ -90,28 +90,36 @@ public class StrokeSettingsPanel extends JPanel {
         gbh.addLabelAndControl(StrokeCap.NAME + ":", capSelector);
         gbh.addLabelAndControl(StrokeJoin.NAME + ":", joinSelector);
 
-        return p;
+        return panel;
     }
 
     private static JPanel createStrokeTypePanel(StrokeParam sp) {
-        EnumParam<StrokeType> strokeTypeParam = sp.getStrokeTypeParam();
-        BooleanParam dashedParam = sp.getDashedParam();
-        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(createTitledBorder("Stroke Type"));
+        var gbh = new GridBagHelper(panel);
 
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBorder(createTitledBorder("Stroke Type"));
+        gbh.addLabelAndControl(sp.getStrokeTypeParam(), "strokeType");
+        gbh.addLabelAndControl(sp.getShapeTypeParam(), "shapeType");
+        gbh.addLabelAndControl(sp.getDashedParam(), "dashed");
 
-        var gbh = new GridBagHelper(p);
-        gbh.addLabelAndControl(strokeTypeParam, "strokeType");
-        gbh.addLabelAndControl(shapeTypeParam, "shapeType");
-        gbh.addLabelAndControl(dashedParam, "dashed");
-
-        return p;
+        return panel;
     }
 
     private static JPanel createStrokePreviewPanel(StrokeParam sp) {
+        JComponent preview = createPreviewComponent(sp);
+        sp.setPreviewer(preview);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(preview, CENTER);
+        panel.setBorder(createTitledBorder("Stroke Preview"));
+
+        return panel;
+    }
+
+    private static JComponent createPreviewComponent(StrokeParam sp) {
         JComponent preview = new JComponent() {
-            final Dimension size = new Dimension(120, 120);
+            // only the height matters, because the width will be stretched
+            final Dimension size = new Dimension(PREVIEW_SIZE, PREVIEW_SIZE);
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -119,10 +127,14 @@ public class StrokeSettingsPanel extends JPanel {
 
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-                g2.setColor(darkTheme ? Color.BLACK : Color.WHITE);
+
+                // fill background
                 int width = getWidth();
                 int height = getHeight();
+                g2.setColor(darkTheme ? Color.BLACK : Color.WHITE);
                 g2.fillRect(0, 0, width, height);
+
+                // paint the stroke preview
                 QuadCurve2D.Double shape = new QuadCurve2D.Double(
                     width * 0.1, height * 0.4,
                     width * 0.5, height * 0.8,
@@ -143,12 +155,6 @@ public class StrokeSettingsPanel extends JPanel {
                 return size;
             }
         };
-        sp.setPreviewer(preview);
-
-        JPanel p = new JPanel(new BorderLayout());
-        p.add(preview, CENTER);
-        p.setBorder(createTitledBorder("Stroke Preview"));
-
-        return p;
+        return preview;
     }
 }

@@ -39,7 +39,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * An adjustment layer is a filter that acts on the result of the layers bellow it.
+ * An adjustment layer contains a filter that acts on the result of the layers bellow it.
  */
 public class AdjustmentLayer extends Layer implements Filterable {
     @Serial

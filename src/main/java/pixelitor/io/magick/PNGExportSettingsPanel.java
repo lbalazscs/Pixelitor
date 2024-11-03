@@ -35,15 +35,15 @@ class PNGExportSettingsPanel extends JPanel implements ExportSettings {
         RGB("RGB (24 bit, no transparency)"),
         INDEXED("Indexed, (8 bit, max 256 colors)");
 
-        private final String guiName;
+        private final String displayName;
 
-        Type(String guiName) {
-            this.guiName = guiName;
+        Type(String displayName) {
+            this.displayName = displayName;
         }
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 

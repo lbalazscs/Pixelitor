@@ -27,7 +27,7 @@ public abstract class Palette {
     protected PaletteConfig config;
 
     protected Palette(int rowCount, int columnCount) {
-        setDimensions(rowCount, columnCount);
+        setGridSize(rowCount, columnCount);
     }
 
     /**
@@ -42,7 +42,7 @@ public abstract class Palette {
         return config;
     }
 
-    public void setDimensions(int rows, int columns) {
+    public void setGridSize(int rows, int columns) {
         this.columnCount = columns;
         this.rowCount = rows;
     }

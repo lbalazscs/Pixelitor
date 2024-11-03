@@ -35,6 +35,7 @@ import static java.lang.Math.min;
  * A rectangle rotated/scaled/sheared around its center.
  */
 public class TransformedRectangle implements Debuggable {
+    // Original corner coordinates of the rectangle
     private final double origTopLeftX;
     private final double origTopLeftY;
     private final double origTopRightX;
@@ -44,6 +45,7 @@ public class TransformedRectangle implements Debuggable {
     private final double origBottomLeftX;
     private final double origBottomLeftY;
 
+    // Transformed corner coordinates of the rectangle
     private double topLeftX;
     private double topLeftY;
     private double topRightX;
@@ -53,17 +55,21 @@ public class TransformedRectangle implements Debuggable {
     private double bottomLeftX;
     private double bottomLeftY;
 
+    // Cached shape and bounding box of the transformed rectangle
     private GeneralPath cachedShape;
     private Rectangle cachedBox;
 
-    public TransformedRectangle(Rectangle r, double theta,
-                                double sx, double sy, double shx, double shy) {
+    public TransformedRectangle(Rectangle r,
+                                double theta,
+                                double sx, double sy,
+                                double shx, double shy) {
         this(r.getX(), r.getY(), r.getWidth(), r.getHeight(), theta, sx, sy, shx, shy);
     }
 
     public TransformedRectangle(double x, double y,
                                 double width, double height,
-                                double theta, double sx, double sy,
+                                double theta,
+                                double sx, double sy,
                                 double shx, double shy) {
         origTopLeftX = x;
         origTopLeftY = y;
@@ -93,6 +99,7 @@ public class TransformedRectangle implements Debuggable {
         }
         transform.translate(-cx, -cy);
 
+        // Transform each corner point
         Point2D topLeft = new Point2D.Double(origTopLeftX, origTopLeftY);
         Point2D bottomLeft = new Point2D.Double(origBottomLeftX, origBottomLeftY);
         Point2D topRight = new Point2D.Double(origTopRightX, origTopRightY);
@@ -103,6 +110,7 @@ public class TransformedRectangle implements Debuggable {
         transform.transform(topRight, topRight);
         transform.transform(bottomRight, bottomRight);
 
+        // Update transformed coordinates
         topLeftX = topLeft.getX();
         topLeftY = topLeft.getY();
         bottomLeftX = bottomLeft.getX();
@@ -121,6 +129,9 @@ public class TransformedRectangle implements Debuggable {
         return topLeftY;
     }
 
+    /**
+     * Returns the transformed rectangle as a Shape.
+     */
     public Shape asShape() {
         if (cachedShape != null) {
             return cachedShape;
@@ -136,6 +147,9 @@ public class TransformedRectangle implements Debuggable {
         return cachedShape;
     }
 
+    /**
+     * Returns the bounding box of the transformed rectangle.
+     */
     public Rectangle getBoundingBox() {
         if (cachedBox != null) {
             return cachedBox;
@@ -151,6 +165,9 @@ public class TransformedRectangle implements Debuggable {
         return cachedBox;
     }
 
+    /**
+     * Aligns the transformed rectangle with the given layout rectangle.
+     */
     public void align(Rectangle layout, Rectangle transformedBounds) {
         int dx = layout.x - transformedBounds.x;
         int dy = layout.y - transformedBounds.y;
@@ -174,7 +191,9 @@ public class TransformedRectangle implements Debuggable {
         cachedBox = null;
     }
 
-    // paints the original and transformed corners for debugging
+    /**
+     * Paints the original and transformed corners (for debugging).
+     */
     public void paintCorners(Graphics2D g) {
         g.setColor(Color.RED);
         g.fillOval((int) topLeftX - 5, (int) topLeftY - 5, 10, 10);

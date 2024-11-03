@@ -55,7 +55,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             // Swing is not consistent: in the case of JComboBox, action
             // listeners are called when the component is changed indirectly,
             // but not in the case of JCheckBox
-            checkBox.addChangeListener(e -> resetButton.updateIcon());
+            checkBox.addChangeListener(e -> resetButton.updateState());
         }
 
         if (extraAction != null) {

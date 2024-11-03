@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,9 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.Y_AXIS;
 
@@ -42,9 +44,9 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     protected void setupGUI(ParamSet paramSet,
                             boolean addShowOriginal,
                             Action[] presets) {
-        var upperPanel = new JPanel(new BorderLayout());
-        var leftPanel = GUIUtils.arrangeVertically(paramSet);
-        var rightPanel = createPresetsPanel(presets);
+        JPanel upperPanel = new JPanel(new BorderLayout());
+        JPanel leftPanel = GUIUtils.arrangeVertically(paramSet);
+        JPanel rightPanel = createPresetsPanel(presets);
 
         // This is a right place to do this, because when this code is
         // called, the default adjustment listener is already set.
@@ -53,7 +55,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
         upperPanel.add(leftPanel, CENTER);
         upperPanel.add(rightPanel, EAST);
 
-        var buttonsPanel = createFilterActionsPanel(
+        JPanel buttonsPanel = createFilterActionsPanel(
             paramSet.getActions(), addShowOriginal, 5);
 
         setLayout(new BorderLayout());
@@ -62,11 +64,11 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     }
 
     private static JPanel createPresetsPanel(Action[] presets) {
-        var rightPanel = new JPanel();
+        JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
         rightPanel.setBorder(createTitledBorder(DialogMenuBar.BUILT_IN_PRESETS));
         for (Action preset : presets) {
-            JComponent b = new JButton(preset);
+            JButton b = new JButton(preset);
             b.setAlignmentX(LEFT_ALIGNMENT);
             rightPanel.add(b);
         }

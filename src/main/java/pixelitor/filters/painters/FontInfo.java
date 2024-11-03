@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,15 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.font.TextAttribute.*;
+import static java.awt.font.TextAttribute.KERNING;
+import static java.awt.font.TextAttribute.KERNING_ON;
+import static java.awt.font.TextAttribute.LIGATURES;
+import static java.awt.font.TextAttribute.LIGATURES_ON;
+import static java.awt.font.TextAttribute.STRIKETHROUGH;
+import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
+import static java.awt.font.TextAttribute.TRACKING;
+import static java.awt.font.TextAttribute.UNDERLINE;
+import static java.awt.font.TextAttribute.UNDERLINE_ON;
 
 /**
  * Wraps a {@link Font} into a more usable API.
@@ -41,7 +49,7 @@ public class FontInfo {
     private boolean kerning = false;
     private boolean underline = false;
     private boolean ligatures = false;
-    private int tracking = 0;
+    private int tracking = 0; // Stored as percentage (100 = 1.0)
 
     public FontInfo(Font font) {
         size = font.getSize();
@@ -50,17 +58,7 @@ public class FontInfo {
         italic = font.isItalic();
 
         if (font.hasLayoutAttributes()) {
-            var map = font.getAttributes();
-
-            strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
-            kerning = KERNING_ON.equals(map.get(KERNING));
-            underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
-            ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
-
-            Float trackingValue = (Float) map.get(TRACKING);
-            if (trackingValue != null) {
-                tracking = (int) (100 * trackingValue);
-            }
+            extractLayoutAttributes(font);
         }
     }
 
@@ -75,6 +73,23 @@ public class FontInfo {
         underline = preset.getBoolean("underline");
         ligatures = preset.getBoolean("ligatures");
         tracking = preset.getInt("tracking", 0);
+    }
+
+    /**
+     * Extracts advanced typography attributes from a Font's attribute map.
+     */
+    private void extractLayoutAttributes(Font font) {
+        Map<TextAttribute, ?> map = font.getAttributes();
+
+        strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
+        kerning = KERNING_ON.equals(map.get(KERNING));
+        underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
+        ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
+
+        Float trackingValue = (Float) map.get(TRACKING);
+        if (trackingValue != null) {
+            tracking = (int) (100 * trackingValue);
+        }
     }
 
     public void saveStateTo(UserPreset preset) {
@@ -106,40 +121,24 @@ public class FontInfo {
         this.tracking = tracking;
     }
 
-    public Font createStyledFont() {
-        Font font = createFont(name, size, bold, italic);
-
-        Map<TextAttribute, Object> map = new HashMap<>();
-        Boolean strikeThroughSetting = Boolean.FALSE;
-        if (strikethrough) {
-            strikeThroughSetting = STRIKETHROUGH_ON;
-        }
-        map.put(STRIKETHROUGH, strikeThroughSetting);
-
-        Integer kerningSetting = 0;
-        if (kerning) {
-            kerningSetting = KERNING_ON;
-        }
-        map.put(KERNING, kerningSetting);
-
-        Integer ligaturesSetting = 0;
-        if (ligatures) {
-            ligaturesSetting = LIGATURES_ON;
-        }
-        map.put(LIGATURES, ligaturesSetting);
-
-        Integer underlineSetting = -1;
-        if (underline) {
-            underlineSetting = UNDERLINE_ON;
-        }
-        map.put(UNDERLINE, underlineSetting);
-
-        map.put(TRACKING, tracking / 100.0f);
-
-        return font.deriveFont(map);
+    public Font createFont() {
+        Font font = createBaseFont(name, size, bold, italic);
+        return font.deriveFont(createAttributeMap());
     }
 
-    private static Font createFont(String family, int size, boolean bold, boolean italic) {
+    private Map<TextAttribute, Object> createAttributeMap() {
+        Map<TextAttribute, Object> map = new HashMap<>();
+
+        map.put(STRIKETHROUGH, strikethrough ? STRIKETHROUGH_ON : Boolean.FALSE);
+        map.put(KERNING, kerning ? KERNING_ON : 0);
+        map.put(LIGATURES, ligatures ? LIGATURES_ON : 0);
+        map.put(UNDERLINE, underline ? UNDERLINE_ON : -1);
+        map.put(TRACKING, tracking / 100.0f);
+
+        return map;
+    }
+
+    private static Font createBaseFont(String family, int size, boolean bold, boolean italic) {
         int style = Font.PLAIN;
         if (bold) {
             style |= Font.BOLD;

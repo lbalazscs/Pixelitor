@@ -109,14 +109,14 @@ public enum TwoPointPaintType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
     // true if when blending it with a custom blending mode,
     // the src has no transparency, and the blending modes don't work
     private final boolean hasBlendingIssue;
 
-    TwoPointPaintType(String guiName, boolean hasBlendingIssue) {
-        this.guiName = guiName;
+    TwoPointPaintType(String displayName, boolean hasBlendingIssue) {
+        this.displayName = displayName;
         this.hasBlendingIssue = hasBlendingIssue;
     }
 
@@ -142,6 +142,6 @@ public enum TwoPointPaintType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

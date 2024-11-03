@@ -19,7 +19,7 @@ package pixelitor.gui.utils;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
@@ -285,7 +285,7 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (GUIMode.isFinal()) {
+        if (AppMode.isFinal()) {
             return;
         }
 
@@ -343,7 +343,7 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }

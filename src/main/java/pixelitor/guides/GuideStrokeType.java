@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,12 +48,12 @@ public enum GuideStrokeType {
         new BasicStroke(1, CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0)
     );
 
-    private final String guiName;
+    private final String displayName;
     private final Stroke strokeA;
     private final Stroke strokeB;
 
-    GuideStrokeType(String guiName, Stroke strokeA, Stroke strokeB) {
-        this.guiName = guiName;
+    GuideStrokeType(String displayName, Stroke strokeA, Stroke strokeB) {
+        this.displayName = displayName;
         this.strokeA = strokeA;
         this.strokeB = strokeB;
     }
@@ -68,6 +68,6 @@ public enum GuideStrokeType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

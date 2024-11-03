@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,12 @@ import pixelitor.tools.util.PMouseEvent;
 import java.awt.Cursor;
 
 /**
- * The chain of {@link ToolHandler}s, following the "Chain of Responsibility"
- * design pattern. The last handler is always the current tool.
- *
+ * Implements the Chain of Responsibility pattern to manage tool behavior
+ * modifications. The chain processes mouse events through a series of
+ * {@link ToolHandler}s before reaching the tool itself. Each handler
+ * can either handle the event and stop propagation or pass the event
+ * to the next handler in the chain.
+ * <p>
  * Most mouse events are sent to this, and not directly to the tool.
  */
 public class ToolHandlerChain {
@@ -36,12 +39,15 @@ public class ToolHandlerChain {
 
     public ToolHandlerChain(Tool tool, Cursor cursor) {
         lastHandler = null;
+
         if (tool.hasHandToolForwarding()) {
+            // enables temporary pan behavior
             handToolHandler = new HandToolHandler(cursor, tool);
             lastHandler = appendNext(handToolHandler);
         }
 
         if (tool.allowOnlyDrawables()) {
+            // ensures proper layer type for the tool
             lastHandler = appendNext(new DrawableCheckHandler(tool));
         }
 
@@ -50,8 +56,9 @@ public class ToolHandlerChain {
             lastHandler = appendNext(new ColorPickerToolHandler());
         }
 
-        // if there was no special case, the current tool should handle the events
-        lastHandler = appendNext(new CurrentToolHandler(tool));
+        // The last handler executes the tool's primary behavior
+        // if the event was not intercepted before.
+        lastHandler = appendNext(new ActiveToolHandler(tool));
     }
 
     /**
@@ -61,27 +68,30 @@ public class ToolHandlerChain {
         if (lastHandler == null) {
             firstHandler = newHandler;
         } else {
-            lastHandler.setSuccessor(newHandler);
+            lastHandler.setNextHandler(newHandler);
         }
         return newHandler;
     }
 
+    /**
+     * Activates temporary hand tool behavior if this chain
+     * includes a hand tool handler.
+     */
     public void spacePressed() {
-        if (hasHandToolForwarding()) {
+        if (handToolHandler != null) {
             handToolHandler.spacePressed();
         }
     }
 
     public void spaceReleased() {
-        if (hasHandToolForwarding()) {
+        if (handToolHandler != null) {
             handToolHandler.spaceReleased();
         }
     }
 
-    private boolean hasHandToolForwarding() {
-        return handToolHandler != null;
-    }
-
+    /**
+     * Processes a mouse pressed event through the handler chain.
+     */
     public void handleMousePressed(PMouseEvent e) {
         firstHandler.handleMousePressed(e);
     }

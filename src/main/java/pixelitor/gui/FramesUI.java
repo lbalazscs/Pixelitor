@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import java.util.List;
  * An {@link ImageAreaUI} implementation
  * where the edited images are in internal frames
  */
-public class FramesUI extends JDesktopPane implements ImageAreaUI {
+public final class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
     private static final int CASCADE_VERTICAL_SHIFT = 25;
 

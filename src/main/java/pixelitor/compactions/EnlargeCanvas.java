@@ -75,7 +75,7 @@ public class EnlargeCanvas extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        return srcGuides.copyForEnlargedCanvas(enlargement.top, enlargement.right, enlargement.bottom, enlargement.left, view, srcCanvas);
+        return srcGuides.copyEnlarging(enlargement, view, srcCanvas);
     }
 
     @Override

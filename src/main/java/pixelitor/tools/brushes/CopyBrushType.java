@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,11 +72,11 @@ public enum CopyBrushType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
     protected double size;
 
-    CopyBrushType(String guiName) {
-        this.guiName = guiName;
+    CopyBrushType(String displayName) {
+        this.displayName = displayName;
     }
 
     /**
@@ -95,6 +95,6 @@ public enum CopyBrushType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

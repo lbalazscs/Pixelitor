@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,14 +44,16 @@ public class SerialExecutor implements Executor {
                 scheduleNext();
             }
         });
+
         if (activeTask == null) {
+            // If no task is currently running, start the next task in the queue.
+            // This will be the newly added task + the scheduling on completion.
             scheduleNext();
         }
     }
 
     private synchronized void scheduleNext() {
-        // if there are any tasks in the queue,
-        // execute the first one, otherwise do nothing
+        // if there are any tasks in the queue, execute the first one
         if ((activeTask = tasks.poll()) != null) {
             delegateExecutor.execute(activeTask);
         }

@@ -134,7 +134,7 @@ public class Resize implements CompAction {
         if (srcGuides != null) {
             // the guides don't need transforming,
             // just a correct canvas size
-            Guides newGuides = srcGuides.copyForNewComp(view);
+            Guides newGuides = srcGuides.copyIdentical(view);
             newComp.setGuides(newGuides);
         }
 

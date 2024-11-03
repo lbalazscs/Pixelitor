@@ -267,7 +267,7 @@ public class GlobalEvents {
     public static void enableMouseEventDebugging(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
-            String msg = Tools.getCurrent().getName() + ": " + Debug.mouseEventAsString(e);
+            String msg = Tools.getActive().getName() + ": " + Debug.mouseEventAsString(e);
             if (postEvents) {
                 Events.postMouseEvent(msg);
             } else {

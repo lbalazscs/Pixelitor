@@ -28,6 +28,7 @@ import pixelitor.filters.Starburst;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.TabsUI;
+import pixelitor.guitest.AppRunner.ExpectConfirmation;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
@@ -235,7 +236,7 @@ public class WorkflowTest {
 
         app.addTextLayer("Wood", null, "Pixelitor");
         app.editTextLayer(dialog -> {
-            dialog.textBox("textTF").requireText("Wood");
+            dialog.textBox("textArea").requireText("Wood");
             dialog.slider("fontSize").slideTo(200);
         });
         duplicateLayerThenUndo(TextLayer.class);
@@ -296,14 +297,14 @@ public class WorkflowTest {
         convertLayerToSmartObject();
 
         app.runMenuCommand("Edit Contents");
-        app.editTextLayer(dialog -> dialog.textBox("textTF")
+        app.editTextLayer(dialog -> dialog.textBox("textArea")
             .requireText("TEXT")
             .deleteText()
             .enterText("WARPED TEXT"));
 
         app.addLayerMask();
         app.drawGradient(RADIAL);
-        app.closeCurrentView();
+        app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         runFilterWithDialog("Magnify",
             dialog -> {
@@ -347,7 +348,7 @@ public class WorkflowTest {
         move(MOVE_LAYER_ONLY, 0, -25);
         app.runMenuCommand("Lower Layer Selection");
         move(MOVE_LAYER_ONLY, 0, 50);
-        app.closeCurrentView();
+        app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         loadReferenceImage("wf2.png");
     }
@@ -380,8 +381,7 @@ public class WorkflowTest {
 
         // close the temporary tab
         pw.tabbedPane().selectTab(compName + " copy");
-        app.closeCurrentView();
-        app.closeDoYouWantToSaveChangesDialog();
+        app.closeCurrentView(ExpectConfirmation.YES);
 
         // now the main tab should be the active one
         pw.tabbedPane().requireSelectedTab(Index.atIndex(mainTabIndex));
@@ -433,7 +433,7 @@ public class WorkflowTest {
 //        app.runMenuCommand("Rasterize Shape Layer");
 //        app.changeLayerBlendingMode(BlendingMode.ERASE);
 
-        app.closeCurrentView();
+        app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         // duplicate the whole smart object
         app.runMenuCommand("Duplicate Layer");
@@ -482,7 +482,7 @@ public class WorkflowTest {
         app.runMenuCommand("Edit Contents");
         app.addGradientFillLayer(SPIRAL_CW);
         app.changeLayerBlendingMode(BlendingMode.MULTIPLY);
-        app.closeCurrentView();
+        app.closeCurrentView(ExpectConfirmation.NO); // smart object content
 
         // add some smart filters to the checkers kiwi image
         keyboard.pressCtrlOne(); // go back to layer editing mode
@@ -544,6 +544,7 @@ public class WorkflowTest {
         convertLayerToSmartObject();
         runFilterWithDialog("Crystallize");
         app.resize(600);
+        keyboard.undoRedoUndo("Resize");
     }
 
     private void addTextLayer(String text, String alignment) {

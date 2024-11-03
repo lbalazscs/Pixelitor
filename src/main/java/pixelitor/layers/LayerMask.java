@@ -43,7 +43,7 @@ import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**
- * A layer mask.
+ * A layer mask that applies a transparency mask to an associated layer, controlling its visibility.
  */
 public class LayerMask extends ImageLayer {
     @Serial

@@ -17,7 +17,7 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.*;
@@ -33,7 +33,7 @@ public class PixelitorEventListener implements ActiveHolderListener,
     ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
-        if (GUIMode.isFinal()) {
+        if (AppMode.isFinal()) {
             // should be used only for debugging
             throw new IllegalStateException();
         }

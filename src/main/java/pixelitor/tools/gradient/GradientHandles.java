@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gradient;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
@@ -117,7 +117,7 @@ public class GradientHandles implements ToolWidget, Debuggable {
             end.restoreCoordsFromImSpace(view);
             middle.restoreCoordsFromImSpace(view);
         } else { // in random tests they can be different
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
                     + ImageArea.getMode());
             }

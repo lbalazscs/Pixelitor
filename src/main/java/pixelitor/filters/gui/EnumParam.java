@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ public class EnumParam<E extends Enum<E>> extends ListParam<E> {
     }
 
     public EnumParam<E> withDefault(E item) {
-        defaultChoice = item;
+        defaultValue = item;
         setSelectedItem(item, false);
         return this;
     }

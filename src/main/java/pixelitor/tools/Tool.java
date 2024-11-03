@@ -17,8 +17,8 @@
 
 package pixelitor.tools;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.PresetOwner;
 import pixelitor.gui.GlobalEvents;
@@ -46,18 +46,21 @@ import java.util.ResourceBundle;
 import static java.awt.Color.BLACK;
 
 /**
- * An abstract superclass for all tools.
+ * Abstract base class for all tools.
  *
- * A tool defines the interaction between the
- * mouse and key events and a {@link Composition}
+ * A tool defines how mouse and keyboard interactions
+ * affect a {@link Composition}.
  */
 public abstract class Tool implements PresetOwner, Debuggable {
     private final String name;
     private final String shortName;
     private final String toolMessage;
     private final char activationKey;
-    final ToolHandlerChain handlerChain;
     private final Cursor cursor;
+
+    // a chain of handlers that can intercept
+    // and modify the tool's default behavior
+    final ToolHandlerChain eventHandlerChain;
 
     private ToolButton toolButton;
     protected ToolSettingsPanel settingsPanel;
@@ -79,7 +82,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
         this.toolMessage = toolMessage;
         this.cursor = cursor;
 
-        handlerChain = new ToolHandlerChain(this, cursor);
+        eventHandlerChain = new ToolHandlerChain(this, cursor);
     }
 
     public boolean hasHandToolForwarding() {
@@ -152,14 +155,6 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     /**
-     * Paint over the active layer, used only by the shapes tool.
-     * The transform of the given Graphics2D is in image space.
-     */
-    public void paintOverActiveLayer(Graphics2D g) {
-        // empty by default
-    }
-
-    /**
      * Paint over the given {@link Composition} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
@@ -197,12 +192,20 @@ public abstract class Tool implements PresetOwner, Debuggable {
         GUIUtils.randomizeChildren(settingsPanel);
     }
 
+    /**
+     * Handles the space key being pressed. This typically activates
+     * temporary hand tool behavior for tools that support it.
+     */
     public void spacePressed() {
-        handlerChain.spacePressed();
+        eventHandlerChain.spacePressed();
     }
 
+    /**
+     * Handles the space key being released, restoring the tool's
+     * normal behavior if temporary hand tool mode was active.
+     */
     public void spaceReleased() {
-        handlerChain.spaceReleased();
+        eventHandlerChain.spaceReleased();
     }
 
     /**
@@ -241,7 +244,7 @@ public abstract class Tool implements PresetOwner, Debuggable {
     }
 
     public void viewActivated(View oldCV, View newCV) {
-        assert Tools.currentTool == this;
+        assert Tools.activeTool == this;
         if (oldCV != null) {
             oldCV.repaint();
             resetInitialState();
@@ -318,13 +321,13 @@ public abstract class Tool implements PresetOwner, Debuggable {
             toolButton.setSelected(true);
             toolButton.requestFocus();
         } else {
-            assert GUIMode.isUnitTesting();
+            assert AppMode.isUnitTesting();
             Tools.start(this);
         }
     }
 
     public boolean isActive() {
-        return Tools.currentIs(this);
+        return Tools.activeIs(this);
     }
 
     /**

@@ -18,10 +18,10 @@
 package pixelitor.layers;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.CopyType;
 import pixelitor.Features;
-import pixelitor.GUIMode;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
@@ -63,7 +63,7 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
- * The abstract superclass of all layer classes
+ * The base class of all layer classes.
  */
 public abstract class Layer implements Serializable, Debuggable {
     @Serial
@@ -169,7 +169,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public void activateUI() {
-        assert GUIMode.isUnitTesting() || calledOnEDT();
+        assert AppMode.isUnitTesting() || calledOnEDT();
         ui.setSelected(true);
     }
 
@@ -575,7 +575,7 @@ public abstract class Layer implements Serializable, Debuggable {
         // an active layer (when the undo activates the MaskViewMode).
         // If this isn't always true, then MaskViewMode activation
         // must also be guarded in DeleteLayerMaskEdit.undo.
-        assert isActive() || GUIMode.isUnitTesting();
+        assert isActive() || AppMode.isUnitTesting();
 
         if (isActive()) {
             MaskViewMode.NORMAL.activate(view, this);
@@ -775,7 +775,7 @@ public abstract class Layer implements Serializable, Debuggable {
                               boolean allowGrowing);
 
     public void changeStackIndex(int newIndex) {
-        comp.changeLayerIndex(this, newIndex);
+        comp.reorderLayer(this, newIndex);
     }
 
     /**

@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.CopyType;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Outsets;
@@ -57,8 +57,8 @@ import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * A "smart object" that contains an embedded composition and allows "smart filters".
- * The cached result image behaves like the image of a regular {@link ImageLayer}.
+ * A layer that embeds a {@link Composition},
+ * and supports non-destructive editing via smart filters.
  */
 public class SmartObject extends CompositeLayer {
     @Serial
@@ -407,7 +407,7 @@ public class SmartObject extends CompositeLayer {
                 addSmartFilter(newSF, true, true);
             }));
         }
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             popup.add(new PAction("Debug Images", this::debugImages));
         }
     }

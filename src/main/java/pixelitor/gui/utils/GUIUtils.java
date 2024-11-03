@@ -18,8 +18,8 @@
 package pixelitor.gui.utils;
 
 import com.bric.util.JVM;
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.Linkable;
 import pixelitor.filters.gui.ParamSet;
@@ -248,7 +248,7 @@ public final class GUIUtils {
     }
 
     public static void runWithBusyCursor(Runnable task, Component parent) {
-        assert parent.isShowing() || GUIMode.isUnitTesting();
+        assert parent.isShowing() || AppMode.isUnitTesting();
         
         java.util.Timer timer = new Timer();
         var startBusyCursorTask = new TimerTask() {

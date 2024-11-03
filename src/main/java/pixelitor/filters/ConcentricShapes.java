@@ -86,14 +86,14 @@ public class ConcentricShapes extends ParametrizedFilter {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
         private final boolean hasSides;
         private final boolean hasTuning;
         private final double distMultiplier;
         private final double ringsMultiplier;
 
-        ConcentricShapeType(String guiName, boolean hasSides, boolean hasTuning, double distMultiplier, double ringsMultiplier) {
-            this.guiName = guiName;
+        ConcentricShapeType(String displayName, boolean hasSides, boolean hasTuning, double distMultiplier, double ringsMultiplier) {
+            this.displayName = displayName;
             this.hasSides = hasSides;
             this.hasTuning = hasTuning;
             this.distMultiplier = distMultiplier;
@@ -120,7 +120,7 @@ public class ConcentricShapes extends ParametrizedFilter {
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 

@@ -115,7 +115,7 @@ public class EDT {
     }
 
     public static void assertActiveToolIs(Tool expected) {
-        Tool actual = call(Tools::getCurrent);
+        Tool actual = call(Tools::getActive);
         if (actual != expected) {
             throw new AssertionError("Expected " + expected + ", found " + actual);
         }

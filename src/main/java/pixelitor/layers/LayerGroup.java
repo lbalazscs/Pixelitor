@@ -47,7 +47,7 @@ import static pixelitor.Views.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**
- * A layer group.
+ * A layer group that organizes multiple layers as a single entity in the layer stack.
  */
 public class LayerGroup extends CompositeLayer {
     @Serial

@@ -19,13 +19,15 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Views;
+import pixelitor.colors.Colors;
 import pixelitor.compactions.Flip;
 import pixelitor.gui.utils.BoxAlignment;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.QuadrantAngle;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
@@ -43,6 +45,8 @@ import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
 import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
@@ -61,47 +65,51 @@ import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
 import static java.awt.font.TextAttribute.TRACKING;
 import static java.awt.font.TextAttribute.UNDERLINE;
 import static java.awt.font.TextAttribute.UNDERLINE_ON;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
- * A {@link Painter} that can have an extra translation
- * (so that text layers can be moved with the move tool).
- * It also supports the rotation, scaling and shearing of the text.
+ * A class similar to {@link TextPainter}, but it can have an extra
+ * translation (so that text layers can be moved with the move tool).
+ * It also supports the rotation, scaling and shearing of the text,
+ * and text on path rendering.
  */
 public class TransformedTextPainter implements Debuggable {
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
 
-    private String text = "";
     private Font font = null;
-    private String[] lines;
     private Color color;
-    private int effectsWidth;
+
+    private String text = "";
+    private String[] textLines;
+
+    private int effectsWidth; // width added to accommodate effects
 
     private AreaEffects effects;
 
     private int translationX = 0;
     private int translationY = 0;
     private double rotation = 0;
+    private double scaleX;
+    private double scaleY;
+    private double shearX;
+    private double shearY;
 
     private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
-    private Shape zeroShape;
+    private Shape baseShape;
     private Shape textShape;
     private float lineHeight;
     private double relLineHeight;
-    private double sx;
-    private double sy;
-    private double shx;
-    private double shy;
 
-    private SoftReference<BufferedImage> cachedImage;
+    private SoftReference<BufferedImage> renderCache;
 
     private boolean invalidLayout = true;
     private boolean invalidShape = true;
     private boolean invalidShapeTransform = true;
 
     // debug settings
-    private static final boolean NO_CACHE = false;
+    private static final boolean DISABLE_CACHE = false;
     private static final boolean DEBUG_LAYOUT = false;
 
     public void paint(Graphics2D g, int width, int height, Composition comp) {
@@ -110,7 +118,7 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         // must be called before updateLayout, even if we paint on the cached image
-        optimizeGraphics(g);
+        setOptimalRenderingHints(g);
 
         if (invalidLayout) {
             updateLayout(width, height, g, comp);
@@ -122,55 +130,56 @@ public class TransformedTextPainter implements Debuggable {
             }
         }
 
-        if (NO_CACHE) {
+        if (DISABLE_CACHE) {
             doPaint(g, g.getTransform());
-            deOptimizeGraphics(g);
+            restoreDefaultRenderingHints(g);
             return;
         }
 
-        Rectangle imageBounds = getBoundingBox();
-        if (imageBounds.isEmpty()) {
+        Rectangle bounds = getBoundingBox();
+        if (bounds.isEmpty()) {
             // A zero-width bounding box can happen
             // for some fonts like "EmojiOne Color".
             return;
         }
 
-        BufferedImage cache = cachedImage == null ? null : cachedImage.get();
-        if (cache == null) {
-            cache = GraphicsUtilities.createCompatibleTranslucentImage(imageBounds.width, imageBounds.height);
-            Graphics2D cacheG = cache.createGraphics();
-            optimizeGraphics(cacheG);
+        BufferedImage cachedImg = renderCache == null ? null : renderCache.get();
+        if (cachedImg == null) {
+            // Create the cached image containing the rendered text and effects
+            cachedImg = GraphicsUtilities.createCompatibleTranslucentImage(bounds.width, bounds.height);
+            Graphics2D cacheG = cachedImg.createGraphics();
 
+            setOptimalRenderingHints(cacheG);
             AffineTransform origTransform = cacheG.getTransform();
-            cacheG.translate(-imageBounds.x, -imageBounds.y);
+            cacheG.translate(-bounds.x, -bounds.y);
             doPaint(cacheG, origTransform);
-
             cacheG.dispose();
-            cachedImage = new SoftReference<>(cache);
+
+            renderCache = new SoftReference<>(cachedImg);
         }
 
-        deOptimizeGraphics(g);
-        g.drawImage(cache, imageBounds.x, imageBounds.y, null);
+        restoreDefaultRenderingHints(g);
+        g.drawImage(cachedImg, bounds.x, bounds.y, null);
     }
 
-    private static void optimizeGraphics(Graphics2D g) {
+    private static void setOptimalRenderingHints(Graphics2D g) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
     }
 
-    private static void deOptimizeGraphics(Graphics2D g) {
+    private static void restoreDefaultRenderingHints(Graphics2D g) {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_DEFAULT);
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_DEFAULT);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_DEFAULT);
     }
 
     private void clearCache() {
-        BufferedImage cache = cachedImage == null ? null : cachedImage.get();
+        BufferedImage cache = renderCache == null ? null : renderCache.get();
         if (cache != null) {
             cache.flush();
         }
-        cachedImage = null;
+        renderCache = null;
     }
 
     /**
@@ -208,7 +217,7 @@ public class TransformedTextPainter implements Debuggable {
         return rect;
     }
 
-    private Rectangle calculateBoundingBox(int textWidth, int textHeight, int width, int height, Graphics2D g) {
+    private Rectangle calcBoundingBox(int textWidth, int textHeight, int width, int height, Graphics2D g) {
         if (hasNoTransform()) {
             Rectangle layout = calcAlignment(textWidth, textHeight, width, height);
             transformedRect = null;
@@ -228,7 +237,7 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         // first calculate a transformed rectangle starting at 0, 0
-        transformedRect = new TransformedRectangle(0, 0, textWidth, textHeight, rotation, sx, sy, shx, shy);
+        transformedRect = new TransformedRectangle(0, 0, textWidth, textHeight, rotation, scaleX, scaleY, shearX, shearY);
         Rectangle transformedBounds = transformedRect.getBoundingBox();
 
         // use the transformed bounds to calculate the correct layout
@@ -251,7 +260,7 @@ public class TransformedTextPainter implements Debuggable {
             -effectsWidth, -effectsWidth,
             textWidth + 2 * effectsWidth,
             textHeight + 2 * effectsWidth,
-            rotation, sx, sy, shx, shy);
+            rotation, scaleX, scaleY, shearX, shearY);
         transformedRect.align(layout, transformedBounds);
 
         layout.grow(effectsWidth, effectsWidth);
@@ -260,7 +269,7 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     private boolean hasNoTransform() {
-        return rotation == 0 && sx == 1.0 && sy == 1.0 && shx == 0 && shy == 0;
+        return rotation == 0 && scaleX == 1.0 && scaleY == 1.0 && shearX == 0 && shearY == 0;
     }
 
     private void doPaint(Graphics2D g, AffineTransform origTransform) {
@@ -268,8 +277,8 @@ public class TransformedTextPainter implements Debuggable {
 
         if (isOnPath()) {
             g.fill(textShape);
-            if (effects != null && effects.isNotEmpty()) {
-                effects.drawOn(g, textShape);
+            if (effects != null && effects.hasEnabledEffects()) {
+                effects.apply(g, textShape);
             }
             return;
         }
@@ -280,10 +289,10 @@ public class TransformedTextPainter implements Debuggable {
         // Draw the lines relative to the bounding box.
         // Use the ascent, because drawY is relative to the baseline.
         float drawY = (float) (metrics.getAscent() + effectsWidth);
-        if (lines.length == 1) {
+        if (textLines.length == 1) {
             g.drawString(text, effectsWidth, drawY);
         } else {
-            for (String line : lines) {
+            for (String line : textLines) {
                 g.drawString(line, effectsWidth, drawY);
                 drawY += lineHeight;
             }
@@ -297,19 +306,19 @@ public class TransformedTextPainter implements Debuggable {
         //provideShape must be called with untransformed Graphics
         g.setTransform(origTransform);
 
-        if (effects != null && effects.isNotEmpty()) {
+        if (effects != null && effects.hasEnabledEffects()) {
             if (invalidShape) {
-                zeroShape = provideShape(g);
+                baseShape = provideShape(g);
                 invalidShape = false;
                 invalidShapeTransform = true; // implied
             }
             if (invalidShapeTransform) {
                 tx.translate(effectsWidth, effectsWidth);
-                textShape = tx.createTransformedShape(zeroShape);
+                textShape = tx.createTransformedShape(baseShape);
                 invalidShapeTransform = false;
             }
 
-            effects.drawOn(g, textShape);
+            effects.apply(g, textShape);
         }
     }
 
@@ -346,11 +355,11 @@ public class TransformedTextPainter implements Debuggable {
             if (rotation != 0) {
                 g.rotate(rotation);
             }
-            if (sx != 1.0 || sy != 1.0) {
-                g.scale(sx, sy);
+            if (scaleX != 1.0 || scaleY != 1.0) {
+                g.scale(scaleX, scaleY);
             }
-            if (shx != 0 || shy != 0) {
-                g.shear(-shx, -shy);
+            if (shearX != 0 || shearY != 0) {
+                g.shear(-shearX, -shearY);
             }
         }
     }
@@ -360,33 +369,46 @@ public class TransformedTextPainter implements Debuggable {
             if (comp == null) { // the text filter, not a text layer
                 comp = Views.getActiveComp();
             }
-            renderOnPath(g, comp.getActivePath().toImageSpaceShape());
+            renderOnPath(comp.getActivePath().toImageSpaceShape(), g);
             return;
         }
 
         FontMetrics metrics = g.getFontMetrics(font);
         int textWidth = 0;
-        double fontLineHeight = metrics.getStringBounds(lines[0], g).getHeight();
+        double fontLineHeight = metrics.getStringBounds(textLines[0], g).getHeight();
         lineHeight = (float) (fontLineHeight * relLineHeight);
 
         // doesn't count the adjustment of the last line
-        int textHeight = (int) (fontLineHeight + lineHeight * (lines.length - 1));
+        int textHeight = (int) (fontLineHeight + lineHeight * (textLines.length - 1));
 
-        for (String line : lines) {
+        for (String line : textLines) {
             int lineWidth = metrics.stringWidth(line);
             if (lineWidth > textWidth) {
                 textWidth = lineWidth;
             }
         }
-        boundingBox = calculateBoundingBox(textWidth, textHeight, width, height, g);
+        boundingBox = calcBoundingBox(textWidth, textHeight, width, height, g);
         invalidLayout = false;
     }
 
-    private void renderOnPath(Graphics2D g2, Path2D path) {
+    private void renderOnPath(Path2D path, Graphics2D g2) {
         g2.setFont(font);
         FontRenderContext frc = g2.getFontRenderContext();
         GlyphVector glyphVector = font.createGlyphVector(frc, text);
 
+        textShape = distributeGlyphsAlongPath(glyphVector, path);
+
+        Rectangle textShapeBounds = textShape.getBounds();
+        textShapeBounds.grow(effectsWidth, effectsWidth);
+        boundingBox = textShapeBounds;
+
+        // text on path handles its own transformations: make sure
+        // that a leftover transformed rectangle is not interfering
+        // when calculating the rectangle covered by the cached image.
+        transformedRect = null;
+    }
+
+    private Path2D distributeGlyphsAlongPath(GlyphVector glyphVector, Path2D path) {
         Path2D result = new Path2D.Float();
         PathIterator it = new FlatteningPathIterator(path.getPathIterator(null), 1);
 
@@ -411,7 +433,7 @@ public class TransformedTextPainter implements Debuggable {
         AffineTransform at = new AffineTransform();
 
         double nextAdvance = 0;
-        double sxa = Math.abs(sx);
+        double sxa = Math.abs(scaleX);
 
         double tracking = 0.0;
         var map = font.getAttributes();
@@ -453,11 +475,11 @@ public class TransformedTextPainter implements Debuggable {
                             nextAdvance = glyphIndex < numGlyphs - 1 ? tracking + glyphVector.getGlyphMetrics(glyphIndex + 1).getAdvance() * 0.5f : 0;
                             at.setToTranslation(x, y);
                             at.rotate(angle + rotation);
-                            if (sx != 1.0 || sy != 1.0) {
-                                at.scale(sx, sy);
+                            if (scaleX != 1.0 || scaleY != 1.0) {
+                                at.scale(scaleX, scaleY);
                             }
-                            if (shx != 0 || shy != 0) {
-                                at.shear(-shx, -shy);
+                            if (shearX != 0 || shearY != 0) {
+                                at.shear(-shearX, -shearY);
                             }
                             at.translate(-origGlyphPos.getX() - advance, -origGlyphPos.getY());
                             result.append(at.createTransformedShape(glyph), false);
@@ -472,16 +494,7 @@ public class TransformedTextPainter implements Debuggable {
             }
             it.next();
         }
-
-        textShape = result;
-        Rectangle textShapeBounds = result.getBounds();
-        textShapeBounds.grow(effectsWidth, effectsWidth);
-        boundingBox = textShapeBounds;
-
-        // text on path handles its own transformations: make sure
-        // that a leftover transformed rectangle is not interfering
-        // when calculating the rectangle covered by the cached image.
-        transformedRect = null;
+        return result;
     }
 
     public Shape getTextShape() {
@@ -523,17 +536,17 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public void setAdvancedSettings(double newRelLineHeight,
-                                    double sx, double sy,
-                                    double shx, double shy) {
+                                    double scaleX, double scaleY,
+                                    double shearX, double shearY) {
         boolean change = this.relLineHeight != newRelLineHeight
-            || this.sx != sx || this.sy != sy
-            || this.shx != shx || this.shy != shy;
+            || this.scaleX != scaleX || this.scaleY != scaleY
+            || this.shearX != shearX || this.shearY != shearY;
         if (change) {
             this.relLineHeight = newRelLineHeight;
-            this.sx = sx;
-            this.sy = sy;
-            this.shx = shx;
-            this.shy = shy;
+            this.scaleX = scaleX;
+            this.scaleY = scaleY;
+            this.shearX = shearX;
+            this.shearY = shearY;
             clearCache();
             invalidLayout = true;
             invalidShape = true;
@@ -569,14 +582,14 @@ public class TransformedTextPainter implements Debuggable {
         copy.translationY = translationY;
         copy.rotation = rotation;
         copy.lineHeight = lineHeight;
-        copy.sx = sx;
-        copy.sy = sy;
-        copy.shx = shx;
-        copy.shy = shy;
+        copy.scaleX = scaleX;
+        copy.scaleY = scaleY;
+        copy.shearX = shearX;
+        copy.shearY = shearY;
 
         copy.transformedRect = transformedRect;
         copy.boundingBox = boundingBox;
-        copy.zeroShape = zeroShape;
+        copy.baseShape = baseShape;
         copy.textShape = textShape;
 
         return copy;
@@ -593,14 +606,14 @@ public class TransformedTextPainter implements Debuggable {
         boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
         boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
 
-        if (lines.length == 1) {
-            return getLineShape(lines[0], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
+        if (textLines.length == 1) {
+            return getLineShape(textLines[0], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
         }
 
-        assert lines.length > 1;
+        assert textLines.length > 1;
         Area retVal = null;
-        for (int i = 0; i < lines.length; i++) {
-            Shape lineShape = getLineShape(lines[i], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
+        for (int i = 0; i < textLines.length; i++) {
+            Shape lineShape = getLineShape(textLines[i], frc, metrics, hasKerning, hasLigatures, hasUnderline, hasStrikeThrough);
             if (i == 0) {
                 retVal = new Area(lineShape);
             } else {
@@ -701,7 +714,7 @@ public class TransformedTextPainter implements Debuggable {
         boolean change = !Objects.equals(text, newText);
         if (change) {
             this.text = newText == null ? "" : newText;
-            lines = newText.split("\n");
+            textLines = newText.split("\n");
             clearCache();
             invalidLayout = true;
             invalidShape = true;
@@ -728,8 +741,8 @@ public class TransformedTextPainter implements Debuggable {
             // the translation of the shape depends on the effect width
             invalidShapeTransform = true;
 
-            if (effects != null && effects.isNotEmpty()) {
-                effectsWidth = (int) Math.ceil(effects.getMaxEffectThickness());
+            if (effects != null && effects.hasEnabledEffects()) {
+                effectsWidth = (int) Math.ceil(effects.calcMaxEffectThickness());
             } else {
                 effectsWidth = 0;
             }
@@ -745,17 +758,35 @@ public class TransformedTextPainter implements Debuggable {
         clearCache();
     }
 
+    public BufferedImage watermarkImage(BufferedImage src, Composition comp) {
+        BufferedImage bumpImage = createBumpMapImage(
+            src.getWidth(), src.getHeight(), comp);
+        return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
+    }
+
+    // the bump map image has white text on a black background
+    private BufferedImage createBumpMapImage(int width, int height, Composition comp) {
+        BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
+        Graphics2D g = bumpImage.createGraphics();
+        Colors.fillWith(BLACK, g, width, height);
+        setColor(WHITE);
+        paint(g, width, height, comp);
+        g.dispose();
+
+        return bumpImage;
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
 
-        node.addInt("translationX", translationX);
-        node.addInt("translationY", translationY);
+        node.addInt("translation x", translationX);
+        node.addInt("translation y", translationY);
         node.addDouble("rotation", rotation);
-        node.addDouble("sx", sx);
-        node.addDouble("sy", sy);
-        node.addDouble("shx", shx);
-        node.addDouble("shy", shy);
+        node.addDouble("scale x", scaleX);
+        node.addDouble("scale y", scaleY);
+        node.addDouble("shear x", shearX);
+        node.addDouble("shear y", shearY);
 
         node.addNullableDebuggable("boundingBox", boundingBox, DebugNodes::createRectangleNode);
         node.addNullableDebuggable("transformedRect", transformedRect);

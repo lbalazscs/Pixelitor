@@ -123,7 +123,9 @@ public class ResizingFilterHelper {
 
         // filter
         BufferedImage smallDest = filter.filter(smallSrc, null);
-        pt.unitsDone(filterUnits);
+        if (filterUnits > 0) {
+            pt.unitsDone(filterUnits);
+        }
 
         // scale up
         BufferedImage dest = quality.scaleUp(src, smallDest, resizeFactor, pt);

@@ -17,8 +17,8 @@
 
 package pixelitor.tools;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
@@ -64,18 +64,18 @@ public class Tools {
         SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
         PEN, SHAPES, HAND, ZOOM};
 
-    public static Tool currentTool;
+    public static Tool activeTool;
 
     static {
         Views.addActivationListener(new ViewActivationListener() {
             @Override
             public void viewActivated(View oldView, View newView) {
-                currentTool.viewActivated(oldView, newView);
+                activeTool.viewActivated(oldView, newView);
             }
 
             @Override
             public void allViewsClosed() {
-                currentTool.allViewsClosed();
+                activeTool.allViewsClosed();
             }
         });
     }
@@ -96,8 +96,8 @@ public class Tools {
         }
     }
 
-    public static void setCurrentTool(Tool newTool) {
-        currentTool = newTool;
+    public static void setActiveTool(Tool newTool) {
+        activeTool = newTool;
     }
 
     // This doesn't select the button, because it is either
@@ -107,7 +107,7 @@ public class Tools {
         // showing the message could be useful even if the tool didn't change
         Messages.showStatusMessage(newTool.getStatusBarMessage());
 
-        Tool previousTool = currentTool;
+        Tool previousTool = activeTool;
         if (previousTool == newTool) {
             return;
         }
@@ -117,7 +117,7 @@ public class Tools {
             EventDispatcher.toolChanged(previousTool, newTool);
         }
 
-        setCurrentTool(newTool);
+        setActiveTool(newTool);
         newTool.toolStarted();
         ToolSettingsPanelContainer.get().showSettingsOf(newTool);
     }
@@ -126,29 +126,26 @@ public class Tools {
         return allTools;
     }
 
-    public static Tool getCurrent() {
-        return currentTool;
+    public static Tool getActive() {
+        return activeTool;
     }
 
-    public static boolean currentIs(Tool t) {
-        return currentTool == t;
+    public static boolean activeIs(Tool t) {
+        return activeTool == t;
     }
 
     public static boolean isShapesDrawing() {
-        if (currentTool != SHAPES) {
-            return false;
-        }
-        return SHAPES.shouldDrawOverLayer();
+        return activeTool == SHAPES && SHAPES.shouldDrawOverLayer();
     }
 
     public static void increaseBrushSize() {
-        if (currentTool instanceof AbstractBrushTool abt) {
+        if (activeTool instanceof AbstractBrushTool abt) {
             abt.increaseBrushSize();
         }
     }
 
     public static void decreaseBrushSize() {
-        if (currentTool instanceof AbstractBrushTool abt) {
+        if (activeTool instanceof AbstractBrushTool abt) {
             abt.decreaseBrushSize();
         }
     }
@@ -158,55 +155,55 @@ public class Tools {
     }
 
     public static void fgBgColorsChanged() {
-        currentTool.fgBgColorsChanged();
+        activeTool.fgBgColorsChanged();
     }
 
     public static void coCoordsChanged(View view) {
-        currentTool.coCoordsChanged(view);
+        activeTool.coCoordsChanged(view);
     }
 
     public static void imCoordsChanged(AffineTransform at, View view) {
-        currentTool.imCoordsChanged(at, view);
+        activeTool.imCoordsChanged(at, view);
     }
 
     public static void compReplaced(Composition newComp, boolean reloaded) {
-        currentTool.compReplaced(newComp, reloaded);
+        activeTool.compReplaced(newComp, reloaded);
     }
 
     public static void activeLayerChanged(Layer layer) {
-        if (GUIMode.isUnitTesting()) {
+        if (AppMode.isUnitTesting()) {
             return;
         }
-        assert currentTool != null;
+        assert activeTool != null;
 
         // don't switch from the Move Tool, because it's confusing and
         // bug-prone if the tool is changed during an auto-select
-        if (currentTool != MOVE) {
+        if (activeTool != MOVE) {
             Tool preferredTool = layer.getPreferredTool();
-            if (preferredTool != null && preferredTool != currentTool) {
+            if (preferredTool != null && preferredTool != activeTool) {
                 preferredTool.activate();
             }
         }
 
-        if (currentTool != null) {
-            currentTool.activeLayerChanged(layer);
+        if (activeTool != null) {
+            activeTool.activeLayerChanged(layer);
         }
     }
 
     public static void firstModalDialogShown() {
-        currentTool.firstModalDialogShown();
+        activeTool.firstModalDialogShown();
     }
 
     public static void firstModalDialogHidden() {
-        currentTool.firstModalDialogHidden();
+        activeTool.firstModalDialogHidden();
     }
 
     public static void forceFinish() {
-        currentTool.forceFinish();
+        activeTool.forceFinish();
     }
 
     public static void setupMaskEditing(boolean maskEditing) {
-        currentTool.setupMaskEditing(maskEditing);
+        activeTool.setupMaskEditing(maskEditing);
     }
 
     public static class EventDispatcher {
@@ -218,7 +215,7 @@ public class Tools {
 
         public static void mousePressed(MouseEvent e, View view) {
             lastEvent = new PMouseEvent(e, view);
-            currentTool.handlerChain.handleMousePressed(lastEvent);
+            activeTool.eventHandlerChain.handleMousePressed(lastEvent);
             mouseDown = true;
         }
 
@@ -231,7 +228,7 @@ public class Tools {
                 return;
             }
             lastEvent = new PMouseEvent(e, view);
-            currentTool.handlerChain.handleMouseReleased(lastEvent);
+            activeTool.eventHandlerChain.handleMouseReleased(lastEvent);
             mouseDown = false;
         }
 
@@ -240,33 +237,33 @@ public class Tools {
             if (!mouseDown) {
                 // recover from a missing "mouse pressed" event by
                 // simulating one
-                currentTool.handlerChain.handleMousePressed(lastEvent);
+                activeTool.eventHandlerChain.handleMousePressed(lastEvent);
                 mouseDown = true;
                 return;
             }
-            currentTool.handlerChain.handleMouseDragged(lastEvent);
+            activeTool.eventHandlerChain.handleMouseDragged(lastEvent);
         }
 
         public static void mouseClicked(MouseEvent e, View view) {
             lastEvent = new PMouseEvent(e, view);
             // doesn't need to go through the handler chain
-            currentTool.mouseClicked(lastEvent);
+            activeTool.mouseClicked(lastEvent);
             mouseDown = false;
         }
 
         public static void mouseMoved(MouseEvent e, View view) {
             // doesn't need to go through the handler chain
-            currentTool.mouseMoved(e, view);
+            activeTool.mouseMoved(e, view);
         }
 
         public static void mouseEntered(MouseEvent e, View view) {
             // doesn't need to go through the handler chain
-            currentTool.mouseEntered(e, view);
+            activeTool.mouseEntered(e, view);
         }
 
         public static void mouseExited(MouseEvent e, View view) {
             // doesn't need to go through the handler chain
-            currentTool.mouseExited(e, view);
+            activeTool.mouseExited(e, view);
         }
 
         public static void toolChanged(Tool oldTool, Tool newTool) {
@@ -275,10 +272,10 @@ public class Tools {
                 // middle of a mouse drag.
                 // In order to avoid inconsistent tool states,
                 // simulate a mouse release for the old tool...
-                oldTool.handlerChain.handleMouseReleased(lastEvent);
+                oldTool.eventHandlerChain.handleMouseReleased(lastEvent);
 
                 // ...and a mouse pressed for the new one
-                newTool.handlerChain.handleMousePressed(lastEvent);
+                newTool.eventHandlerChain.handleMousePressed(lastEvent);
             }
         }
 

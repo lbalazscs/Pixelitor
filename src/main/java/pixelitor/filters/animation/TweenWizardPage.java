@@ -103,7 +103,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void onComplete(Wizard wizard, Drawable dr) {
-            getAnimation(wizard).rememberInitialState();
+            getAnimation(wizard).captureInitialState();
             getFilter(wizard).getParamSet().setFinalAnimationMode(true);
         }
     }, ENDING_FILTER_STATE {
@@ -146,7 +146,7 @@ public enum TweenWizardPage implements WizardPage {
             dr.onFilterDialogCanceled();
 
             // save the final state
-            getAnimation(wizard).rememberFinalState();
+            getAnimation(wizard).captureFinalState();
         }
     }, ANIMATION_SETTINGS {
         TweenOutputSettingsPanel outputSettingsPanel;

@@ -37,8 +37,7 @@ import static pixelitor.tools.shapes.StrokeType.SHAPE;
 import static pixelitor.tools.shapes.StrokeType.ZIGZAG;
 
 /**
- * A {@link FilterParam} for stroke settings.
- * Its GUI is a button that shows a dialog when pressed.
+ * A {@link FilterParam} that configures stroke settings through a dialog-based GUI.
  */
 public class StrokeParam extends AbstractFilterParam {
     public static final ShapeType DEFAULT_SHAPE_TYPE = ShapeType.KIWI;
@@ -49,6 +48,7 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
     private final BooleanParam dashedParam = new BooleanParam("Dashed", false);
+
     private ResetButton resetButton;
     private JComponent previewer;
 
@@ -61,9 +61,11 @@ public class StrokeParam extends AbstractFilterParam {
 
         shapeTypeParam.withDefault(DEFAULT_SHAPE_TYPE);
 
+        // enable shape type only when stroke type is SHAPE
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
             strokeType -> strokeType == SHAPE);
 
+        // disable dashed option for complex stroke types
         strokeTypeParam.setupDisableOtherIf(dashedParam,
             strokeType -> strokeType != BASIC
                 && strokeType != ZIGZAG
@@ -74,13 +76,14 @@ public class StrokeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
         paramGUI = new ConfigureParamGUI(this::configureSettingsDialog, resetButton);
-
         guiCreated();
         return (JComponent) paramGUI;
     }
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        // ensures that any changes in the children params are propagated
+        // to the global reset button and to the preview panel.
         ParamAdjustmentListener decoratedListener = () -> {
             updateResetButtonState();
             if (previewer != null) {
@@ -91,67 +94,39 @@ public class StrokeParam extends AbstractFilterParam {
 
         super.setAdjustmentListener(decoratedListener);
 
-        strokeWidthParam.setAdjustmentListener(decoratedListener);
-        strokeTypeParam.setAdjustmentListener(decoratedListener);
-        strokeCapParam.setAdjustmentListener(decoratedListener);
-        strokeJoinParam.setAdjustmentListener(decoratedListener);
-        shapeTypeParam.setAdjustmentListener(decoratedListener);
-        dashedParam.setAdjustmentListener(decoratedListener);
+        for (FilterParam param : allParams) {
+            param.setAdjustmentListener(decoratedListener);
+        }
     }
 
-    public ShapeType getShapeType() {
-        return shapeTypeParam.getSelected();
-    }
-
-    public FilterParam withStrokeWidth(int newWidth) {
-        strokeWidthParam.changeDefaultValue(newWidth);
-        return this;
-    }
-
-    public float getStrokeWidth() {
-        return strokeWidthParam.getValueAsFloat();
-    }
-
-    public StrokeType getStrokeType() {
-        return strokeTypeParam.getSelected();
-    }
-
-    public void configureSettingsDialog(DialogBuilder builder) {
-        builder
-            .title("Stroke Settings")
-            .notModal()
-            .content(new StrokeSettingsPanel(this))
-            .withScrollbars()
-            .noCancelButton()
-            .okText(CLOSE_DIALOG);
-    }
-
+    /**
+     * Creates a stroke based on the current settings.
+     */
     public Stroke createStroke() {
         return getStrokeType().createStroke(this, getStrokeWidth());
     }
 
-    public float[] getDashFloats(float strokeWidth) {
-        float[] dashFloats = null;
-        if (hasDashes()) {
-            dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
-        }
-        return dashFloats;
-    }
-
-    private boolean hasDashes() {
-        return dashedParam.isChecked();
-    }
-
+    /**
+     * Creates a stroke based on the current settings, but with randomized width.
+     */
     public Stroke createStrokeWithRandomWidth(Random random, float randomness) {
         assert randomness != 0.0f;
 
-        float origStrokeWidth = strokeWidthParam.getValueAsFloat();
-        // the value of the effective stroke width should be
+        float baseWidth = strokeWidthParam.getValueAsFloat();
+        // the value of the effective stroke will should be
         // between 50% and 150% of the gui setting
-        float randomStrokeWidth = origStrokeWidth / 2.0f + origStrokeWidth * random.nextFloat();
-        float strokeWidth = ImageMath.lerp(randomness, origStrokeWidth, randomStrokeWidth);
+        float randomWidth = baseWidth / 2.0f + baseWidth * random.nextFloat();
+        float finalWidth = ImageMath.lerp(randomness, baseWidth, randomWidth);
 
-        return getStrokeType().createStroke(this, strokeWidth);
+        return getStrokeType().createStroke(this, finalWidth);
+    }
+
+    public float[] getDashPattern(float width) {
+        float[] dashFloats = null;
+        if (hasDashes()) {
+            dashFloats = new float[]{2 * width, 2 * width};
+        }
+        return dashFloats;
     }
 
     @Override
@@ -160,7 +135,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeCapParam.doRandomize();
         strokeJoinParam.doRandomize();
 
-        // ensure that "randomize settings" doesn't create slow strokes
+        // avoid slow stroke types during randomization
         do {
             strokeTypeParam.doRandomize();
         } while (strokeTypeParam.getSelected().isSlow());
@@ -218,11 +193,6 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isAnimatable() {
-        return true;
-    }
-
-    @Override
     public void setEnabled(boolean b, EnabledReason reason) {
         // call super to set the enabled state of the launching button
         super.setEnabled(b, reason);
@@ -255,8 +225,44 @@ public class StrokeParam extends AbstractFilterParam {
 
     private void updateResetButtonState() {
         if (resetButton != null) {
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
+    }
+
+    public void configureSettingsDialog(DialogBuilder builder) {
+        builder
+            .title("Stroke Settings")
+            .notModal()
+            .content(new StrokeSettingsPanel(this))
+            .withScrollbars()
+            .noCancelButton()
+            .okText(CLOSE_DIALOG);
+    }
+
+    public FilterParam withStrokeWidth(int newWidth) {
+        strokeWidthParam.changeDefaultValue(newWidth);
+        return this;
+    }
+
+    public ShapeType getShapeType() {
+        return shapeTypeParam.getSelected();
+    }
+
+    public float getStrokeWidth() {
+        return strokeWidthParam.getValueAsFloat();
+    }
+
+    public StrokeType getStrokeType() {
+        return strokeTypeParam.getSelected();
+    }
+
+    private boolean hasDashes() {
+        return dashedParam.isChecked();
+    }
+
+    @Override
+    public boolean isAnimatable() {
+        return true;
     }
 
     public RangeParam getStrokeWidthParam() {
@@ -296,6 +302,13 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
+    public List<Object> getParamValue() {
+        return Stream.of(allParams)
+            .map(FilterParam::getParamValue)
+            .collect(toList());
+    }
+
+    @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
@@ -307,12 +320,5 @@ public class StrokeParam extends AbstractFilterParam {
         node.addBoolean("dashed", hasDashes());
 
         return node;
-    }
-
-    @Override
-    public List<Object> getParamValue() {
-        return Stream.of(allParams)
-            .map(FilterParam::getParamValue)
-            .collect(toList());
     }
 }

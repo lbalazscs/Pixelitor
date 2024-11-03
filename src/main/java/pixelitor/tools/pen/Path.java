@@ -379,7 +379,7 @@ public class Path implements Serializable, Debuggable {
         if (!Tools.PEN.isActive()) {
             return;
         }
-        if (Tools.PEN.getMode() != PenToolMode.BUILD) {
+        if (Tools.PEN.modeIsNot(PenToolMode.BUILD)) {
             return;
         }
 

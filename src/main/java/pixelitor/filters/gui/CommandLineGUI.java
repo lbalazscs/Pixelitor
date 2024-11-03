@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,10 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
+/**
+ * A specialized {@link ParametrizedFilterGUI} for filters that allow
+ * the user to execute an external filtering command.
+ */
 public class CommandLineGUI extends ParametrizedFilterGUI {
     public CommandLineGUI(ParametrizedFilter filter, Filterable layer, boolean addShowOriginal, boolean reset) {
         super(filter, layer, addShowOriginal, reset);

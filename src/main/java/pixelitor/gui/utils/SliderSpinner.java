@@ -346,7 +346,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             if (hasGradient) {
                 updateResetButtonColor();
             }
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
     }
 

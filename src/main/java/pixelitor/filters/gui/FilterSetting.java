@@ -33,8 +33,8 @@ public interface FilterSetting {
     /**
      * Creates the GUI component that corresponds to this model.
      *
-     * Note: If this is an instance of {@link FilterParam},
-     * the returned component should also implement {@link ParamGUI}.
+     * If this is an instance of {@link FilterParam},
+     * the returned component must also implement {@link ParamGUI}.
      */
     JComponent createGUI();
 

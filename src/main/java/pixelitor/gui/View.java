@@ -93,7 +93,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private static boolean pixelSnapping = false;
 
     public View(Composition comp) {
-        assert !GUIMode.isUnitTesting() : "Swing component in unit test";
+        assert !AppMode.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
         setComp(comp);
@@ -415,7 +415,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         comp.drawGuides(g2);
 
         if (isActive()) {
-            Tools.getCurrent().paintOverImage(g2, comp);
+            Tools.getActive().paintOverImage(g2, comp);
         }
     }
 
@@ -717,11 +717,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public static void snappingSettingChanged(boolean newValue) {
         AppPreferences.setFlag(AppPreferences.FLAG_PIXEL_SNAP, newValue);
-        Tool currentTool = Tools.getCurrent();
-        if (currentTool == Tools.CROP) {
+        Tool activeTool = Tools.getActive();
+        if (activeTool == Tools.CROP) {
             pixelSnapping = true; // the crop tool always snaps
         } else {
-            pixelSnapping = newValue && currentTool.hasPixelSnapping();
+            pixelSnapping = newValue && activeTool.hasPixelSnapping();
         }
     }
 

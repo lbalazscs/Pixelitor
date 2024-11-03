@@ -137,11 +137,11 @@ public enum BlendingMode {
         }
     }
 
-    private final String guiName;
+    private final String displayName;
     private final String svgName; // used by the OpenRaster import-export
 
     BlendingMode(String guiName, String svgName) {
-        this.guiName = guiName;
+        this.displayName = guiName;
         this.svgName = svgName;
     }
 
@@ -153,7 +153,7 @@ public enum BlendingMode {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public static BlendingMode fromSVGName(String svgName) {

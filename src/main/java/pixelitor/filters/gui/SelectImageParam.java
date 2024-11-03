@@ -41,7 +41,7 @@ public class SelectImageParam extends ListParam<NamedImage> {
     }
 
     public BufferedImage getImage() {
-        return currentChoice.getImage();
+        return selectedValue.getImage();
     }
 
     @Override
@@ -54,8 +54,8 @@ public class SelectImageParam extends ListParam<NamedImage> {
         if (choices.size() > 1) {
             for (NamedImage choice : choices) {
                 if (activeImage.getComp() != choice.getComp()) {
-                    defaultChoice = choice;
-                    currentChoice = defaultChoice;
+                    defaultValue = choice;
+                    selectedValue = defaultValue;
                     defaultSet = true;
                     break;
                 }
@@ -63,8 +63,8 @@ public class SelectImageParam extends ListParam<NamedImage> {
         }
         if (!defaultSet) {
             // settle for the active one
-            defaultChoice = activeImage;
-            currentChoice = defaultChoice;
+            defaultValue = activeImage;
+            selectedValue = defaultValue;
         }
     }
 

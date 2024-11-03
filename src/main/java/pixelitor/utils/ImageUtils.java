@@ -1173,7 +1173,7 @@ public class ImageUtils {
     public static BufferedImage calcComposite(List<Layer> layers, Canvas canvas) {
         if (layers.size() == 1) { // shortcut
             Layer layer = layers.getFirst();
-            if (Tools.currentTool.isDirectDrawing() && layer.isVisible()) {
+            if (Tools.activeTool.isDirectDrawing() && layer.isVisible()) {
                 BufferedImage layerImg = layer.asImage(true, true);
 
                 // it can be null if there's a single adjustment layer

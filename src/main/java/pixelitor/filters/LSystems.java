@@ -266,14 +266,14 @@ public class LSystems extends CurveFilter {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
         private final String axiom;
 
         // Whether to draw the axiom in the first iteration
         private final boolean drawAxiom;
 
-        Type(String guiName, String axiom, boolean drawAxiom) {
-            this.guiName = guiName;
+        Type(String displayName, String axiom, boolean drawAxiom) {
+            this.displayName = displayName;
             this.axiom = axiom;
             this.drawAxiom = drawAxiom;
         }
@@ -284,7 +284,7 @@ public class LSystems extends CurveFilter {
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 

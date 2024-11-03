@@ -33,28 +33,34 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition;
 public class AdvancedTextSettingsPanel extends JPanel {
     private JCheckBox underlineCB;
     private JCheckBox strikeThroughCB;
+
     private JCheckBox kerningCB;
     private JCheckBox ligaturesCB;
+
     private RangeParam trackingParam;
     private RangeParam lineHeightParam;
+
     private RangeParam scaleXParam;
     private RangeParam scaleYParam;
     private RangeParam shearXParam;
     private RangeParam shearYParam;
+
     private final GridBagHelper gbh;
     private final ActionListener actionListener;
 
     public AdvancedTextSettingsPanel(ActionListener actionListener,
-                                     FontInfo fontInfo, double relLineHeight,
-                                     double sx, double sy, double shx, double shy) {
+                                     FontInfo fontInfo,
+                                     double lineHeightRatio,
+                                     double scaleX, double scaleY,
+                                     double shearX, double shearY) {
         super(new GridBagLayout());
         this.actionListener = actionListener;
         gbh = new GridBagHelper(this);
 
         addCheckboxes(fontInfo);
         addTrackingGUI(fontInfo);
-        addLineHeightGUI(relLineHeight);
-        addTransformGUI(sx, sy, shx, shy);
+        addLineHeightGUI(lineHeightRatio);
+        addTransformGUI(scaleX, scaleY, shearX, shearY);
     }
 
     private void addCheckboxes(FontInfo font) {
@@ -84,79 +90,82 @@ public class AdvancedTextSettingsPanel extends JPanel {
         gbh.addParam(trackingParam, "trackingGUI");
     }
 
-    private void addLineHeightGUI(double relLineHeight) {
+    private void addLineHeightGUI(double lineHeightRatio) {
         lineHeightParam = new RangeParam("Line Height (%)",
-            0, 100 * relLineHeight, 200, true, LabelPosition.NONE_WITH_TICKS);
+            0, 100 * lineHeightRatio, 200, true, LabelPosition.NONE_WITH_TICKS);
         lineHeightParam.addChangeListener(e -> actionListener.actionPerformed(null));
         gbh.addParam(lineHeightParam);
     }
 
-    private void addTransformGUI(double sx, double sy, double shx, double shy) {
+    private void addTransformGUI(double scaleX, double scaleY,
+                                 double shearX, double shearY) {
         ChangeListener changeListener = e -> actionListener.actionPerformed(null);
 
         scaleXParam = new RangeParam("Horizontal Scaling (%)",
-            -300, 100 * sx, 300, true, LabelPosition.NONE_WITH_TICKS);
+            -300, 100 * scaleX, 300, true, LabelPosition.NONE_WITH_TICKS);
         scaleXParam.addChangeListener(changeListener);
         gbh.addParam(scaleXParam);
 
         scaleYParam = new RangeParam("Vertical Scaling (%)",
-            -300, 100 * sy, 300, true, LabelPosition.NONE_WITH_TICKS);
+            -300, 100 * scaleY, 300, true, LabelPosition.NONE_WITH_TICKS);
         scaleYParam.addChangeListener(changeListener);
         gbh.addParam(scaleYParam);
 
         shearXParam = new RangeParam("Horizontal Shearing (%)",
-            -100, 100 * shx, 100, true, LabelPosition.NONE_WITH_TICKS);
+            -100, 100 * shearX, 100, true, LabelPosition.NONE_WITH_TICKS);
         shearXParam.addChangeListener(changeListener);
         gbh.addParam(shearXParam);
 
         shearYParam = new RangeParam("Vertical Shearing (%)",
-            -100, 100 * shy, 100, true, LabelPosition.NONE_WITH_TICKS);
+            -100, 100 * shearY, 100, true, LabelPosition.NONE_WITH_TICKS);
         shearYParam.addChangeListener(changeListener);
         gbh.addParam(shearYParam);
     }
 
     public void saveStateTo(FontInfo fontInfo) {
-        boolean strikeThrough = strikeThroughCB.isSelected();
-        boolean kerning = kerningCB.isSelected();
-        boolean ligatures = ligaturesCB.isSelected();
-        boolean underline = underlineCB.isSelected();
-        int tracking = trackingParam.getValue();
-
-        fontInfo.updateAdvanced(strikeThrough, kerning, ligatures, underline, tracking);
+        fontInfo.updateAdvanced(
+            strikeThroughCB.isSelected(),
+            kerningCB.isSelected(),
+            ligaturesCB.isSelected(),
+            underlineCB.isSelected(),
+            trackingParam.getValue());
     }
 
-    public void updateFrom(FontInfo font, double relLineHeight,
-                           double sx, double sy, double shx, double shy) {
+    public void updateFrom(FontInfo font, double lineHeightRatio,
+                           double scaleX, double scaleY,
+                           double shearX, double shearY) {
         strikeThroughCB.setSelected(font.hasStrikeThrough());
+        underlineCB.setSelected(font.hasUnderline());
+
         kerningCB.setSelected(font.hasKerning());
         ligaturesCB.setSelected(font.hasLigatures());
-        underlineCB.setSelected(font.hasUnderline());
         trackingParam.setValue(font.getTracking());
-        lineHeightParam.setValueNoTrigger(100 * relLineHeight);
 
-        scaleXParam.setValueNoTrigger(100 * sx);
-        scaleYParam.setValueNoTrigger(100 * sy);
-        shearXParam.setValueNoTrigger(100 * shx);
-        shearYParam.setValueNoTrigger(100 * shy);
+        lineHeightParam.setValueNoTrigger(100 * lineHeightRatio);
+
+        scaleXParam.setValueNoTrigger(100 * scaleX);
+        scaleYParam.setValueNoTrigger(100 * scaleY);
+        shearXParam.setValueNoTrigger(100 * shearX);
+        shearYParam.setValueNoTrigger(100 * shearY);
     }
 
     public double getRelLineHeight() {
         return lineHeightParam.getPercentage();
     }
 
-    public double getSx() {
+    public double getScaleX() {
         return scaleXParam.getPercentage();
     }
 
-    public double getSy() {
+    public double getScaleY() {
         return scaleYParam.getPercentage();
     }
 
-    public double getShx() {
+    public double getShearX() {
         return shearXParam.getPercentage();
     }
 
-    public double getShy() {
+    public double getShearY() {
         return shearYParam.getPercentage();
     }
 }

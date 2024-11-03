@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.GUIText.OPACITY;
 
 /**
- * A GUI for configuring an area effect
+ * A base class for configuring individual area effects in the {@link EffectsPanel}.
  */
 public abstract class EffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
@@ -50,7 +50,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     private final boolean defaultEnabled;
     private final Color defaultColor;
-    private final int defaultOpacityInt; // opacity as a 0..100 value
+    private final int defaultOpacityPercent; // opacity as a 0..100 int value
 
     private Color color;
     static final int BUTTON_SIZE = 20;
@@ -66,16 +66,16 @@ public abstract class EffectPanel extends JPanel implements Resettable {
                 Color defaultColor, float defaultOpacity) {
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
-        this.defaultOpacityInt = (int) (100 * defaultOpacity);
+        this.defaultOpacityPercent = (int) (100 * defaultOpacity);
 
         setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
-        opacityRange = new RangeParam(OPACITY, 1, defaultOpacityInt, 100);
+        opacityRange = new RangeParam(OPACITY, 1, defaultOpacityPercent, 100);
         var opacitySlider = SliderSpinner.from(opacityRange);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
-        setTabEnabled(defaultEnabled);
+        setEffectEnabled(defaultEnabled);
         enabledCB.addActionListener(e -> updateResetButtonIcon());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
@@ -92,10 +92,6 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         gbh.addLabelAndControl("Enabled:", enabledCB);
         gbh.addLabelAndControlNoStretch("Color:", colorSwatch);
         gbh.addLabelAndControl(opacityRange.getName() + ":", opacitySlider);
-    }
-
-    public void setTabEnabled(boolean enabled) {
-        enabledCB.setSelected(enabled);
     }
 
     private void showColorDialog() {
@@ -120,6 +116,10 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         ColorHistory.remember(newColor);
     }
 
+    public void setEffectEnabled(boolean enabled) {
+        enabledCB.setSelected(enabled);
+    }
+
     ButtonModel getEnabledModel() {
         return enabledCB.getModel();
     }
@@ -140,33 +140,30 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         opacityRange.setValueNoTrigger(100 * opacity);
     }
 
-    private void setOpacityAsInt(int opacity) {
+    private void setOpacityAsPercent(int opacity) {
         opacityRange.setValueNoTrigger(opacity);
     }
 
-    public abstract double getBrushWidth();
+    public abstract double getEffectWidth();
 
-    public abstract void setBrushWidth(double value);
+    public abstract void setEffectWidth(double value);
 
-    public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
-        this.adjustmentListener = adjustmentListener;
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        this.adjustmentListener = listener;
 
         if (enabledCBListener != null) {
             // avoid accumulating action listeners on the checkbox
             enabledCB.removeActionListener(enabledCBListener);
         }
-        enabledCBListener = e -> adjustmentListener.paramAdjusted();
+        enabledCBListener = e -> listener.paramAdjusted();
         enabledCB.addActionListener(enabledCBListener);
 
-        opacityRange.setAdjustmentListener(adjustmentListener);
+        opacityRange.setAdjustmentListener(listener);
     }
 
-    public void updateEffectColorAndBrush(AbstractAreaEffect effect) {
+    public void updateEffectColorAndWidth(AbstractAreaEffect effect) {
         effect.setBrushColor(getColor());
-
-        double brushWidth = getBrushWidth();
-        effect.setEffectWidth(brushWidth);
-
+        effect.setEffectWidth(getEffectWidth());
         effect.setAutoBrushSteps();
     }
 
@@ -179,15 +176,15 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     @Override
     public void reset(boolean trigger) {
-        setTabEnabled(defaultEnabled);
+        setEffectEnabled(defaultEnabled);
         setColor(defaultColor, trigger);
-        setOpacityAsInt(defaultOpacityInt);
+        setOpacityAsPercent(defaultOpacityPercent);
     }
 
     public boolean randomize() {
         // each effect is enabled with 25% probability
         boolean enable = Rnd.nextFloat() < 0.25f;
-        setTabEnabled(enable);
+        setEffectEnabled(enable);
         if (enable) {
             setColor(Rnd.createRandomColor(), false);
             opacityRange.randomize();
@@ -201,7 +198,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     protected void updateResetButtonIcon() {
         if (resetButton != null) {
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
     }
 

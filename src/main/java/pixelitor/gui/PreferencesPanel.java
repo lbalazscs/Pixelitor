@@ -449,7 +449,7 @@ public class PreferencesPanel extends JTabbedPane {
             .title(i18n("preferences"))
             .okText(CLOSE_DIALOG)
             .validator(prefPanel::validate)
-            .validateWhenCanceled()
+            .validateOnCancel()
             .show();
     }
 }

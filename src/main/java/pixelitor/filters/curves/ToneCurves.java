@@ -34,7 +34,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
- * Manages RGB and individual color channel curves (Red, Green, Blue)
+ * Manages RGB and individual color channel curves.
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
@@ -117,8 +117,7 @@ public class ToneCurves {
     }
 
     /**
-     * Draws the tone curve grid, scales, and curves for all channels
-     * onto the given Graphics2D.
+     * Draws the tone curve grid, scales, and curves for all channels.
      */
     public void draw(Graphics2D g) {
         boolean darkTheme = Themes.getCurrent().isDark();
@@ -172,7 +171,7 @@ public class ToneCurves {
     }
 
     /**
-     * Draws the diagonal line for reference from the
+     * Draws the diagonal reference line for the
      * bottom-left to the top-right of the curve area.
      */
     private void drawDiagonal(Graphics2D g) {

@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
@@ -75,7 +75,7 @@ public sealed interface PenToolMode permits PathBuilder, PathEditor, PathTransfo
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
-                    if (GUIMode.isDevelopment()) {
+                    if (AppMode.isDevelopment()) {
                         throw new IllegalStateException(
                             "path's comp is %s, active comp is %s".formatted(
                                 path.getComp().getName(), comp.getName()));

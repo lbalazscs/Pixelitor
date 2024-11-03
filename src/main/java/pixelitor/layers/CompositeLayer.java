@@ -24,7 +24,7 @@ import java.io.Serial;
 
 /**
  * A {@link ContentLayer} that is also a {@link LayerHolder},
- * and therefore can have nested "child" layers in its GUI.
+ * and therefore can contain nested layers.
  */
 public abstract class CompositeLayer extends ContentLayer implements LayerHolder {
     @Serial

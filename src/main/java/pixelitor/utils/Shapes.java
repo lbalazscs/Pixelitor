@@ -2246,11 +2246,11 @@ public class Shapes {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
         private final boolean hasTuning;
 
-        NonlinTransform(String guiName, boolean hasTuning) {
-            this.guiName = guiName;
+        NonlinTransform(String displayName, boolean hasTuning) {
+            this.displayName = displayName;
             this.hasTuning = hasTuning;
         }
 
@@ -2266,7 +2266,7 @@ public class Shapes {
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 }

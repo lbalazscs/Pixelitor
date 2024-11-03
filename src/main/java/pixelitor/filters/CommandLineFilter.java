@@ -35,6 +35,14 @@ public class CommandLineFilter extends ParametrizedFilter {
 
     public static final String NAME = "Command Line";
 
+    // Pattern to split on whitespace, while preserving quoted text as single arguments
+    private static final Pattern WHITESPACE_OUTSIDE_QUOTES_PATTERN =
+        Pattern.compile("\\s(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+    // Pattern to match and remove surrounding quotes from strings
+    private static final Pattern SURROUNDING_QUOTES_PATTERN =
+        Pattern.compile("^\"|\"$");
+
     private final TextParam textParam = new TextParam("Command",
         "", true);
 
@@ -57,16 +65,17 @@ public class CommandLineFilter extends ParametrizedFilter {
         return IO.commandLineFilter(src, commands);
     }
 
-    // Splits the input by whitespace, considering quoted parts
     private static List<String> parseCommands(String input) {
         List<String> result = new ArrayList<>();
 
-        String[] parts = input.split("\\s(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-        Pattern surroundingQuotes = Pattern.compile("^\"|\"$");
-        for (String part : parts) {
-            String cleanedPart = surroundingQuotes.matcher(part).replaceAll("");
-            if (!cleanedPart.isBlank()) {
-                result.add(cleanedPart);
+        // splits the input by whitespace, while ignoring whitespace within quotes
+        String[] tokens = WHITESPACE_OUTSIDE_QUOTES_PATTERN.split(input);
+
+        for (String token : tokens) {
+            // removes surrounding quotes if present
+            String cleanedToken = SURROUNDING_QUOTES_PATTERN.matcher(token).replaceAll("");
+            if (!cleanedToken.isBlank()) {
+                result.add(cleanedToken);
             }
         }
 

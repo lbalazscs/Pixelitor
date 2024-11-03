@@ -31,21 +31,21 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         super(actual, SelectionAssert.class);
     }
 
-    public SelectionAssert isAlive() {
+    public SelectionAssert isUsable() {
         isNotNull();
 
-        if (!actual.isAlive()) {
-            failWithMessage("Not alive");
+        if (!actual.isUsable()) {
+            failWithMessage("Not usable");
         }
 
         return this;
     }
 
-    public SelectionAssert isNotAlive() {
+    public SelectionAssert isNotUsable() {
         isNotNull();
 
-        if (actual.isAlive()) {
-            failWithMessage("Alive");
+        if (actual.isUsable()) {
+            failWithMessage("Usable");
         }
 
         return this;

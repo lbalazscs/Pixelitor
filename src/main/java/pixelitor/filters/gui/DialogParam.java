@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Filterable;
@@ -28,11 +29,10 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
-import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
- * A composite {@link FilterParam} that
- * can show its children in a dialog.
+ * A composite {@link FilterParam} that groups child parameters
+ * and displays them in a modal dialog.
  */
 public class DialogParam extends AbstractFilterParam {
     private final FilterParam[] children;
@@ -46,9 +46,7 @@ public class DialogParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
-
         paramGUI = new ConfigureParamGUI(this::configureDialog, resetButton);
-
         guiCreated();
         return (JComponent) paramGUI;
     }
@@ -58,7 +56,7 @@ public class DialogParam extends AbstractFilterParam {
             .content(GUIUtils.arrangeVertically(List.of(children)))
             .title(getName())
             .withScrollbars()
-            .okText(CLOSE_DIALOG)
+            .okText(GUIText.CLOSE_DIALOG)
             .noCancelButton();
     }
 
@@ -155,7 +153,7 @@ public class DialogParam extends AbstractFilterParam {
         if (trigger) {
             adjustmentListener.paramAdjusted();
         } else {
-            // This class updates the default button state
+            // This class updates the reset button state
             // by putting a decorator on the adjustment
             // listeners, so this needs to be called here manually.
             updateResetButtonState();
@@ -164,7 +162,7 @@ public class DialogParam extends AbstractFilterParam {
 
     private void updateResetButtonState() {
         if (resetButton != null) {
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
     }
 

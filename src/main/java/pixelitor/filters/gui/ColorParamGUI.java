@@ -77,7 +77,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     public void updateGUI() {
         colorSwatch.setForeground(model.getColor());
         if (resetButton != null) {
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
     }
 

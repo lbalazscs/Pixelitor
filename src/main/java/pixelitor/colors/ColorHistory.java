@@ -26,23 +26,24 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 /**
- * The history of the colors used as foreground, background and filter colors.
+ * The recently used foreground, background and filter colors in a FIFO queue.
  */
 public class ColorHistory {
     public static final ColorHistory INSTANCE = new ColorHistory();
 
-    private static final int MAX_HISTORY_SIZE = 200;
+    private static final int MAX_HISTORY_CAPACITY = 200;
+    private static final int SWATCHES_PER_ROW = 10;
 
-    private final List<Color> colors;
+    private final Queue<Color> colors;
 
     private ColorHistory() {
-        colors = new ArrayList<>();
+        colors = new ArrayDeque<>();
     }
 
     private void add(Color newColor) {
@@ -53,8 +54,8 @@ public class ColorHistory {
             }
         }
         colors.add(newColor);
-        if (colors.size() > MAX_HISTORY_SIZE) {
-            colors.removeFirst();
+        if (colors.size() > MAX_HISTORY_CAPACITY) {
+            colors.remove(); // Remove oldest color
         }
     }
 
@@ -62,30 +63,37 @@ public class ColorHistory {
         INSTANCE.add(newColor);
     }
 
-    public void showDialog(Window window, ColorSwatchClickHandler clickHandler, boolean forFilters) {
+    public void showDialog(Window window,
+                           ColorSwatchClickHandler clickHandler,
+                           boolean filterMode) {
         assert window != null;
         assert clickHandler != null;
 
-        int numColors = colors.size();
-        int colorsInRow = 10;
-        int rows = 1 + (numColors - 1) / colorsInRow;
-        var panel = new JPanel(new GridLayout(rows, colorsInRow, 2, 2));
-        panel.setBorder(createEmptyBorder(2, 2, 2, 2));
-        for (Color color : colors) {
-            panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
-        }
+        JPanel swatchPanel = createSwatchPanel(clickHandler);
 
-        Messages.showStatusMessage("Color History: " + (forFilters ?
+        Messages.showStatusMessage("Color History: " + (filterMode ?
             ColorSwatchClickHandler.FILTER_HTML_HELP :
             ColorSwatchClickHandler.STANDARD_HTML_HELP));
 
         new DialogBuilder()
             .title("Color History")
             .owner(window)
-            .content(panel)
+            .content(swatchPanel)
             .notModal()
             .noOKButton()
             .noCancelButton()
             .show();
+    }
+
+    private JPanel createSwatchPanel(ColorSwatchClickHandler clickHandler) {
+        int numColors = colors.size();
+        int numRows = 1 + (numColors - 1) / SWATCHES_PER_ROW;
+
+        JPanel swatchPanel = new JPanel(new GridLayout(numRows, SWATCHES_PER_ROW, 2, 2));
+        swatchPanel.setBorder(createEmptyBorder(2, 2, 2, 2));
+        for (Color color : colors) {
+            swatchPanel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
+        }
+        return swatchPanel;
     }
 }

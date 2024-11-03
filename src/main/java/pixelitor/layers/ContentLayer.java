@@ -34,8 +34,8 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 
 /**
- * An abstract base class that defines common properties and behaviors
- * for layers that have content that can be moved or rotated.
+ * Base class for layers with content that can be manipulated
+ * spatially, supporting transformations like move and rotate.
  */
 public abstract class ContentLayer extends Layer {
     @Serial

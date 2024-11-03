@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,20 +58,20 @@ public enum FillType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
-    FillType(String guiName) {
-        this.guiName = guiName;
+    FillType(String displayName) {
+        this.displayName = displayName;
     }
 
     public abstract Color getColor();
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public FilterAction asFillFilterAction() {
-        return new FilterAction(guiName, () -> new Fill(this)).noGUI();
+        return new FilterAction(displayName, () -> new Fill(this)).noGUI();
     }
 }

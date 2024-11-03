@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,32 +21,38 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * Forwards the events to the current tool in order to do the real job of the tool.
- * This is always the last {@link ToolHandler} in the {@link ToolHandlerChain}.
+ * The last {@link ToolHandler} in the {@link ToolHandlerChain}
+ * that executes the active tool's primary behavior when
+ * no other handlers have intercepted the events.
  */
-public class CurrentToolHandler extends ToolHandler {
-    private final Tool tool;
+public class ActiveToolHandler extends ToolHandler {
+    private final Tool targetTool;
 
-    public CurrentToolHandler(Tool tool) {
-        this.tool = tool;
+    public ActiveToolHandler(Tool tool) {
+        this.targetTool = tool;
     }
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        tool.mousePressed(e);
+        targetTool.mousePressed(e);
         // this is the last handler in the chain, therefore it always returns true
         return true;
     }
 
     @Override
     boolean mouseDragged(PMouseEvent e) {
-        tool.mouseDragged(e);
+        targetTool.mouseDragged(e);
         return true;
     }
 
     @Override
     boolean mouseReleased(PMouseEvent e) {
-        tool.mouseReleased(e);
+        targetTool.mouseReleased(e);
         return true;
+    }
+
+    @Override
+    public void setNextHandler(ToolHandler handler) {
+        throw new UnsupportedOperationException(); // allow no successor
     }
 }

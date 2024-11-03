@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Something that contains a list of layers, like a
- * composition, layer group or smart object.
+ * Interface representing any layer container that can hold multiple
+ * child layers, such as compositions, layer groups, or smart objects.
  */
 public interface LayerHolder extends Debuggable {
     int getActiveLayerIndex();

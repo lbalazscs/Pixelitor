@@ -27,21 +27,20 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * A button representing a color swatch in a {@link PalettePanel}.
+ * A color swatch in a {@link PalettePanel}.
  */
 public class ColorSwatchButton extends JComponent {
     public static final int SIZE = 32;
+    public static ColorSwatchButton lastClickedSwatch = null;
 
     // Grid positions.
     private final int gridX;
     private final int gridY;
 
-    private boolean isMarked = false;
-    public static ColorSwatchButton lastClickedSwatch = null;
-
     private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
-    private boolean isRaised = true;
+    private boolean raised = true;
+    private boolean marked = false;
 
     public ColorSwatchButton(Color color, ColorSwatchClickHandler clickHandler, int gridX, int gridY) {
         assert clickHandler != null;
@@ -57,12 +56,12 @@ public class ColorSwatchButton extends JComponent {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isControlDown()) {
-                    isMarked = false;
+                    marked = false;
                 } else {
-                    isMarked = true;
+                    marked = true;
                     regularClick(e);
                 }
-                isRaised = false;
+                raised = false;
                 repaint();
             }
 
@@ -79,7 +78,7 @@ public class ColorSwatchButton extends JComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                isRaised = true;
+                raised = true;
                 repaint();
             }
         });
@@ -89,24 +88,24 @@ public class ColorSwatchButton extends JComponent {
         this.color = color;
         setBackground(color);
         setForeground(color);
-        isMarked = false;
+        marked = false;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         g.setColor(color);
-        g.fill3DRect(0, 0, SIZE, SIZE, isRaised);
+        g.fill3DRect(0, 0, SIZE, SIZE, raised);
         if (this == lastClickedSwatch) {
             paintSelectionBorder(g);
         }
-        if (isMarked) {
+        if (marked) {
             paintMark(g);
         }
     }
 
     private void paintSelectionBorder(Graphics g) {
-        g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, isRaised);
-        g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, isRaised);
+        g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, raised);
+        g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, raised);
     }
 
     private static void paintMark(Graphics g) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,11 @@ import javax.imageio.event.IIOReadProgressListener;
  * Tracks the reading of a large file
  * with the help of a {@link ProgressTracker}
  */
-public class TrackerReadProgressListener implements IIOReadProgressListener {
+public class TrackingReadProgressListener implements IIOReadProgressListener {
     private final ProgressTracker tracker;
     private int workDone = 0;
 
-    public TrackerReadProgressListener(ProgressTracker tracker) {
+    public TrackingReadProgressListener(ProgressTracker tracker) {
         this.tracker = tracker;
     }
 

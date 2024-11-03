@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.Views;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PAction;
@@ -139,7 +139,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         popup.addSeparator();
         popup.add(tabsUI.getTabPlacementMenu());
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             popup.add(new PAction("Debug View...", () ->
                 Debug.showTree(view, "View " + view.getName())));
         }

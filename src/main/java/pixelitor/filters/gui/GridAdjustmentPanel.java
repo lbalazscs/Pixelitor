@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,9 +31,9 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 
 /**
- * A {@link ParametrizedFilterGUI}, where the components (typically representing
- * the four corners of the image) are added in a 2*2 grid.
- * Extra parameters are added in a row bellow the grid.
+ * A {@link ParametrizedFilterGUI}, where the {@link ParamGUI}s (typically
+ * representing the four corners of the image) are added in a 2*2 grid.
+ * Additional parameters are added below the grid in a separate row.
  */
 public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
@@ -70,7 +70,7 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
             JComponent control = param.createGUI();
             String labelText = param.getName() + ':';
 
-            // the first 4 are added into the 4 grid positions...
+            // the first 4 are added into the 4 grid positions
             if (i < MAX_GRID_PARAMS) {
                 if (addGridLabels) {
                     gridPanel.add(new JLabel(labelText));
@@ -86,9 +86,9 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
             return gridPanel;
         }
 
-        JPanel p = new JPanel(new BorderLayout());
-        p.add(gridPanel, CENTER);
-        p.add(extraParamsPanel, SOUTH);
-        return p;
+        JPanel combinedPanel = new JPanel(new BorderLayout());
+        combinedPanel.add(gridPanel, CENTER);
+        combinedPanel.add(extraParamsPanel, SOUTH);
+        return combinedPanel;
     }
 }

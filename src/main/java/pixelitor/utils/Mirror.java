@@ -28,12 +28,12 @@ public enum Mirror {
     VERTICAL("Vertical", -1.0, 1.0),
     HORIZONTAL("Horizontal", 1.0, -1.0);
 
-    private final String guiName;
+    private final String displayName;
     private final double multX;
     private final double multY;
 
-    Mirror(String guiName, double multX, double multY) {
-        this.guiName = guiName;
+    Mirror(String displayName, double multX, double multY) {
+        this.displayName = displayName;
         this.multX = multX;
         this.multY = multY;
     }
@@ -48,6 +48,6 @@ public enum Mirror {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

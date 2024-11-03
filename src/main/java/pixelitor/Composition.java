@@ -76,7 +76,7 @@ import static pixelitor.utils.Utils.createCopyName;
 import static pixelitor.utils.debug.DebugNodes.createBufferedImageNode;
 
 /**
- * An image composition consisting of multiple layers
+ * An image composition containing multiple layers. 
  */
 public class Composition implements Serializable, ImageSource, LayerHolder {
     // serialization is used for saving in the pxc format
@@ -131,8 +131,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     private transient Selection selection;
 
     // A temporary selection that is currently being created
-    // by dragging with a tool, but it's not finalized yet.
-    private transient Selection inProgressSelection;
+    // by dragging, but it's not finalized yet.
+    private transient Selection draftSelection;
 
     /**
      * Private constructor: a {@link Composition}
@@ -202,7 +202,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         dirty = false;
         view = null; // will be set later
         selection = null; // the selection isn't saved
-        inProgressSelection = null;
+        draftSelection = null;
         owners = null; // will be set from the owners when they are deserialized
 
         in.defaultReadObject();
@@ -260,7 +260,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             compCopy.fileTime = 0;
             compCopy.name = createCopyName(removeExtension(name));
             if (guides != null) {
-                compCopy.guides = guides.copyForNewComp(view);
+                compCopy.guides = guides.copyIdentical(view);
             }
         }
         compCopy.createDebugName();
@@ -317,7 +317,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (selection != null) {
             if (view == null) {
-                selection.die();
+                selection.dispose();
             } else {
                 selection.setView(view);
             }
@@ -447,7 +447,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void dispose() {
         if (selection != null) {
             // stop the timer thread
-            selection.die();
+            selection.dispose();
         }
         removeAllLayersFromUI();
         setView(null);
@@ -500,10 +500,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public void rename(TabViewContainer owner) {
-        String oldName = getName();
-        String newName = JOptionPane.showInputDialog(owner,
-            "New Name:", oldName);
-        rename(oldName, newName);
+        String origName = getName();
+        String chosenName = JOptionPane.showInputDialog(owner,
+            "New Name:", origName);
+        rename(origName, chosenName);
     }
 
     public void rename(String oldName, String newName) {
@@ -525,7 +525,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         this.debugName = name + " " + debugCounter++;
     }
 
-    public String generateNewLayerName() {
+    public String generateLayerName() {
         return "layer " + newLayerCount++;
     }
 
@@ -560,20 +560,18 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
         var newLayer = new ImageLayer(this,
-            baseLayerImage, generateNewLayerName());
+            baseLayerImage, generateLayerName());
 
         addLayerNoUI(newLayer);
     }
 
-    public ImageLayer addNewEmptyImageLayer(String name, boolean bellowActive) {
+    public void addNewEmptyImageLayer(String name, boolean bellowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         getHolderForNewLayers().adder()
             .withHistory("New Empty Layer")
             .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
             .noUpdate()
             .add(newLayer);
-
-        return newLayer;
     }
 
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String editName) {
@@ -602,6 +600,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert checkInvariants();
     }
 
+    /**
+     * Flattens all visible layers into a single image layer.
+     */
     public void flattenImage() {
         assert isActive();
 
@@ -610,15 +611,17 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         int numLayers = getNumLayers();
-        BufferedImage bi = getCompositeImage();
+        BufferedImage flattenedImg = getCompositeImage();
+        Layer flattenedLayer = new ImageLayer(this, flattenedImg, "flattened");
 
-        Layer flattened = new ImageLayer(this, bi, "flattened");
+        // add the flattened layer on top
         adder()
-            .atIndex(numLayers) // add to the top
+            .atIndex(numLayers)
             .noUpdate()
-            .add(flattened);
+            .add(flattenedLayer);
 
-        for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
+        // remove all other layers
+        for (int i = numLayers - 1; i >= 0; i--) {
             deleteLayer(layerList.get(i), false);
         }
 
@@ -688,35 +691,39 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public void deleteLayer(Layer layer, boolean addToHistory, boolean updateUI) {
         assert layer.getComp() == this;
         assert layer.getHolder() == this;
+        assert layerList.size() >= 2;
 
-        int layerIndex = layerList.indexOf(layer);
-
+        int deletedIndex = layerList.indexOf(layer);
         if (addToHistory) {
-            History.add(new DeleteLayerEdit(this, layer, layerIndex));
+            History.add(new DeleteLayerEdit(this, layer, deletedIndex));
         }
 
         layerList.remove(layer);
 
         if (layer == activeLayer) {
-            if (layerIndex > 0) {
-                setActiveLayer(layerList.get(layerIndex - 1));
-            } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.getFirst());
-            }
+            // the active layer was deleted, a new one must be selected
+            Layer newActiveLayer = deletedIndex > 0
+                ? layerList.get(deletedIndex - 1)
+                : layerList.getFirst();
+            setActiveLayer(newActiveLayer);
         }
 
         if (updateUI) {
-            LayerUI ui = layer.getUI();
-            if (ui != null) { // can be null if part of layer rasterization
-                view.removeLayerUI(ui);
-
-                if (isActive()) {
-                    Layers.numLayersChanged(this, layerList.size());
-                }
-
-                update();
-            }
+            updateUIAfterLayerDeletion(layer);
         }
+    }
+
+    private void updateUIAfterLayerDeletion(Layer deletedLayer) {
+        LayerUI ui = deletedLayer.getUI();
+        if (ui == null) { // can be null if part of layer rasterization
+            return;
+        }
+
+        view.removeLayerUI(ui);
+        if (isActive()) {
+            Layers.numLayersChanged(this, layerList.size());
+        }
+        update();
     }
 
     @Override
@@ -994,7 +1001,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         forEachNestedLayerAndMask(Layer::updateIconImage);
     }
 
-    public boolean activeLayerAcceptsToolDrawing() {
+    /**
+     * Returns whether a tool can draw on the active layer.
+     */
+    public boolean canDrawOnActiveLayer() {
         return activeLayer instanceof Drawable || activeLayer.isMaskEditing();
     }
 
@@ -1129,9 +1139,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    // Called when the layer order is changed by drag-reordering
-    // in the GUI. The GUI doesn't have to be updated.
-    public void changeLayerIndex(Layer layer, int newIndex) {
+    /**
+     * Changes the position of a layer in the layer stack.
+     * <p>
+     * The GUI doesn't have to be updated because this method is
+     * called when the layer order is changed by drag-reordering in the GUI.
+     */
+    public void reorderLayer(Layer layer, int newIndex) {
         int oldIndex = layerList.indexOf(layer);
         assert oldIndex != -1;
         assert newIndex < layerList.size() : "oldIndex = " + oldIndex + ", newIndex = " + newIndex;
@@ -1184,8 +1198,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private void paintSelectionAsMarchingAnts(Graphics2D g) {
-        if (inProgressSelection != null) {
-            inProgressSelection.paintMarchingAnts(g);
+        if (draftSelection != null) {
+            draftSelection.paintMarchingAnts(g);
         }
         if (selection != null) {
             selection.paintMarchingAnts(g);
@@ -1204,8 +1218,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
     private Shape calcTotalSelectionShape() {
         Shape totalShape = null;
-        if (inProgressSelection != null) {
-            totalShape = inProgressSelection.getShape();
+        if (draftSelection != null) {
+            totalShape = draftSelection.getShape();
         }
         if (selection != null) {
             if (totalShape == null) {
@@ -1219,28 +1233,32 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     public DeselectEdit deselect(boolean addToHistory) {
-        if (inProgressSelection != null) {
-            inProgressSelection.die();
-            inProgressSelection = null;
+        if (draftSelection != null) {
+            draftSelection.dispose();
+            draftSelection = null;
+        }
+
+        if (selection == null) {
+            return null;
         }
 
         DeselectEdit edit = null;
-        if (selection != null) {
-            Shape shape = selection.getShape();
-            if (shape != null) { // null for a simple click without a previous selection
-                edit = new DeselectEdit(this, shape);
-            }
-            if (addToHistory && edit != null) {
-                History.add(edit);
-            }
+        Shape shape = selection.getShape();
+        if (shape != null) { // null for a simple click without a previous selection
+            edit = new DeselectEdit(this, shape);
+        }
+        if (addToHistory && edit != null) {
+            History.add(edit);
+        }
 
-            boolean wasHidden = selection.isHidden();
-            selection.die();
-            setSelectionRef(null);
+        boolean wasHidden = selection.isHidden();
+        selection.dispose();
+        setSelectionRef(null);
 
-            if (wasHidden && isActive()) {
-                SelectionActions.getShowHide().setHideText();
-            }
+        if (wasHidden && isActive()) {
+            // the "hide selection" menu will be disabled, but it's better
+            // than the "show selection" when there is no selection
+            SelectionActions.getShowHide().setHideText();
         }
         return edit;
     }
@@ -1256,12 +1274,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return null;
     }
 
-    public Selection getInProgressSelection() {
-        return inProgressSelection;
+    public Selection getDraftSelection() {
+        return draftSelection;
     }
 
-    public void setInProgressSelection(Selection selection) {
-        inProgressSelection = selection;
+    public void setDraftSelection(Selection selection) {
+        draftSelection = selection;
     }
 
     /**
@@ -1271,37 +1289,45 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     public PixelitorEdit changeSelection(Shape newShape) {
         newShape = clipToCanvasBounds(newShape);
         if (newShape.getBounds().isEmpty()) {
-            // the new selection would be outside the canvas
+            // the new selection would be outside the canvas bounds
             return null;
         }
 
-        PixelitorEdit edit;
-        if (selection != null) {
-            int answer = Dialogs.showManyOptionsDialog(getDialogParent(), "Existing Selection",
-                "<html>There is already a selection on " + getName() +
-                    ".<br>How do you want to combine new selection with the existing one?",
-                new String[]{"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL},
-                JOptionPane.QUESTION_MESSAGE);
-            if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
-                // canceled
-                return null;
-            }
-            Shape oldShape = selection.getShape();
-            ShapeCombinator combinator = switch (answer) {
-                case 0 -> ShapeCombinator.REPLACE;
-                case 1 -> ShapeCombinator.ADD;
-                case 2 -> ShapeCombinator.SUBTRACT;
-                case 3 -> ShapeCombinator.INTERSECT;
-                default -> throw new IllegalStateException("answer = " + answer);
-            };
-            selection.setShape(combinator.combine(oldShape, newShape));
-            selection.setHidden(false, false);
-            edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);
-        } else { // no existing selection
+        if (selection == null) { // no existing selection
+            // create a new selection
             setSelectionRef(new Selection(newShape, view));
-            edit = new NewSelectionEdit(this, selection.getShape());
+            return new NewSelectionEdit(this, selection.getShape());
         }
-        return edit;
+
+        // modify existing selection
+        String[] options = {"Replace", "Add", "Subtract", "Intersect", GUIText.CANCEL};
+        String message = "<html>There is already a selection on " + getName() +
+            ".<br>How do you want to combine new selection with the existing one?";
+
+        int userChoice = Dialogs.showManyOptionsDialog(
+            getDialogParent(),
+            "Existing Selection",
+            message,
+            options,
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (userChoice == JOptionPane.CLOSED_OPTION || userChoice == 4) {
+            // canceled
+            return null;
+        }
+
+        Shape origShape = selection.getShape();
+        ShapeCombinator combinator = switch (userChoice) {
+            case 0 -> ShapeCombinator.REPLACE;
+            case 1 -> ShapeCombinator.ADD;
+            case 2 -> ShapeCombinator.SUBTRACT;
+            case 3 -> ShapeCombinator.INTERSECT;
+            default -> throw new IllegalStateException("userChoice = " + userChoice);
+        };
+        selection.setShape(combinator.combine(origShape, newShape));
+        selection.setHidden(false, false);
+
+        return new SelectionShapeChangeEdit("Selection Change", this, origShape);
     }
 
     /**
@@ -1328,21 +1354,21 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Promote an "in progress selection" into a final one.
+     * Promotes a draft selection into a final one.
      */
     public void promoteSelection() {
-        assert selection == null || !selection.isAlive() : "selection = " + selection;
-        assert inProgressSelection != null;
-        setSelectionRef(inProgressSelection);
-        setInProgressSelection(null);
+        assert selection == null || !selection.isUsable() : "selection = " + selection;
+        assert draftSelection != null;
+        setSelectionRef(draftSelection);
+        setDraftSelection(null);
     }
 
     public boolean hasSelection() {
         return selection != null;
     }
 
-    public boolean hasInProgressSelection() {
-        return inProgressSelection != null;
+    public boolean hasDraftSelection() {
+        return draftSelection != null;
     }
 
     /**
@@ -1382,7 +1408,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             Shape currentShape = selection.getShape();
             Shape intersection = ShapeCombinator.INTERSECT.combine(currentShape, cropRect);
             if (intersection.getBounds().isEmpty()) {
-                selection.die();
+                selection.dispose();
                 setSelectionRef(null);
             } else {
                 selection.setShape(intersection);
@@ -1897,7 +1923,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         node.addBoolean("is smart object content", isSmartObjectContent());
         node.addBoolean("dirty", isDirty());
 
-        node.addNullableDebuggable("in-progress selection", inProgressSelection);
+        node.addNullableDebuggable("draft selection", draftSelection);
         node.addNullableDebuggable("selection", selection);
 
         return node;

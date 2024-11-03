@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pd.GifDecoder;
 import pixelitor.gui.utils.ThumbInfo;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.TrackerReadProgressListener;
 import pixelitor.utils.TrackerWriteProgressListener;
+import pixelitor.utils.TrackingReadProgressListener;
 
 import javax.imageio.*;
 import javax.imageio.stream.ImageInputStream;
@@ -197,7 +197,7 @@ public class TrackedIO {
         try {
             reader.setInput(iis);
 
-            reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
+            reader.addIIOReadProgressListener(new TrackingReadProgressListener(tracker));
 
             ImageReadParam param = reader.getDefaultReadParam();
             image = reader.read(0, param);
@@ -235,7 +235,7 @@ public class TrackedIO {
                 if (tracker != null) {
                     // register the progress tracking
                     reader.addIIOReadProgressListener(
-                        new TrackerReadProgressListener(tracker));
+                        new TrackingReadProgressListener(tracker));
                 }
 
                 // Once the reader has its input source set,

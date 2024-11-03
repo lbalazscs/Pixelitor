@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,13 +31,13 @@ public enum MoveMode {
         false, true) {
     };
 
-    private final String guiName;
+    private final String displayName;
     private final String editName;
     private final boolean moveSelection;
     private final boolean moveLayer;
 
-    MoveMode(String guiName, String editName, boolean moveSelection, boolean moveLayer) {
-        this.guiName = guiName;
+    MoveMode(String displayName, String editName, boolean moveSelection, boolean moveLayer) {
+        this.displayName = displayName;
         this.editName = editName;
         this.moveSelection = moveSelection;
         this.moveLayer = moveLayer;
@@ -57,6 +57,6 @@ public enum MoveMode {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

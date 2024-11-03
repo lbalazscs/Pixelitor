@@ -58,7 +58,7 @@ class ShapesLayerTest {
         Drag drag = new Drag(0, 0, 10, 10);
         drag.calcCoCoords(view);
         styledShape.updateFromDrag(drag, false, false);
-        assert styledShape.isInitialized();
+        assert styledShape.hasShape();
 
         TransformBox box = styledShape.createBox(view);
         layer.setTransformBox(box);

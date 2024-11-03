@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,9 @@ import pixelitor.filters.gui.EnumParam;
 import java.awt.BasicStroke;
 import java.util.Locale;
 
-import static java.awt.BasicStroke.*;
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.CAP_SQUARE;
 
 /**
  * An enum wrapper around the cap argument of a {@link BasicStroke} constructor
@@ -33,10 +35,10 @@ public enum StrokeCap {
 
     public static final String NAME = "Endpoint Cap";
     private final int value;
-    private final String guiName;
+    private final String displayName;
 
-    StrokeCap(String guiName, int value) {
-        this.guiName = guiName;
+    StrokeCap(String displayName, int value) {
+        this.displayName = displayName;
         this.value = value;
     }
 
@@ -56,10 +58,10 @@ public enum StrokeCap {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public String toSVG() {
-        return "stroke-linecap=\"" + guiName.toLowerCase(Locale.ENGLISH) + "\"";
+        return "stroke-linecap=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
     }
 }

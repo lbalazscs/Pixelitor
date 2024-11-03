@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,13 @@
 
 package pixelitor.history;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.utils.Icons;
 import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -52,7 +53,7 @@ public class HistoryPanel extends JPanel {
         buttonsPanel.add(undoButton);
         buttonsPanel.add(redoButton);
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             JButton debugButton = new JButton("Debug...");
             debugButton.addActionListener(e -> {
                 PixelitorEdit edit = History.getEditToBeUndone();

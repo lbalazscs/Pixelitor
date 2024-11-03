@@ -34,7 +34,7 @@ public class Flip extends SimpleCompAction {
     private final Flip.Direction direction;
 
     public Flip(Direction direction) {
-        super(direction.getGUIName(), false);
+        super(direction.getDisplayName(), false);
         this.direction = direction;
     }
 
@@ -46,7 +46,7 @@ public class Flip extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return direction.getGUIName();
+        return direction.getDisplayName();
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Flip extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        return srcGuides.copyForFlip(direction, view);
+        return srcGuides.copyFlipping(direction, view);
     }
 
     @Override
@@ -101,14 +101,14 @@ public class Flip extends SimpleCompAction {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
 
-        Direction(String guiKey) {
-            this.guiName = Texts.i18n(guiKey);
+        Direction(String uiKey) {
+            this.displayName = Texts.i18n(uiKey);
         }
 
-        public String getGUIName() {
-            return guiName;
+        public String getDisplayName() {
+            return displayName;
         }
 
         public abstract String getStatusBarMessage();

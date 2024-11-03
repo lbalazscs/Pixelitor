@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -41,20 +41,23 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
 /**
- * Represents a selection on an image.
+ * Represents a selection area on an image with animated "marching ants" border.
  */
 public class Selection implements Debuggable {
+    private static final double DASH_WIDTH = 1.0;
+    private static final float DASH_LENGTH = 4.0f;
+    private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
     private float dashPhase;
-    private View view;
     private Timer marchingAntsTimer;
 
     // The shape of the selection.
     // The coordinates are in image space, relative to the canvas.
     private Shape shape;
 
-    private static final double DASH_WIDTH = 1.0;
-    private static final float DASH_LENGTH = 4.0f;
-    private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
+    // the original shape before a shape movement
+    private Shape origShape;
+
+    private View view;
 
     // if true, then the "marching ants" are not marching
     private boolean frozen = false;
@@ -63,10 +66,7 @@ public class Selection implements Debuggable {
     private boolean hidden = false;
 
     // if true, then this object should not be used anymore
-    private boolean dead = false;
-
-    // the original shape before a shape movement
-    private Shape moveStartShape;
+    private boolean disposed = false;
 
     public Selection(Shape shape, View view) {
         // the shape can be null, because this Selection
@@ -77,7 +77,7 @@ public class Selection implements Debuggable {
         this.view = view;
 
         // hack to prevent unit tests from starting the marching
-        if (GUIMode.isUnitTesting()) {
+        if (AppMode.isUnitTesting()) {
             frozen = true;
         }
 
@@ -93,23 +93,20 @@ public class Selection implements Debuggable {
         // the shapes can be shared
         shape = orig.shape;
 
-        // the Timer is not copied! - setView starts it
+        // The animation timer is not copied - will be started by setView if needed.
     }
 
     public void startMarching() {
-        if (frozen) {
+        assert !disposed : "disposed selection";
+        assert view != null : "no view in selection";
+
+        if (frozen || hidden) {
             return;
         }
 
-        assert !dead : "dead selection";
-        assert view != null : "no view in selection";
-
-        marchingAntsTimer = new Timer(100, null);
-        marchingAntsTimer.addActionListener(evt -> {
-            if (!hidden) {
-                dashPhase += 1.0f / (float) view.getScaling();
-                repaint();
-            }
+        marchingAntsTimer = new Timer(100, e -> {
+            dashPhase += 1.0f / (float) view.getScaling();
+            repaint();
         });
         marchingAntsTimer.start();
     }
@@ -126,13 +123,13 @@ public class Selection implements Debuggable {
     }
 
     public void paintMarchingAnts(Graphics2D g2) {
-        assert !dead : "dead selection";
+        assert !disposed : "dead selection";
 
         if (shape == null || hidden) {
             return;
         }
 
-        Stroke oldStroke = g2.getStroke();
+        Stroke origStroke = g2.getStroke();
 
         // As the selection coordinates are in image space, this is
         // called with a Graphics2D transformed into image space.
@@ -148,30 +145,32 @@ public class Selection implements Debuggable {
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
-        g2.setPaint(WHITE);
-        Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
-            JOIN_ROUND, 0.0f, dash, dashPhase);
-        g2.setStroke(stroke);
-        g2.draw(shape);
+        // Draw white segments
+        drawSegments(g2, WHITE, lineWidth, dash, dashPhase);
 
-        g2.setPaint(BLACK);
-        Stroke stroke2 = new BasicStroke(lineWidth, CAP_BUTT,
-            JOIN_ROUND, 0.0f, dash,
-            (float) (dashPhase + DASH_LENGTH / viewScale));
-        g2.setStroke(stroke2);
-        g2.draw(shape);
+        // Draw black segments
+        float blackPhase = (float) (dashPhase + DASH_LENGTH / viewScale);
+        drawSegments(g2, BLACK, lineWidth, dash, blackPhase);
 
-        g2.setStroke(oldStroke);
+        // Restore original stroke
+        g2.setStroke(origStroke);
     }
 
-    public void die() {
-        if (dead) {
+    private void drawSegments(Graphics2D g2, Color color, float lineWidth, float[] dash, float phase) {
+        g2.setColor(color);
+        g2.setStroke(new BasicStroke(lineWidth,
+            CAP_BUTT, JOIN_ROUND, 0.0f, dash, phase));
+        g2.draw(shape);
+    }
+
+    public void dispose() {
+        if (disposed) {
             return;
         }
         stopMarching();
         repaint();
         view = null;
-        dead = true;
+        disposed = true;
     }
 
     private void repaint() {
@@ -191,18 +190,16 @@ public class Selection implements Debuggable {
     }
 
     /**
-     * Restricts the selection shape to be within the canvas bounds.
+     * Ensures the selection shape stays within canvas bounds.
      * This must be always called for new or changed selections.
      *
-     * @return true if the selection shape is not empty
+     * @return true if the selection shape is valid
      */
-    private boolean clipToCanvasSize(Composition comp) {
+    private boolean clipToCanvasBounds(Composition comp) {
         assert comp == view.getComp();
         if (shape != null) {
             shape = comp.clipToCanvasBounds(shape);
-
             repaint();
-
             return !shape.getBounds().isEmpty();
         }
         return false;
@@ -229,21 +226,25 @@ public class Selection implements Debuggable {
         return shape.getBounds2D();
     }
 
+    /**
+     * Modifies the selection shape using the given modification type and amount.
+     */
     public void modify(SelectionModifyType type, float amount) {
+        Shape prevShape = shape;
+
+        // Create the modified shape
         Stroke outlineStroke = new BasicStroke(amount);
         Shape outlineShape = outlineStroke.createStrokedShape(shape);
-
-        Area oldArea = new Area(shape);
+        Area currentArea = new Area(shape);
         Area outlineArea = new Area(outlineShape);
+        shape = type.modify(currentArea, outlineArea);
 
-        Shape backupShape = shape;
-        shape = type.modify(oldArea, outlineArea);
-
+        // Handle the modification result
         var comp = view.getComp();
-        boolean notEmpty = clipToCanvasSize(comp);
-        if (notEmpty) {
+        boolean valid = clipToCanvasBounds(comp);
+        if (valid) {
             var edit = new SelectionShapeChangeEdit(
-                "Modify Selection", comp, backupShape);
+                "Modify Selection", comp, prevShape);
             History.add(edit);
         } else {
             comp.deselect(true);
@@ -267,7 +268,7 @@ public class Selection implements Debuggable {
     }
 
     public void setHidden(boolean hide, boolean fromMenu) {
-        assert !dead : "dead selection";
+        assert !disposed : "dead selection";
 
         boolean change = hidden != hide;
         if (!change) {
@@ -279,9 +280,7 @@ public class Selection implements Debuggable {
         if (hide) {
             stopMarching();
         } else {
-            if (marchingAntsTimer == null) {
-                startMarching();
-            }
+            startMarching();
         }
 
         repaint();
@@ -316,27 +315,30 @@ public class Selection implements Debuggable {
         return view;
     }
 
-    public boolean isAlive() {
-        return !dead;
+    /**
+     * Returns whether this selection is still active and usable.
+     */
+    public boolean isUsable() {
+        return !disposed;
     }
 
     public void startMovement() {
         assert shape != null;
-        moveStartShape = shape;
+        origShape = shape;
     }
 
     public void transformWhileDragging(AffineTransform at) {
-        shape = at.createTransformedShape(moveStartShape);
+        shape = at.createTransformedShape(origShape);
     }
 
     public void moveWhileDragging(double relImX, double relImY) {
-        if (moveStartShape instanceof Rectangle2D startRect) {
+        if (origShape instanceof Rectangle2D startRect) {
             // preserve the type information
             shape = new Rectangle2D.Double(
                 startRect.getX() + relImX, startRect.getY() + relImY,
                 startRect.getWidth(), startRect.getHeight());
         } else {
-            shape = Shapes.translate(moveStartShape, relImX, relImY);
+            shape = Shapes.translate(origShape, relImX, relImY);
         }
     }
 
@@ -345,15 +347,15 @@ public class Selection implements Debuggable {
 
         shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas
-            var deselectEdit = new DeselectEdit(comp, moveStartShape);
+            var deselectEdit = new DeselectEdit(comp, origShape);
             comp.deselect(false);
             return deselectEdit;
         }
 
         var edit = new SelectionShapeChangeEdit(
-            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, moveStartShape);
+            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, origShape);
         if (!keepStartShape) {
-            moveStartShape = null;
+            origShape = null;
         }
         return edit;
     }
@@ -363,7 +365,7 @@ public class Selection implements Debuggable {
         var node = new DebugNode(name, this);
 
         node.addBoolean("hidden", hidden);
-        node.addBoolean("dead", dead);
+        node.addBoolean("dead", disposed);
         node.addBoolean("frozen", frozen);
         node.addBoolean("marching", isMarching());
         node.addBoolean("rectangular", isRectangular());

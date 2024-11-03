@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,54 +20,64 @@ package pixelitor.tools.toolhandlers;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * The abstract superclass of all chained handlers in a {@link ToolHandlerChain}.
- * Each tool handler can handle the mouse events instead of the selected tool.
+ * The abstract base class of all chained handlers in a {@link ToolHandlerChain}.
+ * Each {@link ToolHandler} can intercept and modify tool behavior
+ * by processing mouse events before they reach the actual tool.
  */
 public abstract class ToolHandler {
-    private ToolHandler successor;
+    private ToolHandler nextHandler;
 
-    public void setSuccessor(ToolHandler handler) {
-        successor = handler;
+    public void setNextHandler(ToolHandler handler) {
+        nextHandler = handler;
     }
 
+    /**
+     * Processes a mouse pressed event or forwards it to the next handler.
+     */
     public void handleMousePressed(PMouseEvent e) {
         if (mousePressed(e)) {
             return;
         }
 
         // forwards the mouse event to the next handler
-        successor.handleMousePressed(e);
+        nextHandler.handleMousePressed(e);
     }
 
     /**
-     * Returns true if the event was handled, and it should
-     * not be forwarded to the next handler
+     * Processes a mouse dragged event or forwards it to the next handler.
      */
-    abstract boolean mousePressed(PMouseEvent e);
-
     public void handleMouseDragged(PMouseEvent e) {
         if (mouseDragged(e)) {
             return;
         }
-        successor.handleMouseDragged(e);
+        nextHandler.handleMouseDragged(e);
     }
 
     /**
-     * Returns true if the event was handled, and it should
-     * not be forwarded to the next handler
+     * Processes a mouse released event or forwards it to the next handler.
      */
-    abstract boolean mouseDragged(PMouseEvent e);
-
     public void handleMouseReleased(PMouseEvent e) {
         if (mouseReleased(e)) {
             return;
         }
-        successor.handleMouseReleased(e);
+        nextHandler.handleMouseReleased(e);
     }
 
     /**
-     * Returns true if the event was handled, and it should
-     * not be forwarded to the next handler
+     * Handles a mouse pressed event and returns true if the event
+     * was handled, and it should not be forwarded to the next handler.
+     */
+    abstract boolean mousePressed(PMouseEvent e);
+
+    /**
+     * Handles a mouse dragged event and returns true if the event
+     * was handled, and it should not be forwarded to the next handler.
+     */
+    abstract boolean mouseDragged(PMouseEvent e);
+
+    /**
+     * Handles a mouse released event and returns true if the event
+     * was handled, and it should not be forwarded to the next handler.
      */
     abstract boolean mouseReleased(PMouseEvent e);
 }

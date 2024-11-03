@@ -28,33 +28,32 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Base class for filter params that have a JComboBox as their GUI
+ * Base class for filter params that have a JComboBox as their GUI.
  */
-public class ListParam<E>
-    extends AbstractFilterParam implements ComboBoxModel<E> {
+public class ListParam<E> extends AbstractFilterParam implements ComboBoxModel<E> {
     protected List<E> choices;
-    protected E defaultChoice;
-    protected E currentChoice;
-    private final EventListenerList listenerList = new EventListenerList();
+    protected E defaultValue;
+    protected E selectedValue;
+    private final EventListenerList eventListeners = new EventListenerList();
 
     public ListParam(String name, E[] choices) {
         this(name, choices, RandomizePolicy.ALLOW_RANDOMIZE);
     }
 
-    public ListParam(String name, E[] choices, E defaultChoice) {
-        this(name, List.of(choices), defaultChoice, RandomizePolicy.ALLOW_RANDOMIZE);
+    public ListParam(String name, E[] choices, E defaultValue) {
+        this(name, List.of(choices), defaultValue, RandomizePolicy.ALLOW_RANDOMIZE);
     }
 
     public ListParam(String name, E[] choices, RandomizePolicy randomizePolicy) {
         this(name, List.of(choices), choices[0], randomizePolicy);
     }
 
-    public ListParam(String name, List<E> choices, E defaultChoice,
+    public ListParam(String name, List<E> choices, E defaultValue,
                      RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
         this.choices = choices;
-        this.defaultChoice = defaultChoice;
-        currentChoice = defaultChoice;
+        this.defaultValue = defaultValue;
+        selectedValue = defaultValue;
     }
 
     @Override
@@ -67,21 +66,21 @@ public class ListParam<E>
 
     @Override
     public boolean hasDefault() {
-        return defaultChoice.equals(currentChoice);
+        return defaultValue.equals(selectedValue);
     }
 
     @Override
     public void reset(boolean trigger) {
-        setSelectedItem(defaultChoice, trigger);
+        setSelectedItem(defaultValue, trigger);
     }
 
     @Override
     protected void doRandomize() {
         E choice = Rnd.chooseFrom(choices);
-        setCurrentChoice(choice, false);
+        setSelectedValue(choice, false);
     }
 
-    private void setCurrentChoice(E currentChoice, boolean trigger) {
+    private void setSelectedValue(E currentChoice, boolean trigger) {
         setSelectedItem(currentChoice, trigger);
     }
 
@@ -91,31 +90,34 @@ public class ListParam<E>
         setSelectedItem((E) item, true);
     }
 
+    /**
+     * Sets the the selected value and optionally triggers the adjustment listener.
+     */
     public void setSelectedItem(E item, boolean trigger) {
         assert item != null;
-        if (!currentChoice.equals(item)) {
-            currentChoice = item;
-            fireContentsChanged(this, -1, -1);
-            if (trigger) {
-                if (adjustmentListener != null) {  // it's null when called from randomize
-                    adjustmentListener.paramAdjusted();
-                }
-            }
+        if (selectedValue.equals(item)) {
+            return;
+        }
+        selectedValue = item;
+        fireContentsChanged(this, -1, -1);
+
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 
     @Override
     public Object getSelectedItem() {
-        return currentChoice;
+        return selectedValue;
     }
 
     public E getSelected() {
-        return currentChoice;
+        return selectedValue;
     }
 
     @Override
     public Object getParamValue() {
-        return currentChoice;
+        return selectedValue;
     }
 
     @Override
@@ -130,16 +132,16 @@ public class ListParam<E>
 
     @Override
     public void addListDataListener(ListDataListener l) {
-        listenerList.add(ListDataListener.class, l);
+        eventListeners.add(ListDataListener.class, l);
     }
 
     @Override
     public void removeListDataListener(ListDataListener l) {
-        listenerList.remove(ListDataListener.class, l);
+        eventListeners.remove(ListDataListener.class, l);
     }
 
     private void fireContentsChanged(Object source, int index0, int index1) {
-        Object[] listeners = listenerList.getListenerList();
+        Object[] listeners = eventListeners.getListenerList();
         ListDataEvent e = null;
 
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
@@ -160,7 +162,7 @@ public class ListParam<E>
 
     @Override
     public String getResetToolTip() {
-        return super.getResetToolTip() + " to " + defaultChoice;
+        return super.getResetToolTip() + " to " + defaultValue;
     }
 
     @Override
@@ -225,6 +227,7 @@ public class ListParam<E>
         });
     }
 
+    // Adds a listener that will be notified when the selected value changes.
     private void addOnChangeTask(Runnable task) {
         addListDataListener(new ListDataListener() {
             @Override
@@ -242,11 +245,9 @@ public class ListParam<E>
         });
     }
 
-    public String getDebugInfo() {
-        return String.format("choices = %s, default = %s, current = %s",
-            choices, defaultChoice, currentChoice);
-    }
-
+    /**
+     * Encapsulates the state of an {@link ListParam} as a memento object.
+     */
     public record ListParamState<E>(E value) implements ParamState<ListParamState<E>> {
         @Serial
         private static final long serialVersionUID = 1L;

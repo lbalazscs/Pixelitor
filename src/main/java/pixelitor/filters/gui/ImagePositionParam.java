@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,26 +24,27 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 
-import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for selecting an image coordinate (relative to the image size).
+ * A {@link FilterParam} that allows selecting a point within an image using
+ * relative coordinates (0.0 to 1.0) that are independent of the actual image size.
  */
 public class ImagePositionParam extends AbstractFilterParam {
-    private double relativeX = 0.5;
-    private double relativeY = 0.5;
+    private double relativeX;
+    private double relativeY;
     private int decimalPlaces = 1;
 
-    private double defaultRelativeX = 0.5;
-    private double defaultRelativeY = 0.5;
+    private final double defaultRelativeX;
+    private final double defaultRelativeY;
 
     public ImagePositionParam(String name) {
-        super(name, ALLOW_RANDOMIZE);
+        this(name, 0.5, 0.5); // center position
     }
 
     public ImagePositionParam(String name, double relX, double relY) {
         super(name, ALLOW_RANDOMIZE);
+
         relativeX = relX;
         relativeY = relY;
         defaultRelativeX = relX;
@@ -52,10 +53,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        double defaultX = 100 * defaultRelativeX;
-        double defaultY = 100 * defaultRelativeY;
-
-        var gui = new ImagePositionParamGUI(this, defaultX, defaultY);
+        var gui = new ImagePositionParamGUI(this, defaultRelativeX, defaultRelativeY);
         paramGUI = gui;
         guiCreated();
         paramGUI.updateGUI();
@@ -63,21 +61,8 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean hasDefault() {
-        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
-    }
-
-    @Override
-    public void reset(boolean trigger) {
-        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, trigger);
-    }
-
-    @Override
     protected void doRandomize() {
-        double rx = Math.random();
-        double ry = Math.random();
-
-        setRelativeValues(rx, ry, true, false, false);
+        setRelativePosition(Math.random(), Math.random(), true, false, false);
     }
 
     public double getRelativeX() {
@@ -92,11 +77,18 @@ public class ImagePositionParam extends AbstractFilterParam {
         return new Point2D.Double(relativeX, relativeY);
     }
 
-    public Point2D getAbsolutePoint(BufferedImage src) {
-        return new Point2D.Double(relativeX * src.getWidth(), relativeY * src.getHeight());
+    /**
+     * Converts the relative position to absolute pixel coordinates for a given image.
+     */
+    public Point2D getAbsolutePoint(BufferedImage image) {
+        return new Point2D.Double(
+            relativeX * image.getWidth(),
+            relativeY * image.getHeight());
     }
 
-    public void setRelativeValues(double relX, double relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
+    public void setRelativePosition(double relX, double relY,
+                                    boolean updateGUI, boolean isAdjusting,
+                                    boolean trigger) {
         relativeX = relX;
         relativeY = relY;
         if (updateGUI && paramGUI != null) {
@@ -108,11 +100,21 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public void setRelativeX(double x, boolean isAdjusting) {
-        setRelativeValues(x, relativeY, false, isAdjusting, true);
+        setRelativePosition(x, relativeY, false, isAdjusting, true);
     }
 
     public void setRelativeY(double y, boolean isAdjusting) {
-        setRelativeValues(relativeX, y, false, isAdjusting, true);
+        setRelativePosition(relativeX, y, false, isAdjusting, true);
+    }
+
+    @Override
+    public boolean hasDefault() {
+        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
+    }
+
+    @Override
+    public void reset(boolean trigger) {
+        setRelativePosition(defaultRelativeX, defaultRelativeY, true, false, trigger);
     }
 
     @Override
@@ -120,8 +122,8 @@ public class ImagePositionParam extends AbstractFilterParam {
         return true;
     }
 
-    public ImagePositionParam withDecimalPlaces(int dp) {
-        decimalPlaces = dp;
+    public ImagePositionParam withDecimalPlaces(int decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
         return this;
     }
 
@@ -141,7 +143,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         double newRelY = s.relativeY;
 
         if (updateGUI) {
-            setRelativeValues(newRelX, newRelY, true, false, false);
+            setRelativePosition(newRelX, newRelY, true, false, false);
         } else {
             this.relativeX = newRelX;
             this.relativeY = newRelY;
@@ -153,7 +155,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         int commaIndex = savedValue.indexOf(',');
         double newRelX = Double.parseDouble(savedValue.substring(0, commaIndex));
         double newRelY = Double.parseDouble(savedValue.substring(commaIndex + 1));
-        setRelativeValues(newRelX, newRelY, true, false, false);
+        setRelativePosition(newRelX, newRelY, true, false, false);
     }
 
     @Override
@@ -163,7 +165,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
+        return String.format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
             getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 

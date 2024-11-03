@@ -44,15 +44,15 @@ public class Spheres extends ParametrizedFilter {
     enum LayoutType {
         PATTERN("Pattern"), RANDOM("Random");
 
-        private final String guiName;
+        private final String displayName;
 
-        LayoutType(String guiName) {
-            this.guiName = guiName;
+        LayoutType(String displayName) {
+            this.displayName = displayName;
         }
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 

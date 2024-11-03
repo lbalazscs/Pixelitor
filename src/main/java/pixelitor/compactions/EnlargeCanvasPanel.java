@@ -96,7 +96,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         c.anchor = GridBagConstraints.CENTER;
 
         usePixelsRadio.addActionListener(e -> syncToNewUnit(ResizeUnit.PIXELS));
-        usePercentsRadio.addActionListener(e -> syncToNewUnit(ResizeUnit.PERCENT));
+        usePercentsRadio.addActionListener(e -> syncToNewUnit(ResizeUnit.PERCENTAGE));
 
         ButtonGroup unitToggleGroup = new ButtonGroup();
         unitToggleGroup.add(usePixelsRadio);
@@ -205,7 +205,7 @@ class EnlargeCanvasPanel extends JPanel implements DialogMenuOwner {
         switch (newUnit) {
             case PIXELS -> pixels.setValue(
                 percent.getValueAsDouble() * pixels.getMaximum() / 100, false);
-            case PERCENT -> percent.setValue(
+            case PERCENTAGE -> percent.setValue(
                 pixels.getValueAsDouble() * 100 / pixels.getMaximum(), false);
         }
     }

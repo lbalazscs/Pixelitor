@@ -69,11 +69,11 @@ public enum AnchorPointType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
     private final boolean dependent;
 
-    AnchorPointType(String guiName, boolean dependent) {
-        this.guiName = guiName;
+    AnchorPointType(String displayName, boolean dependent) {
+        this.displayName = displayName;
         this.dependent = dependent;
     }
 
@@ -91,7 +91,7 @@ public enum AnchorPointType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     static class AnchorPointTypeMenuItem extends JRadioButtonMenuItem {

@@ -125,7 +125,7 @@ public class JHCells extends ParametrizedFilter {
         filter.setF3(f3);
         filter.setGridType(gridType.getValue());
         filter.setRandomness((float) gridRandomness.getPercentage());
-        filter.setColormap(gradient.getValue());
+        filter.setColormap(gradient.getColorMap());
 
         return filter.filter(src, dest);
     }

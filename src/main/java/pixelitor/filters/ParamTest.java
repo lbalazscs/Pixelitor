@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.BlendingMode;
@@ -51,7 +51,7 @@ public class ParamTest extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (GUIMode.isDevelopment() && !RandomGUITest.isRunning()) {
+        if (AppMode.isDevelopment() && !RandomGUITest.isRunning()) {
             System.out.println("ParamTest.transform CALLED");
         }
 

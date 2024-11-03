@@ -162,7 +162,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         sliderMovedByUser = true;
 
         if (resetButton != null) {
-            resetButton.updateIcon();
+            resetButton.updateState();
         }
     }
 

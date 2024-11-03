@@ -19,7 +19,7 @@ package pixelitor.utils;
 
 public enum ResizeUnit {
     PIXELS("pixels"),
-    PERCENT("percent");
+    PERCENTAGE("percent");
 
     private final String displayName;
 

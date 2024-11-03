@@ -182,19 +182,18 @@ public class TweenOutputSettingsPanel extends ValidatedPanel {
 
     public void configure(TweenAnimation animation) {
         animation.setOutputType(getOutputType());
-
-        File output = browseFilesSupport.getSelectedFile();
-        animation.setOutput(output);
-
         animation.setNumFrames(numFrames);
         animation.setMillisBetweenFrames((int) (1000.0 / fps));
         animation.setInterpolation((TimeInterpolation) ipCB.getSelectedItem());
         animation.setPingPong(pingPongCB.isSelected());
 
-        if (output.isDirectory()) {
-            Dirs.setLastSave(output);
+        File outputLocation = browseFilesSupport.getSelectedFile();
+        animation.setOutputLocation(outputLocation);
+
+        if (outputLocation.isDirectory()) {
+            Dirs.setLastSave(outputLocation);
         } else {
-            Dirs.setLastSave(output.getParentFile());
+            Dirs.setLastSave(outputLocation.getParentFile());
         }
     }
 

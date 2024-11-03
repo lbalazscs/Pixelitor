@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.bric.util.JVM;
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Truchet;
 import pixelitor.gui.utils.PAction;
@@ -100,7 +100,7 @@ public class UserPreset implements Preset {
                 value = content.get("Polygon Sides");
             }
 
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 System.out.println("UserPreset::get: no value found for the key " + key);
             }
         }

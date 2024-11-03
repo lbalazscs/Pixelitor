@@ -97,7 +97,7 @@ public class CompActionTest {
     public static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
 
-        Tools.setCurrentTool(Tools.CROP);
+        Tools.setActiveTool(Tools.CROP);
     }
 
     @Before

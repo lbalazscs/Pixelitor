@@ -76,6 +76,9 @@ public class Rnd {
         return new Point(intInRange(minX, maxX), intInRange(minY, maxY));
     }
 
+    /**
+     * Returns a random integer within the inclusive range [min, max].
+     */
     public static int intInRange(int min, int max) {
         assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
         return min + rand.nextInt(max - min + 1);
@@ -127,7 +130,7 @@ public class Rnd {
     }
 
     public static String createRandomString(int length) {
-        char[] chars = "abcdefghijklmnopqrstuvwxyz -".toCharArray();
+        char[] chars = "abcdefghijklmnopqrstuvwxyz -/\\~!@#$%^&*()".toCharArray();
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             char c = chars[rand.nextInt(chars.length)];
@@ -138,12 +141,12 @@ public class Rnd {
 
     public static AreaEffects createRandomEffects() {
         var ae = new AreaEffects();
-        float f = rand.nextFloat();
-        if (f < 0.25f) {
+        float p = rand.nextFloat();
+        if (p < 0.25f) {
             ae.setNeonBorder(new NeonBorderEffect());
-        } else if (f < 0.5f) {
+        } else if (p < 0.5f) {
             ae.setDropShadow(new ShadowPathEffect(1.0f));
-        } else if (f < 0.75f) {
+        } else if (p < 0.75f) {
             ae.setInnerGlow(new InnerGlowPathEffect(1.0f));
         } else {
             ae.setGlow(new GlowPathEffect(1.0f));
@@ -180,7 +183,7 @@ public class Rnd {
         return new Font(attributes);
     }
 
-    public static boolean withProbability(double p, Runnable task) {
+    public static boolean runWithProbability(Runnable task, double p) {
         assert p >= 0 && p <= 1;
         if (p > rand.nextDouble()) {
             task.run();

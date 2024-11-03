@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,12 +45,12 @@ public enum Theme {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
     private final boolean dark;
     private final boolean flat;
 
-    Theme(String guiName, boolean dark, boolean flat) {
-        this.guiName = guiName;
+    Theme(String displayName, boolean dark, boolean flat) {
+        this.displayName = displayName;
         this.dark = dark;
         this.flat = flat;
     }
@@ -70,11 +70,11 @@ public enum Theme {
     }
 
     public String getSaveCode() {
-        return guiName;
+        return displayName;
     }
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

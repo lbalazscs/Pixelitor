@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,19 +43,19 @@ public class EffectWithWidthPanel extends EffectPanel {
     }
 
     @Override
-    public double getBrushWidth() {
+    public double getEffectWidth() {
         return widthRange.getValueAsDouble();
     }
 
     @Override
-    public void setBrushWidth(double value) {
+    public void setEffectWidth(double value) {
         widthRange.setValue(value, false);
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
-        super.setAdjustmentListener(adjustmentListener);
-        widthRange.setAdjustmentListener(adjustmentListener);
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+        widthRange.setAdjustmentListener(listener);
     }
 
     @Override

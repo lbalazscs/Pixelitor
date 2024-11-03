@@ -305,7 +305,7 @@ public class RandomToolTest {
         randomEvents();
         dragRandomly(tool);
         randomEvents();
-        pushToolButtons();
+        clickToolButtons();
 
         closeRareDialog(tool);
 
@@ -404,7 +404,7 @@ public class RandomToolTest {
     private void randomEvents() {
         Collections.shuffle(events);
         for (Runnable event : events) {
-            Rnd.withProbability(0.2, event);
+            Rnd.runWithProbability(event, 0.2);
             keyboard.assertModifiersReleased();
         }
     }
@@ -437,7 +437,7 @@ public class RandomToolTest {
     }
 
     private void cleanupAfterTool() {
-        Tool tool = EDT.call(Tools::getCurrent);
+        Tool tool = EDT.call(Tools::getActive);
         log("cleaning up after " + tool.getName());
 
         var comp = EDT.getComp();
@@ -447,20 +447,20 @@ public class RandomToolTest {
             }
         }
         if (EDT.getActiveSelection() != null) {
-            Rnd.withProbability(0.2, this::deselect);
+            Rnd.runWithProbability(this::deselect, 0.2);
         }
 
         if (tool == ZOOM) {
-            Rnd.withProbability(0.5, this::actualPixels);
+            Rnd.runWithProbability(this::actualPixels, 0.5);
         }
 
-        if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
+        if (tool == PEN && PEN.modeIs(PenToolMode.BUILD)) {
             // prevent paths getting too large
             log("removing the path");
-            Rnd.withProbability(0.5, () -> EDT.run(PEN::removePath));
+            Rnd.runWithProbability(() -> EDT.run(PEN::removePath), 0.5);
         }
 
-        Rnd.withProbability(0.05, this::reload);
+        Rnd.runWithProbability(this::reload, 0.05);
         randomizeColors();
         cutBigLayersIfNecessary(comp);
         setStandardSize();
@@ -475,7 +475,7 @@ public class RandomToolTest {
     }
 
     private void randomizeColors() {
-        Tool tool = EDT.call(Tools::getCurrent);
+        Tool tool = EDT.call(Tools::getActive);
         if (tool == ZOOM || tool == HAND || tool == CROP || tool == SELECTION || tool == PEN) {
             return;
         }
@@ -524,9 +524,9 @@ public class RandomToolTest {
             Utils.sleep(200, MILLISECONDS);
             mouse.moveRandomlyWithinCanvas();
 
-            boolean ctrlPressed = Rnd.withProbability(0.25, keyboard::pressCtrl);
-            boolean altPressed = Rnd.withProbability(0.25, keyboard::pressAlt);
-            boolean shiftPressed = Rnd.withProbability(0.25, keyboard::pressShift);
+            boolean ctrlPressed = Rnd.runWithProbability(keyboard::pressCtrl, 0.25);
+            boolean altPressed = Rnd.runWithProbability(keyboard::pressAlt, 0.25);
+            boolean shiftPressed = Rnd.runWithProbability(keyboard::pressShift, 0.25);
             String msg = "random " + Debug.modifiersToString(ctrlPressed, altPressed,
                 shiftPressed, false, false) + "drag";
             log(msg);
@@ -556,11 +556,11 @@ public class RandomToolTest {
             return;
         }
 
-        boolean undone = Rnd.withProbability(0.5, this::undo);
+        boolean undone = Rnd.runWithProbability(this::undo, 0.5);
         if (undone) {
             Utils.sleep(200, MILLISECONDS);
             assert EDT.call(History::canRedo);
-            Rnd.withProbability(0.5, this::redo);
+            Rnd.runWithProbability(this::redo, 0.5);
         }
     }
 
@@ -610,7 +610,7 @@ public class RandomToolTest {
     private void log(String msg) {
         checkControlVariables();
 
-        Tool tool = EDT.call(Tools::getCurrent);
+        Tool tool = EDT.call(Tools::getActive);
         String toolInfo = tool.getShortName();
 
         String stateInfo = EDT.call(tool::getStateInfo);
@@ -620,7 +620,7 @@ public class RandomToolTest {
         if (EDT.getActiveSelection() != null) {
             printed += Ansi.red(" SEL");
         }
-        if (EDT.active(Composition::getInProgressSelection) != null) {
+        if (EDT.active(Composition::getDraftSelection) != null) {
             printed += Ansi.red(" IP SEL");
         }
         System.out.println(printed);
@@ -644,7 +644,7 @@ public class RandomToolTest {
             // the image will grow too large during the next resize
             cutBigLayers();
         } else if (imgSize.width > canvasSize.width || imgSize.height > canvasSize.height) {
-            Rnd.withProbability(0.3, this::cutBigLayers);
+            Rnd.runWithProbability(this::cutBigLayers, 0.3);
         }
     }
 
@@ -681,35 +681,35 @@ public class RandomToolTest {
         mouse.randomAltClick();
     }
 
-    private void pushToolButtons() {
+    private void clickToolButtons() {
         boolean toolsShown = EDT.call(() -> PixelitorWindow.get().areToolsShown());
         if (!toolsShown) {
             return;
         }
 
-        Tool tool = EDT.call(Tools::getCurrent);
+        Tool tool = EDT.call(Tools::getActive);
 
         if (tool == CROP) {
-            Rnd.withProbability(0.5, this::clickCropToolButton);
+            Rnd.runWithProbability(this::clickCropToolButton, 0.5);
         } else if (tool == BRUSH || tool == ERASER) {
-            Rnd.withProbability(0.2, this::changeLazyMouseSetting);
-            Rnd.withProbability(0.2, () -> changeBrushSetting(tool));
+            Rnd.runWithProbability(this::changeLazyMouseSetting, 0.2);
+            Rnd.runWithProbability(() -> changeBrushSetting(tool), 0.2);
         } else if (tool == CLONE || tool == SMUDGE) {
-            Rnd.withProbability(0.2, this::changeLazyMouseSetting);
+            Rnd.runWithProbability(this::changeLazyMouseSetting, 0.2);
             if (tool == CLONE) {
-                Rnd.withProbability(0.2, this::changeCloneTransform);
+                Rnd.runWithProbability(this::changeCloneTransform, 0.2);
             }
         } else if (tool == PEN) {
-            Rnd.withProbability(0.4, this::clickPenToolButton);
+            Rnd.runWithProbability(this::clickPenToolButton, 0.4);
         } else if (tool == ZOOM || tool == HAND) {
-            Rnd.withProbability(0.2, this::clickZoomOrHandToolButton);
+            Rnd.runWithProbability(this::clickZoomOrHandToolButton, 0.2);
         } else if (tool == SELECTION) {
-            Rnd.withProbability(0.5, this::clickSelectionToolButton);
+            Rnd.runWithProbability(this::clickSelectionToolButton, 0.5);
         } else if (tool == SHAPES) {
-            Rnd.withProbability(0.2, this::changeShapeTypeSettings);
-            Rnd.withProbability(0.2, this::changeShapeStrokeSettings);
-            Rnd.withProbability(0.2, this::changeShapeEffects);
-            Rnd.withProbability(0.2, this::clickShapeConvertToSelection);
+            Rnd.runWithProbability(this::changeShapeTypeSettings, 0.2);
+            Rnd.runWithProbability(this::changeShapeStrokeSettings, 0.2);
+            Rnd.runWithProbability(this::changeShapeEffects, 0.2);
+            Rnd.runWithProbability(this::clickShapeConvertToSelection, 0.2);
         }
     }
 

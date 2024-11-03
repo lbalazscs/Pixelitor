@@ -41,16 +41,16 @@ import java.awt.Stroke;
 public enum StrokeType {
     BASIC("Basic", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new BasicStroke(width, cap, join, 1.5f,
-                dashFloats, 0.0f);
+                dashPattern, 0.0f);
         }
     }, ZIGZAG("Zigzag", false) {
         private Stroke tmp;
 
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
-            tmp = BASIC.createStroke(width, cap, join, dashFloats);
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
+            tmp = BASIC.createStroke(width, cap, join, dashPattern);
             return new ZigzagStroke(tmp, width, width);
         }
 
@@ -69,7 +69,7 @@ public enum StrokeType {
         private WobbleStroke wobbleStroke;
 
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             if (wobbleStroke == null) {
                 createStroke(width);
                 lastWidth = width;
@@ -96,17 +96,17 @@ public enum StrokeType {
         }
     }, CHARCOAL("Charcoal (can be slow!)", true) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CharcoalStroke(width, 0.5f);
         }
     }, BRISTLE("Bristle (can be slow!)", true) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new BristleStroke(width, 0.5f);
         }
     }, OUTLINE("Outline", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CompositeStroke(
                 new BasicStroke(width, cap, join),
                 innerOutlineStroke);
@@ -118,21 +118,21 @@ public enum StrokeType {
         }
     }, CALLIGRAPHY("Calligraphy", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new CalligraphyStroke(width);
         }
     }, SHAPE("Shape", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             // needs a full StrokeParam
             throw new UnsupportedOperationException();
         }
 
         @Override
         public Stroke createStroke(StrokeParam param, float width) {
-            float[] dashFloats = param.getDashFloats(width);
+            float[] dashPattern = param.getDashPattern(width);
             float advance = width * 1.2f;
-            if (dashFloats != null) {
+            if (dashPattern != null) {
                 advance *= 2.0f; // simulate dashes
             }
             ShapeType shapeType = param.getShapeType();
@@ -141,12 +141,12 @@ public enum StrokeType {
         }
     }, TAPERING("Tapering", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new TaperingStroke(width);
         }
     }, TAPERING_REV("Reversed Tapering", false) {
         @Override
-        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new TaperingStroke(width, true);
         }
     };
@@ -155,11 +155,11 @@ public enum StrokeType {
     private static final float OUTLINE_WIDTH = 1.0f;
     private static final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
-    private final String guiName;
+    private final String displayName;
     private final boolean slow;
 
-    StrokeType(String guiName, boolean slow) {
-        this.guiName = guiName;
+    StrokeType(String displayName, boolean slow) {
+        this.displayName = displayName;
         this.slow = slow;
     }
 
@@ -171,13 +171,13 @@ public enum StrokeType {
         return null;
     }
 
-    public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
+    public abstract Stroke createStroke(float width, int cap, int join, float[] dashPattern);
 
     public Stroke createStroke(StrokeParam param, float width) {
         int cap = param.getCapValue();
         int join = param.getJoinValue();
-        float[] dashFloats = param.getDashFloats(width);
-        return createStroke(width, cap, join, dashFloats);
+        float[] dashPattern = param.getDashPattern(width);
+        return createStroke(width, cap, join, dashPattern);
     }
 
     public boolean isSlow() {
@@ -198,7 +198,7 @@ public enum StrokeType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }
 

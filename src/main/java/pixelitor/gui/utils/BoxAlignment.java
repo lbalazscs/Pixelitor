@@ -35,12 +35,12 @@ public enum BoxAlignment {
     BOTTOM_RIGHT("Bottom Right", HorizontalAlignment.RIGHT, VerticalAlignment.BOTTOM),
     PATH("Path", null, null);
 
-    private final String guiName;
+    private final String displayName;
     private final HorizontalAlignment horizontalAlignment;
     private final VerticalAlignment verticalAlignment;
 
-    BoxAlignment(String guiName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
-        this.guiName = guiName;
+    BoxAlignment(String displayName, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+        this.displayName = displayName;
         this.horizontalAlignment = horizontalAlignment;
         this.verticalAlignment = verticalAlignment;
     }
@@ -55,7 +55,7 @@ public enum BoxAlignment {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public static BoxAlignment of(HorizontalAlignment horizontal, VerticalAlignment vertical) {

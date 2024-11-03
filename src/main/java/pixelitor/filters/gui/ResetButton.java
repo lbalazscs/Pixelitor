@@ -40,10 +40,10 @@ public class ResetButton extends JButton {
         this.resettable = resettable;
         addActionListener(e -> resettable.reset(true));
         setToolTipText(resettable.getResetToolTip());
-        updateIcon();
+        updateState();
     }
 
-    public void updateIcon() {
+    public void updateState() {
         boolean isDefault = resettable.hasDefault();
         setArrowIcon(isDefault);
         setEnabled(!isDefault);

@@ -43,6 +43,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Views.thumbSize;
 
+/**
+ * A layer that renders a vector-based shape (or in the future: multiple shapes).
+ */
 public class ShapesLayer extends ContentLayer {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -185,7 +188,7 @@ public class ShapesLayer extends ContentLayer {
     }
 
     private boolean hasShape() {
-        return styledShape != null && styledShape.isInitialized();
+        return styledShape != null && styledShape.hasShape();
     }
 
     public StyledShape getStyledShape() {

@@ -79,7 +79,7 @@ public class JHPlasma extends ParametrizedFilter {
         filter.setLessColors(type.getValue() != MORE_COLORS);
         filter.setTurbulence((float) turbulence.getPercentage());
         filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
-        filter.setColormap(gradient.getValue());
+        filter.setColormap(gradient.getColorMap());
         filter.setSeed(paramSet.getLastSeed());
 
         return filter.filter(src, dest);

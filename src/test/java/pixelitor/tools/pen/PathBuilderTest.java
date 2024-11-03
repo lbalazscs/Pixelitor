@@ -51,7 +51,7 @@ class PathBuilderTest {
     @BeforeAll
     static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
-        Tools.setCurrentTool(Tools.PEN);
+        Tools.setActiveTool(Tools.PEN);
     }
 
     @BeforeEach

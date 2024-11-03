@@ -22,27 +22,26 @@ import pixelitor.io.FileChoosers;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
-
-import static java.lang.String.format;
+import java.nio.file.Files;
 
 /**
- * The output type of the tweening animation.
+ * The output formats of the tween animation.
  */
 public enum TweenOutputType {
     PNG_FILE_SEQUENCE("PNG File Sequence", true) {
         @Override
-        AnimationWriter createWriter(File file, int delayMillis) {
-            return new PNGFileSequenceWriter(file);
+        AnimationWriter createWriter(File outputDir, int delayMillis) {
+            return new PNGFileSequenceWriter(outputDir);
         }
 
         @Override
-        public ValidationResult validate(File output) {
-            return checkDir(output, this);
+        public ValidationResult validate(File outputDir) {
+            return checkDir(outputDir, this);
         }
 
         @Override
         public FileNameExtensionFilter getFileFilter() {
-            return null;
+            return null; // Directory selection doesn't use file filters
         }
     }, ANIM_GIF("Animated GIF File", false) {
         @Override
@@ -61,43 +60,53 @@ public enum TweenOutputType {
         }
     };
 
-    private final String guiName;
-    private final boolean needsDirectory;
+    private final String displayName;
+    private final boolean requiresDirectory;
 
-    TweenOutputType(String guiName, boolean needsDirectory) {
-        this.guiName = guiName;
-        this.needsDirectory = needsDirectory;
+    TweenOutputType(String displayName, boolean requiresDirectory) {
+        this.displayName = displayName;
+        this.requiresDirectory = requiresDirectory;
     }
 
     public boolean needsDirectory() {
-        return needsDirectory;
+        return requiresDirectory;
     }
 
+    /**
+     * Creates an appropriate {@link AnimationWriter} for this output type.
+     */
     abstract AnimationWriter createWriter(File file, int delayMillis);
 
-    public abstract ValidationResult validate(File output);
+    /**
+     * Validates that the given output location (file or directory)
+     * is appropriate for this output type.
+     */
+    public abstract ValidationResult validate(File outputLocation);
 
-    private static ValidationResult checkFile(File output,
+    public abstract FileNameExtensionFilter getFileFilter();
+
+    private static ValidationResult checkFile(File outputFile,
                                               TweenOutputType type,
                                               String fileType) {
-        if (output.exists()) {
-            if (output.isDirectory()) {
-                String msg = format("%s is a folder." +
+        if (outputFile.exists()) {
+            if (outputFile.isDirectory()) {
+                String msg = String.format("%s is a folder." +
                         "<br>For the \"%s\" output type, " +
                         "select a (new or existing) %s file in an existing folder.",
-                    output.getAbsolutePath(), type, fileType);
+                    outputFile.getAbsolutePath(), type, fileType);
                 return ValidationResult.invalid(msg);
             }
         } else { // if it doesn't exist, we still expect the parent directory to exist
-            File parentDir = output.getParentFile();
+            File parentDir = outputFile.getParentFile();
             if (parentDir == null) {
-                return ValidationResult.invalid("Folder not found");
+                return ValidationResult.invalid(
+                    String.format("Folder %s not found", parentDir.getAbsolutePath()));
             }
             if (!parentDir.exists()) {
-                String msg = format("The folder %s of the %s file does not exist." +
+                String msg = String.format("The folder %s of the %s file does not exist." +
                         "<br>For the \"%s\" output type, " +
                         "select a (new or existing) %s file in an existing folder.",
-                    parentDir.getName(), output.getAbsolutePath(),
+                    parentDir.getName(), outputFile.getAbsolutePath(),
                     type, fileType);
                 return ValidationResult.invalid(msg);
             }
@@ -105,24 +114,28 @@ public enum TweenOutputType {
         return ValidationResult.valid();
     }
 
-    private static ValidationResult checkDir(File output, TweenOutputType type) {
-        // we expect it to be an existing directory
-        if (!output.isDirectory()) {
-            String msg = format("\"<b>%s</b>\" isn't a folder." +
+    private static ValidationResult checkDir(File outputDir, TweenOutputType type) {
+        if (!outputDir.exists()) {
+            return ValidationResult.invalid(outputDir.getAbsolutePath() + " doesn't exist.");
+        }
+
+        if (!outputDir.isDirectory()) {
+            String msg = String.format("\"<b>%s</b>\" isn't a folder." +
                     "<br>For the \"%s\" output type, select an existing folder.",
-                output.getAbsolutePath(), type);
+                outputDir.getAbsolutePath(), type);
             return ValidationResult.invalid(msg);
         }
-        if (!output.exists()) {
-            return ValidationResult.invalid(output.getAbsolutePath() + " doesn't exist.");
+
+        if (!Files.isWritable(outputDir.toPath())) {
+            return ValidationResult.invalid(
+                String.format("Folder '%s' is not writable.", outputDir));
         }
+
         return ValidationResult.valid();
     }
 
-    public abstract FileNameExtensionFilter getFileFilter();
-
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

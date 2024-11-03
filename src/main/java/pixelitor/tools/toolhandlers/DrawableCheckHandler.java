@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,21 +24,22 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * Checks whether the active edited object is
- * a Drawable (image layer or mask)
+ * Ensures that tools requiring a {@link Drawable} layer (like brushes)
+ * are only used on appropriate layers.
  */
 public class DrawableCheckHandler extends ToolHandler {
     private final DrawableAction drawableAction;
-    private final Tool currentTool;
+    private final Tool activeTool;
 
-    public DrawableCheckHandler(Tool currentTool) {
-        drawableAction = new DrawableAction(currentTool.getName()) {
+    public DrawableCheckHandler(Tool activeTool) {
+        drawableAction = new DrawableAction(activeTool.getName()) {
             @Override
             protected void process(Drawable dr) {
-                // do nothing
+                // The action itself does nothing - it's only used for
+                // showing the rasterization dialogs
             }
         };
-        this.currentTool = currentTool;
+        this.activeTool = activeTool;
     }
 
     @Override
@@ -48,7 +49,6 @@ public class DrawableCheckHandler extends ToolHandler {
         }
 
         // If we are here, offer the auto-rasterization as last resort.
-        // The action itself does nothing, we call it only for the dialogs.
         drawableAction.actionPerformed(null);
 
         // Whatever happened, do not forward this event,
@@ -68,14 +68,12 @@ public class DrawableCheckHandler extends ToolHandler {
 
     private boolean shouldForwardToNextHandler(PMouseEvent e) {
         Composition activeComp = e.getComp();
-        if (activeComp.activeLayerAcceptsToolDrawing()) { // normal case
+        if (activeComp.canDrawOnActiveLayer()) { // normal case
             return true;
         }
 
-        // special layers don't have to be rasterized even if the tool
-        // declares that it accepts only drawables
-        Tool preferredTool = activeComp.getActiveLayer().getPreferredTool();
-        if (preferredTool == currentTool) {
+        // special layers may bypass this check if the active tool is their preferred tool
+        if (activeTool == activeComp.getActiveLayer().getPreferredTool()) {
             return true;
         }
 

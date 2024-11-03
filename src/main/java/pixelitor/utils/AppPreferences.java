@@ -498,7 +498,7 @@ public final class AppPreferences {
     }
 
     private static void saveLastToolName() {
-        toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getShortName());
+        toolsNode.put(LAST_TOOL_KEY, Tools.getActive().getShortName());
     }
 
     public static Theme loadTheme() {

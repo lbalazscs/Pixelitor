@@ -18,7 +18,7 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.PointFilter;
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
 import pixelitor.utils.PoissonDiskSampling;
@@ -122,7 +122,7 @@ public class VoronoiFilter extends PointFilter {
             metric.asIntPrecisionDistance());
         if (closestIndex == -1) {
             // there wasn't a point in the cell or in its neighbours
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 throw new IllegalStateException(String.format(
                     "x = %d, y = %d", x, y));
             }

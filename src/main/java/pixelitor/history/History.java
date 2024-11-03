@@ -17,9 +17,9 @@
 
 package pixelitor.history;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.AppPreferences;
@@ -62,7 +62,7 @@ public class History {
         if (forbidEdits) {
             // TODO we can get here if undoing something activates a view, and this in turn
             //   creates another edit, such as an auto-rasterization in the shapes tool
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 throw new IllegalStateException();
             } else {
                 return;
@@ -88,7 +88,7 @@ public class History {
         numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
             ConsistencyChecks.checkAll(comp);
@@ -104,7 +104,7 @@ public class History {
     }
 
     public static void undo() {
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeUndone();
             Events.postUndoEvent(edit);
         }
@@ -120,7 +120,7 @@ public class History {
     }
 
     public static void redo() {
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeRedone();
             Events.postRedoEvent(edit);
         }

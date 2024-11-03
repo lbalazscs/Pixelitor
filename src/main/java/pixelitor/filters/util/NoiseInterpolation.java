@@ -46,16 +46,16 @@ public enum NoiseInterpolation {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
 
-    NoiseInterpolation(String guiName) {
-        this.guiName = guiName;
+    NoiseInterpolation(String displayName) {
+        this.displayName = displayName;
     }
 
     public abstract float step(float x);
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

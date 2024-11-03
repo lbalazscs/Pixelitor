@@ -62,7 +62,7 @@ import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
- * An image layer.
+ * A layer that renders a {@link BufferedImage}.
  */
 public class ImageLayer extends ContentLayer implements Drawable {
     public enum State {

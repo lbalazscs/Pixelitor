@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * A filter parameter for selecting a choice from a list of values
+ * A {@link ListParam} that associates string descriptions with integer values.
  */
 public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     public IntChoiceParam(String name, String[] choices) {
@@ -52,18 +52,21 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     } 
 
     public int getValue() {
-        return currentChoice.getValue();
+        return selectedValue.getValue();
     }
 
-    public IntChoiceParam withDefaultChoice(Item defaultChoice) {
-        this.defaultChoice = defaultChoice;
+    public IntChoiceParam withDefaultChoice(Item defaultValue) {
+        this.defaultValue = defaultValue;
         return this;
     }
 
+    /**
+     * Sets the default choice by its integer value.
+     */
     public IntChoiceParam withDefaultChoice(int defaultValue) {
         for (Item choice : choices) {
             if (choice.getValue() == defaultValue) {
-                this.defaultChoice = choice;
+                this.defaultValue = choice;
                 break;
             }
         }
@@ -99,10 +102,9 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof Item item)) {
                 return false;
             }
-            Item item = (Item) o;
             return value == item.value;
         }
 
@@ -134,21 +136,20 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     }
 
     public static IntChoiceParam forEdgeAction(boolean reflectFirst) {
-        var choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
-        if (reflectFirst) {
-            return choice.withDefaultChoice(EDGE_REFLECT);
-        }
-        return choice;
+        var param = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
+        return reflectFirst ?
+            param.withDefaultChoice(EDGE_REFLECT) :
+            param;
     }
 
-    private static final Item[] interpolationChoices = {
+    private static final Item[] interpolationMethods = {
         new Item("Bilinear (Better)", TransformFilter.BILINEAR),
         new Item("Nearest Neighbour (Faster)", TransformFilter.NEAREST_NEIGHBOUR),
     };
 
     public static IntChoiceParam forInterpolation() {
         return new IntChoiceParam("Interpolation",
-            interpolationChoices, IGNORE_RANDOMIZE);
+            interpolationMethods, IGNORE_RANDOMIZE);
     }
 
     private static final Item[] gridTypeChoices = {
@@ -159,7 +160,7 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
         new Item("Triangles", CellularFilter.GR_TRIANGULAR),
     };
 
-    public static final Item[] waveTypeChoices = {
+    private static final Item[] waveTypeChoices = {
         new Item("Sine", WaveType.SINE),
         new Item("Triangle", WaveType.TRIANGLE),
         new Item("Sawtooth", WaveType.SAWTOOTH),
@@ -192,6 +193,6 @@ public class IntChoiceParam extends ListParam<IntChoiceParam.Item> {
     @Override
     public String toString() {
         return format("%s[name = '%s', selected = '%s']",
-            getClass().getSimpleName(), getName(), currentChoice);
+            getClass().getSimpleName(), getName(), selectedValue);
     }
 }

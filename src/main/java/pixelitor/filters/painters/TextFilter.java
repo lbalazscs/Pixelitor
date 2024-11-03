@@ -55,7 +55,7 @@ public class TextFilter extends FilterWithGUI {
         settings.configurePainter(textPainter);
 
         if (settings.hasWatermark()) {
-            dest = settings.watermarkImage(src, textPainter, null);
+            dest = textPainter.watermarkImage(src, null);
         } else {
             int width = dest.getWidth();
             int height = dest.getHeight();

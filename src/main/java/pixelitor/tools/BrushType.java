@@ -136,15 +136,15 @@ public enum BrushType {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
     private final boolean hasSettings;
 
     // The settings are shared between the symmetry-brushes of a
     // tool, but they are different between the different tools
     private IdentityHashMap<Tool, BrushSettings> settingsByTool;
 
-    BrushType(String guiName, boolean hasSettings) {
-        this.guiName = guiName;
+    BrushType(String displayName, boolean hasSettings) {
+        this.displayName = displayName;
         this.hasSettings = hasSettings;
     }
 
@@ -152,7 +152,7 @@ public enum BrushType {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public boolean hasRadius() {

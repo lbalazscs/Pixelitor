@@ -40,7 +40,7 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 
 /**
- * A fluent interface for building JDialogs
+ * A fluent interface for building JDialogs.
  */
 public class DialogBuilder {
     private static final String DEFAULT_OK_TEXT = GUIText.OK;
@@ -52,11 +52,11 @@ public class DialogBuilder {
     private boolean addCancelButton = true;
     private JComponent content;
     private boolean addScrollBars;
-    private JFrame frameOwner;
-    private JDialog dialogOwner;
+    private JFrame ownerFrame;
+    private JDialog ownerDialog;
     private String title;
     private boolean modal = true;
-    private boolean disposeWhenClosing = true;
+    private boolean disposeOnClose = true;
     private Screens.Align align = SCREEN_CENTER;
     private JComponent parent;
 
@@ -67,14 +67,14 @@ public class DialogBuilder {
     private Predicate<JDialog> validator;
 
     private JDialog dialog;
-    private boolean cancelled;
+    private boolean canceled;
 
     // Normally, a dialog is validated only when the "OK" button is
-    // pressed. However, sometimes (e.g., if the "OK" button text is
+    // clicked. However, sometimes (e.g., if the "OK" button text is
     // "Close" and there is no Cancel button, but the dialog can still
     // be canceled with X or Esc), we want to prevent closing it
     // without validation.
-    private boolean validateWhenCanceled = false;
+    private boolean validateOnCancel = false;
 
     private String name;
     private JButton okButton;
@@ -84,16 +84,16 @@ public class DialogBuilder {
     public DialogBuilder() {
     }
 
-    public DialogBuilder title(String s) {
-        title = s;
+    public DialogBuilder title(String title) {
+        this.title = title;
         return this;
     }
 
     public DialogBuilder owner(Window window) {
         if (window instanceof JFrame) {
-            frameOwner = (JFrame) window;
+            ownerFrame = (JFrame) window;
         } else if (window instanceof JDialog) {
-            dialogOwner = (JDialog) window;
+            ownerDialog = (JDialog) window;
         } else {
             throw new IllegalStateException(window == null
                 ? "null window"
@@ -113,25 +113,25 @@ public class DialogBuilder {
     /**
      * Sets an alternative text for the "OK" button.
      */
-    public DialogBuilder okText(String s) {
-        okText = s;
+    public DialogBuilder okText(String text) {
+        okText = text;
         return this;
     }
 
     /**
      * Sets an alternative text for the "Cancel" button.
      */
-    public DialogBuilder cancelText(String s) {
-        cancelText = s;
+    public DialogBuilder cancelText(String text) {
+        cancelText = text;
         return this;
     }
 
     /**
      * Uses the given component as the dialog's content.
      */
-    public DialogBuilder content(JComponent form) {
-        assert form != null;
-        content = form;
+    public DialogBuilder content(JComponent content) {
+        assert content != null;
+        this.content = content;
         return this;
     }
 
@@ -162,13 +162,13 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder willBeShownAgain() {
-        disposeWhenClosing = false;
+    public DialogBuilder reusable() {
+        disposeOnClose = false;
         return this;
     }
 
-    public DialogBuilder validateWhenCanceled() {
-        validateWhenCanceled = true;
+    public DialogBuilder validateOnCancel() {
+        validateOnCancel = true;
         return this;
     }
 
@@ -203,7 +203,7 @@ public class DialogBuilder {
     }
 
     /**
-     * When "OK" is pressed (and when canceled, if validateWhenCanceled is set),
+     * When "OK" is pressed (and when canceled, if validateOnCancel is set),
      * the dialog will close only if the given predicate evaluates to true.
      * The predicate must show an error dialog if it returns false.
      * The predicate will be evaluated with the built dialog,
@@ -299,10 +299,10 @@ public class DialogBuilder {
     }
 
     private void createDialog() {
-        if (frameOwner != null) {
-            dialog = new BuiltDialog(frameOwner, modal);
-        } else if (dialogOwner != null) {
-            dialog = new BuiltDialog(dialogOwner, modal);
+        if (ownerFrame != null) {
+            dialog = new BuiltDialog(ownerFrame, modal);
+        } else if (ownerDialog != null) {
+            dialog = new BuiltDialog(ownerDialog, modal);
         } else {
             var pw = PixelitorWindow.get();
             dialog = new BuiltDialog(pw, modal);
@@ -358,7 +358,7 @@ public class DialogBuilder {
     }
 
     private void okButtonPressed(JDialog d) {
-        if (dialogIsInvalid(d)) {
+        if (isDialogInvalid(d)) {
             // keep the dialog open
             return;
         }
@@ -367,12 +367,12 @@ public class DialogBuilder {
         if (okAction != null) {
             okAction.run();
         }
-        cancelled = false;
+        canceled = false;
     }
 
     // a dialog without a Cancel button can still be cancelled with Esc/X
     private void dialogCancelled(JDialog d) {
-        if (validateWhenCanceled && dialogIsInvalid(d)) {
+        if (validateOnCancel && isDialogInvalid(d)) {
             // keep the dialog open
             return;
         }
@@ -380,19 +380,19 @@ public class DialogBuilder {
         if (cancelAction != null) {
             cancelAction.run();
         }
-        cancelled = true;
+        canceled = true;
     }
 
     public boolean wasAccepted() {
-        return !cancelled;
+        return !canceled;
     }
 
-    private boolean dialogIsInvalid(JDialog d) {
+    private boolean isDialogInvalid(JDialog d) {
         return validator != null && !validator.test(d);
     }
 
     private void closeDialog(JDialog d) {
-        GUIUtils.closeDialog(d, disposeWhenClosing);
+        GUIUtils.closeDialog(d, disposeOnClose);
     }
 
     private void setupDefaults() {
@@ -426,10 +426,10 @@ public class DialogBuilder {
         }
 
         @Override
-        public void setVisible(boolean b) {
+        public void setVisible(boolean visible) {
             assert modal == isModal();
             if (modal) {
-                if (b) {
+                if (visible) {
                     GlobalEvents.dialogOpened(getTitle());
                     assert !rootDialog || GlobalEvents.getModalDialogCount() == 1;
                 } else {
@@ -437,7 +437,7 @@ public class DialogBuilder {
                     assert !rootDialog || GlobalEvents.getModalDialogCount() == 0;
                 }
             }
-            super.setVisible(b);
+            super.setVisible(visible);
         }
     }
 }

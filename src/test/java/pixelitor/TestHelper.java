@@ -484,11 +484,11 @@ public class TestHelper {
         }
         Views.reinitialize();
 
-        if (GUIMode.isUnitTesting()) {
+        if (AppMode.isUnitTesting()) {
             // unit testing mode is already set
             return;
         }
-        GUIMode.setUnitTestingMode();
+        AppMode.setUnitTestingMode();
 
         Utils.ensureAssertionsEnabled();
         Utils.preloadUnitTestFontNames();
@@ -496,8 +496,8 @@ public class TestHelper {
         Language.setCurrent(Language.ENGLISH);
         Messages.setHandler(new TestMessageHandler());
 
-        // make sure that the current tool is not null
-        Tools.setCurrentTool(Tools.BRUSH);
+        // make sure that the active tool is not null
+        Tools.setActiveTool(Tools.BRUSH);
 
         History.setUndoLevels(15);
 

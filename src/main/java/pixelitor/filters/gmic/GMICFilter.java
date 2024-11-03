@@ -41,7 +41,7 @@ public abstract class GMICFilter extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         List<String> args = getArgs();
-        System.out.println(String.join(" ", args));
+//        System.out.println(String.join(" ", args));
 
         List<String> command = new ArrayList<>(10);
         command.add(GMIC_PATH.getAbsolutePath());

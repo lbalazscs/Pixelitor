@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
@@ -90,7 +90,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     private int outlineCoX;
     private int outlineCoY;
-    private final BrushOutlinePainter outlinePainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
+    private final BrushOutlinePainter brushPainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
     private boolean paintBrushOutline = false;
 
     // some extra space is added to the repaint region
@@ -221,7 +221,7 @@ public abstract class AbstractBrushTool extends Tool {
             .content(p)
             .title("Lazy Mouse Settings")
             .notModal()
-            .willBeShownAgain()
+            .reusable()
             .okText(CLOSE_DIALOG)
             .noCancelButton()
             .parentComponent(showLazyMouseDialogButton)
@@ -309,13 +309,13 @@ public abstract class AbstractBrushTool extends Tool {
 
         var repaintRect = Shapes.toPositiveRect(prevX, outlineCoX, prevY, outlineCoY);
 
-        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+        int growth = brushPainter.getCoRadius() + REPAINT_EXTRA_SPACE;
         repaintRect.grow(growth, growth);
         view.repaint(repaintRect);
     }
 
     private void repaintOutline(View view) {
-        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+        int growth = brushPainter.getCoRadius() + REPAINT_EXTRA_SPACE;
 
         view.repaint(outlineCoX - growth, outlineCoY - growth, 2 * growth, 2 * growth);
     }
@@ -328,7 +328,7 @@ public abstract class AbstractBrushTool extends Tool {
             if (visiblePart.contains(mousePos)) {
                 startOutlinePaintingAt(mousePos.x, mousePos.y, view);
             }
-        } else if (!GUIMode.isUnitTesting()) {
+        } else if (!AppMode.isUnitTesting()) {
             throw new IllegalStateException();
         }
     }
@@ -427,7 +427,7 @@ public abstract class AbstractBrushTool extends Tool {
         int newRadius = getRadius();
         brush.setRadius(newRadius);
 
-        outlinePainter.setRadius(newRadius);
+        brushPainter.setRadius(newRadius);
         if (paintBrushOutline) {
             // changing the brush via keyboard shortcut
             repaintOutline(Views.getActive());
@@ -441,7 +441,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         View view = Views.getActive();
         if (view != null) {
-            outlinePainter.setView(view);
+            brushPainter.setView(view);
 
             // If the tool is started with the hotkey, then there is
             // no mouseEntered event to start the outline painting
@@ -467,7 +467,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void viewActivated(View oldCV, View newCV) {
         resetInitialState();
-        outlinePainter.setView(newCV);
+        brushPainter.setView(newCV);
 
         // get rid of the outline on the old view
         // (important in "Internal Windows" mode)
@@ -487,7 +487,7 @@ public abstract class AbstractBrushTool extends Tool {
     private void paintOutlineOnChangedView(View view) {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, view);
-        outlinePainter.setView(view);
+        brushPainter.setView(view);
         repaintOutlineSinceLast(mousePos.x, mousePos.y, view);
     }
 
@@ -610,7 +610,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void paintOverImage(Graphics2D g2, Composition comp) {
         if (paintBrushOutline) {
-            outlinePainter.paint(g2, outlineCoX, outlineCoY);
+            brushPainter.paint(g2, outlineCoX, outlineCoY);
         }
     }
 

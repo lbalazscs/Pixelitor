@@ -150,8 +150,8 @@ public class HSBColorMixPalette extends Palette {
     }
 
     @Override
-    public void setDimensions(int rows, int columns) {
-        super.setDimensions(rows, columns);
+    public void setGridSize(int rows, int columns) {
+        super.setGridSize(rows, columns);
         lastColumnCount = columns;
         lastRowCount = rows;
     }

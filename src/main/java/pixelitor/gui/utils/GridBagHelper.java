@@ -131,8 +131,8 @@ public class GridBagHelper {
         addLabelAndControl(param.getName() + ":", param.createGUI());
     }
 
-    public void addParam(FilterParam param, String guiName) {
-        addLabelAndControl(param.getName() + ":", param.createGUI(guiName));
+    public void addParam(FilterParam param, String lookupName) {
+        addLabelAndControl(param.getName() + ":", param.createGUI(lookupName));
     }
 
     public void addLabelAndControl(String labelText, Component c, int row) {

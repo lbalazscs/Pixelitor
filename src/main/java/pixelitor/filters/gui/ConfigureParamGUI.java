@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,30 +28,33 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 
 /**
- * A button with the "Configure..." text.
+ * A panel that shows a "Configure..." button which opens a dialog when clicked.
  * It is the GUI of the params with dialog, such as
  * {@link DialogParam}, {@link EffectsParam}, {@link StrokeParam}.
  */
 public class ConfigureParamGUI extends JPanel implements ParamGUI {
+    private static final String CONFIGURE_BUTTON_TEXT = "Configure...";
+    
     private final JButton configureButton;
     private final ResetButton resetButton;
 
-    public ConfigureParamGUI(Consumer<DialogBuilder> dialogConfig,
+    public ConfigureParamGUI(Consumer<DialogBuilder> dialogConfigurator,
                              ResetButton resetButton) {
         super(new BorderLayout());
-
         this.resetButton = resetButton;
-        configureButton = new JButton("Configure...");
+
+        configureButton = new JButton(CONFIGURE_BUTTON_TEXT);
+        configureButton.addActionListener(e -> createAndShowDialog(dialogConfigurator));
+
         add(configureButton, CENTER);
         add(resetButton, EAST);
-        configureButton.addActionListener(e -> createAndShowDialog(dialogConfig));
     }
 
-    private void createAndShowDialog(Consumer<DialogBuilder> dialogConfig) {
+    private void createAndShowDialog(Consumer<DialogBuilder> dialogConfigurator) {
         DialogBuilder builder = new DialogBuilder()
             .owner(GUIUtils.getDialogAncestor(configureButton))
             .parentComponent(configureButton);
-        dialogConfig.accept(builder);
+        dialogConfigurator.accept(builder);
         builder.show();
     }
 
@@ -74,10 +77,6 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
     public void setEnabled(boolean enabled) {
         configureButton.setEnabled(enabled);
         resetButton.setEnabled(enabled);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return configureButton.isEnabled();
+        super.setEnabled(enabled);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,16 +27,24 @@ import static java.nio.file.Files.isWritable;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
+/**
+ * A tweening animation that interpolates filter parameters between two states.
+ */
 public class TweenAnimation {
     private ParametrizedFilter filter;
     private FilterState initialState;
     private FilterState finalState;
+
     private int numFrames;
     private int millisBetweenFrames;
     private TimeInterpolation interpolation;
-    private TweenOutputType outputType;
-    private File output; // file or directory
     private boolean pingPong;
+
+    private TweenOutputType outputType;
+    private File outputLocation; // file or directory
+
+    public TweenAnimation() {
+    }
 
     public ParametrizedFilter getFilter() {
         return filter;
@@ -46,12 +54,21 @@ public class TweenAnimation {
         this.filter = filter;
     }
 
-    public void rememberFinalState() {
+    public void captureInitialState() {
+        initialState = filter.getParamSet().copyState(true);
+    }
+
+    public void captureFinalState() {
         finalState = filter.getParamSet().copyState(true);
     }
 
-    public void rememberInitialState() {
-        initialState = filter.getParamSet().copyState(true);
+    public FilterState tween(double time) {
+        double progress = interpolation.time2progress(time);
+        return initialState.interpolate(finalState, progress);
+    }
+
+    public AnimationWriter createWriter() {
+        return outputType.createWriter(outputLocation, millisBetweenFrames);
     }
 
     public void setInterpolation(TimeInterpolation interpolation) {
@@ -70,8 +87,8 @@ public class TweenAnimation {
         this.numFrames = numFrames;
     }
 
-    public void setOutput(File output) {
-        this.output = output;
+    public void setOutputLocation(File outputLocation) {
+        this.outputLocation = outputLocation;
     }
 
     public void setOutputType(TweenOutputType outputType) {
@@ -84,15 +101,6 @@ public class TweenAnimation {
 
     public boolean isPingPong() {
         return pingPong;
-    }
-
-    public AnimationWriter createWriter() {
-        return outputType.createWriter(output, millisBetweenFrames);
-    }
-
-    public FilterState tween(double time) {
-        double progress = interpolation.time2progress(time);
-        return initialState.interpolate(finalState, progress);
     }
 
     /**
@@ -112,7 +120,7 @@ public class TweenAnimation {
     }
 
     private boolean checkOverwriteForDirectory(Component dialogParent) {
-        if (output.list().length == 0) {
+        if (outputLocation.list().length == 0) {
             return true; // empty directory: OK
         } else {
             return showFolderNotEmptyDialog(dialogParent);
@@ -120,13 +128,13 @@ public class TweenAnimation {
     }
 
     private boolean checkOverwriteForFile(Component dialogParent) {
-        if (output.exists()) {
+        if (outputLocation.exists()) {
             boolean overwrite = showFileExistsDialog(dialogParent);
             if (overwrite) {
-                if (isWritable(output.toPath())) {
+                if (isWritable(outputLocation.toPath())) {
                     return true;
                 } else {
-                    Dialogs.showFileNotWritableDialog(output);
+                    Dialogs.showFileNotWritableDialog(outputLocation);
                     return false;
                 }
             } else {
@@ -141,11 +149,11 @@ public class TweenAnimation {
         return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
             String.format("<html>The folder <b>%s</b> is not empty. " +
                     "<br>Some files might be overwritten. Are sure you want to continue?",
-                output.getAbsolutePath()));
+                outputLocation.getAbsolutePath()));
     }
 
     private boolean showFileExistsDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
-            output.getAbsolutePath() + " exists already. Overwrite?");
+            outputLocation.getAbsolutePath() + " exists already. Overwrite?");
     }
 }

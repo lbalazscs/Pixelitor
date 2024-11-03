@@ -599,10 +599,10 @@ public class Truchet extends ParametrizedFilter {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
 
-        TileType(String guiName) {
-            this.guiName = guiName;
+        TileType(String displayName) {
+            this.displayName = displayName;
         }
 
         public abstract Shape createFilledArea(int tileSize, int lineWidth);
@@ -611,7 +611,7 @@ public class Truchet extends ParametrizedFilter {
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 }

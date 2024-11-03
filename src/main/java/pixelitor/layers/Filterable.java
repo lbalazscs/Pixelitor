@@ -44,7 +44,8 @@ import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
 /**
- * A layer (or layer mask) that can interact with a filtering dialog session.
+ * Interface for layers that can interact with a filtering dialog
+ * session, enabling filter adjustments and preview.
  */
 public interface Filterable {
     Composition getComp();

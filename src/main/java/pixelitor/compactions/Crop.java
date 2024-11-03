@@ -99,7 +99,7 @@ public class Crop implements CompAction {
 
         Guides guides = srcComp.getGuides();
         if (guides != null) {
-            Guides newGuides = guides.copyForCrop(cropRect, view);
+            Guides newGuides = guides.copyCropping(cropRect, view);
             croppedComp.setGuides(newGuides);
         }
 

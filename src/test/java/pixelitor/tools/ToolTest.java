@@ -108,7 +108,7 @@ public class ToolTest {
         PenTool.path = null;
         Composition comp = TestHelper.createComp("ToolTest", 2, true);
         view = comp.getView();
-        Tools.setCurrentTool(tool);
+        Tools.setActiveTool(tool);
         tool.toolStarted();
     }
 

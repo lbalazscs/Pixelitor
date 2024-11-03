@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.Colors;
@@ -25,15 +24,12 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.beans.PropertyChangeEvent;
 import java.io.Serial;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
@@ -43,25 +39,20 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
  * Represents a gradient.
- * Unlike other filter parameter implementations, this isn't
- * a GUI-free model, the actual value is stored inside the GradientSlider.
  */
 public class GradientParam extends AbstractFilterParam {
-    private static final String USE_BEVEL = "GradientSlider.useBevel";
-    private GradientSlider gradientSlider;
-    private GUI gui;
+    private GradientParamGUI gui;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
+    private float[] thumbPositions;
+    private Color[] colors;
 
-    // whether the running of the filter should be triggered
-    private boolean trigger = true;
-
-    public GradientParam(String name, Color firstColor, Color secondColor) {
+    public GradientParam(String name, Color startColor, Color endColor) {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
-                firstColor,
-                Colors.averageRGB(firstColor, secondColor),
-                secondColor});
+                startColor,
+                Colors.averageRGB(startColor, endColor),
+                endColor});
     }
 
     public GradientParam(String name, float[] defaultThumbPositions,
@@ -75,11 +66,8 @@ public class GradientParam extends AbstractFilterParam {
         this.defaultThumbPositions = defaultThumbPositions;
         this.defaultColors = defaultColors;
 
-        // TODO the gui shouldn't be created here so that
-        //   the filters can be created outside the EDT
-
-        // has to be created in the constructor because getValue() can be called early
-        createGradientSlider(defaultThumbPositions, defaultColors);
+        thumbPositions = defaultThumbPositions;
+        colors = defaultColors;
     }
 
     public static GradientParam createBlackToWhite(String name) {
@@ -88,56 +76,57 @@ public class GradientParam extends AbstractFilterParam {
             new Color[]{BLACK, GRAY, WHITE});
     }
 
-    private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
-        gradientSlider = new GradientSlider(HORIZONTAL,
-            defaultThumbPositions, defaultColors);
-        gradientSlider.addPropertyChangeListener(this::sliderPropertyChanged);
-        gradientSlider.putClientProperty(USE_BEVEL, "true");
-        gradientSlider.setPreferredSize(new Dimension(250, 30));
+    @Override
+    public JComponent createGUI() {
+        gui = new GradientParamGUI(this);
+        paramGUI = gui;
+        guiCreated();
+        return gui;
     }
 
-    private void setValuesNoTrigger(float[] thumbPositions, Color[] defaultColors) {
-        this.trigger = false;
-        gradientSlider.setValues(thumbPositions, defaultColors);
-        this.trigger = true;
-    }
+    public void setValues(float[] thumbPositions, Color[] colors, boolean trigger) {
+        if (Arrays.equals(this.thumbPositions, thumbPositions)
+            && Arrays.equals(this.colors, colors)) {
 
-    private void sliderPropertyChanged(PropertyChangeEvent evt) {
-        if (shouldStartFilter(evt)) {
-            if (gui != null) {
-                gui.updateResetButtonIcon();
-            }
+            return;
+        }
+
+        this.thumbPositions = thumbPositions;
+        this.colors = colors;
+
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
+        }
+        if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
     }
 
-    private boolean shouldStartFilter(PropertyChangeEvent evt) {
-        if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
-            return switch (evt.getPropertyName()) {
-                case "ancestor", "selected thumb", "enabled",
-                    "graphicsConfiguration", "UI", USE_BEVEL -> false;
-                default -> true;
-            };
+    public Colormap getColorMap() {
+        return this::interpolatedColorAt;
+    }
+
+    private int interpolatedColorAt(float pos) {
+        // Interpolate here, replicating the getValue(pos) logic in
+        // GradientSlider, because this code might be called in cases
+        // when there is no GUI instantiated (testing, smart filters).
+        for (int i = 0; i < thumbPositions.length - 1; i++) {
+            if (thumbPositions[i] <= pos && pos <= thumbPositions[i + 1]) {
+                float t = (pos - thumbPositions[i]) / (thumbPositions[i + 1] - thumbPositions[i]);
+                int left = (colors[i]).getRGB();
+                int right = (colors[i + 1]).getRGB();
+                return ImageMath.mixColors(t, left, right);
+            }
         }
-        return false;
-    }
-
-    @Override
-    public JComponent createGUI() {
-        gui = new GUI(gradientSlider, this);
-        return gui;
-    }
-
-    public Colormap getValue() {
-        return this::rgbIntFromValue;
-    }
-
-    private int rgbIntFromValue(float v) {
-        Color c = (Color) gradientSlider.getValue(v);
-        if (c == null) {
-            throw new IllegalStateException("null color for v = " + v);
+        if (pos < thumbPositions[0]) {
+            return colors[0].getRGB(); // first color
         }
-        return c.getRGB();
+        if (pos > thumbPositions[thumbPositions.length - 1]) {
+            return colors[colors.length - 1].getRGB(); // last color
+        }
+
+        // should never get here
+        throw new IllegalStateException("pos = " + pos);
     }
 
     @Override
@@ -147,10 +136,7 @@ public class GradientParam extends AbstractFilterParam {
             randomColors[i] = Rnd.createRandomColor();
         }
 
-        setValuesNoTrigger(defaultThumbPositions, randomColors);
-        if (gui != null) {
-            gui.updateResetButtonIcon();
-        }
+        setValues(defaultThumbPositions, randomColors, false);
     }
 
     @Override
@@ -159,7 +145,6 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private boolean areThumbPositionsChanged() {
-        float[] thumbPositions = gradientSlider.getThumbPositions();
         if (thumbPositions.length != defaultThumbPositions.length) {
             return true;
         }
@@ -172,13 +157,12 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private boolean areColorsChanged() {
-        Object[] values = gradientSlider.getValues();
-        if (values.length != defaultColors.length) {
+        if (colors.length != defaultColors.length) {
             return true;
         }
 
         for (int i = 0; i < defaultColors.length; i++) {
-            if (!defaultColors[i].equals(values[i])) {
+            if (!defaultColors[i].equals(colors[i])) {
                 return true;
             }
         }
@@ -187,21 +171,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        if (trigger) {
-            gradientSlider.setValues(defaultThumbPositions, defaultColors);
-        } else {
-            setValuesNoTrigger(defaultThumbPositions, defaultColors);
-        }
-        if (gui != null) {
-            gui.updateResetButtonIcon();
-        }
-    }
-
-    @Override
-    protected void updateEnabledState() {
-        if (gradientSlider != null) {
-            gradientSlider.setEnabled(isEnabled());
-        }
+        setValues(defaultThumbPositions, defaultColors, trigger);
     }
 
     @Override
@@ -216,15 +186,14 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public GradientParamState copyState() {
-        return new GradientParamState(gradientSlider.getThumbPositions(),
-            gradientSlider.getColors());
+        return new GradientParamState(thumbPositions, colors);
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         GradientParamState gr = (GradientParamState) state;
 
-        setValuesNoTrigger(gr.thumbPositions, gr.colors);
+        setValues(gr.thumbPositions, gr.colors, false);
     }
 
     @Override
@@ -241,19 +210,27 @@ public class GradientParam extends AbstractFilterParam {
             throw new IllegalArgumentException("savedValue = " + savedValue);
         }
 
-        float[] thumbPositions = new float[thumbStrings.length];
-        Color[] colors = new Color[colorStrings.length];
+        float[] newThumbPositions = new float[thumbStrings.length];
+        Color[] newColors = new Color[colorStrings.length];
         for (int i = 0; i < thumbStrings.length; i++) {
-            thumbPositions[i] = Float.parseFloat(thumbStrings[i]);
-            colors[i] = Colors.fromHTMLHex(colorStrings[i]);
+            newThumbPositions[i] = Float.parseFloat(thumbStrings[i]);
+            newColors[i] = Colors.fromHTMLHex(colorStrings[i]);
         }
 
-        setValuesNoTrigger(thumbPositions, colors);
+        setValues(newThumbPositions, newColors, false);
     }
 
     @Override
     public List<Object> getParamValue() {
-        return List.of(gradientSlider.getValues());
+        return List.of(colors);
+    }
+
+    public float[] getThumbPositions() {
+        return thumbPositions;
+    }
+
+    public Color[] getColors() {
+        return colors;
     }
 
     @Override
@@ -275,21 +252,21 @@ public class GradientParam extends AbstractFilterParam {
             return new GradientParamState(interpolatedPositions, interpolatedColors);
         }
 
-        private float[] interpolatePositions(float progress, GradientParamState grEndState) {
+        private float[] interpolatePositions(float progress, GradientParamState endState) {
             float[] interpolatedPositions = new float[thumbPositions.length];
             for (int i = 0; i < thumbPositions.length; i++) {
                 float initial = thumbPositions[i];
-                float end = grEndState.thumbPositions[i];
+                float end = endState.thumbPositions[i];
                 interpolatedPositions[i] = ImageMath.lerp(progress, initial, end);
             }
             return interpolatedPositions;
         }
 
-        private Color[] interpolateColors(float progress, GradientParamState grEndState) {
+        private Color[] interpolateColors(float progress, GradientParamState endState) {
             Color[] interpolatedColors = new Color[colors.length];
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
-                Color end = grEndState.colors[i];
+                Color end = endState.colors[i];
                 interpolatedColors[i] = Colors.interpolateRGB(initial, end, progress);
             }
             return interpolatedColors;
@@ -307,48 +284,6 @@ public class GradientParam extends AbstractFilterParam {
                 .collect(joining(","));
 
             return thumbsString + colorsString;
-        }
-    }
-
-    static class GUI extends JPanel implements ParamGUI {
-        private final GradientSlider slider;
-        private final ResetButton resetButton;
-
-        public GUI(GradientSlider slider, GradientParam gradientParam) {
-            super(new FlowLayout());
-            this.slider = slider;
-            add(slider);
-            resetButton = new ResetButton(gradientParam);
-            add(resetButton);
-        }
-
-        @Override
-        public void updateGUI() {
-
-        }
-
-        @Override
-        public void setEnabled(boolean enabled) {
-            slider.setEnabled(enabled);
-        }
-
-        @Override
-        public void setToolTip(String tip) {
-            slider.setToolTipText(tip);
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return slider.isEnabled();
-        }
-
-        public void updateResetButtonIcon() {
-            resetButton.updateIcon();
-        }
-
-        @Override
-        public int getNumLayoutColumns() {
-            return 2;
         }
     }
 }

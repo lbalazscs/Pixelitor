@@ -17,9 +17,9 @@
 
 package pixelitor.tools.crop;
 
+import pixelitor.AppMode;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
@@ -132,13 +132,13 @@ public class CropTool extends DragTool {
         float alpha = (float) maskOpacity.getPercentage();
         // can the slider get out of range?
         if (alpha < 0.0f) {
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 throw new IllegalStateException("alpha = " + alpha);
             }
             alpha = 0.0f;
             maskOpacity.setValue(0);
         } else if (alpha > 1.0f) {
-            if (GUIMode.isDevelopment()) {
+            if (AppMode.isDevelopment()) {
                 throw new IllegalStateException("alpha = " + alpha);
             }
             alpha = 1.0f;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,9 @@ import pixelitor.filters.gui.EnumParam;
 import java.awt.BasicStroke;
 import java.util.Locale;
 
-import static java.awt.BasicStroke.*;
+import static java.awt.BasicStroke.JOIN_BEVEL;
+import static java.awt.BasicStroke.JOIN_MITER;
+import static java.awt.BasicStroke.JOIN_ROUND;
 
 /**
  * An enum wrapper around the join argument of a {@link BasicStroke} constructor
@@ -33,10 +35,10 @@ public enum StrokeJoin {
 
     public static final String NAME = "Corner Join";
     private final int value;
-    private final String guiName;
+    private final String displayName;
 
-    StrokeJoin(String guiName, int value) {
-        this.guiName = guiName;
+    StrokeJoin(String displayName, int value) {
+        this.displayName = displayName;
         this.value = value;
     }
 
@@ -52,10 +54,10 @@ public enum StrokeJoin {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     public String toSVG() {
-        return "stroke-linejoin=\"" + guiName.toLowerCase(Locale.ENGLISH) + "\"";
+        return "stroke-linejoin=\"" + displayName.toLowerCase(Locale.ENGLISH) + "\"";
     }
 }

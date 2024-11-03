@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,26 +22,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Allows treating multiple {@link ParamState} objects as a single
+ * {@link ParamState} ("Composite design pattern").
+ */
 public class CompositeParamState implements ParamState<CompositeParamState> {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final List<ParamState<?>> states;
+    private final List<ParamState<?>> children;
 
-    public CompositeParamState(FilterParam[] children) {
-        this(Arrays.stream(children));
+    public CompositeParamState(List<ParamState<?>> children) {
+        this.children = children;
     }
 
-    public CompositeParamState(List<ParamState<?>> states) {
-        this.states = states;
-    }
-
-    private CompositeParamState(Stream<FilterParam> paramStream) {
-        states = paramStream
+    public CompositeParamState(FilterParam[] params) {
+        children = Arrays.stream(params)
             .filter(FilterParam::isAnimatable)
             .map(FilterParam::copyState)
             .collect(toList());
@@ -53,28 +52,46 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
      */
     @Override
     public CompositeParamState interpolate(CompositeParamState endState, double progress) {
-        List<ParamState<?>> interpolatedStates = new ArrayList<>();
-        for (int i = 0; i < states.size(); i++) {
+        int numChildren = children.size();
+        if (numChildren != endState.children.size()) {
+            throw new IllegalStateException("%d != %d".formatted(
+                numChildren, endState.children.size()));
+        }
+        List<ParamState<?>> interpolatedStates = new ArrayList<>(numChildren);
+        for (int i = 0; i < numChildren; i++) {
             // each ParamState is interpolated independently
-            interpolatedStates.add(interpolateOne(endState, progress, i));
+            interpolatedStates.add(interpolateChild(endState, progress, i));
         }
         return new CompositeParamState(interpolatedStates);
     }
 
+    /**
+     * Interpolates a single child state with its corresponding end state.
+     */
     @SuppressWarnings("unchecked")
-    private <T extends ParamState<T>> ParamState<T> interpolateOne(CompositeParamState endState, double progress, int i) {
-        // The cast works at runtime because start and end have the same concrete type
-        T start = (T) states.get(i);
-        T end = (T) endState.get(i);
+    private <T extends ParamState<T>> ParamState<T> interpolateChild(CompositeParamState endState, double progress, int i) {
+        ParamState<?> startChildState = children.get(i);
+        ParamState<?> endChildState = endState.get(i);
+
+        if (!startChildState.getClass().equals(endChildState.getClass())) {
+            throw new IllegalStateException(String.format(
+                "Incompatible types at index %d: %s vs %s",
+                i, startChildState.getClass(), endChildState.getClass()));
+        }
+
+        // The cast is safe because we checked the runtime types
+        T start = (T) startChildState;
+        T end = (T) endChildState;
+
         return start.interpolate(end, progress);
     }
 
     public Iterator<ParamState<?>> iterator() {
-        return states.iterator();
+        return children.iterator();
     }
 
     public ParamState<?> get(int index) {
-        return states.get(index);
+        return children.get(index);
     }
 
     @Override

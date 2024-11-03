@@ -43,9 +43,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Smart filters allow non-destructive editing, but unlike
- * regular adjustment layers, they don't have to run every time
- * some other layer is edited, because their output is cached
+ * A specialized layer inside a smart object that contains a
+ * filter that can edit its smart object in a non-destructive way.
+ * Unlike regular adjustment layers, they don't have to apply their filter
+ * whenever an unrelated layer is changed, because their output is cached
  * inside the smart object. Additionally, smart filters also
  * cache their own output, so that if the filter settings are changed,
  * only the filters downstream from that filter will be rerun.

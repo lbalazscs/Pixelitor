@@ -43,6 +43,7 @@ import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.*;
 import pixelitor.guides.GuideStrokeType;
+import pixelitor.guitest.AppRunner.ExpectConfirmation;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.guitest.AppRunner.ShowOriginal;
@@ -193,7 +194,7 @@ public class MainGuiTest {
 
             for (int i = 0; i < maskModes.length; i++) {
                 MaskMode mode = maskModes[i];
-                runTests(mode, testSuite);
+                runTests(testSuite, mode);
 
                 if (i < maskModes.length - 1) {
                     resetState();
@@ -233,7 +234,7 @@ public class MainGuiTest {
         pw.toggleButton("Shapes Tool Button").click();
     }
 
-    private void runTests(MaskMode maskMode, TestSuite testSuite) {
+    private void runTests(TestSuite testSuite, MaskMode maskMode) {
         this.maskMode = maskMode;
         maskMode.apply(this);
         app.configureRobotDelay();
@@ -592,7 +593,7 @@ public class MainGuiTest {
     }
 
     private void testTextDialog(DialogFixture dialog, String expectedText) {
-        dialog.textBox("textTF")
+        dialog.textBox("textArea")
             .requireText(expectedText)
             .deleteText()
             .enterText("my text");
@@ -949,7 +950,7 @@ public class MainGuiTest {
         EDT.assertNumOpenImagesIs(2);
 
         // close the pasted image
-        runMenuCommand("Close");
+        app.closeCurrentView(ExpectConfirmation.NO);
         EDT.assertNumOpenImagesIs(1);
 
         // delete the pasted layer
@@ -998,7 +999,7 @@ public class MainGuiTest {
 
         app.createNewImage(611, 411, null);
 
-        runMenuCommand("Close");
+        app.closeCurrentView(ExpectConfirmation.NO);
     }
 
     private void testFileOpen() {
@@ -1062,20 +1063,14 @@ public class MainGuiTest {
 
         // there is always a dialog for "Save As"
         app.saveWithOverwrite(baseDir, fileName);
-        assert !EDT.active(Composition::isDirty);
 
-        runMenuCommand("Close");
+        app.closeCurrentView(ExpectConfirmation.NO);
+
         openFileWithDialog(baseDir, fileName);
         maskMode.apply(this);
 
         // can be dirty if a masked mask mode is set
-        boolean dirty = EDT.active(Composition::isDirty);
-
-        runMenuCommand("Close");
-
-        if (dirty) {
-            app.closeDoYouWantToSaveChangesDialog();
-        }
+        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
 
         maskMode.apply(this);
         checkConsistency();
@@ -1101,7 +1096,7 @@ public class MainGuiTest {
         app.openFileWithDialog("Import...", baseDir, "webp_image.webp");
 
         // TODO test ImageMagick exporting as well
-        app.closeCurrentView();
+        app.closeCurrentView(ExpectConfirmation.NO);
     }
 
     private void testExportLayerAnimation() {
@@ -1178,13 +1173,7 @@ public class MainGuiTest {
 
         EDT.assertNumOpenImagesIs(2);
 
-        boolean dirty = EDT.active(Composition::isDirty);
-
-        app.closeCurrentView();
-
-        if (dirty) {
-            app.closeDoYouWantToSaveChangesDialog();
-        }
+        app.closeCurrentView(ExpectConfirmation.UNKNOWN);
 
         EDT.assertNumOpenImagesIs(1);
 
@@ -1770,6 +1759,11 @@ public class MainGuiTest {
         testFilterWithDialog("Local Normalization", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Stroke", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Vibrance", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+
+        // the image was reduced in size at the start of the GMIC filter tests
+        app.closeCurrentView(ExpectConfirmation.YES);
+        app.openFileWithDialog("Open...", inputDir, "a.jpg");
+        maskMode.apply(this);
     }
 
     private void testOtherFilters() {
@@ -2004,8 +1998,7 @@ public class MainGuiTest {
             keyboard.undoRedo("Change Shape Type");
         }
 
-        TwoPointPaintType[] paintTypes = TwoPointPaintType.values();
-        for (TwoPointPaintType paintType : paintTypes) {
+        for (TwoPointPaintType paintType : TwoPointPaintType.values()) {
             if (skipThis()) {
                 continue;
             }
@@ -2598,7 +2591,7 @@ public class MainGuiTest {
     private static void checkAfterSelectionCropUndone(int origCanvasWidth, int origCanvasHeight) {
         assertThat(EDT.getActiveSelection())
             .isNotNull()
-            .isAlive()
+            .isUsable()
             .isMarching();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
     }
@@ -3108,9 +3101,10 @@ public class MainGuiTest {
         for (int i = 0; i < indent; i++) {
             System.out.print("    ");
         }
-        System.out.println(getCurrentTimeHM() + ": " + msg
-            + " (" + maskMode + ", "
-            + ImageArea.getMode() + ")");
+        String fullMsg = "%s: %s (%s)".formatted(
+            getCurrentTimeHM(), msg, maskMode);
+        System.out.println(fullMsg);
+        EDT.run(() -> PixelitorWindow.get().setTitle(fullMsg));
     }
 
     private DialogFixture findDialogByTitle(String title) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.utils.debug.DebugNode;
 
 /**
@@ -34,7 +34,7 @@ public class TestLayerUI implements LayerUI {
 
     public TestLayerUI(Layer layer) {
         this.layer = layer;
-        assert GUIMode.isUnitTesting();
+        assert AppMode.isUnitTesting();
     }
 
     @Override

@@ -124,7 +124,7 @@ public class GUITestUtils {
         }
     }
 
-    static void pushRandomly(double p, JButtonFixture button) {
-        Rnd.withProbability(p, button::click);
+    static void clickRandomly(double p, JButtonFixture button) {
+        Rnd.runWithProbability(button::click, p);
     }
 }

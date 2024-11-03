@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
@@ -52,16 +52,16 @@ public enum MaskViewMode {
         LayerRestriction.HAS_LAYER_MASK, CTRL_4) {
     };
 
-    private final String guiName;
+    private final String displayName;
     private final boolean showRuby;
     private final LayerRestriction layerRestriction;
     private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
-    MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby,
+    MaskViewMode(String displayName, boolean showMask, boolean editMask, boolean showRuby,
                  LayerRestriction layerRestriction, KeyStroke keyStroke) {
-        this.guiName = guiName;
+        this.displayName = displayName;
         this.showMask = showMask;
         this.editMask = editMask;
         this.showRuby = showRuby;
@@ -73,7 +73,7 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the active layer of the active image
      */
     public void addToMenuBar(PMenu sub) {
-        var action = new RestrictedLayerAction(guiName, layerRestriction) {
+        var action = new RestrictedLayerAction(displayName, layerRestriction) {
             @Override
             public void onActiveLayer(Layer layer) {
                 activate(layer);
@@ -86,7 +86,7 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the given layer and its image
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
-        var menuItem = new JMenuItem(new PAction(guiName, () ->
+        var menuItem = new JMenuItem(new PAction(displayName, () ->
             activate(layer)));
         menuItem.setAccelerator(keyStroke);
         menu.add(menuItem);
@@ -105,7 +105,7 @@ public enum MaskViewMode {
         assert view != null;
         assert layer.isActive();
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
         }
 
@@ -161,6 +161,6 @@ public enum MaskViewMode {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

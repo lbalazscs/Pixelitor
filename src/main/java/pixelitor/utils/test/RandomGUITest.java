@@ -125,7 +125,7 @@ public class RandomGUITest {
     }
 
     public void start() {
-        if (GUIMode.isFinal()) {
+        if (AppMode.isFinal()) {
             Messages.showError("Error", "Build is FINAL");
             return;
         }
@@ -358,7 +358,7 @@ public class RandomGUITest {
     }
 
     private void randomDrag(Robot robot) {
-        Tool tool = Tools.getCurrent();
+        Tool tool = Tools.getActive();
         if (!canUseTool(tool)) {
             return;
         }
@@ -372,7 +372,7 @@ public class RandomGUITest {
     }
 
     private void randomClick(Robot robot) {
-        Tool tool = Tools.getCurrent();
+        Tool tool = Tools.getActive();
         if (!canUseTool(tool)) {
             return;
         }
@@ -526,10 +526,10 @@ public class RandomGUITest {
 
         ParamSet paramSet = filter.getParamSet();
         paramSet.randomize();
-        animation.rememberInitialState();
+        animation.captureInitialState();
 
         paramSet.randomize();
-        animation.rememberFinalState();
+        animation.captureFinalState();
 
         double randomTime = Math.random();
         FilterState intermediateState = animation.tween(randomTime);
@@ -727,7 +727,7 @@ public class RandomGUITest {
     }
 
     private void randomizeToolSettings() {
-        log("randomize tool settings for " + Tools.getCurrent());
+        log("randomize tool settings for " + Tools.getActive());
         ToolSettingsPanelContainer.get().randomizeToolSettings();
     }
 
@@ -800,7 +800,7 @@ public class RandomGUITest {
         if (comp == null) {
             return false;
         }
-        return comp.hasActivePath() && comp.activeLayerAcceptsToolDrawing();
+        return comp.hasActivePath() && comp.canDrawOnActiveLayer();
     }
 
     private void randomRotateFlip() {
@@ -998,9 +998,9 @@ public class RandomGUITest {
                 return;
             }
         }
-        Tool currentTool = Tools.getCurrent();
-        if (currentTool != tool) {
-            log("tool click on " + currentTool);
+        Tool activeTool = Tools.getActive();
+        if (activeTool != tool) {
+            log("tool click on " + activeTool);
             tool.activate();
         }
     }

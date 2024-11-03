@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,11 +64,11 @@ public class DropShadowPanel extends EffectPanel {
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
-        super.setAdjustmentListener(adjustmentListener);
-        angleParam.setAdjustmentListener(adjustmentListener);
-        distanceParam.setAdjustmentListener(adjustmentListener);
-        spreadParam.setAdjustmentListener(adjustmentListener);
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
+        angleParam.setAdjustmentListener(listener);
+        distanceParam.setAdjustmentListener(listener);
+        spreadParam.setAdjustmentListener(listener);
     }
 
     public Point2D getOffset() {
@@ -79,12 +79,12 @@ public class DropShadowPanel extends EffectPanel {
     }
 
     @Override
-    public double getBrushWidth() {
+    public double getEffectWidth() {
         return spreadParam.getValueAsDouble();
     }
 
     @Override
-    public void setBrushWidth(double value) {
+    public void setEffectWidth(double value) {
         spreadParam.setValue(value, false);
     }
 

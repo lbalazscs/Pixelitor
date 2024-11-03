@@ -52,7 +52,7 @@ import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.utils.Keys.CTRL_T;
 
 /**
- * A text layer
+ * A text layer that renders editable text.
  */
 public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Serial
@@ -245,7 +245,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public BufferedImage transformImage(BufferedImage src) {
         assert settings.hasWatermark(); // should be called only in this case
-        return settings.watermarkImage(src, painter, comp);
+        return painter.watermarkImage(src, comp);
     }
 
     @Override

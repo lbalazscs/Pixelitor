@@ -18,8 +18,8 @@
 package pixelitor.tools.pen;
 
 import com.bric.geom.ShapeStringUtils;
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
@@ -161,7 +161,7 @@ public class PenTool extends Tool {
 
     public void startMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null && mode != BUILD) {
-            if (GUIMode.isUnitTesting()) {
+            if (AppMode.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
             if (RandomGUITest.isRunning()) {
@@ -205,6 +205,14 @@ public class PenTool extends Tool {
 
     public PenToolMode getMode() {
         return mode;
+    }
+
+    public boolean modeIs(PenToolMode otherMode) {
+        return mode == otherMode;
+    }
+
+    public boolean modeIsNot(PenToolMode otherMode) {
+        return mode != otherMode;
     }
 
     @Override

@@ -51,7 +51,8 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.utils.Shapes.NonlinTransform.NONE;
 
 /**
- * Abstract superclass for the curve filters
+ * Abstract superclass for the "Render/Curves" filters.
+ * Not to be confused with the "Curves" color adjustment.
  */
 public abstract class CurveFilter extends ParametrizedFilter {
     private static final boolean DEBUG_SHAPE_POINTS = false;
@@ -207,11 +208,11 @@ public abstract class CurveFilter extends ParametrizedFilter {
         // If there are effects and the foreground is set to transparent,
         // then the effects have to be run on a temporary image, because
         // they also set the composite. Also, inner glow is ignored.
-        if (!effects.isEmpty()) {
+        if (effects.hasEnabledEffects()) {
             if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
                 drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
             } else { // the simple case
-                effects.drawOn(g2, shape);
+                effects.apply(g2, shape);
             }
         }
 

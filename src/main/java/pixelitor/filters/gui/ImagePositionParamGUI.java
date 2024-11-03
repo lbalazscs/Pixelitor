@@ -30,33 +30,38 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NORTH;
  * The GUI component for an {@link ImagePositionParam}.
  */
 public class ImagePositionParamGUI extends JPanel implements ParamGUI {
+    private static final int HORIZONTAL_GAP = 10;
+    
     private final ImagePositionParam model;
     private final RangeParam xSliderModel;
     private final RangeParam ySliderModel;
 
-    private final ImagePositionSelector thumbSelector;
+    private final ImagePositionSelector positionSelector;
     private final JComponent xSlider;
     private final JComponent ySlider;
 
-    private boolean slidersMovedByUser = true;
+    // flag to prevent infinite update loops between GUI components
+    private boolean sliderUpdatesEnabled = true;
 
-    public ImagePositionParamGUI(ImagePositionParam model, double defaultX, double defaultY) {
-        super(new BorderLayout(10, 0));
+    public ImagePositionParamGUI(ImagePositionParam model,
+                                 double defaultRelativeX,
+                                 double defaultRelativeY) {
+        super(new BorderLayout(HORIZONTAL_GAP, 0));
         setBorder(createTitledBorder(model.getName()));
-
         this.model = model;
 
+        // initialize sliders
         int decimalPlaces = model.getDecimalPlaces();
         xSliderModel = new RangeParam("Horizontal Position (%)",
-            0, defaultX, 100, true, NORTH);
+            0, defaultRelativeX * 100, 100, true, NORTH);
         xSliderModel.setDecimalPlaces(decimalPlaces);
         ySliderModel = new RangeParam("Vertical Position (%)",
-            0, defaultY, 100, true, NORTH);
+            0, defaultRelativeY * 100, 100, true, NORTH);
         ySliderModel.setDecimalPlaces(decimalPlaces);
 
-        // add the thumbnail selector
-        thumbSelector = new ImagePositionSelector(this, model, 100);
-        add(thumbSelector, WEST);
+        // add the thumbnail-based selector
+        positionSelector = new ImagePositionSelector(this, model, 100);
+        add(positionSelector, WEST);
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
@@ -72,31 +77,33 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     }
 
     private void setupPreferredSize() {
-        Dimension origPS = getPreferredSize();
-        Dimension sliderPS = xSlider.getPreferredSize();
-        setPreferredSize(new Dimension(sliderPS.width, origPS.height));
+        Dimension currentSize = getPreferredSize();
+        Dimension sliderSize = xSlider.getPreferredSize();
+        setPreferredSize(new Dimension(
+            sliderSize.width,
+            currentSize.height));
     }
 
     // if one of the sliders was moved by the users, update the
     // image position selector and run the filter
     private void linkSliderChangesToModel(ImagePositionParam model) {
-        xSliderModel.addChangeListener(e -> onXSliderChange(model));
-        ySliderModel.addChangeListener(e -> onYSliderChange(model));
+        xSliderModel.addChangeListener(e -> xSliderChanged(model));
+        ySliderModel.addChangeListener(e -> ySliderChanged(model));
     }
 
-    private void onXSliderChange(ImagePositionParam model) {
-        if (slidersMovedByUser) {
+    private void xSliderChanged(ImagePositionParam model) {
+        if (sliderUpdatesEnabled) {
             model.setRelativeX(xSliderModel.getPercentage(),
                 xSliderModel.getValueIsAdjusting());
-            thumbSelector.repaint();
+            positionSelector.repaint();
         }
     }
 
-    private void onYSliderChange(ImagePositionParam model) {
-        if (slidersMovedByUser) {
+    private void ySliderChanged(ImagePositionParam model) {
+        if (sliderUpdatesEnabled) {
             model.setRelativeY(ySliderModel.getPercentage(),
                 ySliderModel.getValueIsAdjusting());
-            thumbSelector.repaint();
+            positionSelector.repaint();
         }
     }
 
@@ -105,32 +112,30 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
      * This doesn't trigger the running of the filter.
      */
     public void updateSlidersFromModel() {
-        slidersMovedByUser = false;
-
-        int xValue = xSliderModel.getValue();
-        double modelXValue = model.getRelativeX() * 100;
-        if (modelXValue != xValue) {
-            xSliderModel.setValue(modelXValue, true);
+        sliderUpdatesEnabled = false;
+        try {
+            updateSlider(xSliderModel, model.getRelativeX() * 100);
+            updateSlider(ySliderModel, model.getRelativeY() * 100);
+        } finally {
+            sliderUpdatesEnabled = true;
         }
+    }
 
-        int yValue = ySliderModel.getValue();
-        double modelYValue = model.getRelativeY() * 100;
-        if (modelYValue != yValue) {
-            ySliderModel.setValue(modelYValue, true);
+    private static void updateSlider(RangeParam sliderModel, double newValue) {
+        if (newValue != sliderModel.getValue()) {
+            sliderModel.setValue(newValue, true);
         }
-
-        slidersMovedByUser = true;
     }
 
     @Override
     public void updateGUI() {
         updateSlidersFromModel();
-        thumbSelector.repaint();
+        positionSelector.repaint();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        thumbSelector.setEnabled(enabled);
+        positionSelector.setEnabled(enabled);
         xSlider.setEnabled(enabled);
         ySlider.setEnabled(enabled);
         super.setEnabled(enabled);
@@ -138,7 +143,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-        thumbSelector.setToolTipText(tip);
+        positionSelector.setToolTipText(tip);
     }
 
     @Override

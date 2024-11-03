@@ -503,7 +503,10 @@ public class ShapesTool extends DragTool {
         enableStrokeSettings(getSelectedStrokePaint() != NONE);
     }
 
-    @Override
+    /**
+     * Paint over the active layer while rendering the composite image.
+     * The transform of the given Graphics2D is in image space.
+     */
     public void paintOverActiveLayer(Graphics2D g) {
         // updates the shape continuously while drawing
         if (state == INITIAL_DRAG) {
@@ -555,7 +558,7 @@ public class ShapesTool extends DragTool {
     private void convertToSelection() {
         assert state == TRANSFORM : "state = " + state;
 
-        Shape shape = styledShape.getShapeForSelection();
+        Shape shape = styledShape.getShape();
 
         var comp = Views.getActiveComp();
 
@@ -788,8 +791,8 @@ public class ShapesTool extends DragTool {
             extraStrokeThickness = strokeType.getExtraThickness(thickness);
             thickness += extraStrokeThickness;
         }
-        if (effects.isNotEmpty()) {
-            double effectThickness = effects.getMaxEffectThickness();
+        if (effects.hasEnabledEffects()) {
+            double effectThickness = effects.calcMaxEffectThickness();
             // the extra stroke thickness must be added
             // because the effect can be on the stroke
             effectThickness += extraStrokeThickness;
@@ -842,25 +845,26 @@ public class ShapesTool extends DragTool {
 
     private void startEditingShapesLayer() {
         styledShape = shapesLayer.getStyledShape();
-        if (styledShape == null || !styledShape.isInitialized()) {
+        if (styledShape == null || !styledShape.hasShape()) {
             setNoInteractionState();
-        } else {
-            View view = shapesLayer.getComp().getView();
-            transformBox = shapesLayer.getTransformBox();
-
-            if (transformBox != null) {
-                transformBox.reInitialize(view, styledShape);
-                // the zoom could have changed since the box was active
-                transformBox.coCoordsChanged(view);
-
-                loadShapeAndBox(styledShape, transformBox);
-            } else {
-                throw new IllegalStateException("state = " + state);
-            }
-
-            // make the loaded box visible
-            shapesLayer.getComp().repaint();
+            return;
         }
+
+        View view = shapesLayer.getComp().getView();
+        transformBox = shapesLayer.getTransformBox();
+
+        if (transformBox != null) {
+            transformBox.reInitialize(view, styledShape);
+            // the zoom could have changed since the box was active
+            transformBox.coCoordsChanged(view);
+
+            loadShapeAndBox(styledShape, transformBox);
+        } else {
+            throw new IllegalStateException("state = " + state);
+        }
+
+        // make the loaded box visible
+        shapesLayer.getComp().repaint();
     }
 
     private void startEditingRasterLayer(Layer layer) {

@@ -18,9 +18,9 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.GUIMode;
 import pixelitor.Views;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.UserPreset;
@@ -169,7 +169,7 @@ public class SelectionTool extends DragTool {
         }
 
         drag.setExpandFromCenter(startFromCenter);
-        selectionBuilder.updateInProgressSelection(drag, e.getComp(), e);
+        selectionBuilder.updateDraftSelection(drag, e.getComp(), e);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class SelectionTool extends DragTool {
         }
 
         var comp = e.getComp();
-        Selection builtSelection = comp.getInProgressSelection();
+        Selection builtSelection = comp.getDraftSelection();
         if (builtSelection == null && !polygonal) {
             // can happen, if we called stopBuildingSelection()
             // for some exceptional reason
@@ -205,10 +205,10 @@ public class SelectionTool extends DragTool {
             setupCombinatorWithKeyModifiers(e);
             selectionBuilder = new SelectionBuilder(
                 getSelectionType(), getCombinator(), comp);
-            selectionBuilder.updateInProgressSelection(e, comp);
+            selectionBuilder.updateDraftSelection(e, comp);
             restoreCombinator();
         } else {
-            selectionBuilder.updateInProgressSelection(e, comp);
+            selectionBuilder.updateDraftSelection(e, comp);
             if (e.isRight()) {
                 selectionBuilder.combineShapes(comp);
                 stopBuildingSelection();
@@ -223,11 +223,11 @@ public class SelectionTool extends DragTool {
         boolean startFromCenter = !altMeansSubtract && e.isAltDown();
         drag.setExpandFromCenter(startFromCenter);
 
-        selectionBuilder.updateInProgressSelection(drag, comp, e);
+        selectionBuilder.updateDraftSelection(drag, comp, e);
         selectionBuilder.combineShapes(comp);
         stopBuildingSelection();
 
-        assert !comp.hasInProgressSelection();
+        assert !comp.hasDraftSelection();
     }
 
     public static int getTolerance() {
@@ -240,7 +240,7 @@ public class SelectionTool extends DragTool {
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
-                selectionBuilder.updateInProgressSelection(e, comp);
+                selectionBuilder.updateDraftSelection(e, comp);
                 selectionBuilder.combineShapes(comp);
                 stopBuildingSelection();
             } else {
@@ -260,7 +260,7 @@ public class SelectionTool extends DragTool {
                     @Override
                     public Void doInBackground() {
                         try {
-                            sb.updateInProgressSelection(e, comp);
+                            sb.updateDraftSelection(e, comp);
                             sb.combineShapes(comp);
                             stopBuildingSelection();
                         } catch (Exception e) {
@@ -279,15 +279,15 @@ public class SelectionTool extends DragTool {
     }
 
     private void cancelSelection(Composition comp) {
-        if (comp.hasSelection() || comp.hasInProgressSelection()) {
+        if (comp.hasSelection() || comp.hasDraftSelection()) {
             comp.deselect(true);
         }
-        assert !comp.hasInProgressSelection() : "built selection is = " + comp.getInProgressSelection();
+        assert !comp.hasDraftSelection() : "built selection is = " + comp.getDraftSelection();
         assert !comp.hasSelection() : "selection is = " + comp.getSelection();
 
         altMeansSubtract = false;
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
     }
@@ -302,7 +302,7 @@ public class SelectionTool extends DragTool {
     public void altPressed() {
         if (!altDown && !altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(true);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
+            selectionBuilder.updateDraftSelection(drag, Views.getActiveComp(), null);
         }
         altDown = true;
     }
@@ -311,7 +311,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && drag != null && drag.isDragging()) {
             drag.setExpandFromCenter(false);
-            selectionBuilder.updateInProgressSelection(drag, Views.getActiveComp(), null);
+            selectionBuilder.updateDraftSelection(drag, Views.getActiveComp(), null);
         }
         altDown = false;
     }

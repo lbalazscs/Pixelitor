@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,11 +53,11 @@ public enum AutoZoom {
     public static final Action FIT_WIDTH_ACTION = FIT_WIDTH.asAction();
     public static final Action FIT_SPACE_ACTION = FIT_SPACE.asAction();
 
-    private final String guiName;
+    private final String displayName;
     private final String toolTip;
 
-    AutoZoom(String guiName, String toolTip) {
-        this.guiName = guiName;
+    AutoZoom(String displayName, String toolTip) {
+        this.displayName = displayName;
         this.toolTip = toolTip;
     }
 
@@ -68,7 +68,7 @@ public enum AutoZoom {
     public abstract double selectRatio(double hor, double ver);
 
     private Action asAction() {
-        var action = new OpenViewEnabledAction(guiName,
+        var action = new OpenViewEnabledAction(displayName,
             comp -> comp.getView().setZoom(this));
         action.setToolTip(toolTip);
         return action;

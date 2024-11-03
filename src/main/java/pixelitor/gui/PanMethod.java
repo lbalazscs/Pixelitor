@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,11 +33,11 @@ public enum PanMethod {
         }
     };
 
-    private final String guiName;
+    private final String displayName;
     private final String saveCode;
 
-    PanMethod(String guiName, String saveCode) {
-        this.guiName = guiName;
+    PanMethod(String displayName, String saveCode) {
+        this.displayName = displayName;
         this.saveCode = saveCode;
     }
 
@@ -70,6 +70,6 @@ public enum PanMethod {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 }

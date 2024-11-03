@@ -31,6 +31,7 @@ import pixelitor.Views;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
@@ -73,7 +74,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.GUITestUtils.checkRandomly;
 import static pixelitor.guitest.GUITestUtils.chooseRandomly;
-import static pixelitor.guitest.GUITestUtils.pushRandomly;
+import static pixelitor.guitest.GUITestUtils.clickRandomly;
 import static pixelitor.guitest.GUITestUtils.slideRandomly;
 import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -131,6 +132,9 @@ public class AppRunner {
 
         if (Language.getCurrent() != Language.ENGLISH) {
             throw new IllegalStateException("language is " + Language.getCurrent());
+        }
+        if (EDT.call(() -> ImageArea.currentModeIs(ImageArea.Mode.FRAMES))) {
+            throw new IllegalStateException("frames");
         }
 
         // initialize the AWT native picker here, if it is used
@@ -251,7 +255,7 @@ public class AppRunner {
         slideRandomly(dialog.slider("density"));
         slideRandomly(dialog.slider("width"));
         checkRandomly(dialog.checkBox("resetForEach"));
-        pushRandomly(0.1, dialog.button("resetHistNow"));
+        clickRandomly(0.1, dialog.button("resetHistNow"));
     }
 
     void setIndexedMode() {
@@ -389,8 +393,25 @@ public class AppRunner {
         }
     }
 
-    void closeCurrentView() {
+    void closeCurrentView(ExpectConfirmation expectConfirmation) {
+        boolean unsaved = EDT.active(Composition::isUnsaved);
+
+        if (unsaved && expectConfirmation == ExpectConfirmation.NO
+            || !unsaved && expectConfirmation == ExpectConfirmation.YES) {
+            throw new IllegalStateException("unsaved = " + unsaved + ", expectConfirmation = " + expectConfirmation);
+        }
+
+        boolean expectDialog = switch (expectConfirmation) {
+            case YES -> true;
+            case NO -> false;
+            case UNKNOWN -> unsaved;
+        };
+
         runMenuCommand("Close");
+
+        if (expectDialog) {
+            findJOptionPane().buttonWithText("Don't Save").click();
+        }
     }
 
     void closeAll() {
@@ -732,10 +753,6 @@ public class AppRunner {
         Dirs.setLastSave(initialSaveDir);
     }
 
-    void closeDoYouWantToSaveChangesDialog() {
-        findJOptionPane().buttonWithText("Don't Save").click();
-    }
-
     public void addLayerMask() {
         pw.button("addLayerMask")
             .requireEnabled()
@@ -786,7 +803,7 @@ public class AppRunner {
         pw.button("addTextLayer").click();
 
         var dialog = findDialogByTitle("Create Text Layer");
-        dialog.textBox("textTF")
+        dialog.textBox("textArea")
             .requireText(expectedText)
             .deleteText()
             .enterText(text);
@@ -990,4 +1007,11 @@ public class AppRunner {
 
     // Whether a "show original" checkbox should be tested for a filter.
     public enum ShowOriginal {YES, NO}
+
+    // Whether we expect a save modified image confirmation dialog
+    public enum ExpectConfirmation {
+        YES,
+        NO,
+        UNKNOWN;
+    }
 }

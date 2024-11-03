@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,11 +34,11 @@ public enum Language {
     SPANISH("Spanish", "es") {};
 
 
-    private final String guiName;
+    private final String displayName;
     private final String code;
 
-    Language(String guiName, String code) {
-        this.guiName = guiName;
+    Language(String displayName, String code) {
+        this.displayName = displayName;
         this.code = code;
     }
 
@@ -48,7 +48,7 @@ public enum Language {
 
     @Override
     public String toString() {
-        return guiName;
+        return displayName;
     }
 
     // from here static members and methods

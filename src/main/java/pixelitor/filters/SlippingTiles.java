@@ -54,10 +54,10 @@ public class SlippingTiles extends ParametrizedFilter {
             }
         };
 
-        private final String guiName;
+        private final String displayName;
 
-        Distributor(String guiName) {
-            this.guiName = guiName;
+        Distributor(String displayName) {
+            this.displayName = displayName;
         }
 
         /**
@@ -74,7 +74,7 @@ public class SlippingTiles extends ParametrizedFilter {
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
     }
 
@@ -85,16 +85,16 @@ public class SlippingTiles extends ParametrizedFilter {
         OPPOSITE("Opposite", 0);
 
         private final int val;
-        private final String guiName;
+        private final String displayName;
 
-        SlipDirection(String guiName, int val) {
-            this.guiName = guiName;
+        SlipDirection(String displayName, int val) {
+            this.displayName = displayName;
             this.val = val;
         }
 
         @Override
         public String toString() {
-            return guiName;
+            return displayName;
         }
 
         boolean isFirstSideFalling() {

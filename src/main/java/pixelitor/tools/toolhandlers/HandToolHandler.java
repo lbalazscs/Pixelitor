@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2024 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,18 +26,20 @@ import pixelitor.tools.util.PMouseEvent;
 import java.awt.Cursor;
 
 /**
- * Checks whether the current tool should behave as a hand tool
- * (space is down at the start of a mouse drag).
+ * Enables temporary hand tool (panning) behavior for any active tool
+ * when the space key is pressed at the start of a mouse drag.
+ * The original tool behavior resumes if the space key is released
+ * before mouse drag starts or if the drag ends (mouse released).
  */
 public class HandToolHandler extends ToolHandler {
     private boolean handToolForwarding = false;
     private boolean panning = false;
 
-    private final Cursor cursor;
+    private final Cursor origCursor;
     private final Tool tool;
 
-    public HandToolHandler(Cursor cursor, Tool tool) {
-        this.cursor = cursor;
+    public HandToolHandler(Cursor origCursor, Tool tool) {
+        this.origCursor = origCursor;
         this.tool = tool;
     }
 
@@ -59,18 +61,19 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mouseDragged(PMouseEvent e) {
-        if (handToolForwarding) {
-            if (!panning) { // space was released in the meantime
-                handToolForwarding = false;
-                tool.mousePressed(e); // initialize the real tool's drag
-                return false;
-            } else {
-                Tools.HAND.mouseDragged(e);
-            }
-            return true;
+        if (!handToolForwarding) {
+            return false;
         }
 
-        return false;
+        if (!panning) { // space was released during dragging
+            // switch back to the original tool
+            handToolForwarding = false;
+            tool.mousePressed(e); // initialize the real tool's drag
+            return false;
+        } else {
+            Tools.HAND.mouseDragged(e);
+            return true;
+        }
     }
 
     @Override
@@ -103,7 +106,7 @@ public class HandToolHandler extends ToolHandler {
         }
         panning = false;
         if (!handToolForwarding) {
-            Views.setCursorForAll(cursor);
+            Views.setCursorForAll(origCursor);
         }
     }
 }

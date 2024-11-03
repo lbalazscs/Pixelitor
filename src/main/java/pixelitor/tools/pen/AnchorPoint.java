@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.GUIMode;
+import pixelitor.AppMode;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
 import pixelitor.history.History;
@@ -244,7 +244,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             popup.add(new PAction("Dump", this::dump));
         }
 

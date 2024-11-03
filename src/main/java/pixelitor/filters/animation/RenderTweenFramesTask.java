@@ -33,32 +33,33 @@ import static pixelitor.FilterContext.TWEEN_PREVIEW;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
- * A SwingWorker for rendering the frames of a tween animation
+ * A SwingWorker that renders frames for a tweening animation
+ * by interpolating between two filter states.
  */
 class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
-    private final Drawable dr;
+    private final Drawable drawable;
     private final ProgressMonitor progressMonitor;
 
-    public RenderTweenFramesTask(TweenAnimation animation, Drawable dr) {
+    public RenderTweenFramesTask(TweenAnimation animation, Drawable drawable) {
         this.animation = animation;
-        this.dr = dr;
-        progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Frames");
-        addPropertyChangeListener(this::onPropertyChange);
+        this.drawable = drawable;
+        progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Animation Frames");
+        addPropertyChangeListener(this::handleProgressUpdate);
     }
 
-    private void onPropertyChange(PropertyChangeEvent evt) {
+    private void handleProgressUpdate(PropertyChangeEvent evt) {
         if ("progress".equals(evt.getPropertyName())) {
-            onProgress((Integer) evt.getNewValue());
+            updateProgressMonitor((Integer) evt.getNewValue());
         }
     }
 
-    private void onProgress(int progress) {
-        progressMonitor.setProgress(progress);
-        progressMonitor.setNote(format("Completed %d%%.%n", progress));
+    private void updateProgressMonitor(int progressPercent) {
+        progressMonitor.setProgress(progressPercent);
+        progressMonitor.setNote(format("Completed %d%%.%n", progressPercent));
+
         if (progressMonitor.isCanceled()) {
-            // Probably nothing bad happens if the current frame rendering is
-            // interrupted, but to be on the safe side, let the current frame finish
+            // Allow current frame to complete
             cancel(false);
         }
     }
@@ -66,7 +67,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     @Override
     protected Void doInBackground() {
         try {
-            renderFrames();
+            renderAllFrames();
         } catch (Exception e) {
             Messages.showExceptionOnEDT(e);
         }
@@ -74,40 +75,30 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         return null;
     }
 
-    private void renderFrames() {
+    private void renderAllFrames() {
         assert calledOutsideEDT() : "on EDT";
 
-        int numFrames = animation.getNumFrames();
-        ParametrizedFilter filter = animation.getFilter();
         AnimationWriter animationWriter = animation.createWriter();
+        ParametrizedFilter filter = animation.getFilter();
+        int baseFrameCount = animation.getNumFrames();
 
-        dr.startTweening();
+        drawable.startTweening();
 
-        int numTotalFrames = numFrames;
-        boolean pingPong = animation.isPingPong() && numFrames > 2;
-        if (pingPong) {
-            numTotalFrames = 2 * numFrames - 2;
-        }
+        int totalFrames = calculateTotalFrameCount(baseFrameCount);
 
         boolean canceled = false;
-        for (int frameNr = 0; frameNr < numTotalFrames; frameNr++) {
+        for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
             if (isCancelled()) {
                 canceled = true;
                 break;
             }
-            int percentProgress = (int) ((100.0 * frameNr) / numTotalFrames);
+            int percentProgress = (int) ((100.0 * frameIndex) / totalFrames);
             setProgress(percentProgress);
 
-            double time = calcRenderTime(frameNr, numFrames);
+            double interpolationTime = calcInterpolationTime(frameIndex, baseFrameCount);
 
             try {
-                // first render the frame...
-                BufferedImage image = renderFrame(filter, time);
-
-                // ...then write the file
-                // TODO ideally while writing out the frame,
-                // the rendering of the next frame should be
-                // started on another thread
+                BufferedImage image = renderSingleFrame(filter, interpolationTime);
                 animationWriter.addFrame(image);
             } catch (Exception e) {
                 canceled = true;
@@ -122,44 +113,61 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         SwingUtilities.invokeLater(() -> finishOnEDT(animationWriter, finalCanceled));
     }
 
-    private static double calcRenderTime(int frameNr, int numFrames) {
-        double time;
-        if (frameNr < numFrames) { // ping: normal animation forwards
-            time = ((double) frameNr) / numFrames;
-        } else { // pong: animating backwards
+    private int calculateTotalFrameCount(int baseFrameCount) {
+        int numTotalFrames = baseFrameCount;
+        boolean pingPong = animation.isPingPong() && baseFrameCount > 2;
+        if (pingPong) {
+            // For ping-pong, we need frames for forward and reverse,
+            // minus the two duplicated end frames
+            numTotalFrames = 2 * baseFrameCount - 2;
+        }
+        return numTotalFrames;
+    }
+
+    /**
+     * Calculates the interpolation time for the current frame, handling both
+     * forward and reverse (pong) animation phases.
+     *
+     * @param frameIndex     Current frame being rendered
+     * @param baseFrameCount Number of frames in the forward sequence
+     * @return Interpolation time value between 0.0 and 1.0
+     */
+    private static double calcInterpolationTime(int frameIndex, int baseFrameCount) {
+        if (frameIndex < baseFrameCount) {
+            // Forward animation phase
+            return ((double) frameIndex) / baseFrameCount;
+        } else {
+            // Reverse animation phase (pong)
+
             // Here the same frames are calculated again.
             // They could be cached in an array of soft references
             // or in the case of the file sequence output,
             // the output files could be copied.
             // However, "ping-pong" animations are probably uncommon.
-            int effectiveFrame = 2 * (numFrames - 1) - frameNr;
-            time = ((double) effectiveFrame) / numFrames;
+            int reverseIndex = 2 * (baseFrameCount - 1) - frameIndex;
+            return ((double) reverseIndex) / baseFrameCount;
         }
-        return time;
     }
 
-    private BufferedImage renderFrame(ParametrizedFilter filter, double time) {
+    private BufferedImage renderSingleFrame(ParametrizedFilter filter, double time) {
         long executionsBefore = Filter.executionCount;
 
-        // all sorts of problems can happen
-        // if filters run outside of EDT
-        Runnable filterRunTask = () -> {
+        // Filters must run on EDT
+        GUIUtils.invokeAndWait(() -> {
             FilterState intermediateState = animation.tween(time);
             filter.getParamSet().setState(intermediateState, true);
-            dr.startFilter(filter, TWEEN_PREVIEW);
-        };
-        GUIUtils.invokeAndWait(filterRunTask);
+            drawable.startFilter(filter, TWEEN_PREVIEW);
+        });
 
         assert Filter.executionCount == executionsBefore + 1;
 
-        var comp = dr.getComp();
+        var comp = drawable.getComp();
         comp.repaint();
-
         return comp.getCompositeImage();
     }
 
     private void finishOnEDT(AnimationWriter animationWriter, boolean canceled) {
-        dr.endTweening();
+        drawable.endTweening();
         if (canceled) {
             animationWriter.cancel();
         } else {

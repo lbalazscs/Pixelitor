@@ -95,7 +95,7 @@ public class ToolsPanel extends JPanel {
 
     private static void setupKeyboardShortcut(Tool tool) {
         Action activateAction = new PAction(() -> {
-            if (Tools.currentTool != tool) {
+            if (Tools.activeTool != tool) {
                 tool.activate();
             }
         });

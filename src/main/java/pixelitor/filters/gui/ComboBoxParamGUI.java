@@ -32,11 +32,9 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;
     private final ResetButton resetButton;
 
-    public ComboBoxParamGUI(ComboBoxModel<E> model, FilterButtonModel action) {
-        assert model instanceof Resettable;
-
-        resetButton = new ResetButton((Resettable) model);
-        comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateIcon());
+    public ComboBoxParamGUI(ListParam<E> model, FilterButtonModel action) {
+        resetButton = new ResetButton(model);
+        comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateState());
 
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));

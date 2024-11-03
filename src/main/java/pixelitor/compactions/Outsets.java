@@ -23,6 +23,7 @@ import pixelitor.layers.ContentLayer;
 
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.util.StringJoiner;
 
 /**
  * Like {@link Insets}, but outwards. Represents an enlargement.
@@ -76,10 +77,27 @@ public class Outsets {
         }
     }
 
+    public void negate() {
+        left = -left;
+        right = -right;
+        top = -top;
+        bottom = -bottom;
+    }
+
     public void resizeCanvas(Canvas canvas, View view) {
         int newWidth = canvas.getWidth() + left + right;
         int newHeight = canvas.getHeight() + top + bottom;
 
         canvas.resize(newWidth, newHeight, view, false);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Outsets.class.getSimpleName() + "[", "]")
+            .add("top=" + top)
+            .add("left=" + left)
+            .add("bottom=" + bottom)
+            .add("right=" + right)
+            .toString();
     }
 }

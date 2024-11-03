@@ -82,7 +82,7 @@ public class JHGlint extends ParametrizedFilter {
         filter.setAmount((float) intensity.getPercentage());
         filter.setLength(length);
         filter.setBlur(blur.getValueAsFloat());
-        filter.setColormap(colors.getValue());
+        filter.setColormap(colors.getColorMap());
 
         return filter.filter(src, dest);
     }

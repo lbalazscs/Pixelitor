@@ -69,17 +69,17 @@ public class PalettePanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                // Calculate new dimensions based on available space and button size
+                // Calculate new grid dimensions based on available space and button size
                 int newNumRows = (getHeight() - GAP) / (ColorSwatchButton.SIZE + GAP);
                 int newNumCols = (getWidth() - GAP) / (ColorSwatchButton.SIZE + GAP);
-                setNewSizes(newNumRows, newNumCols);
+                setGridSize(newNumRows, newNumCols);
             }
         });
     }
 
-    private void setNewSizes(int newNumRows, int newNumCols) {
+    private void setGridSize(int newNumRows, int newNumCols) {
         if (newNumRows != numRows || newNumCols != numCols) {
-            palette.setDimensions(newNumRows, newNumCols);
+            palette.setGridSize(newNumRows, newNumCols);
             regenerate(newNumRows, newNumCols);
         }
     }
@@ -93,8 +93,8 @@ public class PalettePanel extends JPanel {
     private void regenerate(int newNumRows, int newNumCols) {
         ColorSwatchButton.lastClickedSwatch = null;
 
-        // If shrinking the palette, remove only the buttons
-        // that are outside the new dimensions.
+        // If shrinking the palette, remove only
+        // the buttons that are outside the new grid.
         if (newNumRows < numRows || newNumCols < numCols) {
             int count = getComponentCount();
             for (int i = count - 1; i >= 0; i--) {
@@ -105,7 +105,7 @@ public class PalettePanel extends JPanel {
             }
         }
 
-        // update dimensions
+        // update grid dimensions
         numRows = newNumRows;
         numCols = newNumCols;
 
@@ -130,7 +130,7 @@ public class PalettePanel extends JPanel {
     private void addNewButtonToGrid(ColorSwatchButton button, int col, int row) {
         List<ColorSwatchButton> column;
         if (col < grid.size()) {
-            // get the already existing column
+            // use the already existing column
             column = grid.get(col);
 
             // ensure we're adding at the end

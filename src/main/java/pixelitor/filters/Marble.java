@@ -32,7 +32,11 @@ import static com.jhlabs.image.WaveType.wave01;
 import static com.jhlabs.math.Noise.noise2;
 import static com.jhlabs.math.Noise.turbulence2;
 import static com.jhlabs.math.Noise.turbulence2Smooth;
-import static net.jafama.FastMath.*;
+import static net.jafama.FastMath.atan2;
+import static net.jafama.FastMath.cos;
+import static net.jafama.FastMath.pow;
+import static net.jafama.FastMath.sin;
+import static net.jafama.FastMath.sqrt;
 
 /**
  * Marble filter
@@ -59,8 +63,7 @@ public class Marble extends ParametrizedFilter {
         new Item("Star", Impl.TYPE_STAR),
     });
 
-    private final IntChoiceParam waveType = new IntChoiceParam("Wave Type",
-        IntChoiceParam.waveTypeChoices);
+    private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
     private final BooleanParam smoothDetails = new BooleanParam("Smoother Details", false);
 
     private final GradientParam gradient = new GradientParam("Colors",
@@ -113,7 +116,7 @@ public class Marble extends ParametrizedFilter {
         filter.setStrength(distortion.getValueAsDouble() / 5.0);
         filter.setDetails(detailsLevel.getValueAsDouble());
         filter.setDetailsStrength(detailsStrength.getValueAsDouble() / 4.0);
-        filter.setColormap(gradient.getValue());
+        filter.setColormap(gradient.getColorMap());
         filter.setSmoothDetails(smoothDetails.isChecked());
         filter.setTime(time.getValueAsDouble() / 5.0);
 

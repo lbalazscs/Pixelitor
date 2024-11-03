@@ -18,8 +18,8 @@
 package pixelitor.tools.pen;
 
 import com.bric.geom.ShapeUtils;
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -121,7 +121,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void setMovingPoint(MovingPoint p) {
-        if (finished && p != null && GUIMode.isDevelopment()) {
+        if (finished && p != null && AppMode.isDevelopment()) {
             throw new IllegalStateException();
         }
         moving = p;

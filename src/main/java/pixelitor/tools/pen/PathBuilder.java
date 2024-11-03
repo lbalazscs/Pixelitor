@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.GUIMode;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
@@ -31,7 +31,11 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.*;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
@@ -363,7 +367,7 @@ public final class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
         }
@@ -375,7 +379,7 @@ public final class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
-        if (GUIMode.isDevelopment()) {
+        if (AppMode.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
         }

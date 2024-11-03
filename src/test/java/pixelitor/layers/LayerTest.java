@@ -261,23 +261,29 @@ public class LayerTest {
         iconUpdates.check(0, 0);
     }
 
-//    @Test
-//    public void activating() {
-//        Layer layer2 = comp.getLayer(1);
-//        assertThat(layer2).isNotActive();
-//
-//        layer2.activate(true);
-//        assertThat(layer2).isActive();
-//
-//        History.undo("Layer Selection Change");
-//        assertThat(layer2).isNotActive();
-//
-//        History.redo("Layer Selection Change");
-//        assertThat(layer2).isActive();
-//
-//        History.assertNumEditsIs(1);
-//        iconUpdates.check(0, 0);
-//    }
+    @Test
+    public void activating() {
+        assertThat(layer2).isNotActive();
+
+        layer2.activate(); // doesn't add history
+        assertThat(layer2).isActive();
+        layer.activate();
+        assertThat(layer).isActive();
+        assertThat(History.getLastEdit()).isNull();
+
+        // now try with history
+        comp.setActiveLayer(layer2, true, "Layer Selection Change");
+        assertThat(layer2).isActive();
+
+        History.undo("Layer Selection Change");
+        assertThat(layer2).isNotActive();
+
+        History.redo("Layer Selection Change");
+        assertThat(layer2).isActive();
+
+        History.assertNumEditsIs(1);
+        iconUpdates.check(0, 0);
+    }
 
     @Test
     public void resizing() {

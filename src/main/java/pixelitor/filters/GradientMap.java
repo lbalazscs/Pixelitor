@@ -44,7 +44,7 @@ public class GradientMap extends ParametrizedFilter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        Colormap colormap = gradient.getValue();
+        Colormap colormap = gradient.getColorMap();
 
         int[] gradientLookup = new int[256];
         for (int i = 0; i < gradientLookup.length; i++) {

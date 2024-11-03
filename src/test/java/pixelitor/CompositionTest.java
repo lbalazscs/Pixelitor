@@ -468,9 +468,9 @@ class CompositionTest {
 
     @Test
     void generateNewLayerName() {
-        assertThat(comp.generateNewLayerName()).isEqualTo("layer 1");
-        assertThat(comp.generateNewLayerName()).isEqualTo("layer 2");
-        assertThat(comp.generateNewLayerName()).isEqualTo("layer 3");
+        assertThat(comp.generateLayerName()).isEqualTo("layer 1");
+        assertThat(comp.generateLayerName()).isEqualTo("layer 2");
+        assertThat(comp.generateLayerName()).isEqualTo("layer 3");
         assertThat(comp)
             .numLayersIs(2) // didn't change
             .invariantsAreOK();
@@ -638,11 +638,11 @@ class CompositionTest {
     }
 
     @Test
-    void changeLayerIndex() {
+    void reorderLayer() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.changeLayerIndex(layer, 1);
+        comp.reorderLayer(layer, 1);
 
         assertThat(comp)
             .layerNamesAre("layer 2", "layer 1")

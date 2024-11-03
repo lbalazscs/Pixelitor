@@ -81,15 +81,15 @@ public enum QuadrantAngle {
     };
 
     private final int angleDegree;
-    private final String guiName;
+    private final String displayName;
 
     QuadrantAngle(int angleDegree, String guiKey) {
         this.angleDegree = angleDegree;
-        this.guiName = Texts.i18n(guiKey);
+        this.displayName = Texts.i18n(guiKey);
     }
 
-    public String getGUIName() {
-        return guiName;
+    public String getDisplayName() {
+        return displayName;
     }
 
     /**

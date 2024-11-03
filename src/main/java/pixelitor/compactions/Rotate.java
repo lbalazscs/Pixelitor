@@ -32,7 +32,7 @@ public class Rotate extends SimpleCompAction {
     private final QuadrantAngle angle;
 
     public Rotate(QuadrantAngle angle) {
-        super(angle.getGUIName(), angle != QuadrantAngle.ANGLE_180);
+        super(angle.getDisplayName(), angle != QuadrantAngle.ANGLE_180);
         this.angle = angle;
     }
 
@@ -43,7 +43,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected String getEditName() {
-        return angle.getGUIName();
+        return angle.getDisplayName();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class Rotate extends SimpleCompAction {
 
     @Override
     protected Guides createTransformedGuides(Guides srcGuides, View view, Canvas srcCanvas) {
-        return srcGuides.copyForRotate(angle, view);
+        return srcGuides.copyRotating(angle, view);
     }
 
     @Override
