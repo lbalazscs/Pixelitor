@@ -26,6 +26,8 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -33,7 +35,7 @@ import java.io.Serial;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Flashlight filter
+ * The "Flashlight" filter.
  */
 public class Flashlight extends ParametrizedFilter {
     public static final String NAME = "Flashlight";
@@ -43,21 +45,23 @@ public class Flashlight extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 1, 200, 1000, false);
-    private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
+    private final RangeParam softness = new RangeParam("Edge Softness", 0, 20, 100);
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final IntChoiceParam bg = new IntChoiceParam("Background", new Item[]{
-        new Item("Black", Impl.BG_BLACK),
-        new Item("White", Impl.BG_WHITE),
-        new Item("Background Color", Impl.BG_TOOL_BG),
-        new Item("Transparent", Impl.BG_TRANSPARENT),
+        new Item("Black", FlashLightFilter.BG_BLACK),
+        new Item("White", FlashLightFilter.BG_WHITE),
+        new Item("Background Color", FlashLightFilter.BG_TOOL_BG),
+        new Item("Transparent", FlashLightFilter.BG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
     private final BooleanParam invert = new BooleanParam("Invert");
+    private final RangeParam opacity =
+        new RangeParam(GUIText.OPACITY, 0, 100, 100);
 
-    private Impl filter;
+    private FlashLightFilter filter;
 
     public Flashlight() {
         super(true);
-
+        opacity.setPresetKey("Opacity");
         radius.setPresetKey("Radius");
 
         setParams(
@@ -66,79 +70,88 @@ public class Flashlight extends ParametrizedFilter {
             softness,
             shape,
             invert,
-            bg
+            bg,
+            opacity
         );
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new Impl();
+            filter = new FlashLightFilter();
         }
 
         filter.setCenter(
             src.getWidth() * center.getRelativeX(),
             src.getHeight() * center.getRelativeY()
         );
-
-        double radiusX = radius.getValueAsDouble(0);
-        double radiusY = radius.getValueAsDouble(1);
-        double softnessFactor = softness.getValueAsDouble() / 100.0;
-        filter.setRadius(radiusX, radiusY, softnessFactor);
-
+        filter.setRadius(
+            radius.getValueAsDouble(0),
+            radius.getValueAsDouble(1),
+            softness.getPercentage());
         filter.setShape(shape.getValue());
-        filter.setBG(bg.getValue());
+        filter.setBackgroundType(bg.getValue());
         filter.setInvert(invert.isChecked());
 
-        return filter.filter(src, dest);
+        BufferedImage filtered = filter.filter(src, dest);
+
+        if (opacity.getValue() == 100) {
+            return filtered;
+        } else {
+            float alpha = (float) opacity.getPercentage();
+            Graphics2D g = filtered.createGraphics();
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f - alpha));
+            g.drawImage(src, 0, 0, null);
+            g.dispose();
+            return filtered;
+        }
     }
 
     /**
-     * Flashlight implementation
+     * Flashlight implementation.
      */
-    private static class Impl extends PointFilter {
-        private Point2D center;
-        private double innerRadiusX;
-        private double innerRadiusY;
-        private double outerRadiusX;
-        private double outerRadiusY;
-
+    private static class FlashLightFilter extends PointFilter {
         public static final int BG_BLACK = 0;
         public static final int BG_WHITE = 1;
         public static final int BG_TRANSPARENT = 2;
         public static final int BG_TOOL_BG = 3;
 
-        private int bgPixel;
+        private Point2D center;
+        private double innerRadiusX;
+        private double innerRadiusY;
+        private double outerRadiusX;
+        private double outerRadiusY;
+        private int bgRGBA;
         private BlurredShape shape;
         private boolean invert;
 
-        public Impl() {
+        public FlashLightFilter() {
             super(NAME);
         }
 
         @Override
         public int processPixel(int x, int y, int rgb) {
+            int srcAlpha = (rgb >>> 24) & 0xFF;
             double outside = shape.isOutside(x, y);
             if (invert) {
                 outside = 1.0 - outside;
             }
+
             if (outside == 1.0) {
-                return bgPixel;
+                // outside the blurred shape set the background color
+                // while preserving the transparency of the source
+                return Colors.setMinAlpha(bgRGBA, srcAlpha);
             } else if (outside == 0.0) {
                 return rgb;
             } else {
-                if (bgPixel == 0) {
-                    // if the background is transparent, set the alpha directly,
-                    // because mixing with black transparent would darken it.
-
-                    int origAlpha = (rgb >>> 24) & 0xFF;
+                if (bgRGBA == 0) {
+                    // Don't mix, because it would darken the image.
+                    // Take the smaller alpha in order to preserve existing transparency.
                     int calcAlpha = (int) (255.0 * (1.0 - outside));
-                    // take the smaller one in order to preserve existing transparency
-                    int newAlpha = Math.min(origAlpha, calcAlpha);
-
-                    return Colors.setAlpha(rgb, newAlpha);
+                    return Colors.setMinAlpha(rgb, calcAlpha);
                 } else {
-                    return ImageMath.mixColors((float) outside, rgb, bgPixel);
+                    int mixed = ImageMath.mixColors((float) outside, rgb, bgRGBA);
+                    return Colors.setMinAlpha(mixed, srcAlpha);
                 }
             }
         }
@@ -155,8 +168,8 @@ public class Flashlight extends ParametrizedFilter {
             outerRadiusY = radiusY + radiusY * softness;
         }
 
-        public void setBG(int bg) {
-            bgPixel = switch (bg) {
+        public void setBackgroundType(int bg) {
+            bgRGBA = switch (bg) {
                 case BG_BLACK -> 0xFF_00_00_00;
                 case BG_WHITE -> 0xFF_FF_FF_FF;
                 case BG_TOOL_BG -> FgBgColors.getBGColor().getRGB();

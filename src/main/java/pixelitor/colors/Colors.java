@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2025 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -335,6 +335,15 @@ public class Colors {
     public static int setAlpha(int rgb, int newAlpha) {
         // discard the original alpha and set it to the new value
         return (newAlpha << 24) | (rgb & 0x00_FF_FF_FF);
+    }
+
+    /**
+     * Sets the alpha channel of the given ARGB packed int to the
+     * minimum of its current alpha and the given new alpha value.
+     */
+    public static int setMinAlpha(int rgb, int newAlpha) {
+        int origAlpha = (rgb >>> 24) & 0xFF;
+        return setAlpha(rgb, Math.min(origAlpha, newAlpha));
     }
 
     /**
