@@ -203,15 +203,13 @@ public class Geometry {
     public static Point2D midPoint(Point2D p1, Point2D p2) {
         return new Point2D.Double(
             (p1.getX() + p2.getX()) / 2.0,
-            (p1.getY() + p2.getY()) / 2.0
-        );
+            (p1.getY() + p2.getY()) / 2.0);
     }
 
     public static Point2D interpolate(Point2D p1, Point2D p2, double t) {
         return new Point2D.Double(
             ImageMath.lerp(t, p1.getX(), p2.getX()),
-            ImageMath.lerp(t, p1.getY(), p2.getY())
-        );
+            ImageMath.lerp(t, p1.getY(), p2.getY()));
     }
 
     public static void subtract(Point2D a, Point2D b, Point2D result) {
@@ -241,8 +239,7 @@ public class Geometry {
         double t = dotProduct / lineVectorLengthSq;
         return new Point2D.Double(
             lineStart.x + t * lineVector.x,
-            lineStart.y + t * lineVector.y
-        );
+            lineStart.y + t * lineVector.y);
     }
 
     /**
@@ -255,8 +252,7 @@ public class Geometry {
     public static void toRange(Point2D pos, double x1, double y1, double x2, double y2) {
         pos.setLocation(
             FastMath.toRange(x1, x2, pos.getX()),
-            FastMath.toRange(y1, y2, pos.getY())
-        );
+            FastMath.toRange(y1, y2, pos.getY()));
     }
 
     public static double calcSquaredDistance(double x1, double y1, double x2, double y2) {
@@ -289,20 +285,15 @@ public class Geometry {
      * The inverse function of atan2ToIntuitive
      */
     public static double intuitiveToAtan2(double angleRadians) {
-        if (angleRadians > Math.PI) {
-            return 2 * Math.PI - angleRadians;
-        } else {
-            return -angleRadians;
-        }
+        return angleRadians > Math.PI
+            ? 2 * Math.PI - angleRadians
+            : -angleRadians;
     }
 
     public static double toIntuitiveDegrees(double angleRadians) {
         double degrees = Math.toDegrees(angleRadians);
-        if (degrees <= 0) {
-            degrees = -degrees;
-        } else {
-            degrees = 360.0 - degrees;
-        }
-        return degrees;
+        return degrees <= 0
+            ? -degrees
+            : 360.0 - degrees;
     }
 }

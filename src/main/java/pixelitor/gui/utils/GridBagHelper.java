@@ -39,17 +39,18 @@ import static javax.swing.SwingConstants.RIGHT;
  * Helper object for GridBagLayout
  */
 public class GridBagHelper {
-    private static final Insets DEFAULT_PADDING = new Insets(2, 2, 2, 2);
+    private static final int DEFAULT_PADDING = 2;
+    private static final Insets DEFAULT_INSETS = new Insets(DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_PADDING);
 
     private static final GridBagConstraints LABEL_CONSTRAINTS = new GridBagConstraints(
         0, 0, 1, 1, 0.0, 1.0,
-        EAST, NONE, DEFAULT_PADDING, 0, 0);
+        EAST, NONE, DEFAULT_INSETS, 0, 0);
     private static final GridBagConstraints COMPONENT_CONSTRAINTS = new GridBagConstraints(
         0, 0, 1, 1, 1.0, 1.0,
-        WEST, HORIZONTAL, DEFAULT_PADDING, 0, 0);
+        WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0);
     private static final GridBagConstraints LAST_COMPONENT_CONSTRAINTS = new GridBagConstraints(
         0, 0, REMAINDER, 1, 1.0, 1.0,
-        WEST, HORIZONTAL, DEFAULT_PADDING, 0, 0);
+        WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0);
 
     private final Container container;
     private int currentRow = 0;
@@ -57,6 +58,22 @@ public class GridBagHelper {
     public GridBagHelper(Container container) {
         this.container = container;
 
+        initConstraints();
+    }
+
+    public GridBagHelper(Container container, int padding) {
+        this.container = container;
+
+        initConstraints();
+        if (padding != DEFAULT_PADDING) {
+            Insets newPadding = new Insets(padding, padding, padding, padding);
+            LABEL_CONSTRAINTS.insets = newPadding;
+            COMPONENT_CONSTRAINTS.insets = newPadding;
+            LAST_COMPONENT_CONSTRAINTS.insets = newPadding;
+        }
+    }
+
+    private static void initConstraints() {
         LABEL_CONSTRAINTS.gridy = 0;
         COMPONENT_CONSTRAINTS.gridy = 0;
         LAST_COMPONENT_CONSTRAINTS.gridy = 0;
@@ -200,6 +217,10 @@ public class GridBagHelper {
         LAST_COMPONENT_CONSTRAINTS.gridx = LABEL_CONSTRAINTS.gridx + 1;
         LAST_COMPONENT_CONSTRAINTS.gridy = LABEL_CONSTRAINTS.gridy;
         container.add(c, LAST_COMPONENT_CONSTRAINTS);
+    }
+
+    public void addFullRow(FilterParam param) {
+        addFullRow(param.createGUI());
     }
 
     public void addFullRow(Component c) {

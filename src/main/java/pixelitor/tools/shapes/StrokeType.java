@@ -27,6 +27,7 @@ import com.jhlabs.awt.ZigzagStroke;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.RailwayTrackStroke;
 import pixelitor.utils.TaperingStroke;
 
 import java.awt.BasicStroke;
@@ -148,6 +149,11 @@ public enum StrokeType {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
             return new TaperingStroke(width, true);
+        }
+    }, RAILWAY("Railway Tracks", false) {
+        @Override
+        public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {
+            return new RailwayTrackStroke(width);
         }
     };
 

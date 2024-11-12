@@ -306,7 +306,7 @@ public class IO {
         boolean exportFilled = false;
         if (strokeParam != null) {
             exportFilled = switch (strokeParam.getStrokeType()) {
-                case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV -> true;
+                case ZIGZAG, CALLIGRAPHY, SHAPE, TAPERING, TAPERING_REV, RAILWAY -> true;
                 case BASIC, WOBBLE, CHARCOAL, BRISTLE, OUTLINE -> false;
             };
         }

@@ -23,6 +23,7 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,14 +43,14 @@ import static pixelitor.utils.Geometry.subtract;
  * The tapering direction can be reversed to make the stroke taper from thin to thick instead.
  */
 public class TaperingStroke implements Stroke {
-    private final float maxStrokeWidth;
+    private final double maxStrokeWidth;
     private final boolean reverse; // switches the tapering direction
 
-    public TaperingStroke(float maxStrokeWidth) {
+    public TaperingStroke(double maxStrokeWidth) {
         this(maxStrokeWidth, false);
     }
 
-    public TaperingStroke(float maxStrokeWidth, boolean reverse) {
+    public TaperingStroke(double maxStrokeWidth, boolean reverse) {
         if (maxStrokeWidth <= 0) {
             throw new IllegalArgumentException("maxStrokeWidth = " + maxStrokeWidth);
         }
@@ -59,7 +60,7 @@ public class TaperingStroke implements Stroke {
 
     @Override
     public Shape createStrokedShape(Shape shape) {
-        float[] coords = new float[6];
+        double[] coords = new double[6];
 
         // Will hold the final shape of the tapered stroke
         GeneralPath taperedOutline = new GeneralPath();
@@ -83,7 +84,14 @@ public class TaperingStroke implements Stroke {
                     // noinspection fallthrough
                 case SEG_LINETO:
                     // Store the point
-                    points.add(new Point2D.Float(coords[0], coords[1]));
+                    points.add(new Point2D.Double(coords[0], coords[1]));
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    // check if it was closed before reaching the first
+                    Point2D first = points.getFirst();
+                    if (coords[0] != first.getX() || coords[1] != first.getY()) {
+                        points.add(first);
+                    }
                     break;
             }
             it.next();
@@ -104,57 +112,57 @@ public class TaperingStroke implements Stroke {
     // always starting from the full width and going to zero
     private void createSubpathOutline(List<Point2D> points, GeneralPath result) {
         // Calculate segment lengths and total subpath length
-        float[] segmentLengths = new float[points.size() - 1];
-        float totalPathLength = 0;
+        double[] segmentLengths = new double[points.size() - 1];
+        double totalPathLength = 0;
         for (int i = 0; i < segmentLengths.length; i++) {
             Point2D a = points.get(i);
             Point2D b = points.get(i + 1);
-            totalPathLength += segmentLengths[i] = (float) FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+            totalPathLength += segmentLengths[i] = FastMath.hypot(a.getX() - b.getX(), a.getY() - b.getY());
         }
 
         // Handle the first segment of the subpath
-        Point2D startPoint = points.get(0);
-        Point2D secondPoint = points.get(1);
-        Point2D leftPoint = new Point2D.Float();
-        Point2D rightPoint = new Point2D.Float();
-        float initialDist = maxStrokeWidth / 2;
-        calcPerpendicularPoints(startPoint, secondPoint, initialDist, leftPoint, rightPoint);
+        Point2D first = points.get(0);
+        Point2D second = points.get(1);
+        Point2D firstLeft = new Point2D.Double();
+        Point2D firstRight = new Point2D.Double();
+        double initialDist = maxStrokeWidth / 2;
+        calcPerpendicularPoints(first, second, initialDist, firstLeft, firstRight);
 
         // Start the outline path
-        result.moveTo(leftPoint.getX(), leftPoint.getY());
-        float distanceCovered = segmentLengths[0];
+        result.moveTo(firstLeft.getX(), firstLeft.getY());
+        double distanceCovered = segmentLengths[0];
 
         // Store points for the return path
         Point2D[] returnPath = new Point2D[points.size() - 1];
-        returnPath[0] = rightPoint;
+        returnPath[0] = firstRight;
 
         // Process intermediate points
         for (int i = 1, s = points.size() - 1; i < s; i++) {
-            Point2D prevPoint = points.get(i - 1);
-            Point2D currentPoint = points.get(i);
-            Point2D nextPoint = points.get(i + 1);
+            Point2D prev = points.get(i - 1);
+            Point2D current = points.get(i);
+            Point2D next = points.get(i + 1);
 
             // Temporary points for storing perpendicular vectors
-            var prevPerp1 = new Point2D.Float();
-            var prevPerp2 = new Point2D.Float();
-            var nextPerp1 = new Point2D.Float();
-            var nextPerp2 = new Point2D.Float();
+            var prevPerp1 = new Point2D.Double();
+            var prevPerp2 = new Point2D.Double();
+            var nextPerp1 = new Point2D.Double();
+            var nextPerp2 = new Point2D.Double();
 
             // stroke width at this point based on distance covered
-            float currentWidth = (maxStrokeWidth - maxStrokeWidth * distanceCovered / totalPathLength) / 2;
+            double currentWidth = (maxStrokeWidth - maxStrokeWidth * distanceCovered / totalPathLength) / 2;
             distanceCovered += segmentLengths[i - 1];
 
             // Calculate perpendicular points for both segments meeting at current point
-            calcPerpendicularPoints(currentPoint, prevPoint, prevPerp1, prevPerp2);
-            calcPerpendicularPoints(currentPoint, nextPoint, nextPerp1, nextPerp2);
+            calcPerpendicularPoints(current, prev, prevPerp1, prevPerp2);
+            calcPerpendicularPoints(current, next, nextPerp1, nextPerp2);
 
             // Average the perpendicular vectors to create smooth transitions
-            Point2D avgLeft = new Point2D.Float((prevPerp1.x + nextPerp2.x) / 2, (prevPerp1.y + nextPerp2.y) / 2);
-            Point2D avgRight = new Point2D.Float((prevPerp2.x + nextPerp1.x) / 2, (prevPerp2.y + nextPerp1.y) / 2);
+            Point2D avgLeft = Geometry.midPoint(prevPerp1, nextPerp2);
+            Point2D avgRight = Geometry.midPoint(prevPerp2, nextPerp1);
 
             // Normalize and scale the vectors to current stroke width
-            normalizeAndScale(avgLeft, currentPoint, currentWidth);
-            normalizeAndScale(avgRight, currentPoint, currentWidth);
+            normalizeAndScale(avgLeft, current, currentWidth);
+            normalizeAndScale(avgRight, current, currentWidth);
 
             // Store for return path
             returnPath[i] = avgLeft;
@@ -176,7 +184,7 @@ public class TaperingStroke implements Stroke {
         result.closePath();
     }
 
-    private static void normalizeAndScale(Point2D avgLeft, Point2D currentPoint, float currentWidth) {
+    private static void normalizeAndScale(Point2D avgLeft, Point2D currentPoint, double currentWidth) {
         // Convert to vector from current point
         subtract(avgLeft, currentPoint, avgLeft);
 
